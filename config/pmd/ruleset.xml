@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<ruleset name="OpenLMIS ruleset">
+
+    <rule ref="rulesets/java/strings.xml"/>
+
+    <rule ref="rulesets/java/basic.xml"/>
+
+    <rule ref="rulesets/java/braces.xml"/>
+
+    <rule ref="rulesets/java/empty.xml"/>
+
+    <rule ref="rulesets/java/unusedcode.xml/UnusedLocalVariable"/>
+    <rule ref="rulesets/java/unusedcode.xml/UnusedPrivateField"/>
+
+    <rule ref="rulesets/java/imports.xml/DuplicateImports"/>
+    <rule ref="rulesets/java/imports.xml/UnusedImports"/>
+
+    <rule ref="rulesets/java/finalizers.xml/FinalizeShouldBeProtected"/>
+
+    <rule ref="rulesets/java/design.xml/PreserveStackTrace"/>
+
+    <rule ref="rulesets/java/strictexception.xml/AvoidThrowingRawExceptionTypes"/>
+    <rule ref="rulesets/java/strictexception.xml/DoNotThrowExceptionInFinally"/>
+
+    <rule ref="rulesets/java/codesize.xml/CyclomaticComplexity">
+        <properties>
+            <property name="reportLevel" value="11"/>
+        </properties>
+    </rule>
+    <rule ref="rulesets/java/codesize.xml/TooManyMethods"/>
+
+    <rule ref="rulesets/java/logging-java.xml/AvoidPrintStackTrace"/>
+
+</ruleset>

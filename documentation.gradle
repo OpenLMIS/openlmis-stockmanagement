@@ -1,0 +1,46 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+def ramlToCopy = copySpec {
+    from('src/main/resources') {
+        include 'api-definition.yaml'
+        rename { 'api-definition-raml.yaml' }
+        filter(ReplaceTokens, tokens: [
+                baseUrl: System.env.BASE_URL,
+                prefix: System.env.VIRTUAL_LOCATION ? "/" + System.env.VIRTUAL_LOCATION : "",
+                version: version])
+    }
+    from('src/main/resources/schemas') {
+        include '*.json'
+        into 'schemas'
+    }
+}
+
+def ramlHtmlToCopy = copySpec {
+    from 'src/main/resources'
+    include 'api-definition.html'
+}
+
+task copyRamlToBuild(type:Copy) {
+    with ramlToCopy
+    into 'build/resources/main'
+}
+
+// Generate live documentation
+task ramlToSwagger(type: Exec) {
+    description = 'Convert RAML to Swagger'
+    commandLine 'npm', 'run', 'runApiSpecConverter'
+}
+ramlToSwagger.dependsOn(npm_install, copyRamlToBuild)
+
+// Generate static (offline) documentation
+task ramlToHtml(type: Exec) {
+    description = 'Convert RAML to HTML document'
+    commandLine 'npm', 'run', 'runApiHtmlConverter'
+}
+ramlToHtml.dependsOn(npm_install, copyRamlToBuild)
+
+task copyRamlHtmlToBuild(type:Copy) {
+    with ramlHtmlToCopy
+    into 'build/resources/main'
+}
+copyRamlHtmlToBuild.dependsOn ramlToHtml

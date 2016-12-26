@@ -1,0 +1,88 @@
+#%RAML 0.8
+---
+title: OpenLMIS Template API
+version: "@version@"
+baseUri: "http://localhost:8080"
+
+documentation:
+    - title: Getting Started
+      content: Welcome to the OpenLMIS template-service documentation. This minimal API is intended for illustrative purposes.
+
+schemas:
+  - version: |
+      {   "$schema": "http://json-schema.org/draft-03/schema",
+          "description": "Service version and build information",
+          "type": "object",
+          "properties": {
+              "service": { "type": "string", "required": true},
+              "build": { "type": "string", "required": true},
+              "branch": { "type": "string", "required": true},
+              "timeStamp": { "type": "string", "required": true},
+              "version": { "type": "string", "required": true}
+          }
+      }
+
+resourceTypes:
+    - collection:
+        get:
+            responses:
+                200:
+                  description: Collection retrieved successfully
+                  headers:
+                    X-Content-Type-Options:
+                    X-XSS-Protection:
+                  body:
+                      application/json:
+                          schema: <<schema>>
+                404:
+                  description: Collection is empty.
+                  headers:
+                    X-Content-Type-Options:
+                    X-XSS-Protection:
+        post:
+            body:
+                application/json:
+                    schema: <<schema>>
+            responses:
+                201:
+                  description: Item created successfully
+                  headers:
+                    X-Content-Type-Options:
+                    X-XSS-Protection:
+                  body:
+                      application/json:
+                          schema: <<schema>>
+    - member:
+        get:
+            responses:
+                200:
+                    body:
+                        application/json:
+                            schema: <<schema>>
+        post:
+            body:
+                application/json:
+                    schema: <<schema>>
+            responses:
+                200:
+                    body:
+                        application/json:
+                            schema: <<schema>>
+        delete:
+            responses:
+                200:
+
+
+/:
+    displayName: Version
+    get:
+        description: Get version
+        responses:
+          200:
+            description: Returns version information.
+            headers:
+              X-Content-Type-Options:
+              X-XSS-Protection:
+            body:
+              application/json:
+                schema: version

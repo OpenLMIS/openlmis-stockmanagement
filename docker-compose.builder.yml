@@ -1,0 +1,37 @@
+version: "2"
+services:
+  builder:
+    image: openlmis/dev
+    links:
+      - db
+      - log
+    volumes:
+      - '.:/app'
+      - '../logback.xml:/logback.xml'
+    command:
+      - './build.sh'
+    environment:
+      GRADLE_OPTS: '-Dorg.gradle.daemon=false'
+      JAVA_OPTS: '-Dlogging.config=/logback.xml'
+    env_file: .env
+  sonar:
+    image: openlmis/dev
+    volumes:
+      - '.:/app'
+    entrypoint:
+      - 'gradle'
+    command:
+      - 'sonarqube'
+    environment:
+      GRADLE_OPTS: '-Dorg.gradle.daemon=false $SONAR_LOGIN $SONAR_PASSWORD'
+    env_file: .env
+  image:
+    build: .
+    image: openlmis/template-service
+  db:
+    image: openlmis/postgres
+    env_file: .env
+  log:
+    image: openlmis/rsyslog
+    volumes:
+      - '../logs/template-service:/var/log'
