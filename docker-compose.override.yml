@@ -1,6 +1,6 @@
 version: "2"
 services:
-  template-service:
+  stockmanagement:
     image: openlmis/dev
     ports:
       - "5005:5005"

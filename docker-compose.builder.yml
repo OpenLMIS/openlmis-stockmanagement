@@ -27,11 +27,11 @@ services:
     env_file: .env
   image:
     build: .
-    image: openlmis/template-service
+    image: openlmis/stockmanagement
   db:
     image: openlmis/postgres
     env_file: .env
   log:
     image: openlmis/rsyslog
     volumes:
-      - '../logs/template-service:/var/log'
+      - '../logs/stockmanagement:/var/log'
