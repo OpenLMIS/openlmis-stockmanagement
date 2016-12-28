@@ -7,6 +7,8 @@ baseUri: "http://localhost:8080"
 documentation:
     - title: Getting Started
       content: Welcome to the OpenLMIS Stock Management Service documentation.
+schemas:
+  - optionalFields: !include schemas/optionalFields.json
 
 resourceTypes:
     - collection:
@@ -68,20 +70,30 @@ resourceTypes:
                 description: Get optional fields
                 queryParameters:
                   facilityType:
+                    required: false
                   program:
+                    required: false
                 responses:
                   200:
-                    description: Returns available optional fields
+                    description: |
+                      Returns all available optional fields to choose from when no query parameters are passed.
+                      Returns enabled optional fields that match facility type and program when query parameters are given.
                     headers:
                       X-Content-Type-Options:
                       X-XSS-Protection:
+                    body:
+                      application/json:
+                        schema: optionalFields
+                  404:
+                    description: Optional fields config not found for the given query parameter.
+
             post:
-                description: Create optional fields configuration
+                description: Create optional fields configuration for a facility-type&program combination.
                 responses:
                   200:
                     description: Indicates that a new configuration has been created
                   400:
-                    description: Indicated that validation failed while trying to create configuration
+                    description: Indicats that validation failed while trying to create configuration.
 
         /min-stock:
           get:
