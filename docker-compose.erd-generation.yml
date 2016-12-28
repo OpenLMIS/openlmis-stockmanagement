@@ -1,0 +1,20 @@
+version: "2"
+services:
+
+  requisition:
+    image: openlmis/stockmanagement
+    links:
+      - db
+      - log
+    env_file: .env
+
+  db:
+    image: openlmis/postgres
+    ports:
+      - "8767:5432"
+    env_file: .env
+
+  log:
+    image: openlmis/rsyslog
+    volumes:
+      - '../logs/stockmanagement:/var/log'
