@@ -9,6 +9,7 @@ documentation:
       content: Welcome to the OpenLMIS Stock Management Service documentation.
 schemas:
   - optionalFields: !include schemas/optionalFields.json
+  - stockEvent: !include schemas/stockEvent.json
 
 resourceTypes:
     - collection:
@@ -105,10 +106,59 @@ resourceTypes:
     /stock-event:
         post:
           description: Create a new stock event
+          body:
+            application/json:
+              schema: stockEvent
+              example:  |
+                {
+                  "facility":"id1"
+                  "movements":[
+                    {"product":"pid1",reason:"rid1","quantity":"10"},
+                    {"product":"pid2",reason:"rid2","quantity":"15"}
+                    //there could be other fields too in the body of movement
+                  ]
+                }
           responses:
             200:
-              description: Stock event has been processed, corresponding stock movements have been created
+              description: Stock event has been processed, corresponding stock movements have been made. (It might also indicate that stock cards have been created, this depends on what timing we choose for stock cards creation.)
+
+    /stock-cards:
+        get:
+          description: Get a list of stock cards of a facility
+          queryParameters:
+            facility:
+              required: true
+            program:
+              required: false
+              description: If not present, will return all stock cards that belong to a facility. (So the front end can do filtering faster.)
+            soh_only:
+              type: boolean
+              required: false
+              description: When true, body of each stock card will only contain product name and soh. (Might be needed when front end renders the list view.)
+          responses:
+            200:
+              body:
+                application/json:
+                  example: |
+                    [
+                      {product:"A Drug", SOH: 10},
+                      {product:"B Drug", SOH: 20},
+                      //......
+                    ]
+
+        post:
+          description: Not sure if we need post here. If we only create a stock card when a product has its first movement, then the post here is not necessary.
+
+    /stock-card/[id]:
+        get:
+          description: Get full details of one stock card
+          responses:
+            200:
+              body:
+                application/json:
+                  example: |
+                      {product:"A Drug", SOH: 10, movements:[......]}
 
     /stock-card:
-        get:
-
+      post:
+        description: Not sure if we need post here. If we only create a stock card when a product has its first movement, then the post here is not necessary.
