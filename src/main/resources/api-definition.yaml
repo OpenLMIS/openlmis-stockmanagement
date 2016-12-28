@@ -89,6 +89,9 @@ resourceTypes:
 
             post:
                 description: Create optional fields configuration for a facility-type&program combination.
+                body:
+                  application/json:
+                    schema: optionalFields
                 responses:
                   200:
                     description: Indicates that a new configuration has been created
