@@ -14,7 +14,7 @@ wget https://raw.githubusercontent.com/OpenLMIS/openlmis-config/master/.env -O .
 && (/usr/local/bin/docker-compose -f docker-compose.erd-generation.yml up &) \
 && sleep 90 \
 && sudo rm /var/www/html/erd-$1/* -rf \
-&& (sudo java -jar schemaSpy_5.0.0.jar -t pgsql -host localhost:$2 -db open_lmis -u postgres -p $DBPASSWORD -dp postgresql-9.4-1201.jdbc41.jar -all -schemaSpec '^(?!pg_catalog$|information_schema$).*' -hq -o /var/www/html/erd-requisition &) \
+&& (sudo java -jar schemaSpy_5.0.0.jar -t pgsql -host localhost:$2 -db open_lmis -u postgres -p $DBPASSWORD -dp postgresql-9.4-1201.jdbc41.jar -all -schemaSpec '^(?!pg_catalog$|information_schema$).*' -hq -o /var/www/html/erd-$1 &) \
 && sleep 30 \
 && /usr/local/bin/docker-compose -f docker-compose.erd-generation.yml down --volumes \
 && rm erd-$1.zip -f \
