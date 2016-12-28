@@ -14,7 +14,7 @@ import javax.persistence.Table;
 @Table(name = "just_testing_erd_generation", schema = "stockmanagement")
 @NoArgsConstructor
 @AllArgsConstructor
-public class JustTestingERDGeneration {
+public class JustTestingErdGeneration {
 
     @Id
     private String id;
