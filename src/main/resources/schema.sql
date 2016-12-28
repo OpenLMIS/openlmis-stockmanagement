@@ -1,1 +1,1 @@
-CREATE SCHEMA IF NOT EXISTS template;
+CREATE SCHEMA IF NOT EXISTS stockmanagement;
