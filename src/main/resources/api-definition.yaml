@@ -1,26 +1,12 @@
 #%RAML 0.8
 ---
-title: OpenLMIS Template API
+title: OpenLMIS Stock Management API
 version: "@version@"
 baseUri: "http://localhost:8080"
 
 documentation:
     - title: Getting Started
-      content: Welcome to the OpenLMIS template-service documentation. This minimal API is intended for illustrative purposes.
-
-schemas:
-  - version: |
-      {   "$schema": "http://json-schema.org/draft-03/schema",
-          "description": "Service version and build information",
-          "type": "object",
-          "properties": {
-              "service": { "type": "string", "required": true},
-              "build": { "type": "string", "required": true},
-              "branch": { "type": "string", "required": true},
-              "timeStamp": { "type": "string", "required": true},
-              "version": { "type": "string", "required": true}
-          }
-      }
+      content: Welcome to the OpenLMIS Stock Management Service documentation.
 
 resourceTypes:
     - collection:
@@ -72,17 +58,42 @@ resourceTypes:
             responses:
                 200:
 
+/api:
+  /stock-management:
 
-/:
-    displayName: Version
-    get:
-        description: Get version
-        responses:
-          200:
-            description: Returns version information.
-            headers:
-              X-Content-Type-Options:
-              X-XSS-Protection:
-            body:
-              application/json:
-                schema: version
+    /configuration:
+        displayName: Configurations
+        /optional-fields:
+            get:
+                description: Get optional fields
+                queryParameters:
+                  facilityType:
+                  program:
+                responses:
+                  200:
+                    description: Returns available optional fields
+                    headers:
+                      X-Content-Type-Options:
+                      X-XSS-Protection:
+            post:
+                description: Create optional fields configuration
+                responses:
+                  200:
+                    description: Indicates that a new configuration has been created
+                  400:
+                    description: Indicated that validation failed while trying to create configuration
+
+        /min-stock:
+          get:
+          post:
+
+    /stock-event:
+        post:
+          description: Create a new stock event
+          responses:
+            200:
+              description: Stock event has been processed, corresponding stock movements have been created
+
+    /stock-card:
+        get:
+
