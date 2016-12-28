@@ -1,4 +1,4 @@
-package org.openlmis.template.i18n;
+package org.openlmis.stockmanagement.i18n;
 
 import org.springframework.context.MessageSource;
 

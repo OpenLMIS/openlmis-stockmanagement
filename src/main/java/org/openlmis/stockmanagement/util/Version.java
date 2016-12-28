@@ -1,4 +1,4 @@
-package org.openlmis.template.util;
+package org.openlmis.stockmanagement.util;
 
 import lombok.Getter;
 import org.slf4j.Logger;

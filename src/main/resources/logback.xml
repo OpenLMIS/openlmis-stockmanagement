@@ -7,7 +7,7 @@
         <suffixPattern>[%15.15thread] %level %logger %msg</suffixPattern>
     </appender>
 
-    <logger name="org.openlmis.template" level="DEBUG" additivity="false">
+    <logger name="org.openlmis.stockmanagement" level="DEBUG" additivity="false">
         <appender-ref ref="SYSLOG"/>
     </logger>
 

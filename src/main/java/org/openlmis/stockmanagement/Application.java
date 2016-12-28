@@ -1,6 +1,6 @@
-package org.openlmis.template;
+package org.openlmis.stockmanagement;
 
-import org.openlmis.template.i18n.ExposedMessageSourceImpl;
+import org.openlmis.stockmanagement.i18n.ExposedMessageSourceImpl;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;

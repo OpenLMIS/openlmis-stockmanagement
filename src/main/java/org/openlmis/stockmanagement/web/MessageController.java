@@ -1,6 +1,6 @@
-package org.openlmis.template.web;
+package org.openlmis.stockmanagement.web;
 
-import org.openlmis.template.i18n.ExposedMessageSource;
+import org.openlmis.stockmanagement.i18n.ExposedMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

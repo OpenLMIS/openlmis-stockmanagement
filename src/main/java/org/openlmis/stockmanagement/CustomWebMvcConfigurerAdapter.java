@@ -1,4 +1,4 @@
-package org.openlmis.template;
+package org.openlmis.stockmanagement;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
