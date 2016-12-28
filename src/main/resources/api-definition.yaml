@@ -130,24 +130,24 @@ resourceTypes:
               required: true
             program:
               required: false
-              description: If not present, will return all stock cards that belong to a facility. (So the front end can do filtering faster.)
+              description: If not present, will return all stock cards that belong to a facility. (Front end could use this to load all stock cards, then filter them by program without sending more requests.)
             soh_only:
               type: boolean
               required: false
-              description: When true, body of each stock card will only contain product name and soh. (Might be needed when front end renders the list view.)
+              description: When true, body of each stock card will only contain product name and soh. (Front end may use this to display list view without loading too much data.)
           responses:
             200:
               body:
                 application/json:
                   example: |
                     [
-                      {product:"A Drug", SOH: 10},
-                      {product:"B Drug", SOH: 20},
+                      {id:"uuid1", product:"A Drug", SOH: 10},
+                      {id:"uuid2", product:"B Drug", SOH: 20},
                       //......
                     ]
 
         post:
-          description: Not sure if we need post here. If we only create a stock card when a product has its first movement, then the post here is not necessary.
+          description: Not sure if we need post here. If we only create a stock card when a product has its first movement, then the post here is not necessary.It'll just be done inside of the "stock-event" end point.
 
     /stock-card/[id]:
         get:
@@ -157,8 +157,8 @@ resourceTypes:
               body:
                 application/json:
                   example: |
-                      {product:"A Drug", SOH: 10, movements:[......]}
+                      {id:"uuid", product:"A Drug", SOH: 10, movements:[......]}
 
     /stock-card:
       post:
-        description: Not sure if we need post here. If we only create a stock card when a product has its first movement, then the post here is not necessary.
+        description: Not sure if we need post here. If we only create a stock card when a product has its first movement, then the post here is not necessary.It'll just be done inside of the "stock-event" end point.
