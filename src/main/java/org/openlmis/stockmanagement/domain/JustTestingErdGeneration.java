@@ -16,16 +16,16 @@ import javax.persistence.Table;
 @AllArgsConstructor
 public class JustTestingErdGeneration {
 
-    @Id
-    private String id;
+  @Id
+  private String id;
 
-    @Column(nullable = false)
-    @Getter
-    @Setter
-    private String someField;
+  @Column(nullable = false)
+  @Getter
+  @Setter
+  private String someField;
 
-    @Column(nullable = false)
-    @Getter
-    @Setter
-    private String someOtherField;
+  @Column(nullable = false)
+  @Getter
+  @Setter
+  private String someOtherField;
 }
