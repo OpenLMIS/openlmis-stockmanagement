@@ -59,15 +59,15 @@ idea {
                 }
             }
         }
-    /*    iml.withXml { xmlFile ->
-            xmlFile.asNode().component.find { it.@name == 'NewModuleRootManager'}['Content'][0]
-                .addNode {
-                sourceFolder {
-                    profile(url: "file://$MODULE_DIR\$/src/integration-test/java", isTestSource:
-                            true)
+        /*    iml.withXml { xmlFile ->
+                xmlFile.asNode().component.find { it.@name == 'NewModuleRootManager'}['Content'][0]
+                    .addNode {
+                    sourceFolder {
+                        profile(url: "file://$MODULE_DIR\$/src/integration-test/java", isTestSource:
+                                true)
+                    }
                 }
-            }
-        }*/
+            }*/
     }
 }
 
@@ -121,11 +121,11 @@ task generateMigration << {
     def fileName = project.hasProperty('migrationName') ? migrationName : 'migration'
     def timestamp = new Date().format('yyyyMMddHHmmssSSS', TimeZone.getTimeZone('GMT'))
     def fullFileName = "${timestamp}__${fileName}.sql"
-    def migrationFile = new File(sourceSets.main.resources.srcDirs.first(),'db/migration/'+fullFileName)
+    def migrationFile = new File(sourceSets.main.resources.srcDirs.first(), 'db/migration/' + fullFileName)
     migrationFile.createNewFile()
 }
 
-task checkApiIsRaml(type:Exec) {
+task checkApiIsRaml(type: Exec) {
     executable "raml-cop"
     args "src/main/resources/api-definition.yaml"
 }
@@ -154,7 +154,7 @@ checkstyle {
 //Usage: gradle sonarqube
 sonarqube {
     properties {
-        property "sonar.projectName", "OpenLMIS Template Service"
+        property "sonar.projectName", "OpenLMIS Stock Management Service"
         property "sonar.projectKey", "org.sonarqube:$rootProject.name"
         property "sonar.projectVersion", version
         property "sonar.host.url", "http://sonar.openlmis.org"
@@ -171,13 +171,13 @@ sonarqube {
 
 pmd {
     toolVersion = '5.4.0'
-    consoleOutput= true
+    consoleOutput = true
     ignoreFailures = false
     ruleSetFiles = files("config/pmd/ruleset.xml")
     reportsDir = file("build/reports/pmd")
 }
 
-tasks.withType(Pmd){
+tasks.withType(Pmd) {
     reports {
         xml.enabled true
         html.enabled true
