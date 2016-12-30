@@ -1,5 +1,7 @@
 package org.openlmis.stockmanagement.domain.template;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 
 import javax.persistence.Column;
@@ -11,20 +13,32 @@ import javax.persistence.Table;
 public class StockCardLineItemOptionalFields extends BaseEntity {
 
   @Column(nullable = false)
-  private Boolean documentNumber;
+  @Getter
+  @Setter
+  private Boolean documentNumber = false;
 
   @Column(nullable = false)
-  private Boolean receivedFrom;
+  @Getter
+  @Setter
+  private Boolean receivedFrom = false;
 
   @Column(nullable = false)
-  private Boolean issuedTo;
+  @Getter
+  @Setter
+  private Boolean issuedTo = false;
 
   @Column(nullable = false)
-  private Boolean adjustmentReason;
+  @Getter
+  @Setter
+  private Boolean adjustmentReason = false;
 
   @Column(nullable = false)
-  private Boolean pricePerUnit;
+  @Getter
+  @Setter
+  private Boolean pricePerUnit = false;
 
   @Column(nullable = false)
-  private Boolean signature;
+  @Getter
+  @Setter
+  private Boolean signature = false;
 }

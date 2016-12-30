@@ -1,8 +1,11 @@
 package org.openlmis.stockmanagement.domain.template;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.Type;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToOne;
@@ -15,16 +18,24 @@ public class StockCardTemplate extends BaseEntity {
 
   @Column(nullable = false)
   @Type(type = PG_UUID)
+  @Getter
+  @Setter
   private UUID programId;
 
   @Column(nullable = false)
   @Type(type = PG_UUID)
+  @Getter
+  @Setter
   private UUID facilityTypeId;
 
-  @OneToOne(optional = false)
+  @OneToOne(optional = false, cascade = CascadeType.ALL)
+  @Getter
+  @Setter
   private StockCardOptionalFields stockCardOptionalFields;
 
-  @OneToOne(optional = false)
+  @OneToOne(optional = false, cascade = CascadeType.ALL)
+  @Getter
+  @Setter
   private StockCardLineItemOptionalFields stockCardLineItemOptionalFields;
 
 }

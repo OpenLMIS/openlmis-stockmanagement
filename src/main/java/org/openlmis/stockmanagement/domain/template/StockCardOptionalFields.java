@@ -1,5 +1,7 @@
 package org.openlmis.stockmanagement.domain.template;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 
 import javax.persistence.Column;
@@ -11,14 +13,22 @@ import javax.persistence.Table;
 public class StockCardOptionalFields extends BaseEntity {
 
   @Column(nullable = false)
-  private Boolean packSize;
+  @Getter
+  @Setter
+  private Boolean packSize = false;
 
   @Column(nullable = false)
-  private Boolean donor;
+  @Getter
+  @Setter
+  private Boolean donor = false;
 
   @Column(nullable = false)
-  private Boolean maxMonthsOfStock;
+  @Getter
+  @Setter
+  private Boolean maxMonthsOfStock = false;
 
   @Column(nullable = false)
-  private Boolean minMonthsOfStock;
+  @Getter
+  @Setter
+  private Boolean minMonthsOfStock = false;
 }
