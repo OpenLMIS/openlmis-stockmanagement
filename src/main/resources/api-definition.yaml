@@ -1,6 +1,6 @@
 #%RAML 0.8
 ---
-title: OpenLMIS Stock Management API
+title: OpenLMIS Stock Management
 version: "@version@"
 baseUri: "http://localhost:8080"
 
@@ -64,92 +64,77 @@ resourceTypes:
 /api:
   /stock-management:
 
-    /configuration:
-        displayName: Configurations
-        /optional-fields:
-            get:
-                description: Get optional fields
-                queryParameters:
-                  facilityType:
-                    required: false
-                  program:
-                    required: false
-                responses:
-                  200:
-                    description: |
-                      Returns all available optional fields to choose from when no query parameters are passed.
-                      Returns enabled optional fields that match facility type and program when query parameters are given.
-                    headers:
-                      X-Content-Type-Options:
-                      X-XSS-Protection:
-                    body:
-                      application/json:
-                        schema: optionalFields
-                  404:
-                    description: Optional fields config not found for the given query parameter.
-
-            post:
-                description: Create optional fields configuration for a facility-type&program combination.
-                body:
-                  application/json:
-                    schema: optionalFields
-                responses:
-                  200:
-                    description: Indicates that a new configuration has been created
-                  400:
-                    description: Indicats that validation failed while trying to create configuration.
-
-        /min-stock:
-          get:
-          post:
-
     /stock-event:
         post:
           description: Create a new stock event
           body:
             application/json:
-              schema: stockEvent
               example:  |
                 {
-                  "facility":"id1"
-                  "movements":[
-                    {"product":"pid1",reason:"rid1","quantity":"10"},
-                    {"product":"pid2",reason:"rid2","quantity":"15"}
-                    //there could be other fields too in the body of movement
+                  "lineItems":[
+                    {facility:"f1", "product":"pid1",reason:"rid1","quantity":"10" ......},
+                    {facility:"f2", "product":"pid2",reason:"rid2","quantity":"15" ......}
+                    //product instead of stock card is used in the second property
+                    //because a stock card may not exist yet
                   ]
                 }
+
           responses:
             200:
-              description: Stock event has been processed, corresponding stock movements have been made. (It might also indicate that stock cards have been created, this depends on what timing we choose for stock cards creation.)
+              description: Stock event has been processed, all corresponding line items have been created.
+            207:
+              description: Not all line items were created.
+              body:
+                application/json:
+                  example: |
+                    {
+                      createdLineItems:[
+                        {id:"line item id1", ......}
+                        //......
+                      ],
+                      failedLineItems:[
+                        {lineItem:{...}, failureReason:"..."}
+                        //......
+                      ]
+                    }
 
-    /stock-cards:
+    /facility/[facility id]/stock-cards:
         get:
-          description: Get a list of stock cards of a facility
+          description: Get a list of stock cards of a facility, with full details of each stock card
           queryParameters:
-            facility:
-              required: true
             program:
               required: false
-              description: If not present, will return all stock cards that belong to a facility. (Front end could use this to load all stock cards, then filter them by program without sending more requests.)
-            soh_only:
-              type: boolean
-              required: false
-              description: When true, body of each stock card will only contain product name and soh. (Front end may use this to display list view without loading too much data.)
+              description: When provided, returns stock cards under this program
           responses:
             200:
               body:
                 application/json:
                   example: |
                     [
-                      {id:"uuid1", product:"A Drug", SOH: 10},
-                      {id:"uuid2", product:"B Drug", SOH: 20},
+                      {id:"uuid1", product:"A Drug", SOH: 10, lineItems:[......]},
+                      {id:"uuid2", product:"B Drug", SOH: 20, lineItems:[......]},
                       //......
                     ]
 
-        post:
-          description: Not sure if we need post here. If we only create a stock card when a product has its first movement, then the post here is not necessary.It'll just be done inside of the "stock-event" end point.
+    /facility/[facility id]/stock-card-summaries:
+        get:
+          description: Get summaries of stock cards, which contains SOH, product name, and other essential information. This will NOT return any line items. (This could be used by front end for list view.)
+          queryParameters:
+            program:
+              required: false
+              description: When provided, returns stock cards under this program
+          responses:
+            200:
+              body:
+                application/json:
+                  example: |
+                    [
+                      {id:"uuid1", product:"A Drug", SOH: 10, ......}
+                      {id:"uuid2", product:"B Drug", SOH: 20, ......}
+                      //......
+                    ]
 
-    /stock-card/[id]:
+    /stock-cards/[stock card id]:
         get:
           description: Get full details of one stock card
           responses:
@@ -157,8 +142,41 @@ resourceTypes:
               body:
                 application/json:
                   example: |
-                      {id:"uuid", product:"A Drug", SOH: 10, movements:[......]}
+                      {id:"uuid1", product:"A Drug", SOH: 10, lineItems:[......]}
 
-    /stock-card:
+    /stock-card-template:
+        get:
+            description: Get stock card template
+            queryParameters:
+              facilityType:
+                required: false
+              program:
+                required: false
+            responses:
+              200:
+                description: |
+                  Returns all available optional fields to choose from when no query parameters are passed.
+                  Returns enabled optional fields that match facility type and program when query parameters are given.
+                headers:
+                  X-Content-Type-Options:
+                  X-XSS-Protection:
+                body:
+                  application/json:
+                    schema: optionalFields
+              404:
+                description: Stock card template not found for the given query parameter.
+
+        post:
+            description: Create stock card template for a facility-type&program combination.
+            body:
+              application/json:
+                schema: optionalFields
+            responses:
+              200:
+                description: Indicates that a new stock card template has been created
+              400:
+                description: Indicates that validation failed while trying to create template
+
+    /min-stock:
+      get:
       post:
-        description: Not sure if we need post here. If we only create a stock card when a product has its first movement, then the post here is not necessary.It'll just be done inside of the "stock-event" end point.
