@@ -62,121 +62,120 @@ resourceTypes:
                 200:
 
 /api:
-  /stock-management:
 
-    /stock-event:
-        post:
-          description: Create a new stock event
-          body:
-            application/json:
-              example:  |
-                {
-                  "lineItems":[
-                    {facility:"f1", "product":"pid1",reason:"rid1","quantity":"10" ......},
-                    {facility:"f2", "product":"pid2",reason:"rid2","quantity":"15" ......}
-                    //product instead of stock card is used in the second property
-                    //because a stock card may not exist yet
-                  ]
-                }
+  /stock-event:
+      post:
+        description: Create a new stock event
+        body:
+          application/json:
+            example:  |
+              {
+                "lineItems":[
+                  {facility:"f1", "product":"pid1",reason:"rid1","quantity":"10" ......},
+                  {facility:"f2", "product":"pid2",reason:"rid2","quantity":"15" ......}
+                  //product instead of stock card is used in the second property
+                  //because a stock card may not exist yet
+                ]
+              }
 
-          responses:
-            200:
-              description: Stock event has been processed, all corresponding line items have been created.
-            207:
-              description: Not all line items were created.
-              body:
-                application/json:
-                  example: |
-                    {
-                      createdLineItems:[
-                        {id:"line item id1", ......}
-                        //......
-                      ],
-                      failedLineItems:[
-                        {lineItem:{...}, failureReason:"..."}
-                        //......
-                      ]
-                    }
-
-    /facility/[facility id]/stock-cards:
-        get:
-          description: Get a list of stock cards of a facility, with full details of each stock card
-          queryParameters:
-            program:
-              required: false
-              description: When provided, returns stock cards under this program
-          responses:
-            200:
-              body:
-                application/json:
-                  example: |
-                    [
-                      {id:"uuid1", product:"A Drug", SOH: 10, lineItems:[......]},
-                      {id:"uuid2", product:"B Drug", SOH: 20, lineItems:[......]},
-                      //......
-                    ]
-
-    /facility/[facility id]/stock-card-summaries:
-        get:
-          description: Get summaries of stock cards, which contains SOH, product name, and other essential information. This will NOT return any line items. (This could be used by front end for list view.)
-          queryParameters:
-            program:
-              required: false
-              description: When provided, returns stock cards under this program
-          responses:
-            200:
-              body:
-                application/json:
-                  example: |
-                    [
-                      {id:"uuid1", product:"A Drug", SOH: 10, ......}
-                      {id:"uuid2", product:"B Drug", SOH: 20, ......}
-                      //......
-                    ]
-
-    /stock-cards/[stock card id]:
-        get:
-          description: Get full details of one stock card
-          responses:
-            200:
-              body:
-                application/json:
-                  example: |
-                      {id:"uuid1", product:"A Drug", SOH: 10, lineItems:[......]}
-
-    /stock-card-template:
-        get:
-            description: Get stock card template
-            queryParameters:
-              facilityType:
-                required: false
-              program:
-                required: false
-            responses:
-              200:
-                description: |
-                  Returns all available optional fields to choose from when no query parameters are passed.
-                  Returns enabled optional fields that match facility type and program when query parameters are given.
-                headers:
-                  X-Content-Type-Options:
-                  X-XSS-Protection:
-                body:
-                  application/json:
-                    schema: optionalFields
-              404:
-                description: Stock card template not found for the given query parameter.
-
-        post:
-            description: Create stock card template for a facility-type&program combination.
+        responses:
+          200:
+            description: Stock event has been processed, all corresponding line items have been created.
+          207:
+            description: Not all line items were created.
             body:
               application/json:
-                schema: optionalFields
-            responses:
-              200:
-                description: Indicates that a new stock card template has been created
-              400:
-                description: Indicates that validation failed while trying to create template
+                example: |
+                  {
+                    createdLineItems:[
+                      {id:"line item id1", ......}
+                      //......
+                    ],
+                    failedLineItems:[
+                      {lineItem:{...}, failureReason:"..."}
+                      //......
+                    ]
+                  }
 
-    /min-stock:
+  /facilities/[facility id]/stock-cards:
       get:
+        description: Get a list of stock cards of a facility, with full details of each stock card
+        queryParameters:
+          program:
+            required: false
+            description: When provided, returns stock cards under this program
+        responses:
+          200:
+            body:
+              application/json:
+                example: |
+                  [
+                    {id:"uuid1", product:"A Drug", SOH: 10, lineItems:[......]},
+                    {id:"uuid2", product:"B Drug", SOH: 20, lineItems:[......]},
+                    //......
+                  ]
+
+  /facilities/[facility id]/stock-card-summaries:
+      get:
+        description: Get summaries of stock cards, which contains SOH, product name, and other essential information. This will NOT return any line items. (This could be used by front end for list view.)
+        queryParameters:
+          program:
+            required: false
+            description: When provided, returns stock cards under this program
+        responses:
+          200:
+            body:
+              application/json:
+                example: |
+                  [
+                    {id:"uuid1", product:"A Drug", SOH: 10, ......}
+                    {id:"uuid2", product:"B Drug", SOH: 20, ......}
+                    //......
+                  ]
+
+  /stock-cards/[stock card id]:
+      get:
+        description: Get full details of one stock card
+        responses:
+          200:
+            body:
+              application/json:
+                example: |
+                    {id:"uuid1", product:"A Drug", SOH: 10, lineItems:[......]}
+
+  /stock-card-template:
+      get:
+          description: Get stock card template
+          queryParameters:
+            facilityType:
+              required: false
+            program:
+              required: false
+          responses:
+            200:
+              description: |
+                Returns all available optional fields to choose from when no query parameters are passed.
+                Returns enabled optional fields that match facility type and program when query parameters are given.
+              headers:
+                X-Content-Type-Options:
+                X-XSS-Protection:
+              body:
+                application/json:
+                  schema: optionalFields
+            404:
+              description: Stock card template not found for the given query parameter.
+
       post:
+          description: Create stock card template for a facility-type&program combination.
+          body:
+            application/json:
+              schema: optionalFields
+          responses:
+            200:
+              description: Indicates that a new stock card template has been created
+            400:
+              description: Indicates that validation failed while trying to create template
+
+  /min-stock:
+    get:
+    post:
