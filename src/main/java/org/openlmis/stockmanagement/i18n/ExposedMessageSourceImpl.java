@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.Properties;
 
 @Component
-public class ExposedMessageSourceImpl extends ReloadableResourceBundleMessageSource implements 
-    ExposedMessageSource {
+public class ExposedMessageSourceImpl extends ReloadableResourceBundleMessageSource implements
+        ExposedMessageSource {
 
   protected Properties getAllProperties(Locale locale) {
     clearCacheIncludingAncestors();

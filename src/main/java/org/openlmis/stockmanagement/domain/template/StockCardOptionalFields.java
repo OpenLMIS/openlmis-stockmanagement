@@ -1,8 +1,6 @@
 package org.openlmis.stockmanagement.domain.template;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 
 import javax.persistence.Column;

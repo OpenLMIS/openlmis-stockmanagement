@@ -27,8 +27,8 @@ public class MessageController {
   public String hello() {
     String[] msgArgs = {"world"};
     logger.debug("Returning hello world message");
-    return messageSource.getMessage("template.message.hello", msgArgs, 
-        LocaleContextHolder.getLocale());
+    return messageSource.getMessage("template.message.hello", msgArgs,
+            LocaleContextHolder.getLocale());
   }
 
   @RequestMapping("/messages")

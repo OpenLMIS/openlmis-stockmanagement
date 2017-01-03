@@ -2,21 +2,20 @@ package org.openlmis.stockmanagement.repository;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openlmis.stockmanagement.Application;
 import org.openlmis.stockmanagement.domain.template.StockCardLineItemOptionalFields;
 import org.openlmis.stockmanagement.domain.template.StockCardOptionalFields;
 import org.openlmis.stockmanagement.domain.template.StockCardTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(Application.class)
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class StockCardTemplateRepositoryTest {
 
   @Autowired
