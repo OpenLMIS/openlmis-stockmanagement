@@ -97,7 +97,7 @@ resourceTypes:
                     ]
                   }
 
-  /facilities/[facility id]/stockCards:
+  /facilities/{id}/stockCards:
       get:
         description: Get a list of stock cards of a facility, with full details of each stock card
         queryParameters:
@@ -115,7 +115,7 @@ resourceTypes:
                     //......
                   ]
 
-  /facilities/[facility id]/stockCardSummaries:
+  /facilities/{id}/stockCardSummaries:
       get:
         description: Get summaries of stock cards, which contains SOH, product name, and other essential information. This will NOT return any line items. (This could be used by front end for list view.)
         queryParameters:
@@ -133,7 +133,7 @@ resourceTypes:
                     //......
                   ]
 
-  /stockCards/[stock card id]:
+  /stockCards/{id}:
       get:
         description: Get full details of one stock card
         responses:
