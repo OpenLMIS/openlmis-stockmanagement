@@ -63,7 +63,7 @@ resourceTypes:
 
 /api:
 
-  /stock-event:
+  /stockEvent:
       post:
         description: Create a new stock event
         body:
@@ -97,7 +97,7 @@ resourceTypes:
                     ]
                   }
 
-  /facilities/[facility id]/stock-cards:
+  /facilities/[facility id]/stockCards:
       get:
         description: Get a list of stock cards of a facility, with full details of each stock card
         queryParameters:
@@ -115,7 +115,7 @@ resourceTypes:
                     //......
                   ]
 
-  /facilities/[facility id]/stock-card-summaries:
+  /facilities/[facility id]/stockCardSummaries:
       get:
         description: Get summaries of stock cards, which contains SOH, product name, and other essential information. This will NOT return any line items. (This could be used by front end for list view.)
         queryParameters:
@@ -133,7 +133,7 @@ resourceTypes:
                     //......
                   ]
 
-  /stock-cards/[stock card id]:
+  /stockCards/[stock card id]:
       get:
         description: Get full details of one stock card
         responses:
@@ -143,7 +143,7 @@ resourceTypes:
                 example: |
                     {id:"uuid1", product:"A Drug", SOH: 10, lineItems:[......]}
 
-  /stock-card-template:
+  /stockCardTemplate:
       get:
           description: Get stock card template
           queryParameters:
@@ -176,6 +176,6 @@ resourceTypes:
             400:
               description: Indicates that validation failed while trying to create template
 
-  /min-stock:
+  /minStock:
     get:
     post:
