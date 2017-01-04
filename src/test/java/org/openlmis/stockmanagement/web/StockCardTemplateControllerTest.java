@@ -44,7 +44,7 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
             .thenReturn(createDummyTemplate());
 
     //when
-    MockHttpServletRequestBuilder builder = get("/stockCardTemplate")
+    MockHttpServletRequestBuilder builder = get("/api/stockCardTemplate")
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
             .param("program", programId.toString())
             .param("facilityType", facilityTypeId.toString());
@@ -64,7 +64,7 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
             .thenReturn(createDummyTemplate());
 
     //when
-    MockHttpServletRequestBuilder builder = get("/stockCardTemplate")
+    MockHttpServletRequestBuilder builder = get("/api/stockCardTemplate")
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
             .param("program", UUID.randomUUID().toString())
             .param("facilityType", UUID.randomUUID().toString());
