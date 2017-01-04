@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @AutoConfigureMockMvc
-public class StockCardTemplateControllerTest {
+public class StockCardTemplateControllerTest extends BaseWebTest {
 
   @Autowired
   private MockMvc mvc;
@@ -45,6 +45,7 @@ public class StockCardTemplateControllerTest {
 
     //when
     MockHttpServletRequestBuilder builder = get("/stockCardTemplate")
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
             .param("program", programId.toString())
             .param("facilityType", facilityTypeId.toString());
 
@@ -64,6 +65,7 @@ public class StockCardTemplateControllerTest {
 
     //when
     MockHttpServletRequestBuilder builder = get("/stockCardTemplate")
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
             .param("program", UUID.randomUUID().toString())
             .param("facilityType", UUID.randomUUID().toString());
 
