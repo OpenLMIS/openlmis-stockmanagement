@@ -1,0 +1,32 @@
+task consulRegistration(type: Exec) {
+    executable "node"
+    args "consul/registration.js", "-c", "register", "-f", "consul/config.json"
+}
+
+task consulDeregistration(type: Exec) {
+    executable "node"
+    args "consul/registration.js", "-c", "deregister", "-f", "consul/config.json"
+}
+
+task copyRegistrationToConsulBuild(type: Copy) {
+    from 'consul'
+    into 'build/consul'
+}
+
+task copyRamlToConsulBuild(type: Copy) {
+    from 'src/main/resources'
+    into 'build/consul'
+    include 'api-definition.yaml'
+}
+
+task copyRamlSchemasToConsulBuild(type: Copy) {
+    from 'src/main/resources/schemas'
+    into 'build/consul/schemas'
+}
+
+task copyConsulRegistrationToBuild(type: Copy)
+copyConsulRegistrationToBuild {
+    dependsOn copyRegistrationToConsulBuild
+    dependsOn copyRamlSchemasToConsulBuild
+    dependsOn copyRamlToConsulBuild
+}

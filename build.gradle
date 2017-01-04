@@ -214,9 +214,12 @@ check {
     dependsOn integrationTest
 }
 
+apply from: "registration.gradle"
+
 build {
     dependsOn jacocoTestReport
     dependsOn check
     dependsOn ramlToHtml
     dependsOn copyRamlHtmlToBuild
+    dependsOn copyConsulRegistrationToBuild
 }

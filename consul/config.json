@@ -1,0 +1,15 @@
+{
+  "service": {
+    "Name": "stockmanagement",
+    "Port": 8080,
+    "Tags": ["openlmis-service"]
+  },
+  "raml": "src/main/resources/api-definition.yaml",
+  "path": [
+    "stockmanagement",
+    "stockmanagement/docs",
+    "stockmanagement/docs/<all>",
+    "stockmanagement/webjars",
+    "stockmanagement/webjars/<all>"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "openlmis-consul-registration",
+  "version": "0.0.1",
+
+  "devDependencies":
+  {
+    "uuid": "~3.0.0",
+    "raml-parser": "~0.8.0",
+    "command-line-args": "~3.0.0",
+    "system-sleep": "~1.0.0",
+    "deasync": "~0.1.9",
+    "ip": "~1.1.0"
+  }
+}
