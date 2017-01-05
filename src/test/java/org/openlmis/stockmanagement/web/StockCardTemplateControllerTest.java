@@ -1,5 +1,6 @@
 package org.openlmis.stockmanagement.web;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.domain.template.StockCardOptionalFields;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -16,9 +18,11 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import java.util.UUID;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -41,39 +45,56 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
 
     //given
     when(repository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
-            .thenReturn(createDummyTemplate());
+        .thenReturn(createDummyTemplate());
 
     //when
     MockHttpServletRequestBuilder builder = get("/api/stockCardTemplate")
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param("program", programId.toString())
-            .param("facilityType", facilityTypeId.toString());
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .param("program", programId.toString())
+        .param("facilityType", facilityTypeId.toString());
 
     ResultActions resultActions = mvc.perform(builder);
 
     //then
     resultActions
-            .andExpect(status().isOk())
-            .andExpect(content().json("{'stockCardOptionalFields':{'donor':true}}"));
+        .andExpect(status().isOk())
+        .andExpect(content().json("{'stockCardOptionalFields':{'donor':true}}"));
   }
 
   @Test
   public void should_return_404_when_template_not_found() throws Exception {
     //given
     when(repository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
-            .thenReturn(createDummyTemplate());
+        .thenReturn(createDummyTemplate());
 
     //when
-    MockHttpServletRequestBuilder builder = get("/api/stockCardTemplate")
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param("program", UUID.randomUUID().toString())
-            .param("facilityType", UUID.randomUUID().toString());
 
-    ResultActions resultActions = mvc.perform(builder);
+    ResultActions resultActions = mvc.perform(get("/api/stockCardTemplate")
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .param("program", UUID.randomUUID().toString())
+        .param("facilityType", UUID.randomUUID().toString()));
 
     //then
     resultActions
-            .andExpect(status().isNotFound());
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  public void should_return_201_when_create_template() throws Exception {
+    //given
+    when(repository.save(any(StockCardTemplate.class))).thenReturn(createDummyTemplate());
+
+    //when
+    ObjectMapper mapper = new ObjectMapper();
+    String jsonString = mapper.writeValueAsString(new StockCardTemplate());
+
+    ResultActions resultActions = mvc.perform(post("/api/stockCardTemplate")
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(jsonString));
+
+    //then
+    resultActions.andExpect(status().isCreated());
   }
 
   private StockCardTemplate createDummyTemplate() {
@@ -85,5 +106,4 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
 
     return template;
   }
-
 }

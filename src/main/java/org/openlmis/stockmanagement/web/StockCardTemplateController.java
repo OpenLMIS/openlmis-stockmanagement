@@ -5,14 +5,17 @@ import org.openlmis.stockmanagement.repository.StockCardTemplateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.UUID;
 
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
  * Controller used for creating/getting stock card templates.
@@ -44,6 +47,21 @@ public class StockCardTemplateController {
       return new ResponseEntity<>(NOT_FOUND);
     }
     return new ResponseEntity<>(foundTemplate, OK);
+  }
+
+  /**
+   * Create stock card template.
+   *
+   * @param stockCardTemplate  a stock card template bound to request body.
+   * @return The created stock card template.
+   */
+  @RequestMapping(value = "/stockCardTemplate", method = POST)
+  public ResponseEntity<StockCardTemplate> createStockCardTemplate(
+      @RequestBody StockCardTemplate stockCardTemplate
+  ) {
+
+    StockCardTemplate newStockCardTemplate = repository.save(stockCardTemplate);
+    return new ResponseEntity<>(newStockCardTemplate, CREATED);
   }
 
 }
