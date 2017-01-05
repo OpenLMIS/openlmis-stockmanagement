@@ -173,6 +173,19 @@ traits:
               X-XSS-Protection:
             body:
               application/json:
+                example: |
+                  {
+                    facilityType: "id",
+                    program: "id",
+                    stockCardOptionalFields:{
+                      packSize: false,
+                      packSizeDisplayOrder: 1,
+                      //... other optional fields
+                    },
+                    stockCardLineItemOptionalFields:{
+                      //... similar structure to the above
+                    }
+                  }
           404:
             description: Stock card template not found for the given query parameter.
 
@@ -181,6 +194,19 @@ traits:
         description: Create stock card template for a facility-type&program combination.
         body:
           application/json:
+            example: |
+              {
+                facilityType: "id",
+                program: "id",
+                stockCardOptionalFields:{
+                  packSize: false,
+                  packSizeDisplayOrder: 1,
+                  //... other optional fields
+                },
+                stockCardLineItemOptionalFields:{
+                  //... similar structure to the above
+                }
+              }
         responses:
           200:
             description: Indicates that a new stock card template has been created
