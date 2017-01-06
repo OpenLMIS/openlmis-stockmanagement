@@ -1,7 +1,9 @@
 package org.openlmis.stockmanagement.web;
 
 import org.openlmis.stockmanagement.domain.template.StockCardTemplate;
+import org.openlmis.stockmanagement.exception.MissingPermissionException;
 import org.openlmis.stockmanagement.repository.StockCardTemplateRepository;
+import org.openlmis.stockmanagement.service.PermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -27,6 +29,9 @@ public class StockCardTemplateController {
   @Autowired
   private StockCardTemplateRepository repository;
 
+  @Autowired
+  private PermissionService permissionService;
+
   /**
    * Search for stock card template by program id and facility type id.
    *
@@ -36,12 +41,12 @@ public class StockCardTemplateController {
    */
   @RequestMapping(value = "/stockCardTemplate", method = GET)
   public ResponseEntity<StockCardTemplate> searchStockCardTemplate(
-          @RequestParam UUID program,
-          @RequestParam UUID facilityType
+      @RequestParam UUID program,
+      @RequestParam UUID facilityType
   ) {
 
     StockCardTemplate foundTemplate = repository
-            .findByProgramIdAndFacilityTypeId(program, facilityType);
+        .findByProgramIdAndFacilityTypeId(program, facilityType);
 
     if (foundTemplate == null) {
       return new ResponseEntity<>(NOT_FOUND);
@@ -52,16 +57,15 @@ public class StockCardTemplateController {
   /**
    * Create stock card template.
    *
-   * @param stockCardTemplate  a stock card template bound to request body.
+   * @param stockCardTemplate a stock card template bound to request body.
    * @return The created stock card template.
    */
   @RequestMapping(value = "/stockCardTemplate", method = POST)
   public ResponseEntity<StockCardTemplate> createStockCardTemplate(
-      @RequestBody StockCardTemplate stockCardTemplate
-  ) {
+      @RequestBody StockCardTemplate stockCardTemplate) throws MissingPermissionException {
 
+    permissionService.canCreateStockCardTemplate();
     StockCardTemplate newStockCardTemplate = repository.save(stockCardTemplate);
     return new ResponseEntity<>(newStockCardTemplate, CREATED);
   }
-
 }
