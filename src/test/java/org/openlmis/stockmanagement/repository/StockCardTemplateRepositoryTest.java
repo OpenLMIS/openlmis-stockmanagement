@@ -2,8 +2,6 @@ package org.openlmis.stockmanagement.repository;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openlmis.stockmanagement.domain.template.StockCardLineItemOptionalFields;
-import org.openlmis.stockmanagement.domain.template.StockCardOptionalFields;
 import org.openlmis.stockmanagement.domain.template.StockCardTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,7 +21,7 @@ public class StockCardTemplateRepositoryTest {
 
   @Test
   public void should_search_for_stock_card_template_by_facility_type_and_program()
-          throws Exception {
+      throws Exception {
     //given
     StockCardTemplate template = createTemplate();
 
@@ -31,23 +29,17 @@ public class StockCardTemplateRepositoryTest {
 
     //when
     StockCardTemplate found = stockCardTemplateRepository.findByProgramIdAndFacilityTypeId(
-            template.getProgramId(), template.getFacilityTypeId());
+        template.getProgramId(), template.getFacilityTypeId());
 
     //then
     assertThat(found.getStockCardOptionalFields().getDonor(), is(true));
   }
 
   private StockCardTemplate createTemplate() {
-    StockCardOptionalFields stockCardOptionalFields = new StockCardOptionalFields();
-    stockCardOptionalFields.setDonor(true);
-
     StockCardTemplate template = new StockCardTemplate();
-
     template.setFacilityTypeId(UUID.randomUUID());
     template.setProgramId(UUID.randomUUID());
-    template.setStockCardOptionalFields(stockCardOptionalFields);
-    template.setStockCardLineItemOptionalFields(new StockCardLineItemOptionalFields());
-
+    template.getStockCardOptionalFields().setDonor(true);
     return template;
   }
 }

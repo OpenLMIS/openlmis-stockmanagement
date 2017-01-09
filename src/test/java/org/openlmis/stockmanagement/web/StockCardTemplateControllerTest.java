@@ -7,7 +7,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.openlmis.stockmanagement.domain.template.StockCardOptionalFields;
 import org.openlmis.stockmanagement.domain.template.StockCardTemplate;
 import org.openlmis.stockmanagement.errorhandling.GlobalErrorHandling;
 import org.openlmis.stockmanagement.exception.AuthenticationException;
@@ -61,6 +60,22 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
         .standaloneSetup(controllerUnderTest)
         .setControllerAdvice(new GlobalErrorHandling())
         .build();
+  }
+
+  @Test
+  public void should_get_default_stock_card_templates_without_params() throws Exception {
+
+    //when
+    MockHttpServletRequestBuilder builder = get(STOCK_CARD_TEMPLATE_API)
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE);
+
+    ResultActions resultActions = mvc.perform(builder);
+
+    //then
+    resultActions.andExpect(status()
+        .isOk())
+        .andExpect(content()
+            .json("{'stockCardOptionalFields':{'donor':false}}"));
   }
 
   @Test
@@ -159,12 +174,8 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
   }
 
   private StockCardTemplate createDummyTemplate() {
-    StockCardOptionalFields stockCardOptionalFields = new StockCardOptionalFields();
-    stockCardOptionalFields.setDonor(true);
-
     StockCardTemplate template = new StockCardTemplate();
-    template.setStockCardOptionalFields(stockCardOptionalFields);
-
+    template.getStockCardOptionalFields().setDonor(true);
     return template;
   }
 }

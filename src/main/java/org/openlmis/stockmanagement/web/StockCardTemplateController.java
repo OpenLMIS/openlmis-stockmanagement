@@ -41,17 +41,16 @@ public class StockCardTemplateController {
    */
   @RequestMapping(value = "/stockCardTemplate", method = GET)
   public ResponseEntity<StockCardTemplate> searchStockCardTemplate(
-      @RequestParam UUID program,
-      @RequestParam UUID facilityType
-  ) {
+      @RequestParam(required = false) UUID program,
+      @RequestParam(required = false) UUID facilityType) {
 
-    StockCardTemplate foundTemplate = repository
-        .findByProgramIdAndFacilityTypeId(program, facilityType);
+    boolean isRequestingForDefaultTemplate = program == null && facilityType == null;
 
-    if (foundTemplate == null) {
-      return new ResponseEntity<>(NOT_FOUND);
+    if (isRequestingForDefaultTemplate) {
+      return new ResponseEntity<>(new StockCardTemplate(), OK);
+    } else {
+      return searchForExistingTemplate(program, facilityType);
     }
-    return new ResponseEntity<>(foundTemplate, OK);
   }
 
   /**
@@ -67,5 +66,18 @@ public class StockCardTemplateController {
     permissionService.canCreateStockCardTemplate();
     StockCardTemplate newStockCardTemplate = repository.save(stockCardTemplate);
     return new ResponseEntity<>(newStockCardTemplate, CREATED);
+  }
+
+  private ResponseEntity<StockCardTemplate> searchForExistingTemplate(
+      UUID program, UUID facilityType) {
+
+    StockCardTemplate foundTemplate = repository
+        .findByProgramIdAndFacilityTypeId(program, facilityType);
+
+    if (foundTemplate != null) {
+      return new ResponseEntity<>(foundTemplate, OK);
+    } else {
+      return new ResponseEntity<>(NOT_FOUND);
+    }
   }
 }
