@@ -154,7 +154,7 @@ traits:
                 example: |
                     {id:"uuid1", product:"A Drug", SOH: 10, lineItems:[......]}
 
-  /stockCardTemplate:
+  /stockCardTemplates:
       get:
         is: [ secured ]
         description: Get stock card template

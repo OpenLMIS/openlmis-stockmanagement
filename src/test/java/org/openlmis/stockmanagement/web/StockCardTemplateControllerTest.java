@@ -50,7 +50,7 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
   private UUID programId = UUID.randomUUID();
   private UUID facilityTypeId = UUID.randomUUID();
 
-  static final String STOCK_CARD_TEMPLATE_API = "/api/stockCardTemplate";
+  static final String STOCK_CARD_TEMPLATE_API = "/api/stockCardTemplates";
 
   @Before
   public void setup() {

@@ -39,7 +39,7 @@ public class StockCardTemplateController {
    * @param facilityType Facility type id
    * @return The found stock card template, or 404 when not found.
    */
-  @RequestMapping(value = "/stockCardTemplate", method = GET)
+  @RequestMapping(value = "/stockCardTemplates", method = GET)
   public ResponseEntity<StockCardTemplate> searchStockCardTemplate(
       @RequestParam(required = false) UUID program,
       @RequestParam(required = false) UUID facilityType) {
@@ -59,7 +59,7 @@ public class StockCardTemplateController {
    * @param stockCardTemplate a stock card template bound to request body.
    * @return The created stock card template.
    */
-  @RequestMapping(value = "/stockCardTemplate", method = POST)
+  @RequestMapping(value = "/stockCardTemplates", method = POST)
   public ResponseEntity<StockCardTemplate> createStockCardTemplate(
       @RequestBody StockCardTemplate stockCardTemplate) throws MissingPermissionException {
 
