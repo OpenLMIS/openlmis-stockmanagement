@@ -11,8 +11,8 @@ import org.openlmis.stockmanagement.domain.template.StockCardTemplate;
 import org.openlmis.stockmanagement.errorhandling.GlobalErrorHandling;
 import org.openlmis.stockmanagement.exception.AuthenticationException;
 import org.openlmis.stockmanagement.exception.MissingPermissionException;
-import org.openlmis.stockmanagement.repository.StockCardTemplateRepository;
 import org.openlmis.stockmanagement.service.PermissionService;
+import org.openlmis.stockmanagement.service.StockCardTemplateService;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -26,7 +26,7 @@ import java.util.UUID;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.uitls.StockCardTemplateBuilder.createTemplate;
+import static org.openlmis.stockmanagement.testutils.StockCardTemplateBuilder.createTemplate;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -40,7 +40,7 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
   private MockMvc mvc;
 
   @MockBean
-  private StockCardTemplateRepository repository;
+  private StockCardTemplateService stockCardTemplateService;
 
   @MockBean
   private PermissionService permissionService;
@@ -83,7 +83,7 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
   public void should_search_for_stock_card_templates() throws Exception {
 
     //given
-    when(repository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
+    when(stockCardTemplateService.findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
             .thenReturn(createTemplate());
 
     //when
@@ -103,7 +103,7 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
   @Test
   public void should_return_404_when_template_not_found() throws Exception {
     //given
-    when(repository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
+    when(stockCardTemplateService.findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
             .thenReturn(createTemplate());
 
     //when
@@ -122,7 +122,8 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
 
     //given
     Mockito.doNothing().when(permissionService).canCreateStockCardTemplate();
-    when(repository.save(any(StockCardTemplate.class))).thenReturn(createTemplate());
+    when(stockCardTemplateService.saveOrUpdate(any(StockCardTemplate.class)))
+            .thenReturn(createTemplate());
 
     //when
     ObjectMapper mapper = new ObjectMapper();

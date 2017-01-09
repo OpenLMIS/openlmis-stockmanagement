@@ -2,8 +2,8 @@ package org.openlmis.stockmanagement.web;
 
 import org.openlmis.stockmanagement.domain.template.StockCardTemplate;
 import org.openlmis.stockmanagement.exception.MissingPermissionException;
-import org.openlmis.stockmanagement.repository.StockCardTemplateRepository;
 import org.openlmis.stockmanagement.service.PermissionService;
+import org.openlmis.stockmanagement.service.StockCardTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -27,7 +27,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 public class StockCardTemplateController {
 
   @Autowired
-  private StockCardTemplateRepository repository;
+  private StockCardTemplateService stockCardTemplateService;
 
   @Autowired
   private PermissionService permissionService;
@@ -41,8 +41,8 @@ public class StockCardTemplateController {
    */
   @RequestMapping(value = "/stockCardTemplates", method = GET)
   public ResponseEntity<StockCardTemplate> searchStockCardTemplate(
-      @RequestParam(required = false) UUID program,
-      @RequestParam(required = false) UUID facilityType) {
+          @RequestParam(required = false) UUID program,
+          @RequestParam(required = false) UUID facilityType) {
 
     boolean isRequestingForDefaultTemplate = program == null && facilityType == null;
 
@@ -61,18 +61,19 @@ public class StockCardTemplateController {
    */
   @RequestMapping(value = "/stockCardTemplates", method = POST)
   public ResponseEntity<StockCardTemplate> createStockCardTemplate(
-      @RequestBody StockCardTemplate stockCardTemplate) throws MissingPermissionException {
+          @RequestBody StockCardTemplate stockCardTemplate) throws MissingPermissionException {
 
     permissionService.canCreateStockCardTemplate();
-    StockCardTemplate newStockCardTemplate = repository.save(stockCardTemplate);
+    StockCardTemplate newStockCardTemplate = stockCardTemplateService
+            .saveOrUpdate(stockCardTemplate);
     return new ResponseEntity<>(newStockCardTemplate, CREATED);
   }
 
   private ResponseEntity<StockCardTemplate> searchForExistingTemplate(
-      UUID program, UUID facilityType) {
+          UUID program, UUID facilityType) {
 
-    StockCardTemplate foundTemplate = repository
-        .findByProgramIdAndFacilityTypeId(program, facilityType);
+    StockCardTemplate foundTemplate = stockCardTemplateService
+            .findByProgramIdAndFacilityTypeId(program, facilityType);
 
     if (foundTemplate != null) {
       return new ResponseEntity<>(foundTemplate, OK);

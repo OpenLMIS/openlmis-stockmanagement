@@ -3,7 +3,7 @@ package org.openlmis.stockmanagement.repository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.domain.template.StockCardTemplate;
-import org.openlmis.stockmanagement.uitls.StockCardTemplateBuilder;
+import org.openlmis.stockmanagement.testutils.StockCardTemplateBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
