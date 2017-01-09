@@ -3,11 +3,10 @@ package org.openlmis.stockmanagement.repository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.domain.template.StockCardTemplate;
+import org.openlmis.stockmanagement.uitls.StockCardTemplateBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -21,25 +20,18 @@ public class StockCardTemplateRepositoryTest {
 
   @Test
   public void should_search_for_stock_card_template_by_facility_type_and_program()
-      throws Exception {
+          throws Exception {
     //given
-    StockCardTemplate template = createTemplate();
+    StockCardTemplate template = StockCardTemplateBuilder.createTemplate();
 
     stockCardTemplateRepository.save(template);
 
     //when
     StockCardTemplate found = stockCardTemplateRepository.findByProgramIdAndFacilityTypeId(
-        template.getProgramId(), template.getFacilityTypeId());
+            template.getProgramId(), template.getFacilityTypeId());
 
     //then
     assertThat(found.getStockCardOptionalFields().getDonor(), is(true));
   }
 
-  private StockCardTemplate createTemplate() {
-    StockCardTemplate template = new StockCardTemplate();
-    template.setFacilityTypeId(UUID.randomUUID());
-    template.setProgramId(UUID.randomUUID());
-    template.getStockCardOptionalFields().setDonor(true);
-    return template;
-  }
 }

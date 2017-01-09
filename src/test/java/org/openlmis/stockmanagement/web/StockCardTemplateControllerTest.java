@@ -26,6 +26,7 @@ import java.util.UUID;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.uitls.StockCardTemplateBuilder.createTemplate;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -57,9 +58,9 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
     MockitoAnnotations.initMocks(this);
 
     mvc = MockMvcBuilders
-        .standaloneSetup(controllerUnderTest)
-        .setControllerAdvice(new GlobalErrorHandling())
-        .build();
+            .standaloneSetup(controllerUnderTest)
+            .setControllerAdvice(new GlobalErrorHandling())
+            .build();
   }
 
   @Test
@@ -67,15 +68,15 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
 
     //when
     MockHttpServletRequestBuilder builder = get(STOCK_CARD_TEMPLATE_API)
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE);
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE);
 
     ResultActions resultActions = mvc.perform(builder);
 
     //then
     resultActions.andExpect(status()
-        .isOk())
-        .andExpect(content()
-            .json("{'stockCardOptionalFields':{'donor':false}}"));
+            .isOk())
+            .andExpect(content()
+                    .json("{'stockCardOptionalFields':{'donor':false}}"));
   }
 
   @Test
@@ -83,37 +84,37 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
 
     //given
     when(repository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
-        .thenReturn(createDummyTemplate());
+            .thenReturn(createTemplate());
 
     //when
     MockHttpServletRequestBuilder builder = get(STOCK_CARD_TEMPLATE_API)
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .param("program", programId.toString())
-        .param("facilityType", facilityTypeId.toString());
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+            .param("program", programId.toString())
+            .param("facilityType", facilityTypeId.toString());
 
     ResultActions resultActions = mvc.perform(builder);
 
     //then
     resultActions
-        .andExpect(status().isOk())
-        .andExpect(content().json("{'stockCardOptionalFields':{'donor':true}}"));
+            .andExpect(status().isOk())
+            .andExpect(content().json("{'stockCardOptionalFields':{'donor':true}}"));
   }
 
   @Test
   public void should_return_404_when_template_not_found() throws Exception {
     //given
     when(repository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
-        .thenReturn(createDummyTemplate());
+            .thenReturn(createTemplate());
 
     //when
     ResultActions resultActions = mvc.perform(get(STOCK_CARD_TEMPLATE_API)
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .param("program", UUID.randomUUID().toString())
-        .param("facilityType", UUID.randomUUID().toString()));
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+            .param("program", UUID.randomUUID().toString())
+            .param("facilityType", UUID.randomUUID().toString()));
 
     //then
     resultActions
-        .andExpect(status().isNotFound());
+            .andExpect(status().isNotFound());
   }
 
   @Test
@@ -121,15 +122,16 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
 
     //given
     Mockito.doNothing().when(permissionService).canCreateStockCardTemplate();
-    when(repository.save(any(StockCardTemplate.class))).thenReturn(createDummyTemplate());
+    when(repository.save(any(StockCardTemplate.class))).thenReturn(createTemplate());
+
     //when
     ObjectMapper mapper = new ObjectMapper();
     String jsonString = mapper.writeValueAsString(new StockCardTemplate());
 
     ResultActions resultActions = mvc.perform(post(STOCK_CARD_TEMPLATE_API)
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(jsonString));
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(jsonString));
 
     //then
     resultActions.andExpect(status().isCreated());
@@ -139,16 +141,16 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
   public void should_return_403_when_create_template_permission_not_found() throws Exception {
     //given
     Mockito.doThrow(new MissingPermissionException("MANAGE_STOCK_CARD_TEMPLATES"))
-        .when(permissionService).canCreateStockCardTemplate();
+            .when(permissionService).canCreateStockCardTemplate();
 
     //when
     ObjectMapper mapper = new ObjectMapper();
     String jsonString = mapper.writeValueAsString(new StockCardTemplate());
 
     ResultActions resultActions = mvc.perform(post(STOCK_CARD_TEMPLATE_API)
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(jsonString));
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(jsonString));
 
     //then
     resultActions.andExpect(status().isForbidden());
@@ -158,24 +160,19 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
   public void should_return_401_when_user_unauthorized() throws Exception {
     //given
     Mockito.doThrow(new AuthenticationException("MANAGE_STOCK_CARD_TEMPLATES"))
-        .when(permissionService).canCreateStockCardTemplate();
+            .when(permissionService).canCreateStockCardTemplate();
 
     //when
     ObjectMapper mapper = new ObjectMapper();
     String jsonString = mapper.writeValueAsString(new StockCardTemplate());
 
     ResultActions resultActions = mvc.perform(post(STOCK_CARD_TEMPLATE_API)
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(jsonString));
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(jsonString));
 
     //then
     resultActions.andExpect(status().isUnauthorized());
   }
 
-  private StockCardTemplate createDummyTemplate() {
-    StockCardTemplate template = new StockCardTemplate();
-    template.getStockCardOptionalFields().setDonor(true);
-    return template;
-  }
 }
