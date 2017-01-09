@@ -28,6 +28,12 @@ public class StockCardTemplateService {
 
     if (found != null) {
       template.setId(found.getId());
+
+      template.getStockCardOptionalFields()
+              .setId(found.getStockCardOptionalFields().getId());
+
+      template.getStockCardLineItemOptionalFields()
+              .setId(found.getStockCardLineItemOptionalFields().getId());
     }
 
     return stockCardTemplateRepository.save(template);
