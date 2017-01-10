@@ -1,30 +1,34 @@
 package org.openlmis.stockmanagement.domain.template;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
 @Data
-@Table(name = "stock_card_optional_fields", schema = "stockmanagement")
+@AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "stock_card_fields", schema = "stockmanagement")
 public class StockCardFields extends BaseEntity {
 
-  @Column(nullable = false)
-  private Boolean packSize = false;
-  private Integer packSizeDisplayOrder;
+  @ManyToOne()
+  @JoinColumn()
+  private StockCardTemplate stockCardTemplate;
+
+  @ManyToOne()
+  @JoinColumn()
+  private AvailableStockCardFields availableStockCardFields;
 
   @Column(nullable = false)
-  private Boolean donor = false;
-  private Integer donorDisplayOrder;
+  private Boolean isDisplayed = false;
 
   @Column(nullable = false)
-  private Boolean maxMonthsOfStock = false;
-  private Integer maxMonthsOfStockDisplayOrder;
-
-  @Column(nullable = false)
-  private Boolean minMonthsOfStock = false;
-  private Integer minMonthsOfStockDisplayOrder;
+  private Integer displayOrder = 0;
 }

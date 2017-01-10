@@ -1,38 +1,34 @@
 package org.openlmis.stockmanagement.domain.template;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
 @Data
-@Table(name = "stock_card_line_item_optional_fields", schema = "stockmanagement")
+@AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "stock_card_line_item_fields", schema = "stockmanagement")
 public class StockCardLineItemFields extends BaseEntity {
 
-  @Column(nullable = false)
-  private Boolean documentNumber = false;
-  private Integer documentNumberDisplayOrder;
+  @ManyToOne()
+  @JoinColumn()
+  private StockCardTemplate stockCardTemplate;
+
+  @ManyToOne()
+  @JoinColumn()
+  private AvailableStockCardLineItemFields availableStockCardLineItemFields;
 
   @Column(nullable = false)
-  private Boolean receivedFrom = false;
-  private Integer receivedFromDisplayOrder;
+  private Boolean isDisplayed = false;
 
   @Column(nullable = false)
-  private Boolean issuedTo = false;
-  private Integer issuedToDisplayOrder;
-
-  @Column(nullable = false)
-  private Boolean adjustmentReason = false;
-  private Integer adjustmentReasonDisplayOrder;
-
-  @Column(nullable = false)
-  private Boolean pricePerUnit = false;
-  private Integer pricePerUnitDisplayOrder;
-
-  @Column(nullable = false)
-  private Boolean signature = false;
-  private Integer signatureDisplayOrder;
+  private Integer displayOrder = 0;
 }

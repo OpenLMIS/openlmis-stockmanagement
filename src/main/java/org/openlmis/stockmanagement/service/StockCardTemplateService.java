@@ -28,12 +28,7 @@ public class StockCardTemplateService {
 
     if (found != null) {
       template.setId(found.getId());
-
-      template.getStockCardFields()
-              .setId(found.getStockCardFields().getId());
-
-      template.getStockCardLineItemFields()
-              .setId(found.getStockCardLineItemFields().getId());
+      stockCardTemplateRepository.delete(found);
     }
 
     return stockCardTemplateRepository.save(template);
