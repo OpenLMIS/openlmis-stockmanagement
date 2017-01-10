@@ -2,8 +2,7 @@ package org.openlmis.stockmanagement.service;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openlmis.stockmanagement.domain.template.StockCardFields;
-import org.openlmis.stockmanagement.domain.template.StockCardTemplate;
+import org.openlmis.stockmanagement.dto.StockCardFieldDto;
 import org.openlmis.stockmanagement.dto.StockCardTemplateDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,7 +12,7 @@ import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.openlmis.stockmanagement.testutils.StockCardTemplateBuilder.createTemplate;
+import static org.openlmis.stockmanagement.testutils.StockCardTemplateBuilder.createTemplateDto;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -25,26 +24,26 @@ public class StockCardTemplateServiceTest {
   @Test
   public void should_update_existing_template() throws Exception {
     //given: there is an existing template
-    StockCardTemplate savedTemplate = stockCardTemplateService.saveOrUpdate(createTemplate());
+    StockCardTemplateDto savedTemplate = stockCardTemplateService.saveOrUpdate(createTemplateDto());
     UUID facilityTypeId = savedTemplate.getFacilityTypeId();
     UUID programId = savedTemplate.getProgramId();
 
     //when: try to save a template with the same program and facility type
-    StockCardTemplate newTemplate = createTemplate();
+    StockCardTemplateDto newTemplate = createTemplateDto();
     newTemplate.setFacilityTypeId(facilityTypeId);
     newTemplate.setProgramId(programId);
     newTemplate.getStockCardFields().get(0).setDisplayOrder(321);
 
     stockCardTemplateService.saveOrUpdate(newTemplate);
-    StockCardTemplate updatedTemplate = stockCardTemplateService
+    StockCardTemplateDto updatedTemplate = stockCardTemplateService
             .findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
 
     //then
     assertThat(updatedTemplate.getStockCardFields().size(), is(1));
 
-    StockCardFields firstFields = updatedTemplate.getStockCardFields().get(0);
+    StockCardFieldDto firstFields = updatedTemplate.getStockCardFields().get(0);
     assertThat(firstFields.getDisplayOrder(), is(321));
-    assertThat(firstFields.getAvailableStockCardFields().getName(), is("packSize"));
+    assertThat(firstFields.getName(), is("packSize"));
   }
 
   @Test

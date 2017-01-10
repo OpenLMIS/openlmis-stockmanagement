@@ -5,6 +5,9 @@ import org.openlmis.stockmanagement.domain.template.AvailableStockCardLineItemFi
 import org.openlmis.stockmanagement.domain.template.StockCardFields;
 import org.openlmis.stockmanagement.domain.template.StockCardLineItemFields;
 import org.openlmis.stockmanagement.domain.template.StockCardTemplate;
+import org.openlmis.stockmanagement.dto.StockCardFieldDto;
+import org.openlmis.stockmanagement.dto.StockCardLineItemFieldDto;
+import org.openlmis.stockmanagement.dto.StockCardTemplateDto;
 
 import java.util.UUID;
 
@@ -33,5 +36,20 @@ public class StockCardTemplateBuilder {
             .add(new StockCardLineItemFields(template, docNumber, true, 456));
 
     return template;
+  }
+
+  /**
+   * Create template dto.
+   *
+   * @return dto.
+   */
+  public static StockCardTemplateDto createTemplateDto() {
+    StockCardTemplateDto dto = new StockCardTemplateDto();
+    dto.setFacilityTypeId(UUID.randomUUID());
+    dto.setProgramId(UUID.randomUUID());
+    dto.getStockCardFields().add(new StockCardFieldDto("packSize", true, 123));
+    dto.getStockCardLineItemFields().add(
+            new StockCardLineItemFieldDto("documentNumber", true, 456));
+    return dto;
   }
 }

@@ -16,8 +16,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
 /**
@@ -28,30 +29,34 @@ import static java.util.stream.StreamSupport.stream;
 public class StockCardTemplateService {
 
   @Autowired
-  private StockCardTemplateRepository stockCardTemplateRepository;
+  private StockCardTemplateRepository templateRepository;
 
   @Autowired
-  private AvailableStockCardFieldsRepository cardFieldsRepository;
+  private AvailableStockCardFieldsRepository cardFieldsRepo;
 
   @Autowired
-  private AvailableStockCardLineItemFieldsRepository lineItemFieldsRepository;
+  private AvailableStockCardLineItemFieldsRepository lineItemFieldsRepo;
 
   /**
    * Save or update stock card template by facility type id and program id.
    *
-   * @param template object to save or update.
+   * @param templateDto object to save or update.
    * @return the saved or updated object.
    */
-  public StockCardTemplate saveOrUpdate(StockCardTemplate template) {
-    StockCardTemplate found = stockCardTemplateRepository.findByProgramIdAndFacilityTypeId(
+  public StockCardTemplateDto saveOrUpdate(StockCardTemplateDto templateDto) {
+    StockCardTemplate template = templateDto.toModel(
+            findAllFieldsFrom(cardFieldsRepo).collect(toList()),
+            findAllFieldsFrom(lineItemFieldsRepo).collect(toList()));
+
+    StockCardTemplate found = templateRepository.findByProgramIdAndFacilityTypeId(
             template.getProgramId(), template.getFacilityTypeId());
 
     if (found != null) {
       template.setId(found.getId());
-      stockCardTemplateRepository.delete(found);
+      templateRepository.delete(found);
     }
 
-    return stockCardTemplateRepository.save(template);
+    return StockCardTemplateDto.from(templateRepository.save(template));
   }
 
   /**
@@ -61,8 +66,11 @@ public class StockCardTemplateService {
    * @param facilityTypeId facility type id.
    * @return the found template or null if not found.
    */
-  public StockCardTemplate findByProgramIdAndFacilityTypeId(UUID programId, UUID facilityTypeId) {
-    return stockCardTemplateRepository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
+  public StockCardTemplateDto findByProgramIdAndFacilityTypeId(
+          UUID programId, UUID facilityTypeId) {
+    StockCardTemplate template = templateRepository
+            .findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
+    return StockCardTemplateDto.from(template);
   }
 
   /**
@@ -72,10 +80,10 @@ public class StockCardTemplateService {
    */
   public StockCardTemplateDto getDefaultStockCardTemplate() {
     List<StockCardFieldDto> cardFieldDtos =
-            findAllFields(cardFieldsRepository, this::convertModelToDto);
+            convertAllFieldsToDto(cardFieldsRepo, this::convertModelToDefaultDto);
 
     List<StockCardLineItemFieldDto> lineItemFieldDtos =
-            findAllFields(lineItemFieldsRepository, this::convertModelToDto);
+            convertAllFieldsToDto(lineItemFieldsRepo, this::convertModelToDefaultDto);
 
     StockCardTemplateDto dto = new StockCardTemplateDto();
     dto.setStockCardFields(cardFieldDtos);
@@ -84,18 +92,24 @@ public class StockCardTemplateService {
     return dto;
   }
 
-  private <F, T> List<T> findAllFields(PagingAndSortingRepository<F, UUID> repo,
-                                       Function<F, T> converter) {
-    return stream(repo.findAll().spliterator(), false)
+  private <F, T> List<T> convertAllFieldsToDto(
+          PagingAndSortingRepository<F, UUID> repo, Function<F, T> converter) {
+    return findAllFieldsFrom(repo)
             .map(converter)
-            .collect(Collectors.toList());
+            .collect(toList());
   }
 
-  private StockCardFieldDto convertModelToDto(AvailableStockCardFields model) {
+  private <F> Stream<F> findAllFieldsFrom(PagingAndSortingRepository<F, UUID> repo) {
+    return stream(repo.findAll().spliterator(), false);
+  }
+
+  private StockCardFieldDto convertModelToDefaultDto(
+          AvailableStockCardFields model) {
     return new StockCardFieldDto(model.getName(), false, 0);
   }
 
-  private StockCardLineItemFieldDto convertModelToDto(AvailableStockCardLineItemFields model) {
+  private StockCardLineItemFieldDto convertModelToDefaultDto(
+          AvailableStockCardLineItemFields model) {
     return new StockCardLineItemFieldDto(model.getName(), false, 0);
   }
 }
