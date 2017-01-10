@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.openlmis.stockmanagement.domain.template.StockCardTemplate;
+import org.openlmis.stockmanagement.dto.StockCardTemplateDto;
 import org.openlmis.stockmanagement.errorhandling.GlobalErrorHandling;
 import org.openlmis.stockmanagement.exception.AuthenticationException;
 import org.openlmis.stockmanagement.exception.MissingPermissionException;
@@ -20,13 +21,14 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.UUID;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.testutils.StockCardTemplateBuilder.createTemplate;
+import static org.openlmis.stockmanagement.testutils.StockCardTemplateBuilder.createTemplateDto;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -65,6 +67,9 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
 
   @Test
   public void should_get_default_stock_card_templates_without_params() throws Exception {
+    //given
+    when(stockCardTemplateService.getDefaultStockCardTemplate())
+            .thenReturn(createTemplateDto());
 
     //when
     MockHttpServletRequestBuilder builder = get(STOCK_CARD_TEMPLATE_API)
@@ -73,10 +78,11 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
     ResultActions resultActions = mvc.perform(builder);
 
     //then
-    resultActions.andExpect(status()
-            .isOk())
+    resultActions
+            .andDo(MockMvcResultHandlers.print())
+            .andExpect(status().isOk())
             .andExpect(content()
-                    .json("{'stockCardOptionalFields':{'donor':false}}"));
+                    .json("{'stockCardFields':[{'name':'packSize'}]}"));
   }
 
   @Test
@@ -84,7 +90,7 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
 
     //given
     when(stockCardTemplateService.findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
-            .thenReturn(createTemplate());
+            .thenReturn(createTemplateDto());
 
     //when
     MockHttpServletRequestBuilder builder = get(STOCK_CARD_TEMPLATE_API)
@@ -96,21 +102,23 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
 
     //then
     resultActions
+            .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isOk())
-            .andExpect(content().json("{'stockCardOptionalFields':{'donor':true}}"));
+            .andExpect(content().json("{'stockCardFields':[{'name':'packSize', displayed:true}]}"));
   }
 
   @Test
   public void should_return_404_when_template_not_found() throws Exception {
     //given
     when(stockCardTemplateService.findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
-            .thenReturn(createTemplate());
+            .thenReturn(createTemplateDto());
 
     //when
+    UUID noneExistingId = UUID.randomUUID();
     ResultActions resultActions = mvc.perform(get(STOCK_CARD_TEMPLATE_API)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param("program", UUID.randomUUID().toString())
-            .param("facilityType", UUID.randomUUID().toString()));
+            .param("program", noneExistingId.toString())
+            .param("facilityType", noneExistingId.toString()));
 
     //then
     resultActions
@@ -122,8 +130,8 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
 
     //given
     Mockito.doNothing().when(permissionService).canCreateStockCardTemplate();
-    when(stockCardTemplateService.saveOrUpdate(any(StockCardTemplate.class)))
-            .thenReturn(createTemplate());
+    when(stockCardTemplateService.saveOrUpdate(any(StockCardTemplateDto.class)))
+            .thenReturn(createTemplateDto());
 
     //when
     ObjectMapper mapper = new ObjectMapper();
