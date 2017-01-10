@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.domain.template.StockCardFields;
 import org.openlmis.stockmanagement.domain.template.StockCardTemplate;
+import org.openlmis.stockmanagement.dto.StockCardTemplateDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -46,4 +47,16 @@ public class StockCardTemplateServiceTest {
     assertThat(firstFields.getAvailableStockCardFields().getName(), is("packSize"));
   }
 
+  @Test
+  public void should_get_default_stock_card_template() throws Exception {
+    //when
+    StockCardTemplateDto template = stockCardTemplateService.getDefaultStockCardTemplate();
+
+    //then:
+    assertThat(template.getStockCardFields().size(), is(4));
+    assertThat(template.getStockCardLineItemFields().size(), is(5));
+
+    assertThat(template.getStockCardFields().get(0).getName(), is("packSize"));
+    assertThat(template.getStockCardLineItemFields().get(0).getName(), is("documentNumber"));
+  }
 }

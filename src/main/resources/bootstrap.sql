@@ -14,6 +14,4 @@ INSERT INTO stockmanagement.available_stock_card_line_item_fields VALUES ('b15ad
 
 INSERT INTO stockmanagement.available_stock_card_line_item_fields VALUES ('b15ad566-d6da-11e6-bf26-cec0c932ce01', 'adjustmentReason');
 
-INSERT INTO stockmanagement.available_stock_card_line_item_fields VALUES ('b15ad64c-d6da-11e6-bf26-cec0c932ce01', 'pricePerUnit');
-
 INSERT INTO stockmanagement.available_stock_card_line_item_fields VALUES ('b15ada3e-d6da-11e6-bf26-cec0c932ce01', 'signature');
