@@ -25,12 +25,12 @@ public class StockCardTemplateServiceTest {
             .saveOrUpdate(StockCardTemplateBuilder.createTemplate());
 
     //when: try to save a template with the same program and facility type
-    savedTemplate.getStockCardOptionalFields().setPackSize(true);
+    savedTemplate.getStockCardFields().setPackSize(true);
 
     StockCardTemplate updatedTemplate = stockCardTemplateService.saveOrUpdate(savedTemplate);
 
     //then
-    assertThat(updatedTemplate.getStockCardOptionalFields().getDonor(), is(true));
-    assertThat(updatedTemplate.getStockCardOptionalFields().getPackSize(), is(true));
+    assertThat(updatedTemplate.getStockCardFields().getDonor(), is(true));
+    assertThat(updatedTemplate.getStockCardFields().getPackSize(), is(true));
   }
 }

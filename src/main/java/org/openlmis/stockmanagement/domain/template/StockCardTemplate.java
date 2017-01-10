@@ -25,10 +25,10 @@ public class StockCardTemplate extends BaseEntity {
   private UUID facilityTypeId;
 
   @OneToOne(optional = false, cascade = CascadeType.ALL)
-  private StockCardOptionalFields stockCardOptionalFields =
-      new StockCardOptionalFields();
+  private StockCardFields stockCardFields =
+      new StockCardFields();
 
   @OneToOne(optional = false, cascade = CascadeType.ALL)
-  private StockCardLineItemOptionalFields stockCardLineItemOptionalFields =
-      new StockCardLineItemOptionalFields();
+  private StockCardLineItemFields stockCardLineItemFields =
+      new StockCardLineItemFields();
 }

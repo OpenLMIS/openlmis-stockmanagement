@@ -31,7 +31,7 @@ public class StockCardTemplateRepositoryTest {
             template.getProgramId(), template.getFacilityTypeId());
 
     //then
-    assertThat(found.getStockCardOptionalFields().getDonor(), is(true));
+    assertThat(found.getStockCardFields().getDonor(), is(true));
   }
 
 }

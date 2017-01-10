@@ -15,7 +15,7 @@ public class StockCardTemplateBuilder {
     StockCardTemplate template = new StockCardTemplate();
     template.setFacilityTypeId(UUID.randomUUID());
     template.setProgramId(UUID.randomUUID());
-    template.getStockCardOptionalFields().setDonor(true);
+    template.getStockCardFields().setDonor(true);
     return template;
   }
 }

@@ -10,7 +10,7 @@ import javax.persistence.Table;
 @Entity
 @Data
 @Table(name = "stock_card_optional_fields", schema = "stockmanagement")
-public class StockCardOptionalFields extends BaseEntity {
+public class StockCardFields extends BaseEntity {
 
   @Column(nullable = false)
   private Boolean packSize = false;
