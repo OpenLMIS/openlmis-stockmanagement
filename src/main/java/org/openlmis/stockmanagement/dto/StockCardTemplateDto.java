@@ -27,6 +27,10 @@ public class StockCardTemplateDto {
    * @return dto object.
    */
   public static StockCardTemplateDto from(StockCardTemplate template) {
+    if (template == null) {
+      return null;
+    }
+
     StockCardTemplateDto dto = new StockCardTemplateDto();
     dto.setProgramId(template.getProgramId());
     dto.setFacilityTypeId(template.getFacilityTypeId());

@@ -110,15 +110,14 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
   @Test
   public void should_return_404_when_template_not_found() throws Exception {
     //given
-    when(stockCardTemplateService.findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
-            .thenReturn(createTemplateDto());
+    when(stockCardTemplateService.findByProgramIdAndFacilityTypeId(any(), any()))
+            .thenReturn(null);
 
     //when
-    UUID noneExistingId = UUID.randomUUID();
     ResultActions resultActions = mvc.perform(get(STOCK_CARD_TEMPLATE_API)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param("program", noneExistingId.toString())
-            .param("facilityType", noneExistingId.toString()));
+            .param("program", UUID.randomUUID().toString())
+            .param("facilityType", UUID.randomUUID().toString()));
 
     //then
     resultActions

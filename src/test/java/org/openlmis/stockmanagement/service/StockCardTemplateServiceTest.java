@@ -11,6 +11,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.openlmis.stockmanagement.testutils.StockCardTemplateBuilder.createTemplateDto;
 
@@ -57,5 +58,16 @@ public class StockCardTemplateServiceTest {
 
     assertThat(template.getStockCardFields().get(0).getName(), is("packSize"));
     assertThat(template.getStockCardLineItemFields().get(0).getName(), is("documentNumber"));
+  }
+
+  @Test
+  public void should_return_null_when_no_template_found() throws Exception {
+
+    //when: searching for non-existing template
+    StockCardTemplateDto dto = stockCardTemplateService
+            .findByProgramIdAndFacilityTypeId(UUID.randomUUID(), UUID.randomUUID());
+
+    //then
+    assertNull(dto);
   }
 }
