@@ -1,7 +1,6 @@
 package org.openlmis.stockmanagement.service;
 
 import org.apache.commons.codec.binary.Base64;
-import org.openlmis.stockmanagement.util.HttpContextHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -11,11 +10,9 @@ import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
-
 
 public abstract class BaseCommunicationService {
   protected static final String ACCESS_TOKEN = "access_token";
@@ -36,13 +33,6 @@ public abstract class BaseCommunicationService {
   }
 
   protected String obtainAccessToken() {
-    HttpServletRequest httpServletRequest = HttpContextHelper.getCurrentHttpRequest();
-    if (httpServletRequest != null) {
-      String token = httpServletRequest.getParameter(ACCESS_TOKEN);
-      if (token != null ) {
-        return token;
-      }
-    }
     String plainCreds = clientId + ":" + clientSecret;
     byte[] plainCredsBytes = plainCreds.getBytes();
     byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
@@ -57,7 +47,7 @@ public abstract class BaseCommunicationService {
     params.put("grant_type", "client_credentials");
 
     ResponseEntity<?> response = restTemplate.exchange(
-        buildUri(authorizationUrl, params), HttpMethod.POST, request, Object.class);
+            buildUri(authorizationUrl, params), HttpMethod.POST, request, Object.class);
 
 
     return ((Map<String, String>) response.getBody()).get(ACCESS_TOKEN);
