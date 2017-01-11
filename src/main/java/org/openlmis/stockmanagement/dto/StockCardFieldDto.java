@@ -5,6 +5,7 @@ import lombok.Data;
 import org.openlmis.stockmanagement.domain.template.AvailableStockCardFields;
 import org.openlmis.stockmanagement.domain.template.StockCardFields;
 import org.openlmis.stockmanagement.domain.template.StockCardTemplate;
+import org.openlmis.stockmanagement.exception.FieldsNotAvailableException;
 
 import java.util.List;
 import java.util.Optional;
@@ -50,7 +51,10 @@ public class StockCardFieldDto {
     Optional<AvailableStockCardFields> first = cardFields.stream()
             .filter(field -> field.getName().equals(name))
             .findFirst();
-    //todo: throw exception that will be handled by controller advise if can not get
-    return first.get();
+    if (first.isPresent()) {
+      return first.get();
+    } else {
+      throw new FieldsNotAvailableException(name);
+    }
   }
 }

@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.dto.StockCardFieldDto;
 import org.openlmis.stockmanagement.dto.StockCardTemplateDto;
+import org.openlmis.stockmanagement.exception.FieldsNotAvailableException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -69,5 +70,15 @@ public class StockCardTemplateServiceTest {
 
     //then
     assertNull(dto);
+  }
+
+  @Test(expected = FieldsNotAvailableException.class)
+  public void should_not_save_template_with_unavailable_field() throws Exception {
+    //given
+    StockCardTemplateDto templateDto = createTemplateDto();
+    templateDto.getStockCardFields().add(new StockCardFieldDto("i do not exist", false, 1));
+
+    //when
+    stockCardTemplateService.saveOrUpdate(templateDto);
   }
 }

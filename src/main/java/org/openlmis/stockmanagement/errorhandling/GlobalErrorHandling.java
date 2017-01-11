@@ -1,9 +1,10 @@
 package org.openlmis.stockmanagement.errorhandling;
 
 import org.openlmis.stockmanagement.exception.AuthenticationException;
+import org.openlmis.stockmanagement.exception.FieldsNotAvailableException;
+import org.openlmis.stockmanagement.exception.MissingPermissionException;
 import org.openlmis.stockmanagement.service.referencedata.ReferenceDataRetrievalException;
 import org.openlmis.stockmanagement.util.ErrorResponse;
-import org.openlmis.stockmanagement.exception.MissingPermissionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -41,10 +42,19 @@ public class GlobalErrorHandling {
     return logErrorAndRespond("Error fetching from reference data", ex);
   }
 
+  @ExceptionHandler(FieldsNotAvailableException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public ErrorResponse handleUnavailableFieldsException(FieldsNotAvailableException ex) {
+    return logErrorAndRespond("Not an available field", ex);
+  }
+
   /**
    * Logs an error message and returns an error response.
+   *
    * @param message the error message
-   * @param ex the exception to log. Message from the exception is used as the error description.
+   * @param ex      the exception to log.
+   *                Message from the exception is used as the error description.
    * @return the error response that should be sent to the client
    */
   protected ErrorResponse logErrorAndRespond(String message, Exception ex) {
