@@ -8,6 +8,9 @@ documentation:
     - title: Getting Started
       content: Welcome to the OpenLMIS Stock Management Service documentation.
 
+schemas:
+  - stockCardTemplate: !include schemas/stockCardTemplate.json
+
 resourceTypes:
     - collection:
         get:
@@ -90,32 +93,23 @@ traits:
               X-XSS-Protection:
             body:
               application/json:
+                schema: stockCardTemplate
           404:
             description: Stock card template not found for the given query parameter.
+          400:
+            description: Provided query parameters are not correctly formatted.
 
       post:
         is: [ secured ]
         description: Create stock card template for a facility-type&program combination.
         body:
           application/json:
-            example: |
-              {
-                facilityType: "id",
-                program: "id",
-                stockCardOptionalFields:{
-                  packSize: false,
-                  packSizeDisplayOrder: 1,
-                  //... other optional fields
-                },
-                stockCardLineItemOptionalFields:{
-                  //... similar structure to the above
-                }
-              }
+            schema: stockCardTemplate
         responses:
-          200:
-            description: Indicates that a new stock card template has been created
+          201:
+            description: Indicates that stock card template has been created.
           400:
-            description: Indicates that validation failed while trying to create template
+            description: Indicates that request body is not correctly formated.
 
   /stockEvent:
       post:

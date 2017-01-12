@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "programId": {
+      "type": "string"
+    },
+    "facilityTypeId": {
+      "type": "string"
+    },
+    "stockCardFields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "displayOrder": {
+            "type": "integer"
+          },
+          "displayed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "displayOrder",
+          "displayed"
+        ]
+      }
+    },
+    "stockCardLineItemFields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "displayOrder": {
+            "type": "integer"
+          },
+          "displayed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "displayOrder",
+          "displayed"
+        ]
+      }
+    }
+  },
+  "required": [
+    "programId",
+    "facilityTypeId",
+    "stockCardFields",
+    "stockCardLineItemFields"
+  ]
+}
