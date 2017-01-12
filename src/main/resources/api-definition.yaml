@@ -12,6 +12,7 @@ schemas:
   - stockCardTemplate: !include schemas/stockCardTemplate.json
   - stockEvents: !include schemas/stockEvents.json
   - stockEventsSuccessResult: !include schemas/stockEventsSuccessResult.json
+  - stockEventsPartialSuccessResult: !include schemas/stockEventsPartialSuccessResult.json
 
 resourceTypes:
     - collection:
@@ -122,14 +123,15 @@ traits:
             schema: stockEvents
         responses:
           201:
-            description: Stock events have been processed, corresponding changes to SOH made.
+            description: All stock events have been processed, corresponding changes to SOH made.
             body:
               application/json:
                 schema: stockEventsSuccessResult
           207:
-            description: Not all events were processed successfully.
+            description: NOT all events were processed successfully.
             body:
               application/json:
+                schema: stockEventsPartialSuccessResult
           400:
             description: Validation error.
             body:
