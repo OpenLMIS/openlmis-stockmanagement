@@ -1,5 +1,6 @@
 package org.openlmis.stockmanagement.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import org.openlmis.stockmanagement.domain.template.AvailableStockCardFields;
 import org.openlmis.stockmanagement.domain.template.AvailableStockCardLineItemFields;
@@ -9,9 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static java.util.stream.Collectors.toList;
 
 @Data
+@JsonInclude(NON_NULL)
 public class StockCardTemplateDto {
 
   private UUID programId;
