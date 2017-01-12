@@ -1,5 +1,5 @@
 {
-  "name": "openlmis-template",
+  "name": "openlmis-stockmanagement",
   "version": "0.0.1",
   "devDependencies": {
     "api-spec-converter": "~1.9.0",

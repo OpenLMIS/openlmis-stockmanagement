@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "stockCard": {
+        "type": "string"
+      },
+      "facility": {
+        "type": "string"
+      },
+      "product": {
+        "type": "string"
+      },
+      "program": {
+        "type": "string"
+      },
+      "date": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "documentNumber": {
+        "type": "string"
+      },
+      "receivedQuantity": {
+        "type": "integer"
+      },
+      "receivedFrom": {
+        "type": "integer"
+      },
+      "issueQuantity": {
+        "type": "integer"
+      },
+      "issueTo": {
+        "type": "integer"
+      },
+      "adjustmentQuantity": {
+        "type": "integer"
+      },
+      "adjustmentReason": {
+        "type": "integer"
+      },
+      "stockOnHand": {
+        "type": "integer"
+      },
+      "signature": {
+        "type": "string"
+      }
+    }
+  }
+}

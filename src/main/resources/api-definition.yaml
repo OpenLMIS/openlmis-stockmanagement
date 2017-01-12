@@ -10,6 +10,7 @@ documentation:
 
 schemas:
   - stockCardTemplate: !include schemas/stockCardTemplate.json
+  - stockEvents: !include schemas/stockEvents.json
 
 resourceTypes:
     - collection:
@@ -111,40 +112,30 @@ traits:
           400:
             description: Indicates that request body is not correctly formated.
 
-  /stockEvent:
+  /stockEvents:
       post:
         is: [ secured ]
-        description: Create a new stock event
+        description: Create new stock events.
         body:
           application/json:
-            example:  |
-              {
-                "lineItems":[
-                  {facility:"f1", "product":"pid1",reason:"rid1","quantity":"10" ......},
-                  {facility:"f2", "product":"pid2",reason:"rid2","quantity":"15" ......}
-                  //product instead of stock card is used in the second property
-                  //because a stock card may not exist yet
-                ]
-              }
-
+            schema: stockEvents
         responses:
-          200:
-            description: Stock event has been processed, all corresponding line items have been created.
-          207:
-            description: Not all line items were created.
+          201:
+            description: Stock events have been processed, corresponding changes to SOH made.
             body:
               application/json:
-                example: |
-                  {
-                    createdLineItems:[
-                      {id:"line item id1", ......}
-                      //......
-                    ],
-                    failedLineItems:[
-                      {lineItem:{...}, failureReason:"..."}
-                      //......
-                    ]
-                  }
+          207:
+            description: Not all events were processed successfully.
+            body:
+              application/json:
+          400:
+            description: Validation error.
+            body:
+              application/json:
+          403:
+            description: User is not permitted to make changes to one or more stock cards.
+            body:
+              application/json:
 
   /stockCards:
       get:
