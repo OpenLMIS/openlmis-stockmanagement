@@ -27,19 +27,19 @@
         "type": "integer"
       },
       "receivedFrom": {
-        "type": "integer"
+        "type": "string"
       },
       "issueQuantity": {
         "type": "integer"
       },
       "issueTo": {
-        "type": "integer"
+        "type": "string"
       },
       "adjustmentQuantity": {
         "type": "integer"
       },
       "adjustmentReason": {
-        "type": "integer"
+        "type": "string"
       },
       "stockOnHand": {
         "type": "integer"

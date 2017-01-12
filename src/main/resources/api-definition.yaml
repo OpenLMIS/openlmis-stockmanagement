@@ -11,6 +11,7 @@ documentation:
 schemas:
   - stockCardTemplate: !include schemas/stockCardTemplate.json
   - stockEvents: !include schemas/stockEvents.json
+  - stockEventsSuccessResult: !include schemas/stockEventsSuccessResult.json
 
 resourceTypes:
     - collection:
@@ -124,6 +125,7 @@ traits:
             description: Stock events have been processed, corresponding changes to SOH made.
             body:
               application/json:
+                schema: stockEventsSuccessResult
           207:
             description: Not all events were processed successfully.
             body:
