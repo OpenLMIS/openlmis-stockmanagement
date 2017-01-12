@@ -13,6 +13,7 @@ schemas:
   - stockEvents: !include schemas/stockEvents.json
   - stockEventsSuccessResult: !include schemas/stockEventsSuccessResult.json
   - stockEventsPartialSuccessResult: !include schemas/stockEventsPartialSuccessResult.json
+  - stockEventsFailureResult: !include schemas/stockEventsFailureResult.json
 
 resourceTypes:
     - collection:
@@ -121,6 +122,7 @@ traits:
         body:
           application/json:
             schema: stockEvents
+
         responses:
           201:
             description: All stock events have been processed, corresponding changes to SOH made.
@@ -133,9 +135,10 @@ traits:
               application/json:
                 schema: stockEventsPartialSuccessResult
           400:
-            description: Validation error.
+            description: All stock events failed to process.
             body:
               application/json:
+                schema: stockEventsFailureResult
           403:
             description: User is not permitted to make changes to one or more stock cards.
             body:

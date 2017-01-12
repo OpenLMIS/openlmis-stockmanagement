@@ -19,7 +19,8 @@
                   "type": "integer"
                 },
                 "date": {
-                  "type": "string"
+                  "type": "string",
+                  "format": "date-time"
                 },
                 "documentNumber": {
                   "type": "string"
@@ -79,7 +80,8 @@
                   "type": "integer"
                 },
                 "date": {
-                  "type": "string"
+                  "type": "string",
+                  "format": "date-time"
                 },
                 "documentNumber": {
                   "type": "string"
