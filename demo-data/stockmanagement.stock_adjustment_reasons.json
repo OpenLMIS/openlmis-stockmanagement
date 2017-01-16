@@ -1,0 +1,20 @@
+[
+  {
+    "id": "e3fc3cf3-da18-44b0-a220-77c985202e06",
+    "name": "Transfer In",
+    "description": "Transfer In",
+    "adjustmentType": "POSITIVE"
+  },
+  {
+    "id": "d2fc3cf3-da18-44b0-a220-77c985202e06",
+    "name": "Physical Inventory",
+    "description": "Physical Inventory",
+    "adjustmentType": "EQUAL"
+  },
+  {
+    "id": "c1fc3cf3-da18-44b0-a220-77c985202e06",
+    "name": "Transfer Out",
+    "description": "Transfer Out",
+    "adjustmentType": "NEGATIVE"
+  }
+]
