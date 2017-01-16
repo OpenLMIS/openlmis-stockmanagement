@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
@@ -51,8 +52,8 @@ public class StockCardTemplateService {
    * @param templateDto object to save or update.
    * @return the saved or updated object.
    */
+  @Transactional
   public StockCardTemplateDto saveOrUpdate(StockCardTemplateDto templateDto) {
-    checkProgramAndFacilityTypeExist(templateDto.getProgramId(), templateDto.getFacilityTypeId());
 
     StockCardTemplate template = templateDto.toModel(
             findAllFieldsFrom(cardFieldsRepo).collect(toList()),
@@ -64,6 +65,8 @@ public class StockCardTemplateService {
     if (found != null) {
       template.setId(found.getId());
       templateRepository.delete(found);
+    } else {
+      checkProgramAndFacilityTypeExist(template.getProgramId(), template.getFacilityTypeId());
     }
 
     return StockCardTemplateDto.from(templateRepository.save(template));

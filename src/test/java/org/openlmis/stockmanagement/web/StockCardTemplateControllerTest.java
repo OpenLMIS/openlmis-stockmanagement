@@ -17,7 +17,6 @@ import org.openlmis.stockmanagement.service.StockCardTemplateService;
 import org.openlmis.stockmanagement.service.referencedata.ReferenceDataNotFoundException;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -188,7 +187,7 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
   @Test
   public void should_return_400_when_program_or_facility_type_do_not_exist() throws Exception {
     //given
-    Mockito.doThrow(new ReferenceDataNotFoundException("", HttpStatus.NOT_FOUND, null))
+    Mockito.doThrow(new ReferenceDataNotFoundException(""))
             .when(stockCardTemplateService).saveOrUpdate(any());
 
     //when
