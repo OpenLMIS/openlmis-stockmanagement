@@ -113,7 +113,7 @@ traits:
           201:
             description: Indicates that stock card template has been created.
           400:
-            description: Indicates that request body is not correctly formated.
+            description: Indicates that request body is not correctly formated(incorrect fileds names, non-existing program or facility ids, etc).
 
   /stockEvents:
       post:
