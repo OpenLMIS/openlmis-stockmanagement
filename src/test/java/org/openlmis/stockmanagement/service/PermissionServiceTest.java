@@ -9,12 +9,12 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.openlmis.stockmanagement.dto.BooleanResultDto;
+import org.openlmis.stockmanagement.dto.ResultDto;
 import org.openlmis.stockmanagement.dto.RightDto;
 import org.openlmis.stockmanagement.dto.UserDto;
+import org.openlmis.stockmanagement.exception.MissingPermissionException;
 import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
-import org.openlmis.stockmanagement.exception.MissingPermissionException;
 
 import java.util.UUID;
 
@@ -60,7 +60,7 @@ public class PermissionServiceTest {
     when(authenticationHelper.getCurrentUser()).thenReturn(user);
 
     when(authenticationHelper.getRight(MANAGE_STOCK_CARD_TEMPLATES))
-        .thenReturn(manageStockCardTemplatesRight);
+            .thenReturn(manageStockCardTemplatesRight);
   }
 
   @Test
@@ -69,7 +69,7 @@ public class PermissionServiceTest {
     permissionService.canCreateStockCardTemplate();
     InOrder order = inOrder(authenticationHelper, userReferenceDataService);
     verifyCreateStockCardTemplatesRight(order,
-        MANAGE_STOCK_CARD_TEMPLATES, manageStockCardTemplatesRightId);
+            MANAGE_STOCK_CARD_TEMPLATES, manageStockCardTemplatesRightId);
   }
 
   @Test
@@ -79,16 +79,16 @@ public class PermissionServiceTest {
   }
 
   private void hasRight(UUID rightId, boolean assign) {
-    BooleanResultDto resultDto = new BooleanResultDto(assign);
+    ResultDto<Boolean> resultDto = new ResultDto<>(assign);
     when(userReferenceDataService
-        .hasRight(userId, rightId, null, null, null)
+            .hasRight(userId, rightId, null, null, null)
     ).thenReturn(resultDto);
   }
 
   private void expectException(String rightName) {
     exception.expect(MissingPermissionException.class);
     exception.expectMessage(
-        "You do not have the following permission to perform this action: " + rightName
+            "You do not have the following permission to perform this action: " + rightName
     );
   }
 
@@ -96,7 +96,7 @@ public class PermissionServiceTest {
     order.verify(authenticationHelper).getCurrentUser();
     order.verify(authenticationHelper).getRight(rightName);
     order.verify(userReferenceDataService).hasRight(userId, rightId, null, null,
-        null);
+            null);
   }
 
 }

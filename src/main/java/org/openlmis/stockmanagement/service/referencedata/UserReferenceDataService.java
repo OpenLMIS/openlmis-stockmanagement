@@ -1,6 +1,6 @@
 package org.openlmis.stockmanagement.service.referencedata;
 
-import org.openlmis.stockmanagement.dto.BooleanResultDto;
+import org.openlmis.stockmanagement.dto.ResultDto;
 import org.openlmis.stockmanagement.dto.UserDto;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +45,7 @@ public class UserReferenceDataService extends BaseReferenceDataService<UserDto> 
     requestBody.put("username", name);
 
     List<UserDto> users = new ArrayList<>(postFindAll("search", Collections.emptyMap(),
-        requestBody));
+            requestBody));
     return users.isEmpty() ? null : users.get(0);
   }
 
@@ -56,11 +56,10 @@ public class UserReferenceDataService extends BaseReferenceDataService<UserDto> 
    * @param right    right to check
    * @param program  program to check (for supervision rights, can be {@code null})
    * @param facility facility to check (for supervision rights, can be {@code null})
-   * @return an instance of {@link BooleanResultDto} with true or false depending on if user has the
-   *         right.
+   * @return {@link ResultDto} of true or false depending on if user has the right.
    */
-  public BooleanResultDto hasRight(UUID user, UUID right, UUID program, UUID facility,
-                                   UUID warehouse) {
+  public ResultDto<Boolean> hasRight(UUID user, UUID right, UUID program, UUID facility,
+                                     UUID warehouse) {
     Map<String, Object> parameters = new HashMap<>();
     parameters.put("rightId", right);
 
@@ -76,7 +75,7 @@ public class UserReferenceDataService extends BaseReferenceDataService<UserDto> 
       parameters.put("warehouseId", warehouse);
     }
 
-    return get(BooleanResultDto.class, user + "/hasRight", parameters);
+    return getValue(user + "/hasRight", parameters, Boolean.class);
   }
 
 }

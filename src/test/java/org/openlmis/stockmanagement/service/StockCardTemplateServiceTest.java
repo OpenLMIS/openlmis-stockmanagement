@@ -1,12 +1,19 @@
 package org.openlmis.stockmanagement.service;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
+import org.openlmis.stockmanagement.dto.FacilityTypeDto;
+import org.openlmis.stockmanagement.dto.ProgramDto;
 import org.openlmis.stockmanagement.dto.StockCardFieldDto;
 import org.openlmis.stockmanagement.dto.StockCardTemplateDto;
 import org.openlmis.stockmanagement.exception.FieldsNotAvailableException;
+import org.openlmis.stockmanagement.service.referencedata.FacilityTypeReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.UUID;
@@ -14,6 +21,7 @@ import java.util.UUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.StockCardTemplateBuilder.createTemplateDto;
 
 @RunWith(SpringRunner.class)
@@ -22,6 +30,21 @@ public class StockCardTemplateServiceTest {
 
   @Autowired
   private StockCardTemplateService stockCardTemplateService;
+
+  @MockBean
+  private ProgramReferenceDataService programReferenceDataService;
+
+  @MockBean
+  private FacilityTypeReferenceDataService facilityTypeReferenceDataService;
+
+  @Before
+  public void setUp() throws Exception {
+    //pretend that program and facility type are both present in ref data service
+    when(programReferenceDataService.findOne(Matchers.any()))
+            .thenReturn(new ProgramDto());
+    when(facilityTypeReferenceDataService.findOne(Matchers.any()))
+            .thenReturn(new FacilityTypeDto());
+  }
 
   @Test
   public void should_update_existing_template() throws Exception {
@@ -81,4 +104,5 @@ public class StockCardTemplateServiceTest {
     //when
     stockCardTemplateService.saveOrUpdate(templateDto);
   }
+
 }

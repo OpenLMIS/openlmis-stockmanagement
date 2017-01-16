@@ -1,12 +1,12 @@
 package org.openlmis.stockmanagement.service;
 
 
-import org.openlmis.stockmanagement.dto.BooleanResultDto;
+import org.openlmis.stockmanagement.dto.ResultDto;
 import org.openlmis.stockmanagement.dto.RightDto;
 import org.openlmis.stockmanagement.dto.UserDto;
+import org.openlmis.stockmanagement.exception.MissingPermissionException;
 import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
-import org.openlmis.stockmanagement.exception.MissingPermissionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +25,6 @@ public class PermissionService {
   private UserReferenceDataService userReferenceDataService;
 
 
-
   /**
    * Checks if current user has permission to submit a stock card template.
    *
@@ -36,14 +35,14 @@ public class PermissionService {
   }
 
   private void hasPermission(String rightName, UUID program, UUID facility, UUID warehouse)
-      throws MissingPermissionException {
+          throws MissingPermissionException {
     UserDto user = authenticationHelper.getCurrentUser();
     RightDto right = authenticationHelper.getRight(rightName);
-    BooleanResultDto result = userReferenceDataService.hasRight(
-        user.getId(), right.getId(), program, facility, warehouse
+    ResultDto<Boolean> result = userReferenceDataService.hasRight(
+            user.getId(), right.getId(), program, facility, warehouse
     );
 
-    if (null == result || !result.isResult()) {
+    if (null == result || !result.getResult()) {
       throw new MissingPermissionException(rightName);
     }
   }

@@ -9,6 +9,8 @@ import org.openlmis.stockmanagement.dto.StockCardTemplateDto;
 import org.openlmis.stockmanagement.repository.AvailableStockCardFieldsRepository;
 import org.openlmis.stockmanagement.repository.AvailableStockCardLineItemFieldsRepository;
 import org.openlmis.stockmanagement.repository.StockCardTemplateRepository;
+import org.openlmis.stockmanagement.service.referencedata.FacilityTypeReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Service;
@@ -37,6 +39,12 @@ public class StockCardTemplateService {
   @Autowired
   private AvailableStockCardLineItemFieldsRepository lineItemFieldsRepo;
 
+  @Autowired
+  private ProgramReferenceDataService programReferenceDataService;
+
+  @Autowired
+  private FacilityTypeReferenceDataService facilityTypeReferenceDataService;
+
   /**
    * Save or update stock card template by facility type id and program id.
    *
@@ -44,6 +52,8 @@ public class StockCardTemplateService {
    * @return the saved or updated object.
    */
   public StockCardTemplateDto saveOrUpdate(StockCardTemplateDto templateDto) {
+    checkProgramAndFacilityTypeExist(templateDto.getProgramId(), templateDto.getFacilityTypeId());
+
     StockCardTemplate template = templateDto.toModel(
             findAllFieldsFrom(cardFieldsRepo).collect(toList()),
             findAllFieldsFrom(lineItemFieldsRepo).collect(toList()));
@@ -111,5 +121,10 @@ public class StockCardTemplateService {
   private StockCardLineItemFieldDto convertModelToDefaultDto(
           AvailableStockCardLineItemFields model) {
     return new StockCardLineItemFieldDto(model.getName(), false, 0);
+  }
+
+  private void checkProgramAndFacilityTypeExist(UUID programId, UUID facilityTypeId) {
+    programReferenceDataService.findOne(programId);
+    facilityTypeReferenceDataService.findOne(facilityTypeId);
   }
 }

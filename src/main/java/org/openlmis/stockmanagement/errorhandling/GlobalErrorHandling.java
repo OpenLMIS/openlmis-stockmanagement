@@ -3,6 +3,7 @@ package org.openlmis.stockmanagement.errorhandling;
 import org.openlmis.stockmanagement.exception.AuthenticationException;
 import org.openlmis.stockmanagement.exception.FieldsNotAvailableException;
 import org.openlmis.stockmanagement.exception.MissingPermissionException;
+import org.openlmis.stockmanagement.service.referencedata.ReferenceDataNotFoundException;
 import org.openlmis.stockmanagement.service.referencedata.ReferenceDataRetrievalException;
 import org.openlmis.stockmanagement.util.ErrorResponse;
 import org.slf4j.Logger;
@@ -39,6 +40,13 @@ public class GlobalErrorHandling {
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   @ResponseBody
   public ErrorResponse handleRefDataException(ReferenceDataRetrievalException ex) {
+    return logErrorAndRespond("Error fetching from reference data", ex);
+  }
+
+  @ExceptionHandler(ReferenceDataNotFoundException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public ErrorResponse handleRefDataException(ReferenceDataNotFoundException ex) {
     return logErrorAndRespond("Error fetching from reference data", ex);
   }
 
