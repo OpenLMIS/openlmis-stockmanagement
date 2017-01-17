@@ -1,8 +1,7 @@
 FROM anapsix/alpine-java:jre8
 
 COPY build/libs/*.jar /service.jar
-#COPY build/demo-data /demo-data
-#There is no demo data yet, will enable the line above when there is.
+COPY build/demo-data /demo-data
 COPY build/consul /consul
 COPY run.sh /run.sh
 

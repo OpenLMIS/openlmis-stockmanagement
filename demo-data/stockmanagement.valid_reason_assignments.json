@@ -1,44 +1,44 @@
 [
   {
     "id": "8cd4d7f3-a5e1-4f12-a404-1d9a9a8d38f0",
-    "programId": "3aba5ed3-11fc-46dc-a8c6-f49b1ea34e86",
-    "facilityId": "a5d41ae1-ef70-480d-870b-0c9a335353da",
-    "isFreeTextAllowed": true,
-    "stockAdjustmentReasonId": "e3fc3cf3-da18-44b0-a220-77c985202e06"
+    "program_id": "3aba5ed3-11fc-46dc-a8c6-f49b1ea34e86",
+    "facility_type_id": "a5d41ae1-ef70-480d-870b-0c9a335353da",
+    "is_free_text_allowed": true,
+    "stock_adjustment_reason_id": "e3fc3cf3-da18-44b0-a220-77c985202e06"
   },
   {
     "id": "7bd4d7f3-a5e1-4f12-a404-1d9a9a8d38f0",
-    "programId": "3aba5ed3-11fc-46dc-a8c6-f49b1ea34e86",
-    "facilityId": "a5d41ae1-ef70-480d-870b-0c9a335353da",
-    "isFreeTextAllowed": false,
-    "stockAdjustmentReasonId": "d2fc3cf3-da18-44b0-a220-77c985202e06"
+    "program_id": "3aba5ed3-11fc-46dc-a8c6-f49b1ea34e86",
+    "facility_type_id": "a5d41ae1-ef70-480d-870b-0c9a335353da",
+    "is_free_text_allowed": false,
+    "stock_adjustment_reason_id": "d2fc3cf3-da18-44b0-a220-77c985202e06"
   },
   {
     "id": "6ad4d7f3-a5e1-4f12-a404-1d9a9a8d38f0",
-    "programId": "3aba5ed3-11fc-46dc-a8c6-f49b1ea34e86",
-    "facilityId": "a5d41ae1-ef70-480d-870b-0c9a335353da",
-    "isFreeTextAllowed": true,
-    "stockAdjustmentReasonId": "c1fc3cf3-da18-44b0-a220-77c985202e06"
+    "program_id": "3aba5ed3-11fc-46dc-a8c6-f49b1ea34e86",
+    "facility_type_id": "a5d41ae1-ef70-480d-870b-0c9a335353da",
+    "is_free_text_allowed": true,
+    "stock_adjustment_reason_id": "c1fc3cf3-da18-44b0-a220-77c985202e06"
   },
   {
     "id": "8cf6d7f3-a5e1-4f12-a404-1d9a9a8d38f0",
-    "programId": "4acb5ed3-11fc-46dc-a8c6-f49b1ea34e86",
-    "facilityId": "45d41ae1-ef70-480d-870b-0c9a335353da",
-    "isFreeTextAllowed": true,
-    "stockAdjustmentReasonId": "e3fc3cf3-da18-44b0-a220-77c985202e06"
+    "program_id": "4acb5ed3-11fc-46dc-a8c6-f49b1ea34e86",
+    "facility_type_id": "45d41ae1-ef70-480d-870b-0c9a335353da",
+    "is_free_text_allowed": true,
+    "stock_adjustment_reason_id": "e3fc3cf3-da18-44b0-a220-77c985202e06"
   },
   {
     "id": "7be5d7f3-a5e1-4f12-a404-1d9a9a8d38f0",
-    "programId": "4acb5ed3-11fc-46dc-a8c6-f49b1ea34e86",
-    "facilityId": "45e51ae1-ef70-480d-870b-0c9a335353da",
-    "isFreeTextAllowed": false,
-    "stockAdjustmentReasonId": "d2fc3cf3-da18-44b0-a220-77c985202e06"
+    "program_id": "4acb5ed3-11fc-46dc-a8c6-f49b1ea34e86",
+    "facility_type_id": "45e51ae1-ef70-480d-870b-0c9a335353da",
+    "is_free_text_allowed": false,
+    "stock_adjustment_reason_id": "d2fc3cf3-da18-44b0-a220-77c985202e06"
   },
   {
     "id": "6ae5d7f3-a5e1-4f12-a404-1d9a9a8d38f0",
-    "programId": "4acb5ed3-11fc-46dc-a8c6-f49b1ea34e86",
-    "facilityId": "45e51ae1-ef70-480d-870b-0c9a335353da",
-    "isFreeTextAllowed": true,
-    "stockAdjustmentReasonId": "c1fc3cf3-da18-44b0-a220-77c985202e06"
+    "program_id": "4acb5ed3-11fc-46dc-a8c6-f49b1ea34e86",
+    "facility_type_id": "45e51ae1-ef70-480d-870b-0c9a335353da",
+    "is_free_text_allowed": true,
+    "stock_adjustment_reason_id": "c1fc3cf3-da18-44b0-a220-77c985202e06"
   }
 ]

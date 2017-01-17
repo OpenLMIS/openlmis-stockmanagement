@@ -19,4 +19,4 @@ mv input.sql ${OUTPUT_DIR}/data.sql
 
 echo "Generated ${OUTPUT_DIR}/data.sql"
 echo "To insert the data into database, first run the service, and then from outside of container type:"
-echo "docker exec -i openlmisrequisition_db_1 psql -Upostgres open_lmis < ${OUTPUT_DIR}/data.sql"
+echo "docker exec -i openlmisstockmanagement_db_1 psql -Upostgres open_lmis < ${OUTPUT_DIR}/data.sql"
