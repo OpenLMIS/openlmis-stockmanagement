@@ -24,4 +24,6 @@ public class StockAdjustmentReason extends BaseEntity {
   @Enumerated(value = EnumType.STRING)
   private AdjustmentType adjustmentType;
 
+  @Column(nullable = false)
+  private Boolean isFreeTextAllowed = false;
 }

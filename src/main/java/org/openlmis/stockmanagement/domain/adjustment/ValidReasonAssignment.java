@@ -23,9 +23,6 @@ public class ValidReasonAssignment extends BaseEntity {
   @Type(type = PG_UUID)
   private UUID facilityTypeId;
 
-  @Column(nullable = false)
-  private Boolean isFreeTextAllowed = false;
-
   @ManyToOne()
   @JoinColumn()
   private StockAdjustmentReason stockAdjustmentReason;
