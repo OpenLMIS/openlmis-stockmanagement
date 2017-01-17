@@ -5,10 +5,13 @@ import lombok.Data;
 import org.openlmis.stockmanagement.domain.template.AvailableStockCardFields;
 import org.openlmis.stockmanagement.domain.template.StockCardFields;
 import org.openlmis.stockmanagement.domain.template.StockCardTemplate;
-import org.openlmis.stockmanagement.exception.FieldsNotAvailableException;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.utils.Message;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_STOCK_CARD_FIELD_INVALID;
 
 @Data
 @AllArgsConstructor
@@ -54,7 +57,8 @@ public class StockCardFieldDto {
     if (first.isPresent()) {
       return first.get();
     } else {
-      throw new FieldsNotAvailableException(name);
+      throw new ValidationMessageException(
+              new Message(ERROR_STOCK_CARD_FIELD_INVALID, name));
     }
   }
 }

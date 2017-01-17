@@ -5,10 +5,13 @@ import lombok.Data;
 import org.openlmis.stockmanagement.domain.template.AvailableStockCardLineItemFields;
 import org.openlmis.stockmanagement.domain.template.StockCardLineItemFields;
 import org.openlmis.stockmanagement.domain.template.StockCardTemplate;
-import org.openlmis.stockmanagement.exception.FieldsNotAvailableException;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.utils.Message;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_STOCK_CARD_FIELD_INVALID;
 
 @Data
 @AllArgsConstructor
@@ -37,9 +40,8 @@ public class StockCardLineItemFieldDto {
    * @param lineItemFields all available fields.
    * @return DB model object.
    */
-  StockCardLineItemFields toModel(
-          StockCardTemplate template,
-          List<AvailableStockCardLineItemFields> lineItemFields) {
+  StockCardLineItemFields toModel(StockCardTemplate template,
+                                  List<AvailableStockCardLineItemFields> lineItemFields) {
     StockCardLineItemFields stockCardLineItemFields = new StockCardLineItemFields();
     stockCardLineItemFields.setStockCardTemplate(template);
     stockCardLineItemFields.setIsDisplayed(isDisplayed);
@@ -54,10 +56,10 @@ public class StockCardLineItemFieldDto {
             .filter(field -> field.getName().equals(name))
             .findFirst();
     if (first.isPresent()) {
-
       return first.get();
     } else {
-      throw new FieldsNotAvailableException(name);
+      throw new ValidationMessageException(
+              new Message(ERROR_STOCK_CARD_FIELD_INVALID, name));
     }
   }
 }

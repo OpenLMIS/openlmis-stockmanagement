@@ -1,13 +1,11 @@
 package org.openlmis.stockmanagement.errorhandling;
 
 import org.openlmis.stockmanagement.exception.AuthenticationException;
-import org.openlmis.stockmanagement.exception.FieldsNotAvailableException;
 import org.openlmis.stockmanagement.exception.MissingPermissionException;
-import org.openlmis.stockmanagement.service.referencedata.ReferenceDataNotFoundException;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.referencedata.ReferenceDataRetrievalException;
 import org.openlmis.stockmanagement.util.ErrorResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -18,9 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * Base classes for controller advices dealing with error handling.
  */
 @ControllerAdvice
-public class GlobalErrorHandling {
-
-  private final Logger logger = LoggerFactory.getLogger(getClass());
+public class GlobalErrorHandling extends AbstractErrorHandling {
 
   @ExceptionHandler(AuthenticationException.class)
   @ResponseStatus(HttpStatus.UNAUTHORIZED)
@@ -43,31 +39,16 @@ public class GlobalErrorHandling {
     return logErrorAndRespond("Error fetching from reference data", ex);
   }
 
-  @ExceptionHandler(ReferenceDataNotFoundException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  @ResponseBody
-  public ErrorResponse handleRefDataException(ReferenceDataNotFoundException ex) {
-    return logErrorAndRespond("Error fetching from reference data", ex);
-  }
-
-  @ExceptionHandler(FieldsNotAvailableException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  @ResponseBody
-  public ErrorResponse handleUnavailableFieldsException(FieldsNotAvailableException ex) {
-    return logErrorAndRespond("Not an available field", ex);
-  }
-
   /**
-   * Logs an error message and returns an error response.
+   * Handles Message exceptions and returns status 400 Bad Request.
    *
-   * @param message the error message
-   * @param ex      the exception to log.
-   *                Message from the exception is used as the error description.
-   * @return the error response that should be sent to the client
+   * @param ex the ValidationMessageException to handle
+   * @return the error response for the user
    */
-  protected ErrorResponse logErrorAndRespond(String message, Exception ex) {
-    logger.error(message, ex);
-    return new ErrorResponse(message, ex.getMessage());
+  @ExceptionHandler(ValidationMessageException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public Message.LocalizedMessage handleMessageException(ValidationMessageException ex) {
+    return getLocalizedMessage(ex);
   }
-
 }

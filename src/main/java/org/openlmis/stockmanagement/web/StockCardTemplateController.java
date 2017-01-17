@@ -1,7 +1,6 @@
 package org.openlmis.stockmanagement.web;
 
 import org.openlmis.stockmanagement.dto.StockCardTemplateDto;
-import org.openlmis.stockmanagement.exception.MissingPermissionException;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +60,7 @@ public class StockCardTemplateController {
    */
   @RequestMapping(value = "/stockCardTemplates", method = POST)
   public ResponseEntity<StockCardTemplateDto> createStockCardTemplate(
-          @RequestBody StockCardTemplateDto stockCardTemplate) throws MissingPermissionException {
+          @RequestBody StockCardTemplateDto stockCardTemplate) {
 
     permissionService.canCreateStockCardTemplate();
     StockCardTemplateDto savedTemplate = stockCardTemplateService

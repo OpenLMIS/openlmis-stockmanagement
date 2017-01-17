@@ -8,7 +8,7 @@ import org.openlmis.stockmanagement.dto.FacilityTypeDto;
 import org.openlmis.stockmanagement.dto.ProgramDto;
 import org.openlmis.stockmanagement.dto.StockCardFieldDto;
 import org.openlmis.stockmanagement.dto.StockCardTemplateDto;
-import org.openlmis.stockmanagement.exception.FieldsNotAvailableException;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.referencedata.FacilityTypeReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +47,7 @@ public class StockCardTemplateServiceTest {
   }
 
   @Test
-  public void should_update_existing_template() throws Exception {
+  public void should_update_existing_template() {
     //given: there is an existing template
     StockCardTemplateDto savedTemplate = stockCardTemplateService.saveOrUpdate(createTemplateDto());
     UUID facilityTypeId = savedTemplate.getFacilityTypeId();
@@ -72,7 +72,7 @@ public class StockCardTemplateServiceTest {
   }
 
   @Test
-  public void should_get_default_stock_card_template() throws Exception {
+  public void should_get_default_stock_card_template() {
     //when
     StockCardTemplateDto template = stockCardTemplateService.getDefaultStockCardTemplate();
 
@@ -85,7 +85,7 @@ public class StockCardTemplateServiceTest {
   }
 
   @Test
-  public void should_return_null_when_no_template_found() throws Exception {
+  public void should_return_null_when_no_template_found() {
 
     //when: searching for non-existing template
     StockCardTemplateDto dto = stockCardTemplateService
@@ -95,11 +95,24 @@ public class StockCardTemplateServiceTest {
     assertNull(dto);
   }
 
-  @Test(expected = FieldsNotAvailableException.class)
-  public void should_not_save_template_with_unavailable_field() throws Exception {
+  @Test(expected = ValidationMessageException.class)
+  public void should_not_save_template_with_unavailable_field() {
     //given
     StockCardTemplateDto templateDto = createTemplateDto();
     templateDto.getStockCardFields().add(new StockCardFieldDto("i do not exist", false, 1));
+
+    //when
+    stockCardTemplateService.saveOrUpdate(templateDto);
+  }
+
+  @Test(expected = ValidationMessageException.class)
+  public void should_not_save_template_with_non_existing_program_and_facility_type() {
+    //given: program and facility can not be found in ref data service
+    when(programReferenceDataService.findOne(Matchers.any()))
+            .thenReturn(null);
+    when(facilityTypeReferenceDataService.findOne(Matchers.any()))
+            .thenReturn(null);
+    StockCardTemplateDto templateDto = createTemplateDto();
 
     //when
     stockCardTemplateService.saveOrUpdate(templateDto);

@@ -44,6 +44,7 @@ dependencies {
     compile "org.postgresql:postgresql:9.4.1208"
     compile "com.github.tomakehurst:wiremock:1.58"
     compile 'org.webjars:swagger-ui:2.2.6'
+    compile 'org.apache.commons:commons-lang3:3.4'
 
     testCompile "junit:junit"
     testCompile "org.mockito:mockito-core:1.+"
@@ -201,7 +202,7 @@ test {
     }
 }
 
-//enable the lines below if you need to debug spring runing in docker
+//enable the lines below if you need to debug spring running in docker
 //bootRun {
 //    jvmArgs = ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"]
 //}

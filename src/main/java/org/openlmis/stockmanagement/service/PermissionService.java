@@ -30,12 +30,11 @@ public class PermissionService {
    *
    * @throws MissingPermissionException if the current user has not a permission.
    */
-  public void canCreateStockCardTemplate() throws MissingPermissionException {
+  public void canCreateStockCardTemplate() {
     hasPermission(MANAGE_STOCK_CARD_TEMPLATES, null, null, null);
   }
 
-  private void hasPermission(String rightName, UUID program, UUID facility, UUID warehouse)
-          throws MissingPermissionException {
+  private void hasPermission(String rightName, UUID program, UUID facility, UUID warehouse) {
     UserDto user = authenticationHelper.getCurrentUser();
     RightDto right = authenticationHelper.getRight(rightName);
     ResultDto<Boolean> result = userReferenceDataService.hasRight(

@@ -48,7 +48,7 @@ public abstract class BaseReferenceDataService<T> extends BaseCommunicationServi
       // rest template will handle 404 as an exception, instead of returning null
       if (ex.getStatusCode() == HttpStatus.NOT_FOUND) {
         logger.warn("{} with id {} does not exist. ", getResultClass().getSimpleName(), id);
-        throw buildRefDataNotFoundException();
+        return null;
       } else {
         throw buildRefDataException(ex);
       }
@@ -136,10 +136,5 @@ public abstract class BaseReferenceDataService<T> extends BaseCommunicationServi
     return new ReferenceDataRetrievalException(getResultClass().getSimpleName(),
             ex.getStatusCode(),
             ex.getResponseBodyAsString());
-  }
-
-  private ReferenceDataNotFoundException buildRefDataNotFoundException() {
-    return new ReferenceDataNotFoundException(getResultClass().getSimpleName()
-    );
   }
 }

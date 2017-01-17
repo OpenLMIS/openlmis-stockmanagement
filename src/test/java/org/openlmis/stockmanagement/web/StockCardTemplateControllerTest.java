@@ -1,70 +1,45 @@
 package org.openlmis.stockmanagement.web;
 
 import org.codehaus.jackson.map.ObjectMapper;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.openlmis.stockmanagement.domain.template.StockCardTemplate;
 import org.openlmis.stockmanagement.dto.StockCardTemplateDto;
-import org.openlmis.stockmanagement.errorhandling.GlobalErrorHandling;
 import org.openlmis.stockmanagement.exception.AuthenticationException;
 import org.openlmis.stockmanagement.exception.MissingPermissionException;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardTemplateService;
-import org.openlmis.stockmanagement.service.referencedata.ReferenceDataNotFoundException;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.UUID;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_TYPE_NOT_FOUND;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_NOT_FOUND;
 import static org.openlmis.stockmanagement.testutils.StockCardTemplateBuilder.createTemplateDto;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(webEnvironment = RANDOM_PORT)
 public class StockCardTemplateControllerTest extends BaseWebTest {
 
-  private MockMvc mvc;
+  private static final String STOCK_CARD_TEMPLATE_API = "/api/stockCardTemplates";
 
   @MockBean
   private StockCardTemplateService stockCardTemplateService;
-
   @MockBean
   private PermissionService permissionService;
 
-  @InjectMocks
-  StockCardTemplateController controllerUnderTest;
-
   private UUID programId = UUID.randomUUID();
   private UUID facilityTypeId = UUID.randomUUID();
-
-  static final String STOCK_CARD_TEMPLATE_API = "/api/stockCardTemplates";
-
-  @Before
-  public void setup() {
-    MockitoAnnotations.initMocks(this);
-
-    mvc = MockMvcBuilders
-            .standaloneSetup(controllerUnderTest)
-            .setControllerAdvice(new GlobalErrorHandling())
-            .build();
-  }
 
   @Test
   public void should_get_default_stock_card_templates_without_params() throws Exception {
@@ -185,9 +160,19 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_400_when_program_or_facility_type_do_not_exist() throws Exception {
+  public void should_return_400_when_program_does_not_exist() throws Exception {
+    throwValidationExceptionWith(ERROR_PROGRAM_NOT_FOUND);
+  }
+
+  @Test
+  public void should_return_400_when_facility_type_does_not_exist() throws Exception {
+    throwValidationExceptionWith(ERROR_FACILITY_TYPE_NOT_FOUND);
+  }
+
+  private void throwValidationExceptionWith(String exceptionKey) throws Exception {
     //given
-    Mockito.doThrow(new ReferenceDataNotFoundException(""))
+    Mockito.doThrow(new ValidationMessageException(
+            new Message(exceptionKey, "some id")))
             .when(stockCardTemplateService).saveOrUpdate(any());
 
     //when
