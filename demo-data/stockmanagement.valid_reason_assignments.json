@@ -22,5 +22,11 @@
     "programId": "10845cb9-d365-4aaa-badd-b4fa39c6a26a",
     "facilityTypeId": "663b1d34-cc17-4d60-9619-e553e45aa441",
     "stockAdjustmentReasonId": "c1fc3cf3-da18-44b0-a220-77c985202e06"
+  },
+  {
+    "id": "b6bdb398-c98c-492e-bdf6-c912f2af5eb0",
+    "programId": "10845cb9-d365-4aaa-badd-b4fa39c6a26a",
+    "facilityTypeId": "663b1d34-cc17-4d60-9619-e553e45aa441",
+    "stockAdjustmentReasonId": "279d55bd-42e3-438c-a63d-9c021b185dae"
   }
 ]
