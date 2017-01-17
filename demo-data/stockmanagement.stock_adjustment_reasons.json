@@ -3,18 +3,21 @@
     "id": "e3fc3cf3-da18-44b0-a220-77c985202e06",
     "name": "Transfer In",
     "description": "Transfer In",
-    "adjustment_type": "POSITIVE"
+    "adjustmentType": "POSITIVE",
+    "isFreeTextAllowed": true
   },
   {
     "id": "d2fc3cf3-da18-44b0-a220-77c985202e06",
     "name": "Physical Inventory",
     "description": "Physical Inventory",
-    "adjustment_type": "EQUAL"
+    "adjustmentType": "EQUAL",
+    "isFreeTextAllowed": false
   },
   {
     "id": "c1fc3cf3-da18-44b0-a220-77c985202e06",
     "name": "Transfer Out",
     "description": "Transfer Out",
-    "adjustment_type": "NEGATIVE"
+    "adjustmentType": "NEGATIVE",
+    "isFreeTextAllowed": false
   }
 ]
