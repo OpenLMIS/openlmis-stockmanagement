@@ -20,7 +20,7 @@ import java.util.UUID;
 
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.service.PermissionService.MANAGE_STOCK_CARD_TEMPLATES;
+import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARD_TEMPLATES_MANAGE;
 
 @SuppressWarnings("PMD.TooManyMethods")
 @RunWith(MockitoJUnitRunner.class)
@@ -59,7 +59,7 @@ public class PermissionServiceTest {
 
     when(authenticationHelper.getCurrentUser()).thenReturn(user);
 
-    when(authenticationHelper.getRight(MANAGE_STOCK_CARD_TEMPLATES))
+    when(authenticationHelper.getRight(STOCK_CARD_TEMPLATES_MANAGE))
             .thenReturn(manageStockCardTemplatesRight);
   }
 
@@ -69,12 +69,12 @@ public class PermissionServiceTest {
     permissionService.canCreateStockCardTemplate();
     InOrder order = inOrder(authenticationHelper, userReferenceDataService);
     verifyCreateStockCardTemplatesRight(order,
-            MANAGE_STOCK_CARD_TEMPLATES, manageStockCardTemplatesRightId);
+            STOCK_CARD_TEMPLATES_MANAGE, manageStockCardTemplatesRightId);
   }
 
   @Test
   public void cannotCreateStockCardTemplates() throws Exception {
-    expectException(MANAGE_STOCK_CARD_TEMPLATES);
+    expectException(STOCK_CARD_TEMPLATES_MANAGE);
     permissionService.canCreateStockCardTemplate();
   }
 

@@ -16,7 +16,7 @@ import java.util.UUID;
 @Service
 public class PermissionService {
 
-  static final String MANAGE_STOCK_CARD_TEMPLATES = "MANAGE_STOCK_CARD_TEMPLATES";
+  static final String STOCK_CARD_TEMPLATES_MANAGE = "STOCK_CARD_TEMPLATES_MANAGE";
 
   @Autowired
   private AuthenticationHelper authenticationHelper;
@@ -31,7 +31,7 @@ public class PermissionService {
    * @throws MissingPermissionException if the current user has not a permission.
    */
   public void canCreateStockCardTemplate() {
-    hasPermission(MANAGE_STOCK_CARD_TEMPLATES, null, null, null);
+    hasPermission(STOCK_CARD_TEMPLATES_MANAGE, null, null, null);
   }
 
   private void hasPermission(String rightName, UUID program, UUID facility, UUID warehouse) {
