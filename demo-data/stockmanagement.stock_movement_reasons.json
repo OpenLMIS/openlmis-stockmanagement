@@ -17,10 +17,18 @@
   },
   {
     "id": "279d55bd-42e3-438c-a63d-9c021b185dae",
-    "name": "NGO",
-    "description": "NGO",
+    "name": "Donation",
+    "description": "Donation",
     "reasonCategory": "AD_HOC",
     "adjustmentType": "POSITIVE",
+    "isFreeTextAllowed": true
+  },
+  {
+    "id": "5b09202e-b8a7-4f77-9e0e-8156f8efc613",
+    "name": "Top Up",
+    "description": "Top Up",
+    "reasonCategory": "AD_HOC",
+    "adjustmentType": "NEGATIVE",
     "isFreeTextAllowed": true
   }
 ]
