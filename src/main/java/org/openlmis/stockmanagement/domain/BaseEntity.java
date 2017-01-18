@@ -13,6 +13,7 @@ import java.util.UUID;
 @MappedSuperclass
 public abstract class BaseEntity {
 
+  public static final String TEXT_COLUMN_DEFINITION = "text";
   public static final String PG_UUID = "pg-uuid";
 
   @Id

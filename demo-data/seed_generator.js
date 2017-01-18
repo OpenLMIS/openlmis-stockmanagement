@@ -10,7 +10,7 @@ var query = "INSERT INTO %s (SELECT * FROM json_populate_recordset(NULL::%s, '%s
 // This presents the order that must be kept for proper data insertion.
 // Tables not included here are populated in random order
 var filesOrdered = [
-    "stockmanagement.stock_adjustment_reasons",
+    "stockmanagement.stock_movement_reasons",
     "stockmanagement.valid_reason_assignments",
 ]
 

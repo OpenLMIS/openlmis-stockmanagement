@@ -3,6 +3,7 @@
     "id": "e3fc3cf3-da18-44b0-a220-77c985202e06",
     "name": "Transfer In",
     "description": "Transfer In",
+    "reasonCategory": "ADJUSTMENT",
     "adjustmentType": "POSITIVE",
     "isFreeTextAllowed": false
   },
@@ -10,6 +11,7 @@
     "id": "c1fc3cf3-da18-44b0-a220-77c985202e06",
     "name": "Transfer Out",
     "description": "Transfer Out",
+    "reasonCategory": "ADJUSTMENT",
     "adjustmentType": "NEGATIVE",
     "isFreeTextAllowed": false
   },
@@ -17,6 +19,7 @@
     "id": "279d55bd-42e3-438c-a63d-9c021b185dae",
     "name": "NGO",
     "description": "NGO",
+    "reasonCategory": "AD_HOC",
     "adjustmentType": "POSITIVE",
     "isFreeTextAllowed": true
   }

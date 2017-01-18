@@ -11,18 +11,22 @@ import javax.persistence.Table;
 
 @Entity
 @Data
-@Table(name = "stock_adjustment_reasons", schema = "stockmanagement")
-public class StockAdjustmentReason extends BaseEntity {
+@Table(name = "stock_movement_reasons", schema = "stockmanagement")
+public class StockMovementReason extends BaseEntity {
 
-  @Column(nullable = false, columnDefinition = "text")
+  @Column(nullable = false, columnDefinition = TEXT_COLUMN_DEFINITION)
   private String name;
 
-  @Column(columnDefinition = "text")
+  @Column(columnDefinition = TEXT_COLUMN_DEFINITION)
   private String description;
 
-  @Column(nullable = false, columnDefinition = "text")
+  @Column(nullable = false, columnDefinition = TEXT_COLUMN_DEFINITION)
   @Enumerated(value = EnumType.STRING)
   private AdjustmentType adjustmentType;
+
+  @Column(nullable = false, columnDefinition = TEXT_COLUMN_DEFINITION)
+  @Enumerated(value = EnumType.STRING)
+  private ReasonCategory reasonCategory;
 
   @Column(nullable = false)
   private Boolean isFreeTextAllowed = false;
