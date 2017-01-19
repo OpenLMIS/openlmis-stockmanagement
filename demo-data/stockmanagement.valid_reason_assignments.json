@@ -3,30 +3,30 @@
     "id": "8cd4d7f3-a5e1-4f12-a404-1d9a9a8d38f0",
     "programId": "dce17f2e-af3e-40ad-8e00-3496adef44c3",
     "facilityTypeId": "ac1d268b-ce10-455f-bf87-9c667da8f060",
-    "stockAdjustmentReasonId": "e3fc3cf3-da18-44b0-a220-77c985202e06"
+    "stockMovementReasonId": "e3fc3cf3-da18-44b0-a220-77c985202e06"
   },
   {
     "id": "6ad4d7f3-a5e1-4f12-a404-1d9a9a8d38f0",
     "programId": "dce17f2e-af3e-40ad-8e00-3496adef44c3",
     "facilityTypeId": "ac1d268b-ce10-455f-bf87-9c667da8f060",
-    "stockAdjustmentReasonId": "c1fc3cf3-da18-44b0-a220-77c985202e06"
+    "stockMovementReasonId": "c1fc3cf3-da18-44b0-a220-77c985202e06"
   },
   {
     "id": "8cf6d7f3-a5e1-4f12-a404-1d9a9a8d38f0",
     "programId": "10845cb9-d365-4aaa-badd-b4fa39c6a26a",
     "facilityTypeId": "663b1d34-cc17-4d60-9619-e553e45aa441",
-    "stockAdjustmentReasonId": "e3fc3cf3-da18-44b0-a220-77c985202e06"
+    "stockMovementReasonId": "e3fc3cf3-da18-44b0-a220-77c985202e06"
   },
   {
     "id": "6ae5d7f3-a5e1-4f12-a404-1d9a9a8d38f0",
     "programId": "10845cb9-d365-4aaa-badd-b4fa39c6a26a",
     "facilityTypeId": "663b1d34-cc17-4d60-9619-e553e45aa441",
-    "stockAdjustmentReasonId": "c1fc3cf3-da18-44b0-a220-77c985202e06"
+    "stockMovementReasonId": "c1fc3cf3-da18-44b0-a220-77c985202e06"
   },
   {
     "id": "b6bdb398-c98c-492e-bdf6-c912f2af5eb0",
     "programId": "10845cb9-d365-4aaa-badd-b4fa39c6a26a",
     "facilityTypeId": "663b1d34-cc17-4d60-9619-e553e45aa441",
-    "stockAdjustmentReasonId": "279d55bd-42e3-438c-a63d-9c021b185dae"
+    "stockMovementReasonId": "279d55bd-42e3-438c-a63d-9c021b185dae"
   }
 ]
