@@ -18,7 +18,7 @@ import static org.hibernate.annotations.LazyCollectionOption.FALSE;
 
 @Entity
 @Data
-@Table(name = "stock_card_template", schema = "stockmanagement")
+@Table(name = "stock_card_templates", schema = "stockmanagement")
 public class StockCardTemplate extends BaseEntity {
 
   @Column(nullable = false)
