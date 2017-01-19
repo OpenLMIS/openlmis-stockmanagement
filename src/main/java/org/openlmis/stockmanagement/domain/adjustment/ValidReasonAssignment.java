@@ -24,6 +24,6 @@ public class ValidReasonAssignment extends BaseEntity {
   private UUID facilityTypeId;
 
   @ManyToOne()
-  @JoinColumn()
+  @JoinColumn(nullable = false)
   private StockMovementReason stockMovementReason;
 }

@@ -24,6 +24,6 @@ public class ValidSourceAssgnment extends BaseEntity {
   UUID facilityTypeId;
 
   @ManyToOne()
-  @JoinColumn()
+  @JoinColumn(nullable = false)
   Node node;
 }

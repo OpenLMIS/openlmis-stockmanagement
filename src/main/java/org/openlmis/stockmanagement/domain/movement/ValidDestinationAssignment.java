@@ -24,6 +24,6 @@ public class ValidDestinationAssignment extends BaseEntity {
   UUID facilityTypeId;
 
   @ManyToOne()
-  @JoinColumn()
+  @JoinColumn(nullable = false)
   Node node;
 }
