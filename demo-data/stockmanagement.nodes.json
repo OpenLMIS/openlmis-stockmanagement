@@ -1,0 +1,22 @@
+[
+  {
+    "id": "0bd28568-43f1-4836-934d-ec5fb11398e8",
+    "isRefDataFacility": true,
+    "referenceId": "e6799d64-d10d-4011-b8c2-0e4d4a3f65ce"
+  },
+  {
+    "id": "e89eaf68-50c1-47f2-b83a-5b51ffa2206e",
+    "isRefDataFacility": true,
+    "referenceId": "13037147-1769-4735-90a7-b9b310d128b8"
+  },
+  {
+    "id": "087e81f6-a74d-4bba-9d01-16e0d64e9609",
+    "isRefDataFacility": false,
+    "referenceId": "3b2886f1-632b-4bd5-acd9-aaed37045682"
+  },
+  {
+    "id": "bb551f22-66b1-487a-a87d-9083d9eb8d56",
+    "isRefDataFacility": false,
+    "referenceId": "f87480a8-5f06-4152-8e9d-6b53762a917e"
+  }
+]

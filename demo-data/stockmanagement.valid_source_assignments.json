@@ -1,0 +1,14 @@
+[
+  {
+    "id": "5c9ec6f7-2433-4f90-beb0-958e2e6b5835",
+    "facilityTypeId": "ac1d268b-ce10-455f-bf87-9c667da8f060",
+    "programId": "dce17f2e-af3e-40ad-8e00-3496adef44c3",
+    "nodeId": "0bd28568-43f1-4836-934d-ec5fb11398e8"
+  },
+  {
+    "id": "44c2b8d3-1269-46c5-bcd4-265732e380ea",
+    "facilityTypeId": "ac1d268b-ce10-455f-bf87-9c667da8f060",
+    "programId": "dce17f2e-af3e-40ad-8e00-3496adef44c3",
+    "nodeId": "087e81f6-a74d-4bba-9d01-16e0d64e9609"
+  }
+]

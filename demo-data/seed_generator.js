@@ -12,6 +12,10 @@ var query = "INSERT INTO %s (SELECT * FROM json_populate_recordset(NULL::%s, '%s
 var filesOrdered = [
     "stockmanagement.stock_movement_reasons",
     "stockmanagement.valid_reason_assignments",
+    "stockmanagement.organizations",
+    "stockmanagement.nodes",
+    "stockmanagement.valid_source_assignments",
+    "stockmanagement.valid_destination_assignments"
 ]
 
 // Detects if the given key/value pair represents a foreign key.
