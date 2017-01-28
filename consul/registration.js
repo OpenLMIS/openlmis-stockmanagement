@@ -4,6 +4,7 @@ const raml = require('raml-parser');
 const deasync = require('deasync');
 const http = require('http');
 const uuid = require('uuid');
+const util = require('util');
 const fs = require('fs');
 const ip = require('ip');
 
@@ -333,23 +334,43 @@ function CommandLineResolver() {
   }
 }
 
-try {
+// Function ran while executing as script
+(function register() {
+  function formatError(error) {
+    var templates = {
+      "original": "%s",
+      "formatted": "%s\n(original message: \"%s\")"
+    };
+
+    var messages = {
+      "ECONNRESET": "Could not reach Consul host: " + consulHost + ":" + consulPort
+    };
+
+    var errorMessage = error.message;
+    var formatMessage = messages[error.code];
+
+    return formatMessage ?
+      util.format(templates.formatted, formatMessage, errorMessage) : errorMessage;
+  }
+
   var consulHost = process.env.CONSUL_HOST || 'consul';
   var consulPort = process.env.CONSUL_PORT || '8500';
-
-  // Retrieve arguments passed to script
-  var args = new CommandLineResolver().processArgs();
   var registration = new RegistrationService(consulHost, consulPort);
 
-  if (args.command === 'register') {
-    registration.register(args);
-  } else if (args.command === 'deregister') {
-    registration.deregister(args);
-  } else {
-    throw new Error("Invalid command. It should be either 'register' or 'deregister'.")
+  try {
+    // Retrieve arguments passed to script
+    var args = new CommandLineResolver().processArgs();
+
+    if (args.command === 'register') {
+      registration.register(args);
+    } else if (args.command === 'deregister') {
+      registration.deregister(args);
+    } else {
+      throw new Error("Invalid command. It should be either 'register' or 'deregister'.")
+    }
+  } catch(err) {
+    console.error("[ERROR]:")
+    console.error(formatError(err));
+    process.exit(1);
   }
-} catch(err) {
-  console.error("Error during service registration:")
-  console.error(err.message);
-  process.exit(1);
-}
+})();
