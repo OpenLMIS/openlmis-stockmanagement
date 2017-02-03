@@ -12,6 +12,7 @@ schemas:
   - stockCardTemplate: !include schemas/stockCardTemplate.json
   - stockEvent: !include schemas/stockEvent.json
   - stockCards: !include schemas/stockCards.json
+  - stockCard: !include schemas/stockCard.json
 
 resourceTypes:
     - collection:
@@ -183,11 +184,33 @@ traits:
             body:
               application/json:
 
+          404:
+            description: No stock cards were found that matches given facility and program.
+            body:
+              application/json:
+
+          403:
+            description: User does not have permission to view stock cards of given facility and program.
+            body:
+              application/json:
+
   /stockCards/{id}:
       get:
         is: [ secured ]
         description: Get full details of one stock card.
+
         responses:
           200:
+            body:
+              application/json:
+                schema: stockCard
+
+          404:
+            description: Stock card with given id does not exist.
+            body:
+              application/json:
+
+          403:
+            description: User does not have permission to view stock card.
             body:
               application/json:

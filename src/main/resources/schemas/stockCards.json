@@ -13,17 +13,24 @@
             },
             "reason": {
               "type": "object",
-              "$ref": "urn:jsonschema:pseudocode:domain:StockCardLineItemReason"
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "CREDIT",
+                    "DEBIT"
+                  ]
+                }
+              }
             },
             "quantity": {
               "type": "integer"
             },
             "signature": {
               "type": "string"
-            },
-            "stockCard": {
-              "type": "object",
-              "$ref": "urn:jsonschema:pseudocode:domain:StockCard"
             },
             "destinationId": {
               "type": "string"
