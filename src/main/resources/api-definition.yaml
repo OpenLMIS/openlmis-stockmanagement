@@ -11,6 +11,7 @@ documentation:
 schemas:
   - stockCardTemplate: !include schemas/stockCardTemplate.json
   - stockEvent: !include schemas/stockEvent.json
+  - stockCards: !include schemas/stockCards.json
 
 resourceTypes:
     - collection:
@@ -148,8 +149,21 @@ traits:
           program:
             required: false
             description: When provided, returns stock cards under this program.
+
         responses:
           200:
+            description: Returns stock cards that matche given facility and program.
+            body:
+              application/json:
+                schema: stockCards
+
+          404:
+            description: No stock cards were found that matches given facility and program.
+            body:
+              application/json:
+
+          403:
+            description: User does not have permission to view stock cards of given facility and program.
             body:
               application/json:
 
