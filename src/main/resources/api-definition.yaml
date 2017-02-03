@@ -10,10 +10,7 @@ documentation:
 
 schemas:
   - stockCardTemplate: !include schemas/stockCardTemplate.json
-  - stockEvents: !include schemas/stockEvents.json
-  - stockEventsSuccessResult: !include schemas/stockEventsSuccessResult.json
-  - stockEventsPartialSuccessResult: !include schemas/stockEventsPartialSuccessResult.json
-  - stockEventsFailureResult: !include schemas/stockEventsFailureResult.json
+  - stockEvent: !include schemas/stockEvent.json
 
 resourceTypes:
     - collection:
@@ -115,32 +112,28 @@ traits:
           400:
             description: Indicates that request body is not correctly formated(incorrect fileds names, non-existing program or facility ids, etc).
 
-  /stockEvents:
+  /stockEvent:
       post:
         is: [ secured ]
-        description: Create new stock events.
+        description: Create a new stock event.
         body:
           application/json:
-            schema: stockEvents
+            schema: stockEvent
 
         responses:
           201:
-            description: All stock events have been processed, corresponding changes to SOH made.
+            description: Stock event has been processed with no validatoin error or persistence error.
             body:
               application/json:
-                schema: stockEventsSuccessResult
-          207:
-            description: NOT all events were processed successfully.
-            body:
-              application/json:
-                schema: stockEventsPartialSuccessResult
+                schema: stockEvent
+
           400:
-            description: All stock events failed to process.
+            description: Failed to process stock event due to validation error.
             body:
               application/json:
-                schema: stockEventsFailureResult
+
           403:
-            description: User is not permitted to make changes to one or more stock cards.
+            description: User does not have permission to create stock events for given facility.
             body:
               application/json:
 

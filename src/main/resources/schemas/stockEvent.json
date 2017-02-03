@@ -1,0 +1,68 @@
+{
+  "type": "object",
+  "properties": {
+    "sourceId": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "CREDIT",
+            "DEBIT"
+          ]
+        }
+      }
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "facilityId": {
+      "type": "string"
+    },
+    "noticedDate": {
+      "type": "integer",
+      "format": "UTC_MILLISEC"
+    },
+    "signature": {
+      "type": "string"
+    },
+    "destinationId": {
+      "type": "string"
+    },
+    "userId": {
+      "type": "string"
+    },
+    "destinationFreeText": {
+      "type": "string"
+    },
+    "orderableId": {
+      "type": "string"
+    },
+    "reasonFreeText": {
+      "type": "string"
+    },
+    "sourceFreeText": {
+      "type": "string"
+    },
+    "stockCardId": {
+      "type": "string"
+    },
+    "programId": {
+      "type": "string"
+    },
+    "occurredDate": {
+      "type": "integer",
+      "format": "UTC_MILLISEC"
+    },
+    "savedDate": {
+      "type": "integer",
+      "format": "UTC_MILLISEC"
+    }
+  }
+}
