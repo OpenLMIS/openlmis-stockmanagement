@@ -11,8 +11,8 @@ import javax.persistence.Table;
 
 @Entity
 @Data
-@Table(name = "stock_movement_reasons", schema = "stockmanagement")
-public class StockMovementReason extends BaseEntity {
+@Table(name = "stock_card_line_item_reason", schema = "stockmanagement")
+public class StockCardLineItemReason extends BaseEntity {
 
   @Column(nullable = false, columnDefinition = TEXT_COLUMN_DEFINITION)
   private String name;
@@ -22,7 +22,7 @@ public class StockMovementReason extends BaseEntity {
 
   @Column(nullable = false, columnDefinition = TEXT_COLUMN_DEFINITION)
   @Enumerated(value = EnumType.STRING)
-  private AdjustmentType adjustmentType;
+  private StockCardLineItemReasonType stockCardLineItemReasonType;
 
   @Column(nullable = false, columnDefinition = TEXT_COLUMN_DEFINITION)
   @Enumerated(value = EnumType.STRING)

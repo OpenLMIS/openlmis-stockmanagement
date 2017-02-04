@@ -10,7 +10,7 @@ var query = "INSERT INTO %s (SELECT * FROM json_populate_recordset(NULL::%s, '%s
 // This presents the order that must be kept for proper data insertion.
 // Tables not included here are populated in random order
 var filesOrdered = [
-    "stockmanagement.stock_movement_reasons",
+    "stockmanagement.stock_card_line_item_reason",
     "stockmanagement.valid_reason_assignments",
     "stockmanagement.organizations",
     "stockmanagement.nodes",
@@ -19,13 +19,13 @@ var filesOrdered = [
 ]
 
 // Detects if the given key/value pair represents a foreign key.
-var isForeign = function(obj, key) {
+var isForeign = function (obj, key) {
     var val = obj[key];
     return val !== null && typeof val === 'object' && val.hasOwnProperty("id");
 }
 
 // Refractors the key/value pair to match database format.
-var adjustForeign = function(obj, key) {
+var adjustForeign = function (obj, key) {
     var newKey = key.endsWith(dbIdSuffix) ? key : key + dbIdSuffix;
     var newVal = obj[key]["id"];
 
@@ -36,7 +36,7 @@ var adjustForeign = function(obj, key) {
 }
 
 // Transforms object's key to lowercase
-var keyToLower = function(obj, key) {
+var keyToLower = function (obj, key) {
     if (key.toLowerCase() !== key) {
         var val = obj[key];
         delete obj[key];
@@ -49,14 +49,14 @@ var keyToLower = function(obj, key) {
 }
 
 // Takes the input file and transforms it into sql query, inserted into output file
-var parseInput = function(input, output) {
+var parseInput = function (input, output) {
     // Insert into pending files and start processing
     var filename = path.parse(input).name;
     var array = JSON.parse(fs.readFileSync(input));
 
     // Transform JSON to match database format
-    array.forEach(function(obj) {
-        Object.keys(obj).forEach(function(key) {
+    array.forEach(function (obj) {
+        Object.keys(obj).forEach(function (key) {
             key = keyToLower(obj, key);
 
             if (isForeign(obj, key)) {
@@ -76,13 +76,13 @@ var filesPending = {};
 var filesQueue = [];
 
 // Group the files into dictionary
-process.argv.slice(2).forEach(function(file) {
+process.argv.slice(2).forEach(function (file) {
     var filename = path.parse(file).name;
     filesPending[filename] = file;
 });
 
 // First enqueue ordered files
-filesOrdered.forEach(function(key) {
+filesOrdered.forEach(function (key) {
     if (filesPending[key]) {
         filesQueue.push(filesPending[key]);
         delete filesPending[key];
@@ -92,10 +92,11 @@ filesOrdered.forEach(function(key) {
 // Enqueue remaining files
 for (key in filesPending) {
     filesQueue.push(filesPending[key]);
-};
+}
+;
 
 // Process the files
-filesQueue.forEach(function(file) {
+filesQueue.forEach(function (file) {
     console.log("Processing: " + path.parse(file).name);
     parseInput(file, fd);
 });

@@ -1,5 +1,7 @@
 package org.openlmis.stockmanagement.web;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.junit.Before;
 import org.junit.Rule;
@@ -62,5 +64,10 @@ public abstract class BaseWebTest {
             .willReturn(aResponse()
                     .withHeader(CONTENT_TYPE, APPLICATION_JSON)
                     .withBody(MOCK_CHECK_RESULT)));
+  }
+
+  protected String objectToJsonString(Object obj) throws JsonProcessingException {
+    ObjectMapper mapper = new ObjectMapper();
+    return mapper.writeValueAsString(obj);
   }
 }

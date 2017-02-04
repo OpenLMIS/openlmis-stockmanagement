@@ -25,5 +25,5 @@ public class ValidReasonAssignment extends BaseEntity {
 
   @ManyToOne()
   @JoinColumn(nullable = false)
-  private StockMovementReason stockMovementReason;
+  private StockCardLineItemReason stockCardLineItemReason;
 }

@@ -1,6 +1,5 @@
 package org.openlmis.stockmanagement.web;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.openlmis.stockmanagement.domain.template.StockCardTemplate;
@@ -109,13 +108,10 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
             .thenReturn(createTemplateDto());
 
     //when
-    ObjectMapper mapper = new ObjectMapper();
-    String jsonString = mapper.writeValueAsString(new StockCardTemplate());
-
     ResultActions resultActions = mvc.perform(post(STOCK_CARD_TEMPLATE_API)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(jsonString));
+            .content(objectToJsonString(new StockCardTemplate())));
 
     //then
     resultActions.andExpect(status().isCreated());
@@ -128,13 +124,10 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
             .when(permissionService).canCreateStockCardTemplate();
 
     //when
-    ObjectMapper mapper = new ObjectMapper();
-    String jsonString = mapper.writeValueAsString(new StockCardTemplate());
-
     ResultActions resultActions = mvc.perform(post(STOCK_CARD_TEMPLATE_API)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(jsonString));
+            .content(objectToJsonString(new StockCardTemplate())));
 
     //then
     resultActions.andExpect(status().isForbidden());
@@ -147,13 +140,10 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
             .when(permissionService).canCreateStockCardTemplate();
 
     //when
-    ObjectMapper mapper = new ObjectMapper();
-    String jsonString = mapper.writeValueAsString(new StockCardTemplate());
-
     ResultActions resultActions = mvc.perform(post(STOCK_CARD_TEMPLATE_API)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(jsonString));
+            .content(objectToJsonString(new StockCardTemplate())));
 
     //then
     resultActions.andExpect(status().isUnauthorized());
@@ -176,13 +166,10 @@ public class StockCardTemplateControllerTest extends BaseWebTest {
             .when(stockCardTemplateService).saveOrUpdate(any());
 
     //when
-    ObjectMapper mapper = new ObjectMapper();
-    String jsonString = mapper.writeValueAsString(new StockCardTemplate());
-
     ResultActions resultActions = mvc.perform(post(STOCK_CARD_TEMPLATE_API)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(jsonString));
+            .content(objectToJsonString(new StockCardTemplate())));
 
     //then
     resultActions.andExpect(status().isBadRequest());

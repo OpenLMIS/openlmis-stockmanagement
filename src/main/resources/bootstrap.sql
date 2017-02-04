@@ -16,8 +16,6 @@ INSERT INTO stockmanagement.available_stock_card_line_item_fields VALUES ('b15ad
 
 INSERT INTO stockmanagement.available_stock_card_line_item_fields VALUES ('b15ada3e-d6da-11e6-bf26-cec0c932ce01', 'signature');
 
-INSERT INTO stockmanagement.stock_movement_reasons VALUES ('d2fc3cf3-da18-44b0-a220-77c985202e06', 'EQUAL', 'Physical Inventory', FALSE, 'Physical Inventory', 'PHYSICAL_INVENTORY');
+INSERT INTO stockmanagement.stock_card_line_item_reason VALUES ('d3fc3cf3-da18-44b0-a220-77c985202e06', 'CREDIT', 'Overstock', FALSE, 'Inventory correction in case of overstock', 'PHYSICAL_INVENTORY');
 
-INSERT INTO stockmanagement.stock_movement_reasons VALUES ('d3fc3cf3-da18-44b0-a220-77c985202e06', 'POSITIVE', 'Overstock', FALSE, 'Inventory correction in case of overstock', 'PHYSICAL_INVENTORY');
-
-INSERT INTO stockmanagement.stock_movement_reasons VALUES ('d4fc3cf3-da18-44b0-a220-77c985202e06', 'NEGATIVE', 'Understock', FALSE, 'Inventory correction in case of understock', 'PHYSICAL_INVENTORY');
+INSERT INTO stockmanagement.stock_card_line_item_reason VALUES ('d4fc3cf3-da18-44b0-a220-77c985202e06', 'DEBIT', 'Understock', FALSE, 'Inventory correction in case of understock', 'PHYSICAL_INVENTORY');
