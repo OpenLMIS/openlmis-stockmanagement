@@ -4,7 +4,7 @@
     "name": "Transfer In",
     "description": "Transfer In",
     "reasonCategory": "ADJUSTMENT",
-    "adjustmentType": "CREDIT",
+    "stockCardLineItemReasonType": "CREDIT",
     "isFreeTextAllowed": false
   },
   {
@@ -12,7 +12,7 @@
     "name": "Transfer Out",
     "description": "Transfer Out",
     "reasonCategory": "ADJUSTMENT",
-    "adjustmentType": "DEBIT",
+    "stockCardLineItemReasonType": "DEBIT",
     "isFreeTextAllowed": false
   },
   {
@@ -20,7 +20,7 @@
     "name": "Donation",
     "description": "Donation",
     "reasonCategory": "AD_HOC",
-    "adjustmentType": "CREDIT",
+    "stockCardLineItemReasonType": "CREDIT",
     "isFreeTextAllowed": true
   },
   {
@@ -28,7 +28,7 @@
     "name": "Top Up",
     "description": "Top Up",
     "reasonCategory": "AD_HOC",
-    "adjustmentType": "DEBIT",
+    "stockCardLineItemReasonType": "DEBIT",
     "isFreeTextAllowed": true
   }
 ]

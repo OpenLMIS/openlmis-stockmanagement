@@ -11,7 +11,7 @@ import javax.persistence.Table;
 
 @Entity
 @Data
-@Table(name = "stock_card_line_item_reason", schema = "stockmanagement")
+@Table(name = "stock_card_line_item_reasons", schema = "stockmanagement")
 public class StockCardLineItemReason extends BaseEntity {
 
   @Column(nullable = false, columnDefinition = TEXT_COLUMN_DEFINITION)
