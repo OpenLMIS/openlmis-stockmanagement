@@ -23,7 +23,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
  */
 @Controller
 @RequestMapping("/api")
-public class StockCardTemplateController {
+public class StockCardTemplatesController {
 
   @Autowired
   private StockCardTemplateService stockCardTemplateService;

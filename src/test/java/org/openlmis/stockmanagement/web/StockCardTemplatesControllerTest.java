@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class StockCardTemplateControllerTest extends BaseWebTest {
+public class StockCardTemplatesControllerTest extends BaseWebTest {
 
   private static final String STOCK_CARD_TEMPLATE_API = "/api/stockCardTemplates";
 

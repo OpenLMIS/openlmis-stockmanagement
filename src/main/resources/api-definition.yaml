@@ -115,7 +115,7 @@ traits:
           400:
             description: Indicates that request body is not correctly formated(incorrect fileds names, non-existing program or facility ids, etc).
 
-  /stockEvent:
+  /stockEvents:
       post:
         is: [ secured ]
         description: Create a new stock event.
