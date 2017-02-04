@@ -17,6 +17,7 @@ import java.util.UUID;
 public class PermissionService {
 
   static final String STOCK_CARD_TEMPLATES_MANAGE = "STOCK_CARD_TEMPLATES_MANAGE";
+  static final String STOCK_EVENT_CREATE = "STOCK_EVENT_CREATE";
 
   @Autowired
   private AuthenticationHelper authenticationHelper;
@@ -32,6 +33,10 @@ public class PermissionService {
    */
   public void canCreateStockCardTemplate() {
     hasPermission(STOCK_CARD_TEMPLATES_MANAGE, null, null, null);
+  }
+
+  public void canCreateStockEvent(UUID programId, UUID facilityId) {
+    hasPermission(STOCK_EVENT_CREATE, programId, facilityId, null);
   }
 
   private void hasPermission(String rightName, UUID program, UUID facility, UUID warehouse) {
