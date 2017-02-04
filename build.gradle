@@ -49,6 +49,7 @@ dependencies {
     testCompile "junit:junit"
     testCompile "org.mockito:mockito-core:1.+"
     testCompile "org.springframework.boot:spring-boot-starter-test"
+    testCompile 'org.springframework.security:spring-security-test'
 }
 
 idea {
@@ -135,7 +136,7 @@ task checkApiIsRaml(type: Exec) {
     args "src/main/resources/api-definition.yaml"
 }
 
-task demoDataSeed(type:Exec) {
+task demoDataSeed(type: Exec) {
     executable "./demo-data/demo_seed.sh"
     args "./demo-data", "node ./demo-data/seed_generator.js"
 }

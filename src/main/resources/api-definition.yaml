@@ -10,7 +10,7 @@ documentation:
 
 schemas:
   - stockCardTemplate: !include schemas/stockCardTemplate.json
-  - stockEvent: !include schemas/stockEvent.json
+  - stockEventDto: !include schemas/stockEventDto.json
   - stockCards: !include schemas/stockCards.json
   - stockCard: !include schemas/stockCard.json
   - stockCardSummaries: !include schemas/stockCardSummaries.json
@@ -121,14 +121,13 @@ traits:
         description: Create a new stock event.
         body:
           application/json:
-            schema: stockEvent
+            schema: stockEventDto
 
         responses:
           201:
             description: Stock event has been processed with no validatoin error or persistence error.
             body:
               application/json:
-                schema: stockEvent
 
           400:
             description: Failed to process stock event due to validation error.

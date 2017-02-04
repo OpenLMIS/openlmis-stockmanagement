@@ -1,4 +1,4 @@
-package org.openlmis.stockmanagement.domain.event;
+package org.openlmis.stockmanagement.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,7 +11,9 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class StockEvent {
+public class StockEventDto {
+  private UUID id;
+
   private Integer quantity;
   private StockCardLineItemReason reason;
 

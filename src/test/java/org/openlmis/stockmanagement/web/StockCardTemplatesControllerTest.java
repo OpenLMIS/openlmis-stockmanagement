@@ -150,12 +150,12 @@ public class StockCardTemplatesControllerTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_400_when_program_does_not_exist() throws Exception {
+  public void should_return_400_when_program_not_found() throws Exception {
     throwValidationExceptionWith(ERROR_PROGRAM_NOT_FOUND);
   }
 
   @Test
-  public void should_return_400_when_facility_type_does_not_exist() throws Exception {
+  public void should_return_400_when_facility_type_not_found() throws Exception {
     throwValidationExceptionWith(ERROR_FACILITY_TYPE_NOT_FOUND);
   }
 

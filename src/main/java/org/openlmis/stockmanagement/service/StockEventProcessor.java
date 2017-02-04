@@ -1,6 +1,6 @@
 package org.openlmis.stockmanagement.service;
 
-import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.springframework.stereotype.Service;
 
 /**
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class StockEventProcessor {
-  public StockEvent process(StockEvent event) {
+  public StockEventDto process(StockEventDto event) {
     return null;
   }
 }
