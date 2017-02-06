@@ -1,0 +1,56 @@
+version: "2"
+services:
+
+  consul:
+    command: -server -bootstrap
+    image: gliderlabs/consul-server
+    ports:
+      - "8300"
+      - "8400"
+      - "8500:8500"
+      - "53"
+
+  nginx:
+    image: openlmis/nginx
+    ports:
+      - "80:80"
+    env_file: .manual-api-test-env
+    depends_on: [consul]
+
+  stockmanagement:
+    image: openlmis/dev
+    ports:
+      - "5005:5005"
+      - "8080:8080"
+    volumes:
+      - '.:/app'
+      - 'gradlecache:/gradle'
+    env_file: .manual-api-test-env
+    depends_on: [nginx,auth,referencedata]
+
+  auth:
+    image: openlmis/auth:3.0.0-SNAPSHOT
+    env_file: .manual-api-test-env
+    environment:
+      JAVA_OPTS: '-Dspring.jpa.properties.hibernate.hbm2ddl.import_files=/bootstrap.sql,file:///demo-data/data.sql'
+    depends_on: [consul,log,db]
+
+  referencedata:
+    image: openlmis/referencedata:3.0.0-SNAPSHOT
+    env_file: .manual-api-test-env
+    environment:
+      JAVA_OPTS: '-Dspring.jpa.properties.hibernate.hbm2ddl.import_files=/bootstrap.sql,file:///demo-data/data.sql'
+    depends_on: [consul,log,db]
+
+  db:
+    image: openlmis/postgres
+    ports:
+      - "5432:5432"
+    env_file: .manual-api-test-env
+
+  log:
+    image: openlmis/rsyslog
+
+volumes:
+  gradlecache:
+    external: false
