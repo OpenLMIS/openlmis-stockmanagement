@@ -25,8 +25,8 @@ public class StockEventsController {
 
   @RequestMapping(value = "stockEvents", method = POST)
   public ResponseEntity<UUID> createStockEvent(@RequestBody StockEventDto stockEventDto) {
-    StockEventDto createdEvent = stockEventProcessor.process(stockEventDto);
-    return new ResponseEntity<>(createdEvent.getId(), CREATED);
+    UUID createdEventId = stockEventProcessor.process(stockEventDto);
+    return new ResponseEntity<>(createdEventId, CREATED);
   }
 
 }

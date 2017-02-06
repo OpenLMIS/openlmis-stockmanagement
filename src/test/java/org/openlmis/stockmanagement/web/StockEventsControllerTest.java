@@ -6,7 +6,7 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.MissingPermissionException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.StockEventProcessor;
-import org.openlmis.stockmanagement.testutils.StockEventBuilder;
+import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -32,11 +32,10 @@ public class StockEventsControllerTest extends BaseWebTest {
   public void should_return_201_when_event_successfully_created() throws Exception {
     //given
     UUID uuid = UUID.randomUUID();
-    StockEventDto event = StockEventBuilder.createStockEventWithId(uuid);
-    when(stockEventProcessor.process(event)).thenReturn(event);
+    StockEventDto event = StockEventDtoBuilder.createStockEventDto();
+    when(stockEventProcessor.process(event)).thenReturn(uuid);
 
     //when
-
     ResultActions resultActions = mvc.perform(post(CREATE_STOCK_EVENT_API)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
             .contentType(MediaType.APPLICATION_JSON)

@@ -15,10 +15,10 @@ import static org.openlmis.stockmanagement.testutils.StockCardTemplateBuilder.cr
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class StockCardTemplateRepositoryTest {
+public class StockCardTemplatesRepositoryTest {
 
   @Autowired
-  private StockCardTemplateRepository stockCardTemplateRepository;
+  private StockCardTemplatesRepository stockCardTemplatesRepository;
 
   @Test
   public void should_search_for_stock_card_template_by_facility_type_and_program()
@@ -26,10 +26,10 @@ public class StockCardTemplateRepositoryTest {
     //given
     StockCardTemplate template = createTemplate();
 
-    stockCardTemplateRepository.save(template);
+    stockCardTemplatesRepository.save(template);
 
     //when
-    StockCardTemplate found = stockCardTemplateRepository.findByProgramIdAndFacilityTypeId(
+    StockCardTemplate found = stockCardTemplatesRepository.findByProgramIdAndFacilityTypeId(
             template.getProgramId(), template.getFacilityTypeId());
 
     //then

@@ -6,7 +6,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.UUID;
 
-public interface StockCardTemplateRepository extends
+public interface StockCardTemplatesRepository extends
         PagingAndSortingRepository<StockCardTemplate, UUID> {
 
   StockCardTemplate findByProgramIdAndFacilityTypeId(

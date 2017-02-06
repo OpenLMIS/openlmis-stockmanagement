@@ -11,7 +11,7 @@ import org.openlmis.stockmanagement.dto.StockCardTemplateDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.AvailableStockCardFieldsRepository;
 import org.openlmis.stockmanagement.repository.AvailableStockCardLineItemFieldsRepository;
-import org.openlmis.stockmanagement.repository.StockCardTemplateRepository;
+import org.openlmis.stockmanagement.repository.StockCardTemplatesRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityTypeReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.openlmis.stockmanagement.utils.Message;
@@ -38,7 +38,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_NOT_FO
 public class StockCardTemplateService {
 
   @Autowired
-  private StockCardTemplateRepository templateRepository;
+  private StockCardTemplatesRepository templateRepository;
 
   @Autowired
   private AvailableStockCardFieldsRepository cardFieldsRepo;

@@ -46,7 +46,7 @@ public abstract class BaseWebTest {
           + "}";
 
   @Rule
-  public WireMockRule wireMockRule = new WireMockRule(8888);
+  public WireMockRule wireMockRule = new WireMockRule(80);
 
   @Autowired
   private WebApplicationContext context;

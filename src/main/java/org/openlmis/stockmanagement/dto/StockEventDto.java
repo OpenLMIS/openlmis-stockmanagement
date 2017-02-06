@@ -5,14 +5,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class StockEventDto {
-  private UUID id;
 
   private Integer quantity;
   private StockCardLineItemReason reason;
@@ -23,18 +22,17 @@ public class StockEventDto {
   private UUID programId;
   private UUID orderableId;
 
-  private UUID userId;
-
   private UUID sourceId;
   private UUID destinationId;
 
-  private Date occurredDate;
-  private Date noticedDate;
-  private Date savedDate;
+  private ZonedDateTime occurredDate;
+  private ZonedDateTime noticedDate;
 
   private String signature;
 
   private String reasonFreeText;
   private String sourceFreeText;
   private String destinationFreeText;
+
+  private String documentNumber;
 }
