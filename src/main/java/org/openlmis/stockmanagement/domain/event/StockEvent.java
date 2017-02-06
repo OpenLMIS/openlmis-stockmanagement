@@ -1,6 +1,8 @@
 package org.openlmis.stockmanagement.domain.event;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 
@@ -14,6 +16,8 @@ import java.util.UUID;
 
 @Entity
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "stock_events", schema = "stockmanagement")
 public class StockEvent extends BaseEntity {
 
