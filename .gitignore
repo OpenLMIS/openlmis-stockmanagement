@@ -6,5 +6,6 @@ build/
 out/
 .idea/
 .env
+.manual-api-test-env
 .tx/
 node_modules/

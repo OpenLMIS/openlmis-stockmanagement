@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
+import org.openlmis.stockmanagement.domain.movement.Node;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -28,8 +29,6 @@ public class StockEvent extends BaseEntity {
   @JoinColumn()
   private StockCardLineItemReason reason;
 
-  private UUID stockCardId;
-
   private UUID facilityId;
   private UUID programId;
   private UUID orderableId;
@@ -37,8 +36,13 @@ public class StockEvent extends BaseEntity {
   @Column(nullable = false)
   private UUID userId;
 
-  private UUID sourceId;
-  private UUID destinationId;
+  @ManyToOne()
+  @JoinColumn()
+  private Node source;
+
+  @ManyToOne()
+  @JoinColumn()
+  private Node destination;
 
   @Column(nullable = false, columnDefinition = "timestamp")
   private ZonedDateTime occurredDate;

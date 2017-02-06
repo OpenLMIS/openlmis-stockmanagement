@@ -42,6 +42,7 @@ dependencies {
     compile "com.github.tomakehurst:wiremock:1.58"
     compile 'org.webjars:swagger-ui:2.2.6'
     compile 'org.apache.commons:commons-lang3:3.4'
+    compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
 
     testCompile "junit:junit"
     testCompile "org.mockito:mockito-core:1.+"

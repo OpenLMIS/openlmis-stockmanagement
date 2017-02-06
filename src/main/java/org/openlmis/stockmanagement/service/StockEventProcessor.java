@@ -31,7 +31,8 @@ public class StockEventProcessor {
    * @param stockEventDto stock event dto.
    * @return the persisted event's id.
    */
-  public UUID process(StockEventDto stockEventDto) {
+  public UUID process(StockEventDto stockEventDto)
+          throws IllegalAccessException, InstantiationException {
     stockEventValidationsService.validate(stockEventDto);
 
     StockEvent stockEvent = stockEventDto.toEvent(authenticationHelper.getCurrentUser().getId());

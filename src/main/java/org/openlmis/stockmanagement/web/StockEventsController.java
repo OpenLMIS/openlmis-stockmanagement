@@ -24,7 +24,8 @@ public class StockEventsController {
   private StockEventProcessor stockEventProcessor;
 
   @RequestMapping(value = "stockEvents", method = POST)
-  public ResponseEntity<UUID> createStockEvent(@RequestBody StockEventDto stockEventDto) {
+  public ResponseEntity<UUID> createStockEvent(@RequestBody StockEventDto stockEventDto)
+          throws InstantiationException, IllegalAccessException {
     UUID createdEventId = stockEventProcessor.process(stockEventDto);
     return new ResponseEntity<>(createdEventId, CREATED);
   }

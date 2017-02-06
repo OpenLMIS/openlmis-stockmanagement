@@ -23,4 +23,31 @@ public abstract class BaseEntity {
   @Getter
   @Setter
   protected UUID id;
+
+  /*
+  Create instance of base entity.
+   */
+  public BaseEntity() {
+  }
+
+  /**
+   * Create entity with id.
+   *
+   * @param id    id.
+   * @param clazz type of entity.
+   * @param <T>   type of entity.
+   * @return created entity object.
+   * @throws IllegalAccessException IllegalAccessException.
+   * @throws InstantiationException IllegalAccessException.
+   */
+  public static <T extends BaseEntity> T fromId(UUID id, Class<T> clazz)
+          throws IllegalAccessException, InstantiationException {
+    if (id == null) {
+      return null;
+    }
+
+    T instance = clazz.newInstance();
+    instance.setId(id);
+    return instance;
+  }
 }

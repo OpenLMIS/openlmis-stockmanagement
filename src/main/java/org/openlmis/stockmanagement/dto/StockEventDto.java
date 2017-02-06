@@ -5,9 +5,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.domain.movement.Node;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
+
+import static org.openlmis.stockmanagement.domain.BaseEntity.fromId;
 
 @Data
 @AllArgsConstructor
@@ -15,7 +18,7 @@ import java.util.UUID;
 public class StockEventDto {
 
   private Integer quantity;
-  private StockCardLineItemReason reason;
+  private UUID reasonId;
 
   private UUID stockCardId;
 
@@ -43,11 +46,12 @@ public class StockEventDto {
    * @param userId user id.
    * @return the converted jpa model object.
    */
-  public StockEvent toEvent(UUID userId) {
-    return new StockEvent(quantity, reason,
-            stockCardId, facilityId, programId, orderableId,
-            userId,
-            sourceId, destinationId,
+  public StockEvent toEvent(UUID userId)
+          throws InstantiationException, IllegalAccessException {
+
+    return new StockEvent(quantity, fromId(reasonId, StockCardLineItemReason.class),
+            facilityId, programId, orderableId, userId,
+            fromId(sourceId, Node.class), fromId(destinationId, Node.class),
             occurredDate, noticedDate, ZonedDateTime.now(),
             signature, reasonFreeText, sourceFreeText, destinationFreeText, documentNumber);
   }

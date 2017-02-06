@@ -1,7 +1,6 @@
 package org.openlmis.stockmanagement.dto;
 
 import org.junit.Test;
-import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 
 import java.time.ZonedDateTime;
@@ -25,7 +24,7 @@ public class StockEventDtoTest {
     stockEventDto.setSignature("e");
 
     stockEventDto.setQuantity(1);
-    stockEventDto.setReason(new StockCardLineItemReason());
+    stockEventDto.setReasonId(UUID.randomUUID());
 
     stockEventDto.setSourceId(UUID.randomUUID());
     stockEventDto.setDestinationId(UUID.randomUUID());
@@ -51,16 +50,14 @@ public class StockEventDtoTest {
     assertThat(event.getSignature(), is(stockEventDto.getSignature()));
 
     assertThat(event.getQuantity(), is(stockEventDto.getQuantity()));
-    assertThat(event.getReason(), is(stockEventDto.getReason()));
+    assertThat(event.getReason().getId(), is(stockEventDto.getReasonId()));
 
-    assertThat(event.getSourceId(), is(stockEventDto.getSourceId()));
-    assertThat(event.getDestinationId(), is(stockEventDto.getDestinationId()));
+    assertThat(event.getSource().getId(), is(stockEventDto.getSourceId()));
+    assertThat(event.getDestination().getId(), is(stockEventDto.getDestinationId()));
 
     assertThat(event.getProgramId(), is(stockEventDto.getProgramId()));
     assertThat(event.getFacilityId(), is(stockEventDto.getFacilityId()));
     assertThat(event.getOrderableId(), is(stockEventDto.getOrderableId()));
-
-    assertThat(event.getStockCardId(), is(stockEventDto.getStockCardId()));
 
     assertThat(event.getNoticedDate(), is(stockEventDto.getNoticedDate()));
     assertThat(event.getOccurredDate(), is(stockEventDto.getOccurredDate()));
