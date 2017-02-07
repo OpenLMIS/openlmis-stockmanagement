@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.UserDto;
@@ -17,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -35,6 +37,9 @@ public class StockEventProcessorTest {
 
   @MockBean
   private StockEventValidationsService stockEventValidationsService;
+
+  @MockBean
+  private StockCardService stockCardService;
 
   @MockBean
   private StockEventsRepository stockEventsRepository;
@@ -64,7 +69,7 @@ public class StockEventProcessorTest {
   }
 
   @Test
-  public void should_save_event_with_user_id_when_validation_service_passes() throws Exception {
+  public void should_save_event_and_line_items_when_validation_service_passes() throws Exception {
     //given
     UUID userId = UUID.randomUUID();
     UserDto userDto = new UserDto();
@@ -81,10 +86,17 @@ public class StockEventProcessorTest {
     UUID idFromProcessor = stockEventProcessor.process(stockEventDto);
 
     //then
-    ArgumentCaptor<StockEvent> argument = ArgumentCaptor.forClass(StockEvent.class);
-    verify(stockEventsRepository).save(argument.capture());
+    Class<List<StockCardLineItem>> clazz = (Class<List<StockCardLineItem>>) (Object) List.class;
 
-    assertThat(argument.getValue().getUserId(), is(userId));
+    ArgumentCaptor<StockEvent> eventCaptor = ArgumentCaptor.forClass(StockEvent.class);
+    ArgumentCaptor<List<StockCardLineItem>> lineItemCaptor = ArgumentCaptor.forClass(clazz);
+
+    verify(stockEventsRepository).save(eventCaptor.capture());
+    verify(stockCardService).save(lineItemCaptor.capture());
+
+    assertThat(eventCaptor.getValue().getUserId(), is(userId));
+    assertThat(lineItemCaptor.getValue().get(0).getUserId(), is(userId));
+
     assertThat(idFromProcessor, is(eventIdFromRepo));
   }
 }

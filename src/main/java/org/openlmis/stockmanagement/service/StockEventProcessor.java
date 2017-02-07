@@ -1,5 +1,6 @@
 package org.openlmis.stockmanagement.service;
 
+import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
@@ -23,6 +24,9 @@ public class StockEventProcessor {
   private StockEventValidationsService stockEventValidationsService;
 
   @Autowired
+  private StockCardService stockCardService;
+
+  @Autowired
   private StockEventsRepository stockEventsRepository;
 
   /**
@@ -35,7 +39,15 @@ public class StockEventProcessor {
           throws IllegalAccessException, InstantiationException {
     stockEventValidationsService.validate(stockEventDto);
 
-    StockEvent stockEvent = stockEventDto.toEvent(authenticationHelper.getCurrentUser().getId());
+    return saveEventAndGenerateLineItems(stockEventDto);
+  }
+
+  private UUID saveEventAndGenerateLineItems(StockEventDto stockEventDto)
+          throws InstantiationException, IllegalAccessException {
+    UUID currentUserId = authenticationHelper.getCurrentUser().getId();
+    stockCardService.save(StockCardLineItem.createFrom(stockEventDto, currentUserId));
+
+    StockEvent stockEvent = stockEventDto.toEvent(currentUserId);
     return stockEventsRepository.save(stockEvent).getId();
   }
 }
