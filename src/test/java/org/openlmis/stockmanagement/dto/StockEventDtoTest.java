@@ -2,6 +2,7 @@ package org.openlmis.stockmanagement.dto;
 
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -15,28 +16,7 @@ public class StockEventDtoTest {
   @Test
   public void should_convert_from_dto_to_jpa_model() throws Exception {
     //given
-    StockEventDto stockEventDto = new StockEventDto();
-
-    stockEventDto.setSourceFreeText("a");
-    stockEventDto.setDestinationFreeText("b");
-    stockEventDto.setDocumentNumber("c");
-    stockEventDto.setReasonFreeText("d");
-    stockEventDto.setSignature("e");
-
-    stockEventDto.setQuantity(1);
-    stockEventDto.setReasonId(UUID.randomUUID());
-
-    stockEventDto.setSourceId(UUID.randomUUID());
-    stockEventDto.setDestinationId(UUID.randomUUID());
-
-    stockEventDto.setProgramId(UUID.randomUUID());
-    stockEventDto.setFacilityId(UUID.randomUUID());
-    stockEventDto.setOrderableId(UUID.randomUUID());
-
-    stockEventDto.setStockCardId(UUID.randomUUID());
-
-    stockEventDto.setNoticedDate(ZonedDateTime.now());
-    stockEventDto.setOccurredDate(ZonedDateTime.now());
+    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
 
     //when
     UUID userId = UUID.randomUUID();
@@ -69,4 +49,5 @@ public class StockEventDtoTest {
 
     assertThat(between, lessThan(2L));
   }
+
 }
