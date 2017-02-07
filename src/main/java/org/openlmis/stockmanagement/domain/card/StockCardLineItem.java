@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
+import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 
@@ -25,6 +26,15 @@ import static java.util.Arrays.asList;
 @NoArgsConstructor
 @Table(name = "stock_card_line_items", schema = "stockmanagement")
 public class StockCardLineItem extends BaseEntity {
+
+  @ManyToOne()
+  @JoinColumn(nullable = false)
+  private StockCard stockCard;
+
+  @ManyToOne()
+  @JoinColumn(nullable = false)
+  private StockEvent originEvent;
+
   @Column(nullable = false)
   private Integer quantity;
 
@@ -56,22 +66,25 @@ public class StockCardLineItem extends BaseEntity {
   private UUID userId;
 
   /**
-   * Create line item from event.
+   * Create line item from eventDto.
    *
-   * @param event  stock event.
-   * @param userId user who performed the operation.
-   * @return created line item.
+   * @param eventDto stock eventDto.
+   * @param eventId
+   * @param userId   user who performed the operation.  @return created line item.
    * @throws InstantiationException InstantiationException.
    * @throws IllegalAccessException IllegalAccessException.
    */
-  public static List<StockCardLineItem> createFrom(StockEventDto event, UUID userId)
+  public static List<StockCardLineItem> createFrom(
+          StockEventDto eventDto, UUID eventId, UUID userId)
           throws InstantiationException, IllegalAccessException {
     StockCardLineItem lineItem = new StockCardLineItem(
-            event.getQuantity(), fromId(event.getReasonId(), StockCardLineItemReason.class),
-            event.getSourceFreeText(), event.getDestinationFreeText(),
-            event.getDocumentNumber(), event.getReasonFreeText(), event.getSignature(),
-            fromId(event.getSourceId(), Node.class), fromId(event.getDestinationId(), Node.class),
-            event.getOccurredDate(), event.getNoticedDate(), ZonedDateTime.now(), userId);
+            fromId(eventDto.getStockCardId(), StockCard.class), fromId(eventId, StockEvent.class),
+            eventDto.getQuantity(), fromId(eventDto.getReasonId(), StockCardLineItemReason.class),
+            eventDto.getSourceFreeText(), eventDto.getDestinationFreeText(),
+            eventDto.getDocumentNumber(), eventDto.getReasonFreeText(), eventDto.getSignature(),
+            fromId(eventDto.getSourceId(), Node.class),
+            fromId(eventDto.getDestinationId(), Node.class),
+            eventDto.getOccurredDate(), eventDto.getNoticedDate(), ZonedDateTime.now(), userId);
     return asList(lineItem);
   }
 

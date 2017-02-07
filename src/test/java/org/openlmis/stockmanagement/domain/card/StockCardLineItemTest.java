@@ -21,7 +21,8 @@ public class StockCardLineItemTest {
 
     //when
     UUID userId = UUID.randomUUID();
-    List<StockCardLineItem> lineItems = StockCardLineItem.createFrom(eventDto, userId);
+    UUID eventId = UUID.randomUUID();
+    List<StockCardLineItem> lineItems = StockCardLineItem.createFrom(eventDto, eventId, userId);
     StockCardLineItem lineItem = lineItems.get(0);
 
     //then
@@ -40,7 +41,11 @@ public class StockCardLineItemTest {
     assertThat(lineItem.getOccurredDate(), is(eventDto.getOccurredDate()));
     assertThat(lineItem.getNoticedDate(), is(eventDto.getNoticedDate()));
 
+    assertThat(lineItem.getStockCard().getId(), is(eventDto.getStockCardId()));
+    assertThat(lineItem.getOriginEvent().getId(), is(eventId));
+
     assertThat(lineItem.getUserId(), is(userId));
+
 
     ZonedDateTime savedDate = lineItem.getSavedDate();
     long between = SECONDS.between(savedDate, ZonedDateTime.now());
