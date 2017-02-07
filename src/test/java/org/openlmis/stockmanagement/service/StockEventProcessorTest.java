@@ -86,8 +86,9 @@ public class StockEventProcessorTest {
     UUID idFromProcessor = stockEventProcessor.process(stockEventDto);
 
     //then
-    Class<List<StockCardLineItem>> clazz = (Class<List<StockCardLineItem>>) (Object) List.class;
+    assertThat(idFromProcessor, is(eventIdFromRepo));
 
+    Class<List<StockCardLineItem>> clazz = (Class<List<StockCardLineItem>>) (Object) List.class;
     ArgumentCaptor<StockEvent> eventCaptor = ArgumentCaptor.forClass(StockEvent.class);
     ArgumentCaptor<List<StockCardLineItem>> lineItemCaptor = ArgumentCaptor.forClass(clazz);
 
@@ -96,7 +97,5 @@ public class StockEventProcessorTest {
 
     assertThat(eventCaptor.getValue().getUserId(), is(userId));
     assertThat(lineItemCaptor.getValue().get(0).getUserId(), is(userId));
-
-    assertThat(idFromProcessor, is(eventIdFromRepo));
   }
 }

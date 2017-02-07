@@ -7,6 +7,7 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
+import org.openlmis.stockmanagement.BaseTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -21,7 +22,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public abstract class BaseWebTest {
+public abstract class BaseWebTest extends BaseTest {
 
   public static final String ACCESS_TOKEN = "access_token";
   public static final String ACCESS_TOKEN_VALUE = "xxx";
@@ -47,7 +48,7 @@ public abstract class BaseWebTest {
           + "}";
 
   @Rule
-  public WireMockRule wireMockRule = new WireMockRule(80);
+  public WireMockRule wireMockRule = new WireMockRule(8888);
 
   @Autowired
   private WebApplicationContext context;

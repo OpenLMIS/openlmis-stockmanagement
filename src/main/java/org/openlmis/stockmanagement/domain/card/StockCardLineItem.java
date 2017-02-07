@@ -69,7 +69,7 @@ public class StockCardLineItem extends BaseEntity {
    * Create line item from eventDto.
    *
    * @param eventDto stock eventDto.
-   * @param eventId
+   * @param eventId  line item's origin event's id.
    * @param userId   user who performed the operation.  @return created line item.
    * @throws InstantiationException InstantiationException.
    * @throws IllegalAccessException IllegalAccessException.

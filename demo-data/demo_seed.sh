@@ -7,6 +7,8 @@
 DIRECTORY=${1}
 GENERATOR=${2}
 OUTPUT_DIR=${DIRECTORY}/../build/demo-data
+TEST_OUTPUT_DIR=${DIRECTORY}/../build/resources/test/demo-data
+
 
 # Get list of JSON files in current directory
 FILES=`find ${DIRECTORY} -name "*.json"`
@@ -15,7 +17,10 @@ FILES=`find ${DIRECTORY} -name "*.json"`
 ${GENERATOR} ${FILES}
 
 mkdir ${OUTPUT_DIR}
+mkdir ${TEST_OUTPUT_DIR}
+
 mv input.sql ${OUTPUT_DIR}/data.sql
+cp ${OUTPUT_DIR}/data.sql ${TEST_OUTPUT_DIR}/data.sql
 
 echo "Generated ${OUTPUT_DIR}/data.sql"
 echo "To insert the data into database, first run the service, and then from outside of container type:"

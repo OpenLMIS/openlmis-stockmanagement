@@ -193,8 +193,9 @@ tasks.withType(Pmd) {
     }
 }
 
-
 test {
+    dependsOn demoDataSeed
+
     testLogging {
         events 'started', 'passed'
         exceptionFormat = 'full'
