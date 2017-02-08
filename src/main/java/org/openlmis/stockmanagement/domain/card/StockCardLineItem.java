@@ -74,12 +74,14 @@ public class StockCardLineItem extends BaseEntity {
    * @throws InstantiationException InstantiationException.
    * @throws IllegalAccessException IllegalAccessException.
    */
-  public static List<StockCardLineItem> createFrom(
+  public static List<StockCardLineItem> createLineItemsFrom(
           StockEventDto eventDto, UUID eventId, UUID userId)
           throws InstantiationException, IllegalAccessException {
     StockCardLineItem lineItem = new StockCardLineItem(
-            fromId(eventDto.getStockCardId(), StockCard.class), fromId(eventId, StockEvent.class),
-            eventDto.getQuantity(), fromId(eventDto.getReasonId(), StockCardLineItemReason.class),
+            fromId(eventDto.getStockCardId(), StockCard.class),
+            fromId(eventId, StockEvent.class),
+            eventDto.getQuantity(),
+            fromId(eventDto.getReasonId(), StockCardLineItemReason.class),
             eventDto.getSourceFreeText(), eventDto.getDestinationFreeText(),
             eventDto.getDocumentNumber(), eventDto.getReasonFreeText(), eventDto.getSignature(),
             fromId(eventDto.getSourceId(), Node.class),

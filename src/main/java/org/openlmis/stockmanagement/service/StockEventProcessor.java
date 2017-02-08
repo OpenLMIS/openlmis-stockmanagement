@@ -7,6 +7,7 @@ import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.UUID;
 
 /**
@@ -41,8 +42,10 @@ public class StockEventProcessor {
     return saveEventAndGenerateLineItems(stockEventDto);
   }
 
+  @Transactional
   private UUID saveEventAndGenerateLineItems(StockEventDto stockEventDto)
           throws InstantiationException, IllegalAccessException {
+
     UUID currentUserId = authenticationHelper.getCurrentUser().getId();
 
     StockEvent stockEvent = stockEventDto.toEvent(currentUserId);

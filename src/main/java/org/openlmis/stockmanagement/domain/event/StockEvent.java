@@ -29,8 +29,11 @@ public class StockEvent extends BaseEntity {
   @JoinColumn()
   private StockCardLineItemReason reason;
 
+  @Column(nullable = false)
   private UUID facilityId;
+  @Column(nullable = false)
   private UUID programId;
+  @Column(nullable = false)
   private UUID orderableId;
 
   @Column(nullable = false)

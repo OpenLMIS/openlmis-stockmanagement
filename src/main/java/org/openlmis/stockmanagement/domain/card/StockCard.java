@@ -29,8 +29,9 @@ public class StockCard extends BaseEntity {
   private UUID programId;
   private UUID orderableId;
 
-  public static StockCard createFrom(StockEventDto stockEventDto, StockEvent savedEvent) {
-    return new StockCard(savedEvent, stockEventDto.getFacilityId(),
+  public static StockCard createStockCardFrom(StockEventDto stockEventDto, UUID savedEventId)
+          throws InstantiationException, IllegalAccessException {
+    return new StockCard(fromId(savedEventId, StockEvent.class), stockEventDto.getFacilityId(),
             stockEventDto.getProgramId(), stockEventDto.getOrderableId());
   }
 }

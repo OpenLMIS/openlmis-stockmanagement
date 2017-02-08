@@ -73,7 +73,7 @@ public class StockCardServiceTest extends BaseTest {
     StockEvent savedCardEvent = stockEventsRepository
             .save(cardEventDto.toEvent(UUID.randomUUID()));
     StockCard existingCard = stockCardRepository
-            .save(StockCard.createFrom(cardEventDto, savedCardEvent));
+            .save(StockCard.createStockCardFrom(cardEventDto, savedCardEvent.getId()));
 
     //2. and there is a new event saved
     UUID userId = UUID.randomUUID();
@@ -107,7 +107,7 @@ public class StockCardServiceTest extends BaseTest {
     StockEvent savedCardEvent = stockEventsRepository
             .save(cardEventDto.toEvent(UUID.randomUUID()));
     final StockCard existingCard = stockCardRepository
-            .save(StockCard.createFrom(cardEventDto, savedCardEvent));
+            .save(StockCard.createStockCardFrom(cardEventDto, savedCardEvent.getId()));
 
     //2. and there is a new event saved
     UUID userId = UUID.randomUUID();

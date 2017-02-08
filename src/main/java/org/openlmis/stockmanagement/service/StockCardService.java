@@ -11,7 +11,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 
-import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createFrom;
+import static org.openlmis.stockmanagement.domain.card.StockCard.createStockCardFrom;
+import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemsFrom;
 
 @Service
 public class StockCardService {
@@ -35,11 +36,12 @@ public class StockCardService {
           throws IllegalAccessException, InstantiationException {
 
     StockCard foundStockCard = tryToFindExistingCard(stockEventDto);
-    List<StockCardLineItem> lineItems = createFrom(stockEventDto, savedEventId, currentUserId);
+    List<StockCardLineItem> lineItems =
+            createLineItemsFrom(stockEventDto, savedEventId, currentUserId);
 
     for (StockCardLineItem lineItem : lineItems) {
       if (foundStockCard == null) {
-        createNewStockCard(stockEventDto, lineItem);
+        createAndSaveNewStockCard(stockEventDto, lineItem);
       } else {
         lineItem.setStockCard(foundStockCard);
       }
@@ -47,8 +49,9 @@ public class StockCardService {
     stockCardLineItemsRepository.save(lineItems);
   }
 
-  private void createNewStockCard(StockEventDto stockEventDto, StockCardLineItem lineItem) {
-    StockCard stockCard = StockCard.createFrom(stockEventDto, lineItem.getOriginEvent());
+  private void createAndSaveNewStockCard(StockEventDto stockEventDto, StockCardLineItem lineItem)
+          throws IllegalAccessException, InstantiationException {
+    StockCard stockCard = createStockCardFrom(stockEventDto, lineItem.getOriginEvent().getId());
     lineItem.setStockCard(stockCard);
     stockCardRepository.save(stockCard);
   }

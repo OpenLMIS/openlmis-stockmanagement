@@ -11,6 +11,7 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertThat;
+import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemsFrom;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
 
 public class StockCardLineItemTest {
@@ -22,7 +23,7 @@ public class StockCardLineItemTest {
     //when
     UUID userId = UUID.randomUUID();
     UUID eventId = UUID.randomUUID();
-    List<StockCardLineItem> lineItems = StockCardLineItem.createFrom(eventDto, eventId, userId);
+    List<StockCardLineItem> lineItems = createLineItemsFrom(eventDto, eventId, userId);
     StockCardLineItem lineItem = lineItems.get(0);
 
     //then
