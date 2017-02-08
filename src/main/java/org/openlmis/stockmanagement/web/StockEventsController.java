@@ -5,6 +5,7 @@ import org.openlmis.stockmanagement.service.StockEventProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -24,6 +25,7 @@ public class StockEventsController {
   private StockEventProcessor stockEventProcessor;
 
   @RequestMapping(value = "stockEvents", method = POST)
+  @Transactional(rollbackFor = {InstantiationException.class, IllegalAccessException.class})
   public ResponseEntity<UUID> createStockEvent(@RequestBody StockEventDto stockEventDto)
           throws InstantiationException, IllegalAccessException {
     UUID createdEventId = stockEventProcessor.process(stockEventDto);

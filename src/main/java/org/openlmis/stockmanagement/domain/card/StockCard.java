@@ -24,9 +24,11 @@ public class StockCard extends BaseEntity {
   @JoinColumn(nullable = false)
   private StockEvent originEvent;
 
-  @Column
+  @Column(nullable = false)
   private UUID facilityId;
+  @Column(nullable = false)
   private UUID programId;
+  @Column(nullable = false)
   private UUID orderableId;
 
   public static StockCard createStockCardFrom(StockEventDto stockEventDto, UUID savedEventId)

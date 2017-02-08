@@ -1,14 +1,16 @@
 package org.openlmis.stockmanagement.service;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.BaseTest;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.UserDto;
 import org.openlmis.stockmanagement.exception.MissingPermissionException;
+import org.openlmis.stockmanagement.repository.StockCardLineItemsRepository;
+import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
@@ -20,30 +22,37 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.hamcrest.collection.IsIterableWithSize.iterableWithSize;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class StockEventProcessorTest {
+public class StockEventProcessorTest extends BaseTest {
 
-  @Autowired
-  private StockEventProcessor stockEventProcessor;
+  @MockBean
+  private AuthenticationHelper authenticationHelper;
 
   @MockBean
   private StockEventValidationsService stockEventValidationsService;
 
-  @MockBean
-  private StockCardService stockCardService;
+  @Autowired
+  private StockEventProcessor stockEventProcessor;
 
-  @MockBean
+  @Autowired
   private StockEventsRepository stockEventsRepository;
 
-  @MockBean
-  private AuthenticationHelper authenticationHelper;
+  @Autowired
+  private StockCardRepository stockCardRepository;
+
+  @Autowired
+  private StockCardLineItemsRepository stockCardLineItemsRepository;
+
+  @After
+  public void tearDown() throws Exception {
+    stockCardLineItemsRepository.deleteAll();
+    stockCardRepository.deleteAll();
+    stockEventsRepository.deleteAll();
+  }
 
   @Test
   public void should_not_save_events_without_user_permission() throws Exception {
@@ -59,7 +68,7 @@ public class StockEventProcessorTest {
       stockEventProcessor.process(stockEventDto);
     } catch (MissingPermissionException ex) {
       //then
-      verify(stockEventsRepository, never()).save(any(StockEvent.class));
+      assertEventAndCardAndLineItemTableSize(0);
       return;
     }
 
@@ -74,23 +83,19 @@ public class StockEventProcessorTest {
     userDto.setId(userId);
     when(authenticationHelper.getCurrentUser()).thenReturn(userDto);
 
-    UUID eventIdFromRepo = UUID.randomUUID();
-    StockEvent stockEvent = new StockEvent();
-    stockEvent.setId(eventIdFromRepo);
-    when(stockEventsRepository.save(any(StockEvent.class))).thenReturn(stockEvent);
-
     //when
+    assertEventAndCardAndLineItemTableSize(0);
+
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
-    UUID idFromProcessor = stockEventProcessor.process(stockEventDto);
+    stockEventProcessor.process(stockEventDto);
 
     //then
-    assertThat(idFromProcessor, is(eventIdFromRepo));
+    assertEventAndCardAndLineItemTableSize(1);
+  }
 
-    ArgumentCaptor<StockEvent> eventCaptor = ArgumentCaptor.forClass(StockEvent.class);
-
-    verify(stockEventsRepository).save(eventCaptor.capture());
-    verify(stockCardService).saveFromEvent(stockEventDto, eventIdFromRepo, userId);
-
-    assertThat(eventCaptor.getValue().getUserId(), is(userId));
+  private void assertEventAndCardAndLineItemTableSize(int size) {
+    assertThat(stockEventsRepository.findAll(), iterableWithSize(size));
+    assertThat(stockCardLineItemsRepository.findAll(), iterableWithSize(size));
+    assertThat(stockCardRepository.findAll(), iterableWithSize(size));
   }
 }
