@@ -55,4 +55,12 @@ public class StockEventDto {
             occurredDate, noticedDate, ZonedDateTime.now(),
             signature, reasonFreeText, sourceFreeText, destinationFreeText, documentNumber);
   }
+
+  public boolean hasAlternativeStockCardIdentifier() {
+    return programId != null && facilityId != null & orderableId != null;
+  }
+
+  public boolean hasStockCardIdentifier() {
+    return stockCardId != null;
+  }
 }

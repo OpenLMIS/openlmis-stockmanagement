@@ -1,6 +1,5 @@
 package org.openlmis.stockmanagement.service;
 
-import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
@@ -49,7 +48,7 @@ public class StockEventProcessor {
     StockEvent stockEvent = stockEventDto.toEvent(currentUserId);
     UUID savedEventId = stockEventsRepository.save(stockEvent).getId();
 
-    stockCardService.save(StockCardLineItem.createFrom(stockEventDto, savedEventId, currentUserId));
+    stockCardService.saveFromEvent(stockEventDto, savedEventId, currentUserId);
 
     return savedEventId;
   }
