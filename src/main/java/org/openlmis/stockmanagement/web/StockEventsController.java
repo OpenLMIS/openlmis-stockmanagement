@@ -25,7 +25,6 @@ public class StockEventsController {
   private StockEventProcessor stockEventProcessor;
 
   @RequestMapping(value = "stockEvents", method = POST)
-  @Transactional(rollbackFor = {InstantiationException.class, IllegalAccessException.class})
   public ResponseEntity<UUID> createStockEvent(@RequestBody StockEventDto stockEventDto)
           throws InstantiationException, IllegalAccessException {
     UUID createdEventId = stockEventProcessor.process(stockEventDto);
