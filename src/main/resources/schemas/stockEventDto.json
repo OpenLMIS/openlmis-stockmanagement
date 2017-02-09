@@ -12,7 +12,7 @@
     },
     "noticedDate": {
       "type": "string",
-      "format": "date-time"
+      "format": "UTC_MILLISEC"
     },
     "signature": {
       "type": "string"
@@ -46,7 +46,7 @@
     },
     "occurredDate": {
       "type": "string",
-      "format": "date-time"
+      "format": "UTC_MILLISEC"
     }
   }
 }
