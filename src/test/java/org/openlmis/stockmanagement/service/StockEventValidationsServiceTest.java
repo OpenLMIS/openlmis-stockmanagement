@@ -3,8 +3,10 @@ package org.openlmis.stockmanagement.service;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 import org.openlmis.stockmanagement.utils.Message;
 import org.openlmis.stockmanagement.validators.ApprovedOrderableValidator;
@@ -14,12 +16,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.UUID;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -40,6 +45,9 @@ public class StockEventValidationsServiceTest {
   @MockBean
   private ApprovedOrderableValidator approvedOrderableValidator;
 
+  @MockBean
+  private StockCardRepository stockCardRepository;
+
   @Before
   public void setUp() throws Exception {
     doNothing().when(approvedOrderableValidator).validate(any(StockEventDto.class));
@@ -55,7 +63,7 @@ public class StockEventValidationsServiceTest {
 
     //then:
     verify(permissionService, times(1))
-        .canCreateStockEvent(stockEventDto.getProgramId(), stockEventDto.getFacilityId());
+            .canCreateStockEvent(stockEventDto.getProgramId(), stockEventDto.getFacilityId());
 
   }
 
@@ -77,7 +85,7 @@ public class StockEventValidationsServiceTest {
     //given
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     doThrow(new ValidationMessageException(new Message("some error")))
-        .when(validator1).validate(stockEventDto);
+            .when(validator1).validate(stockEventDto);
 
     //when:
     try {
@@ -87,6 +95,28 @@ public class StockEventValidationsServiceTest {
       verify(validator1, times(1)).validate(stockEventDto);
       verify(validator2, never()).validate(stockEventDto);
     }
-
   }
+
+  @Test
+  public void should_validate_permission_with_program_facility_from_card_when_they_are_not_in_dto()
+          throws Exception {
+    //given
+    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    stockEventDto.setProgramId(null);
+    stockEventDto.setFacilityId(null);
+
+    StockCard stockCard = new StockCard();
+    stockCard.setFacilityId(UUID.randomUUID());
+    stockCard.setProgramId(UUID.randomUUID());
+
+    when(stockCardRepository.findOne(stockEventDto.getStockCardId())).thenReturn(stockCard);
+
+    //when
+    stockEventValidationsService.validate(stockEventDto);
+
+    //then
+    verify(permissionService, times(1))
+            .canCreateStockEvent(stockCard.getProgramId(), stockCard.getFacilityId());
+  }
+
 }

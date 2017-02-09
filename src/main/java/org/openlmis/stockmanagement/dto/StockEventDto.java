@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
+import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.movement.Node;
 
@@ -62,5 +63,16 @@ public class StockEventDto {
 
   public boolean hasStockCardIdentifier() {
     return stockCardId != null;
+  }
+
+  /**
+   * Reassign alternative identifier in case of missing.
+   *
+   * @param stockCard source of alternative identifier.
+   */
+  public void assignAlternativeIdentifier(StockCard stockCard) {
+    setProgramId(stockCard.getProgramId());
+    setFacilityId(stockCard.getFacilityId());
+    setOrderableId(stockCard.getOrderableId());
   }
 }

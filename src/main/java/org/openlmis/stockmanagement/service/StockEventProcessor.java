@@ -1,7 +1,9 @@
 package org.openlmis.stockmanagement.service;
 
+import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,9 @@ public class StockEventProcessor {
   @Autowired
   private StockEventsRepository stockEventsRepository;
 
+  @Autowired
+  private StockCardRepository stockCardRepository;
+
   /**
    * Validate and persist event and its line items.
    *
@@ -46,8 +51,12 @@ public class StockEventProcessor {
 
   private UUID saveEventAndGenerateLineItems(StockEventDto stockEventDto)
           throws InstantiationException, IllegalAccessException {
-
     UUID currentUserId = authenticationHelper.getCurrentUser().getId();
+
+    if (!stockEventDto.hasAlternativeStockCardIdentifier()) {
+      StockCard stockCard = stockCardRepository.findOne(stockEventDto.getStockCardId());
+      stockEventDto.assignAlternativeIdentifier(stockCard);
+    }
 
     StockEvent stockEvent = stockEventDto.toEvent(currentUserId);
     UUID savedEventId = stockEventsRepository.save(stockEvent).getId();
@@ -56,4 +65,5 @@ public class StockEventProcessor {
 
     return savedEventId;
   }
+
 }
