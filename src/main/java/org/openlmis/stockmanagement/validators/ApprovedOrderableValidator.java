@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import java.util.Collection;
 import java.util.UUID;
 
+import static com.google.common.collect.Iterables.concat;
+import static java.util.stream.StreamSupport.stream;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_ORDERABLE_NOT_FOUND;
 
 @Component(value = "ApprovedOrderableValidator")
@@ -25,21 +27,37 @@ public class ApprovedOrderableValidator implements StockEventValidator {
    * @param stockEventDto the event to be validated.
    */
   public void validate(StockEventDto stockEventDto) {
-    Collection<ApprovedProductDto> approvedProducts =
-        approvedProductReferenceDataService.getApprovedProducts(
-            stockEventDto.getFacilityId(), stockEventDto.getProgramId(), true);
+    UUID facility = stockEventDto.getFacilityId();
+    UUID program = stockEventDto.getProgramId();
 
-    boolean isFoundInApprovedList = approvedProducts
-        .stream()
-        .anyMatch(product -> {
-          UUID orderableId = product.getProgramOrderable().getOrderableId();
-          return orderableId.equals(stockEventDto.getOrderableId());
-        });
+    if (facility == null || program == null) {
+      return;
+    }
+
+    Collection<ApprovedProductDto> fullSupply = getApprovedList(facility, program, true);
+    Collection<ApprovedProductDto> nonFullSupply = getApprovedList(facility, program, false);
+
+    boolean isFoundInApprovedList = tryToFindInBothLists(stockEventDto, fullSupply, nonFullSupply);
 
     if (!isFoundInApprovedList) {
       throw new ValidationMessageException(
           new Message(ERROR_ORDERABLE_NOT_FOUND, stockEventDto.getOrderableId()));
     }
+  }
 
+  private boolean tryToFindInBothLists(StockEventDto stockEventDto,
+                                       Collection<ApprovedProductDto> fullSupplyList,
+                                       Collection<ApprovedProductDto> nonFullSupplyList) {
+    return stream(concat(fullSupplyList, nonFullSupplyList).spliterator(), false)
+        .anyMatch(product -> {
+          UUID orderableId = product.getProgramOrderable().getOrderableId();
+          return orderableId.equals(stockEventDto.getOrderableId());
+        });
+  }
+
+  private Collection<ApprovedProductDto> getApprovedList(
+      UUID facilityId, UUID programId, boolean fullSupply) {
+    return approvedProductReferenceDataService
+        .getApprovedProducts(facilityId, programId, fullSupply);
   }
 }

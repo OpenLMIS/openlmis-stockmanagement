@@ -27,7 +27,7 @@ public class ApprovedOrderableValidatorTest {
   private ApprovedProductReferenceDataService approvedProductReferenceDataService;
 
   @Test(expected = ValidationMessageException.class)
-  public void stock_event_with_orderable_id_not_in_approved_list_should_not_pass_validation()
+  public void stock_event_with_orderable_id_not_in_both_approved_list_should_not_pass_validation()
       throws Exception {
     //given:
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
@@ -42,14 +42,46 @@ public class ApprovedOrderableValidatorTest {
         stockEventDto.getFacilityId(), stockEventDto.getProgramId(), true))
         .thenReturn(Collections.singletonList(approvedProductDto));
 
+    when(approvedProductReferenceDataService.getApprovedProducts(
+        stockEventDto.getFacilityId(), stockEventDto.getProgramId(), false))
+        .thenReturn(Collections.singletonList(approvedProductDto));
+
     //when:
     approvedOrderableValidator.validate(stockEventDto);
 
   }
 
   @Test
-  public void stock_event_with_orderable_id_in_approved_list_should_pass_validation()
+  public void stock_event_with_orderable_id_in_full_supply_approved_list_should_pass()
       throws Exception {
+    shouldPassValidationWhenOderableIdInApprovedList(true);
+  }
+
+  @Test
+  public void stock_event_with_orderable_id_in_non_full_supply_approved_list_should_pass()
+      throws Exception {
+    shouldPassValidationWhenOderableIdInApprovedList(false);
+  }
+
+  @Test
+  public void should_not_throw_validation_exception_if_event_has_no_program_and_facility_id()
+      throws Exception {
+    //given
+    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    stockEventDto.setProgramId(null);
+
+    //when
+    approvedOrderableValidator.validate(stockEventDto);
+
+    //given
+    stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    stockEventDto.setFacilityId(null);
+
+    //when
+    approvedOrderableValidator.validate(stockEventDto);
+  }
+
+  private void shouldPassValidationWhenOderableIdInApprovedList(boolean fullSupply) {
     //given:
     String orderableIdString = "d8290082-f9fa-4a37-aefb-a3d76ff805a8";
     UUID orderableId = UUID.fromString(orderableIdString);
@@ -64,12 +96,11 @@ public class ApprovedOrderableValidatorTest {
     approvedProductDto.setProgramOrderable(programOrderableDto);
 
     when(approvedProductReferenceDataService.getApprovedProducts(
-        stockEventDto.getFacilityId(), stockEventDto.getProgramId(), true))
+        stockEventDto.getFacilityId(), stockEventDto.getProgramId(), fullSupply))
         .thenReturn(Collections.singletonList(approvedProductDto));
 
     //when:
     approvedOrderableValidator.validate(stockEventDto);
-
   }
 
 }
