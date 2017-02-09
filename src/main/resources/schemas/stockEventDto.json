@@ -4,21 +4,6 @@
     "sourceId": {
       "type": "string"
     },
-    "reason": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "type": {
-          "type": "string",
-          "enum": [
-            "CREDIT",
-            "DEBIT"
-          ]
-        }
-      }
-    },
     "quantity": {
       "type": "integer"
     },
@@ -26,19 +11,22 @@
       "type": "string"
     },
     "noticedDate": {
-      "type": "integer",
-      "format": "UTC_MILLISEC"
+      "type": "string",
+      "format": "date-time"
     },
     "signature": {
+      "type": "string"
+    },
+    "documentNumber": {
       "type": "string"
     },
     "destinationId": {
       "type": "string"
     },
-    "userId": {
+    "destinationFreeText": {
       "type": "string"
     },
-    "destinationFreeText": {
+    "reasonId": {
       "type": "string"
     },
     "orderableId": {
@@ -57,12 +45,8 @@
       "type": "string"
     },
     "occurredDate": {
-      "type": "integer",
-      "format": "UTC_MILLISEC"
-    },
-    "savedDate": {
-      "type": "integer",
-      "format": "UTC_MILLISEC"
+      "type": "string",
+      "format": "date-time"
     }
   }
 }
