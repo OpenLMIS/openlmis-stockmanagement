@@ -15,6 +15,9 @@ public abstract class MessageKeys {
   public static final String ERROR_STOCK_EVENT_REASON_NOT_MATCH =
           ERROR_PREFIX + ".reason.notMatch";
 
+  public static final String ERROR_ORDERABLE_NOT_FOUND =
+          ERROR_PREFIX + ".orderable.notFound";
+
   private MessageKeys() {
     throw new UnsupportedOperationException();
   }
