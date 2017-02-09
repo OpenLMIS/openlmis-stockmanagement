@@ -8,7 +8,6 @@ import org.mockito.Mockito;
 import org.openlmis.stockmanagement.BaseTest;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.UserDto;
-import org.openlmis.stockmanagement.exception.MissingPermissionException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemsRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
@@ -55,18 +54,19 @@ public class StockEventProcessorTest extends BaseTest {
   }
 
   @Test
-  public void should_not_save_events_without_user_permission() throws Exception {
+  public void should_not_save_events_if_anything_goes_wrong_in_validations_service()
+      throws Exception {
     //given
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
 
-    Mockito.doThrow(new MissingPermissionException(""))
-            .when(stockEventValidationsService)
-            .validate(stockEventDto);
+    Mockito.doThrow(new RuntimeException("something wrong from validations service"))
+        .when(stockEventValidationsService)
+        .validate(stockEventDto);
 
     //when
     try {
       stockEventProcessor.process(stockEventDto);
-    } catch (MissingPermissionException ex) {
+    } catch (RuntimeException ex) {
       //then
       assertEventAndCardAndLineItemTableSize(0);
       return;

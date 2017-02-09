@@ -1,17 +1,21 @@
 package org.openlmis.stockmanagement.service;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.validators.ApprovedOrderableValidator;
 import org.openlmis.stockmanagement.validators.StockEventValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -32,6 +36,14 @@ public class StockEventValidationsServiceTest {
 
   @MockBean(name = "v2")
   private StockEventValidator validator2;
+
+  @MockBean
+  private ApprovedOrderableValidator approvedOrderableValidator;
+
+  @Before
+  public void setUp() throws Exception {
+    doNothing().when(approvedOrderableValidator).validate(any(StockEventDto.class));
+  }
 
   @Test
   public void should_validate_current_user_permission() throws Exception {

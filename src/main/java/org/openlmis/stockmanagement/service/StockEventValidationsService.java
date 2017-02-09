@@ -17,6 +17,11 @@ public class StockEventValidationsService {
   @Autowired
   private List<StockEventValidator> stockEventValidators;
 
+  /**
+   * Validate stock event with permission service and all validators.
+   *
+   * @param stockEventDto the event to be validated.
+   */
   public void validate(StockEventDto stockEventDto) {
     permissionService
         .canCreateStockEvent(stockEventDto.getProgramId(), stockEventDto.getFacilityId());

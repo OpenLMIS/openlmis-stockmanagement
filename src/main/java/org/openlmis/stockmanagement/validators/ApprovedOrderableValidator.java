@@ -13,12 +13,17 @@ import java.util.UUID;
 
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_ORDERABLE_NOT_FOUND;
 
-@Component
-public class ApprovedOrderableValidator {
+@Component(value = "ApprovedOrderableValidator")
+public class ApprovedOrderableValidator implements StockEventValidator {
 
   @Autowired
   private ApprovedProductReferenceDataService approvedProductReferenceDataService;
 
+  /**
+   * Validate if the orderable in stock event is in the approved list.
+   *
+   * @param stockEventDto the event to be validated.
+   */
   public void validate(StockEventDto stockEventDto) {
     Collection<ApprovedProductDto> approvedProducts =
         approvedProductReferenceDataService.getApprovedProducts(
