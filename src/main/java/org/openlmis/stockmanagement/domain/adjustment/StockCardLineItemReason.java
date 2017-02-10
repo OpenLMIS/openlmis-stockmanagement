@@ -22,7 +22,7 @@ public class StockCardLineItemReason extends BaseEntity {
 
   @Column(nullable = false, columnDefinition = TEXT_COLUMN_DEFINITION)
   @Enumerated(value = EnumType.STRING)
-  private StockCardLineItemReasonType stockCardLineItemReasonType;
+  private StockCardLineItemReasonType reasonType;
 
   @Column(nullable = false, columnDefinition = TEXT_COLUMN_DEFINITION)
   @Enumerated(value = EnumType.STRING)
