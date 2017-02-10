@@ -1,6 +1,7 @@
 package org.openlmis.stockmanagement.domain.card;
 
 import org.junit.Test;
+import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 
 import java.time.ZonedDateTime;
@@ -20,10 +21,15 @@ public class StockCardLineItemTest {
     //given
     StockEventDto eventDto = createStockEventDto();
 
+    StockEvent event = new StockEvent();
+    event.setId(UUID.randomUUID());
+
+    StockCard stockCard = new StockCard();
+    stockCard.setOriginEvent(event);
+
     //when
     UUID userId = UUID.randomUUID();
-    UUID eventId = UUID.randomUUID();
-    List<StockCardLineItem> lineItems = createLineItemsFrom(eventDto, eventId, userId);
+    List<StockCardLineItem> lineItems = createLineItemsFrom(eventDto, stockCard, userId);
     StockCardLineItem lineItem = lineItems.get(0);
 
     //then
@@ -42,8 +48,8 @@ public class StockCardLineItemTest {
     assertThat(lineItem.getOccurredDate(), is(eventDto.getOccurredDate()));
     assertThat(lineItem.getNoticedDate(), is(eventDto.getNoticedDate()));
 
-    assertThat(lineItem.getStockCard().getId(), is(eventDto.getStockCardId()));
-    assertThat(lineItem.getOriginEvent().getId(), is(eventId));
+    assertThat(lineItem.getStockCard(), is(stockCard));
+    assertThat(lineItem.getOriginEvent(), is(stockCard.getOriginEvent()));
 
     assertThat(lineItem.getUserId(), is(userId));
 

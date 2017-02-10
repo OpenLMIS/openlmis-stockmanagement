@@ -31,8 +31,6 @@ public class StockEventDtoBuilder {
     stockEventDto.setFacilityId(UUID.randomUUID());
     stockEventDto.setOrderableId(UUID.randomUUID());
 
-    stockEventDto.setStockCardId(UUID.randomUUID());
-
     stockEventDto.setNoticedDate(ZonedDateTime.now());
     stockEventDto.setOccurredDate(ZonedDateTime.now());
     return stockEventDto;

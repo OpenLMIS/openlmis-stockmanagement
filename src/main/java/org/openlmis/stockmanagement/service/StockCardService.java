@@ -1,14 +1,12 @@
 package org.openlmis.stockmanagement.service;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
-import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.repository.StockCardLineItemsRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 import static org.openlmis.stockmanagement.domain.card.StockCard.createStockCardFrom;
@@ -35,37 +33,25 @@ public class StockCardService {
   public void saveFromEvent(StockEventDto stockEventDto, UUID savedEventId, UUID currentUserId)
           throws IllegalAccessException, InstantiationException {
 
-    StockCard foundStockCard = tryToFindExistingCard(stockEventDto);
-    List<StockCardLineItem> lineItems =
-            createLineItemsFrom(stockEventDto, savedEventId, currentUserId);
+    StockCard stockCard = findExistingOrCreateNewCard(stockEventDto, savedEventId);
 
-    for (StockCardLineItem lineItem : lineItems) {
-      if (foundStockCard == null) {
-        createAndSaveNewStockCard(stockEventDto, lineItem);
-      } else {
-        lineItem.setStockCard(foundStockCard);
-      }
-    }
-    stockCardLineItemsRepository.save(lineItems);
+    createLineItemsFrom(stockEventDto, stockCard, currentUserId).forEach(lineItem -> {
+      stockCardLineItemsRepository.save(lineItem);
+    });
   }
 
-  private void createAndSaveNewStockCard(StockEventDto stockEventDto, StockCardLineItem lineItem)
-          throws IllegalAccessException, InstantiationException {
-    StockCard stockCard = createStockCardFrom(stockEventDto, lineItem.getOriginEvent().getId());
-    lineItem.setStockCard(stockCard);
-    stockCardRepository.save(stockCard);
-  }
+  private StockCard findExistingOrCreateNewCard(StockEventDto stockEventDto, UUID savedEventId)
+          throws InstantiationException, IllegalAccessException {
 
-  private StockCard tryToFindExistingCard(StockEventDto stockEventDto) {
-    StockCard foundStockCard = null;
-    if (stockEventDto.hasStockCardIdentifier()) {
-      foundStockCard = stockCardRepository.findOne(stockEventDto.getStockCardId());
-    } else if (stockEventDto.hasAlternativeStockCardIdentifier()) {
-      foundStockCard = stockCardRepository.findByProgramIdAndFacilityIdAndOrderableId(
-              stockEventDto.getProgramId(),
-              stockEventDto.getFacilityId(),
-              stockEventDto.getOrderableId());
+    StockCard foundCard = stockCardRepository.findByProgramIdAndFacilityIdAndOrderableId(
+            stockEventDto.getProgramId(),
+            stockEventDto.getFacilityId(),
+            stockEventDto.getOrderableId());
+
+    if (foundCard != null) {
+      return foundCard;
+    } else {
+      return stockCardRepository.save(createStockCardFrom(stockEventDto, savedEventId));
     }
-    return foundStockCard;
   }
 }

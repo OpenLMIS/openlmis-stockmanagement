@@ -7,8 +7,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.openlmis.stockmanagement.BaseTest;
-import org.openlmis.stockmanagement.domain.card.StockCard;
-import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.UserDto;
 import org.openlmis.stockmanagement.repository.StockCardLineItemsRepository;
@@ -23,10 +21,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsIterableWithSize.iterableWithSize;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.domain.BaseEntity.fromId;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
 
 @RunWith(SpringRunner.class)
@@ -98,31 +94,6 @@ public class StockEventProcessorTest extends BaseTest {
 
     //then
     assertEventAndCardAndLineItemTableSize(1);
-  }
-
-  @Test
-  public void should_assign_alternative_indentifier_for_dto_if_they_are_missing()
-          throws Exception {
-    //given
-    //1. there is an existing event
-    StockEventDto stockEventDto1 = createStockEventDto();
-    UUID saveEventId = stockEventProcessor.process(stockEventDto1);
-    StockCard card = stockCardRepository.findByOriginEvent(fromId(saveEventId, StockEvent.class));
-
-    //2. later, another even with out program, facility and orderable
-    StockEventDto stockEventDto = createStockEventDto();
-    stockEventDto.setProgramId(null);
-    stockEventDto.setFacilityId(null);
-    stockEventDto.setOrderableId(null);
-    stockEventDto.setStockCardId(card.getId());
-
-    //when
-    stockEventProcessor.process(stockEventDto);
-
-    //then
-    assertThat(stockEventDto.getProgramId(), is(card.getProgramId()));
-    assertThat(stockEventDto.getFacilityId(), is(card.getFacilityId()));
-    assertThat(stockEventDto.getOrderableId(), is(card.getOrderableId()));
   }
 
   private void assertEventAndCardAndLineItemTableSize(int size) {

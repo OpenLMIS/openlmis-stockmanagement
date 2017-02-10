@@ -45,7 +45,6 @@ public class StockCardServiceTest extends BaseTest {
     //given
     UUID userId = UUID.randomUUID();
     StockEventDto stockEventDto = createStockEventDto();
-    stockEventDto.setStockCardId(null);//first movement, no card id
     StockEvent savedEvent = stockEventsRepository.save(stockEventDto.toEvent(userId));
 
     //when
@@ -66,60 +65,28 @@ public class StockCardServiceTest extends BaseTest {
   }
 
   @Test
-  public void should_save_stock_card_line_items_with_existing_stock_card() throws Exception {
-    //given
-    //1. there is an existing event that caused a stock card to exist
-    StockEventDto cardEventDto = createStockEventDto();
-    StockEvent savedCardEvent = stockEventsRepository
-            .save(cardEventDto.toEvent(UUID.randomUUID()));
-    StockCard existingCard = stockCardRepository
-            .save(StockCard.createStockCardFrom(cardEventDto, savedCardEvent.getId()));
-
-    //2. and there is a new event saved
-    UUID userId = UUID.randomUUID();
-    StockEventDto stockEventDto = createStockEventDto();
-    stockEventDto.setStockCardId(existingCard.getId());
-    stockEventDto.setProgramId(cardEventDto.getProgramId());
-    stockEventDto.setFacilityId(cardEventDto.getFacilityId());
-    stockEventDto.setOrderableId(cardEventDto.getOrderableId());
-
-    StockEvent savedEvent = stockEventsRepository.save(stockEventDto.toEvent(userId));
-
-    //when
-    stockCardService.saveFromEvent(stockEventDto, savedEvent.getId(), userId);
-
-    //then
-    List<StockCardLineItem> savedLineItems =
-            stream(stockCardLineItemsRepository.findAll().spliterator(), false)
-                    .collect(Collectors.toList());
-    StockCardLineItem latestLineItem = savedLineItems.get(savedLineItems.size() - 1);
-
-    assertThat(latestLineItem.getUserId(), is(userId));
-    assertThat(latestLineItem.getStockCard().getId(), is(existingCard.getId()));
-  }
-
-  @Test
   public void should_save_line_items_with_program_facility_orderable_for_non_first_movement()
           throws Exception {
     //given
     //1. there is an existing event that caused a stock card to exist
-    StockEventDto cardEventDto = createStockEventDto();
-    StockEvent savedCardEvent = stockEventsRepository
-            .save(cardEventDto.toEvent(UUID.randomUUID()));
+    StockEventDto existingEventDto = createStockEventDto();
+    StockEvent existingEvent = stockEventsRepository
+            .save(existingEventDto.toEvent(UUID.randomUUID()));
     final StockCard existingCard = stockCardRepository
-            .save(StockCard.createStockCardFrom(cardEventDto, savedCardEvent.getId()));
+            .save(StockCard.createStockCardFrom(existingEventDto, existingEvent.getId()));
 
-    //2. and there is a new event saved
+    //2. and there is a new event coming
     UUID userId = UUID.randomUUID();
-    StockEventDto stockEventDto = createStockEventDto();
-    stockEventDto.setProgramId(cardEventDto.getProgramId());
-    stockEventDto.setFacilityId(cardEventDto.getFacilityId());
-    stockEventDto.setOrderableId(cardEventDto.getOrderableId());
-    stockEventDto.setStockCardId(null);
-    StockEvent savedEvent = stockEventsRepository.save(stockEventDto.toEvent(userId));
+    StockEventDto newEventDto = createStockEventDto();
+    newEventDto.setProgramId(existingEventDto.getProgramId());
+    newEventDto.setFacilityId(existingEventDto.getFacilityId());
+    newEventDto.setOrderableId(existingEventDto.getOrderableId());
+    StockEvent savedNewEvent = stockEventsRepository.save(newEventDto.toEvent(userId));
 
     //when
-    stockCardService.saveFromEvent(stockEventDto, savedEvent.getId(), userId);
+    long cardAmountBeforeSave = stockCardRepository.findAll().spliterator().getExactSizeIfKnown();
+    stockCardService.saveFromEvent(newEventDto, savedNewEvent.getId(), userId);
+    long cardAmountAfterSave = stockCardRepository.findAll().spliterator().getExactSizeIfKnown();
 
     //then
     List<StockCardLineItem> savedLineItems =
@@ -127,6 +94,7 @@ public class StockCardServiceTest extends BaseTest {
                     .collect(Collectors.toList());
     StockCardLineItem latestLineItem = savedLineItems.get(savedLineItems.size() - 1);
 
+    assertThat(cardAmountAfterSave, is(cardAmountBeforeSave));
     assertThat(latestLineItem.getUserId(), is(userId));
     assertThat(latestLineItem.getStockCard().getId(), is(existingCard.getId()));
   }
