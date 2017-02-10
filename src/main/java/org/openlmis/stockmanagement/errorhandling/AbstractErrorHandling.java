@@ -1,6 +1,6 @@
 package org.openlmis.stockmanagement.errorhandling;
 
-import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.exception.BaseMessageException;
 import org.openlmis.stockmanagement.i18n.MessageService;
 import org.openlmis.stockmanagement.util.ErrorResponse;
 import org.openlmis.stockmanagement.utils.Message;
@@ -27,8 +27,10 @@ public abstract class AbstractErrorHandling {
    * @return a LocalizedMessage translated by the MessageService bean
    */
   protected final Message.LocalizedMessage getLocalizedMessage(
-          ValidationMessageException exception) {
-    return messageService.localize(exception.asMessage());
+      BaseMessageException exception) {
+    Message.LocalizedMessage message = messageService.localize(exception.asMessage());
+    logger.error(message.toString());
+    return message;
   }
 
   /**

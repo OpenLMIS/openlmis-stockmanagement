@@ -1,7 +1,7 @@
 package org.openlmis.stockmanagement.errorhandling;
 
 import org.openlmis.stockmanagement.exception.AuthenticationException;
-import org.openlmis.stockmanagement.exception.MissingPermissionException;
+import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.referencedata.ReferenceDataRetrievalException;
 import org.openlmis.stockmanagement.util.ErrorResponse;
@@ -25,11 +25,11 @@ public class GlobalErrorHandling extends AbstractErrorHandling {
     return logErrorAndRespond("Could not authenticate user", ex);
   }
 
-  @ExceptionHandler(MissingPermissionException.class)
+  @ExceptionHandler(PermissionMessageException.class)
   @ResponseStatus(HttpStatus.FORBIDDEN)
   @ResponseBody
-  public ErrorResponse handlePermissionException(MissingPermissionException ex) {
-    return logErrorAndRespond("User is lacking permission to access the resource", ex);
+  public Message.LocalizedMessage handlePermissionException(PermissionMessageException ex) {
+    return getLocalizedMessage(ex);
   }
 
   @ExceptionHandler(ReferenceDataRetrievalException.class)

@@ -12,7 +12,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.ResultDto;
 import org.openlmis.stockmanagement.dto.RightDto;
 import org.openlmis.stockmanagement.dto.UserDto;
-import org.openlmis.stockmanagement.exception.MissingPermissionException;
+import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 
@@ -20,6 +20,7 @@ import java.util.UUID;
 
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARD_TEMPLATES_MANAGE;
 
 @SuppressWarnings("PMD.TooManyMethods")
@@ -60,7 +61,7 @@ public class PermissionServiceTest {
     when(authenticationHelper.getCurrentUser()).thenReturn(user);
 
     when(authenticationHelper.getRight(STOCK_CARD_TEMPLATES_MANAGE))
-            .thenReturn(manageStockCardTemplatesRight);
+        .thenReturn(manageStockCardTemplatesRight);
   }
 
   @Test
@@ -69,7 +70,7 @@ public class PermissionServiceTest {
     permissionService.canCreateStockCardTemplate();
     InOrder order = inOrder(authenticationHelper, userReferenceDataService);
     verifyCreateStockCardTemplatesRight(order,
-            STOCK_CARD_TEMPLATES_MANAGE, manageStockCardTemplatesRightId);
+        STOCK_CARD_TEMPLATES_MANAGE, manageStockCardTemplatesRightId);
   }
 
   @Test
@@ -81,22 +82,20 @@ public class PermissionServiceTest {
   private void hasRight(UUID rightId, boolean assign) {
     ResultDto<Boolean> resultDto = new ResultDto<>(assign);
     when(userReferenceDataService
-            .hasRight(userId, rightId, null, null, null)
+        .hasRight(userId, rightId, null, null, null)
     ).thenReturn(resultDto);
   }
 
   private void expectException(String rightName) {
-    exception.expect(MissingPermissionException.class);
-    exception.expectMessage(
-            "You do not have the following permission to perform this action: " + rightName
-    );
+    exception.expect(PermissionMessageException.class);
+    exception.expectMessage(ERROR_NO_FOLLOWING_PERMISSION + ": " + rightName);
   }
 
   private void verifyCreateStockCardTemplatesRight(InOrder order, String rightName, UUID rightId) {
     order.verify(authenticationHelper).getCurrentUser();
     order.verify(authenticationHelper).getRight(rightName);
     order.verify(userReferenceDataService).hasRight(userId, rightId, null, null,
-            null);
+        null);
   }
 
 }

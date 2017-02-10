@@ -5,7 +5,7 @@ import org.mockito.Mockito;
 import org.openlmis.stockmanagement.domain.template.StockCardTemplate;
 import org.openlmis.stockmanagement.dto.StockCardTemplateDto;
 import org.openlmis.stockmanagement.exception.AuthenticationException;
-import org.openlmis.stockmanagement.exception.MissingPermissionException;
+import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardTemplateService;
@@ -21,7 +21,9 @@ import java.util.UUID;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_TYPE_NOT_FOUND;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_NOT_FOUND;
+import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARD_TEMPLATES_MANAGE;
 import static org.openlmis.stockmanagement.testutils.StockCardTemplateBuilder.createTemplateDto;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -44,20 +46,20 @@ public class StockCardTemplatesControllerTest extends BaseWebTest {
   public void should_get_default_stock_card_templates_without_params() throws Exception {
     //given
     when(stockCardTemplateService.getDefaultStockCardTemplate())
-            .thenReturn(createTemplateDto());
+        .thenReturn(createTemplateDto());
 
     //when
     MockHttpServletRequestBuilder builder = get(STOCK_CARD_TEMPLATE_API)
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE);
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE);
 
     ResultActions resultActions = mvc.perform(builder);
 
     //then
     resultActions
-            .andDo(MockMvcResultHandlers.print())
-            .andExpect(status().isOk())
-            .andExpect(content()
-                    .json("{'stockCardFields':[{'name':'packSize'}]}"));
+        .andDo(MockMvcResultHandlers.print())
+        .andExpect(status().isOk())
+        .andExpect(content()
+            .json("{'stockCardFields':[{'name':'packSize'}]}"));
   }
 
   @Test
@@ -65,38 +67,38 @@ public class StockCardTemplatesControllerTest extends BaseWebTest {
 
     //given
     when(stockCardTemplateService.findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
-            .thenReturn(createTemplateDto());
+        .thenReturn(createTemplateDto());
 
     //when
     MockHttpServletRequestBuilder builder = get(STOCK_CARD_TEMPLATE_API)
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param("program", programId.toString())
-            .param("facilityType", facilityTypeId.toString());
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .param("program", programId.toString())
+        .param("facilityType", facilityTypeId.toString());
 
     ResultActions resultActions = mvc.perform(builder);
 
     //then
     resultActions
-            .andDo(MockMvcResultHandlers.print())
-            .andExpect(status().isOk())
-            .andExpect(content().json("{'stockCardFields':[{'name':'packSize', displayed:true}]}"));
+        .andDo(MockMvcResultHandlers.print())
+        .andExpect(status().isOk())
+        .andExpect(content().json("{'stockCardFields':[{'name':'packSize', displayed:true}]}"));
   }
 
   @Test
   public void should_return_404_when_template_not_found() throws Exception {
     //given
     when(stockCardTemplateService.findByProgramIdAndFacilityTypeId(any(), any()))
-            .thenReturn(null);
+        .thenReturn(null);
 
     //when
     ResultActions resultActions = mvc.perform(get(STOCK_CARD_TEMPLATE_API)
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param("program", UUID.randomUUID().toString())
-            .param("facilityType", UUID.randomUUID().toString()));
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .param("program", UUID.randomUUID().toString())
+        .param("facilityType", UUID.randomUUID().toString()));
 
     //then
     resultActions
-            .andExpect(status().isNotFound());
+        .andExpect(status().isNotFound());
   }
 
   @Test
@@ -105,13 +107,13 @@ public class StockCardTemplatesControllerTest extends BaseWebTest {
     //given
     Mockito.doNothing().when(permissionService).canCreateStockCardTemplate();
     when(stockCardTemplateService.saveOrUpdate(any(StockCardTemplateDto.class)))
-            .thenReturn(createTemplateDto());
+        .thenReturn(createTemplateDto());
 
     //when
     ResultActions resultActions = mvc.perform(post(STOCK_CARD_TEMPLATE_API)
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectToJsonString(new StockCardTemplate())));
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectToJsonString(new StockCardTemplate())));
 
     //then
     resultActions.andExpect(status().isCreated());
@@ -120,14 +122,15 @@ public class StockCardTemplatesControllerTest extends BaseWebTest {
   @Test
   public void should_return_403_when_create_template_permission_not_found() throws Exception {
     //given
-    Mockito.doThrow(new MissingPermissionException("MANAGE_STOCK_CARD_TEMPLATES"))
-            .when(permissionService).canCreateStockCardTemplate();
+    Mockito.doThrow(new PermissionMessageException(
+        new Message(ERROR_NO_FOLLOWING_PERMISSION, STOCK_CARD_TEMPLATES_MANAGE)))
+        .when(permissionService).canCreateStockCardTemplate();
 
     //when
     ResultActions resultActions = mvc.perform(post(STOCK_CARD_TEMPLATE_API)
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectToJsonString(new StockCardTemplate())));
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectToJsonString(new StockCardTemplate())));
 
     //then
     resultActions.andExpect(status().isForbidden());
@@ -137,13 +140,13 @@ public class StockCardTemplatesControllerTest extends BaseWebTest {
   public void should_return_401_when_user_unauthorized() throws Exception {
     //given
     Mockito.doThrow(new AuthenticationException("MANAGE_STOCK_CARD_TEMPLATES"))
-            .when(permissionService).canCreateStockCardTemplate();
+        .when(permissionService).canCreateStockCardTemplate();
 
     //when
     ResultActions resultActions = mvc.perform(post(STOCK_CARD_TEMPLATE_API)
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectToJsonString(new StockCardTemplate())));
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectToJsonString(new StockCardTemplate())));
 
     //then
     resultActions.andExpect(status().isUnauthorized());
@@ -162,14 +165,14 @@ public class StockCardTemplatesControllerTest extends BaseWebTest {
   private void throwValidationExceptionWith(String exceptionKey) throws Exception {
     //given
     Mockito.doThrow(new ValidationMessageException(
-            new Message(exceptionKey, "some id")))
-            .when(stockCardTemplateService).saveOrUpdate(any());
+        new Message(exceptionKey, "some id")))
+        .when(stockCardTemplateService).saveOrUpdate(any());
 
     //when
     ResultActions resultActions = mvc.perform(post(STOCK_CARD_TEMPLATE_API)
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectToJsonString(new StockCardTemplate())));
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectToJsonString(new StockCardTemplate())));
 
     //then
     resultActions.andExpect(status().isBadRequest());
