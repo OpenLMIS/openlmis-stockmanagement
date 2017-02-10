@@ -1,6 +1,7 @@
 package org.openlmis.stockmanagement.domain.adjustment;
 
-public enum StockCardLineItemReasonType {
+public enum ReasonType {
   CREDIT,
-  DEBIT;
+  DEBIT,
+  BALANCE_ADJUSTMENT;
 }

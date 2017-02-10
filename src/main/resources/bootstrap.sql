@@ -16,6 +16,8 @@ INSERT INTO stockmanagement.available_stock_card_line_item_fields VALUES ('b15ad
 
 INSERT INTO stockmanagement.available_stock_card_line_item_fields VALUES ('b15ada3e-d6da-11e6-bf26-cec0c932ce01', 'signature');
 
+INSERT INTO stockmanagement.stock_card_line_item_reasons VALUES ('d2fc3cf3-da18-44b0-a220-77c985202e06', 'Physical Inventory', FALSE, 'Balance adjustment','PHYSICAL_INVENTORY','BALANCE_ADJUSTMENT');
+
 INSERT INTO stockmanagement.stock_card_line_item_reasons VALUES ('d3fc3cf3-da18-44b0-a220-77c985202e06', 'Overstock', FALSE, 'Inventory correction in case of overstock', 'PHYSICAL_INVENTORY', 'CREDIT');
 
 INSERT INTO stockmanagement.stock_card_line_item_reasons VALUES ('d4fc3cf3-da18-44b0-a220-77c985202e06', 'Understock', FALSE, 'Inventory correction in case of understock', 'PHYSICAL_INVENTORY', 'DEBIT');
