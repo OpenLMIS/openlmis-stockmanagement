@@ -1,6 +1,7 @@
 package org.openlmis.stockmanagement.service;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.repository.StockCardLineItemsRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
@@ -53,5 +54,9 @@ public class StockCardService {
     } else {
       return stockCardRepository.save(createStockCardFrom(stockEventDto, savedEventId));
     }
+  }
+
+  public StockCardDto findStockCardById(UUID stockCardId) {
+    return null;
   }
 }

@@ -1,6 +1,9 @@
 package org.openlmis.stockmanagement.domain.card;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.openlmis.stockmanagement.domain.BaseEntity;
@@ -18,12 +21,19 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static java.util.Arrays.asList;
 
 @Entity
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties({
+        "stockCard", "originEvent",
+        "source", "destination",
+        "noticedDate", "savedDate",
+        "userId"})
 @Table(name = "stock_card_line_items", schema = "stockmanagement")
 public class StockCardLineItem extends BaseEntity {
 
@@ -51,14 +61,18 @@ public class StockCardLineItem extends BaseEntity {
   @ManyToOne()
   @JoinColumn()
   private Node source;
+
   @ManyToOne()
   @JoinColumn()
   private Node destination;
 
   @Column(nullable = false, columnDefinition = "timestamp")
+  @JsonFormat(shape = STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
   private ZonedDateTime occurredDate;
+
   @Column(nullable = false, columnDefinition = "timestamp")
   private ZonedDateTime noticedDate;
+
   @Column(nullable = false, columnDefinition = "timestamp")
   private ZonedDateTime savedDate;
 
