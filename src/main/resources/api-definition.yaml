@@ -3,6 +3,7 @@
 title: OpenLMIS Stock Management
 version: "@version@"
 baseUri: "@baseUrl@"
+protocols: [ HTTP, HTTPS ]
 
 documentation:
     - title: Getting Started
