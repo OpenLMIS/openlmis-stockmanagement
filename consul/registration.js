@@ -169,7 +169,7 @@ function RegistrationService(host, port) {
   self.consulPort = port;
   self.filename = '.consul_service_id~';
 
-  self.registrator = new ServiceConsulRegistrator(self.consulHost, self.consulPort);;
+  self.registrator = new ServiceConsulRegistrator(self.consulHost, self.consulPort);
   self.parser = new ServiceRAMLParser();
 
   self.register = function(args) {
@@ -353,8 +353,39 @@ function CommandLineResolver() {
       util.format(templates.formatted, formatMessage, errorMessage) : errorMessage;
   }
 
+  function awaitConsul(consulHost, consulPort) {
+    var result;
+
+    var settings = {
+      host: consulHost,
+      port: consulPort,
+      path: '/v1/catalog/services'
+    }
+
+    for (var i = 0; i < 5; i++) {
+      sleep(1000);
+      var request = http.get(settings, function(response) {
+        result = response;
+      });
+
+      while(!result) {
+        deasync.runLoopOnce();
+      }
+
+      if (result.statusCode === 200) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   var consulHost = process.env.CONSUL_HOST || 'consul';
   var consulPort = process.env.CONSUL_PORT || '8500';
+
+  if (!awaitConsul(consulHost, consulPort)) {
+    throw new Error("The Consul service has not started up properly.");
+  }
+
   var registration = new RegistrationService(consulHost, consulPort);
 
   try {
