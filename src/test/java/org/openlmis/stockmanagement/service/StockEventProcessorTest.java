@@ -7,9 +7,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.openlmis.stockmanagement.BaseTest;
+import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.UserDto;
-import org.openlmis.stockmanagement.repository.StockCardLineItemsRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
@@ -20,8 +20,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.UUID;
 
+import static java.util.stream.StreamSupport.stream;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsIterableWithSize.iterableWithSize;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
 
@@ -44,9 +45,6 @@ public class StockEventProcessorTest extends BaseTest {
   @Autowired
   private StockCardRepository stockCardRepository;
 
-  @Autowired
-  private StockCardLineItemsRepository stockCardLineItemsRepository;
-
   @Before
   public void setUp() throws Exception {
     UUID userId = UUID.randomUUID();
@@ -57,7 +55,6 @@ public class StockEventProcessorTest extends BaseTest {
 
   @After
   public void tearDown() throws Exception {
-    stockCardLineItemsRepository.deleteAll();
     stockCardRepository.deleteAll();
     stockEventsRepository.deleteAll();
   }
@@ -96,9 +93,13 @@ public class StockEventProcessorTest extends BaseTest {
     assertEventAndCardAndLineItemTableSize(1);
   }
 
-  private void assertEventAndCardAndLineItemTableSize(int size) {
-    assertThat(stockEventsRepository.findAll(), iterableWithSize(size));
-    assertThat(stockCardLineItemsRepository.findAll(), iterableWithSize(size));
-    assertThat(stockCardRepository.findAll(), iterableWithSize(size));
+  private void assertEventAndCardAndLineItemTableSize(long size) {
+    Iterable<StockCard> allCards = stockCardRepository.findAll();
+    long lineItemsCount = stream(allCards.spliterator(), false)
+            .flatMap(card -> card.getLineItems().stream()).count();
+
+    assertThat(allCards.spliterator().getExactSizeIfKnown(), is(size));
+    assertThat(lineItemsCount, is(size));
+    assertThat(stockEventsRepository.count(), is(size));
   }
 }

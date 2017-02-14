@@ -101,6 +101,7 @@ public class StockCardLineItem extends BaseEntity {
             fromId(eventDto.getSourceId(), Node.class),
             fromId(eventDto.getDestinationId(), Node.class),
             eventDto.getOccurredDate(), eventDto.getNoticedDate(), ZonedDateTime.now(), userId);
+    stockCard.getLineItems().add(lineItem);
     return asList(lineItem);
   }
 

@@ -16,4 +16,16 @@ public class StockCardLineItemDto {
 
   private FacilityDto source;
   private FacilityDto destination;
+
+  /**
+   * Create stock card line item dto from stock card line item.
+   *
+   * @param stockCardLineItem stock card line item.
+   * @return the created stock card line item dto.
+   */
+  public static StockCardLineItemDto createFrom(StockCardLineItem stockCardLineItem) {
+    return StockCardLineItemDto.builder()
+            .lineItem(stockCardLineItem)
+            .build();
+  }
 }

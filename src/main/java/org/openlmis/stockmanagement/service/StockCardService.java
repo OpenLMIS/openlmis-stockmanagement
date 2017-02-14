@@ -1,10 +1,18 @@
 package org.openlmis.stockmanagement.service;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.domain.movement.Node;
+import org.openlmis.stockmanagement.domain.movement.Organization;
+import org.openlmis.stockmanagement.dto.FacilityDto;
+import org.openlmis.stockmanagement.dto.OrderableDto;
+import org.openlmis.stockmanagement.dto.ProgramDto;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
-import org.openlmis.stockmanagement.repository.StockCardLineItemsRepository;
+import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
+import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,10 +25,19 @@ import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createL
 public class StockCardService {
 
   @Autowired
-  private StockCardLineItemsRepository stockCardLineItemsRepository;
+  private StockCardRepository stockCardRepository;
 
   @Autowired
-  private StockCardRepository stockCardRepository;
+  private FacilityReferenceDataService facilityReferenceDataService;
+
+  @Autowired
+  private ProgramReferenceDataService programReferenceDataService;
+
+  @Autowired
+  private OrderableReferenceDataService orderableReferenceDataService;
+
+  @Autowired
+  private OrganizationRepository organizationRepository;
 
   /**
    * Generate stock card line items and stock cards based on event, and persist them.
@@ -36,9 +53,51 @@ public class StockCardService {
 
     StockCard stockCard = findExistingOrCreateNewCard(stockEventDto, savedEventId);
 
-    createLineItemsFrom(stockEventDto, stockCard, currentUserId).forEach(lineItem -> {
-      stockCardLineItemsRepository.save(lineItem);
+    createLineItemsFrom(stockEventDto, stockCard, currentUserId);
+    stockCardRepository.save(stockCard);
+  }
+
+  /**
+   * Find stock card by stock card id.
+   *
+   * @param stockCardId stock card id.
+   * @return the found stock card.
+   */
+  public StockCardDto findStockCardById(UUID stockCardId) {
+    StockCardDto stockCardDto = createStockCardDto(stockCardId);
+    assignSourceDestinationForLineItems(stockCardDto);
+    return stockCardDto;
+  }
+
+  private StockCardDto createStockCardDto(UUID stockCardId) {
+    StockCard stockCard = stockCardRepository.findOne(stockCardId);
+
+    FacilityDto facility = facilityReferenceDataService.findOne(stockCard.getFacilityId());
+    ProgramDto program = programReferenceDataService.findOne(stockCard.getProgramId());
+    OrderableDto orderable = orderableReferenceDataService.findOne(stockCard.getOrderableId());
+
+    return StockCardDto.createFrom(stockCard, facility, program, orderable);
+  }
+
+  private void assignSourceDestinationForLineItems(StockCardDto stockCardDto) {
+    stockCardDto.getLineItems().forEach(lineItemDto -> {
+      FacilityDto source =
+              getFromRefDataOrConvertOrg(lineItemDto.getLineItem().getSource());
+      FacilityDto destination =
+              getFromRefDataOrConvertOrg(lineItemDto.getLineItem().getDestination());
+
+      lineItemDto.setSource(source);
+      lineItemDto.setDestination(destination);
     });
+  }
+
+  private FacilityDto getFromRefDataOrConvertOrg(Node node) {
+    if (node.isRefDataFacility()) {
+      return facilityReferenceDataService.findOne(node.getReferenceId());
+    } else {
+      Organization organization = organizationRepository.findOne(node.getReferenceId());
+      return FacilityDto.createFrom(organization);
+    }
   }
 
   private StockCard findExistingOrCreateNewCard(StockEventDto stockEventDto, UUID savedEventId)
@@ -52,11 +111,7 @@ public class StockCardService {
     if (foundCard != null) {
       return foundCard;
     } else {
-      return stockCardRepository.save(createStockCardFrom(stockEventDto, savedEventId));
+      return createStockCardFrom(stockEventDto, savedEventId);
     }
-  }
-
-  public StockCardDto findStockCardById(UUID stockCardId) {
-    return null;
   }
 }

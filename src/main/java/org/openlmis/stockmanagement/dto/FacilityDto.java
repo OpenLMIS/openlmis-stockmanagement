@@ -1,16 +1,19 @@
 package org.openlmis.stockmanagement.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.openlmis.stockmanagement.domain.movement.Organization;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-@Getter
-@Setter
+@Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class FacilityDto {
   private UUID id;
   private String code;
@@ -25,4 +28,16 @@ public class FacilityDto {
   private List<SupportedProgramDto> supportedPrograms;
   private GeographicZoneDto geographicZone;
   private FacilityTypeDto type;
+
+  /**
+   * Create facility dto from organization.
+   *
+   * @param organization organization.
+   * @return facility dto.
+   */
+  public static FacilityDto createFrom(Organization organization) {
+    return FacilityDto.builder()
+            .name(organization.getName())
+            .build();
+  }
 }

@@ -25,7 +25,7 @@ public class StockEventDtoBuilder {
     stockEventDto.setReasonId(UUID.fromString("d3fc3cf3-da18-44b0-a220-77c985202e06"));
 
     stockEventDto.setSourceId(UUID.fromString("0bd28568-43f1-4836-934d-ec5fb11398e8"));
-    stockEventDto.setDestinationId(UUID.fromString("e89eaf68-50c1-47f2-b83a-5b51ffa2206e"));
+    stockEventDto.setDestinationId(UUID.fromString("087e81f6-a74d-4bba-9d01-16e0d64e9609"));
 
     stockEventDto.setProgramId(UUID.randomUUID());
     stockEventDto.setFacilityId(UUID.randomUUID());

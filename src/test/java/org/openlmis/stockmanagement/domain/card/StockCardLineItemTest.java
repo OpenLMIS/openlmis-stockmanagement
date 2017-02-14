@@ -5,6 +5,7 @@ import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,15 +20,15 @@ public class StockCardLineItemTest {
   @Test
   public void should_create_line_item_from_stock_event() throws Exception {
     //given
-    StockEventDto eventDto = createStockEventDto();
-
     StockEvent event = new StockEvent();
     event.setId(UUID.randomUUID());
 
     StockCard stockCard = new StockCard();
     stockCard.setOriginEvent(event);
+    stockCard.setLineItems(new ArrayList<>());
 
     //when
+    StockEventDto eventDto = createStockEventDto();
     UUID userId = UUID.randomUUID();
     List<StockCardLineItem> lineItems = createLineItemsFrom(eventDto, stockCard, userId);
     StockCardLineItem lineItem = lineItems.get(0);
