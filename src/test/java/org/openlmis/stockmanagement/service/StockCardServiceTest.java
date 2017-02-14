@@ -18,11 +18,14 @@ import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
+import org.openlmis.stockmanagement.testutils.DatesUtil;
+import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,6 +33,9 @@ import static java.util.UUID.fromString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.testutils.DatesUtil.oneDayLater;
+import static org.openlmis.stockmanagement.testutils.DatesUtil.oneHourEarlier;
+import static org.openlmis.stockmanagement.testutils.DatesUtil.oneHourLater;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
 
 @RunWith(SpringRunner.class)
@@ -66,7 +72,7 @@ public class StockCardServiceTest extends BaseTest {
     //given
     UUID userId = UUID.randomUUID();
     StockEventDto stockEventDto = createStockEventDto();
-    StockEvent savedEvent = stockEventsRepository.save(stockEventDto.toEvent(userId));
+    StockEvent savedEvent = save(stockEventDto, userId);
 
     //when
     stockCardService.saveFromEvent(stockEventDto, savedEvent.getId(), userId);
@@ -91,10 +97,7 @@ public class StockCardServiceTest extends BaseTest {
     //given
     //1. there is an existing event that caused a stock card to exist
     StockEventDto existingEventDto = createStockEventDto();
-    StockEvent existingEvent = stockEventsRepository
-            .save(existingEventDto.toEvent(UUID.randomUUID()));
-    final StockCard existingCard = stockCardRepository
-            .save(StockCard.createStockCardFrom(existingEventDto, existingEvent.getId()));
+    StockEvent existingEvent = save(existingEventDto, UUID.randomUUID());
 
     //2. and there is a new event coming
     UUID userId = UUID.randomUUID();
@@ -102,11 +105,10 @@ public class StockCardServiceTest extends BaseTest {
     newEventDto.setProgramId(existingEventDto.getProgramId());
     newEventDto.setFacilityId(existingEventDto.getFacilityId());
     newEventDto.setOrderableId(existingEventDto.getOrderableId());
-    StockEvent savedNewEvent = stockEventsRepository.save(newEventDto.toEvent(userId));
 
     //when
     long cardAmountBeforeSave = stockCardRepository.count();
-    stockCardService.saveFromEvent(newEventDto, savedNewEvent.getId(), userId);
+    StockEvent savedNewEvent = save(newEventDto, userId);
     long cardAmountAfterSave = stockCardRepository.count();
 
     //then
@@ -115,8 +117,9 @@ public class StockCardServiceTest extends BaseTest {
     StockCardLineItem latestLineItem = lineItems.get(lineItems.size() - 1);
 
     assertThat(cardAmountAfterSave, is(cardAmountBeforeSave));
+    assertThat(latestLineItem.getOriginEvent().getId(), is(savedNewEvent.getId()));
+    assertThat(latestLineItem.getStockCard().getId(), is(savedCard.getId()));
     assertThat(latestLineItem.getUserId(), is(userId));
-    assertThat(latestLineItem.getStockCard().getId(), is(existingCard.getId()));
   }
 
   @Test
@@ -143,12 +146,11 @@ public class StockCardServiceTest extends BaseTest {
             .thenReturn(orderableDto);
 
     //2. there is an existing stock card with line items
-    StockEvent savedEvent = stockEventsRepository.save(stockEventDto.toEvent(userId));
-    stockCardService.saveFromEvent(stockEventDto, savedEvent.getId(), userId);
-    UUID savedCardId = stockCardRepository.findByOriginEvent(savedEvent).getId();
+    StockEvent savedEvent = save(stockEventDto, userId);
 
     //when
-    StockCardDto foundCardDto = stockCardService.findStockCardById(savedCardId);
+    StockCard savedCard = stockCardRepository.findByOriginEvent(savedEvent);
+    StockCardDto foundCardDto = stockCardService.findStockCardById(savedCard.getId());
 
     //then
     assertThat(foundCardDto.getFacility(), is(cardFacility));
@@ -158,5 +160,50 @@ public class StockCardServiceTest extends BaseTest {
     StockCardLineItemDto lineItemDto = foundCardDto.getLineItems().get(0);
     assertThat(lineItemDto.getSource(), is(sourceFacility));
     assertThat(lineItemDto.getDestination().getName(), is("NGO"));
+  }
+
+  @Test
+  public void should_order_line_items_by_occurred_then_noticed() throws Exception {
+    //given
+    ZonedDateTime baseDate = DatesUtil.getBaseDateTime();
+    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+
+    //save 1 event
+    stockEventDto.setOccurredDate(baseDate);
+    stockEventDto.setNoticedDate(oneDayLater(baseDate));
+    final StockEvent event1 = save(stockEventDto, UUID.randomUUID());
+
+    //save 2 event
+    stockEventDto.setOccurredDate(baseDate);
+    stockEventDto.setNoticedDate(oneHourLater(baseDate));
+    final StockEvent event2 = save(stockEventDto, UUID.randomUUID());
+
+    //save 3 event
+    stockEventDto.setOccurredDate(oneHourEarlier(baseDate));
+    stockEventDto.setNoticedDate(oneHourEarlier(baseDate));
+    final StockEvent event3 = save(stockEventDto, UUID.randomUUID());
+
+    //when
+    UUID cardId = stockCardRepository.findByOriginEvent(event1).getId();
+    StockCardDto card = stockCardService.findStockCardById(cardId);
+
+    //then
+    assertThat(card.getLineItems().size(), is(3));
+
+    assertThat(getEventIdOfNthLineItem(card, 1), is(event3.getId()));
+    assertThat(getEventIdOfNthLineItem(card, 2), is(event2.getId()));
+    assertThat(getEventIdOfNthLineItem(card, 3), is(event1.getId()));
+  }
+
+  private StockEvent save(StockEventDto eventDto, UUID userId)
+          throws InstantiationException, IllegalAccessException {
+    StockEvent savedEvent = stockEventsRepository
+            .save(eventDto.toEvent(UUID.randomUUID()));
+    stockCardService.saveFromEvent(eventDto, savedEvent.getId(), userId);
+    return savedEvent;
+  }
+
+  private UUID getEventIdOfNthLineItem(StockCardDto card, int nth) {
+    return card.getLineItems().get(nth - 1).getLineItem().getOriginEvent().getId();
   }
 }

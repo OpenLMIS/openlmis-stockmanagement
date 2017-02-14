@@ -82,18 +82,19 @@ public class StockCardLineItem extends BaseEntity {
   /**
    * Create line item from eventDto.
    *
-   * @param eventDto  stock eventDto.
-   * @param stockCard the card that this line item belongs to.
-   * @param userId    user who performed the operation.  @return created line item.
+   * @param eventDto     stock eventDto.
+   * @param stockCard    the card that this line item belongs to.
+   * @param savedEventId saved event id.
+   * @param userId       user who performed the operation.  @return created line item.
    * @throws InstantiationException InstantiationException.
    * @throws IllegalAccessException IllegalAccessException.
    */
   public static List<StockCardLineItem> createLineItemsFrom(
-          StockEventDto eventDto, StockCard stockCard, UUID userId)
+          StockEventDto eventDto, StockCard stockCard, UUID savedEventId, UUID userId)
           throws InstantiationException, IllegalAccessException {
     StockCardLineItem lineItem = new StockCardLineItem(
             stockCard,
-            stockCard.getOriginEvent(),
+            fromId(savedEventId, StockEvent.class),
             eventDto.getQuantity(),
             fromId(eventDto.getReasonId(), StockCardLineItemReason.class),
             eventDto.getSourceFreeText(), eventDto.getDestinationFreeText(),

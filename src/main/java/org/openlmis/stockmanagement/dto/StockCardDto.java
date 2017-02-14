@@ -4,8 +4,10 @@ import lombok.Builder;
 import lombok.Data;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 
+import java.util.Comparator;
 import java.util.List;
 
+import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 
 @Builder
@@ -37,5 +39,17 @@ public class StockCardDto {
             .program(programDto)
             .orderable(orderableDto)
             .build();
+  }
+
+  /**
+   * Reorder line items by occurred date then by noticed date.
+   */
+  public void reorderLineItemsByDates() {
+    Comparator<StockCardLineItemDto> byOccurred =
+            comparing(item -> item.getLineItem().getOccurredDate());
+    Comparator<StockCardLineItemDto> byNoticed =
+            comparing(item -> item.getLineItem().getNoticedDate());
+
+    setLineItems(lineItems.stream().sorted(byOccurred.thenComparing(byNoticed)).collect(toList()));
   }
 }

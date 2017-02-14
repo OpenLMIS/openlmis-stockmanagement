@@ -30,7 +30,8 @@ public class StockCardLineItemTest {
     //when
     StockEventDto eventDto = createStockEventDto();
     UUID userId = UUID.randomUUID();
-    List<StockCardLineItem> lineItems = createLineItemsFrom(eventDto, stockCard, userId);
+    List<StockCardLineItem> lineItems =
+            createLineItemsFrom(eventDto, stockCard, event.getId(), userId);
     StockCardLineItem lineItem = lineItems.get(0);
 
     //then
@@ -50,10 +51,9 @@ public class StockCardLineItemTest {
     assertThat(lineItem.getNoticedDate(), is(eventDto.getNoticedDate()));
 
     assertThat(lineItem.getStockCard(), is(stockCard));
-    assertThat(lineItem.getOriginEvent(), is(stockCard.getOriginEvent()));
+    assertThat(lineItem.getOriginEvent().getId(), is(event.getId()));
 
     assertThat(lineItem.getUserId(), is(userId));
-
 
     ZonedDateTime savedDate = lineItem.getSavedDate();
     long between = SECONDS.between(savedDate, ZonedDateTime.now());

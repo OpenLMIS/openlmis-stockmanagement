@@ -53,7 +53,7 @@ public class StockCardService {
 
     StockCard stockCard = findExistingOrCreateNewCard(stockEventDto, savedEventId);
 
-    createLineItemsFrom(stockEventDto, stockCard, currentUserId);
+    createLineItemsFrom(stockEventDto, stockCard, savedEventId, currentUserId);
     stockCardRepository.save(stockCard);
   }
 
@@ -66,6 +66,7 @@ public class StockCardService {
   public StockCardDto findStockCardById(UUID stockCardId) {
     StockCardDto stockCardDto = createStockCardDto(stockCardId);
     assignSourceDestinationForLineItems(stockCardDto);
+    stockCardDto.reorderLineItemsByDates();
     return stockCardDto;
   }
 
