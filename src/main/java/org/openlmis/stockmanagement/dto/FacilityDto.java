@@ -1,5 +1,6 @@
 package org.openlmis.stockmanagement.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,10 +11,13 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(NON_NULL)
 public class FacilityDto {
   private UUID id;
   private String code;
@@ -37,7 +41,7 @@ public class FacilityDto {
    */
   public static FacilityDto createFrom(Organization organization) {
     return FacilityDto.builder()
-            .name(organization.getName())
-            .build();
+        .name(organization.getName())
+        .build();
   }
 }
