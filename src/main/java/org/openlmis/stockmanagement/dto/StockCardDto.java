@@ -58,9 +58,9 @@ public class StockCardDto {
    */
   public void calculateStockOnHand() {
     int previousSoh = 0;
-    for (StockCardLineItemDto lineItem : getLineItems()) {
-      lineItem.calculateStockOnHand(previousSoh);
-      previousSoh = lineItem.getStockOnHand();
+    for (StockCardLineItemDto lineItemDto : getLineItems()) {
+      lineItemDto.calculateStockOnHand(previousSoh);
+      previousSoh = lineItemDto.getStockOnHand();
     }
     StockCardLineItemDto lastLineItem = getLineItems().get(getLineItems().size() - 1);
     setStockOnHand(lastLineItem.getStockOnHand());

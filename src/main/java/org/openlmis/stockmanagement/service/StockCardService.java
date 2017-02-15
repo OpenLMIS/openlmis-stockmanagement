@@ -1,5 +1,7 @@
 package org.openlmis.stockmanagement.service;
 
+import org.openlmis.stockmanagement.domain.adjustment.ReasonType;
+import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.domain.movement.Organization;
@@ -9,6 +11,7 @@ import org.openlmis.stockmanagement.dto.ProgramDto;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
+import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
@@ -18,6 +21,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+import static org.openlmis.stockmanagement.domain.adjustment.ReasonCategory.PHYSICAL_INVENTORY;
+import static org.openlmis.stockmanagement.domain.adjustment.ReasonType.BALANCE_ADJUSTMENT;
+import static org.openlmis.stockmanagement.domain.adjustment.ReasonType.CREDIT;
+import static org.openlmis.stockmanagement.domain.adjustment.ReasonType.DEBIT;
 import static org.openlmis.stockmanagement.domain.card.StockCard.createStockCardFrom;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemsFrom;
 
@@ -39,6 +46,10 @@ public class StockCardService {
   @Autowired
   private OrganizationRepository organizationRepository;
 
+  @Autowired
+  private StockCardLineItemReasonRepository reasonRepository;
+
+
   /**
    * Generate stock card line items and stock cards based on event, and persist them.
    *
@@ -53,7 +64,11 @@ public class StockCardService {
 
     StockCard stockCard = findExistingOrCreateNewCard(stockEventDto, savedEventId);
 
-    createLineItemsFrom(stockEventDto, stockCard, savedEventId, currentUserId);
+    createLineItemsFrom(stockEventDto, stockCard, savedEventId, currentUserId)
+            .forEach(lineItem -> lineItem.tryAssignReasonForPhysicalInventory(
+                    getPhysicalReason(CREDIT),
+                    getPhysicalReason(DEBIT),
+                    getPhysicalReason(BALANCE_ADJUSTMENT)));
     stockCardRepository.save(stockCard);
   }
 
@@ -122,5 +137,10 @@ public class StockCardService {
     } else {
       return createStockCardFrom(stockEventDto, savedEventId);
     }
+  }
+
+  private StockCardLineItemReason getPhysicalReason(ReasonType reasonType) {
+    return reasonRepository
+            .findByReasonTypeAndReasonCategory(reasonType, PHYSICAL_INVENTORY);
   }
 }

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
+import static java.lang.Math.abs;
 import static java.util.Arrays.asList;
 
 @Entity
@@ -123,6 +124,41 @@ public class StockCardLineItem extends BaseEntity {
     }
   }
 
+  /**
+   * Assigns reason and quantity if this line item is physical inventory.
+   * If not, nothing will be changed.
+   *
+   * @param physicalCredit  credit.
+   * @param physicalDebit   debit.
+   * @param physicalBalance balance.
+   */
+  public void tryAssignReasonForPhysicalInventory(StockCardLineItemReason physicalCredit,
+                                                  StockCardLineItemReason physicalDebit,
+                                                  StockCardLineItemReason physicalBalance) {
+    if (isPhysicalInventory()) {
+      Integer currentSoh = stockCard.calculateStockOnHand();
+      StockCardLineItemReason reason = determineReasonByQuantity(currentSoh,
+              physicalCredit, physicalDebit, physicalBalance);
+
+      setReason(reason);
+      setQuantity(abs(currentSoh - getQuantity()));
+    }
+  }
+
+  private StockCardLineItemReason determineReasonByQuantity(
+          Integer currentSoh,
+          StockCardLineItemReason physicalCredit,
+          StockCardLineItemReason physicalDebit,
+          StockCardLineItemReason physicalBalance) {
+    if (getQuantity() > currentSoh) {
+      return physicalCredit;
+    } else if (getQuantity() < currentSoh) {
+      return physicalDebit;
+    } else {
+      return physicalBalance;
+    }
+  }
+
   private boolean shouldDecrease() {
     boolean hasDestination = destination != null;
     boolean isDebit = reason != null && reason.getReasonType() == ReasonType.DEBIT;
@@ -133,5 +169,9 @@ public class StockCardLineItem extends BaseEntity {
     boolean hasSource = source != null;
     boolean isCredit = reason != null && reason.getReasonType() == ReasonType.CREDIT;
     return hasSource || isCredit;
+  }
+
+  private boolean isPhysicalInventory() {
+    return source == null && destination == null && reason == null;
   }
 }
