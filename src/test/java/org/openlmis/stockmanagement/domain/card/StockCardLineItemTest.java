@@ -16,17 +16,10 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemsFrom;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
 
 public class StockCardLineItemTest {
-
-  private StockCardLineItemReason physicalCredit = new StockCardLineItemReason();
-  private StockCardLineItemReason physicalDebit = new StockCardLineItemReason();
-  private StockCardLineItemReason physicalBalance = new StockCardLineItemReason();
-
   @Test
   public void should_create_line_item_from_stock_event() throws Exception {
     //given
@@ -143,84 +136,5 @@ public class StockCardLineItemTest {
 
     //then
     assertThat(soh, is(0));
-  }
-
-  @Test
-  public void should_assign_credit_reason_and_recalculate_quantity_for_physical_check_overstock()
-          throws Exception {
-    //given
-    StockCard mockedCard = mock(StockCard.class);
-    when(mockedCard.calculateStockOnHand()).thenReturn(123);
-
-    StockCardLineItem lineItem = StockCardLineItem.builder()
-            .stockCard(mockedCard)
-            .quantity(124)
-            .build();
-
-    //when
-    lineItem.tryAssignReasonForPhysicalInventory(physicalCredit, physicalDebit, physicalBalance);
-
-    //then
-    assertThat(lineItem.getQuantity(), is(1));
-    assertThat(lineItem.getReason(), is(physicalCredit));
-  }
-
-  @Test
-  public void should_assign_debit_reason_and_recalculate_quantity_for_physical_check_under_stock()
-          throws Exception {
-    //given
-    StockCard mockedCard = mock(StockCard.class);
-    when(mockedCard.calculateStockOnHand()).thenReturn(125);
-
-    StockCardLineItem lineItem = StockCardLineItem.builder()
-            .stockCard(mockedCard)
-            .quantity(124)
-            .build();
-
-    //when
-    lineItem.tryAssignReasonForPhysicalInventory(physicalCredit, physicalDebit, physicalBalance);
-
-    //then
-    assertThat(lineItem.getQuantity(), is(1));
-    assertThat(lineItem.getReason(), is(physicalDebit));
-  }
-
-  @Test
-  public void should_assign_balance_reason_and_recalculate_quantity_for_physical_check_balance()
-          throws Exception {
-    //given
-    StockCard mockedCard = mock(StockCard.class);
-    when(mockedCard.calculateStockOnHand()).thenReturn(125);
-
-    StockCardLineItem lineItem = StockCardLineItem.builder()
-            .stockCard(mockedCard)
-            .quantity(125)
-            .build();
-
-    //when
-    lineItem.tryAssignReasonForPhysicalInventory(physicalCredit, physicalDebit, physicalBalance);
-
-    //then
-    assertThat(lineItem.getQuantity(), is(0));
-    assertThat(lineItem.getReason(), is(physicalBalance));
-  }
-
-  @Test
-  public void should_not_assign_anything_if_line_item_is_not_physical_inventory()
-          throws Exception {
-    //given
-    StockCardLineItemReason reason = new StockCardLineItemReason();
-    StockCardLineItem lineItem = StockCardLineItem.builder()
-            .source(new Node())
-            .reason(reason)
-            .quantity(125)
-            .build();
-
-    //when
-    lineItem.tryAssignReasonForPhysicalInventory(physicalCredit, physicalDebit, physicalBalance);
-
-    //then
-    assertThat(lineItem.getQuantity(), is(125));
-    assertThat(lineItem.getReason(), is(reason));
   }
 }

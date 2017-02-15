@@ -27,8 +27,6 @@ import static org.hibernate.annotations.LazyCollectionOption.FALSE;
 @NoArgsConstructor
 @Table(name = "stock_cards", schema = "stockmanagement")
 public class StockCard extends BaseEntity {
-  private static final int ZERO = 0;
-
   @ManyToOne()
   @JoinColumn(nullable = false)
   private StockEvent originEvent;
@@ -58,21 +56,5 @@ public class StockCard extends BaseEntity {
     return new StockCard(fromId(savedEventId, StockEvent.class),
             stockEventDto.getFacilityId(), stockEventDto.getProgramId(),
             stockEventDto.getOrderableId(), new ArrayList<>());
-  }
-
-  /**
-   * Calculate stock on hand based on line items.
-   *
-   * @return calculated soh.
-   */
-  public Integer calculateStockOnHand() {
-    if (getLineItems().isEmpty()) {
-      return ZERO;
-    }
-    int stockOnHand = ZERO;
-    for (StockCardLineItem lineItem : getLineItems()) {
-      stockOnHand = lineItem.calculateStockOnHand(stockOnHand);
-    }
-    return stockOnHand;
   }
 }

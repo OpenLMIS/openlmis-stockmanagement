@@ -4,7 +4,6 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.BaseTest;
-import org.openlmis.stockmanagement.domain.adjustment.ReasonType;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
@@ -122,26 +121,6 @@ public class StockCardServiceTest extends BaseTest {
     assertThat(latestLineItem.getOriginEvent().getId(), is(savedNewEvent.getId()));
     assertThat(latestLineItem.getStockCard().getId(), is(savedCard.getId()));
     assertThat(latestLineItem.getUserId(), is(userId));
-  }
-
-
-  @Test
-  public void should_save_stock_line_item_with_recalculated_quantity_for_physical_inventory()
-          throws Exception {
-    //given: an event with quantity, but no from, no to, no reason
-    StockEventDto stockEventDto = createStockEventDto();
-    stockEventDto.setSourceId(null);
-    stockEventDto.setDestinationId(null);
-    stockEventDto.setReasonId(null);
-
-    //when
-    StockEvent savedEvent = save(stockEventDto, UUID.randomUUID());
-
-    //then
-    StockCardLineItem lineItem = stockCardRepository.findByOriginEvent(savedEvent)
-            .getLineItems().get(0);
-    assertThat(lineItem.getQuantity(), is(1));
-    assertThat(lineItem.getReason().getReasonType(), is(ReasonType.CREDIT));
   }
 
   @Test
