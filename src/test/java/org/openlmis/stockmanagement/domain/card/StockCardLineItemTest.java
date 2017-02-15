@@ -1,6 +1,7 @@
 package org.openlmis.stockmanagement.domain.card;
 
 import org.junit.Test;
+import org.openlmis.stockmanagement.domain.adjustment.ReasonCategory;
 import org.openlmis.stockmanagement.domain.adjustment.ReasonType;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
@@ -20,6 +21,7 @@ import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createL
 import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
 
 public class StockCardLineItemTest {
+
   @Test
   public void should_create_line_item_from_stock_event() throws Exception {
     //given
@@ -97,22 +99,6 @@ public class StockCardLineItemTest {
   }
 
   @Test
-  public void should_take_previous_soh_when_reason_is_balance_adjustment() throws Exception {
-    //given
-    StockCardLineItemReason balanceAdjustmentReason = StockCardLineItemReason.builder()
-            .reasonType(ReasonType.BALANCE_ADJUSTMENT).build();
-
-    StockCardLineItem lineItem = StockCardLineItem.builder()
-            .reason(balanceAdjustmentReason)
-            .quantity(15).build();
-    //when
-    int soh = lineItem.calculateStockOnHand(15);
-
-    //then
-    assertThat(soh, is(15));
-  }
-
-  @Test
   public void should_increase_soh_of_line_item_when_receive_from() throws Exception {
     //given
     StockCardLineItem lineItem = StockCardLineItem.builder()
@@ -136,5 +122,53 @@ public class StockCardLineItemTest {
 
     //then
     assertThat(soh, is(0));
+  }
+
+  @Test
+  public void should_assign_credit_reason_and_return_quantity_as_soh_for_physical_overstock()
+          throws Exception {
+    //given
+    StockCardLineItem lineItem = StockCardLineItem.builder()
+            .quantity(15).build();
+
+    //when
+    int soh = lineItem.calculateStockOnHand(10);
+
+    //then
+    assertThat(soh, is(15));
+    assertThat(lineItem.getReason().getReasonType(), is(ReasonType.CREDIT));
+    assertThat(lineItem.getReason().getReasonCategory(), is(ReasonCategory.PHYSICAL_INVENTORY));
+  }
+
+  @Test
+  public void should_assign_debit_reason_and_return_quantity_as_soh_for_physical_understock()
+          throws Exception {
+    //given
+    StockCardLineItem lineItem = StockCardLineItem.builder()
+            .quantity(15).build();
+
+    //when
+    int soh = lineItem.calculateStockOnHand(20);
+
+    //then
+    assertThat(soh, is(15));
+    assertThat(lineItem.getReason().getReasonType(), is(ReasonType.DEBIT));
+    assertThat(lineItem.getReason().getReasonCategory(), is(ReasonCategory.PHYSICAL_INVENTORY));
+  }
+
+  @Test
+  public void should_assign_balance_reason_and_return_quantity_as_soh_for_physical_balance()
+          throws Exception {
+    //given
+    StockCardLineItem lineItem = StockCardLineItem.builder()
+            .quantity(15).build();
+
+    //when
+    int soh = lineItem.calculateStockOnHand(15);
+
+    //then
+    assertThat(soh, is(15));
+    assertThat(lineItem.getReason().getReasonType(), is(ReasonType.BALANCE_ADJUSTMENT));
+    assertThat(lineItem.getReason().getReasonCategory(), is(ReasonCategory.PHYSICAL_INVENTORY));
   }
 }

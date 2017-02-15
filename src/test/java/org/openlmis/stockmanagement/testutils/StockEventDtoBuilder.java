@@ -22,7 +22,7 @@ public class StockEventDtoBuilder {
     stockEventDto.setSignature("e");
 
     stockEventDto.setQuantity(1);
-    stockEventDto.setReasonId(UUID.fromString("d3fc3cf3-da18-44b0-a220-77c985202e06"));
+    stockEventDto.setReasonId(UUID.fromString("e3fc3cf3-da18-44b0-a220-77c985202e06"));
 
     stockEventDto.setSourceId(UUID.fromString("0bd28568-43f1-4836-934d-ec5fb11398e8"));
     stockEventDto.setDestinationId(UUID.fromString("087e81f6-a74d-4bba-9d01-16e0d64e9609"));

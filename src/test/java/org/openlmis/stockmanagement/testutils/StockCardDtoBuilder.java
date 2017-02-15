@@ -37,6 +37,7 @@ public class StockCardDtoBuilder {
     StockCardLineItemDto lineItemDto = StockCardLineItemDto
             .builder()
             .stockOnHand(1)
+            .quantity(1)
             .lineItem(lineItem)
             .source(FacilityDto.builder().name("HF1").build())
             .build();

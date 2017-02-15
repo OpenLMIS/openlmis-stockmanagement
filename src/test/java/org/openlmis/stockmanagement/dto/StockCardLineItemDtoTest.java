@@ -26,4 +26,22 @@ public class StockCardLineItemDtoTest {
     //then
     assertThat(stockCardLineItemDto.getStockOnHand(), is(200));
   }
+
+  @Test
+  public void should_assign_quantity_by_line_item_quantity_and_soh_delta() throws Exception {
+    //given
+    StockCardLineItem mockedLineItem = mock(StockCardLineItem.class);
+    when(mockedLineItem.calculateStockOnHand(100)).thenReturn(200);
+    when(mockedLineItem.getQuantity()).thenReturn(150);
+
+    StockCardLineItemDto stockCardLineItemDto = StockCardLineItemDto.builder()
+            .lineItem(mockedLineItem)
+            .build();
+
+    //when
+    stockCardLineItemDto.calculateStockOnHand(100);
+
+    //then
+    assertThat(stockCardLineItemDto.getQuantity(), is(50));
+  }
 }

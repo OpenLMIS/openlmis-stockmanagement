@@ -24,6 +24,9 @@ import java.util.UUID;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static java.util.Arrays.asList;
+import static org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason.physicalBalance;
+import static org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason.physicalCredit;
+import static org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason.physicalDebit;
 
 @Entity
 @Data
@@ -34,7 +37,7 @@ import static java.util.Arrays.asList;
         "stockCard", "originEvent",
         "source", "destination",
         "noticedDate", "savedDate",
-        "userId"})
+        "userId", "quantity"})
 @Table(name = "stock_card_line_items", schema = "stockmanagement")
 public class StockCardLineItem extends BaseEntity {
 
@@ -114,13 +117,28 @@ public class StockCardLineItem extends BaseEntity {
    * @return calculated stock on hand.
    */
   public int calculateStockOnHand(int previousStockOnHand) {
-    if (shouldIncrease()) {
+    if (isPhysicalInventory()) {
+      setReason(determineReasonByQuantity(previousStockOnHand));
+      return quantity;
+    } else if (shouldIncrease()) {
       return previousStockOnHand + quantity;
-    } else if (shouldDecrease()) {
-      return previousStockOnHand - quantity;
     } else {
-      return previousStockOnHand;
+      return previousStockOnHand - quantity;
     }
+  }
+
+  private StockCardLineItemReason determineReasonByQuantity(int previousStockOnHand) {
+    if (quantity > previousStockOnHand) {
+      return physicalCredit();
+    } else if (quantity < previousStockOnHand) {
+      return physicalDebit();
+    } else {
+      return physicalBalance();
+    }
+  }
+
+  private boolean isPhysicalInventory() {
+    return source == null && destination == null && reason == null;
   }
 
   private boolean shouldDecrease() {
