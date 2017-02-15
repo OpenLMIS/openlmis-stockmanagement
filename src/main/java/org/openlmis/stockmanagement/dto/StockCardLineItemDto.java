@@ -28,4 +28,13 @@ public class StockCardLineItemDto {
             .lineItem(stockCardLineItem)
             .build();
   }
+
+  /**
+   * Calculate soh based previous soh.
+   *
+   * @param previousStockOnHand the previous soh.
+   */
+  public void calculateStockOnHand(int previousStockOnHand) {
+    setStockOnHand(lineItem.calculateStockOnHand(previousStockOnHand));
+  }
 }

@@ -67,6 +67,7 @@ public class StockCardService {
     StockCardDto stockCardDto = createStockCardDto(stockCardId);
     assignSourceDestinationForLineItems(stockCardDto);
     stockCardDto.reorderLineItemsByDates();
+    stockCardDto.calculateStockOnHand();
     return stockCardDto;
   }
 
@@ -93,6 +94,10 @@ public class StockCardService {
   }
 
   private FacilityDto getFromRefDataOrConvertOrg(Node node) {
+    if (node == null) {
+      return null;
+    }
+
     if (node.isRefDataFacility()) {
       return facilityReferenceDataService.findOne(node.getReferenceId());
     } else {

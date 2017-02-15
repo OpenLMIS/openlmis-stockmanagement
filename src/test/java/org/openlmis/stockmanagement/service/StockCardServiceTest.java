@@ -195,6 +195,22 @@ public class StockCardServiceTest extends BaseTest {
     assertThat(getEventIdOfNthLineItem(card, 3), is(event1.getId()));
   }
 
+  @Test
+  public void should_get_stock_card_with_calculated_soh_when_find_stock_card() throws Exception {
+    //given
+    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    stockEventDto.setSourceId(null);
+    stockEventDto.setDestinationId(null);
+    StockEvent savedEvent = save(stockEventDto, UUID.randomUUID());
+
+    //when
+    UUID cardId = stockCardRepository.findByOriginEvent(savedEvent).getId();
+    StockCardDto card = stockCardService.findStockCardById(cardId);
+
+    //then
+    assertThat(card.getStockOnHand(), is(stockEventDto.getQuantity()));
+  }
+
   private StockEvent save(StockEventDto eventDto, UUID userId)
           throws InstantiationException, IllegalAccessException {
     StockEvent savedEvent = stockEventsRepository

@@ -52,4 +52,17 @@ public class StockCardDto {
 
     setLineItems(lineItems.stream().sorted(byOccurred.thenComparing(byNoticed)).collect(toList()));
   }
+
+  /**
+   * Calculate stock on hand for each line item and the card itself.
+   */
+  public void calculateStockOnHand() {
+    int previousSoh = 0;
+    for (StockCardLineItemDto lineItem : getLineItems()) {
+      lineItem.calculateStockOnHand(previousSoh);
+      previousSoh = lineItem.getStockOnHand();
+    }
+    StockCardLineItemDto lastLineItem = getLineItems().get(getLineItems().size() - 1);
+    setStockOnHand(lastLineItem.getStockOnHand());
+  }
 }
