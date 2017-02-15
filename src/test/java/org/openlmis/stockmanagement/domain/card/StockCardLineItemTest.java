@@ -1,7 +1,10 @@
 package org.openlmis.stockmanagement.domain.card;
 
 import org.junit.Test;
+import org.openlmis.stockmanagement.domain.adjustment.ReasonType;
+import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 
 import java.time.ZonedDateTime;
@@ -59,5 +62,79 @@ public class StockCardLineItemTest {
     long between = SECONDS.between(savedDate, ZonedDateTime.now());
 
     assertThat(between, lessThan(2L));
+  }
+
+  @Test
+  public void should_increase_soh_of_line_item_with_credit_reason() throws Exception {
+    //given
+    StockCardLineItemReason creditReason = StockCardLineItemReason.builder()
+            .reasonType(ReasonType.CREDIT).build();
+
+    StockCardLineItem lineItem = StockCardLineItem.builder()
+            .reason(creditReason)
+            .quantity(10).build();
+    //when
+    int soh = lineItem.calculateStockOnHand(5);
+
+    //then
+    assertThat(soh, is(15));
+  }
+
+  @Test
+  public void should_decrease_soh_of_line_item_with_debit_reason() throws Exception {
+    //given
+    StockCardLineItemReason debitReason = StockCardLineItemReason.builder()
+            .reasonType(ReasonType.DEBIT).build();
+
+    StockCardLineItem lineItem = StockCardLineItem.builder()
+            .reason(debitReason)
+            .quantity(5).build();
+    //when
+    int soh = lineItem.calculateStockOnHand(15);
+
+    //then
+    assertThat(soh, is(10));
+  }
+
+  @Test
+  public void should_take_previous_soh_when_reason_is_balance_adjustment() throws Exception {
+    //given
+    StockCardLineItemReason balanceAdjustmentReason = StockCardLineItemReason.builder()
+            .reasonType(ReasonType.BALANCE_ADJUSTMENT).build();
+
+    StockCardLineItem lineItem = StockCardLineItem.builder()
+            .reason(balanceAdjustmentReason)
+            .quantity(15).build();
+    //when
+    int soh = lineItem.calculateStockOnHand(15);
+
+    //then
+    assertThat(soh, is(15));
+  }
+
+  @Test
+  public void should_increase_soh_of_line_item_when_receive_from() throws Exception {
+    //given
+    StockCardLineItem lineItem = StockCardLineItem.builder()
+            .source(new Node())
+            .quantity(15).build();
+    //when
+    int soh = lineItem.calculateStockOnHand(15);
+
+    //then
+    assertThat(soh, is(30));
+  }
+
+  @Test
+  public void should_decrease_soh_of_line_item_when_issue_to() throws Exception {
+    //given
+    StockCardLineItem lineItem = StockCardLineItem.builder()
+            .destination(new Node())
+            .quantity(15).build();
+    //when
+    int soh = lineItem.calculateStockOnHand(15);
+
+    //then
+    assertThat(soh, is(0));
   }
 }

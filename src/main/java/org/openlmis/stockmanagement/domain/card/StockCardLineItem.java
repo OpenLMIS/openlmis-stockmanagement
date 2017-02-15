@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.openlmis.stockmanagement.domain.BaseEntity;
+import org.openlmis.stockmanagement.domain.adjustment.ReasonType;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.movement.Node;
@@ -106,4 +107,31 @@ public class StockCardLineItem extends BaseEntity {
     return asList(lineItem);
   }
 
+  /**
+   * Calculate stock on hand with previous stock on hand.
+   *
+   * @param previousStockOnHand previous stock on hand.
+   * @return calculated stock on hand.
+   */
+  public int calculateStockOnHand(int previousStockOnHand) {
+    if (shouldIncrease()) {
+      return previousStockOnHand + quantity;
+    } else if (shouldDecrease()) {
+      return previousStockOnHand - quantity;
+    } else {
+      return previousStockOnHand;
+    }
+  }
+
+  private boolean shouldDecrease() {
+    boolean hasDestination = destination != null;
+    boolean isDebit = reason != null && reason.getReasonType() == ReasonType.DEBIT;
+    return hasDestination || isDebit;
+  }
+
+  private boolean shouldIncrease() {
+    boolean hasSource = source != null;
+    boolean isCredit = reason != null && reason.getReasonType() == ReasonType.CREDIT;
+    return hasSource || isCredit;
+  }
 }
