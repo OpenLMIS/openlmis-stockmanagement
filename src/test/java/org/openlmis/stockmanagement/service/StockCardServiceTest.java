@@ -32,6 +32,7 @@ import java.util.UUID;
 import static java.util.UUID.fromString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.DatesUtil.oneDayLater;
 import static org.openlmis.stockmanagement.testutils.DatesUtil.oneHourEarlier;
@@ -209,6 +210,16 @@ public class StockCardServiceTest extends BaseTest {
 
     //then
     assertThat(card.getStockOnHand(), is(stockEventDto.getQuantity()));
+  }
+
+  @Test
+  public void should_return_null_when_can_not_find_stock_card_by_id() throws Exception {
+    //when
+    UUID nonExistingCardId = UUID.randomUUID();
+    StockCardDto cardDto = stockCardService.findStockCardById(nonExistingCardId);
+
+    //then
+    assertNull(cardDto);
   }
 
   private StockEvent save(StockEventDto eventDto, UUID userId)

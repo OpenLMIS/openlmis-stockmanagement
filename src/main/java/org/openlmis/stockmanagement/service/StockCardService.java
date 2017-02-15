@@ -64,16 +64,19 @@ public class StockCardService {
    * @return the found stock card.
    */
   public StockCardDto findStockCardById(UUID stockCardId) {
-    StockCardDto stockCardDto = createStockCardDto(stockCardId);
+    StockCard foundCard = stockCardRepository.findOne(stockCardId);
+    if (foundCard == null) {
+      return null;
+    }
+
+    StockCardDto stockCardDto = createStockCardDto(foundCard);
     assignSourceDestinationForLineItems(stockCardDto);
     stockCardDto.reorderLineItemsByDates();
     stockCardDto.calculateStockOnHand();
     return stockCardDto;
   }
 
-  private StockCardDto createStockCardDto(UUID stockCardId) {
-    StockCard stockCard = stockCardRepository.findOne(stockCardId);
-
+  private StockCardDto createStockCardDto(StockCard stockCard) {
     FacilityDto facility = facilityReferenceDataService.findOne(stockCard.getFacilityId());
     ProgramDto program = programReferenceDataService.findOne(stockCard.getProgramId());
     OrderableDto orderable = orderableReferenceDataService.findOne(stockCard.getOrderableId());
