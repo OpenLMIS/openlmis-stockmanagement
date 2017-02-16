@@ -22,41 +22,24 @@ public class StockCardDto {
   /**
    * Create stock card dto from stock card.
    *
-   * @param stockCard    stock card.
-   * @param facilityDto  facility dto.
-   * @param programDto   program dto.
-   * @param orderableDto orderable dto.
+   * @param stockCard stock card.
    * @return the created stock card dto.
    */
-  public static StockCardDto createFrom(StockCard stockCard, FacilityDto facilityDto,
-                                        ProgramDto programDto, OrderableDto orderableDto) {
+  public static StockCardDto createFrom(StockCard stockCard) {
     List<StockCardLineItemDto> lineItemDtos = stockCard.getLineItems().stream()
             .map(StockCardLineItemDto::createFrom).collect(toList());
 
     return StockCardDto.builder()
             .lineItems(lineItemDtos)
-            .facility(facilityDto)
-            .program(programDto)
-            .orderable(orderableDto)
             .build();
-  }
-
-  /**
-   * Reorder line items by occurred date then by noticed date.
-   */
-  public void reorderLineItemsByDates() {
-    Comparator<StockCardLineItemDto> byOccurred =
-            comparing(item -> item.getLineItem().getOccurredDate());
-    Comparator<StockCardLineItemDto> byNoticed =
-            comparing(item -> item.getLineItem().getNoticedDate());
-
-    setLineItems(lineItems.stream().sorted(byOccurred.thenComparing(byNoticed)).collect(toList()));
   }
 
   /**
    * Calculate stock on hand for each line item and the card itself.
    */
   public void calculateStockOnHand() {
+    reorderLineItemsByDates();
+
     int previousSoh = 0;
     for (StockCardLineItemDto lineItem : getLineItems()) {
       lineItem.calculateStockOnHand(previousSoh);
@@ -64,5 +47,14 @@ public class StockCardDto {
     }
     StockCardLineItemDto lastLineItem = getLineItems().get(getLineItems().size() - 1);
     setStockOnHand(lastLineItem.getStockOnHand());
+  }
+
+  private void reorderLineItemsByDates() {
+    Comparator<StockCardLineItemDto> byOccurred =
+            comparing(item -> item.getLineItem().getOccurredDate());
+    Comparator<StockCardLineItemDto> byNoticed =
+            comparing(item -> item.getLineItem().getNoticedDate());
+
+    setLineItems(lineItems.stream().sorted(byOccurred.thenComparing(byNoticed)).collect(toList()));
   }
 }

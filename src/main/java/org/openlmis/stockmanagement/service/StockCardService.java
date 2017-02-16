@@ -1,11 +1,9 @@
 package org.openlmis.stockmanagement.service;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.movement.Node;
-import org.openlmis.stockmanagement.domain.movement.Organization;
 import org.openlmis.stockmanagement.dto.FacilityDto;
-import org.openlmis.stockmanagement.dto.OrderableDto;
-import org.openlmis.stockmanagement.dto.ProgramDto;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
@@ -28,13 +26,13 @@ public class StockCardService {
   private StockCardRepository stockCardRepository;
 
   @Autowired
-  private FacilityReferenceDataService facilityReferenceDataService;
+  private FacilityReferenceDataService facilityRefDataService;
 
   @Autowired
-  private ProgramReferenceDataService programReferenceDataService;
+  private ProgramReferenceDataService programRefDataService;
 
   @Autowired
-  private OrderableReferenceDataService orderableReferenceDataService;
+  private OrderableReferenceDataService orderableRefDataService;
 
   @Autowired
   private OrganizationRepository organizationRepository;
@@ -73,31 +71,31 @@ public class StockCardService {
     }
 
     permissionService.canViewStockCard(foundCard.getProgramId(), foundCard.getFacilityId());
+    return createStockCardDto(foundCard);
+  }
 
-    StockCardDto stockCardDto = createStockCardDto(foundCard);
+  private StockCardDto createStockCardDto(StockCard foundCard) {
+    StockCardDto stockCardDto = StockCardDto.createFrom(foundCard);
+
+    assignFacilityProgramOrderableForStockCard(foundCard, stockCardDto);
     assignSourceDestinationForLineItems(stockCardDto);
-    stockCardDto.reorderLineItemsByDates();
+
     stockCardDto.calculateStockOnHand();
     return stockCardDto;
   }
 
-  private StockCardDto createStockCardDto(StockCard stockCard) {
-    FacilityDto facility = facilityReferenceDataService.findOne(stockCard.getFacilityId());
-    ProgramDto program = programReferenceDataService.findOne(stockCard.getProgramId());
-    OrderableDto orderable = orderableReferenceDataService.findOne(stockCard.getOrderableId());
-
-    return StockCardDto.createFrom(stockCard, facility, program, orderable);
+  private void assignFacilityProgramOrderableForStockCard(
+          StockCard foundCard, StockCardDto stockCardDto) {
+    stockCardDto.setFacility(facilityRefDataService.findOne(foundCard.getFacilityId()));
+    stockCardDto.setProgram(programRefDataService.findOne(foundCard.getProgramId()));
+    stockCardDto.setOrderable(orderableRefDataService.findOne(foundCard.getOrderableId()));
   }
 
   private void assignSourceDestinationForLineItems(StockCardDto stockCardDto) {
     stockCardDto.getLineItems().forEach(lineItemDto -> {
-      FacilityDto source =
-              getFromRefDataOrConvertOrg(lineItemDto.getLineItem().getSource());
-      FacilityDto destination =
-              getFromRefDataOrConvertOrg(lineItemDto.getLineItem().getDestination());
-
-      lineItemDto.setSource(source);
-      lineItemDto.setDestination(destination);
+      StockCardLineItem lineItem = lineItemDto.getLineItem();
+      lineItemDto.setSource(getFromRefDataOrConvertOrg(lineItem.getSource()));
+      lineItemDto.setDestination(getFromRefDataOrConvertOrg(lineItem.getDestination()));
     });
   }
 
@@ -107,10 +105,9 @@ public class StockCardService {
     }
 
     if (node.isRefDataFacility()) {
-      return facilityReferenceDataService.findOne(node.getReferenceId());
+      return facilityRefDataService.findOne(node.getReferenceId());
     } else {
-      Organization organization = organizationRepository.findOne(node.getReferenceId());
-      return FacilityDto.createFrom(organization);
+      return FacilityDto.createFrom(organizationRepository.findOne(node.getReferenceId()));
     }
   }
 
