@@ -39,6 +39,9 @@ public class StockCardService {
   @Autowired
   private OrganizationRepository organizationRepository;
 
+  @Autowired
+  private PermissionService permissionService;
+
   /**
    * Generate stock card line items and stock cards based on event, and persist them.
    *
@@ -68,6 +71,8 @@ public class StockCardService {
     if (foundCard == null) {
       return null;
     }
+
+    permissionService.canViewStockCard(foundCard.getProgramId(), foundCard.getFacilityId());
 
     StockCardDto stockCardDto = createStockCardDto(foundCard);
     assignSourceDestinationForLineItems(stockCardDto);

@@ -13,6 +13,7 @@ import org.openlmis.stockmanagement.dto.ProgramDto;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockCardLineItemDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
@@ -20,6 +21,7 @@ import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceData
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.openlmis.stockmanagement.testutils.DatesUtil;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
+import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -33,6 +35,7 @@ import static java.util.UUID.fromString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.DatesUtil.oneDayLater;
 import static org.openlmis.stockmanagement.testutils.DatesUtil.oneHourEarlier;
@@ -60,6 +63,9 @@ public class StockCardServiceTest extends BaseTest {
 
   @MockBean
   private OrderableReferenceDataService orderableReferenceDataService;
+
+  @MockBean
+  private PermissionService permissionService;
 
   @After
   public void tearDown() throws Exception {
@@ -220,6 +226,20 @@ public class StockCardServiceTest extends BaseTest {
 
     //then
     assertNull(cardDto);
+  }
+
+  @Test(expected = PermissionMessageException.class)
+  public void should_throw_permission_exception_if_user_has_no_permission_to_view_card()
+          throws Exception {
+    //given
+    StockEvent savedEvent = save(createStockEventDto(), UUID.randomUUID());
+    doThrow(new PermissionMessageException(new Message("some error")))
+            .when(permissionService)
+            .canViewStockCard(savedEvent.getProgramId(), savedEvent.getFacilityId());
+
+    //when
+    UUID savedCardId = stockCardRepository.findByOriginEvent(savedEvent).getId();
+    stockCardService.findStockCardById(savedCardId);
   }
 
   private StockEvent save(StockEventDto eventDto, UUID userId)
