@@ -10,7 +10,7 @@ import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 public class StockCardLineItemDto {
 
   private Integer stockOnHand;
-  private Integer quantity;
+  private Integer quantity;//delta
 
   @JsonUnwrapped
   private StockCardLineItem lineItem;
@@ -38,6 +38,6 @@ public class StockCardLineItemDto {
   public void calculateStockOnHand(int previousStockOnHand) {
     int soh = lineItem.calculateStockOnHand(previousStockOnHand);
     setStockOnHand(soh);
-    setQuantity(Math.abs(soh - lineItem.getQuantity()));
+    setQuantity(Math.abs(soh - previousStockOnHand));
   }
 }
