@@ -220,3 +220,8 @@ traits:
       get:
         is: [secured]
         description: This is a temporary end point for convenience of showcase, will be removed.
+
+        responses:
+          200:
+            body:
+              text/plain:
