@@ -23,7 +23,7 @@ services:
       - "5005:5005"
       - "8080:8080"
     volumes:
-      - '.:/app'
+      - '..:/app'
       - 'gradlecache:/gradle'
     env_file: .manual-api-test-env
     depends_on: [nginx,auth,referencedata]
