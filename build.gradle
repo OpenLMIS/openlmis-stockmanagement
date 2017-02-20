@@ -114,6 +114,7 @@ task integrationTest(type: Test) {
 tasks.withType(Test) {
     reports.html.destination = file("${reporting.baseDir}/${name}")
     reports.junitXml.destination = file("${testResultsDir}/${name}")
+    environment 'BASE_URL', "http://localhost"
 }
 
 // Usage: gradle generateMigration [-PmigrationName=name_of_migration]
