@@ -23,6 +23,7 @@ import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 import org.openlmis.stockmanagement.utils.Message;
 import org.openlmis.stockmanagement.validators.ApprovedOrderableValidator;
+import org.openlmis.stockmanagement.validators.MandatoryFieldsValidator;
 import org.openlmis.stockmanagement.validators.SourceDestinationValidator;
 import org.openlmis.stockmanagement.validators.StockEventValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,12 +60,16 @@ public class StockEventValidationsServiceTest {
   @MockBean
   private SourceDestinationValidator sourceDestinationValidator;
 
+  @MockBean
+  private MandatoryFieldsValidator mandatoryFieldsValidator;
+
   @Before
   public void setUp() throws Exception {
     //make real validators do nothing because
     //we only want to test the aggregation here
     doNothing().when(approvedOrderableValidator).validate(any(StockEventDto.class));
     doNothing().when(sourceDestinationValidator).validate(any(StockEventDto.class));
+    doNothing().when(mandatoryFieldsValidator).validate(any(StockEventDto.class));
   }
 
   @Test

@@ -48,6 +48,21 @@ public abstract class MessageKeys {
   public static final String ERROR_NO_FOLLOWING_PERMISSION = ERROR_PREFIX
           + ".authorization.noFollowingPermission";
 
+  public static final String ERROR_EVENT_OCCURRED_DATE_INVALID = ERROR_PREFIX
+      + ".event.occurredDate.invalid";
+
+  public static final String ERROR_EVENT_QUANTITY_INVALID = ERROR_PREFIX
+      + ".event.quantity.invalid";
+
+  public static final String ERROR_EVENT_FACILITY_INVALID = ERROR_PREFIX
+      + ".event.facilityId.invalid";
+
+  public static final String ERROR_EVENT_PROGRAM_INVALID = ERROR_PREFIX
+      + ".event.programId.invalid";
+
+  public static final String ERROR_EVENT_ORDERABLE_INVALID = ERROR_PREFIX
+      + ".event.ordeableId.invalid";
+
   private MessageKeys() {
     throw new UnsupportedOperationException();
   }

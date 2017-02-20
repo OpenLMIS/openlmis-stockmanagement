@@ -32,7 +32,7 @@ services:
     image: openlmis/auth:3.0.0-SNAPSHOT
     env_file: .manual-api-test-env
     environment:
-      JAVA_OPTS: '-Dspring.jpa.properties.hibernate.hbm2ddl.import_files=/bootstrap.sql,file:///demo-data/data.sql'
+      JAVA_OPTS: '-Dflyway.locations=classpath:db/migration,filesystem:/demo-data'
     depends_on: [consul,log,db]
 
   referencedata:
