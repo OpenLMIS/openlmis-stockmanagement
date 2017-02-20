@@ -14,7 +14,7 @@ import java.util.UUID;
 @Entity
 @Data
 @Table(name = "valid_source_assignments", schema = "stockmanagement")
-public class ValidSourceAssgnment extends BaseEntity {
+public class ValidSourceAssignment extends BaseEntity {
   @Column(nullable = false)
   @Type(type = PG_UUID)
   UUID programId;
