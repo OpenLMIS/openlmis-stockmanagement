@@ -54,4 +54,11 @@ public class StockEventDto {
             signature, reasonFreeText, sourceFreeText, destinationFreeText, documentNumber);
   }
 
+  public boolean hasSource() {
+    return this.sourceId != null;
+  }
+
+  public boolean hasDestination() {
+    return this.destinationId != null;
+  }
 }
