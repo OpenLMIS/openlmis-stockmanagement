@@ -51,19 +51,19 @@ public abstract class MessageKeys {
 
   //stock events creation: mandatory fields
   public static final String ERROR_EVENT_OCCURRED_DATE_INVALID = EVENT_ERROR_PREFIX
-          + ".event.occurredDate.invalid";
+          + ".occurredDate.invalid";
 
   public static final String ERROR_EVENT_QUANTITY_INVALID = EVENT_ERROR_PREFIX
-          + ".event.quantity.invalid";
+          + ".quantity.invalid";
 
   public static final String ERROR_EVENT_FACILITY_INVALID = EVENT_ERROR_PREFIX
-          + ".event.facilityId.invalid";
+          + ".facilityId.invalid";
 
   public static final String ERROR_EVENT_PROGRAM_INVALID = EVENT_ERROR_PREFIX
-          + ".event.programId.invalid";
+          + ".programId.invalid";
 
   public static final String ERROR_EVENT_ORDERABLE_INVALID = EVENT_ERROR_PREFIX
-          + ".event.ordeableId.invalid";
+          + ".ordeableId.invalid";
 
   //permission error
   public static final String ERROR_NO_FOLLOWING_PERMISSION = ERROR_PREFIX
