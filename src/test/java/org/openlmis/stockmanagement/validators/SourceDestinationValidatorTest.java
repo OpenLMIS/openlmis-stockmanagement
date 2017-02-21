@@ -37,9 +37,9 @@ import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_NOT_VALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_NOT_IN_VALID_LIST;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_BOTH_PRESENT;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_VALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_IN_VALID_LIST;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SourceDestinationValidatorTest {
@@ -93,7 +93,7 @@ public class SourceDestinationValidatorTest {
       sourceDestinationValidator.validate(eventDto);
     } catch (ValidationMessageException ex) {
       //then
-      assertThat(ex.asMessage().toString(), containsString(ERROR_SOURCE_NOT_VALID));
+      assertThat(ex.asMessage().toString(), containsString(ERROR_SOURCE_NOT_IN_VALID_LIST));
       return;
     }
 
@@ -117,7 +117,7 @@ public class SourceDestinationValidatorTest {
       sourceDestinationValidator.validate(eventDto);
     } catch (ValidationMessageException ex) {
       //then
-      assertThat(ex.asMessage().toString(), containsString(ERROR_DESTINATION_NOT_VALID));
+      assertThat(ex.asMessage().toString(), containsString(ERROR_DESTINATION_NOT_IN_VALID_LIST));
       return;
     }
 

@@ -15,31 +15,52 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openlmis.stockmanagement.BaseTest;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
+import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.repository.NodeRepository;
+import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.UUID;
 
 import static java.util.UUID.fromString;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_FREE_TEXT_NOT_ALLOWED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_FREE_TEXT_NOT_ALLOWED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_FREE_TEXT_BOTH_PRESENT;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_FREE_TEXT_NOT_ALLOWED;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class FreeTextValidatorTest extends BaseTest {
+@RunWith(MockitoJUnitRunner.class)
+public class FreeTextValidatorTest {
 
-  @Autowired
+  @InjectMocks
   FreeTextValidator freeTextValidator;
+
+  @Mock
+  NodeRepository nodeRepository;
+
+  @Mock
+  StockCardLineItemReasonRepository stockCardLineItemReasonRepository;
+
+  @Before
+  public void setUp() throws Exception {
+    Node mockNode = mock(Node.class);
+    when(nodeRepository.findOne(any(UUID.class))).thenReturn(mockNode);
+    when(mockNode.isRefDataFacility()).thenReturn(true);
+  }
 
   @Test
   public void should_fail_when_event_has_both_source_and_destination_free_text() throws Exception {
@@ -101,6 +122,10 @@ public class FreeTextValidatorTest extends BaseTest {
 
   @Test
   public void should_fail_when_reason_free_text_not_allowed_but_exist() throws Exception {
+    StockCardLineItemReason mockReason = mock(StockCardLineItemReason.class);
+    when(stockCardLineItemReasonRepository.findOne(any(UUID.class))).thenReturn(mockReason);
+    when(mockReason.getIsFreeTextAllowed()).thenReturn(false);
+
     StockEventDto eventDto = StockEventDtoBuilder.createStockEventDto();
     eventDto.setSourceFreeText(null);
     eventDto.setDestinationFreeText(null);
