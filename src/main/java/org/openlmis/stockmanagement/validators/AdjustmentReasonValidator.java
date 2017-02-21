@@ -35,10 +35,12 @@ public class AdjustmentReasonValidator implements StockEventValidator {
   @Override
   public void validate(StockEventDto stockEventDto) {
     boolean hasNoSourceDestination = !stockEventDto.hasSource() && !stockEventDto.hasDestination();
-    if (hasNoSourceDestination && stockEventDto.hasReason()) {
-      StockCardLineItemReason reason = reasonRepository.findOne(stockEventDto.getReasonId());
-      validReasonType(reason);
-      validReasonCategory(reason);
+    StockCardLineItemReason foundReason = reasonRepository.findOne(stockEventDto.getReasonId());
+    //this validator does not care if reason id not found in db
+    //that is handled by other validators
+    if (hasNoSourceDestination && foundReason != null) {
+      validReasonType(foundReason);
+      validReasonCategory(foundReason);
     }
   }
 

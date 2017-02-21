@@ -49,11 +49,21 @@ public class SourceDestinationAssignmentValidator implements StockEventValidator
   @Override
   public void validate(StockEventDto eventDto) {
     checkSourceDestinationBothPresent(eventDto);
-    if (eventDto.hasSource()) {
-      checkSourceInValidList(eventDto);
-    }
-    if (eventDto.hasDestination()) {
-      checkDestinationInValidList(eventDto);
+    checkIsValidAssignment(eventDto);
+  }
+
+  private void checkIsValidAssignment(StockEventDto eventDto) {
+    UUID facilityTypeId = getFacilityTypeId(eventDto);
+    UUID programId = eventDto.getProgramId();
+    //this validator does not care if program missing or facility not found in ref data
+    //that is handled in other validators
+    if (facilityTypeId != null && programId != null) {
+      if (eventDto.hasSource()) {
+        checkSourceAssignment(eventDto, facilityTypeId, programId);
+      }
+      if (eventDto.hasDestination()) {
+        checkDestinationAssignment(eventDto, facilityTypeId, programId);
+      }
     }
   }
 
@@ -64,10 +74,8 @@ public class SourceDestinationAssignmentValidator implements StockEventValidator
     }
   }
 
-  private void checkSourceInValidList(StockEventDto eventDto) {
-    UUID facilityTypeId = getFacilityTypeId(eventDto);
-    UUID programId = eventDto.getProgramId();
-
+  private void checkSourceAssignment(StockEventDto eventDto,
+                                     UUID facilityTypeId, UUID programId) {
     List<ValidSourceAssignment> sourceAssignments = validSourceAssignmentRepository
             .findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
 
@@ -78,10 +86,8 @@ public class SourceDestinationAssignmentValidator implements StockEventValidator
     }
   }
 
-  private void checkDestinationInValidList(StockEventDto eventDto) {
-    UUID facilityTypeId = getFacilityTypeId(eventDto);
-    UUID programId = eventDto.getProgramId();
-
+  private void checkDestinationAssignment(StockEventDto eventDto,
+                                          UUID facilityTypeId, UUID programId) {
     List<ValidDestinationAssignment> sourceAssignments = validDestinationAssignmentRepository
             .findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
 
@@ -94,7 +100,10 @@ public class SourceDestinationAssignmentValidator implements StockEventValidator
 
   private UUID getFacilityTypeId(StockEventDto eventDto) {
     FacilityDto facilityDto = facilityReferenceDataService.findOne(eventDto.getFacilityId());
-    return facilityDto.getType().getId();
+    if (facilityDto != null) {
+      return facilityDto.getType().getId();
+    }
+    return null;
   }
 
   private void throwError(String key, Object... params) {

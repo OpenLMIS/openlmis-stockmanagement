@@ -30,6 +30,8 @@ import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 
+import java.util.UUID;
+
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_REASON_CATEGORY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_REASON_TYPE_INVALID;
@@ -88,11 +90,23 @@ public class AdjustmentReasonValidatorTest {
   }
 
   @Test
-  public void should_not_throw_validation_exception_if_event_has_no_source_destination_and_reason()
+  public void should_not_throw_exception_if_event_has_no_source_destination_reason_id()
           throws Exception {
     //given
     StockEventDto stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
     stockEventDto.setReasonId(null);
+
+    //when
+    adjustmentReasonValidator.validate(stockEventDto);
+  }
+
+  @Test
+  public void should_not_throw_error_for_event_with_no_source_destination_and_reason_not_in_db()
+          throws Exception {
+    //given
+    StockEventDto stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
+    stockEventDto.setReasonId(UUID.randomUUID());
+    when(reasonRepository.findOne(stockEventDto.getReasonId())).thenReturn(null);
 
     //when
     adjustmentReasonValidator.validate(stockEventDto);

@@ -124,6 +124,42 @@ public class SourceDestinationAssignmentValidatorTest {
     Assert.fail();
   }
 
+  @Test
+  //this validator does not care if program missing
+  //that is handled in other validators
+  public void should_pass_if_program_missing() throws Exception {
+    //given
+    StockEventDto eventDto = StockEventDtoBuilder.createStockEventDto();
+    eventDto.setDestinationId(UUID.randomUUID());
+    eventDto.setSourceId(null);
+    eventDto.setProgramId(null);
+
+    mockFacilityRefDataService(eventDto);
+
+    //when
+    sourceDestinationAssignmentValidator.validate(eventDto);
+
+    //then: no error
+  }
+
+  @Test
+  //this validator does not care if facility type not found in ref data
+  //that is handled in other validators
+  public void should_pass_if_facility_not_found_in_ref_data() throws Exception {
+    //given
+    StockEventDto eventDto = StockEventDtoBuilder.createStockEventDto();
+    eventDto.setDestinationId(UUID.randomUUID());
+    eventDto.setSourceId(null);
+    eventDto.setFacilityId(null);
+
+    when(facilityReferenceDataService.findOne(eventDto.getFacilityId())).thenReturn(null);
+
+    //when
+    sourceDestinationAssignmentValidator.validate(eventDto);
+
+    //then: no error
+  }
+
   private void mockFacilityRefDataService(StockEventDto eventDto) {
     FacilityTypeDto facilityTypeDto = new FacilityTypeDto();
     facilityTypeDto.setId(UUID.randomUUID());

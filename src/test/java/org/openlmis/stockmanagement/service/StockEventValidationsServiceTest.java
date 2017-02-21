@@ -61,16 +61,16 @@ public class StockEventValidationsServiceTest {
   private ApprovedOrderableValidator approvedOrderableValidator;
 
   @MockBean
-  private SourceDestinationValidator sourceDestinationValidator;
+  private SourceDestinationAssignmentValidator sourceDestinationAssignmentValidator;
 
   @MockBean
   private MandatoryFieldsValidator mandatoryFieldsValidator;
 
   @MockBean
-  private ReceiveAndIssueValidator receiveAndIssueValidator;
+  private ReceiveIssueReasonValidator receiveIssueReasonValidator;
 
   @MockBean
-  private AdjustmentValidator adjustmentValidator;
+  private AdjustmentReasonValidator adjustmentReasonValidator;
 
   @MockBean
   private FreeTextValidator freeTextValidator;

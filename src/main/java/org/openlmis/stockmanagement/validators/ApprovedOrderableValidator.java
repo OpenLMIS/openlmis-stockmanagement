@@ -46,6 +46,8 @@ public class ApprovedOrderableValidator implements StockEventValidator {
     UUID program = stockEventDto.getProgramId();
 
     if (facility == null || program == null) {
+      //this validator does not care if facility and program are missing
+      //that is other validator's job
       return;
     }
 
@@ -56,7 +58,7 @@ public class ApprovedOrderableValidator implements StockEventValidator {
 
     if (!isFoundInApprovedList) {
       throw new ValidationMessageException(
-          new Message(ERROR_ORDERABLE_NOT_IN_APPROVED_LIST, stockEventDto.getOrderableId()));
+              new Message(ERROR_ORDERABLE_NOT_IN_APPROVED_LIST, stockEventDto.getOrderableId()));
     }
   }
 
@@ -64,15 +66,15 @@ public class ApprovedOrderableValidator implements StockEventValidator {
                                        Collection<ApprovedProductDto> fullSupplyList,
                                        Collection<ApprovedProductDto> nonFullSupplyList) {
     return stream(concat(fullSupplyList, nonFullSupplyList).spliterator(), false)
-        .anyMatch(product -> {
-          UUID orderableId = product.getProgramOrderable().getOrderableId();
-          return orderableId.equals(stockEventDto.getOrderableId());
-        });
+            .anyMatch(product -> {
+              UUID orderableId = product.getProgramOrderable().getOrderableId();
+              return orderableId.equals(stockEventDto.getOrderableId());
+            });
   }
 
   private Collection<ApprovedProductDto> getApprovedList(
-      UUID facilityId, UUID programId, boolean fullSupply) {
+          UUID facilityId, UUID programId, boolean fullSupply) {
     return approvedProductReferenceDataService
-        .getApprovedProducts(facilityId, programId, fullSupply);
+            .getApprovedProducts(facilityId, programId, fullSupply);
   }
 }

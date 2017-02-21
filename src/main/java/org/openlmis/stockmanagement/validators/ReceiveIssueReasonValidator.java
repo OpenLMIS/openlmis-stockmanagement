@@ -66,12 +66,12 @@ public class ReceiveIssueReasonValidator implements StockEventValidator {
   private void checkReason(StockEventDto eventDto, ReasonType expectedReasonType,
                            String typeErrorKey, String categoryErrorKey) {
     UUID reasonId = eventDto.getReasonId();
-    if (reasonId != null) {
-      StockCardLineItemReason foundReason = reasonRepository.findOne(reasonId);
-      if (foundReason != null) {
-        checkReasonType(expectedReasonType, typeErrorKey, reasonId, foundReason);
-        checkReasonCategory(categoryErrorKey, reasonId, foundReason);
-      }
+    StockCardLineItemReason foundReason = reasonRepository.findOne(reasonId);
+    //this validator does not care if reason id points to something in DB
+    //that is handled by other validators
+    if (foundReason != null) {
+      checkReasonType(expectedReasonType, typeErrorKey, reasonId, foundReason);
+      checkReasonCategory(categoryErrorKey, reasonId, foundReason);
     }
   }
 
