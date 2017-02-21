@@ -2,6 +2,7 @@
 This service allows users to create/update stock cards and stock movements.
 
 ## Prerequisites
+* Java 1.8+
 * Docker 1.11+
 * Docker Compose 1.6+
 
@@ -24,7 +25,7 @@ See [Developing w/ Docker](#devdocker).
 environment, start the Service with: `gradle bootRun`
 5. Go to `http://<yourDockerIPAddress>:8080/` to see the service name 
 and version. Note that you can determine yourDockerIPAddress by running `docker-machine ip`.
-6. Go to `http://<yourDockerIPAddress>:8080/api/` to see the APIs.
+6. Go to `http://<yourDockerIPAddress>:8080/stockmanagement/docs` to see the APIs.
 
 ## <a name="building">Building & Testing</a>
 Gradle is our usual build tool.  This template includes common tasks 
