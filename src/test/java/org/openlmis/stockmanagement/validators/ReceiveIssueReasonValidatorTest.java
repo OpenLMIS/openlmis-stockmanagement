@@ -44,7 +44,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_RECEIVE_
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_RECEIVE_REASON_TYPE_INVALID;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ReceiveAndIssueValidatorTest {
+public class ReceiveIssueReasonValidatorTest {
 
   @Rule
   public ExpectedException expectedEx = none();
@@ -53,7 +53,7 @@ public class ReceiveAndIssueValidatorTest {
   private StockCardLineItemReasonRepository reasonRepository;
 
   @InjectMocks
-  private ReceiveAndIssueValidator receiveAndIssueValidator;
+  private ReceiveIssueReasonValidator receiveIssueReasonValidator;
 
   private StockCardLineItemReason creditAdhocReason;
   private StockCardLineItemReason debitAdhocReason;
@@ -77,7 +77,7 @@ public class ReceiveAndIssueValidatorTest {
     stockEventDto.setReasonId(null);
 
     //when
-    receiveAndIssueValidator.validate(stockEventDto);
+    receiveIssueReasonValidator.validate(stockEventDto);
 
     //then: no error exception
   }
@@ -91,7 +91,7 @@ public class ReceiveAndIssueValidatorTest {
     stockEventDto.setReasonId(null);
 
     //when
-    receiveAndIssueValidator.validate(stockEventDto);
+    receiveIssueReasonValidator.validate(stockEventDto);
 
     //then: no error exception
   }
@@ -107,7 +107,7 @@ public class ReceiveAndIssueValidatorTest {
     when(reasonRepository.findOne(stockEventDto.getReasonId())).thenReturn(creditAdhocReason);
 
     //when
-    receiveAndIssueValidator.validate(stockEventDto);
+    receiveIssueReasonValidator.validate(stockEventDto);
 
     //then: no error exception
   }
@@ -124,7 +124,7 @@ public class ReceiveAndIssueValidatorTest {
     when(reasonRepository.findOne(stockEventDto.getReasonId())).thenReturn(debitAdhocReason);
 
     //when
-    receiveAndIssueValidator.validate(stockEventDto);
+    receiveIssueReasonValidator.validate(stockEventDto);
 
     //then: no error exception
   }
@@ -181,6 +181,6 @@ public class ReceiveAndIssueValidatorTest {
     when(reasonRepository.findOne(stockEventDto.getReasonId())).thenReturn(mockedReason);
 
     //when
-    receiveAndIssueValidator.validate(stockEventDto);
+    receiveIssueReasonValidator.validate(stockEventDto);
   }
 }

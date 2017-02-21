@@ -35,8 +35,8 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ISSUE_RE
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_RECEIVE_REASON_CATEGORY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_RECEIVE_REASON_TYPE_INVALID;
 
-@Component(value = "ReceiveAndIssueValidator")
-public class ReceiveAndIssueValidator implements StockEventValidator {
+@Component(value = "ReceiveIssueReasonValidator")
+public class ReceiveIssueReasonValidator implements StockEventValidator {
 
   @Autowired
   private StockCardLineItemReasonRepository reasonRepository;

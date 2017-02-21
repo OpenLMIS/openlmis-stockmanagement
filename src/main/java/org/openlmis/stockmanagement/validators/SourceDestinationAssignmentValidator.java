@@ -34,8 +34,8 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_NO
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_BOTH_PRESENT;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_IN_VALID_LIST;
 
-@Component(value = "SourceDestinationValidator")
-public class SourceDestinationValidator implements StockEventValidator {
+@Component(value = "SourceDestinationAssignmentValidator")
+public class SourceDestinationAssignmentValidator implements StockEventValidator {
 
   @Autowired
   private FacilityReferenceDataService facilityReferenceDataService;

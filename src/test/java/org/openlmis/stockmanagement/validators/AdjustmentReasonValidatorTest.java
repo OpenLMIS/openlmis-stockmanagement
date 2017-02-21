@@ -15,10 +15,6 @@
 
 package org.openlmis.stockmanagement.validators;
 
-import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_REASON_CATEGORY_INVALID;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_REASON_TYPE_INVALID;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -34,11 +30,15 @@ import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 
+import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_REASON_CATEGORY_INVALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_REASON_TYPE_INVALID;
+
 @RunWith(MockitoJUnitRunner.class)
-public class AdjustmentValidatorTest {
+public class AdjustmentReasonValidatorTest {
 
   @InjectMocks
-  private AdjustmentValidator adjustmentValidator;
+  private AdjustmentReasonValidator adjustmentReasonValidator;
 
   @Mock
   private StockCardLineItemReasonRepository reasonRepository;
@@ -48,53 +48,53 @@ public class AdjustmentValidatorTest {
 
   @Test
   public void incorrect_reason_type_should_not_pass_when_event_has_no_source_and_destination()
-      throws Exception {
+          throws Exception {
     //given
     StockEventDto stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
 
     StockCardLineItemReason reason = StockCardLineItemReason
-        .builder()
-        .reasonType(ReasonType.BALANCE_ADJUSTMENT)
-        .build();
+            .builder()
+            .reasonType(ReasonType.BALANCE_ADJUSTMENT)
+            .build();
     when(reasonRepository.findOne(stockEventDto.getReasonId())).thenReturn(reason);
 
     expectedEx.expect(ValidationMessageException.class);
     expectedEx.expectMessage(
-        ERROR_EVENT_ADJUSTMENT_REASON_TYPE_INVALID + ": " + reason.getReasonType());
+            ERROR_EVENT_ADJUSTMENT_REASON_TYPE_INVALID + ": " + reason.getReasonType());
 
     //when
-    adjustmentValidator.validate(stockEventDto);
+    adjustmentReasonValidator.validate(stockEventDto);
   }
 
   @Test
   public void incorrect_reason_category_should_not_pass_when_event_has_no_source_and_destination()
-      throws Exception {
+          throws Exception {
     //given
     StockEventDto stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
 
     StockCardLineItemReason reason = StockCardLineItemReason
-        .builder()
-        .reasonType(ReasonType.CREDIT)
-        .reasonCategory(ReasonCategory.AD_HOC)
-        .build();
+            .builder()
+            .reasonType(ReasonType.CREDIT)
+            .reasonCategory(ReasonCategory.AD_HOC)
+            .build();
     when(reasonRepository.findOne(stockEventDto.getReasonId())).thenReturn(reason);
 
     expectedEx.expect(ValidationMessageException.class);
     expectedEx.expectMessage(
-        ERROR_EVENT_ADJUSTMENT_REASON_CATEGORY_INVALID + ": " + reason.getReasonCategory());
+            ERROR_EVENT_ADJUSTMENT_REASON_CATEGORY_INVALID + ": " + reason.getReasonCategory());
 
     //when
-    adjustmentValidator.validate(stockEventDto);
+    adjustmentReasonValidator.validate(stockEventDto);
   }
 
   @Test
   public void should_not_throw_validation_exception_if_event_has_no_source_destination_and_reason()
-      throws Exception {
+          throws Exception {
     //given
     StockEventDto stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
     stockEventDto.setReasonId(null);
 
     //when
-    adjustmentValidator.validate(stockEventDto);
+    adjustmentReasonValidator.validate(stockEventDto);
   }
 }

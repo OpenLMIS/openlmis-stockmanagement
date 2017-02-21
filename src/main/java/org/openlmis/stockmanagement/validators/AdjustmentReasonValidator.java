@@ -15,9 +15,6 @@
 
 package org.openlmis.stockmanagement.validators;
 
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_REASON_CATEGORY_INVALID;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_REASON_TYPE_INVALID;
-
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
@@ -26,8 +23,11 @@ import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component(value = "AdjustmentValidator")
-public class AdjustmentValidator implements StockEventValidator {
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_REASON_CATEGORY_INVALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_REASON_TYPE_INVALID;
+
+@Component(value = "AdjustmentReasonValidator")
+public class AdjustmentReasonValidator implements StockEventValidator {
 
   @Autowired
   private StockCardLineItemReasonRepository reasonRepository;
@@ -45,14 +45,15 @@ public class AdjustmentValidator implements StockEventValidator {
   private void validReasonType(StockCardLineItemReason reason) {
     if (!reason.isCreditReasonType() && !reason.isDebitReasonType()) {
       throw new ValidationMessageException(
-          new Message(ERROR_EVENT_ADJUSTMENT_REASON_TYPE_INVALID, reason.getReasonType()));
+              new Message(ERROR_EVENT_ADJUSTMENT_REASON_TYPE_INVALID, reason.getReasonType()));
     }
   }
 
   private void validReasonCategory(StockCardLineItemReason reason) {
     if (!reason.isAdjustmentReasonCategory()) {
       throw new ValidationMessageException(
-          new Message(ERROR_EVENT_ADJUSTMENT_REASON_CATEGORY_INVALID, reason.getReasonCategory()));
+              new Message(ERROR_EVENT_ADJUSTMENT_REASON_CATEGORY_INVALID,
+                      reason.getReasonCategory()));
     }
   }
 }

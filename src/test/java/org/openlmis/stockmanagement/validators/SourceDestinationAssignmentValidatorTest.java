@@ -42,7 +42,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINA
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_IN_VALID_LIST;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SourceDestinationValidatorTest {
+public class SourceDestinationAssignmentValidatorTest {
 
   @Mock
   private FacilityReferenceDataService facilityReferenceDataService;
@@ -54,7 +54,7 @@ public class SourceDestinationValidatorTest {
   private ValidDestinationAssignmentRepository validDestinationAssignmentRepository;
 
   @InjectMocks
-  private SourceDestinationValidator sourceDestinationValidator;
+  private SourceDestinationAssignmentValidator sourceDestinationAssignmentValidator;
 
   @Test
   public void should_not_pass_when_event_has_both_source_and_destination() throws Exception {
@@ -65,7 +65,7 @@ public class SourceDestinationValidatorTest {
 
     //when
     try {
-      sourceDestinationValidator.validate(eventDto);
+      sourceDestinationAssignmentValidator.validate(eventDto);
     } catch (ValidationMessageException ex) {
       //then
       assertThat(ex.asMessage().toString(), containsString(
@@ -90,7 +90,7 @@ public class SourceDestinationValidatorTest {
 
     //when
     try {
-      sourceDestinationValidator.validate(eventDto);
+      sourceDestinationAssignmentValidator.validate(eventDto);
     } catch (ValidationMessageException ex) {
       //then
       assertThat(ex.asMessage().toString(), containsString(ERROR_SOURCE_NOT_IN_VALID_LIST));
@@ -114,7 +114,7 @@ public class SourceDestinationValidatorTest {
 
     //when
     try {
-      sourceDestinationValidator.validate(eventDto);
+      sourceDestinationAssignmentValidator.validate(eventDto);
     } catch (ValidationMessageException ex) {
       //then
       assertThat(ex.asMessage().toString(), containsString(ERROR_DESTINATION_NOT_IN_VALID_LIST));

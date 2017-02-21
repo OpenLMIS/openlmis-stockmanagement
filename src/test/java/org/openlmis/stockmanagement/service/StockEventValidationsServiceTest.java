@@ -15,13 +15,6 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,17 +22,24 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 import org.openlmis.stockmanagement.utils.Message;
-import org.openlmis.stockmanagement.validators.AdjustmentValidator;
+import org.openlmis.stockmanagement.validators.AdjustmentReasonValidator;
 import org.openlmis.stockmanagement.validators.ApprovedOrderableValidator;
 import org.openlmis.stockmanagement.validators.FreeTextValidator;
 import org.openlmis.stockmanagement.validators.MandatoryFieldsValidator;
-import org.openlmis.stockmanagement.validators.ReceiveAndIssueValidator;
-import org.openlmis.stockmanagement.validators.SourceDestinationValidator;
+import org.openlmis.stockmanagement.validators.ReceiveIssueReasonValidator;
+import org.openlmis.stockmanagement.validators.SourceDestinationAssignmentValidator;
 import org.openlmis.stockmanagement.validators.StockEventValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -80,11 +80,11 @@ public class StockEventValidationsServiceTest {
     //make real validators do nothing because
     //we only want to test the aggregation here
     doNothing().when(approvedOrderableValidator).validate(any(StockEventDto.class));
-    doNothing().when(sourceDestinationValidator).validate(any(StockEventDto.class));
+    doNothing().when(sourceDestinationAssignmentValidator).validate(any(StockEventDto.class));
     doNothing().when(mandatoryFieldsValidator).validate(any(StockEventDto.class));
-    doNothing().when(receiveAndIssueValidator).validate(any(StockEventDto.class));
-    doNothing().when(adjustmentValidator).validate(any(StockEventDto.class));
     doNothing().when(freeTextValidator).validate(any(StockEventDto.class));
+    doNothing().when(receiveIssueReasonValidator).validate(any(StockEventDto.class));
+    doNothing().when(adjustmentReasonValidator).validate(any(StockEventDto.class));
   }
 
   @Test
