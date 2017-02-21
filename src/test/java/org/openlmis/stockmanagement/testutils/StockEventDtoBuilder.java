@@ -15,10 +15,9 @@
 
 package org.openlmis.stockmanagement.testutils;
 
-import org.openlmis.stockmanagement.dto.StockEventDto;
-
 import java.time.ZonedDateTime;
 import java.util.UUID;
+import org.openlmis.stockmanagement.dto.StockEventDto;
 
 public class StockEventDtoBuilder {
 
@@ -51,4 +50,15 @@ public class StockEventDtoBuilder {
     return stockEventDto;
   }
 
+  /**
+   * Create stock event dto object without source and destination for testing.
+   *
+   * @return created dto object.
+   */
+  public static StockEventDto createNoSourceDestinationStockEventDto() {
+    StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.setSourceId(null);
+    stockEventDto.setDestinationId(null);
+    return stockEventDto;
+  }
 }

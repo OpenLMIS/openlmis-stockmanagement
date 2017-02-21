@@ -16,58 +16,66 @@
 package org.openlmis.stockmanagement.i18n;
 
 public abstract class MessageKeys {
+
   private static final String SERVICE_PREFIX = "stockmanagement";
   private static final String ERROR_PREFIX = SERVICE_PREFIX + ".error";
   private static final String EVENT_ERROR_PREFIX = ERROR_PREFIX + ".event";
 
   //stock card templates
   public static final String ERROR_STOCK_CARD_FIELD_INVALID =
-          ERROR_PREFIX + ".field.invalid";
+      ERROR_PREFIX + ".field.invalid";
 
   public static final String ERROR_PROGRAM_NOT_FOUND =
-          ERROR_PREFIX + ".program.notFound";
+      ERROR_PREFIX + ".program.notFound";
   public static final String ERROR_FACILITY_TYPE_NOT_FOUND =
-          ERROR_PREFIX + ".facilityType.notFound";
+      ERROR_PREFIX + ".facilityType.notFound";
 
   public static final String ERROR_STOCK_EVENT_REASON_NOT_MATCH =
-          ERROR_PREFIX + ".reason.notMatch";
+      ERROR_PREFIX + ".reason.notMatch";
 
   //stock events creation: source and destination
   public static final String ERROR_ORDERABLE_NOT_FOUND =
-          EVENT_ERROR_PREFIX + ".orderable.notFound";
+      EVENT_ERROR_PREFIX + ".orderable.notFound";
 
   public static final String ERROR_SOURCE_DESTINATION_BOTH_PRESENT =
-          EVENT_ERROR_PREFIX + ".sourceAndDestination.bothPresent";
+      EVENT_ERROR_PREFIX + ".sourceAndDestination.bothPresent";
 
   public static final String ERROR_SOURCE_NOT_VALID =
-          EVENT_ERROR_PREFIX + ".source.invalid";
+      EVENT_ERROR_PREFIX + ".source.invalid";
 
   public static final String ERROR_DESTINATION_NOT_VALID =
-          EVENT_ERROR_PREFIX + ".destination.invalid";
+      EVENT_ERROR_PREFIX + ".destination.invalid";
 
   //stock events creation: free texts
   public static final String ERROR_SOURCE_FREE_TEXT_NOT_ALLOWED =
-          EVENT_ERROR_PREFIX + ".sourceFreeText.notAllowed";
+      EVENT_ERROR_PREFIX + ".sourceFreeText.notAllowed";
 
   //stock events creation: mandatory fields
   public static final String ERROR_EVENT_OCCURRED_DATE_INVALID = EVENT_ERROR_PREFIX
-          + ".occurredDate.invalid";
+      + ".occurredDate.invalid";
 
   public static final String ERROR_EVENT_QUANTITY_INVALID = EVENT_ERROR_PREFIX
-          + ".quantity.invalid";
+      + ".quantity.invalid";
 
   public static final String ERROR_EVENT_FACILITY_INVALID = EVENT_ERROR_PREFIX
-          + ".facilityId.invalid";
+      + ".facilityId.invalid";
 
   public static final String ERROR_EVENT_PROGRAM_INVALID = EVENT_ERROR_PREFIX
-          + ".programId.invalid";
+      + ".programId.invalid";
 
   public static final String ERROR_EVENT_ORDERABLE_INVALID = EVENT_ERROR_PREFIX
-          + ".ordeableId.invalid";
+      + ".ordeableId.invalid";
+
+  //stock events creation: adjustment
+  public static final String ERROR_EVENT_ADJUSTMENT_REASON_TYPE_INVALID = EVENT_ERROR_PREFIX
+      + ".adjustment.reason.type.invalid";
+
+  public static final String ERROR_EVENT_ADJUSTMENT_REASON_CATEGORY_INVALID = EVENT_ERROR_PREFIX
+      + ".adjustment.reason.category.invalid";
 
   //permission error
   public static final String ERROR_NO_FOLLOWING_PERMISSION = ERROR_PREFIX
-          + ".authorization.noFollowingPermission";
+      + ".authorization.noFollowingPermission";
 
   private MessageKeys() {
     throw new UnsupportedOperationException();

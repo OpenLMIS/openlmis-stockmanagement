@@ -15,20 +15,19 @@
 
 package org.openlmis.stockmanagement.domain.adjustment;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.openlmis.stockmanagement.domain.BaseEntity;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.openlmis.stockmanagement.domain.BaseEntity;
 
 @Entity
 @Data
@@ -63,11 +62,11 @@ public class StockCardLineItemReason extends BaseEntity {
    */
   public static StockCardLineItemReason physicalCredit() {
     return builder()
-            .reasonType(ReasonType.CREDIT)
-            .reasonCategory(ReasonCategory.PHYSICAL_INVENTORY)
-            .name("Overstock")
-            .description("Inventory correction in case of overstock")
-            .build();
+        .reasonType(ReasonType.CREDIT)
+        .reasonCategory(ReasonCategory.PHYSICAL_INVENTORY)
+        .name("Overstock")
+        .description("Inventory correction in case of overstock")
+        .build();
   }
 
 
@@ -78,11 +77,11 @@ public class StockCardLineItemReason extends BaseEntity {
    */
   public static StockCardLineItemReason physicalDebit() {
     return builder()
-            .reasonType(ReasonType.DEBIT)
-            .reasonCategory(ReasonCategory.PHYSICAL_INVENTORY)
-            .name("Understock")
-            .description("Inventory correction in case of understock")
-            .build();
+        .reasonType(ReasonType.DEBIT)
+        .reasonCategory(ReasonCategory.PHYSICAL_INVENTORY)
+        .name("Understock")
+        .description("Inventory correction in case of understock")
+        .build();
   }
 
 
@@ -93,10 +92,22 @@ public class StockCardLineItemReason extends BaseEntity {
    */
   public static StockCardLineItemReason physicalBalance() {
     return builder()
-            .reasonType(ReasonType.BALANCE_ADJUSTMENT)
-            .reasonCategory(ReasonCategory.PHYSICAL_INVENTORY)
-            .name("Balance adjustment")
-            .description("Balance adjustment")
-            .build();
+        .reasonType(ReasonType.BALANCE_ADJUSTMENT)
+        .reasonCategory(ReasonCategory.PHYSICAL_INVENTORY)
+        .name("Balance adjustment")
+        .description("Balance adjustment")
+        .build();
+  }
+
+  public boolean isCreditReasonType() {
+    return getReasonType() == ReasonType.CREDIT;
+  }
+
+  public boolean isDebitReasonType() {
+    return getReasonType() == ReasonType.DEBIT;
+  }
+
+  public boolean isAdjustmentReasonCategory() {
+    return getReasonCategory() == ReasonCategory.ADJUSTMENT;
   }
 }

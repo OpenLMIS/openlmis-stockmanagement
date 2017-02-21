@@ -15,6 +15,13 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,6 +29,7 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.validators.AdjustmentValidator;
 import org.openlmis.stockmanagement.validators.ApprovedOrderableValidator;
 import org.openlmis.stockmanagement.validators.MandatoryFieldsValidator;
 import org.openlmis.stockmanagement.validators.SourceDestinationValidator;
@@ -30,13 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -63,6 +64,9 @@ public class StockEventValidationsServiceTest {
   @MockBean
   private MandatoryFieldsValidator mandatoryFieldsValidator;
 
+  @MockBean
+  private AdjustmentValidator adjustmentValidator;
+
   @Before
   public void setUp() throws Exception {
     //make real validators do nothing because
@@ -70,6 +74,7 @@ public class StockEventValidationsServiceTest {
     doNothing().when(approvedOrderableValidator).validate(any(StockEventDto.class));
     doNothing().when(sourceDestinationValidator).validate(any(StockEventDto.class));
     doNothing().when(mandatoryFieldsValidator).validate(any(StockEventDto.class));
+    doNothing().when(adjustmentValidator).validate(any(StockEventDto.class));
   }
 
   @Test
@@ -82,7 +87,7 @@ public class StockEventValidationsServiceTest {
 
     //then:
     verify(permissionService, times(1))
-            .canCreateStockEvent(stockEventDto.getProgramId(), stockEventDto.getFacilityId());
+        .canCreateStockEvent(stockEventDto.getProgramId(), stockEventDto.getFacilityId());
 
   }
 
@@ -104,7 +109,7 @@ public class StockEventValidationsServiceTest {
     //given
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     doThrow(new ValidationMessageException(new Message("some error")))
-            .when(validator1).validate(stockEventDto);
+        .when(validator1).validate(stockEventDto);
 
     //when:
     try {
