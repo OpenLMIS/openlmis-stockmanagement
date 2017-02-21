@@ -34,21 +34,30 @@ public abstract class MessageKeys {
       ERROR_PREFIX + ".reason.notMatch";
 
   //stock events creation: source and destination
-  public static final String ERROR_ORDERABLE_NOT_FOUND =
-      EVENT_ERROR_PREFIX + ".orderable.notFound";
+  public static final String ERROR_ORDERABLE_NOT_IN_APPROVED_LIST =
+      EVENT_ERROR_PREFIX + ".orderable.not.in.approvedList";
 
   public static final String ERROR_SOURCE_DESTINATION_BOTH_PRESENT =
       EVENT_ERROR_PREFIX + ".sourceAndDestination.bothPresent";
 
-  public static final String ERROR_SOURCE_NOT_VALID =
-      EVENT_ERROR_PREFIX + ".source.invalid";
+  public static final String ERROR_SOURCE_DESTINATION_FREE_TEXT_BOTH_PRESENT =
+      ERROR_PREFIX + ".sourceAndDestinationFreeText.bothPresent";
 
-  public static final String ERROR_DESTINATION_NOT_VALID =
-      EVENT_ERROR_PREFIX + ".destination.invalid";
+  public static final String ERROR_SOURCE_NOT_IN_VALID_LIST =
+      EVENT_ERROR_PREFIX + ".source.not.in.validList";
+
+  public static final String ERROR_DESTINATION_NOT_IN_VALID_LIST =
+      EVENT_ERROR_PREFIX + ".destination.not.in.validList";
 
   //stock events creation: free texts
   public static final String ERROR_SOURCE_FREE_TEXT_NOT_ALLOWED =
       EVENT_ERROR_PREFIX + ".sourceFreeText.notAllowed";
+
+  public static final String ERROR_DESTINATION_FREE_TEXT_NOT_ALLOWED =
+      EVENT_ERROR_PREFIX + ".destinationFreeText.notAllowed";
+
+  public static final String ERROR_REASON_FREE_TEXT_NOT_ALLOWED =
+      EVENT_ERROR_PREFIX + ".reasonFreeText.notAllowed";
 
   //stock events creation: mandatory fields
   public static final String ERROR_EVENT_OCCURRED_DATE_INVALID = EVENT_ERROR_PREFIX

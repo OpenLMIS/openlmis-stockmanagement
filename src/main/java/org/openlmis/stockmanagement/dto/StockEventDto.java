@@ -76,7 +76,19 @@ public class StockEventDto {
     return this.destinationId != null;
   }
 
+  public boolean hasDestinationFreeText() {
+    return this.destinationFreeText != null;
+  }
+
+  public boolean hasSourceFreeText() {
+    return this.sourceFreeText != null;
+  }
+
   public boolean hasReason() {
     return this.reasonId != null;
+  }
+
+  public boolean hasReasonFreeText() {
+    return this.reasonFreeText != null;
   }
 }

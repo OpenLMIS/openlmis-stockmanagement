@@ -28,7 +28,7 @@ import java.util.UUID;
 
 import static com.google.common.collect.Iterables.concat;
 import static java.util.stream.StreamSupport.stream;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_ORDERABLE_NOT_FOUND;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_ORDERABLE_NOT_IN_APPROVED_LIST;
 
 @Component(value = "ApprovedOrderableValidator")
 public class ApprovedOrderableValidator implements StockEventValidator {
@@ -56,7 +56,7 @@ public class ApprovedOrderableValidator implements StockEventValidator {
 
     if (!isFoundInApprovedList) {
       throw new ValidationMessageException(
-          new Message(ERROR_ORDERABLE_NOT_FOUND, stockEventDto.getOrderableId()));
+          new Message(ERROR_ORDERABLE_NOT_IN_APPROVED_LIST, stockEventDto.getOrderableId()));
     }
   }
 

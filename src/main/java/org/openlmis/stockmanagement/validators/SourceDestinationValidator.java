@@ -30,9 +30,9 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.UUID;
 
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_NOT_VALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_NOT_IN_VALID_LIST;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_BOTH_PRESENT;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_VALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_IN_VALID_LIST;
 
 @Component(value = "SourceDestinationValidator")
 public class SourceDestinationValidator implements StockEventValidator {
@@ -74,7 +74,7 @@ public class SourceDestinationValidator implements StockEventValidator {
     boolean isInValidList = sourceAssignments.stream().anyMatch(validSourceAssignment ->
             validSourceAssignment.getNode().getId().equals(eventDto.getSourceId()));
     if (!isInValidList) {
-      throwError(ERROR_SOURCE_NOT_VALID, eventDto.getSourceId());
+      throwError(ERROR_SOURCE_NOT_IN_VALID_LIST, eventDto.getSourceId());
     }
   }
 
@@ -88,7 +88,7 @@ public class SourceDestinationValidator implements StockEventValidator {
     boolean isInValidList = sourceAssignments.stream().anyMatch(validSourceAssignment ->
             validSourceAssignment.getNode().getId().equals(eventDto.getDestinationId()));
     if (!isInValidList) {
-      throwError(ERROR_DESTINATION_NOT_VALID, eventDto.getDestinationId());
+      throwError(ERROR_DESTINATION_NOT_IN_VALID_LIST, eventDto.getDestinationId());
     }
   }
 
