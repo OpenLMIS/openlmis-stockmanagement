@@ -20,6 +20,6 @@ import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 public interface StockCardLineItemReasonRepository
-    extends PagingAndSortingRepository<StockCardLineItemReason, UUID> {
+        extends PagingAndSortingRepository<StockCardLineItemReason, UUID> {
 
 }

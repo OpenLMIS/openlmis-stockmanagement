@@ -73,6 +73,19 @@ public abstract class MessageKeys {
   public static final String ERROR_EVENT_ADJUSTMENT_REASON_CATEGORY_INVALID = EVENT_ERROR_PREFIX
       + ".adjustment.reason.category.invalid";
 
+  //stock events creation: receive and issue
+  public static final String ERROR_EVENT_RECEIVE_REASON_TYPE_INVALID = EVENT_ERROR_PREFIX
+          + ".receive.reasonType.invalid";
+
+  public static final String ERROR_EVENT_ISSUE_REASON_TYPE_INVALID = EVENT_ERROR_PREFIX
+          + ".issue.reasonType.invalid";
+
+  public static final String ERROR_EVENT_RECEIVE_REASON_CATEGORY_INVALID = EVENT_ERROR_PREFIX
+          + ".receive.reasonCategory.invalid";
+
+  public static final String ERROR_EVENT_ISSUE_REASON_CATEGORY_INVALID = EVENT_ERROR_PREFIX
+          + ".issue.reasonCategory.invalid";
+
   //permission error
   public static final String ERROR_NO_FOLLOWING_PERMISSION = ERROR_PREFIX
       + ".authorization.noFollowingPermission";

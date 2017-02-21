@@ -32,6 +32,7 @@ import org.openlmis.stockmanagement.utils.Message;
 import org.openlmis.stockmanagement.validators.AdjustmentValidator;
 import org.openlmis.stockmanagement.validators.ApprovedOrderableValidator;
 import org.openlmis.stockmanagement.validators.MandatoryFieldsValidator;
+import org.openlmis.stockmanagement.validators.ReceiveAndIssueValidator;
 import org.openlmis.stockmanagement.validators.SourceDestinationValidator;
 import org.openlmis.stockmanagement.validators.StockEventValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +66,9 @@ public class StockEventValidationsServiceTest {
   private MandatoryFieldsValidator mandatoryFieldsValidator;
 
   @MockBean
+  private ReceiveAndIssueValidator receiveAndIssueValidator;
+
+  @MockBean
   private AdjustmentValidator adjustmentValidator;
 
   @Before
@@ -74,6 +78,7 @@ public class StockEventValidationsServiceTest {
     doNothing().when(approvedOrderableValidator).validate(any(StockEventDto.class));
     doNothing().when(sourceDestinationValidator).validate(any(StockEventDto.class));
     doNothing().when(mandatoryFieldsValidator).validate(any(StockEventDto.class));
+    doNothing().when(receiveAndIssueValidator).validate(any(StockEventDto.class));
     doNothing().when(adjustmentValidator).validate(any(StockEventDto.class));
   }
 
@@ -87,7 +92,7 @@ public class StockEventValidationsServiceTest {
 
     //then:
     verify(permissionService, times(1))
-        .canCreateStockEvent(stockEventDto.getProgramId(), stockEventDto.getFacilityId());
+            .canCreateStockEvent(stockEventDto.getProgramId(), stockEventDto.getFacilityId());
 
   }
 
@@ -109,7 +114,7 @@ public class StockEventValidationsServiceTest {
     //given
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     doThrow(new ValidationMessageException(new Message("some error")))
-        .when(validator1).validate(stockEventDto);
+            .when(validator1).validate(stockEventDto);
 
     //when:
     try {
