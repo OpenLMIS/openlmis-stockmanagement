@@ -15,6 +15,14 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static org.openlmis.stockmanagement.domain.adjustment.ReasonCategory.AD_HOC;
+import static org.openlmis.stockmanagement.domain.adjustment.ReasonType.CREDIT;
+import static org.openlmis.stockmanagement.domain.adjustment.ReasonType.DEBIT;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ISSUE_REASON_CATEGORY_INVALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ISSUE_REASON_TYPE_INVALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_RECEIVE_REASON_CATEGORY_INVALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_RECEIVE_REASON_TYPE_INVALID;
+
 import org.openlmis.stockmanagement.domain.adjustment.ReasonCategory;
 import org.openlmis.stockmanagement.domain.adjustment.ReasonType;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
@@ -27,14 +35,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-import static org.openlmis.stockmanagement.domain.adjustment.ReasonCategory.AD_HOC;
-import static org.openlmis.stockmanagement.domain.adjustment.ReasonType.CREDIT;
-import static org.openlmis.stockmanagement.domain.adjustment.ReasonType.DEBIT;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ISSUE_REASON_CATEGORY_INVALID;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ISSUE_REASON_TYPE_INVALID;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_RECEIVE_REASON_CATEGORY_INVALID;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_RECEIVE_REASON_TYPE_INVALID;
-
 @Component(value = "ReceiveIssueReasonValidator")
 public class ReceiveIssueReasonValidator implements StockEventValidator {
 
@@ -43,6 +43,9 @@ public class ReceiveIssueReasonValidator implements StockEventValidator {
 
   @Override
   public void validate(StockEventDto eventDto) {
+    if (!eventDto.hasReason()) {
+      return;
+    }
     if (eventDto.hasSource()) {
       checkReceiveReason(eventDto);
     }
@@ -53,14 +56,14 @@ public class ReceiveIssueReasonValidator implements StockEventValidator {
 
   private void checkReceiveReason(StockEventDto eventDto) {
     checkReason(eventDto, CREDIT,
-            ERROR_EVENT_RECEIVE_REASON_TYPE_INVALID,
-            ERROR_EVENT_RECEIVE_REASON_CATEGORY_INVALID);
+        ERROR_EVENT_RECEIVE_REASON_TYPE_INVALID,
+        ERROR_EVENT_RECEIVE_REASON_CATEGORY_INVALID);
   }
 
   private void checkIssueReason(StockEventDto eventDto) {
     checkReason(eventDto, DEBIT,
-            ERROR_EVENT_ISSUE_REASON_TYPE_INVALID,
-            ERROR_EVENT_ISSUE_REASON_CATEGORY_INVALID);
+        ERROR_EVENT_ISSUE_REASON_TYPE_INVALID,
+        ERROR_EVENT_ISSUE_REASON_CATEGORY_INVALID);
   }
 
   private void checkReason(StockEventDto eventDto, ReasonType expectedReasonType,
@@ -80,7 +83,7 @@ public class ReceiveIssueReasonValidator implements StockEventValidator {
     ReasonType reasonType = foundReason.getReasonType();
     if (reasonType != expectedReasonType) {
       throw new ValidationMessageException(new Message(typeErrorKey,
-              reasonId, reasonType, expectedReasonType));
+          reasonId, reasonType, expectedReasonType));
     }
   }
 
@@ -89,7 +92,7 @@ public class ReceiveIssueReasonValidator implements StockEventValidator {
     ReasonCategory reasonCategory = foundReason.getReasonCategory();
     if (reasonCategory != AD_HOC) {
       throw new ValidationMessageException(new Message(categoryErrorKey,
-              reasonId, reasonCategory, AD_HOC));
+          reasonId, reasonCategory, AD_HOC));
     }
   }
 }

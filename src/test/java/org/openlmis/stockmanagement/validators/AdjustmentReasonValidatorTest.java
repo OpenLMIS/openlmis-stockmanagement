@@ -15,13 +15,14 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_REASON_CATEGORY_INVALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_REASON_TYPE_INVALID;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.openlmis.stockmanagement.BaseTest;
 import org.openlmis.stockmanagement.domain.adjustment.ReasonCategory;
 import org.openlmis.stockmanagement.domain.adjustment.ReasonType;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
@@ -29,20 +30,21 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.UUID;
 
-import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_REASON_CATEGORY_INVALID;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_REASON_TYPE_INVALID;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AdjustmentReasonValidatorTest {
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+public class AdjustmentReasonValidatorTest extends BaseTest {
 
-  @InjectMocks
+  @Autowired
   private AdjustmentReasonValidator adjustmentReasonValidator;
 
-  @Mock
+  @Autowired
   private StockCardLineItemReasonRepository reasonRepository;
 
   @Rule
@@ -50,19 +52,21 @@ public class AdjustmentReasonValidatorTest {
 
   @Test
   public void incorrect_reason_type_should_not_pass_when_event_has_no_source_and_destination()
-          throws Exception {
+      throws Exception {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
-
     StockCardLineItemReason reason = StockCardLineItemReason
-            .builder()
-            .reasonType(ReasonType.BALANCE_ADJUSTMENT)
-            .build();
-    when(reasonRepository.findOne(stockEventDto.getReasonId())).thenReturn(reason);
+        .builder()
+        .reasonType(ReasonType.BALANCE_ADJUSTMENT)
+        .reasonCategory(ReasonCategory.ADJUSTMENT)
+        .isFreeTextAllowed(true)
+        .name("Balance Adjustment")
+        .build();
+    StockEventDto stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
+    stockEventDto.setReasonId(reasonRepository.save(reason).getId());
 
     expectedEx.expect(ValidationMessageException.class);
     expectedEx.expectMessage(
-            ERROR_EVENT_ADJUSTMENT_REASON_TYPE_INVALID + ": " + reason.getReasonType());
+        ERROR_EVENT_ADJUSTMENT_REASON_TYPE_INVALID + ": " + reason.getReasonType());
 
     //when
     adjustmentReasonValidator.validate(stockEventDto);
@@ -70,20 +74,22 @@ public class AdjustmentReasonValidatorTest {
 
   @Test
   public void incorrect_reason_category_should_not_pass_when_event_has_no_source_and_destination()
-          throws Exception {
+      throws Exception {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
 
     StockCardLineItemReason reason = StockCardLineItemReason
-            .builder()
-            .reasonType(ReasonType.CREDIT)
-            .reasonCategory(ReasonCategory.AD_HOC)
-            .build();
-    when(reasonRepository.findOne(stockEventDto.getReasonId())).thenReturn(reason);
+        .builder()
+        .reasonType(ReasonType.CREDIT)
+        .reasonCategory(ReasonCategory.AD_HOC)
+        .name("Credit Ad_hoc")
+        .isFreeTextAllowed(false)
+        .build();
+    StockEventDto stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
+    stockEventDto.setReasonId(reasonRepository.save(reason).getId());
 
     expectedEx.expect(ValidationMessageException.class);
     expectedEx.expectMessage(
-            ERROR_EVENT_ADJUSTMENT_REASON_CATEGORY_INVALID + ": " + reason.getReasonCategory());
+        ERROR_EVENT_ADJUSTMENT_REASON_CATEGORY_INVALID + ": " + reason.getReasonCategory());
 
     //when
     adjustmentReasonValidator.validate(stockEventDto);
@@ -91,7 +97,7 @@ public class AdjustmentReasonValidatorTest {
 
   @Test
   public void should_not_throw_exception_if_event_has_no_source_destination_reason_id()
-          throws Exception {
+      throws Exception {
     //given
     StockEventDto stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
     stockEventDto.setReasonId(null);
@@ -102,11 +108,20 @@ public class AdjustmentReasonValidatorTest {
 
   @Test
   public void should_not_throw_error_for_event_with_no_source_destination_and_reason_not_in_db()
-          throws Exception {
+      throws Exception {
     //given
     StockEventDto stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
     stockEventDto.setReasonId(UUID.randomUUID());
-    when(reasonRepository.findOne(stockEventDto.getReasonId())).thenReturn(null);
+
+    //when
+    adjustmentReasonValidator.validate(stockEventDto);
+  }
+
+  @Test
+  public void should_not_throw_error_for_event_with_no_reason_id() throws Exception {
+    //given
+    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    stockEventDto.setReasonId(null);
 
     //when
     adjustmentReasonValidator.validate(stockEventDto);
