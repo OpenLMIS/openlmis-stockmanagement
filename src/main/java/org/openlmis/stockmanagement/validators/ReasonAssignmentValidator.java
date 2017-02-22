@@ -41,6 +41,9 @@ public class ReasonAssignmentValidator implements StockEventValidator {
 
   @Override
   public void validate(StockEventDto stockEventDto) {
+    if (stockEventDto.getReasonId() == null) {
+      return;
+    }
     FacilityDto facility = facilityReferenceDataService.findOne(stockEventDto.getFacilityId());
     UUID programId = stockEventDto.getProgramId();
     if (facility != null && programId != null) {

@@ -56,7 +56,8 @@ public class ReasonAssignmentValidatorTest {
     //given
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setReasonId(null);
-
+    when(facilityReferenceDataService.findOne(stockEventDto.getFacilityId()))
+        .thenReturn(createFacilityDto());
     //when
     reasonAssignmentValidator.validate(stockEventDto);
 
@@ -74,23 +75,27 @@ public class ReasonAssignmentValidatorTest {
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setReasonId(UUID.randomUUID());
 
+    FacilityDto facilityDto = createFacilityDto();
+
+    UUID programId = stockEventDto.getProgramId();
+
+    when(facilityReferenceDataService.findOne(stockEventDto.getFacilityId()))
+            .thenReturn(facilityDto);
+    when(validReasonAssignmentRepository
+            .findByProgramIdAndFacilityTypeId(programId, facilityDto.getType().getId()))
+            .thenReturn(new ArrayList<>());
+
+    //when
+    reasonAssignmentValidator.validate(stockEventDto);
+  }
+
+  private FacilityDto createFacilityDto() {
     FacilityTypeDto facilityTypeDto = new FacilityTypeDto();
     facilityTypeDto.setId(UUID.randomUUID());
 
     FacilityDto facilityDto = new FacilityDto();
     facilityDto.setType(facilityTypeDto);
-
-    UUID programId = stockEventDto.getProgramId();
-    UUID facilityTypeId = facilityTypeDto.getId();
-
-    when(facilityReferenceDataService.findOne(stockEventDto.getFacilityId()))
-            .thenReturn(facilityDto);
-    when(validReasonAssignmentRepository
-            .findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
-            .thenReturn(new ArrayList<>());
-
-    //when
-    reasonAssignmentValidator.validate(stockEventDto);
+    return facilityDto;
   }
 
   @Test
