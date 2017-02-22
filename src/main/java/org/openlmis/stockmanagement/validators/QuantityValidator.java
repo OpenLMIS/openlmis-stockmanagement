@@ -38,8 +38,8 @@ public class QuantityValidator implements StockEventValidator {
 
   @Override
   public void validate(StockEventDto stockEventDto) {
-    boolean isDebitEvent = !stockEventDto.hasDestination() && !hasDebitReasonOnEvent(stockEventDto);
-    if (isDebitEvent) {
+    boolean isDebitEvent = stockEventDto.hasDestination() || hasDebitReasonOnEvent(stockEventDto);
+    if (!isDebitEvent) {
       return;
     }
 
