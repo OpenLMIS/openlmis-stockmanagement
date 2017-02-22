@@ -1,4 +1,5 @@
 {
+  "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
     "sourceId": {
@@ -9,10 +10,6 @@
     },
     "facilityId": {
       "type": "string"
-    },
-    "noticedDate": {
-      "type": "string",
-      "format": "UTC_MILLISEC"
     },
     "signature": {
       "type": "string"
@@ -38,15 +35,19 @@
     "sourceFreeText": {
       "type": "string"
     },
-    "stockCardId": {
-      "type": "string"
-    },
     "programId": {
       "type": "string"
     },
     "occurredDate": {
       "type": "string",
-      "format": "UTC_MILLISEC"
+      "format": "date-time"
     }
-  }
+  },
+  "required": [
+    "quantity",
+    "facilityId",
+    "programId",
+    "orderableId",
+    "occurredDate"
+  ]
 }

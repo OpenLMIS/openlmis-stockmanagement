@@ -136,7 +136,7 @@ traits:
               application/json:
 
           403:
-            description: User does not have permission to create stock events for given facility.
+            description: User does not have permission to create stock events for given facility and program.
             body:
               application/json:
 

@@ -51,8 +51,8 @@
               "type": "string"
             },
             "occurredDate": {
-              "type": "integer",
-              "format": "UTC_MILLISEC"
+              "type": "string",
+              "format": "date-time"
             }
           }
         }
