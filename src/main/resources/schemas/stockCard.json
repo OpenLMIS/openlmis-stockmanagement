@@ -6,20 +6,35 @@
       "items": {
         "type": "object",
         "properties": {
-          "sourceId": {
-            "type": "string"
-          },
           "reason": {
             "type": "object",
             "properties": {
+              "isFreeTextAllowed": {
+                "type": "boolean"
+              },
               "name": {
                 "type": "string"
               },
-              "type": {
+              "description": {
+                "type": "string"
+              },
+              "id": {
+                "type": "string"
+              },
+              "reasonType": {
                 "type": "string",
                 "enum": [
                   "CREDIT",
-                  "DEBIT"
+                  "DEBIT",
+                  "BALANCE_ADJUSTMENT"
+                ]
+              },
+              "reasonCategory": {
+                "type": "string",
+                "enum": [
+                  "AD_HOC",
+                  "ADJUSTMENT",
+                  "PHYSICAL_INVENTORY"
                 ]
               }
             }
@@ -30,22 +45,38 @@
           "signature": {
             "type": "string"
           },
-          "destinationId": {
-            "type": "string"
-          },
-          "destinationFreeText": {
+          "documentNumber": {
             "type": "string"
           },
           "reasonFreeText": {
             "type": "string"
           },
+          "destination": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            }
+          },
           "stockOnHand": {
             "type": "integer"
+          },
+          "id": {
+            "type": "string"
+          },
+          "source": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            }
           },
           "sourceFreeText": {
             "type": "string"
           },
-          "stockCardId": {
+          "destinationFreeText": {
             "type": "string"
           },
           "occurredDate": {
@@ -55,14 +86,227 @@
         }
       }
     },
-    "facilityId": {
-      "type": "string"
+    "orderable": {
+      "type": "object",
+      "properties": {
+        "packSize": {
+          "type": "integer"
+        },
+        "dispensable": {
+          "type": "object",
+          "properties": {
+            "dispensingUnit": {
+              "type": "string"
+            }
+          }
+        },
+        "productCode": {
+          "type": "string"
+        },
+        "roundToZero": {
+          "type": "boolean"
+        },
+        "packRoundingThreshold": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "programs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "orderableId": {
+                "type": "string"
+              },
+              "orderableDisplayCategoryId": {
+                "type": "string"
+              },
+              "displayOrder": {
+                "type": "integer"
+              },
+              "active": {
+                "type": "boolean"
+              },
+              "orderableCategoryDisplayOrder": {
+                "type": "integer"
+              },
+              "programId": {
+                "type": "string"
+              },
+              "orderableCategoryDisplayName": {
+                "type": "string"
+              },
+              "fullSupply": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
     },
-    "orderableId": {
-      "type": "string"
+    "stockOnHand": {
+      "type": "integer"
     },
-    "programId": {
-      "type": "string"
+    "program": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "active": {
+          "type": "boolean"
+        },
+        "periodsSkippable": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "showNonFullSupplyTab": {
+          "type": "boolean"
+        }
+      }
+    },
+    "facility": {
+      "type": "object",
+      "properties": {
+        "openLmisAccessible": {
+          "type": "boolean"
+        },
+        "code": {
+          "type": "string"
+        },
+        "goDownDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": {
+          "type": "string"
+        },
+        "active": {
+          "type": "boolean"
+        },
+        "goLiveDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "type": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "displayOrder": {
+              "type": "integer"
+            },
+            "description": {
+              "type": "string"
+            },
+            "active": {
+              "type": "boolean"
+            },
+            "id": {
+              "type": "string"
+            }
+          }
+        },
+        "supportedPrograms": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "supportActive": {
+                "type": "boolean"
+              },
+              "programActive": {
+                "type": "boolean"
+              },
+              "code": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "periodsSkippable": {
+                "type": "boolean"
+              },
+              "id": {
+                "type": "string"
+              },
+              "showNonFullSupplyTab": {
+                "type": "boolean"
+              },
+              "supportStartDate": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "geographicZone": {
+          "type": "object",
+          "properties": {
+            "parent": {
+              "type": "object"
+            },
+            "code": {
+              "type": "string"
+            },
+            "level": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "levelNumber": {
+                  "type": "integer"
+                },
+                "id": {
+                  "type": "string"
+                }
+              }
+            },
+            "name": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            }
+          }
+        },
+        "name": {
+          "type": "string"
+        },
+        "comment": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      }
     }
   }
 }
