@@ -43,9 +43,11 @@ public class QuantityValidator implements StockEventValidator {
       return;
     }
 
-    if (stockEventDto.getQuantity() > currentStockOnHand(stockEventDto)) {
+    Integer quantity = stockEventDto.getQuantity();
+    Integer stockOnHand = currentStockOnHand(stockEventDto);
+    if (quantity > stockOnHand) {
       throw new ValidationMessageException(
-          new Message(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH, stockEventDto.getQuantity()));
+          new Message(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH, quantity, stockOnHand));
     }
   }
 

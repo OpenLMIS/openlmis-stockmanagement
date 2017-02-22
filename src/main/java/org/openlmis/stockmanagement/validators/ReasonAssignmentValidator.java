@@ -23,12 +23,14 @@ import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.UUID;
 
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_REASON_NOT_IN_VALID_LIST;
 
+@Component(value = "ReasonAssignmentValidator")
 public class ReasonAssignmentValidator implements StockEventValidator {
 
   @Autowired

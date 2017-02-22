@@ -27,6 +27,7 @@ import org.openlmis.stockmanagement.validators.ApprovedOrderableValidator;
 import org.openlmis.stockmanagement.validators.FreeTextValidator;
 import org.openlmis.stockmanagement.validators.MandatoryFieldsValidator;
 import org.openlmis.stockmanagement.validators.QuantityValidator;
+import org.openlmis.stockmanagement.validators.ReasonAssignmentValidator;
 import org.openlmis.stockmanagement.validators.ReceiveIssueReasonValidator;
 import org.openlmis.stockmanagement.validators.SourceDestinationAssignmentValidator;
 import org.openlmis.stockmanagement.validators.StockEventValidator;
@@ -79,6 +80,9 @@ public class StockEventValidationsServiceTest {
   @MockBean
   private QuantityValidator quantityValidator;
 
+  @MockBean
+  private ReasonAssignmentValidator reasonAssignmentValidator;
+
   @Before
   public void setUp() throws Exception {
     //make real validators do nothing because
@@ -90,6 +94,7 @@ public class StockEventValidationsServiceTest {
     doNothing().when(receiveIssueReasonValidator).validate(any(StockEventDto.class));
     doNothing().when(adjustmentReasonValidator).validate(any(StockEventDto.class));
     doNothing().when(quantityValidator).validate(any(StockEventDto.class));
+    doNothing().when(reasonAssignmentValidator).validate(any(StockEventDto.class));
   }
 
   @Test
