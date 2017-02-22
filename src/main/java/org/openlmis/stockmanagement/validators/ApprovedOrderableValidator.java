@@ -42,6 +42,9 @@ public class ApprovedOrderableValidator implements StockEventValidator {
    * @param stockEventDto the event to be validated.
    */
   public void validate(StockEventDto stockEventDto) {
+    if (stockEventDto.getOrderableId() == null) {
+      return;
+    }
     UUID facility = stockEventDto.getFacilityId();
     UUID program = stockEventDto.getProgramId();
 

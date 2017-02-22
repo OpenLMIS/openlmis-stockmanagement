@@ -42,7 +42,7 @@ public abstract class MessageKeys {
       EVENT_ERROR_PREFIX + ".sourceAndDestination.bothPresent";
 
   public static final String ERROR_SOURCE_DESTINATION_FREE_TEXT_BOTH_PRESENT =
-      ERROR_PREFIX + ".sourceAndDestinationFreeText.bothPresent";
+      EVENT_ERROR_PREFIX + ".sourceAndDestinationFreeText.bothPresent";
 
   public static final String ERROR_SOURCE_NOT_IN_VALID_LIST =
       EVENT_ERROR_PREFIX + ".source.not.in.validList";
@@ -74,7 +74,7 @@ public abstract class MessageKeys {
       + ".programId.invalid";
 
   public static final String ERROR_EVENT_ORDERABLE_INVALID = EVENT_ERROR_PREFIX
-      + ".ordeableId.invalid";
+      + ".orderableId.invalid";
 
   //stock events creation: adjustment reason
   public static final String ERROR_EVENT_ADJUSTMENT_REASON_TYPE_INVALID = EVENT_ERROR_PREFIX
