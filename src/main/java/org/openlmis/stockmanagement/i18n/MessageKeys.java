@@ -23,86 +23,90 @@ public abstract class MessageKeys {
 
   //stock card templates
   public static final String ERROR_STOCK_CARD_FIELD_INVALID =
-          ERROR_PREFIX + ".field.invalid";
+      ERROR_PREFIX + ".field.invalid";
 
   public static final String ERROR_PROGRAM_NOT_FOUND =
-          ERROR_PREFIX + ".program.notFound";
+      ERROR_PREFIX + ".program.notFound";
   public static final String ERROR_FACILITY_TYPE_NOT_FOUND =
-          ERROR_PREFIX + ".facilityType.notFound";
+      ERROR_PREFIX + ".facilityType.notFound";
 
   public static final String ERROR_STOCK_EVENT_REASON_NOT_MATCH =
-          ERROR_PREFIX + ".reason.notMatch";
+      ERROR_PREFIX + ".reason.notMatch";
 
   //stock events creation: approved products
   public static final String ERROR_ORDERABLE_NOT_IN_APPROVED_LIST =
-          EVENT_ERROR_PREFIX + ".orderable.not.in.approvedList";
+      EVENT_ERROR_PREFIX + ".orderable.not.in.approvedList";
 
   //stock events creation: source and destination assignment
   public static final String ERROR_SOURCE_DESTINATION_BOTH_PRESENT =
-          EVENT_ERROR_PREFIX + ".sourceAndDestination.bothPresent";
+      EVENT_ERROR_PREFIX + ".sourceAndDestination.bothPresent";
 
   public static final String ERROR_SOURCE_DESTINATION_FREE_TEXT_BOTH_PRESENT =
-          ERROR_PREFIX + ".sourceAndDestinationFreeText.bothPresent";
+      ERROR_PREFIX + ".sourceAndDestinationFreeText.bothPresent";
 
   public static final String ERROR_SOURCE_NOT_IN_VALID_LIST =
-          EVENT_ERROR_PREFIX + ".source.not.in.validList";
+      EVENT_ERROR_PREFIX + ".source.not.in.validList";
 
   public static final String ERROR_DESTINATION_NOT_IN_VALID_LIST =
-          EVENT_ERROR_PREFIX + ".destination.not.in.validList";
+      EVENT_ERROR_PREFIX + ".destination.not.in.validList";
 
   //stock events creation: free texts
   public static final String ERROR_SOURCE_FREE_TEXT_NOT_ALLOWED =
-          EVENT_ERROR_PREFIX + ".sourceFreeText.notAllowed";
+      EVENT_ERROR_PREFIX + ".sourceFreeText.notAllowed";
 
   public static final String ERROR_DESTINATION_FREE_TEXT_NOT_ALLOWED =
-          EVENT_ERROR_PREFIX + ".destinationFreeText.notAllowed";
+      EVENT_ERROR_PREFIX + ".destinationFreeText.notAllowed";
 
   public static final String ERROR_REASON_FREE_TEXT_NOT_ALLOWED =
-          EVENT_ERROR_PREFIX + ".reasonFreeText.notAllowed";
+      EVENT_ERROR_PREFIX + ".reasonFreeText.notAllowed";
 
   //stock events creation: mandatory fields
   public static final String ERROR_EVENT_OCCURRED_DATE_INVALID = EVENT_ERROR_PREFIX
-          + ".occurredDate.invalid";
+      + ".occurredDate.invalid";
 
   public static final String ERROR_EVENT_QUANTITY_INVALID = EVENT_ERROR_PREFIX
-          + ".quantity.invalid";
+      + ".quantity.invalid";
 
   public static final String ERROR_EVENT_FACILITY_INVALID = EVENT_ERROR_PREFIX
-          + ".facilityId.invalid";
+      + ".facilityId.invalid";
 
   public static final String ERROR_EVENT_PROGRAM_INVALID = EVENT_ERROR_PREFIX
-          + ".programId.invalid";
+      + ".programId.invalid";
 
   public static final String ERROR_EVENT_ORDERABLE_INVALID = EVENT_ERROR_PREFIX
-          + ".ordeableId.invalid";
+      + ".ordeableId.invalid";
 
   //stock events creation: adjustment reason
   public static final String ERROR_EVENT_ADJUSTMENT_REASON_TYPE_INVALID = EVENT_ERROR_PREFIX
-          + ".adjustment.reason.type.invalid";
+      + ".adjustment.reason.type.invalid";
 
   public static final String ERROR_EVENT_ADJUSTMENT_REASON_CATEGORY_INVALID = EVENT_ERROR_PREFIX
-          + ".adjustment.reason.category.invalid";
+      + ".adjustment.reason.category.invalid";
 
   //stock events creation: receive issue reason
   public static final String ERROR_EVENT_RECEIVE_REASON_TYPE_INVALID = EVENT_ERROR_PREFIX
-          + ".receive.reasonType.invalid";
+      + ".receive.reasonType.invalid";
 
   public static final String ERROR_EVENT_ISSUE_REASON_TYPE_INVALID = EVENT_ERROR_PREFIX
-          + ".issue.reasonType.invalid";
+      + ".issue.reasonType.invalid";
 
   public static final String ERROR_EVENT_RECEIVE_REASON_CATEGORY_INVALID = EVENT_ERROR_PREFIX
-          + ".receive.reasonCategory.invalid";
+      + ".receive.reasonCategory.invalid";
 
   public static final String ERROR_EVENT_ISSUE_REASON_CATEGORY_INVALID = EVENT_ERROR_PREFIX
-          + ".issue.reasonCategory.invalid";
+      + ".issue.reasonCategory.invalid";
+
+  //stock events creation: debit quantity
+  public static final String ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH = EVENT_ERROR_PREFIX
+      + ".debit.quantity.exceed.stockOnHand";
 
   //stock events creation: reason assignment
   public static final String ERROR_EVENT_REASON_NOT_IN_VALID_LIST = EVENT_ERROR_PREFIX
-          + ".reason.not.in.validList";
+      + ".reason.not.in.validList";
 
   //permission error
   public static final String ERROR_NO_FOLLOWING_PERMISSION = ERROR_PREFIX
-          + ".authorization.noFollowingPermission";
+      + ".authorization.noFollowingPermission";
 
   private MessageKeys() {
     throw new UnsupportedOperationException();

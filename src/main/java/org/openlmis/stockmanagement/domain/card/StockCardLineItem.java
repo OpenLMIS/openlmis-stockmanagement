@@ -33,6 +33,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -49,10 +50,10 @@ import static org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemRe
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties({
-        "stockCard", "originEvent",
-        "source", "destination",
-        "noticedDate", "savedDate",
-        "userId", "quantity"})
+    "stockCard", "originEvent",
+    "source", "destination",
+    "noticedDate", "savedDate",
+    "userId"})
 @Table(name = "stock_card_line_items", schema = "stockmanagement")
 public class StockCardLineItem extends BaseEntity {
 
@@ -98,6 +99,9 @@ public class StockCardLineItem extends BaseEntity {
   @Column(nullable = false)
   private UUID userId;
 
+  @Transient
+  private Integer stockOnHand;
+
   /**
    * Create line item from eventDto.
    *
@@ -109,18 +113,18 @@ public class StockCardLineItem extends BaseEntity {
    * @throws IllegalAccessException IllegalAccessException.
    */
   public static List<StockCardLineItem> createLineItemsFrom(
-          StockEventDto eventDto, StockCard stockCard, UUID savedEventId, UUID userId)
-          throws InstantiationException, IllegalAccessException {
+      StockEventDto eventDto, StockCard stockCard, UUID savedEventId, UUID userId)
+      throws InstantiationException, IllegalAccessException {
     StockCardLineItem lineItem = new StockCardLineItem(
-            stockCard,
-            fromId(savedEventId, StockEvent.class),
-            eventDto.getQuantity(),
-            fromId(eventDto.getReasonId(), StockCardLineItemReason.class),
-            eventDto.getSourceFreeText(), eventDto.getDestinationFreeText(),
-            eventDto.getDocumentNumber(), eventDto.getReasonFreeText(), eventDto.getSignature(),
-            fromId(eventDto.getSourceId(), Node.class),
-            fromId(eventDto.getDestinationId(), Node.class),
-            eventDto.getOccurredDate(), eventDto.getNoticedDate(), ZonedDateTime.now(), userId);
+        stockCard,
+        fromId(savedEventId, StockEvent.class),
+        eventDto.getQuantity(),
+        fromId(eventDto.getReasonId(), StockCardLineItemReason.class),
+        eventDto.getSourceFreeText(), eventDto.getDestinationFreeText(),
+        eventDto.getDocumentNumber(), eventDto.getReasonFreeText(), eventDto.getSignature(),
+        fromId(eventDto.getSourceId(), Node.class),
+        fromId(eventDto.getDestinationId(), Node.class),
+        eventDto.getOccurredDate(), eventDto.getNoticedDate(), ZonedDateTime.now(), userId, 0);
     stockCard.getLineItems().add(lineItem);
     return asList(lineItem);
   }
@@ -129,16 +133,16 @@ public class StockCardLineItem extends BaseEntity {
    * Calculate stock on hand with previous stock on hand.
    *
    * @param previousStockOnHand previous stock on hand.
-   * @return calculated stock on hand.
    */
-  public int calculateStockOnHand(int previousStockOnHand) {
+  public void calculateStockOnHand(int previousStockOnHand) {
     if (isPhysicalInventory()) {
       setReason(determineReasonByQuantity(previousStockOnHand));
-      return quantity;
+      setStockOnHand(quantity);
+      setQuantity(Math.abs(getStockOnHand() - previousStockOnHand));
     } else if (shouldIncrease()) {
-      return previousStockOnHand + quantity;
+      setStockOnHand(previousStockOnHand + quantity);
     } else {
-      return previousStockOnHand - quantity;
+      setStockOnHand(previousStockOnHand - quantity);
     }
   }
 

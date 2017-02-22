@@ -51,7 +51,7 @@ public class StockCardLineItemTest {
     StockEventDto eventDto = createStockEventDto();
     UUID userId = UUID.randomUUID();
     List<StockCardLineItem> lineItems =
-            createLineItemsFrom(eventDto, stockCard, event.getId(), userId);
+        createLineItemsFrom(eventDto, stockCard, event.getId(), userId);
     StockCardLineItem lineItem = lineItems.get(0);
 
     //then
@@ -85,104 +85,104 @@ public class StockCardLineItemTest {
   public void should_increase_soh_of_line_item_with_credit_reason() throws Exception {
     //given
     StockCardLineItemReason creditReason = StockCardLineItemReason.builder()
-            .reasonType(ReasonType.CREDIT).build();
+        .reasonType(ReasonType.CREDIT).build();
 
     StockCardLineItem lineItem = StockCardLineItem.builder()
-            .reason(creditReason)
-            .quantity(10).build();
+        .reason(creditReason)
+        .quantity(10).build();
     //when
-    int soh = lineItem.calculateStockOnHand(5);
+    lineItem.calculateStockOnHand(5);
 
     //then
-    assertThat(soh, is(15));
+    assertThat(lineItem.getStockOnHand(), is(15));
   }
 
   @Test
   public void should_decrease_soh_of_line_item_with_debit_reason() throws Exception {
     //given
     StockCardLineItemReason debitReason = StockCardLineItemReason.builder()
-            .reasonType(ReasonType.DEBIT).build();
+        .reasonType(ReasonType.DEBIT).build();
 
     StockCardLineItem lineItem = StockCardLineItem.builder()
-            .reason(debitReason)
-            .quantity(5).build();
+        .reason(debitReason)
+        .quantity(5).build();
     //when
-    int soh = lineItem.calculateStockOnHand(15);
+    lineItem.calculateStockOnHand(15);
 
     //then
-    assertThat(soh, is(10));
+    assertThat(lineItem.getStockOnHand(), is(10));
   }
 
   @Test
   public void should_increase_soh_of_line_item_when_receive_from() throws Exception {
     //given
     StockCardLineItem lineItem = StockCardLineItem.builder()
-            .source(new Node())
-            .quantity(15).build();
+        .source(new Node())
+        .quantity(15).build();
     //when
-    int soh = lineItem.calculateStockOnHand(15);
+    lineItem.calculateStockOnHand(15);
 
     //then
-    assertThat(soh, is(30));
+    assertThat(lineItem.getStockOnHand(), is(30));
   }
 
   @Test
   public void should_decrease_soh_of_line_item_when_issue_to() throws Exception {
     //given
     StockCardLineItem lineItem = StockCardLineItem.builder()
-            .destination(new Node())
-            .quantity(15).build();
+        .destination(new Node())
+        .quantity(15).build();
     //when
-    int soh = lineItem.calculateStockOnHand(15);
+    lineItem.calculateStockOnHand(15);
 
     //then
-    assertThat(soh, is(0));
+    assertThat(lineItem.getStockOnHand(), is(0));
   }
 
   @Test
   public void should_assign_credit_reason_and_return_quantity_as_soh_for_physical_overstock()
-          throws Exception {
+      throws Exception {
     //given
     StockCardLineItem lineItem = StockCardLineItem.builder()
-            .quantity(15).build();
+        .quantity(15).build();
 
     //when
-    int soh = lineItem.calculateStockOnHand(10);
+    lineItem.calculateStockOnHand(10);
 
     //then
-    assertThat(soh, is(15));
+    assertThat(lineItem.getStockOnHand(), is(15));
     assertThat(lineItem.getReason().getReasonType(), is(ReasonType.CREDIT));
     assertThat(lineItem.getReason().getReasonCategory(), is(ReasonCategory.PHYSICAL_INVENTORY));
   }
 
   @Test
   public void should_assign_debit_reason_and_return_quantity_as_soh_for_physical_understock()
-          throws Exception {
+      throws Exception {
     //given
     StockCardLineItem lineItem = StockCardLineItem.builder()
-            .quantity(15).build();
+        .quantity(15).build();
 
     //when
-    int soh = lineItem.calculateStockOnHand(20);
+    lineItem.calculateStockOnHand(20);
 
     //then
-    assertThat(soh, is(15));
+    assertThat(lineItem.getStockOnHand(), is(15));
     assertThat(lineItem.getReason().getReasonType(), is(ReasonType.DEBIT));
     assertThat(lineItem.getReason().getReasonCategory(), is(ReasonCategory.PHYSICAL_INVENTORY));
   }
 
   @Test
   public void should_assign_balance_reason_and_return_quantity_as_soh_for_physical_balance()
-          throws Exception {
+      throws Exception {
     //given
     StockCardLineItem lineItem = StockCardLineItem.builder()
-            .quantity(15).build();
+        .quantity(15).build();
 
     //when
-    int soh = lineItem.calculateStockOnHand(15);
+    lineItem.calculateStockOnHand(15);
 
     //then
-    assertThat(soh, is(15));
+    assertThat(lineItem.getStockOnHand(), is(15));
     assertThat(lineItem.getReason().getReasonType(), is(ReasonType.BALANCE_ADJUSTMENT));
     assertThat(lineItem.getReason().getReasonCategory(), is(ReasonCategory.PHYSICAL_INVENTORY));
   }

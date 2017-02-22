@@ -29,10 +29,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
 import static javax.persistence.CascadeType.ALL;
 import static org.hibernate.annotations.LazyCollectionOption.FALSE;
 
@@ -42,6 +46,7 @@ import static org.hibernate.annotations.LazyCollectionOption.FALSE;
 @NoArgsConstructor
 @Table(name = "stock_cards", schema = "stockmanagement")
 public class StockCard extends BaseEntity {
+
   @ManyToOne()
   @JoinColumn(nullable = false)
   private StockEvent originEvent;
@@ -57,6 +62,9 @@ public class StockCard extends BaseEntity {
   @OneToMany(cascade = ALL, mappedBy = "stockCard")
   private List<StockCardLineItem> lineItems;
 
+  @Transient
+  private Integer stockOnHand;
+
   /**
    * Create stock card from stock event dto.
    *
@@ -67,9 +75,32 @@ public class StockCard extends BaseEntity {
    * @throws IllegalAccessException IllegalAccessException.
    */
   public static StockCard createStockCardFrom(StockEventDto stockEventDto, UUID savedEventId)
-          throws InstantiationException, IllegalAccessException {
+      throws InstantiationException, IllegalAccessException {
     return new StockCard(fromId(savedEventId, StockEvent.class),
-            stockEventDto.getFacilityId(), stockEventDto.getProgramId(),
-            stockEventDto.getOrderableId(), new ArrayList<>());
+        stockEventDto.getFacilityId(), stockEventDto.getProgramId(),
+        stockEventDto.getOrderableId(), new ArrayList<>(), 0);
+  }
+
+  /**
+   * Calculate stock on hand for each line item and the card itself.
+   */
+  public void calculateStockOnHand() {
+    reorderLineItemsByDates();
+
+    int previousSoh = 0;
+    for (StockCardLineItem lineItem : getLineItems()) {
+      lineItem.calculateStockOnHand(previousSoh);
+      previousSoh = lineItem.getStockOnHand();
+    }
+    setStockOnHand(previousSoh);
+  }
+
+  private void reorderLineItemsByDates() {
+    Comparator<StockCardLineItem> byOccurred =
+        comparing(StockCardLineItem::getOccurredDate);
+    Comparator<StockCardLineItem> byNoticed =
+        comparing(StockCardLineItem::getNoticedDate);
+
+    setLineItems(lineItems.stream().sorted(byOccurred.thenComparing(byNoticed)).collect(toList()));
   }
 }

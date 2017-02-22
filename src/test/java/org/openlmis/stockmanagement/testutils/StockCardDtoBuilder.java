@@ -37,32 +37,31 @@ public class StockCardDtoBuilder {
    */
   public static StockCardDto createStockCardDto() {
     StockCardLineItemReason reason = StockCardLineItemReason
-            .builder()
-            .name("Transfer In")
-            .reasonCategory(ReasonCategory.ADJUSTMENT)
-            .reasonType(ReasonType.CREDIT).build();
+        .builder()
+        .name("Transfer In")
+        .reasonCategory(ReasonCategory.ADJUSTMENT)
+        .reasonType(ReasonType.CREDIT).build();
 
 
     StockCardLineItem lineItem = StockCardLineItem
-            .builder()
-            .quantity(1)
-            .occurredDate(ZonedDateTime.of(2017, 2, 13, 4, 2, 18, 781000000, ZoneId.of("UTC")))
-            .reason(reason).build();
+        .builder()
+        .stockOnHand(1)
+        .quantity(1)
+        .occurredDate(ZonedDateTime.of(2017, 2, 13, 4, 2, 18, 781000000, ZoneId.of("UTC")))
+        .reason(reason).build();
 
     StockCardLineItemDto lineItemDto = StockCardLineItemDto
-            .builder()
-            .stockOnHand(1)
-            .quantity(1)
-            .lineItem(lineItem)
-            .source(FacilityDto.builder().name("HF1").build())
-            .build();
+        .builder()
+        .lineItem(lineItem)
+        .source(FacilityDto.builder().name("HF1").build())
+        .build();
 
     return StockCardDto.builder()
-            .stockOnHand(1)
-            .facility(FacilityDto.builder().name("HC01").build())
-            .program(ProgramDto.builder().name("HIV").build())
-            .orderable(OrderableDto.builder().productCode("ABC01").build())
-            .lineItems(Arrays.asList(lineItemDto))
-            .build();
+        .stockOnHand(1)
+        .facility(FacilityDto.builder().name("HC01").build())
+        .program(ProgramDto.builder().name("HIV").build())
+        .orderable(OrderableDto.builder().productCode("ABC01").build())
+        .lineItems(Arrays.asList(lineItemDto))
+        .build();
   }
 }

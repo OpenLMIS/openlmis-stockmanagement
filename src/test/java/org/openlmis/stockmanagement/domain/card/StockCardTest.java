@@ -13,15 +13,12 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.dto;
+package org.openlmis.stockmanagement.domain.card;
 
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -29,16 +26,17 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.dto.StockCardLineItemDto.createFrom;
 import static org.openlmis.stockmanagement.testutils.DatesUtil.getBaseDateTime;
 import static org.openlmis.stockmanagement.testutils.DatesUtil.oneDayLater;
 import static org.openlmis.stockmanagement.testutils.DatesUtil.oneHourEarlier;
 import static org.openlmis.stockmanagement.testutils.DatesUtil.oneHourLater;
 
-public class StockCardDtoTest {
+
+public class StockCardTest {
+
   @Test
   public void should_reorder_line_items_by_occurred_then_by_noticed_when_calculate_soh()
-          throws Exception {
+      throws Exception {
     //given
     ZonedDateTime baseDate = getBaseDateTime();
 
@@ -57,53 +55,40 @@ public class StockCardDtoTest {
     lineItem3.setNoticedDate(oneHourEarlier(baseDate));
     lineItem3.setQuantity(1);
 
-    StockCardDto cardDto = StockCardDto.builder()
-            .lineItems(asList(
-                    createFrom(lineItem1),
-                    createFrom(lineItem2),
-                    createFrom(lineItem3)))
-            .build();
+    StockCard stockCard = new StockCard();
+    stockCard.setLineItems(asList(lineItem1, lineItem2, lineItem3));
 
     //when
-    cardDto.calculateStockOnHand();
+    stockCard.calculateStockOnHand();
 
     //then
-    assertThat(cardDto.getLineItems().get(0).getLineItem(), is(lineItem3));
-    assertThat(cardDto.getLineItems().get(1).getLineItem(), is(lineItem2));
-    assertThat(cardDto.getLineItems().get(2).getLineItem(), is(lineItem1));
+    assertThat(stockCard.getLineItems().get(0), is(lineItem3));
+    assertThat(stockCard.getLineItems().get(1), is(lineItem2));
+    assertThat(stockCard.getLineItems().get(2), is(lineItem1));
   }
 
   @Test
-  public void should_get_soh_by_calculating_soh_of_each_line_item_dto() throws Exception {
+  public void should_get_soh_by_calculating_soh_of_each_line_item_() throws Exception {
     //given
-    StockCardLineItem lineItem1 = new StockCardLineItem();
-    StockCardLineItem lineItem2 = new StockCardLineItem();
+    StockCardLineItem lineItem1 = mock(StockCardLineItem.class);
+    StockCardLineItem lineItem2 = mock(StockCardLineItem.class);
 
-    lineItem1.setOccurredDate(getBaseDateTime());
-    lineItem2.setOccurredDate(oneDayLater(getBaseDateTime()));
+    when(lineItem1.getOccurredDate()).thenReturn(getBaseDateTime());
+    when(lineItem2.getOccurredDate()).thenReturn(oneDayLater(getBaseDateTime()));
+    when(lineItem1.getStockOnHand()).thenReturn(123);
+    when(lineItem2.getStockOnHand()).thenReturn(456);
 
-    StockCardLineItemDto lineItemDto1 = mock(StockCardLineItemDto.class);
-    StockCardLineItemDto lineItemDto2 = mock(StockCardLineItemDto.class);
-
-    when(lineItemDto1.getStockOnHand()).thenReturn(123);
-    when(lineItemDto2.getStockOnHand()).thenReturn(456);
-
-    when(lineItemDto1.getLineItem()).thenReturn(lineItem1);
-    when(lineItemDto2.getLineItem()).thenReturn(lineItem2);
-
-    List<StockCardLineItemDto> lineItemDtos = Arrays.asList(lineItemDto1, lineItemDto2);
-
-    StockCardDto cardDto = StockCardDto.builder()
-            .lineItems(lineItemDtos)
-            .build();
+    StockCard card = new StockCard();
+    card.setLineItems(asList(lineItem1, lineItem2));
 
     //when
-    cardDto.calculateStockOnHand();
+    card.calculateStockOnHand();
 
     //then
-    verify(lineItemDto1, Mockito.times(1)).calculateStockOnHand(0);
-    verify(lineItemDto2, Mockito.times(1)).calculateStockOnHand(123);
+    verify(lineItem1, Mockito.times(1)).calculateStockOnHand(0);
+    verify(lineItem2, Mockito.times(1)).calculateStockOnHand(123);
 
-    assertThat(cardDto.getStockOnHand(), is(456));
+    assertThat(card.getStockOnHand(), is(456));
   }
+
 }

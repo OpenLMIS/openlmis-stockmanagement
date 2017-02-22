@@ -65,7 +65,7 @@ public class StockCardService {
    * @throws InstantiationException InstantiationException.
    */
   public void saveFromEvent(StockEventDto stockEventDto, UUID savedEventId, UUID currentUserId)
-          throws IllegalAccessException, InstantiationException {
+      throws IllegalAccessException, InstantiationException {
 
     StockCard stockCard = findExistingOrCreateNewCard(stockEventDto, savedEventId);
 
@@ -90,17 +90,17 @@ public class StockCardService {
   }
 
   private StockCardDto createStockCardDto(StockCard foundCard) {
+    foundCard.calculateStockOnHand();
     StockCardDto stockCardDto = StockCardDto.createFrom(foundCard);
 
     assignFacilityProgramOrderableForStockCard(foundCard, stockCardDto);
     assignSourceDestinationForLineItems(stockCardDto);
 
-    stockCardDto.calculateStockOnHand();
     return stockCardDto;
   }
 
   private void assignFacilityProgramOrderableForStockCard(
-          StockCard foundCard, StockCardDto stockCardDto) {
+      StockCard foundCard, StockCardDto stockCardDto) {
     stockCardDto.setFacility(facilityRefDataService.findOne(foundCard.getFacilityId()));
     stockCardDto.setProgram(programRefDataService.findOne(foundCard.getProgramId()));
     stockCardDto.setOrderable(orderableRefDataService.findOne(foundCard.getOrderableId()));
@@ -127,12 +127,12 @@ public class StockCardService {
   }
 
   private StockCard findExistingOrCreateNewCard(StockEventDto stockEventDto, UUID savedEventId)
-          throws InstantiationException, IllegalAccessException {
+      throws InstantiationException, IllegalAccessException {
 
     StockCard foundCard = stockCardRepository.findByProgramIdAndFacilityIdAndOrderableId(
-            stockEventDto.getProgramId(),
-            stockEventDto.getFacilityId(),
-            stockEventDto.getOrderableId());
+        stockEventDto.getProgramId(),
+        stockEventDto.getFacilityId(),
+        stockEventDto.getOrderableId());
 
     if (foundCard != null) {
       return foundCard;
