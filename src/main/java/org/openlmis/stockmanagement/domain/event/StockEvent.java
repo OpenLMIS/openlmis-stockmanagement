@@ -15,20 +15,22 @@
 
 package org.openlmis.stockmanagement.domain.event;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.movement.Node;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.ZonedDateTime;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.time.ZonedDateTime;
-import java.util.UUID;
 
 @Entity
 @Data
@@ -67,9 +69,6 @@ public class StockEvent extends BaseEntity {
 
   @Column(nullable = false, columnDefinition = "timestamp")
   private ZonedDateTime noticedDate;
-
-  @Column(nullable = false, columnDefinition = "timestamp")
-  private ZonedDateTime savedDate;
 
   private String signature;
 

@@ -15,6 +15,15 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static java.util.UUID.fromString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.testutils.DatesUtil.oneHourEarlier;
+import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
+
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,17 +54,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
-
-import static java.util.UUID.fromString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.testutils.DatesUtil.oneDayLater;
-import static org.openlmis.stockmanagement.testutils.DatesUtil.oneHourEarlier;
-import static org.openlmis.stockmanagement.testutils.DatesUtil.oneHourLater;
-import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -90,7 +88,7 @@ public class StockCardServiceTest extends BaseTest {
 
   @Test
   public void should_save_stock_card_line_items_and_create_stock_card_for_first_movement()
-          throws Exception {
+      throws Exception {
     //given
     UUID userId = UUID.randomUUID();
     StockEventDto stockEventDto = createStockEventDto();
@@ -115,7 +113,7 @@ public class StockCardServiceTest extends BaseTest {
 
   @Test
   public void should_save_line_items_with_program_facility_orderable_for_non_first_movement()
-          throws Exception {
+      throws Exception {
     //given
     //1. there is an existing event that caused a stock card to exist
     StockEventDto existingEventDto = createStockEventDto();
@@ -146,7 +144,7 @@ public class StockCardServiceTest extends BaseTest {
 
   @Test
   public void should_get_refdata_and_convert_organizations_when_find_stock_card()
-          throws Exception {
+      throws Exception {
     //given
     UUID userId = UUID.randomUUID();
     StockEventDto stockEventDto = createStockEventDto();
@@ -158,14 +156,14 @@ public class StockCardServiceTest extends BaseTest {
     OrderableDto orderableDto = new OrderableDto();
 
     when(facilityReferenceDataService.findOne(stockEventDto.getFacilityId()))
-            .thenReturn(cardFacility);
+        .thenReturn(cardFacility);
     when(facilityReferenceDataService.findOne(fromString("e6799d64-d10d-4011-b8c2-0e4d4a3f65ce")))
-            .thenReturn(sourceFacility);
+        .thenReturn(sourceFacility);
 
     when(programReferenceDataService.findOne(stockEventDto.getProgramId()))
-            .thenReturn(programDto);
+        .thenReturn(programDto);
     when(orderableReferenceDataService.findOne(stockEventDto.getOrderableId()))
-            .thenReturn(orderableDto);
+        .thenReturn(orderableDto);
 
     //2. there is an existing stock card with line items
     StockEvent savedEvent = save(stockEventDto, userId);
@@ -190,23 +188,22 @@ public class StockCardServiceTest extends BaseTest {
     ZonedDateTime baseDate = DatesUtil.getBaseDateTime();
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
 
-    //save 1 event
+    //1 event
     stockEventDto.setOccurredDate(baseDate);
-    stockEventDto.setNoticedDate(oneDayLater(baseDate));
+
+    //2 event
+    stockEventDto.setOccurredDate(baseDate);
+
+    //3 event
+    stockEventDto.setOccurredDate(oneHourEarlier(baseDate));
+
+    //save them in the reverse order, so that noticed date order is 3,2,1
+    final StockEvent event3 = save(stockEventDto, UUID.randomUUID());
+    final StockEvent event2 = save(stockEventDto, UUID.randomUUID());
     final StockEvent event1 = save(stockEventDto, UUID.randomUUID());
 
-    //save 2 event
-    stockEventDto.setOccurredDate(baseDate);
-    stockEventDto.setNoticedDate(oneHourLater(baseDate));
-    final StockEvent event2 = save(stockEventDto, UUID.randomUUID());
-
-    //save 3 event
-    stockEventDto.setOccurredDate(oneHourEarlier(baseDate));
-    stockEventDto.setNoticedDate(oneHourEarlier(baseDate));
-    final StockEvent event3 = save(stockEventDto, UUID.randomUUID());
-
     //when
-    UUID cardId = stockCardRepository.findByOriginEvent(event1).getId();
+    UUID cardId = stockCardRepository.findByOriginEvent(event3).getId();
     StockCardDto card = stockCardService.findStockCardById(cardId);
 
     //then
@@ -245,12 +242,12 @@ public class StockCardServiceTest extends BaseTest {
 
   @Test(expected = PermissionMessageException.class)
   public void should_throw_permission_exception_if_user_has_no_permission_to_view_card()
-          throws Exception {
+      throws Exception {
     //given
     StockEvent savedEvent = save(createStockEventDto(), UUID.randomUUID());
     doThrow(new PermissionMessageException(new Message("some error")))
-            .when(permissionService)
-            .canViewStockCard(savedEvent.getProgramId(), savedEvent.getFacilityId());
+        .when(permissionService)
+        .canViewStockCard(savedEvent.getProgramId(), savedEvent.getFacilityId());
 
     //when
     UUID savedCardId = stockCardRepository.findByOriginEvent(savedEvent).getId();
@@ -258,9 +255,9 @@ public class StockCardServiceTest extends BaseTest {
   }
 
   private StockEvent save(StockEventDto eventDto, UUID userId)
-          throws InstantiationException, IllegalAccessException {
+      throws InstantiationException, IllegalAccessException {
     StockEvent savedEvent = stockEventsRepository
-            .save(eventDto.toEvent(UUID.randomUUID()));
+        .save(eventDto.toEvent(UUID.randomUUID()));
     stockCardService.saveFromEvent(eventDto, savedEvent.getId(), userId);
     return savedEvent;
   }

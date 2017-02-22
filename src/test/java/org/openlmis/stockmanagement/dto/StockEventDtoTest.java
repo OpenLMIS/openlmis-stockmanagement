@@ -15,17 +15,17 @@
 
 package org.openlmis.stockmanagement.dto;
 
+import static java.time.temporal.ChronoUnit.SECONDS;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertThat;
+
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
-
-import static java.time.temporal.ChronoUnit.SECONDS;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.lessThan;
-import static org.junit.Assert.assertThat;
 
 public class StockEventDtoTest {
   @Test
@@ -54,13 +54,12 @@ public class StockEventDtoTest {
     assertThat(event.getFacilityId(), is(stockEventDto.getFacilityId()));
     assertThat(event.getOrderableId(), is(stockEventDto.getOrderableId()));
 
-    assertThat(event.getNoticedDate(), is(stockEventDto.getNoticedDate()));
     assertThat(event.getOccurredDate(), is(stockEventDto.getOccurredDate()));
 
     assertThat(event.getUserId(), is(userId));
 
-    ZonedDateTime savedDate = event.getSavedDate();
-    long between = SECONDS.between(savedDate, ZonedDateTime.now());
+    ZonedDateTime noticedDate = event.getNoticedDate();
+    long between = SECONDS.between(noticedDate, ZonedDateTime.now());
 
     assertThat(between, lessThan(2L));
   }

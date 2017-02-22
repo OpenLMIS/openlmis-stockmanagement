@@ -15,6 +15,13 @@
 
 package org.openlmis.stockmanagement.domain.card;
 
+import static java.time.temporal.ChronoUnit.SECONDS;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertThat;
+import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemsFrom;
+import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
+
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.adjustment.ReasonCategory;
 import org.openlmis.stockmanagement.domain.adjustment.ReasonType;
@@ -27,13 +34,6 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import static java.time.temporal.ChronoUnit.SECONDS;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThan;
-import static org.junit.Assert.assertThat;
-import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemsFrom;
-import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
 
 public class StockCardLineItemTest {
 
@@ -68,15 +68,14 @@ public class StockCardLineItemTest {
     assertThat(lineItem.getDestination().getId(), is(eventDto.getDestinationId()));
 
     assertThat(lineItem.getOccurredDate(), is(eventDto.getOccurredDate()));
-    assertThat(lineItem.getNoticedDate(), is(eventDto.getNoticedDate()));
 
     assertThat(lineItem.getStockCard(), is(stockCard));
     assertThat(lineItem.getOriginEvent().getId(), is(event.getId()));
 
     assertThat(lineItem.getUserId(), is(userId));
 
-    ZonedDateTime savedDate = lineItem.getSavedDate();
-    long between = SECONDS.between(savedDate, ZonedDateTime.now());
+    ZonedDateTime noticedDate = lineItem.getNoticedDate();
+    long between = SECONDS.between(noticedDate, ZonedDateTime.now());
 
     assertThat(between, lessThan(2L));
   }
