@@ -9,7 +9,7 @@ services:
     env_file: .env
 
   db:
-    image: openlmis/postgres
+    image: openlmis/postgres:9.4
     ports:
       - "8767:5432"
     env_file: .env
