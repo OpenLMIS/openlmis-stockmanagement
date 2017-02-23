@@ -109,19 +109,24 @@ public class StockCardSummariesServiceTest {
 
     String orderablePropertyName = "orderable";
     String idPropertyName = "id";
+    String lineItemsPropertyName = "lineItems";
     assertThat(cardDtos, hasItem(allOf(
         hasProperty(orderablePropertyName, is(orderable1)),
-        hasProperty(idPropertyName, notNullValue()))));
+        hasProperty(idPropertyName, notNullValue()),
+        hasProperty(lineItemsPropertyName, nullValue()))));
     assertThat(cardDtos, hasItem(allOf(
         hasProperty(orderablePropertyName, is(orderable3)),
-        hasProperty(idPropertyName, notNullValue()))));
+        hasProperty(idPropertyName, notNullValue()),
+        hasProperty(lineItemsPropertyName, nullValue()))));
 
     assertThat(cardDtos, hasItem(allOf(
         hasProperty(orderablePropertyName, is(orderable2)),
-        hasProperty(idPropertyName, nullValue()))));
+        hasProperty(idPropertyName, nullValue()),
+        hasProperty(lineItemsPropertyName, nullValue()))));
     assertThat(cardDtos, hasItem(allOf(
         hasProperty(orderablePropertyName, is(orderable4)),
-        hasProperty(idPropertyName, nullValue()))));
+        hasProperty(idPropertyName, nullValue()),
+        hasProperty(lineItemsPropertyName, nullValue()))));
   }
 
   private OrderableDto createOrderable(UUID orderableId) {

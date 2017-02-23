@@ -61,7 +61,10 @@ public class StockCardSummariesService extends StockCardBaseService {
         productsToCardDtos(programId, facilityId, productsWithoutCards);
     List<StockCardDto> cardDtos = createStockCardDtos(stockCards);
 
-    return concat(cardDtos.stream(), productCardDtos.stream()).collect(toList());
+    List<StockCardDto> allCardDtos = concat(cardDtos.stream(), productCardDtos.stream())
+        .collect(toList());
+    allCardDtos.forEach(cardDto -> cardDto.setLineItems(null));
+    return allCardDtos;
   }
 
   private List<ApprovedProductDto> filterProductsWithoutCards(
