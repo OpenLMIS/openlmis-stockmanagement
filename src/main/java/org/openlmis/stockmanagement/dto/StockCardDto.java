@@ -15,7 +15,10 @@
 
 package org.openlmis.stockmanagement.dto;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static java.util.stream.Collectors.toList;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
 
@@ -27,6 +30,7 @@ import java.util.UUID;
 
 @Builder
 @Data
+@JsonInclude(NON_NULL)
 public class StockCardDto {
 
   private UUID id;
