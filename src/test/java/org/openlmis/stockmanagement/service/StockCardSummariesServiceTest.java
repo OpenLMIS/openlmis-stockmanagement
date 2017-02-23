@@ -110,6 +110,8 @@ public class StockCardSummariesServiceTest {
     String orderablePropertyName = "orderable";
     String idPropertyName = "id";
     String lineItemsPropertyName = "lineItems";
+    String stockOnHandPropertyName = "stockOnHand";
+
     assertThat(cardDtos, hasItem(allOf(
         hasProperty(orderablePropertyName, is(orderable1)),
         hasProperty(idPropertyName, notNullValue()),
@@ -122,10 +124,12 @@ public class StockCardSummariesServiceTest {
     assertThat(cardDtos, hasItem(allOf(
         hasProperty(orderablePropertyName, is(orderable2)),
         hasProperty(idPropertyName, nullValue()),
+        hasProperty(stockOnHandPropertyName, nullValue()),
         hasProperty(lineItemsPropertyName, nullValue()))));
     assertThat(cardDtos, hasItem(allOf(
         hasProperty(orderablePropertyName, is(orderable4)),
         hasProperty(idPropertyName, nullValue()),
+        hasProperty(stockOnHandPropertyName, nullValue()),
         hasProperty(lineItemsPropertyName, nullValue()))));
   }
 
