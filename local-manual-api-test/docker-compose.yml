@@ -11,14 +11,14 @@ services:
       - "53"
 
   nginx:
-    image: openlmis/nginx
+    image: openlmis/nginx:1
     ports:
       - "80:80"
     env_file: .manual-api-test-env
     depends_on: [consul]
 
   stockmanagement:
-    image: openlmis/dev
+    image: openlmis/dev:1
     ports:
       - "5005:5005"
       - "8080:8080"
@@ -49,7 +49,7 @@ services:
     env_file: .manual-api-test-env
 
   log:
-    image: openlmis/rsyslog
+    image: openlmis/rsyslog:1
 
 volumes:
   gradlecache:
