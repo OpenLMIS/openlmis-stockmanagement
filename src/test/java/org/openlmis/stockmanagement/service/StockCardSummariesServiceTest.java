@@ -115,10 +115,12 @@ public class StockCardSummariesServiceTest {
     assertThat(cardDtos, hasItem(allOf(
         hasProperty(orderablePropertyName, is(orderable1)),
         hasProperty(idPropertyName, notNullValue()),
+        hasProperty(stockOnHandPropertyName, notNullValue()),
         hasProperty(lineItemsPropertyName, nullValue()))));
     assertThat(cardDtos, hasItem(allOf(
         hasProperty(orderablePropertyName, is(orderable3)),
         hasProperty(idPropertyName, notNullValue()),
+        hasProperty(stockOnHandPropertyName, notNullValue()),
         hasProperty(lineItemsPropertyName, nullValue()))));
 
     assertThat(cardDtos, hasItem(allOf(
