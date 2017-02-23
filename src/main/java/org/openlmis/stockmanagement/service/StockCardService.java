@@ -26,7 +26,6 @@ import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -70,17 +69,6 @@ public class StockCardService extends StockCardBaseService {
 
     permissionService.canViewStockCard(foundCard.getProgramId(), foundCard.getFacilityId());
     return createStockCardDtos(singletonList(foundCard)).get(0);
-  }
-
-  /**
-   * Find stock card summaries by program and facility.
-   *
-   * @param programId  program id.
-   * @param facilityId facility id.
-   * @return Stock card summaries.
-   */
-  public List<StockCardDto> findStockCardSummaries(UUID programId, UUID facilityId) {
-    return null;
   }
 
   private StockCard findExistingOrCreateNewCard(StockEventDto stockEventDto, UUID savedEventId)

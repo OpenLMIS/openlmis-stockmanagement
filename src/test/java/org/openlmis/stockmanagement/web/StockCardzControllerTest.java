@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -31,12 +32,12 @@ import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardService;
+import org.openlmis.stockmanagement.service.StockCardSummariesService;
 import org.openlmis.stockmanagement.testutils.StockCardDtoBuilder;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.ResultActions;
 
-import java.util.Arrays;
 import java.util.UUID;
 
 //the name of this controller test is intentional wrong: cardz insteads of cards
@@ -50,6 +51,9 @@ public class StockCardzControllerTest extends BaseWebTest {
 
   @MockBean
   private StockCardService stockCardService;
+
+  @MockBean
+  private StockCardSummariesService stockCardSummariesService;
 
   @MockBean
   private PermissionService permissionService;
@@ -127,8 +131,8 @@ public class StockCardzControllerTest extends BaseWebTest {
     UUID programId = UUID.randomUUID();
     UUID facilityId = UUID.randomUUID();
 
-    when(stockCardService.findStockCardSummaries(programId, facilityId)).thenReturn(
-        Arrays.asList(StockCardDtoBuilder.createStockCardDto()));
+    when(stockCardSummariesService.findStockCards(programId, facilityId)).thenReturn(
+        singletonList(StockCardDtoBuilder.createStockCardDto()));
 
     ResultActions resultActions = mvc.perform(
         get(API_STOCK_CARD_SUMMARIES)

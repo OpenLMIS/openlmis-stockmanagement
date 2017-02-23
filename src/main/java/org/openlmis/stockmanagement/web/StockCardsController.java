@@ -21,6 +21,7 @@ import static org.springframework.http.HttpStatus.OK;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardService;
+import org.openlmis.stockmanagement.service.StockCardSummariesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -40,6 +41,9 @@ public class StockCardsController {
 
   @Autowired
   private StockCardService stockCardService;
+
+  @Autowired
+  private StockCardSummariesService stockCardSummariesService;
 
   /**
    * Get stock card by id.
@@ -67,7 +71,7 @@ public class StockCardsController {
       @RequestParam() UUID program,
       @RequestParam() UUID facility) {
     permissionService.canViewStockCard(program, facility);
-    return new ResponseEntity<>(stockCardService.findStockCardSummaries(program, facility), OK);
+    return new ResponseEntity<>(stockCardSummariesService.findStockCards(program, facility), OK);
   }
 
 }
