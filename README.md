@@ -187,3 +187,7 @@ $ gradle bootRun --debug-jvm
 This will enable debugging for the application, listening on port 5005, which the container has 
 exposed. Note that the process starts suspended, so the application will not start up until the 
 debugger has connected.
+
+## Environment variables
+
+Environment variables common to all services are listed here: https://github.com/OpenLMIS/openlmis-template-service/blob/master/README.md#environment-variables

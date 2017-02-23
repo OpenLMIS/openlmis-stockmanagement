@@ -15,22 +15,30 @@
 
 package org.openlmis.stockmanagement.dto;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import static java.util.stream.Collectors.toList;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 
 import java.util.List;
-
-import static java.util.stream.Collectors.toList;
+import java.util.UUID;
 
 @Builder
 @Data
 public class StockCardDto {
 
+  @JsonInclude(NON_NULL)
+  private UUID id;
+
   private Integer stockOnHand;
   private FacilityDto facility;
   private ProgramDto program;
   private OrderableDto orderable;
+
+  @JsonInclude(NON_NULL)
   private List<StockCardLineItemDto> lineItems;
 
   /**
@@ -44,6 +52,7 @@ public class StockCardDto {
         .map(StockCardLineItemDto::createFrom).collect(toList());
 
     return StockCardDto.builder()
+        .id(stockCard.getId())
         .lineItems(lineItemDtos)
         .stockOnHand(stockCard.getStockOnHand())
         .build();
