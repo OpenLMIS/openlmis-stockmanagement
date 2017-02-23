@@ -15,18 +15,21 @@
 
 package org.openlmis.stockmanagement.dto;
 
-import lombok.Builder;
-import lombok.Data;
+import static java.util.stream.Collectors.toList;
+
 import org.openlmis.stockmanagement.domain.card.StockCard;
 
-import java.util.List;
+import lombok.Builder;
+import lombok.Data;
 
-import static java.util.stream.Collectors.toList;
+import java.util.List;
+import java.util.UUID;
 
 @Builder
 @Data
 public class StockCardDto {
 
+  private UUID id;
   private Integer stockOnHand;
   private FacilityDto facility;
   private ProgramDto program;
@@ -44,6 +47,7 @@ public class StockCardDto {
         .map(StockCardLineItemDto::createFrom).collect(toList());
 
     return StockCardDto.builder()
+        .id(stockCard.getId())
         .lineItems(lineItemDtos)
         .stockOnHand(stockCard.getStockOnHand())
         .build();

@@ -15,11 +15,15 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.concat;
+
 import org.openlmis.stockmanagement.dto.ApprovedProductDto;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -59,4 +63,21 @@ public class ApprovedProductReferenceDataService extends
     return findAll(facilityId + "/approvedProducts", parameters);
   }
 
+  /**
+   * Retrieves all facility approved products from the reference data service, based on the
+   * provided facility. It can be optionally filtered by the program ID.
+   *
+   * @param facilityId id of the facility
+   * @param programId  id of the program
+   * @return a collection of approved products matching the search criteria.
+   */
+  public List<ApprovedProductDto> getAllApprovedProducts(UUID programId, UUID facilityId) {
+    Collection<ApprovedProductDto> fullSupply =
+        getApprovedProducts(facilityId, programId, true);
+
+    Collection<ApprovedProductDto> nonFullSupply =
+        getApprovedProducts(facilityId, programId, false);
+
+    return concat(fullSupply.stream(), nonFullSupply.stream()).collect(toList());
+  }
 }

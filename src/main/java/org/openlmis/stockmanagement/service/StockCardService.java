@@ -20,11 +20,9 @@ import static org.openlmis.stockmanagement.domain.card.StockCard.createStockCard
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemsFrom;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
-import org.openlmis.stockmanagement.dto.OrderableDto;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
-import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,9 +31,6 @@ import java.util.UUID;
 
 @Service
 public class StockCardService extends StockCardBaseService {
-
-  @Autowired
-  private OrderableReferenceDataService orderableRefDataService;
 
   @Autowired
   private StockCardRepository stockCardRepository;
@@ -74,9 +69,7 @@ public class StockCardService extends StockCardBaseService {
     }
 
     permissionService.canViewStockCard(foundCard.getProgramId(), foundCard.getFacilityId());
-    StockCardDto stockCardDto = createStockCardDto(singletonList(foundCard)).get(0);
-    stockCardDto.setOrderable(orderableRefDataService.findOne(foundCard.getOrderableId()));
-    return stockCardDto;
+    return createStockCardDtos(singletonList(foundCard)).get(0);
   }
 
   /**

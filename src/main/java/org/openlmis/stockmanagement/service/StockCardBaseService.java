@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
@@ -26,15 +27,18 @@ import org.openlmis.stockmanagement.dto.ProgramDto;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public abstract class StockCardBaseService {
+
+  @Autowired
+  private OrderableReferenceDataService orderableRefDataService;
 
   @Autowired
   private FacilityReferenceDataService facilityRefDataService;
@@ -45,7 +49,11 @@ public abstract class StockCardBaseService {
   @Autowired
   private OrganizationRepository organizationRepository;
 
-  protected List<StockCardDto> createStockCardDto(List<StockCard> stockCards) {
+  protected List<StockCardDto> createStockCardDtos(List<StockCard> stockCards) {
+    if (stockCards.isEmpty()) {
+      return emptyList();
+    }
+
     stockCards.forEach(StockCard::calculateStockOnHand);
 
     StockCard firstCard = stockCards.get(0);
@@ -53,15 +61,20 @@ public abstract class StockCardBaseService {
     ProgramDto program = programRefDataService.findOne(firstCard.getProgramId());
 
     return stockCards.stream()
-        .map(card -> cardToDto(facility, program, card))
+        .map(card -> {
+          OrderableDto orderable = orderableRefDataService.findOne(card.getOrderableId());
+          return cardToDto(facility, program, orderable, card);
+        })
         .collect(toList());
   }
 
-  private StockCardDto cardToDto(FacilityDto facility, ProgramDto program, StockCard card) {
+  private StockCardDto cardToDto(FacilityDto facility, ProgramDto program,
+                                 OrderableDto orderable, StockCard card) {
     StockCardDto cardDto = StockCardDto.createFrom(card);
 
     cardDto.setFacility(facility);
     cardDto.setProgram(program);
+    cardDto.setOrderable(orderable);
 
     assignSourceDestinationForLineItems(cardDto);
 
