@@ -36,22 +36,10 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public class StockCardService {
+public class StockCardService extends StockCardBaseService {
 
   @Autowired
   private StockCardRepository stockCardRepository;
-
-  @Autowired
-  private FacilityReferenceDataService facilityRefDataService;
-
-  @Autowired
-  private ProgramReferenceDataService programRefDataService;
-
-  @Autowired
-  private OrderableReferenceDataService orderableRefDataService;
-
-  @Autowired
-  private OrganizationRepository organizationRepository;
 
   @Autowired
   private PermissionService permissionService;
@@ -99,43 +87,6 @@ public class StockCardService {
    */
   public List<StockCardDto> findStockCardSummaries(UUID programId, UUID facilityId) {
     return null;
-  }
-
-  private StockCardDto createStockCardDto(StockCard foundCard) {
-    foundCard.calculateStockOnHand();
-    StockCardDto stockCardDto = StockCardDto.createFrom(foundCard);
-
-    assignFacilityProgramOrderableForStockCard(foundCard, stockCardDto);
-    assignSourceDestinationForLineItems(stockCardDto);
-
-    return stockCardDto;
-  }
-
-  private void assignFacilityProgramOrderableForStockCard(
-      StockCard foundCard, StockCardDto stockCardDto) {
-    stockCardDto.setFacility(facilityRefDataService.findOne(foundCard.getFacilityId()));
-    stockCardDto.setProgram(programRefDataService.findOne(foundCard.getProgramId()));
-    stockCardDto.setOrderable(orderableRefDataService.findOne(foundCard.getOrderableId()));
-  }
-
-  private void assignSourceDestinationForLineItems(StockCardDto stockCardDto) {
-    stockCardDto.getLineItems().forEach(lineItemDto -> {
-      StockCardLineItem lineItem = lineItemDto.getLineItem();
-      lineItemDto.setSource(getFromRefDataOrConvertOrg(lineItem.getSource()));
-      lineItemDto.setDestination(getFromRefDataOrConvertOrg(lineItem.getDestination()));
-    });
-  }
-
-  private FacilityDto getFromRefDataOrConvertOrg(Node node) {
-    if (node == null) {
-      return null;
-    }
-
-    if (node.isRefDataFacility()) {
-      return facilityRefDataService.findOne(node.getReferenceId());
-    } else {
-      return FacilityDto.createFrom(organizationRepository.findOne(node.getReferenceId()));
-    }
   }
 
   private StockCard findExistingOrCreateNewCard(StockEventDto stockEventDto, UUID savedEventId)
