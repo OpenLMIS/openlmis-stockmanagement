@@ -15,31 +15,31 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.OK;
+
 import org.openlmis.stockmanagement.dto.StockCardDto;
-import org.openlmis.stockmanagement.repository.StockCardRepository;
+import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
-
-import static java.util.stream.StreamSupport.stream;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.OK;
 
 @Controller
 @RequestMapping("/api")
 public class StockCardsController {
 
   @Autowired
-  private StockCardService stockCardService;
+  private PermissionService permissionService;
 
   @Autowired
-  private StockCardRepository stockCardRepository;
+  private StockCardService stockCardService;
 
   /**
    * Get stock card by id.
@@ -58,16 +58,16 @@ public class StockCardsController {
   }
 
   /**
-   * Get stock card ids.
+   * Get stock card summaries by program and facility.
    *
-   * @return all stock card ids.
+   * @return Stock card summaries.
    */
-  @RequestMapping(value = "/stockCardIds")
-  public ResponseEntity<String> getStockCardIds() {
-    String ids = String.join(",", stream(stockCardRepository.findAll().spliterator(), false)
-            .map(card -> card.getId().toString()).collect(Collectors.toList()));
-    String warning = "this is for showcase convenience, will be removed afterwards.";
-    return new ResponseEntity<String>(warning + ids, OK);
+  @RequestMapping(value = "/stockCardSummaries")
+  public ResponseEntity<List<StockCardDto>> getStockCardSummaries(
+      @RequestParam() UUID program,
+      @RequestParam() UUID facility) {
+    permissionService.canViewStockCard(program, facility);
+    return new ResponseEntity<>(stockCardService.findStockCardSummaries(program, facility), OK);
   }
 
 }

@@ -15,6 +15,9 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static org.openlmis.stockmanagement.domain.card.StockCard.createStockCardFrom;
+import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemsFrom;
+
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.movement.Node;
@@ -29,10 +32,8 @@ import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataSe
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
-
-import static org.openlmis.stockmanagement.domain.card.StockCard.createStockCardFrom;
-import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemsFrom;
 
 @Service
 public class StockCardService {
@@ -87,6 +88,17 @@ public class StockCardService {
 
     permissionService.canViewStockCard(foundCard.getProgramId(), foundCard.getFacilityId());
     return createStockCardDto(foundCard);
+  }
+
+  /**
+   * Find stock card summaries by program and facility.
+   *
+   * @param programId  program id.
+   * @param facilityId facility id.
+   * @return Stock card summaries.
+   */
+  public List<StockCardDto> findStockCardSummaries(UUID programId, UUID facilityId) {
+    return null;
   }
 
   private StockCardDto createStockCardDto(StockCard foundCard) {

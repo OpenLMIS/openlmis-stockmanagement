@@ -178,8 +178,8 @@ traits:
             required: true
             description: Facility id, indicates the facility that the queried stock card summaries should belong to.
           program:
-            required: false
-            description: When provided, returns stock cards under this program.
+            required: true
+            description: Program id, indicates the program that the queries stock card summaries is under.
 
         responses:
           200:
