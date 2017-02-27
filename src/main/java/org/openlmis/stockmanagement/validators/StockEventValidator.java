@@ -20,5 +20,5 @@ import org.springframework.stereotype.Component;
 
 @Component
 public interface StockEventValidator {
-  void validate(StockEventDto stockEventDto);
+  void validate(StockEventDto stockEventDto) throws IllegalAccessException, InstantiationException;
 }

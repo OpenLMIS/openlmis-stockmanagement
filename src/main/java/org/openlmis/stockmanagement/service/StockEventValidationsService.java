@@ -37,11 +37,14 @@ public class StockEventValidationsService {
    *
    * @param stockEventDto the event to be validated.
    */
-  public void validate(StockEventDto stockEventDto) {
-    stockEventValidators.forEach(validator -> validator.validate(stockEventDto));
+  public void validate(StockEventDto stockEventDto)
+      throws InstantiationException, IllegalAccessException {
+    for (StockEventValidator validator : stockEventValidators) {
+      validator.validate(stockEventDto);
+    }
 
     permissionService.canCreateStockEvent(
-            stockEventDto.getProgramId(), stockEventDto.getFacilityId());
+        stockEventDto.getProgramId(), stockEventDto.getFacilityId());
   }
 
 }

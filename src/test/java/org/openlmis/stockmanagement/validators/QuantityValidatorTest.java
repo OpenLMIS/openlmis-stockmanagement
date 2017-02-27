@@ -15,29 +15,36 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static org.junit.rules.ExpectedException.none;
+import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH;
+
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
+import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.UUID;
-
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH;
 
 @RunWith(MockitoJUnitRunner.class)
 public class QuantityValidatorTest {
+
+  @Rule
+  public ExpectedException expectedEx = none();
 
   @InjectMocks
   private QuantityValidator quantityValidator;
@@ -49,49 +56,7 @@ public class QuantityValidatorTest {
   private StockCardLineItemReasonRepository reasonRepository;
 
   @Test
-  public void quantity_of_decrease_event_is_greater_than_current_soh_should_not_pass_validation()
-      throws Exception {
-    StockEventDto stockEventDto = new StockEventDto();
-    stockEventDto.setQuantity(200);
-    stockEventDto.setDestinationId(UUID.fromString("087e81f6-a74d-4bba-9d01-16e0d64e9609"));
-
-    //1. decrease event is the first event of a stock card
-    when(stockCardRepository
-        .findByProgramIdAndFacilityIdAndOrderableId(
-            stockEventDto.getProgramId(),
-            stockEventDto.getFacilityId(),
-            stockEventDto.getOrderableId()))
-        .thenReturn(null);
-
-    //when
-    try {
-      quantityValidator.validate(stockEventDto);
-    } catch (ValidationMessageException ex) {
-      //then
-      assertThat(ex.getMessage(), containsString(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH));
-    }
-
-    //2. decrease event is the subsequent event of a stock card
-    StockCard mockedCard = Mockito.mock(StockCard.class);
-    when(mockedCard.getStockOnHand()).thenReturn(100);
-    when(stockCardRepository
-        .findByProgramIdAndFacilityIdAndOrderableId(
-            stockEventDto.getProgramId(),
-            stockEventDto.getFacilityId(),
-            stockEventDto.getOrderableId()))
-        .thenReturn(mockedCard);
-    try {
-      quantityValidator.validate(stockEventDto);
-    } catch (ValidationMessageException ex) {
-      assertThat(ex.getMessage(), containsString(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH));
-      return;
-    }
-
-    fail();
-  }
-
-  @Test
-  public void should_not_throw_validation_exception_if_event_has_no_destination_and_debit_reason()
+  public void should_not_throw_validation_exception_if_event_has_no_destination_or_debit_reason()
       throws Exception {
     //given
     StockEventDto stockEventDto = new StockEventDto();
@@ -118,5 +83,64 @@ public class QuantityValidatorTest {
 
     //when
     quantityValidator.validate(stockEventDto);
+  }
+
+  @Test
+  public void should_throw_validation_exception_if_quantity_make_soh_below_zero()
+      throws Exception {
+    //expect
+    expectedEx.expect(ValidationMessageException.class);
+    expectedEx.expectMessage(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH);
+
+    //given
+    ZonedDateTime day1 = ZonedDateTime.of(2017, 1, 1, 0, 0, 0, 0, ZoneId.of("UTC"));
+    ZonedDateTime day2 = day1.plusDays(1);
+    ZonedDateTime day3 = day2.plusDays(1);
+    ZonedDateTime day4 = day3.plusDays(1);
+
+    ArrayList<StockCardLineItem> lineItems = new ArrayList<>();
+    lineItems.add(createCreditLineItem(day1, 5));
+    lineItems.add(createDebitLineItem(day3, 1));
+    lineItems.add(createCreditLineItem(day4, 2));
+
+    StockCard card = new StockCard();
+    card.setLineItems(lineItems);
+
+    StockEventDto stockEventDto = createDebitEventDto(day2, 5);
+
+    when(stockCardRepository
+        .findByProgramIdAndFacilityIdAndOrderableId(
+            stockEventDto.getProgramId(),
+            stockEventDto.getFacilityId(),
+            stockEventDto.getOrderableId()))
+        .thenReturn(card);
+
+    //when
+    quantityValidator.validate(stockEventDto);
+  }
+
+  private StockEventDto createDebitEventDto(ZonedDateTime day2, int quantity) {
+    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    stockEventDto.setSourceId(null);
+    stockEventDto.setDestinationId(UUID.randomUUID());
+    stockEventDto.setOccurredDate(day2);
+    stockEventDto.setQuantity(quantity);
+    return stockEventDto;
+  }
+
+  private StockCardLineItem createDebitLineItem(ZonedDateTime dateTime, int quantity) {
+    StockCardLineItem lineItem2 = new StockCardLineItem();
+    lineItem2.setQuantity(quantity);
+    lineItem2.setOccurredDate(dateTime);
+    lineItem2.setDestination(new Node());
+    return lineItem2;
+  }
+
+  private StockCardLineItem createCreditLineItem(ZonedDateTime dateTime, int quantity) {
+    StockCardLineItem lineItem1 = new StockCardLineItem();
+    lineItem1.setQuantity(quantity);
+    lineItem1.setOccurredDate(dateTime);
+    lineItem1.setSource(new Node());
+    return lineItem1;
   }
 }
