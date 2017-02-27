@@ -3,44 +3,57 @@
   "type": "object",
   "properties": {
     "sourceId": {
-      "type": "string"
+      "type": "string",
+      "description": "During the 'RECEIVE' event, sourceId indicates where orderables are received from. Can not be present along with destination id."
     },
     "quantity": {
-      "type": "integer"
+      "type": "integer",
+      "description": "The quantity of the orderable or the stock on hand in 'ADJUSTMENT' event. Can not be negative number."
     },
     "facilityId": {
-      "type": "string"
+      "type": "string",
+      "description": "Part of identifier of stock card. Indicates in which facility this event occurred."
     },
     "signature": {
-      "type": "string"
+      "type": "string",
+      "description": "The signature of the operator."
     },
     "documentNumber": {
-      "type": "string"
+      "type": "string",
+      "description": ""
     },
     "destinationId": {
-      "type": "string"
+      "type": "string",
+      "description": "During the 'ISSUE' event, destinationId indicates where orderables are issued to. Can not be present along with source id."
     },
     "destinationFreeText": {
-      "type": "string"
+      "type": "string",
+      "description": "Remark of the destination. Only allowed when destination id is present and destination id does not point to a facility in ref-data."
     },
     "reasonId": {
-      "type": "string"
+      "type": "string",
+      "description": "Allowed for 'ISSUE', 'RECEIVE' and 'ADJUSTMENT' events, not allowed for 'PHYSICAL INVENTORY' events."
     },
     "orderableId": {
-      "type": "string"
+      "type": "string",
+      "description": "Part of identifier of stock card. Indicates which orderable this event is regarding."
     },
     "reasonFreeText": {
-      "type": "string"
+      "type": "string",
+      "description": "Remark of reason. Only allowed when reason id is present and the reason is configured by implementer or admin to allow free text."
     },
     "sourceFreeText": {
-      "type": "string"
+      "type": "string",
+      "description": "Remark of the source. Only allowed when source id is present and source id does not point to a facility in ref-data."
     },
     "programId": {
-      "type": "string"
+      "type": "string",
+      "description": "Part of identifier of stock card. Indicates under which program the target stock card is."
     },
     "occurredDate": {
       "type": "string",
-      "format": "date-time"
+      "format": "date-time",
+      "description": "The date and time(including time zone) when this event occurred"
     }
   },
   "required": [
