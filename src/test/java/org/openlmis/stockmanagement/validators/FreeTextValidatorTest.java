@@ -57,15 +57,13 @@ public class FreeTextValidatorTest {
 
   @Before
   public void setUp() throws Exception {
-    Node mockNode = mock(Node.class);
-    when(nodeRepository.findOne(any(UUID.class))).thenReturn(mockNode);
-    when(mockNode.isRefDataFacility()).thenReturn(true);
+    when(nodeRepository.findOne(null)).thenThrow(new IllegalArgumentException());
   }
 
   @Test
   public void should_fail_when_source_not_exist_but_source_free_text_exist() throws Exception {
     StockEventDto eventDto = new StockEventDto();
-    eventDto.setReasonId(null);
+    eventDto.setSourceId(null);
     eventDto.setSourceFreeText("source free text");
 
     try {
@@ -135,9 +133,14 @@ public class FreeTextValidatorTest {
 
   @Test
   public void should_fail_when_source_node_is_refdata_with_free_text() throws Exception {
-    StockEventDto eventDto = new StockEventDto();
+    UUID sourceId = fromString("0bd28568-43f1-4836-934d-ec5fb11398e8");
 
-    eventDto.setSourceId(fromString("0bd28568-43f1-4836-934d-ec5fb11398e8"));
+    Node mockNode = mock(Node.class);
+    when(nodeRepository.findOne(sourceId)).thenReturn(mockNode);
+    when(mockNode.isRefDataFacility()).thenReturn(true);
+
+    StockEventDto eventDto = new StockEventDto();
+    eventDto.setSourceId(sourceId);
     eventDto.setSourceFreeText("source free text");
 
     try {
@@ -152,8 +155,14 @@ public class FreeTextValidatorTest {
 
   @Test
   public void should_fail_when_destination_node_is_refdata_with_free_text() throws Exception {
+    UUID destinationId = fromString("0bd28568-43f1-4836-934d-ec5fb11398e8");
+
+    Node mockNode = mock(Node.class);
+    when(nodeRepository.findOne(destinationId)).thenReturn(mockNode);
+    when(mockNode.isRefDataFacility()).thenReturn(true);
+
     StockEventDto eventDto = new StockEventDto();
-    eventDto.setDestinationId(fromString("0bd28568-43f1-4836-934d-ec5fb11398e8"));
+    eventDto.setDestinationId(destinationId);
     eventDto.setDestinationFreeText("destination free text");
 
     try {

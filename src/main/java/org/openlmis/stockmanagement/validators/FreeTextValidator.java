@@ -46,10 +46,10 @@ public class FreeTextValidator implements StockEventValidator {
     LOGGER.debug("Validate free text");
     checkSourceDestinationFreeTextBothPresent(stockEventDto);
 
-    checkNodeFreeText(stockEventDto, stockEventDto.getSourceId(),
-        stockEventDto.getSourceFreeText(), ERROR_SOURCE_FREE_TEXT_NOT_ALLOWED);
-    checkNodeFreeText(stockEventDto, stockEventDto.getDestinationId(),
-        stockEventDto.getDestinationFreeText(), ERROR_DESTINATION_FREE_TEXT_NOT_ALLOWED);
+    checkNodeFreeText(stockEventDto.getSourceId(), stockEventDto.getSourceFreeText(),
+        ERROR_SOURCE_FREE_TEXT_NOT_ALLOWED);
+    checkNodeFreeText(stockEventDto.getDestinationId(), stockEventDto.getDestinationFreeText(),
+        ERROR_DESTINATION_FREE_TEXT_NOT_ALLOWED);
 
     checkReasonFreeText(stockEventDto);
   }
@@ -61,9 +61,8 @@ public class FreeTextValidator implements StockEventValidator {
     }
   }
 
-  private void checkNodeFreeText(StockEventDto stockEventDto, UUID nodeId, String freeText,
-                                 String errorKey) {
-    if (stockEventDto.hasSource()) {
+  private void checkNodeFreeText(UUID nodeId, String freeText, String errorKey) {
+    if (nodeId != null) {
       Node node = nodeRepository.findOne(nodeId);
       if (null != node && node.isRefDataFacility() && freeText != null) {
         throwError(errorKey, nodeId, freeText);
