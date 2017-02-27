@@ -82,8 +82,7 @@ public class ReceiveIssueReasonValidator implements StockEventValidator {
                                UUID reasonId, StockCardLineItemReason foundReason) {
     ReasonType reasonType = foundReason.getReasonType();
     if (reasonType != expectedReasonType) {
-      throw new ValidationMessageException(new Message(typeErrorKey,
-          reasonId, reasonType, expectedReasonType));
+      throw new ValidationMessageException(new Message(typeErrorKey, reasonId, reasonType));
     }
   }
 
@@ -91,8 +90,7 @@ public class ReceiveIssueReasonValidator implements StockEventValidator {
                                    StockCardLineItemReason foundReason) {
     ReasonCategory reasonCategory = foundReason.getReasonCategory();
     if (reasonCategory != AD_HOC) {
-      throw new ValidationMessageException(new Message(categoryErrorKey,
-          reasonId, reasonCategory, AD_HOC));
+      throw new ValidationMessageException(new Message(categoryErrorKey, reasonId, reasonCategory));
     }
   }
 }
