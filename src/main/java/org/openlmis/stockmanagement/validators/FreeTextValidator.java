@@ -15,6 +15,11 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_FREE_TEXT_NOT_ALLOWED;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_FREE_TEXT_NOT_ALLOWED;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_FREE_TEXT_BOTH_PRESENT;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_FREE_TEXT_NOT_ALLOWED;
+
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.dto.StockEventDto;
@@ -26,11 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
-
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_FREE_TEXT_NOT_ALLOWED;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_FREE_TEXT_NOT_ALLOWED;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_FREE_TEXT_BOTH_PRESENT;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_FREE_TEXT_NOT_ALLOWED;
 
 @Component(value = "FreeTextValidator")
 public class FreeTextValidator implements StockEventValidator {
@@ -44,15 +44,13 @@ public class FreeTextValidator implements StockEventValidator {
   @Override
   public void validate(StockEventDto stockEventDto) {
     checkSourceDestinationFreeTextBothPresent(stockEventDto);
-    if (stockEventDto.hasSource()) {
-      checkSourceFreeText(stockEventDto);
-    }
-    if (stockEventDto.hasDestination()) {
-      checkDestinationFreeText(stockEventDto);
-    }
-    if (stockEventDto.hasReason()) {
-      checkReasonFreeText(stockEventDto);
-    }
+
+    checkNodeFreeText(stockEventDto, stockEventDto.getSourceId(),
+        stockEventDto.getSourceFreeText(), ERROR_SOURCE_FREE_TEXT_NOT_ALLOWED);
+    checkNodeFreeText(stockEventDto, stockEventDto.getDestinationId(),
+        stockEventDto.getDestinationFreeText(), ERROR_DESTINATION_FREE_TEXT_NOT_ALLOWED);
+
+    checkReasonFreeText(stockEventDto);
   }
 
   private void checkSourceDestinationFreeTextBothPresent(StockEventDto stockEventDto) {
@@ -62,30 +60,31 @@ public class FreeTextValidator implements StockEventValidator {
     }
   }
 
-  private void checkSourceFreeText(StockEventDto stockEventDto) {
-    checkNodeFreeText(stockEventDto.getSourceId(), ERROR_SOURCE_FREE_TEXT_NOT_ALLOWED,
-        stockEventDto.getSourceFreeText());
-  }
-
-  private void checkDestinationFreeText(StockEventDto stockEventDto) {
-    checkNodeFreeText(stockEventDto.getDestinationId(), ERROR_DESTINATION_FREE_TEXT_NOT_ALLOWED,
-        stockEventDto.getDestinationFreeText());
-  }
-
-  private void checkNodeFreeText(UUID nodeId, String errorKey, String freeText) {
-    Node node = nodeRepository.findOne(nodeId);
-    if (null != node && node.isRefDataFacility() && freeText != null) {
+  private void checkNodeFreeText(StockEventDto stockEventDto, UUID nodeId, String freeText,
+                                 String errorKey) {
+    if (stockEventDto.hasSource()) {
+      Node node = nodeRepository.findOne(nodeId);
+      if (null != node && node.isRefDataFacility() && freeText != null) {
+        throwError(errorKey, nodeId, freeText);
+      }
+    } else if (freeText != null) {
+      //node free text exist but node id is null
       throwError(errorKey, nodeId, freeText);
     }
   }
 
   private void checkReasonFreeText(StockEventDto stockEventDto) {
-    StockCardLineItemReason reason =
-        stockCardLineItemReasonRepository.findOne(stockEventDto.getReasonId());
+    UUID reasonId = stockEventDto.getReasonId();
+    String freeText = stockEventDto.getReasonFreeText();
+    if (stockEventDto.hasReason()) {
+      StockCardLineItemReason reason = stockCardLineItemReasonRepository.findOne(reasonId);
 
-    if (null != reason && !reason.getIsFreeTextAllowed() && stockEventDto.hasReasonFreeText()) {
-      throwError(ERROR_REASON_FREE_TEXT_NOT_ALLOWED, stockEventDto.getReasonId(),
-          stockEventDto.getReasonFreeText());
+      if (null != reason && !reason.getIsFreeTextAllowed() && stockEventDto.hasReasonFreeText()) {
+        throwError(ERROR_REASON_FREE_TEXT_NOT_ALLOWED, reasonId, freeText);
+      }
+    } else if (freeText != null) {
+      //reason free text exist but reason id is null
+      throwError(ERROR_REASON_FREE_TEXT_NOT_ALLOWED, reasonId, freeText);
     }
   }
 
