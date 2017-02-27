@@ -15,6 +15,9 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static java.util.stream.StreamSupport.stream;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_ORDERABLE_NOT_IN_APPROVED_LIST;
+
 import org.openlmis.stockmanagement.dto.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
@@ -25,10 +28,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.UUID;
-
-import static com.google.common.collect.Iterables.concat;
-import static java.util.stream.StreamSupport.stream;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_ORDERABLE_NOT_IN_APPROVED_LIST;
 
 @Component(value = "ApprovedOrderableValidator")
 public class ApprovedOrderableValidator implements StockEventValidator {
@@ -41,43 +40,36 @@ public class ApprovedOrderableValidator implements StockEventValidator {
    *
    * @param stockEventDto the event to be validated.
    */
+  //this validator does not care if facility or program or orderable are missing
+  //that is other validator's job
   public void validate(StockEventDto stockEventDto) {
-    if (stockEventDto.getOrderableId() == null) {
-      return;
-    }
     UUID facility = stockEventDto.getFacilityId();
     UUID program = stockEventDto.getProgramId();
-
-    if (facility == null || program == null) {
-      //this validator does not care if facility and program are missing
-      //that is other validator's job
+    if (stockEventDto.getOrderableId() == null || facility == null || program == null) {
       return;
     }
 
-    Collection<ApprovedProductDto> fullSupply = getApprovedList(facility, program, true);
-    Collection<ApprovedProductDto> nonFullSupply = getApprovedList(facility, program, false);
-
-    boolean isFoundInApprovedList = tryToFindInBothLists(stockEventDto, fullSupply, nonFullSupply);
+    boolean isFoundInApprovedList = tryToFindInApprovedList(stockEventDto,
+        approvedProductReferenceDataService.getAllApprovedProducts(program, facility));
 
     if (!isFoundInApprovedList) {
       throw new ValidationMessageException(
-              new Message(ERROR_ORDERABLE_NOT_IN_APPROVED_LIST, stockEventDto.getOrderableId()));
+          new Message(ERROR_ORDERABLE_NOT_IN_APPROVED_LIST, stockEventDto.getOrderableId()));
     }
   }
 
-  private boolean tryToFindInBothLists(StockEventDto stockEventDto,
-                                       Collection<ApprovedProductDto> fullSupplyList,
-                                       Collection<ApprovedProductDto> nonFullSupplyList) {
-    return stream(concat(fullSupplyList, nonFullSupplyList).spliterator(), false)
-            .anyMatch(product -> {
-              UUID orderableId = product.getProgramOrderable().getOrderableId();
-              return orderableId.equals(stockEventDto.getOrderableId());
-            });
+  private boolean tryToFindInApprovedList(StockEventDto stockEventDto,
+                                          Collection<ApprovedProductDto> approvedProductDtos) {
+    return stream(approvedProductDtos.spliterator(), false)
+        .anyMatch(product -> {
+          UUID orderableId = product.getProgramOrderable().getOrderableId();
+          return orderableId.equals(stockEventDto.getOrderableId());
+        });
   }
 
   private Collection<ApprovedProductDto> getApprovedList(
-          UUID facilityId, UUID programId, boolean fullSupply) {
+      UUID facilityId, UUID programId, boolean fullSupply) {
     return approvedProductReferenceDataService
-            .getApprovedProducts(facilityId, programId, fullSupply);
+        .getApprovedProducts(facilityId, programId, fullSupply);
   }
 }

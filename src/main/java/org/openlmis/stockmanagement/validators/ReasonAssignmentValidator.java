@@ -15,6 +15,8 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_REASON_NOT_IN_VALID_LIST;
+
 import org.openlmis.stockmanagement.domain.adjustment.ValidReasonAssignment;
 import org.openlmis.stockmanagement.dto.FacilityDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
@@ -28,8 +30,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.UUID;
 
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_REASON_NOT_IN_VALID_LIST;
-
 @Component(value = "ReasonAssignmentValidator")
 public class ReasonAssignmentValidator implements StockEventValidator {
 
@@ -41,28 +41,27 @@ public class ReasonAssignmentValidator implements StockEventValidator {
 
   @Override
   public void validate(StockEventDto stockEventDto) {
-    if (stockEventDto.getReasonId() == null) {
-      return;
-    }
     FacilityDto facility = facilityReferenceDataService.findOne(stockEventDto.getFacilityId());
     UUID programId = stockEventDto.getProgramId();
-    if (facility != null && programId != null) {
-      checkIsReasonInValidAssignmentList(stockEventDto, facility, programId);
+    if (!stockEventDto.hasReason() || facility == null || programId == null) {
+      return;
     }
+
+    checkIsReasonInValidAssignmentList(stockEventDto, facility, programId);
   }
 
   private void checkIsReasonInValidAssignmentList(StockEventDto stockEventDto,
                                                   FacilityDto facility, UUID programId) {
     List<ValidReasonAssignment> validReasonAssignments = validReasonAssignmentRepository
-            .findByProgramIdAndFacilityTypeId(programId, facility.getType().getId());
+        .findByProgramIdAndFacilityTypeId(programId, facility.getType().getId());
 
     boolean isInValidAssignmentList = validReasonAssignments.stream()
-            .anyMatch(assignment ->
-                    assignment.getReason().getId().equals(stockEventDto.getReasonId()));
+        .anyMatch(assignment ->
+            assignment.getReason().getId().equals(stockEventDto.getReasonId()));
 
     if (!isInValidAssignmentList) {
       throw new ValidationMessageException(
-              new Message(ERROR_EVENT_REASON_NOT_IN_VALID_LIST, stockEventDto.getReasonId()));
+          new Message(ERROR_EVENT_REASON_NOT_IN_VALID_LIST, stockEventDto.getReasonId()));
     }
   }
 }
