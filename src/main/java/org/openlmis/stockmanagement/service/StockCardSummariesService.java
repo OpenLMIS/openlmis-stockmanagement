@@ -48,25 +48,31 @@ public class StockCardSummariesService extends StockCardBaseService {
    * @return found stock cards, will include approved products without stock cards.
    */
   public List<StockCardDto> findStockCards(UUID programId, UUID facilityId) {
-    List<ApprovedProductDto> approvedProducts = approvedProductRefDataService
-        .getAllApprovedProducts(programId, facilityId);
 
-    List<StockCard> stockCards = stockCardRepository
+    List<StockCard> existingCards = stockCardRepository
         .findByProgramIdAndFacilityId(programId, facilityId);
 
-    List<ApprovedProductDto> productsWithoutCards =
-        filterProductsWithoutCards(approvedProducts, stockCards);
+    List<ApprovedProductDto> allApprovedProducts = approvedProductRefDataService
+        .getAllApprovedProducts(programId, facilityId);
+
+    List<ApprovedProductDto> productsWithNoCards =
+        filterProductsWithoutCards(allApprovedProducts, existingCards);
+
+    return createCardDtosWithNoLineItems(programId, facilityId, existingCards, productsWithNoCards);
+  }
+
+  private List<StockCardDto> createCardDtosWithNoLineItems(
+      UUID programId, UUID facilityId, List<StockCard> existingStockCards,
+      List<ApprovedProductDto> productsWithoutCards) {
 
     List<StockCardDto> productCardDtos =
         productsToCardDtos(programId, facilityId, productsWithoutCards);
+    List<StockCardDto> existingCardDtos = createStockCardDtos(existingStockCards);
 
-    productCardDtos.forEach(productCardDto -> productCardDto.setStockOnHand(null));
-
-    List<StockCardDto> cardDtos = createStockCardDtos(stockCards);
-
-    List<StockCardDto> allCardDtos = concat(cardDtos.stream(), productCardDtos.stream())
+    List<StockCardDto> allCardDtos = concat(existingCardDtos.stream(), productCardDtos.stream())
         .collect(toList());
     allCardDtos.forEach(cardDto -> cardDto.setLineItems(null));
+
     return allCardDtos;
   }
 
@@ -92,7 +98,9 @@ public class StockCardSummariesService extends StockCardBaseService {
           return card;
         }).collect(toList());
 
-    return createStockCardDtos(cards);
+    List<StockCardDto> productCardDtos = createStockCardDtos(cards);
+    productCardDtos.forEach(productCardDto -> productCardDto.setStockOnHand(null));
+    return productCardDtos;
   }
 
 }
