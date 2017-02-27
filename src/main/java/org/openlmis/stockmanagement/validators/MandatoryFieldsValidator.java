@@ -15,6 +15,12 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_FACILITY_INVALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_OCCURRED_DATE_INVALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ORDERABLE_INVALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_PROGRAM_INVALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_QUANTITY_INVALID;
+
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.referencedata.BaseReferenceDataService;
@@ -27,12 +33,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
-
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_FACILITY_INVALID;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ORDERABLE_INVALID;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_PROGRAM_INVALID;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_OCCURRED_DATE_INVALID;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_QUANTITY_INVALID;
 
 @Component(value = "MandatoryFieldsValidator")
 public class MandatoryFieldsValidator implements StockEventValidator {
@@ -48,6 +48,7 @@ public class MandatoryFieldsValidator implements StockEventValidator {
 
   @Override
   public void validate(StockEventDto stockEventDto) {
+    LOGGER.debug("Validate mandatory fields");
     validateFacilityProgramAndOrderable(stockEventDto);
     validateOccurredDate(stockEventDto);
     validateQuantity(stockEventDto);

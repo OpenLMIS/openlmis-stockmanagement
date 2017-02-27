@@ -43,6 +43,7 @@ public class ReceiveIssueReasonValidator implements StockEventValidator {
 
   @Override
   public void validate(StockEventDto eventDto) {
+    LOGGER.debug("Validate receive and issue reason");
     if (!eventDto.hasReason()) {
       return;
     }

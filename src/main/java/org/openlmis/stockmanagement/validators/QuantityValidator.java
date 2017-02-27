@@ -42,6 +42,7 @@ public class QuantityValidator implements StockEventValidator {
   @Override
   public void validate(StockEventDto stockEventDto)
       throws IllegalAccessException, InstantiationException {
+    LOGGER.debug("Validate quantity");
     boolean isDebitEvent = stockEventDto.hasDestination() || hasDebitReason(stockEventDto);
     if (!isDebitEvent) {
       return;

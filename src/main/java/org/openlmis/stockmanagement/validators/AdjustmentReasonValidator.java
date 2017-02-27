@@ -34,6 +34,7 @@ public class AdjustmentReasonValidator implements StockEventValidator {
 
   @Override
   public void validate(StockEventDto stockEventDto) {
+    LOGGER.debug("Validate adjustment reason");
     boolean hasSourceOrDestination = stockEventDto.hasSource() || stockEventDto.hasDestination();
     if (!stockEventDto.hasReason() || hasSourceOrDestination) {
       return;

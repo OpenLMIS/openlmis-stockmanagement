@@ -31,6 +31,8 @@ import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -60,6 +62,8 @@ import javax.persistence.Transient;
     "userId"})
 @Table(name = "stock_card_line_items", schema = "stockmanagement")
 public class StockCardLineItem extends BaseEntity {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(StockCardLineItem.class);
 
   @ManyToOne()
   @JoinColumn(nullable = false)
@@ -141,10 +145,13 @@ public class StockCardLineItem extends BaseEntity {
       setReason(determineReasonByQuantity(previousStockOnHand));
       setStockOnHand(quantity);
       setQuantity(Math.abs(getStockOnHand() - previousStockOnHand));
+      LOGGER.debug("Physical inventory: " + getStockOnHand());
     } else if (shouldIncrease()) {
       setStockOnHand(previousStockOnHand + quantity);
+      LOGGER.debug(previousStockOnHand + " + " + quantity + " = " + getStockOnHand());
     } else {
       setStockOnHand(previousStockOnHand - quantity);
+      LOGGER.debug(previousStockOnHand + " - " + quantity + " = " + getStockOnHand());
     }
   }
 

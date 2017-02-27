@@ -16,9 +16,13 @@
 package org.openlmis.stockmanagement.validators;
 
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public interface StockEventValidator {
+  Logger LOGGER = LoggerFactory.getLogger(StockEventValidator.class);
+
   void validate(StockEventDto stockEventDto) throws IllegalAccessException, InstantiationException;
 }

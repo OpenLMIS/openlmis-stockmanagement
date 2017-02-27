@@ -15,6 +15,10 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_NOT_IN_VALID_LIST;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_BOTH_PRESENT;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_IN_VALID_LIST;
+
 import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.FacilityDto;
@@ -30,10 +34,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.UUID;
 
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_NOT_IN_VALID_LIST;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_BOTH_PRESENT;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_IN_VALID_LIST;
-
 @Component(value = "SourceDestinationAssignmentValidator")
 public class SourceDestinationAssignmentValidator implements StockEventValidator {
 
@@ -48,6 +48,7 @@ public class SourceDestinationAssignmentValidator implements StockEventValidator
 
   @Override
   public void validate(StockEventDto eventDto) {
+    LOGGER.debug("Validate source and destination assignment");
     checkSourceDestinationBothPresent(eventDto);
     checkIsValidAssignment(eventDto);
   }
@@ -70,17 +71,17 @@ public class SourceDestinationAssignmentValidator implements StockEventValidator
   private void checkSourceDestinationBothPresent(StockEventDto eventDto) {
     if (eventDto.hasSource() && eventDto.hasDestination()) {
       throwError(ERROR_SOURCE_DESTINATION_BOTH_PRESENT,
-              eventDto.getSourceId(), eventDto.getDestinationId());
+          eventDto.getSourceId(), eventDto.getDestinationId());
     }
   }
 
   private void checkSourceAssignment(StockEventDto eventDto,
                                      UUID facilityTypeId, UUID programId) {
     List<ValidSourceAssignment> sourceAssignments = validSourceAssignmentRepository
-            .findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
+        .findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
 
     boolean isInValidList = sourceAssignments.stream().anyMatch(validSourceAssignment ->
-            validSourceAssignment.getNode().getId().equals(eventDto.getSourceId()));
+        validSourceAssignment.getNode().getId().equals(eventDto.getSourceId()));
     if (!isInValidList) {
       throwError(ERROR_SOURCE_NOT_IN_VALID_LIST, eventDto.getSourceId());
     }
@@ -89,10 +90,10 @@ public class SourceDestinationAssignmentValidator implements StockEventValidator
   private void checkDestinationAssignment(StockEventDto eventDto,
                                           UUID facilityTypeId, UUID programId) {
     List<ValidDestinationAssignment> sourceAssignments = validDestinationAssignmentRepository
-            .findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
+        .findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
 
     boolean isInValidList = sourceAssignments.stream().anyMatch(validSourceAssignment ->
-            validSourceAssignment.getNode().getId().equals(eventDto.getDestinationId()));
+        validSourceAssignment.getNode().getId().equals(eventDto.getDestinationId()));
     if (!isInValidList) {
       throwError(ERROR_DESTINATION_NOT_IN_VALID_LIST, eventDto.getDestinationId());
     }

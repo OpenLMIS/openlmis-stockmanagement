@@ -43,6 +43,7 @@ public class ApprovedOrderableValidator implements StockEventValidator {
   //this validator does not care if facility or program or orderable are missing
   //that is other validator's job
   public void validate(StockEventDto stockEventDto) {
+    LOGGER.debug("Validate approved product reference data service");
     UUID facility = stockEventDto.getFacilityId();
     UUID program = stockEventDto.getProgramId();
     if (stockEventDto.getOrderableId() == null || facility == null || program == null) {

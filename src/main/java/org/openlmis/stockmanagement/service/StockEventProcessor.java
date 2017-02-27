@@ -19,6 +19,8 @@ import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +33,8 @@ import java.util.UUID;
  */
 @Service
 public class StockEventProcessor {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(StockEventProcessor.class);
 
   @Autowired
   private AuthenticationHelper authenticationHelper;
@@ -53,18 +57,20 @@ public class StockEventProcessor {
   @Transactional(rollbackFor = {InstantiationException.class, IllegalAccessException.class})
   //the Transactional annotation MUST be on a PUBLIC method
   public UUID process(StockEventDto stockEventDto)
-          throws IllegalAccessException, InstantiationException {
+      throws IllegalAccessException, InstantiationException {
+    LOGGER.debug("Process stock event dto");
     stockEventValidationsService.validate(stockEventDto);
 
     return saveEventAndGenerateLineItems(stockEventDto);
   }
 
   private UUID saveEventAndGenerateLineItems(StockEventDto stockEventDto)
-          throws InstantiationException, IllegalAccessException {
+      throws InstantiationException, IllegalAccessException {
     UUID currentUserId = authenticationHelper.getCurrentUser().getId();
 
     StockEvent stockEvent = stockEventDto.toEvent(currentUserId);
     UUID savedEventId = stockEventsRepository.save(stockEvent).getId();
+    LOGGER.debug("Saved stock event with id " + savedEventId);
 
     stockCardService.saveFromEvent(stockEventDto, savedEventId, currentUserId);
 

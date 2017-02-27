@@ -43,6 +43,7 @@ public class FreeTextValidator implements StockEventValidator {
 
   @Override
   public void validate(StockEventDto stockEventDto) {
+    LOGGER.debug("Validate free text");
     checkSourceDestinationFreeTextBothPresent(stockEventDto);
 
     checkNodeFreeText(stockEventDto, stockEventDto.getSourceId(),

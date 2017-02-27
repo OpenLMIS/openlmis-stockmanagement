@@ -23,6 +23,8 @@ import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +32,8 @@ import java.util.UUID;
 
 @Service
 public class StockCardService extends StockCardBaseService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(StockCardService.class);
 
   @Autowired
   private StockCardRepository stockCardRepository;
@@ -53,6 +57,7 @@ public class StockCardService extends StockCardBaseService {
 
     createLineItemsFrom(stockEventDto, stockCard, savedEventId, currentUserId);
     stockCardRepository.save(stockCard);
+    LOGGER.debug("Stock card/line item saved");
   }
 
   /**
@@ -66,6 +71,7 @@ public class StockCardService extends StockCardBaseService {
     if (foundCard == null) {
       return null;
     }
+    LOGGER.debug("Stock card found");
 
     permissionService.canViewStockCard(foundCard.getProgramId(), foundCard.getFacilityId());
     return createStockCardDtos(singletonList(foundCard)).get(0);
@@ -80,8 +86,10 @@ public class StockCardService extends StockCardBaseService {
         stockEventDto.getOrderableId());
 
     if (foundCard != null) {
+      LOGGER.debug("Found existing stock card");
       return foundCard;
     } else {
+      LOGGER.debug("Creating new stock card");
       return createStockCardFrom(stockEventDto, savedEventId);
     }
   }

@@ -15,13 +15,26 @@
 
 package org.openlmis.stockmanagement.domain.card;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
+import static javax.persistence.CascadeType.ALL;
+import static org.hibernate.annotations.LazyCollectionOption.FALSE;
+
 import org.hibernate.annotations.LazyCollection;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,15 +43,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
-
-import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.toList;
-import static javax.persistence.CascadeType.ALL;
-import static org.hibernate.annotations.LazyCollectionOption.FALSE;
 
 @Entity
 @Data
@@ -46,6 +50,8 @@ import static org.hibernate.annotations.LazyCollectionOption.FALSE;
 @NoArgsConstructor
 @Table(name = "stock_cards", schema = "stockmanagement")
 public class StockCard extends BaseEntity {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(StockCard.class);
 
   @ManyToOne()
   @JoinColumn(nullable = false)
@@ -93,6 +99,7 @@ public class StockCard extends BaseEntity {
       previousSoh = lineItem.getStockOnHand();
     }
     setStockOnHand(previousSoh);
+    LOGGER.debug("Calculated stock on hand: " + previousSoh);
   }
 
   private void reorderLineItemsByDates() {

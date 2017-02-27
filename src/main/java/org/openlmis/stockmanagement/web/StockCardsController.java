@@ -22,6 +22,8 @@ import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardService;
 import org.openlmis.stockmanagement.service.StockCardSummariesService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -35,6 +37,8 @@ import java.util.UUID;
 @Controller
 @RequestMapping("/api")
 public class StockCardsController {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(StockCardsController.class);
 
   @Autowired
   private PermissionService permissionService;
@@ -53,10 +57,14 @@ public class StockCardsController {
    */
   @RequestMapping(value = "/stockCards/{stockCardId}")
   public ResponseEntity<StockCardDto> getStockCard(@PathVariable("stockCardId") UUID stockCardId) {
+    LOGGER.debug("Try to find stock card with id: " + stockCardId);
+
     StockCardDto stockCardDto = stockCardService.findStockCardById(stockCardId);
     if (stockCardDto == null) {
+      LOGGER.debug("Not found stock card with id: " + stockCardId);
       return new ResponseEntity<>(NOT_FOUND);
     } else {
+      LOGGER.debug("Found stock card with id: " + stockCardId);
       return new ResponseEntity<>(stockCardDto, OK);
     }
   }
@@ -70,6 +78,7 @@ public class StockCardsController {
   public ResponseEntity<List<StockCardDto>> getStockCardSummaries(
       @RequestParam() UUID program,
       @RequestParam() UUID facility) {
+    LOGGER.debug("Try to find stock card summaries");
     permissionService.canViewStockCard(program, facility);
     return new ResponseEntity<>(stockCardSummariesService.findStockCards(program, facility), OK);
   }

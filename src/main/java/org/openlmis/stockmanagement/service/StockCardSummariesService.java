@@ -24,6 +24,8 @@ import org.openlmis.stockmanagement.dto.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,8 @@ import java.util.UUID;
 
 @Service
 public class StockCardSummariesService extends StockCardBaseService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(StockCardSummariesService.class);
 
   @Autowired
   private ApprovedProductReferenceDataService approvedProductRefDataService;
@@ -57,7 +61,6 @@ public class StockCardSummariesService extends StockCardBaseService {
 
     List<ApprovedProductDto> productsWithNoCards =
         filterProductsWithoutCards(allApprovedProducts, existingCards);
-
     return createCardDtosWithNoLineItems(programId, facilityId, existingCards, productsWithNoCards);
   }
 
@@ -73,6 +76,7 @@ public class StockCardSummariesService extends StockCardBaseService {
         .collect(toList());
     allCardDtos.forEach(cardDto -> cardDto.setLineItems(null));
 
+    LOGGER.debug("Found all cards summaries");
     return allCardDtos;
   }
 

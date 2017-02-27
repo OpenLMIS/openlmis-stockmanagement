@@ -29,6 +29,8 @@ import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +38,8 @@ import java.util.List;
 
 @Service
 public abstract class StockCardBaseService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(StockCardBaseService.class);
 
   @Autowired
   private OrderableReferenceDataService orderableRefDataService;
@@ -57,11 +61,15 @@ public abstract class StockCardBaseService {
     stockCards.forEach(StockCard::calculateStockOnHand);
 
     StockCard firstCard = stockCards.get(0);
+
+    LOGGER.debug("Calling ref data to retrieve facility info for card");
     FacilityDto facility = facilityRefDataService.findOne(firstCard.getFacilityId());
+    LOGGER.debug("Calling ref data to retrieve program info for card");
     ProgramDto program = programRefDataService.findOne(firstCard.getProgramId());
 
     return stockCards.stream()
         .map(card -> {
+          LOGGER.debug("Calling ref data to retrieve orderable info for card");
           OrderableDto orderable = orderableRefDataService.findOne(card.getOrderableId());
           return cardToDto(facility, program, orderable, card);
         })
@@ -95,6 +103,7 @@ public abstract class StockCardBaseService {
     }
 
     if (node.isRefDataFacility()) {
+      LOGGER.debug("Calling ref data to retrieve facility info for line item");
       return facilityRefDataService.findOne(node.getReferenceId());
     } else {
       return FacilityDto.createFrom(organizationRepository.findOne(node.getReferenceId()));
