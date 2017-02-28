@@ -22,6 +22,7 @@ import static org.springframework.http.HttpStatus.OK;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.adjustment.ValidReasonAssignment;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
+import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,14 +40,26 @@ public class ValidReasonAssignmentController {
   @Autowired
   private ValidReasonAssignmentRepository validReasonAssignmentRepository;
 
+  @Autowired
+  private ProgramFacilityTypeExistenceService programFacilityTypeExistenceService;
+
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCardsController.class);
 
+  /**
+   * Get a list of valid reasons
+   * @param program program id
+   * @param facilityType facility type id
+   * @return A list of valid reason
+   */
   @RequestMapping(value = "/validReasons")
   public ResponseEntity<List<StockCardLineItemReason>> getValidReasons(
       @RequestParam("program") UUID program, @RequestParam("facilityType") UUID facilityType) {
     LOGGER.debug(
         format("Try to find stock card line item reason with program %s and facility type %s",
             program.toString(), facilityType.toString()));
+
+    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(program, facilityType);
+
     List<ValidReasonAssignment> validReasonAssignments =
         validReasonAssignmentRepository.findByProgramIdAndFacilityTypeId(program, facilityType);
     List<StockCardLineItemReason> lineItemReasons = validReasonAssignments.stream()
