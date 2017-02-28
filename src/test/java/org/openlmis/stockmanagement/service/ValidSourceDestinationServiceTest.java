@@ -30,10 +30,12 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.domain.movement.Organization;
 import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
+import org.openlmis.stockmanagement.dto.FacilityDto;
 import org.openlmis.stockmanagement.dto.ValidDestinationAssignmentDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
+import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
 
 import java.util.List;
@@ -44,6 +46,9 @@ public class ValidSourceDestinationServiceTest {
 
   @InjectMocks
   private ValidSourceDestinationService validSourceDestinationService;
+
+  @Mock
+  private FacilityReferenceDataService facilityReferenceDataService;
 
   @Mock
   private ProgramFacilityTypeExistenceService programFacilityTypeExistenceService;
