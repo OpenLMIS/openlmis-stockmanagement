@@ -28,6 +28,8 @@ schemas:
   - stockCard: !include schemas/stockCard.json
   - stockCardSummary: !include schemas/stockCardSummary.json
   - stockCardSummaries: !include schemas/stockCardSummaries.json
+  - validDestinationAssignment: !include schemas/validDestinationAssignment.json
+  - validDestinationAssignments: !include schemas/validDestinationAssignments.json
 
 resourceTypes:
     - collection:
@@ -228,6 +230,33 @@ traits:
 
           403:
             description: User does not have permission to view stock card.
+            body:
+              application/json:
+
+  /validDestinations:
+      get:
+        is: [ secured ]
+        description: Get a list of valid destinations of a program and a facility type.
+        queryParameters:
+          program:
+            required: true
+            description: Program ID, indicates the program that the valid destinations are under.
+          facilityType:
+            required: true
+            description: Facility type ID, indicates the facility type that the valid destinations are under.
+        responses:
+          200:
+            body:
+              application/json:
+                schema: validDestinationAssignments
+
+          400:
+            description: Program or facility type does not exist.
+            body:
+              application/json:
+
+          403:
+            description: User does not have permission to view valid destination assignments.
             body:
               application/json:
 

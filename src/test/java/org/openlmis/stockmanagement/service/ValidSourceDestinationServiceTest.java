@@ -15,7 +15,7 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static java.util.Collections.singletonList;
+import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doNothing;
@@ -93,18 +93,38 @@ public class ValidSourceDestinationServiceTest {
     doNothing().when(programFacilityTypeExistenceService)
         .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
-    mockValidDestinationAssignment(programId, facilityTypeId);
+    ValidDestinationAssignment organizationDestination = mockOrganizationDestination();
+    ValidDestinationAssignment facilityDestination = mockFacilityDestinationAssignment();
+    when(validDestinationAssignmentRepository
+        .findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
+        .thenReturn(asList(organizationDestination, facilityDestination));
 
     //when
     List<ValidDestinationAssignmentDto> validDestinations =
         validSourceDestinationService.findValidDestinations(programId, facilityTypeId);
 
     //then
-    assertThat(validDestinations.size(), is(1));
+    assertThat(validDestinations.size(), is(2));
     assertThat(validDestinations.get(0).getName(), is("CHW"));
+    assertThat(validDestinations.get(1).getName(), is("Balaka District Hospital"));
   }
 
-  private void mockValidDestinationAssignment(UUID programId, UUID facilityTypeId) {
+  private ValidDestinationAssignment mockFacilityDestinationAssignment() {
+    FacilityDto facilityDto = new FacilityDto();
+    facilityDto.setName("Balaka District Hospital");
+    facilityDto.setId(UUID.randomUUID());
+
+    Node node2 = new Node();
+    node2.setRefDataFacility(true);
+    node2.setReferenceId(facilityDto.getId());
+
+    ValidDestinationAssignment destination2 = new ValidDestinationAssignment();
+    destination2.setNode(node2);
+    when(facilityReferenceDataService.findOne(facilityDto.getId())).thenReturn(facilityDto);
+    return destination2;
+  }
+
+  private ValidDestinationAssignment mockOrganizationDestination() {
     Organization organization = new Organization();
     organization.setName("CHW");
     organization.setId(UUID.randomUUID());
@@ -116,10 +136,7 @@ public class ValidSourceDestinationServiceTest {
 
     ValidDestinationAssignment destination = new ValidDestinationAssignment();
     destination.setNode(node);
-
-    when(organizationRepository.findOne(node.getReferenceId())).thenReturn(organization);
-    when(validDestinationAssignmentRepository
-        .findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
-        .thenReturn(singletonList(destination));
+    when(organizationRepository.findOne(organization.getId())).thenReturn(organization);
+    return destination;
   }
 }

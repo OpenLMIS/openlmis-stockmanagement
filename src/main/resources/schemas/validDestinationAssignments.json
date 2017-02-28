@@ -1,0 +1,8 @@
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "title": "ValidDestinationAssignment",
+    "$ref": "validDestinationAssignment"
+  }
+}
