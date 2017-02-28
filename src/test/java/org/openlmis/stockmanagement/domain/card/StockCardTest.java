@@ -15,11 +15,6 @@
 
 package org.openlmis.stockmanagement.domain.card;
 
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import java.time.ZonedDateTime;
-
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -31,28 +26,33 @@ import static org.openlmis.stockmanagement.testutils.DatesUtil.oneDayLater;
 import static org.openlmis.stockmanagement.testutils.DatesUtil.oneHourEarlier;
 import static org.openlmis.stockmanagement.testutils.DatesUtil.oneHourLater;
 
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import java.time.ZonedDateTime;
+
 
 public class StockCardTest {
 
   @Test
-  public void should_reorder_line_items_by_occurred_then_by_noticed_when_calculate_soh()
+  public void should_reorder_line_items_by_occurred_then_by_processed_when_calculate_soh()
       throws Exception {
     //given
     ZonedDateTime baseDate = getBaseDateTime();
 
     StockCardLineItem lineItem1 = new StockCardLineItem();
     lineItem1.setOccurredDate(baseDate);
-    lineItem1.setNoticedDate(oneDayLater(baseDate));
+    lineItem1.setProcessedDate(oneDayLater(baseDate));
     lineItem1.setQuantity(1);
 
     StockCardLineItem lineItem2 = new StockCardLineItem();
     lineItem2.setOccurredDate(baseDate);
-    lineItem2.setNoticedDate(oneHourLater(baseDate));
+    lineItem2.setProcessedDate(oneHourLater(baseDate));
     lineItem2.setQuantity(1);
 
     StockCardLineItem lineItem3 = new StockCardLineItem();
     lineItem3.setOccurredDate(oneHourEarlier(baseDate));
-    lineItem3.setNoticedDate(oneHourEarlier(baseDate));
+    lineItem3.setProcessedDate(oneHourEarlier(baseDate));
     lineItem3.setQuantity(1);
 
     StockCard stockCard = new StockCard();

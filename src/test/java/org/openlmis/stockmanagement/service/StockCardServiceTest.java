@@ -183,7 +183,7 @@ public class StockCardServiceTest extends BaseTest {
   }
 
   @Test
-  public void should_order_line_items_by_occurred_then_noticed() throws Exception {
+  public void should_order_line_items_by_occurred_then_processed() throws Exception {
     //given
     ZonedDateTime baseDate = DatesUtil.getBaseDateTime();
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
@@ -197,7 +197,7 @@ public class StockCardServiceTest extends BaseTest {
     //3 event
     stockEventDto.setOccurredDate(oneHourEarlier(baseDate));
 
-    //save them in the reverse order, so that noticed date order is 3,2,1
+    //save them in the reverse order, so that processed date order is 3,2,1
     final StockEvent event3 = save(stockEventDto, UUID.randomUUID());
     final StockEvent event2 = save(stockEventDto, UUID.randomUUID());
     final StockEvent event1 = save(stockEventDto, UUID.randomUUID());

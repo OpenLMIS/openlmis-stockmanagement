@@ -105,9 +105,11 @@ public class StockCard extends BaseEntity {
   private void reorderLineItemsByDates() {
     Comparator<StockCardLineItem> byOccurred =
         comparing(StockCardLineItem::getOccurredDate);
-    Comparator<StockCardLineItem> byNoticed =
-        comparing(StockCardLineItem::getNoticedDate);
+    Comparator<StockCardLineItem> byProcessed =
+        comparing(StockCardLineItem::getProcessedDate);
 
-    setLineItems(lineItems.stream().sorted(byOccurred.thenComparing(byNoticed)).collect(toList()));
+    setLineItems(lineItems.stream()
+        .sorted(byOccurred.thenComparing(byProcessed))
+        .collect(toList()));
   }
 }

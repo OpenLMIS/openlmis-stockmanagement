@@ -74,8 +74,8 @@ public class StockCardLineItemTest {
 
     assertThat(lineItem.getUserId(), is(userId));
 
-    ZonedDateTime noticedDate = lineItem.getNoticedDate();
-    long between = SECONDS.between(noticedDate, ZonedDateTime.now());
+    ZonedDateTime processedDate = lineItem.getProcessedDate();
+    long between = SECONDS.between(processedDate, ZonedDateTime.now());
 
     assertThat(between, lessThan(2L));
   }

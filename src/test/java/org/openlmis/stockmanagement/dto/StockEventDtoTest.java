@@ -58,8 +58,8 @@ public class StockEventDtoTest {
 
     assertThat(event.getUserId(), is(userId));
 
-    ZonedDateTime noticedDate = event.getNoticedDate();
-    long between = SECONDS.between(noticedDate, ZonedDateTime.now());
+    ZonedDateTime processedDate = event.getProcessedDate();
+    long between = SECONDS.between(processedDate, ZonedDateTime.now());
 
     assertThat(between, lessThan(2L));
   }

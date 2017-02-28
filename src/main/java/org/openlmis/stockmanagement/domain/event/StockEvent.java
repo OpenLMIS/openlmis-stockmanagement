@@ -68,7 +68,7 @@ public class StockEvent extends BaseEntity {
   private ZonedDateTime occurredDate;
 
   @Column(nullable = false, columnDefinition = "timestamp")
-  private ZonedDateTime noticedDate;
+  private ZonedDateTime processedDate;
 
   private String signature;
 
