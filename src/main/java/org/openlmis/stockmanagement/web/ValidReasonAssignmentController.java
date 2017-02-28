@@ -46,10 +46,10 @@ public class ValidReasonAssignmentController {
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCardsController.class);
 
   /**
-   * Get a list of valid reasons
-   * @param program program id
-   * @param facilityType facility type id
-   * @return A list of valid reason
+   * Get a list of valid reasons.
+   * @param program program id.
+   * @param facilityType facility type id.
+   * @return A list of valid reason.
    */
   @RequestMapping(value = "/validReasons")
   public ResponseEntity<List<StockCardLineItemReason>> getValidReasons(

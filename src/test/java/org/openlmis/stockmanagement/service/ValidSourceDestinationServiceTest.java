@@ -18,6 +18,8 @@ package org.openlmis.stockmanagement.service;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
@@ -28,14 +30,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.domain.movement.Organization;
 import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
-import org.openlmis.stockmanagement.dto.FacilityTypeDto;
-import org.openlmis.stockmanagement.dto.ProgramDto;
 import org.openlmis.stockmanagement.dto.ValidDestinationAssignmentDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
-import org.openlmis.stockmanagement.service.referencedata.FacilityTypeReferenceDataService;
-import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
 
 import java.util.List;
 import java.util.UUID;
@@ -47,10 +46,7 @@ public class ValidSourceDestinationServiceTest {
   private ValidSourceDestinationService validSourceDestinationService;
 
   @Mock
-  private ProgramReferenceDataService programRefDataService;
-
-  @Mock
-  private FacilityTypeReferenceDataService facilityTypeRefDataService;
+  private ProgramFacilityTypeExistenceService programFacilityTypeExistenceService;
 
   @Mock
   private ValidDestinationAssignmentRepository validDestinationAssignmentRepository;
@@ -64,8 +60,8 @@ public class ValidSourceDestinationServiceTest {
     //given
     UUID programId = UUID.randomUUID();
     UUID facilityTypeId = UUID.randomUUID();
-    when(programRefDataService.findOne(programId)).thenReturn(null);
-    when(facilityTypeRefDataService.findOne(facilityTypeId)).thenReturn(null);
+    doThrow(new ValidationMessageException("errorKey")).when(programFacilityTypeExistenceService)
+        .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
     //when
     validSourceDestinationService.findValidDestinations(programId, facilityTypeId);
@@ -77,8 +73,8 @@ public class ValidSourceDestinationServiceTest {
     //given
     UUID programId = UUID.randomUUID();
     UUID facilityTypeId = UUID.randomUUID();
-    when(programRefDataService.findOne(programId)).thenReturn(new ProgramDto());
-    when(facilityTypeRefDataService.findOne(facilityTypeId)).thenReturn(new FacilityTypeDto());
+    doNothing().when(programFacilityTypeExistenceService)
+        .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
     //when
     List<ValidDestinationAssignmentDto> validDestinations =
@@ -94,8 +90,8 @@ public class ValidSourceDestinationServiceTest {
     //given
     UUID programId = UUID.fromString("dce17f2e-af3e-40ad-8e00-3496adef44c3");
     UUID facilityTypeId = UUID.fromString("ac1d268b-ce10-455f-bf87-9c667da8f060");
-    when(programRefDataService.findOne(programId)).thenReturn(new ProgramDto());
-    when(facilityTypeRefDataService.findOne(facilityTypeId)).thenReturn(new FacilityTypeDto());
+    doNothing().when(programFacilityTypeExistenceService)
+        .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
     mockValidDestinationAssignment(programId, facilityTypeId);
 

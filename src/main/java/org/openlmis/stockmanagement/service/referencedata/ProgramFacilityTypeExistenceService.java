@@ -36,6 +36,11 @@ public class ProgramFacilityTypeExistenceService {
   @Autowired
   private FacilityTypeReferenceDataService facilityTypeReferenceDataService;
 
+  /**
+   * Check program and facility type existence.
+   * @param programId program id.
+   * @param facilityTypeId facility type id.
+   */
   public void checkProgramAndFacilityTypeExist(UUID programId, UUID facilityTypeId) {
     ProgramDto programDto = programReferenceDataService.findOne(programId);
     FacilityTypeDto facilityTypeDto = facilityTypeReferenceDataService.findOne(facilityTypeId);
