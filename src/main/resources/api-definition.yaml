@@ -248,7 +248,12 @@ traits:
 
         responses:
           200:
-            description: Valid reason response,
+            description: Valid reason response
             body:
               application/json:
                 schema: reasons
+          400:
+            description: Facility type or program is not found.
+            body:
+              application/json:
+
