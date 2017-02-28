@@ -1,0 +1,67 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "A single orderable.",
+  "properties": {
+    "packSize": {
+      "type": "integer"
+    },
+    "dispensable": {
+      "type": "object",
+      "title": "Dispensable",
+      "properties": {
+        "dispensingUnit": {
+          "type": "string"
+        }
+      }
+    },
+    "productCode": {
+      "type": "string"
+    },
+    "roundToZero": {
+      "type": "boolean"
+    },
+    "packRoundingThreshold": {
+      "type": "integer"
+    },
+    "name": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "programs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "title": "ProgramOrderable",
+        "properties": {
+          "orderableId": {
+            "type": "string"
+          },
+          "orderableDisplayCategoryId": {
+            "type": "string"
+          },
+          "displayOrder": {
+            "type": "integer"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "orderableCategoryDisplayOrder": {
+            "type": "integer"
+          },
+          "programId": {
+            "type": "string"
+          },
+          "orderableCategoryDisplayName": {
+            "type": "string"
+          },
+          "fullSupply": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

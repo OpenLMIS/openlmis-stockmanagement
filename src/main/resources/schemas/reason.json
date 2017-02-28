@@ -1,0 +1,35 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "The reason in line item.",
+  "properties": {
+    "isFreeTextAllowed": {
+      "type": "boolean"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "reasonType": {
+      "type": "string",
+      "enum": [
+        "CREDIT",
+        "DEBIT",
+        "BALANCE_ADJUSTMENT"
+      ]
+    },
+    "reasonCategory": {
+      "type": "string",
+      "enum": [
+        "AD_HOC",
+        "ADJUSTMENT",
+        "PHYSICAL_INVENTORY"
+      ]
+    }
+  }
+}

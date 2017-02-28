@@ -1,0 +1,50 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "The line item of stock card.",
+  "properties": {
+    "reason": {
+      "type": "object",
+      "title": "Reason",
+      "$ref": "reason"
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "signature": {
+      "type": "string"
+    },
+    "documentNumber": {
+      "type": "string"
+    },
+    "reasonFreeText": {
+      "type": "string"
+    },
+    "destination": {
+      "type": "object",
+      "title": "Destination",
+      "$ref": "facility"
+    },
+    "stockOnHand": {
+      "type": "integer"
+    },
+    "id": {
+      "type": "string"
+    },
+    "source": {
+      "type": "object",
+      "title": "Source",
+      "$ref": "facility"
+    },
+    "sourceFreeText": {
+      "type": "string"
+    },
+    "destinationFreeText": {
+      "type": "string"
+    },
+    "occurredDate": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

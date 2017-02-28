@@ -1,0 +1,37 @@
+{
+  "type": "object",
+  "properties": {
+    "parent": {
+      "type": "object",
+      "title": "GeographicZone",
+      "$ref": "geographicZone"
+    },
+    "code": {
+      "type": "string"
+    },
+    "level": {
+      "type": "object",
+      "title": "GeographicLevel",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "levelNumber": {
+          "type": "integer"
+        },
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "name": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    }
+  }
+}

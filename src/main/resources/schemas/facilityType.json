@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "displayOrder": {
+      "type": "integer"
+    },
+    "description": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean"
+    },
+    "id": {
+      "type": "string"
+    }
+  }
+}

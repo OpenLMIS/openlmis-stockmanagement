@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "A single program.",
+  "properties": {
+    "code": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean"
+    },
+    "periodsSkippable": {
+      "type": "boolean"
+    },
+    "id": {
+      "type": "string"
+    },
+    "showNonFullSupplyTab": {
+      "type": "boolean"
+    }
+  }
+}
