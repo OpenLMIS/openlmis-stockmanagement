@@ -15,8 +15,6 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static java.util.Collections.emptyList;
-
 import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.dto.ValidDestinationAssignmentDto;
@@ -59,10 +57,6 @@ public class ValidSourceDestinationService {
 
     List<ValidDestinationAssignment> destinationAssignments =
         validDestinationRepository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
-
-    if (destinationAssignments.isEmpty()) {
-      return emptyList();
-    }
     return destinationAssignments.stream().map(this::createDtoFrom).collect(Collectors.toList());
   }
 

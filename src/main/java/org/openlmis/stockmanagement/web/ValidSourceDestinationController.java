@@ -15,10 +15,13 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.OK;
 
 import org.openlmis.stockmanagement.dto.ValidDestinationAssignmentDto;
 import org.openlmis.stockmanagement.service.ValidSourceDestinationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -32,13 +35,26 @@ import java.util.UUID;
 @RequestMapping("/api")
 public class ValidSourceDestinationController {
 
+  private static final Logger LOGGER =
+      LoggerFactory.getLogger(ValidSourceDestinationController.class);
+
   @Autowired
   ValidSourceDestinationService validSourceDestinationService;
 
+  /**
+   * Get a list of valid destinations.
+   *
+   * @param program      program ID
+   * @param facilityType facility type ID
+   * @return found valid destinations.
+   */
   @RequestMapping(value = "/validDestinations")
   public ResponseEntity<List<ValidDestinationAssignmentDto>> getValidDestinations(
       @RequestParam UUID program,
       @RequestParam UUID facilityType) {
+    LOGGER.debug(
+        format("Try to find valid destinations with program %s and facility type %s",
+            program.toString(), facilityType.toString()));
     return new ResponseEntity<>(
         validSourceDestinationService.findValidDestinations(program, facilityType), OK);
   }
