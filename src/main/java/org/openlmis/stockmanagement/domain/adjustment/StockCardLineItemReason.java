@@ -17,17 +17,19 @@ package org.openlmis.stockmanagement.domain.adjustment;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.openlmis.stockmanagement.domain.BaseEntity;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Table;
 
 @Entity
 @Data
@@ -99,14 +101,17 @@ public class StockCardLineItemReason extends BaseEntity {
         .build();
   }
 
+  @JsonIgnore
   public boolean isCreditReasonType() {
     return getReasonType() == ReasonType.CREDIT;
   }
 
+  @JsonIgnore
   public boolean isDebitReasonType() {
     return getReasonType() == ReasonType.DEBIT;
   }
 
+  @JsonIgnore
   public boolean isAdjustmentReasonCategory() {
     return getReasonCategory() == ReasonCategory.ADJUSTMENT;
   }
