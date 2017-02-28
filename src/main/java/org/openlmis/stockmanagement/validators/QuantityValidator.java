@@ -26,11 +26,12 @@ import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component(value = "QuantityValidator")
+//commenting the following line out, so spring will NOT pick it up and inject it
+//this is for jira ticket 1987
+//@Component(value = "QuantityValidator")
 public class QuantityValidator implements StockEventValidator {
 
   @Autowired
