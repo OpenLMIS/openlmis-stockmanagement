@@ -16,6 +16,11 @@ schemas:
   - lineItem: !include schemas/lineItem.json
   - facilityType: !include schemas/facilityType.json
   - reason: !include schemas/reason.json
+  - reasons: |
+       {
+           "type": "array",
+           "items": { "type": "object", "$ref": "reason" }
+       }
   - geographicZone: !include schemas/geographicZone.json
   - stockCardTemplate: !include schemas/stockCardTemplate.json
   - stockEventDto: !include schemas/stockEventDto.json
@@ -225,3 +230,25 @@ traits:
             description: User does not have permission to view stock card.
             body:
               application/json:
+
+  /validReasons:
+      get:
+        is: [ secured ]
+        description: Return a list of valid reasons based on program and facility type.
+
+        queryParameters:
+          program:
+            description: Program id
+            type: string
+            required: true
+          facilityType:
+            description: Facility type id
+            type: string
+            required: true
+
+        responses:
+          200:
+            description: Valid reason response,
+            body:
+              application/json:
+                schema: reasons
