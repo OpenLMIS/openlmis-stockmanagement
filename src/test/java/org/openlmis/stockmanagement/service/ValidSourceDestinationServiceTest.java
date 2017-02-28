@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
@@ -24,20 +25,24 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.openlmis.stockmanagement.domain.movement.Node;
+import org.openlmis.stockmanagement.domain.movement.Organization;
+import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.dto.FacilityTypeDto;
 import org.openlmis.stockmanagement.dto.ProgramDto;
 import org.openlmis.stockmanagement.dto.ValidDestinationAssignmentDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityTypeReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ValidSourceDestinationServiceTest {
+
   @InjectMocks
   private ValidSourceDestinationService validSourceDestinationService;
 
@@ -49,6 +54,9 @@ public class ValidSourceDestinationServiceTest {
 
   @Mock
   private ValidDestinationAssignmentRepository validDestinationAssignmentRepository;
+
+  @Mock
+  private OrganizationRepository organizationRepository;
 
   @Test(expected = ValidationMessageException.class)
   public void should_throw_validation_exception_when_program_and_facilityType_not_found()
@@ -71,9 +79,6 @@ public class ValidSourceDestinationServiceTest {
     UUID facilityTypeId = UUID.randomUUID();
     when(programRefDataService.findOne(programId)).thenReturn(new ProgramDto());
     when(facilityTypeRefDataService.findOne(facilityTypeId)).thenReturn(new FacilityTypeDto());
-    when(validDestinationAssignmentRepository
-        .findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
-        .thenReturn(new ArrayList<>());
 
     //when
     List<ValidDestinationAssignmentDto> validDestinations =
@@ -81,5 +86,44 @@ public class ValidSourceDestinationServiceTest {
 
     //then
     assertThat(validDestinations.isEmpty(), is(true));
+  }
+
+  @Test
+  public void should_return_list_of_destination_dtos_when_find_valid_destination_assignment()
+      throws Exception {
+    //given
+    UUID programId = UUID.fromString("dce17f2e-af3e-40ad-8e00-3496adef44c3");
+    UUID facilityTypeId = UUID.fromString("ac1d268b-ce10-455f-bf87-9c667da8f060");
+    when(programRefDataService.findOne(programId)).thenReturn(new ProgramDto());
+    when(facilityTypeRefDataService.findOne(facilityTypeId)).thenReturn(new FacilityTypeDto());
+
+    mockValidDestinationAssignment(programId, facilityTypeId);
+
+    //when
+    List<ValidDestinationAssignmentDto> validDestinations =
+        validSourceDestinationService.findValidDestinations(programId, facilityTypeId);
+
+    //then
+    assertThat(validDestinations.size(), is(1));
+    assertThat(validDestinations.get(0).getName(), is("CHW"));
+  }
+
+  private void mockValidDestinationAssignment(UUID programId, UUID facilityTypeId) {
+    Organization organization = new Organization();
+    organization.setName("CHW");
+    organization.setId(UUID.randomUUID());
+
+    Node node = new Node();
+    node.setRefDataFacility(false);
+    node.setId(UUID.randomUUID());
+    node.setReferenceId(organization.getId());
+
+    ValidDestinationAssignment destination = new ValidDestinationAssignment();
+    destination.setNode(node);
+
+    when(organizationRepository.findOne(node.getReferenceId())).thenReturn(organization);
+    when(validDestinationAssignmentRepository
+        .findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
+        .thenReturn(singletonList(destination));
   }
 }

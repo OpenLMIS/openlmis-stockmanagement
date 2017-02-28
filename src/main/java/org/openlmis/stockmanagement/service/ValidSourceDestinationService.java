@@ -19,12 +19,15 @@ import static java.util.Collections.emptyList;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_TYPE_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_NOT_FOUND;
 
+import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.dto.FacilityTypeDto;
 import org.openlmis.stockmanagement.dto.ProgramDto;
 import org.openlmis.stockmanagement.dto.ValidDestinationAssignmentDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
+import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.FacilityTypeReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.openlmis.stockmanagement.utils.Message;
@@ -47,6 +50,12 @@ public class ValidSourceDestinationService {
   @Autowired
   private ValidDestinationAssignmentRepository validDestinationRepository;
 
+  @Autowired
+  private FacilityReferenceDataService facilityRefDataService;
+
+  @Autowired
+  private OrganizationRepository organizationRepository;
+
   /**
    * Find valid destinations by program ID and facility type ID.
    *
@@ -57,19 +66,14 @@ public class ValidSourceDestinationService {
   public List<ValidDestinationAssignmentDto> findValidDestinations(
       UUID programId, UUID facilityTypeId) {
     checkProgramAndFacilityTypeExist(programId, facilityTypeId);
+
     List<ValidDestinationAssignment> destinationAssignments =
         validDestinationRepository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
 
     if (destinationAssignments.isEmpty()) {
       return emptyList();
     }
-
-    return destinationAssignments.stream()
-        .map(destinations -> destinationToDto()).collect(Collectors.toList());
-  }
-
-  private ValidDestinationAssignmentDto destinationToDto() {
-    return null;
+    return destinationAssignments.stream().map(this::createDtoFrom).collect(Collectors.toList());
   }
 
   private void checkProgramAndFacilityTypeExist(UUID programId, UUID facilityTypeId) {
@@ -84,4 +88,19 @@ public class ValidSourceDestinationService {
           new Message(ERROR_FACILITY_TYPE_NOT_FOUND, facilityTypeId.toString()));
     }
   }
+
+  private ValidDestinationAssignmentDto createDtoFrom(ValidDestinationAssignment destination) {
+    ValidDestinationAssignmentDto dto = new ValidDestinationAssignmentDto();
+    Node node = destination.getNode();
+    dto.setId(node.getId());
+    boolean isRefDataFacility = node.isRefDataFacility();
+    if (isRefDataFacility) {
+      dto.setName(facilityRefDataService.findOne(node.getReferenceId()).getName());
+    } else {
+      dto.setName(organizationRepository.findOne(node.getReferenceId()).getName());
+    }
+    dto.setIsFreeTextAllowed(isRefDataFacility);
+    return dto;
+  }
+
 }
