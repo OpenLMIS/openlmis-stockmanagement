@@ -1,17 +1,8 @@
 {
   "type": "object",
   "$schema": "http://json-schema.org/draft-04/schema",
-  "description": "Stock card dto.",
+  "description": "Stock card without any line items.",
   "properties": {
-    "lineItems": {
-      "type": "array",
-      "title": "LineItems",
-      "items": {
-        "type": "object",
-        "title": "LineItem",
-        "$ref": "lineItem"
-      }
-    },
     "orderable": {
       "type": "object",
       "title": "Orderable",

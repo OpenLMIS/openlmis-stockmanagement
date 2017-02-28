@@ -21,6 +21,7 @@ schemas:
   - stockEventDto: !include schemas/stockEventDto.json
   - stockCards: !include schemas/stockCards.json
   - stockCard: !include schemas/stockCard.json
+  - stockCardSummary: !include schemas/stockCardSummary.json
   - stockCardSummaries: !include schemas/stockCardSummaries.json
 
 resourceTypes:
@@ -150,7 +151,7 @@ traits:
   /stockCards:
       get:
         is: [ secured ]
-        description: Get a list of stock cards of a facility, with full details of each stock card.
+        description: \[TBD\] Get a list of stock cards of a facility, with full details of each stock card.
         queryParameters:
           facility:
             required: true

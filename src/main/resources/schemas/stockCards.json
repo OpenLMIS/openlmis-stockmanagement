@@ -1,71 +1,9 @@
 {
   "type": "array",
+  "$schema": "http://json-schema.org/draft-04/schema",
   "items": {
     "type": "object",
-    "properties": {
-      "lineItems": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "sourceId": {
-              "type": "string"
-            },
-            "reason": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string"
-                },
-                "type": {
-                  "type": "string",
-                  "enum": [
-                    "CREDIT",
-                    "DEBIT"
-                  ]
-                }
-              }
-            },
-            "quantity": {
-              "type": "integer"
-            },
-            "signature": {
-              "type": "string"
-            },
-            "destinationId": {
-              "type": "string"
-            },
-            "destinationFreeText": {
-              "type": "string"
-            },
-            "reasonFreeText": {
-              "type": "string"
-            },
-            "stockOnHand": {
-              "type": "integer"
-            },
-            "sourceFreeText": {
-              "type": "string"
-            },
-            "stockCardId": {
-              "type": "string"
-            },
-            "occurredDate": {
-              "type": "string",
-              "format": "date-time"
-            }
-          }
-        }
-      },
-      "facilityId": {
-        "type": "string"
-      },
-      "orderableId": {
-        "type": "string"
-      },
-      "programId": {
-        "type": "string"
-      }
-    }
+    "title": "StockCard",
+    "$ref": "stockCard"
   }
 }
