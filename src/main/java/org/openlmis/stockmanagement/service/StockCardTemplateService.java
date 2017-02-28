@@ -15,21 +15,19 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
+
 import org.openlmis.stockmanagement.domain.template.AvailableStockCardFields;
 import org.openlmis.stockmanagement.domain.template.AvailableStockCardLineItemFields;
 import org.openlmis.stockmanagement.domain.template.StockCardTemplate;
-import org.openlmis.stockmanagement.dto.FacilityTypeDto;
-import org.openlmis.stockmanagement.dto.ProgramDto;
 import org.openlmis.stockmanagement.dto.StockCardFieldDto;
 import org.openlmis.stockmanagement.dto.StockCardLineItemFieldDto;
 import org.openlmis.stockmanagement.dto.StockCardTemplateDto;
-import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.AvailableStockCardFieldsRepository;
 import org.openlmis.stockmanagement.repository.AvailableStockCardLineItemFieldsRepository;
 import org.openlmis.stockmanagement.repository.StockCardTemplatesRepository;
-import org.openlmis.stockmanagement.service.referencedata.FacilityTypeReferenceDataService;
-import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
-import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Service;
@@ -39,11 +37,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_TYPE_NOT_FOUND;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_NOT_FOUND;
 
 /**
  * A service that wraps around repository to provide ability
@@ -62,10 +55,7 @@ public class StockCardTemplateService {
   private AvailableStockCardLineItemFieldsRepository lineItemFieldsRepo;
 
   @Autowired
-  private ProgramReferenceDataService programReferenceDataService;
-
-  @Autowired
-  private FacilityTypeReferenceDataService facilityTypeReferenceDataService;
+  private ProgramFacilityTypeExistenceService programFacilityTypeExistenceService;
 
   /**
    * Save or update stock card template by facility type id and program id.
@@ -87,7 +77,8 @@ public class StockCardTemplateService {
       template.setId(found.getId());
       templateRepository.delete(found);
     } else {
-      checkProgramAndFacilityTypeExist(template.getProgramId(), template.getFacilityTypeId());
+      programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(
+          template.getProgramId(), template.getFacilityTypeId());
     }
 
     return StockCardTemplateDto.from(templateRepository.save(template));
@@ -145,18 +136,5 @@ public class StockCardTemplateService {
   private StockCardLineItemFieldDto convertModelToDefaultDto(
           AvailableStockCardLineItemFields model) {
     return new StockCardLineItemFieldDto(model.getName(), false, 0);
-  }
-
-  private void checkProgramAndFacilityTypeExist(UUID programId, UUID facilityTypeId) {
-    ProgramDto programDto = programReferenceDataService.findOne(programId);
-    FacilityTypeDto facilityTypeDto = facilityTypeReferenceDataService.findOne(facilityTypeId);
-    if (programDto == null) {
-      throw new ValidationMessageException(
-              new Message(ERROR_PROGRAM_NOT_FOUND, programId.toString()));
-    }
-    if (facilityTypeDto == null) {
-      throw new ValidationMessageException(
-              new Message(ERROR_FACILITY_TYPE_NOT_FOUND, facilityTypeId.toString()));
-    }
   }
 }

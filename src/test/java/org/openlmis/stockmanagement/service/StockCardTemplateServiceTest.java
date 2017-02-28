@@ -15,29 +15,25 @@
 
 package org.openlmis.stockmanagement.service;
 
-import org.junit.Before;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.openlmis.stockmanagement.testutils.StockCardTemplateBuilder.createTemplateDto;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
-import org.openlmis.stockmanagement.dto.FacilityTypeDto;
-import org.openlmis.stockmanagement.dto.ProgramDto;
 import org.openlmis.stockmanagement.dto.StockCardFieldDto;
 import org.openlmis.stockmanagement.dto.StockCardTemplateDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.service.referencedata.FacilityTypeReferenceDataService;
-import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.UUID;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.testutils.StockCardTemplateBuilder.createTemplateDto;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -47,19 +43,7 @@ public class StockCardTemplateServiceTest {
   private StockCardTemplateService stockCardTemplateService;
 
   @MockBean
-  private ProgramReferenceDataService programReferenceDataService;
-
-  @MockBean
-  private FacilityTypeReferenceDataService facilityTypeReferenceDataService;
-
-  @Before
-  public void setUp() throws Exception {
-    //pretend that program and facility type are both present in ref data service
-    when(programReferenceDataService.findOne(Matchers.any()))
-            .thenReturn(new ProgramDto());
-    when(facilityTypeReferenceDataService.findOne(Matchers.any()))
-            .thenReturn(new FacilityTypeDto());
-  }
+  private ProgramFacilityTypeExistenceService programFacilityTypeExistenceService;
 
   @Test
   public void should_update_existing_template() {
@@ -123,10 +107,9 @@ public class StockCardTemplateServiceTest {
   @Test(expected = ValidationMessageException.class)
   public void should_not_save_template_with_non_existing_program_and_facility_type() {
     //given: program and facility can not be found in ref data service
-    when(programReferenceDataService.findOne(Matchers.any()))
-            .thenReturn(null);
-    when(facilityTypeReferenceDataService.findOne(Matchers.any()))
-            .thenReturn(null);
+    doThrow(new ValidationMessageException("errorKey")).when(programFacilityTypeExistenceService)
+        .checkProgramAndFacilityTypeExist(any(UUID.class), any(UUID.class));
+
     StockCardTemplateDto templateDto = createTemplateDto();
 
     //when
