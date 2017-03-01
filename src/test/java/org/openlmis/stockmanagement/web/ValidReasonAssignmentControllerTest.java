@@ -39,6 +39,8 @@ import java.util.UUID;
 
 public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   private static final String GET_VALID_REASON_API = "/api/validReasons";
+  public static final String PROGRAM = "program";
+  public static final String FACILITY_TYPE = "facilityType";
 
   @MockBean
   private ValidReasonAssignmentRepository reasonAssignmentRepository;
@@ -63,8 +65,8 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
     ResultActions resultActions = mvc.perform(
         get(GET_VALID_REASON_API)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param("program", programId.toString())
-            .param("facilityType", facilityTypeId.toString()));
+            .param(PROGRAM, programId.toString())
+            .param(FACILITY_TYPE, facilityTypeId.toString()));
 
     //then
     resultActions
@@ -86,8 +88,8 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
     ResultActions resultActions = mvc.perform(
         get(GET_VALID_REASON_API)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param("program", programId.toString())
-            .param("facilityType", facilityTypeId.toString()));
+            .param(PROGRAM, programId.toString())
+            .param(FACILITY_TYPE, facilityTypeId.toString()));
 
     //then
     resultActions.andExpect(status().isBadRequest());
@@ -106,8 +108,8 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
     ResultActions resultActions = mvc.perform(
         get(GET_VALID_REASON_API)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param("program", programId.toString())
-            .param("facilityType", facilityTypeId.toString()));
+            .param(PROGRAM, programId.toString())
+            .param(FACILITY_TYPE, facilityTypeId.toString()));
 
     //then
     resultActions.andExpect(status().isBadRequest());
@@ -125,8 +127,8 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
     ResultActions resultActions = mvc.perform(
         get(GET_VALID_REASON_API)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param("program", programId.toString())
-            .param("facilityType", facilityTypeId.toString()));
+            .param(PROGRAM, programId.toString())
+            .param(FACILITY_TYPE, facilityTypeId.toString()));
 
     //then
     resultActions.andExpect(status().isForbidden());

@@ -34,6 +34,11 @@ public class ProgramFacilityPermissionService {
   @Autowired
   private AuthenticationHelper authenticationHelper;
 
+  /**
+   * Check program and home facility permission.
+   * @param programId program id.
+   * @param facilityTypeId facility type id.
+   */
   public void checkProgramFacility(UUID programId, UUID facilityTypeId) {
     FacilityDto homeFacility = authenticationHelper.getCurrentUser().getHomeFacility();
 
