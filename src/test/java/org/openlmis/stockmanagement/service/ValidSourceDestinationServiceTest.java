@@ -21,6 +21,10 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationBuilder.createFacilityDestination;
+import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationBuilder.createFacilitySourceAssignment;
+import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationBuilder.createOrganizationDestination;
+import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationBuilder.createOrganizationSourceAssignment;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,11 +34,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.domain.movement.Organization;
 import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
+import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.FacilityDto;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
+import org.openlmis.stockmanagement.repository.ValidSourceAssignmentRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
 
@@ -54,7 +60,10 @@ public class ValidSourceDestinationServiceTest {
   private ProgramFacilityTypeExistenceService programFacilityTypeExistenceService;
 
   @Mock
-  private ValidDestinationAssignmentRepository validDestinationAssignmentRepository;
+  private ValidDestinationAssignmentRepository destinationRepository;
+
+  @Mock
+  private ValidSourceAssignmentRepository sourceRepository;
 
   @Mock
   private OrganizationRepository organizationRepository;
@@ -69,11 +78,11 @@ public class ValidSourceDestinationServiceTest {
         .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
     //when
-    validSourceDestinationService.findSourcesOrDestinations(programId, facilityTypeId, false);
+    validSourceDestinationService.findSources(programId, facilityTypeId);
   }
 
   @Test
-  public void should_return_empty_list_when_valid_destination_assignment_not_found()
+  public void should_return_list_of_destination_dtos_when_find_valid_destination_assignment()
       throws Exception {
     //given
     UUID programId = UUID.randomUUID();
@@ -81,32 +90,16 @@ public class ValidSourceDestinationServiceTest {
     doNothing().when(programFacilityTypeExistenceService)
         .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
-    //when
-    List<ValidSourceDestinationDto> validDestinations =
-        validSourceDestinationService.findSourcesOrDestinations(programId, facilityTypeId, false);
+    List<ValidDestinationAssignment> validDestinationAssignments = asList(
+        createOrganizationDestination(mockedOrganizationNode("CHW")),
+        createFacilityDestination(mockedFacilityNode("Balaka District Hospital")));
 
-    //then
-    assertThat(validDestinations.isEmpty(), is(true));
-  }
-
-  @Test
-  public void should_return_list_of_destination_dtos_when_find_valid_destination_assignment()
-      throws Exception {
-    //given
-    UUID programId = UUID.fromString("dce17f2e-af3e-40ad-8e00-3496adef44c3");
-    UUID facilityTypeId = UUID.fromString("ac1d268b-ce10-455f-bf87-9c667da8f060");
-    doNothing().when(programFacilityTypeExistenceService)
-        .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
-
-    ValidDestinationAssignment organizationDestination = mockOrganizationDestination();
-    ValidDestinationAssignment facilityDestination = mockFacilityDestinationAssignment();
-    when(validDestinationAssignmentRepository
-        .findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
-        .thenReturn(asList(organizationDestination, facilityDestination));
+    when(destinationRepository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
+        .thenReturn(validDestinationAssignments);
 
     //when
     List<ValidSourceDestinationDto> validDestinations =
-        validSourceDestinationService.findSourcesOrDestinations(programId, facilityTypeId, false);
+        validSourceDestinationService.findDestinations(programId, facilityTypeId);
 
     //then
     assertThat(validDestinations.size(), is(2));
@@ -114,34 +107,54 @@ public class ValidSourceDestinationServiceTest {
     assertThat(validDestinations.get(1).getName(), is("Balaka District Hospital"));
   }
 
-  private ValidDestinationAssignment mockFacilityDestinationAssignment() {
-    FacilityDto facilityDto = new FacilityDto();
-    facilityDto.setName("Balaka District Hospital");
-    facilityDto.setId(UUID.randomUUID());
+  @Test
+  public void should_return_list_of_source_dtos_when_find_valid_source_assignment()
+      throws Exception {
+    //given
+    UUID programId = UUID.randomUUID();
+    UUID facilityTypeId = UUID.randomUUID();
+    doNothing().when(programFacilityTypeExistenceService)
+        .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
-    Node node2 = new Node();
-    node2.setRefDataFacility(true);
-    node2.setReferenceId(facilityDto.getId());
+    List<ValidSourceAssignment> validSourceAssignments = asList(
+        createOrganizationSourceAssignment(mockedOrganizationNode("NGO")),
+        createFacilitySourceAssignment(mockedFacilityNode("Health Center")));
 
-    ValidDestinationAssignment destination2 = new ValidDestinationAssignment();
-    destination2.setNode(node2);
-    when(facilityReferenceDataService.findOne(facilityDto.getId())).thenReturn(facilityDto);
-    return destination2;
+    when(sourceRepository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
+        .thenReturn(validSourceAssignments);
+
+    //when
+    List<ValidSourceDestinationDto> validSources =
+        validSourceDestinationService.findSources(programId, facilityTypeId);
+
+    //then
+    assertThat(validSources.size(), is(2));
+    assertThat(validSources.get(0).getName(), is("NGO"));
+    assertThat(validSources.get(1).getName(), is("Health Center"));
   }
 
-  private ValidDestinationAssignment mockOrganizationDestination() {
+  private Node mockedFacilityNode(String name) {
+    FacilityDto facilityDto = new FacilityDto();
+    facilityDto.setName(name);
+    facilityDto.setId(UUID.randomUUID());
+    when(facilityReferenceDataService.findOne(facilityDto.getId())).thenReturn(facilityDto);
+
+    Node node = new Node();
+    node.setRefDataFacility(true);
+    node.setReferenceId(facilityDto.getId());
+    return node;
+  }
+
+  private Node mockedOrganizationNode(String name) {
     Organization organization = new Organization();
-    organization.setName("CHW");
+    organization.setName(name);
     organization.setId(UUID.randomUUID());
+    when(organizationRepository.findOne(organization.getId())).thenReturn(organization);
 
     Node node = new Node();
     node.setRefDataFacility(false);
     node.setId(UUID.randomUUID());
     node.setReferenceId(organization.getId());
-
-    ValidDestinationAssignment destination = new ValidDestinationAssignment();
-    destination.setNode(node);
-    when(organizationRepository.findOne(organization.getId())).thenReturn(organization);
-    return destination;
+    return node;
   }
 }

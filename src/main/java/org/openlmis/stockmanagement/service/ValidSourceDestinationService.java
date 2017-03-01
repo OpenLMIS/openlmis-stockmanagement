@@ -17,9 +17,11 @@ package org.openlmis.stockmanagement.service;
 
 import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
+import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
+import org.openlmis.stockmanagement.repository.ValidSourceAssignmentRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +41,9 @@ public class ValidSourceDestinationService {
   private ValidDestinationAssignmentRepository validDestinationRepository;
 
   @Autowired
+  private ValidSourceAssignmentRepository validSourceRepository;
+
+  @Autowired
   private FacilityReferenceDataService facilityRefDataService;
 
   @Autowired
@@ -49,21 +54,39 @@ public class ValidSourceDestinationService {
    *
    * @param programId      program ID
    * @param facilityTypeId facility type ID
-   * @param isSource       try to get valid sources or destinations
    * @return valid destination assignment DTOs
    */
-  public List<ValidSourceDestinationDto> findSourcesOrDestinations(
-      UUID programId, UUID facilityTypeId, Boolean isSource) {
+  public List<ValidSourceDestinationDto> findSources(
+      UUID programId, UUID facilityTypeId) {
+    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(programId, facilityTypeId);
+
+    List<ValidSourceAssignment> sourceAssignments =
+        validSourceRepository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
+    return sourceAssignments.stream()
+        .map(source -> createDtoFrom(source.getNode()))
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * Find valid sources by program ID and facility type ID.
+   *
+   * @param programId      program ID
+   * @param facilityTypeId facility type ID
+   * @return valid source assignment DTOs
+   */
+  public List<ValidSourceDestinationDto> findDestinations(UUID programId, UUID facilityTypeId) {
     programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
     List<ValidDestinationAssignment> destinationAssignments =
         validDestinationRepository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
-    return destinationAssignments.stream().map(this::createDtoFrom).collect(Collectors.toList());
+    return destinationAssignments.stream()
+        .map(destination -> createDtoFrom(destination.getNode()))
+        .collect(Collectors.toList());
   }
 
-  private ValidSourceDestinationDto createDtoFrom(ValidDestinationAssignment destination) {
+  private ValidSourceDestinationDto createDtoFrom(Node node) {
     ValidSourceDestinationDto dto = new ValidSourceDestinationDto();
-    Node node = destination.getNode();
+
     dto.setId(node.getId());
     boolean isRefDataFacility = node.isRefDataFacility();
     if (isRefDataFacility) {

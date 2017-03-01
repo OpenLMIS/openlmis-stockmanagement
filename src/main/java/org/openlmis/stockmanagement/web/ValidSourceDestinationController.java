@@ -55,7 +55,7 @@ public class ValidSourceDestinationController {
     LOGGER.debug(format("Try to find valid destinations with program %s and facility type %s",
         program.toString(), facilityType.toString()));
     return new ResponseEntity<>(
-        validSourceDestinationService.findSourcesOrDestinations(program, facilityType, false), OK);
+        validSourceDestinationService.findDestinations(program, facilityType), OK);
   }
 
   /**
@@ -72,6 +72,6 @@ public class ValidSourceDestinationController {
     LOGGER.debug(format("Try to find valid sources with program %s and facility type %s",
         program.toString(), facilityType.toString()));
     return new ResponseEntity<>(
-        validSourceDestinationService.findSourcesOrDestinations(program, facilityType, true), OK);
+        validSourceDestinationService.findSources(program, facilityType), OK);
   }
 }

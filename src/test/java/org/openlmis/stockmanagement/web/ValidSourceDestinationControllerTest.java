@@ -52,10 +52,10 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
 
     UUID program = UUID.randomUUID();
     UUID facilityType = UUID.randomUUID();
-    when(validSourceDestinationService.findSourcesOrDestinations(program, facilityType, true))
+    when(validSourceDestinationService.findSources(program, facilityType))
         .thenReturn(singletonList(sourceDestination));
 
-    when(validSourceDestinationService.findSourcesOrDestinations(program, facilityType, false))
+    when(validSourceDestinationService.findDestinations(program, facilityType))
         .thenReturn(singletonList(sourceDestination));
 
     //1. perform valid destinations
@@ -91,7 +91,7 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
     doThrow(new ValidationMessageException(
         new Message(ERROR_PROGRAM_NOT_FOUND, programId.toString())))
         .when(validSourceDestinationService)
-        .findSourcesOrDestinations(programId, facilityTypeId, false);
+        .findDestinations(programId, facilityTypeId);
 
     //when
     ResultActions resultActions = mvc.perform(MockMvcRequestBuilders.get(API_VALID_DESTINATIONS)
