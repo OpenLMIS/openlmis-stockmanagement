@@ -28,7 +28,7 @@ import org.openlmis.stockmanagement.domain.adjustment.ValidReasonAssignment;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
-import org.openlmis.stockmanagement.service.ProgramFacilityPermissionService;
+import org.openlmis.stockmanagement.service.ProgramFacilityTypePermissionService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -39,14 +39,14 @@ import java.util.UUID;
 
 public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   private static final String GET_VALID_REASON_API = "/api/validReasons";
-  public static final String PROGRAM = "program";
-  public static final String FACILITY_TYPE = "facilityType";
+  private static final String PROGRAM = "program";
+  private static final String FACILITY_TYPE = "facilityType";
 
   @MockBean
   private ValidReasonAssignmentRepository reasonAssignmentRepository;
 
   @MockBean
-  private ProgramFacilityPermissionService programFacilityPermissionService;
+  private ProgramFacilityTypePermissionService programFacilityTypePermissionService;
 
   @MockBean
   private ProgramFacilityTypeExistenceService programFacilityTypeExistenceService;
@@ -121,7 +121,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
     UUID facilityTypeId = randomUUID();
     UUID programId = UUID.fromString("dce17f2e-af3e-40ad-8e00-3496adef44c3");
     doThrow(new PermissionMessageException(new Message("errorKey")))
-        .when(programFacilityPermissionService).checkProgramFacility(programId, facilityTypeId);
+        .when(programFacilityTypePermissionService).checkProgramFacility(programId, facilityTypeId);
 
     //when
     ResultActions resultActions = mvc.perform(

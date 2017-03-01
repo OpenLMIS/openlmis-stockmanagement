@@ -34,10 +34,10 @@ import java.util.Arrays;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ProgramFacilityPermissionServiceTest {
+public class ProgramFacilityTypePermissionServiceTest {
 
   @InjectMocks
-  private ProgramFacilityPermissionService programFacilityPermissionService;
+  private ProgramFacilityTypePermissionService programFacilityTypePermissionService;
 
   @Mock
   private AuthenticationHelper authenticationHelper;
@@ -51,7 +51,7 @@ public class ProgramFacilityPermissionServiceTest {
     UserDto userDto = createUserDto(programId, facilityTypeId);
     when(authenticationHelper.getCurrentUser()).thenReturn(userDto);
 
-    programFacilityPermissionService.checkProgramFacility(programId, randomUUID());
+    programFacilityTypePermissionService.checkProgramFacility(programId, randomUUID());
   }
 
   @Test(expected = PermissionMessageException.class)
@@ -62,7 +62,7 @@ public class ProgramFacilityPermissionServiceTest {
     UserDto userDto = createUserDto(randomUUID(), facilityTypeId);
     when(authenticationHelper.getCurrentUser()).thenReturn(userDto);
 
-    programFacilityPermissionService.checkProgramFacility(programId, facilityTypeId);
+    programFacilityTypePermissionService.checkProgramFacility(programId, facilityTypeId);
   }
 
   @Test
@@ -73,13 +73,15 @@ public class ProgramFacilityPermissionServiceTest {
     UserDto userDto = createUserDto(programId, facilityTypeId);
     when(authenticationHelper.getCurrentUser()).thenReturn(userDto);
 
-    programFacilityPermissionService.checkProgramFacility(programId, facilityTypeId);
+    programFacilityTypePermissionService.checkProgramFacility(programId, facilityTypeId);
   }
 
   private UserDto createUserDto(UUID programId, UUID facilityTypeId) {
     UserDto userDto = new UserDto();
 
     FacilityDto homeFacility = new FacilityDto();
+    userDto.setHomeFacility(homeFacility);
+
     FacilityTypeDto facilityTypeDto = new FacilityTypeDto();
     facilityTypeDto.setId(facilityTypeId);
     homeFacility.setType(facilityTypeDto);
@@ -88,7 +90,6 @@ public class ProgramFacilityPermissionServiceTest {
     supportedProgramDto.setId(programId);
     homeFacility.setSupportedPrograms(Arrays.asList(supportedProgramDto));
 
-    userDto.setHomeFacility(homeFacility);
     return userDto;
   }
 }

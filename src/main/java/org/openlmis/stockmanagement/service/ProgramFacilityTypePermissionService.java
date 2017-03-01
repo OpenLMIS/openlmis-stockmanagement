@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public class ProgramFacilityPermissionService {
+public class ProgramFacilityTypePermissionService {
   @Autowired
   private AuthenticationHelper authenticationHelper;
 
@@ -42,7 +42,7 @@ public class ProgramFacilityPermissionService {
   public void checkProgramFacility(UUID programId, UUID facilityTypeId) {
     FacilityDto homeFacility = authenticationHelper.getCurrentUser().getHomeFacility();
 
-    if (homeFacility.getType().getId() != facilityTypeId) {
+    if (homeFacility == null || !facilityTypeId.equals(homeFacility.getType().getId())) {
       throwException(ERROR_FACILITY_TYPE_HOME_FACILITY_TYPE_NOT_MATCH, facilityTypeId.toString());
     }
 
