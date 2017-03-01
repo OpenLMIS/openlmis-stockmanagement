@@ -30,5 +30,6 @@ public class UserDto {
   private String lastName;
   private String email;
   private boolean verified;
+  private FacilityDto homeFacility;
   private Set<RoleAssignmentDto> roleAssignments;
 }

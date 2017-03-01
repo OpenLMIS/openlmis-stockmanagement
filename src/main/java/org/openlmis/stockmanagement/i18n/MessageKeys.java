@@ -108,6 +108,12 @@ public abstract class MessageKeys {
   public static final String ERROR_NO_FOLLOWING_PERMISSION = ERROR_PREFIX
       + ".authorization.noFollowingPermission";
 
+  public static final String ERROR_FACILITY_TYPE_HOME_FACILITY_TYPE_NOT_MATCH = ERROR_PREFIX
+      + ".authorization.facilityTypeAndHomeFacilityType.not.match";
+
+  public static final String ERROR_PROGRAM_NOT_SUPPORTED = ERROR_PREFIX
+      + ".authorization.program.not.supported";
+
   private MessageKeys() {
     throw new UnsupportedOperationException();
   }

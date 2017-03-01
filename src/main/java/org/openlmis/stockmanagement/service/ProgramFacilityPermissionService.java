@@ -15,13 +15,41 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_TYPE_HOME_FACILITY_TYPE_NOT_MATCH;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_NOT_SUPPORTED;
+
+import org.openlmis.stockmanagement.dto.FacilityDto;
+import org.openlmis.stockmanagement.dto.SupportedProgramDto;
+import org.openlmis.stockmanagement.exception.PermissionMessageException;
+import org.openlmis.stockmanagement.util.AuthenticationHelper;
+import org.openlmis.stockmanagement.utils.Message;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
 public class ProgramFacilityPermissionService {
-  public void checkProgramFacility(UUID programId, UUID facilityTypeId) {
+  @Autowired
+  private AuthenticationHelper authenticationHelper;
 
+  public void checkProgramFacility(UUID programId, UUID facilityTypeId) {
+    FacilityDto homeFacility = authenticationHelper.getCurrentUser().getHomeFacility();
+
+    if (homeFacility.getType().getId() != facilityTypeId) {
+      throwException(ERROR_FACILITY_TYPE_HOME_FACILITY_TYPE_NOT_MATCH, facilityTypeId.toString());
+    }
+
+    List<SupportedProgramDto> supportedPrograms = homeFacility.getSupportedPrograms();
+    boolean isSupported = supportedPrograms.stream()
+        .anyMatch(supportedProgram -> programId.equals(supportedProgram.getId()));
+    if (!isSupported) {
+      throwException(ERROR_PROGRAM_NOT_SUPPORTED, programId.toString());
+    }
+  }
+
+  private void throwException(String errorKey, String... params) {
+    throw new PermissionMessageException(new Message(errorKey, params));
   }
 }
