@@ -22,6 +22,7 @@ import static org.springframework.http.HttpStatus.OK;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.adjustment.ValidReasonAssignment;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
+import org.openlmis.stockmanagement.service.ProgramFacilityPermissionService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +44,9 @@ public class ValidReasonAssignmentController {
   @Autowired
   private ProgramFacilityTypeExistenceService programFacilityTypeExistenceService;
 
+  @Autowired
+  private ProgramFacilityPermissionService programFacilityPermissionService;
+
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCardsController.class);
 
   /**
@@ -59,6 +63,7 @@ public class ValidReasonAssignmentController {
             program.toString(), facilityType.toString()));
 
     programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(program, facilityType);
+    programFacilityPermissionService.checkProgramFacility(program, facilityType);
 
     List<ValidReasonAssignment> validReasonAssignments =
         validReasonAssignmentRepository.findByProgramIdAndFacilityTypeId(program, facilityType);
