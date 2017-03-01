@@ -28,7 +28,7 @@ import org.openlmis.stockmanagement.domain.adjustment.ValidReasonAssignment;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
-import org.openlmis.stockmanagement.service.ProgramFacilityTypePermissionService;
+import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -46,10 +46,10 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   private ValidReasonAssignmentRepository reasonAssignmentRepository;
 
   @MockBean
-  private ProgramFacilityTypePermissionService programFacilityTypePermissionService;
+  private ProgramFacilityTypeExistenceService programFacilityTypeExistenceService;
 
   @MockBean
-  private ProgramFacilityTypeExistenceService programFacilityTypeExistenceService;
+  private PermissionService permissionService;
 
   @Test
   public void get_valid_reason_by_program_and_facility_type() throws Exception {
@@ -116,12 +116,13 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   }
 
   @Test
-  public void return_403_when_facility_type_and_home_facility_type_not_match() throws Exception {
+  public void return_403_when_current_user_has_no_permission() throws Exception {
     //given
+    //not exist in demo data
     UUID facilityTypeId = randomUUID();
     UUID programId = UUID.fromString("dce17f2e-af3e-40ad-8e00-3496adef44c3");
-    doThrow(new PermissionMessageException(new Message("errorKey")))
-        .when(programFacilityTypePermissionService).checkProgramFacility(programId, facilityTypeId);
+    doThrow(new PermissionMessageException(new Message("key"))).when(permissionService)
+        .canViewLineItemReasons(programId, facilityTypeId);
 
     //when
     ResultActions resultActions = mvc.perform(

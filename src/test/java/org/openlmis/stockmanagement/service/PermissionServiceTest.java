@@ -15,6 +15,15 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
+import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARD_LINE_ITEM_REASONS_VIEW;
+import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARD_TEMPLATES_MANAGE;
+import static org.openlmis.stockmanagement.service.PermissionService.STOCK_DESTINATIONS_VIEW;
+import static org.openlmis.stockmanagement.service.PermissionService.STOCK_SOURCES_VIEW;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,13 +39,9 @@ import org.openlmis.stockmanagement.dto.UserDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
+import org.openlmis.stockmanagement.utils.Message;
 
 import java.util.UUID;
-
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
-import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARD_TEMPLATES_MANAGE;
 
 @SuppressWarnings("PMD.TooManyMethods")
 @RunWith(MockitoJUnitRunner.class)
@@ -47,6 +52,9 @@ public class PermissionServiceTest {
 
   @Mock
   private UserReferenceDataService userReferenceDataService;
+
+  @Mock
+  private ProgramFacilityTypePermissionService programFacilityTypePermissionService;
 
   @Mock
   private AuthenticationHelper authenticationHelper;
@@ -77,6 +85,11 @@ public class PermissionServiceTest {
 
     when(authenticationHelper.getRight(STOCK_CARD_TEMPLATES_MANAGE))
         .thenReturn(manageStockCardTemplatesRight);
+
+    when(authenticationHelper.getRight(STOCK_SOURCES_VIEW)).thenReturn(new RightDto());
+    when(authenticationHelper.getRight(STOCK_DESTINATIONS_VIEW)).thenReturn(new RightDto());
+    when(authenticationHelper.getRight(STOCK_CARD_LINE_ITEM_REASONS_VIEW))
+        .thenReturn(new RightDto());
   }
 
   @Test
@@ -92,6 +105,45 @@ public class PermissionServiceTest {
   public void cannotCreateStockCardTemplates() throws Exception {
     expectException(STOCK_CARD_TEMPLATES_MANAGE);
     permissionService.canCreateStockCardTemplate();
+  }
+
+  @Test
+  public void canViewStockEventAssignable() throws Exception {
+    hasRight(UUID.randomUUID(), true);
+    UUID program = UUID.randomUUID();
+    UUID facilityType = UUID.randomUUID();
+
+    permissionService.canViewStockSource(program, facilityType);
+    permissionService.canViewStockDestinations(program, facilityType);
+    permissionService.canViewLineItemReasons(program, facilityType);
+  }
+
+  @Test
+  public void cannotViewStockSources() throws Exception {
+    checkViewRight(STOCK_SOURCES_VIEW);
+  }
+
+  @Test
+  public void cannotViewStockDestinations() throws Exception {
+    checkViewRight(STOCK_DESTINATIONS_VIEW);
+  }
+
+  @Test
+  public void cannotViewStockCardLineItemReasons() throws Exception {
+    checkViewRight(STOCK_CARD_LINE_ITEM_REASONS_VIEW);
+  }
+
+  private void checkViewRight(String rightName) {
+    expectException(rightName);
+
+    UUID program = UUID.randomUUID();
+    UUID facilityType = UUID.randomUUID();
+    doThrow(new PermissionMessageException(
+        new Message(ERROR_NO_FOLLOWING_PERMISSION, rightName)))
+        .when(programFacilityTypePermissionService)
+        .checkProgramFacility(program, facilityType);
+
+    permissionService.canViewStockDestinations(program, facilityType);
   }
 
   private void hasRight(UUID rightId, boolean assign) {

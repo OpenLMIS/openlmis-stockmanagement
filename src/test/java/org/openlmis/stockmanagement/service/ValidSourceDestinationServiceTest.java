@@ -37,12 +37,14 @@ import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.FacilityDto;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
+import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
 import org.openlmis.stockmanagement.repository.ValidSourceAssignmentRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
+import org.openlmis.stockmanagement.utils.Message;
 
 import java.util.List;
 import java.util.UUID;
@@ -58,6 +60,9 @@ public class ValidSourceDestinationServiceTest {
 
   @Mock
   private ProgramFacilityTypeExistenceService programFacilityTypeExistenceService;
+
+  @Mock
+  private PermissionService permissionService;
 
   @Mock
   private ValidDestinationAssignmentRepository destinationRepository;
@@ -79,6 +84,34 @@ public class ValidSourceDestinationServiceTest {
 
     //when
     validSourceDestinationService.findSources(programId, facilityTypeId);
+  }
+
+  @Test(expected = PermissionMessageException.class)
+  public void should_throw_permission_exception_when_user_has_no_permission_to_view_sources()
+      throws Exception {
+    //given
+    UUID programId = UUID.randomUUID();
+    UUID facilityTypeId = UUID.randomUUID();
+    doThrow(new PermissionMessageException(new Message("key")))
+        .when(permissionService)
+        .canViewStockSource(programId, facilityTypeId);
+
+    //when
+    validSourceDestinationService.findSources(programId, facilityTypeId);
+  }
+
+  @Test(expected = PermissionMessageException.class)
+  public void should_throw_permission_exception_when_user_has_no_permission_to_view_destinations()
+      throws Exception {
+    //given
+    UUID programId = UUID.randomUUID();
+    UUID facilityTypeId = UUID.randomUUID();
+    doThrow(new PermissionMessageException(new Message("key")))
+        .when(permissionService)
+        .canViewStockDestinations(programId, facilityTypeId);
+
+    //when
+    validSourceDestinationService.findDestinations(programId, facilityTypeId);
   }
 
   @Test

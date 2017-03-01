@@ -38,6 +38,9 @@ public class ValidSourceDestinationService {
   private ProgramFacilityTypeExistenceService programFacilityTypeExistenceService;
 
   @Autowired
+  private PermissionService permissionService;
+
+  @Autowired
   private ValidDestinationAssignmentRepository validDestinationRepository;
 
   @Autowired
@@ -59,6 +62,7 @@ public class ValidSourceDestinationService {
   public List<ValidSourceDestinationDto> findSources(
       UUID programId, UUID facilityTypeId) {
     programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(programId, facilityTypeId);
+    permissionService.canViewStockSource(programId, facilityTypeId);
 
     List<ValidSourceAssignment> sourceAssignments =
         validSourceRepository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
@@ -75,7 +79,10 @@ public class ValidSourceDestinationService {
    * @return valid source assignment DTOs
    */
   public List<ValidSourceDestinationDto> findDestinations(UUID programId, UUID facilityTypeId) {
-    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(programId, facilityTypeId);
+    programFacilityTypeExistenceService
+        .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
+    permissionService
+        .canViewStockDestinations(programId, facilityTypeId);
 
     List<ValidDestinationAssignment> destinationAssignments =
         validDestinationRepository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
