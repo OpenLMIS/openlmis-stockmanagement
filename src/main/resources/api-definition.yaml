@@ -316,4 +316,8 @@ traits:
             description: Facility type or program is not found.
             body:
               application/json:
+          403:
+            description: User does not have permission to view valid Reasons.
+            body:
+              application/json:
 
