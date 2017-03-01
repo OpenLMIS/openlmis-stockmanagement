@@ -101,7 +101,7 @@ public class ValidSourceDestinationService {
     } else {
       dto.setName(organizationRepository.findOne(node.getReferenceId()).getName());
     }
-    dto.setIsFreeTextAllowed(isRefDataFacility);
+    dto.setIsFreeTextAllowed(!isRefDataFacility);
     return dto;
   }
 

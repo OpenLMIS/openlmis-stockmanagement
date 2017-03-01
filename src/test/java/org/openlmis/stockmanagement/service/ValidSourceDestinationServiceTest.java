@@ -136,8 +136,14 @@ public class ValidSourceDestinationServiceTest {
 
     //then
     assertThat(validDestinations.size(), is(2));
-    assertThat(validDestinations.get(0).getName(), is("CHW"));
-    assertThat(validDestinations.get(1).getName(), is("Balaka District Hospital"));
+
+    ValidSourceDestinationDto organization = validDestinations.get(0);
+    assertThat(organization.getName(), is("CHW"));
+    assertThat(organization.getIsFreeTextAllowed(), is(true));
+
+    ValidSourceDestinationDto facility = validDestinations.get(1);
+    assertThat(facility.getName(), is("Balaka District Hospital"));
+    assertThat(facility.getIsFreeTextAllowed(), is(false));
   }
 
   @Test
@@ -162,8 +168,14 @@ public class ValidSourceDestinationServiceTest {
 
     //then
     assertThat(validSources.size(), is(2));
-    assertThat(validSources.get(0).getName(), is("NGO"));
-    assertThat(validSources.get(1).getName(), is("Health Center"));
+
+    ValidSourceDestinationDto organization = validSources.get(0);
+    assertThat(organization.getName(), is("NGO"));
+    assertThat(organization.getIsFreeTextAllowed(), is(true));
+
+    ValidSourceDestinationDto facility = validSources.get(1);
+    assertThat(facility.getName(), is("Health Center"));
+    assertThat(facility.getIsFreeTextAllowed(), is(false));
   }
 
   private Node mockedFacilityNode(String name) {
