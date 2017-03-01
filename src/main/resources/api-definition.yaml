@@ -317,7 +317,7 @@ traits:
             body:
               application/json:
           403:
-            description: User does not have permission to view valid Reasons.
+            description: Facility type given is no match with home facility or given program is not supported by home facility.
             body:
               application/json:
 
