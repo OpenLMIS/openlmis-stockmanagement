@@ -18,7 +18,7 @@ package org.openlmis.stockmanagement.web;
 import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.OK;
 
-import org.openlmis.stockmanagement.dto.ValidDestinationAssignmentDto;
+import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
 import org.openlmis.stockmanagement.service.ValidSourceDestinationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,13 +49,29 @@ public class ValidSourceDestinationController {
    * @return found valid destinations.
    */
   @RequestMapping(value = "/validDestinations")
-  public ResponseEntity<List<ValidDestinationAssignmentDto>> getValidDestinations(
+  public ResponseEntity<List<ValidSourceDestinationDto>> getValidDestinations(
       @RequestParam UUID program,
       @RequestParam UUID facilityType) {
-    LOGGER.debug(
-        format("Try to find valid destinations with program %s and facility type %s",
-            program.toString(), facilityType.toString()));
+    LOGGER.debug(format("Try to find valid destinations with program %s and facility type %s",
+        program.toString(), facilityType.toString()));
     return new ResponseEntity<>(
-        validSourceDestinationService.findValidDestinations(program, facilityType), OK);
+        validSourceDestinationService.findSourcesOrDestinations(program, facilityType, false), OK);
+  }
+
+  /**
+   * Get a list of valid sources.
+   *
+   * @param program      program ID
+   * @param facilityType facility type ID
+   * @return found valid sources.
+   */
+  @RequestMapping(value = "validSources")
+  public ResponseEntity<List<ValidSourceDestinationDto>> getValidSources(
+      @RequestParam UUID program,
+      @RequestParam UUID facilityType) {
+    LOGGER.debug(format("Try to find valid sources with program %s and facility type %s",
+        program.toString(), facilityType.toString()));
+    return new ResponseEntity<>(
+        validSourceDestinationService.findSourcesOrDestinations(program, facilityType, true), OK);
   }
 }

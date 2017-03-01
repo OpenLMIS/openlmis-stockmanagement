@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Test;
-import org.openlmis.stockmanagement.dto.ValidDestinationAssignmentDto;
+import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.ValidSourceDestinationService;
 import org.openlmis.stockmanagement.utils.Message;
@@ -41,20 +41,34 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
   @MockBean
   private ValidSourceDestinationService validSourceDestinationService;
 
-  private static final String API_VALID_DESTINATION = "/api/validDestinations";
+  private static final String API_VALID_DESTINATIONS = "/api/validDestinations";
+  private static final String API_VALID_SOURCES = "/api/validSources";
 
   @Test
-  public void should_get_list_of_valid_destination_by_program_and_facilityType() throws Exception {
+  public void should_get_valid_sources_or_destinations_by_program_and_facilityType()
+      throws Exception {
     //given
-    ValidDestinationAssignmentDto destinationAssignmentDto = createValidDestinationAssignmentDto();
+    ValidSourceDestinationDto sourceDestination = createValidSouceDestinationDto();
 
-    UUID programId = UUID.randomUUID();
-    UUID facilityTypeId = UUID.randomUUID();
-    when(validSourceDestinationService.findValidDestinations(programId, facilityTypeId))
-        .thenReturn(singletonList(destinationAssignmentDto));
+    UUID program = UUID.randomUUID();
+    UUID facilityType = UUID.randomUUID();
+    when(validSourceDestinationService.findSourcesOrDestinations(program, facilityType, true))
+        .thenReturn(singletonList(sourceDestination));
 
-    //when
-    ResultActions resultActions = mvc.perform(MockMvcRequestBuilders.get(API_VALID_DESTINATION)
+    when(validSourceDestinationService.findSourcesOrDestinations(program, facilityType, false))
+        .thenReturn(singletonList(sourceDestination));
+
+    //1. perform valid destinations
+    performSourcesOrDestinations(program, facilityType, sourceDestination, API_VALID_DESTINATIONS);
+
+    //2. perform valid sources
+    performSourcesOrDestinations(program, facilityType, sourceDestination, API_VALID_SOURCES);
+  }
+
+  private void performSourcesOrDestinations(
+      UUID programId, UUID facilityTypeId,
+      ValidSourceDestinationDto sourceDestinationDto, String uri) throws Exception {
+    ResultActions resultActions = mvc.perform(MockMvcRequestBuilders.get(uri)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
         .param("program", programId.toString())
         .param("facilityType", facilityTypeId.toString()));
@@ -63,8 +77,8 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
     resultActions.andExpect(status().isOk())
         .andDo(print())
         .andExpect(jsonPath("$", hasSize(1)))
-        .andExpect(jsonPath("$[0].id", is(destinationAssignmentDto.getId().toString())))
-        .andExpect(jsonPath("$[0].name", is(destinationAssignmentDto.getName())))
+        .andExpect(jsonPath("$[0].id", is(sourceDestinationDto.getId().toString())))
+        .andExpect(jsonPath("$[0].name", is(sourceDestinationDto.getName())))
         .andExpect(jsonPath("$[0].isFreeTextAllowed", is(true)));
   }
 
@@ -77,10 +91,10 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
     doThrow(new ValidationMessageException(
         new Message(ERROR_PROGRAM_NOT_FOUND, programId.toString())))
         .when(validSourceDestinationService)
-        .findValidDestinations(programId, facilityTypeId);
+        .findSourcesOrDestinations(programId, facilityTypeId, false);
 
     //when
-    ResultActions resultActions = mvc.perform(MockMvcRequestBuilders.get(API_VALID_DESTINATION)
+    ResultActions resultActions = mvc.perform(MockMvcRequestBuilders.get(API_VALID_DESTINATIONS)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
         .param("program", programId.toString())
         .param("facilityType", facilityTypeId.toString()));
@@ -89,8 +103,8 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
     resultActions.andExpect(status().isBadRequest());
   }
 
-  private ValidDestinationAssignmentDto createValidDestinationAssignmentDto() {
-    ValidDestinationAssignmentDto destinationAssignmentDto = new ValidDestinationAssignmentDto();
+  private ValidSourceDestinationDto createValidSouceDestinationDto() {
+    ValidSourceDestinationDto destinationAssignmentDto = new ValidSourceDestinationDto();
     destinationAssignmentDto.setId(UUID.randomUUID());
     destinationAssignmentDto.setName("CHW");
     destinationAssignmentDto.setIsFreeTextAllowed(true);

@@ -31,7 +31,7 @@ import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.domain.movement.Organization;
 import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.dto.FacilityDto;
-import org.openlmis.stockmanagement.dto.ValidDestinationAssignmentDto;
+import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
@@ -69,7 +69,7 @@ public class ValidSourceDestinationServiceTest {
         .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
     //when
-    validSourceDestinationService.findValidDestinations(programId, facilityTypeId);
+    validSourceDestinationService.findSourcesOrDestinations(programId, facilityTypeId, false);
   }
 
   @Test
@@ -82,8 +82,8 @@ public class ValidSourceDestinationServiceTest {
         .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
     //when
-    List<ValidDestinationAssignmentDto> validDestinations =
-        validSourceDestinationService.findValidDestinations(programId, facilityTypeId);
+    List<ValidSourceDestinationDto> validDestinations =
+        validSourceDestinationService.findSourcesOrDestinations(programId, facilityTypeId, false);
 
     //then
     assertThat(validDestinations.isEmpty(), is(true));
@@ -105,8 +105,8 @@ public class ValidSourceDestinationServiceTest {
         .thenReturn(asList(organizationDestination, facilityDestination));
 
     //when
-    List<ValidDestinationAssignmentDto> validDestinations =
-        validSourceDestinationService.findValidDestinations(programId, facilityTypeId);
+    List<ValidSourceDestinationDto> validDestinations =
+        validSourceDestinationService.findSourcesOrDestinations(programId, facilityTypeId, false);
 
     //then
     assertThat(validDestinations.size(), is(2));

@@ -17,7 +17,7 @@ package org.openlmis.stockmanagement.service;
 
 import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
-import org.openlmis.stockmanagement.dto.ValidDestinationAssignmentDto;
+import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
@@ -49,10 +49,11 @@ public class ValidSourceDestinationService {
    *
    * @param programId      program ID
    * @param facilityTypeId facility type ID
+   * @param isSource       try to get valid sources or destinations
    * @return valid destination assignment DTOs
    */
-  public List<ValidDestinationAssignmentDto> findValidDestinations(
-      UUID programId, UUID facilityTypeId) {
+  public List<ValidSourceDestinationDto> findSourcesOrDestinations(
+      UUID programId, UUID facilityTypeId, Boolean isSource) {
     programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
     List<ValidDestinationAssignment> destinationAssignments =
@@ -60,8 +61,8 @@ public class ValidSourceDestinationService {
     return destinationAssignments.stream().map(this::createDtoFrom).collect(Collectors.toList());
   }
 
-  private ValidDestinationAssignmentDto createDtoFrom(ValidDestinationAssignment destination) {
-    ValidDestinationAssignmentDto dto = new ValidDestinationAssignmentDto();
+  private ValidSourceDestinationDto createDtoFrom(ValidDestinationAssignment destination) {
+    ValidSourceDestinationDto dto = new ValidSourceDestinationDto();
     Node node = destination.getNode();
     dto.setId(node.getId());
     boolean isRefDataFacility = node.isRefDataFacility();

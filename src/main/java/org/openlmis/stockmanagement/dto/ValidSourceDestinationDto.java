@@ -20,7 +20,7 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-public class ValidDestinationAssignmentDto {
+public class ValidSourceDestinationDto {
   private UUID id;
   private String name;
   private Boolean isFreeTextAllowed;
