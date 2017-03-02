@@ -291,6 +291,36 @@ traits:
               body:
                 application/json:
 
+  /reasonTypes:
+      get:
+        is: [ secured ]
+        description: Returns a list reason types to choose from, for admin user to configure reasons.
+
+        responses:
+          200:
+            body:
+              application/json:
+
+          403:
+            description: User does not have permission to manage reasons.
+            body:
+              application/json:
+
+  /reasonCategories:
+      get:
+        is: [ secured ]
+        description: Returns a list reason categories to choose from, for admin user to configure reasons.
+
+        responses:
+          200:
+            body:
+              application/json:
+
+          403:
+            description: User does not have permission to manage reasons.
+            body:
+              application/json:
+
   /validReasons:
       get:
         is: [ secured ]
