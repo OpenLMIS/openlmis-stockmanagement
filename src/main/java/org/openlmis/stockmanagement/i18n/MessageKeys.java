@@ -104,6 +104,13 @@ public abstract class MessageKeys {
   public static final String ERROR_EVENT_REASON_NOT_IN_VALID_LIST = EVENT_ERROR_PREFIX
       + ".reason.not.in.validList";
 
+  //reason configuration
+  public static final String ERROR_REASON_ID_EMPTY = ERROR_PREFIX
+      + ".reason.id.isEmpty";
+
+  public static final String ERROR_REASON_NOT_FOUND = ERROR_PREFIX
+      + ".reason.notFound";
+
   //permission error
   public static final String ERROR_NO_FOLLOWING_PERMISSION = ERROR_PREFIX
       + ".authorization.noFollowingPermission";

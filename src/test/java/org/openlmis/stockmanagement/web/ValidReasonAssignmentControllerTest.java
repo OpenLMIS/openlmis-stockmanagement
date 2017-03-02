@@ -37,6 +37,7 @@ import org.mockito.ArgumentCaptor;
 import org.openlmis.stockmanagement.domain.adjustment.ValidReasonAssignment;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
@@ -61,6 +62,9 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
 
   @MockBean
   private PermissionService permissionService;
+
+  @MockBean
+  private StockCardLineItemReasonRepository reasonRepository;
 
   @Test
   public void get_valid_reason_by_program_and_facility_type() throws Exception {
@@ -90,6 +94,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
     UUID programId = UUID.randomUUID();
     UUID facilityTypeId = UUID.randomUUID();
     UUID reasonId = UUID.randomUUID();
+    when(reasonRepository.exists(reasonId)).thenReturn(true);
 
     //when
     ResultActions resultActions = mvc.perform(post(VALID_REASON_API)
@@ -115,6 +120,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
     UUID programId = UUID.randomUUID();
     UUID facilityTypeId = UUID.randomUUID();
     UUID reasonId = UUID.randomUUID();
+    when(reasonRepository.exists(reasonId)).thenReturn(true);
 
     when(reasonAssignmentRepository
         .findByProgramIdAndFacilityTypeIdAndReasonId(programId, facilityTypeId, reasonId))
@@ -130,6 +136,46 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
 
     //then
     resultActions.andExpect(status().isOk());
+    verify(reasonAssignmentRepository, never()).save(any(ValidReasonAssignment.class));
+  }
+
+  @Test
+  public void should_return_400_if_reason_id_is_null() throws Exception {
+    //given
+    UUID programId = UUID.randomUUID();
+    UUID facilityTypeId = UUID.randomUUID();
+
+    //when
+    ResultActions resultActions = mvc.perform(post(VALID_REASON_API)
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .param(PROGRAM, programId.toString())
+        .param(FACILITY_TYPE, facilityTypeId.toString())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectToJsonString(null)));
+
+    //then
+    resultActions.andExpect(status().isBadRequest());
+    verify(reasonAssignmentRepository, never()).save(any(ValidReasonAssignment.class));
+  }
+
+  @Test
+  public void should_return_400_if_reason_not_exist() throws Exception {
+    //given
+    UUID programId = UUID.randomUUID();
+    UUID facilityTypeId = UUID.randomUUID();
+    UUID reasonId = UUID.randomUUID();
+    when(reasonRepository.findOne(reasonId)).thenReturn(null);
+
+    //when
+    ResultActions resultActions = mvc.perform(post(VALID_REASON_API)
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .param(PROGRAM, programId.toString())
+        .param(FACILITY_TYPE, facilityTypeId.toString())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectToJsonString(reasonId)));
+
+    //then
+    resultActions.andExpect(status().isBadRequest());
     verify(reasonAssignmentRepository, never()).save(any(ValidReasonAssignment.class));
   }
 

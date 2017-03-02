@@ -18,15 +18,20 @@ package org.openlmis.stockmanagement.web;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static org.openlmis.stockmanagement.domain.BaseEntity.fromId;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_ID_EMPTY;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_NOT_FOUND;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.adjustment.ValidReasonAssignment;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
+import org.openlmis.stockmanagement.utils.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +47,10 @@ import java.util.UUID;
 @Controller
 @RequestMapping("/api")
 public class ValidReasonAssignmentController {
+
+  @Autowired
+  private StockCardLineItemReasonRepository reasonRepository;
+
   @Autowired
   private ValidReasonAssignmentRepository reasonAssignmentRepository;
 
@@ -88,6 +97,14 @@ public class ValidReasonAssignmentController {
       @RequestParam("program") UUID program,
       @RequestParam("facilityType") UUID facilityType,
       @RequestBody UUID reasonId) throws InstantiationException, IllegalAccessException {
+
+    if (reasonId == null) {
+      throw new ValidationMessageException(new Message(ERROR_REASON_ID_EMPTY));
+    }
+
+    if (!reasonRepository.exists(reasonId)) {
+      throw new ValidationMessageException(new Message(ERROR_REASON_NOT_FOUND));
+    }
 
     ValidReasonAssignment assignment = reasonAssignmentRepository
         .findByProgramIdAndFacilityTypeIdAndReasonId(program, facilityType, reasonId);
