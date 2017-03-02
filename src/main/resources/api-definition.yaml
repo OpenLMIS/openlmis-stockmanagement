@@ -388,3 +388,56 @@ traits:
             body:
               application/json:
 
+  /stockCardLineItemReasons:
+      displayName: Stock card line item reason
+      post:
+        is: [ secured ]
+        description: Create a new stock card line item reason.
+        body:
+          application/json:
+            schema: reason
+
+        responses:
+          201:
+            description: Created a new reason.
+            body:
+              application/json:
+                schema: reason
+          400:
+            description: Some Reason required value not found.
+            body:
+              application/json:
+          403:
+            description: User does not have permission to manage stock card line item reasons.
+            body:
+              application/json:
+
+      /{id}:
+        uriParameters:
+          id:
+            displayName: id
+            type: string
+            required: true
+            repeat: false
+
+        put:
+          is: [ secured ]
+          description: Update a stock card line item reason.
+          body:
+            application/json:
+              schema: reason
+
+          responses:
+            200:
+              description: Updated a reason.
+              body:
+                application/json:
+                  schema: reason
+            400:
+              description: Some reason requires value not found.
+              body:
+                application/json:
+            403:
+              description: User does not have permission to manage stock card line item reasons.
+              body:
+                application/json:
