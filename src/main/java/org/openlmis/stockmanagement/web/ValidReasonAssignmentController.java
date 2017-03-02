@@ -98,6 +98,9 @@ public class ValidReasonAssignmentController {
       @RequestParam("facilityType") UUID facilityType,
       @RequestBody UUID reasonId) throws InstantiationException, IllegalAccessException {
 
+    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(program, facilityType);
+    permissionService.canManageReasons();
+
     if (reasonId == null) {
       throw new ValidationMessageException(new Message(ERROR_REASON_ID_EMPTY));
     }

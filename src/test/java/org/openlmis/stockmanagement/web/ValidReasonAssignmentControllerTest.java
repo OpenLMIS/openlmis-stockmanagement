@@ -112,6 +112,8 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
         .andExpect(status().isCreated());
     verify(reasonAssignmentRepository, times(1)).save(assignmentCaptor.capture());
     assertThat(assignmentCaptor.getValue().getReason().getId(), is(reasonId));
+    verify(programFacilityTypeExistenceService, times(1)).checkProgramAndFacilityTypeExist(programId, facilityTypeId);
+    verify(permissionService, times(1)).canManageReasons();
   }
 
   @Test
