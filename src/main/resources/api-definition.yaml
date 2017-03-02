@@ -351,3 +351,40 @@ traits:
             body:
               application/json:
 
+      post:
+        is: [ secured ]
+        description: Configure a reason to program and facility type.
+
+        queryParameters:
+          program:
+            description: Program id
+            type: string
+            required: true
+          facilityType:
+            description: Facility type id
+            type: string
+            required: true
+        body:
+            application/json:
+              schema: string
+
+        responses:
+          200:
+            description: Given reason is already configured.
+            body:
+              application/json:
+                schema: reason
+          201:
+            description: Given reason is configured.
+            body:
+              application/json:
+                schema: reason
+          400:
+            description: Reason id is null. Or program or facility type or reason is not found.
+            body:
+              application/json:
+          403:
+            description: User is not allowed to configure reason.
+            body:
+              application/json:
+
