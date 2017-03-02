@@ -31,6 +31,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.UUID;
+
 
 public class StockCardLineItemReasonControllerTest extends BaseWebTest {
 
@@ -42,25 +44,59 @@ public class StockCardLineItemReasonControllerTest extends BaseWebTest {
   @Test
   public void should_return_201_when_reason_successfully_created() throws Exception {
     //given
+    StockCardLineItemReason createdReason = createReason();
     when(stockCardLineItemReasonService.saveOrUpdate(any(StockCardLineItemReason.class)))
-        .thenReturn(createReason());
+        .thenReturn(createdReason);
 
     //when
     ResultActions resultActions = mvc.perform(MockMvcRequestBuilders
         .post(STOCK_CARD_LINE_ITEM_REASON_API)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
         .contentType(MediaType.APPLICATION_JSON)
-        .content(objectToJsonString(createReason())));
+        .content(objectToJsonString(createdReason)));
 
     //then
     resultActions
         .andDo(print())
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.name", is("Donation")))
-        .andExpect(jsonPath("$.description", is("Donation from the donor")))
-        .andExpect(jsonPath("$.reasonType", is("CREDIT")))
-        .andExpect(jsonPath("$.reasonCategory", is("AD_HOC")))
-        .andExpect(jsonPath("$.isFreeTextAllowed", is(true)));
+        .andExpect(jsonPath("$.name", is(createdReason.getName())))
+        .andExpect(jsonPath("$.description", is(createdReason.getDescription())))
+        .andExpect(jsonPath("$.reasonType",
+            is(createdReason.getReasonType().toString())))
+        .andExpect(jsonPath("$.reasonCategory",
+            is(createdReason.getReasonCategory().toString())))
+        .andExpect(jsonPath("$.isFreeTextAllowed",
+            is(createdReason.getIsFreeTextAllowed())));
   }
 
+  @Test
+  public void should_return_200_when_reason_successfully_updated() throws Exception {
+    //given
+    StockCardLineItemReason updatedReason = createReason();
+    updatedReason.setId(UUID.randomUUID());
+    updatedReason.setDescription("test reason");
+    when(stockCardLineItemReasonService.saveOrUpdate(any(StockCardLineItemReason.class)))
+        .thenReturn(updatedReason);
+
+    //when
+    ResultActions resultActions = mvc.perform(MockMvcRequestBuilders
+        .put(STOCK_CARD_LINE_ITEM_REASON_API + "/" + updatedReason.getId().toString())
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectToJsonString(updatedReason)));
+
+    //then
+    resultActions
+        .andDo(print())
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id", is(updatedReason.getId().toString())))
+        .andExpect(jsonPath("$.name", is(updatedReason.getName())))
+        .andExpect(jsonPath("$.description", is(updatedReason.getDescription())))
+        .andExpect(jsonPath("$.reasonType",
+            is(updatedReason.getReasonType().toString())))
+        .andExpect(jsonPath("$.reasonCategory",
+            is(updatedReason.getReasonCategory().toString())))
+        .andExpect(jsonPath("$.isFreeTextAllowed",
+            is(updatedReason.getIsFreeTextAllowed())));
+  }
 }
