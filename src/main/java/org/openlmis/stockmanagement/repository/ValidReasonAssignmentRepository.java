@@ -23,7 +23,13 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ValidReasonAssignmentRepository extends
-        PagingAndSortingRepository<ValidReasonAssignment, UUID> {
+    PagingAndSortingRepository<ValidReasonAssignment, UUID> {
+
   List<ValidReasonAssignment> findByProgramIdAndFacilityTypeId(
-          @Param("programId") UUID programId, @Param("facilityTypeId") UUID facilityTypeId);
+      @Param("programId") UUID programId, @Param("facilityTypeId") UUID facilityTypeId);
+
+  ValidReasonAssignment findByProgramIdAndFacilityTypeIdAndReasonId(
+      @Param("programId") UUID programId,
+      @Param("facilityTypeId") UUID facilityTypeId,
+      @Param("reasonId") UUID reasonId);
 }

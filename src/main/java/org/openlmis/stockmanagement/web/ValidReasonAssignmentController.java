@@ -17,7 +17,10 @@ package org.openlmis.stockmanagement.web;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
+import static org.openlmis.stockmanagement.domain.BaseEntity.fromId;
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.adjustment.ValidReasonAssignment;
@@ -29,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -39,11 +43,10 @@ import java.util.UUID;
 @RequestMapping("/api")
 public class ValidReasonAssignmentController {
   @Autowired
-  private ValidReasonAssignmentRepository validReasonAssignmentRepository;
+  private ValidReasonAssignmentRepository reasonAssignmentRepository;
 
   @Autowired
   private ProgramFacilityTypeExistenceService programFacilityTypeExistenceService;
-
 
   @Autowired
   private PermissionService permissionService;
@@ -65,15 +68,47 @@ public class ValidReasonAssignmentController {
             program.toString(), facilityType.toString()));
 
     programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(program, facilityType);
-
     permissionService.canViewReasons(program, facilityType);
 
-    List<ValidReasonAssignment> validReasonAssignments =
-        validReasonAssignmentRepository.findByProgramIdAndFacilityTypeId(program, facilityType);
-    List<StockCardLineItemReason> lineItemReasons = validReasonAssignments.stream()
-        .map(ValidReasonAssignment::getReason).collect(toList());
+    return new ResponseEntity<>(getReasons(program, facilityType), OK);
+  }
 
-    return new ResponseEntity<>(lineItemReasons, OK);
+  /**
+   * Assign a reason to program and facility type.
+   *
+   * @param program      program id
+   * @param facilityType facility type id
+   * @param reasonId     reason id
+   * @return the assigned reason and program and facility type.
+   * @throws InstantiationException InstantiationException
+   * @throws IllegalAccessException IllegalAccessException
+   */
+  @RequestMapping(value = "/validReasons", method = POST)
+  public ResponseEntity<ValidReasonAssignment> assignReason(
+      @RequestParam("program") UUID program,
+      @RequestParam("facilityType") UUID facilityType,
+      @RequestBody UUID reasonId) throws InstantiationException, IllegalAccessException {
+
+    ValidReasonAssignment assignment = reasonAssignmentRepository
+        .findByProgramIdAndFacilityTypeIdAndReasonId(program, facilityType, reasonId);
+
+    if (assignment != null) {
+      return new ResponseEntity<>(assignment, OK);
+    }
+
+    return new ResponseEntity<>(saveAssignment(program, facilityType, reasonId), CREATED);
+  }
+
+  private ValidReasonAssignment saveAssignment(UUID program, UUID facilityType, UUID reasonId)
+      throws IllegalAccessException, InstantiationException {
+    return reasonAssignmentRepository.save(new ValidReasonAssignment(program, facilityType,
+        fromId(reasonId, StockCardLineItemReason.class)));
+  }
+
+  private List<StockCardLineItemReason> getReasons(UUID program, UUID facilityType) {
+    return reasonAssignmentRepository
+        .findByProgramIdAndFacilityTypeId(program, facilityType)
+        .stream().map(ValidReasonAssignment::getReason).collect(toList());
   }
 
 }

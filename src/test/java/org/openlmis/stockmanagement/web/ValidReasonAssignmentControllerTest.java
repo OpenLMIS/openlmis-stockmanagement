@@ -16,14 +16,24 @@
 package org.openlmis.stockmanagement.web;
 
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.core.Is.is;
+import static org.mockito.ArgumentCaptor.forClass;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.openlmis.stockmanagement.domain.adjustment.ValidReasonAssignment;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
@@ -32,13 +42,14 @@ import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.Arrays;
 import java.util.UUID;
 
 public class ValidReasonAssignmentControllerTest extends BaseWebTest {
-  private static final String GET_VALID_REASON_API = "/api/validReasons";
+  private static final String VALID_REASON_API = "/api/validReasons";
   private static final String PROGRAM = "program";
   private static final String FACILITY_TYPE = "facilityType";
 
@@ -54,16 +65,15 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   @Test
   public void get_valid_reason_by_program_and_facility_type() throws Exception {
     //given
-    //exist in demo data
-    UUID programId = UUID.fromString("dce17f2e-af3e-40ad-8e00-3496adef44c3");
-    UUID facilityTypeId = UUID.fromString("ac1d268b-ce10-455f-bf87-9c667da8f060");
+    UUID programId = UUID.randomUUID();
+    UUID facilityTypeId = UUID.randomUUID();
 
     when(reasonAssignmentRepository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
         .thenReturn(Arrays.asList(new ValidReasonAssignment()));
 
     //when
     ResultActions resultActions = mvc.perform(
-        get(GET_VALID_REASON_API)
+        get(VALID_REASON_API)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
             .param(PROGRAM, programId.toString())
             .param(FACILITY_TYPE, facilityTypeId.toString()));
@@ -72,6 +82,55 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
     resultActions
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(1)));
+  }
+
+  @Test
+  public void should_assign_reason_to_program_facility_type() throws Exception {
+    //given
+    UUID programId = UUID.randomUUID();
+    UUID facilityTypeId = UUID.randomUUID();
+    UUID reasonId = UUID.randomUUID();
+
+    //when
+    ResultActions resultActions = mvc.perform(post(VALID_REASON_API)
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .param(PROGRAM, programId.toString())
+        .param(FACILITY_TYPE, facilityTypeId.toString())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectToJsonString(reasonId.toString())));
+
+    //then
+    ArgumentCaptor<ValidReasonAssignment> assignmentCaptor = forClass(ValidReasonAssignment.class);
+
+    resultActions
+        .andDo(print())
+        .andExpect(status().isCreated());
+    verify(reasonAssignmentRepository, times(1)).save(assignmentCaptor.capture());
+    assertThat(assignmentCaptor.getValue().getReason().getId(), is(reasonId));
+  }
+
+  @Test
+  public void should_not_assign_same_reason_twice() throws Exception {
+    //given
+    UUID programId = UUID.randomUUID();
+    UUID facilityTypeId = UUID.randomUUID();
+    UUID reasonId = UUID.randomUUID();
+
+    when(reasonAssignmentRepository
+        .findByProgramIdAndFacilityTypeIdAndReasonId(programId, facilityTypeId, reasonId))
+        .thenReturn(new ValidReasonAssignment());
+
+    //when
+    ResultActions resultActions = mvc.perform(post(VALID_REASON_API)
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .param(PROGRAM, programId.toString())
+        .param(FACILITY_TYPE, facilityTypeId.toString())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectToJsonString(reasonId.toString())));
+
+    //then
+    resultActions.andExpect(status().isOk());
+    verify(reasonAssignmentRepository, never()).save(any(ValidReasonAssignment.class));
   }
 
   @Test
@@ -86,7 +145,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
 
     //when
     ResultActions resultActions = mvc.perform(
-        get(GET_VALID_REASON_API)
+        get(VALID_REASON_API)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
             .param(PROGRAM, programId.toString())
             .param(FACILITY_TYPE, facilityTypeId.toString()));
@@ -106,7 +165,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
 
     //when
     ResultActions resultActions = mvc.perform(
-        get(GET_VALID_REASON_API)
+        get(VALID_REASON_API)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
             .param(PROGRAM, programId.toString())
             .param(FACILITY_TYPE, facilityTypeId.toString()));
@@ -126,7 +185,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
 
     //when
     ResultActions resultActions = mvc.perform(
-        get(GET_VALID_REASON_API)
+        get(VALID_REASON_API)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
             .param(PROGRAM, programId.toString())
             .param(FACILITY_TYPE, facilityTypeId.toString()));
