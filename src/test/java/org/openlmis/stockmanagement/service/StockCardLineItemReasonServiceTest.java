@@ -17,16 +17,20 @@ package org.openlmis.stockmanagement.service;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.doThrow;
 import static org.openlmis.stockmanagement.testutils.StockCardLineItemReasonBuilder.createReason;
 
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
+import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
+import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.UUID;
@@ -40,6 +44,9 @@ public class StockCardLineItemReasonServiceTest {
   @Autowired
   private StockCardLineItemReasonRepository reasonRepository;
 
+  @MockBean
+  private PermissionService permissionService;
+
   @After
   public void tearDown() throws Exception {
     reasonRepository.deleteAll();
@@ -52,6 +59,14 @@ public class StockCardLineItemReasonServiceTest {
 
     //when
     reasonService.saveOrUpdate(reason);
+  }
+
+  @Test(expected = PermissionMessageException.class)
+  public void should_throw_permission_exception_when_current_user_has_no_permission()
+      throws Exception {
+    doThrow(new PermissionMessageException(new Message("key")))
+        .when(permissionService).canManageReasons();
+    reasonService.saveOrUpdate(createReason());
   }
 
   @Test

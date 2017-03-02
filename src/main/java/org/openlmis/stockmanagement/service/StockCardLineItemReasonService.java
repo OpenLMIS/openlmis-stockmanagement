@@ -34,6 +34,9 @@ public class StockCardLineItemReasonService {
   @Autowired
   private StockCardLineItemReasonRepository reasonRepository;
 
+  @Autowired
+  private PermissionService permissionService;
+
   /**
    * Save or update stock card line item reason.
    *
@@ -41,6 +44,7 @@ public class StockCardLineItemReasonService {
    * @return created reason DTO object
    */
   public StockCardLineItemReason saveOrUpdate(StockCardLineItemReason reason) {
+    permissionService.canManageReasons();
     validateRequiredValueNotNull(reason);
     boolean hasSameReason = stream(reasonRepository.findAll().spliterator(), false)
         .anyMatch(foundReason -> foundReason.equals(reason));
