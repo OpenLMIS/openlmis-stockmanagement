@@ -121,6 +121,19 @@ public abstract class MessageKeys {
   public static final String ERROR_PROGRAM_NOT_SUPPORTED = ERROR_PREFIX
       + ".authorization.program.not.supported";
 
+  //stock card line item reason
+  public static final String ERROR_LINE_ITEM_REASON_NAME_NOT_FOUND = ERROR_PREFIX
+      + ".lineItem.reason.name.notFound";
+
+  public static final String ERROR_LINE_ITEM_REASON_TYPE_NOT_FOUND = ERROR_PREFIX
+      + ".lineItem.reason.type.notFound";
+
+  public static final String ERROR_LINE_ITEM_REASON_CATEGORY_NOT_FOUND = ERROR_PREFIX
+      + ".lineItem.reason.category.notFound";
+
+  public static final String ERROR_LINE_ITEM_REASON_ISFREETEXTALLOWED_NOT_FOUND = ERROR_PREFIX
+      + ".lineItem.reason.isFreeTextAllowed.notFound";
+
   private MessageKeys() {
     throw new UnsupportedOperationException();
   }

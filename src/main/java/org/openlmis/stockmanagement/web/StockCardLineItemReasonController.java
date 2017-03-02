@@ -17,7 +17,7 @@ package org.openlmis.stockmanagement.web;
 
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-import org.openlmis.stockmanagement.dto.StockCardLineItemReasonDto;
+import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.service.StockCardLineItemReasonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,13 +36,13 @@ public class StockCardLineItemReasonController {
   /**
    * Create a new stock card line item reason.
    *
-   * @param reasonDto a stock card line item reason bound to request body
+   * @param reason a stock card line item reason bound to request body
    * @return created stock card line item reason
    */
   @RequestMapping(value = "stockCardLineItemReasons", method = POST)
-  public ResponseEntity<StockCardLineItemReasonDto> createReason(
-      @RequestBody StockCardLineItemReasonDto reasonDto) {
-    StockCardLineItemReasonDto createdReason = reasonService.saveOrUpdate(reasonDto);
+  public ResponseEntity<StockCardLineItemReason> createReason(
+      @RequestBody StockCardLineItemReason reason) {
+    StockCardLineItemReason createdReason = reasonService.saveOrUpdate(reason);
     return new ResponseEntity<>(createdReason, HttpStatus.CREATED);
   }
 }

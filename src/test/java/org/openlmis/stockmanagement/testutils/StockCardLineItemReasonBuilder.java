@@ -13,22 +13,26 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.dto;
+package org.openlmis.stockmanagement.testutils;
+
 
 import org.openlmis.stockmanagement.domain.adjustment.ReasonCategory;
 import org.openlmis.stockmanagement.domain.adjustment.ReasonType;
+import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class StockCardLineItemReasonDto {
-  private String name;
-  private String description;
-  private ReasonType reasonType;
-  private ReasonCategory reasonCategory;
-  private Boolean isFreeTextAllowed;
+public class StockCardLineItemReasonBuilder {
+  /**
+   * Create a stock card line item reason.
+   *
+   * @return created reason
+   */
+  public static StockCardLineItemReason createReason() {
+    StockCardLineItemReason reason = new StockCardLineItemReason();
+    reason.setName("Donation");
+    reason.setDescription("Donation from the donor");
+    reason.setReasonType(ReasonType.CREDIT);
+    reason.setReasonCategory(ReasonCategory.AD_HOC);
+    reason.setIsFreeTextAllowed(true);
+    return reason;
+  }
 }

@@ -18,13 +18,13 @@ package org.openlmis.stockmanagement.web;
 import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.testutils.StockCardLineItemReasonDtoBuilder.createDto;
+import static org.openlmis.stockmanagement.testutils.StockCardLineItemReasonBuilder.createReason;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Test;
-import org.openlmis.stockmanagement.dto.StockCardLineItemReasonDto;
+import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.service.StockCardLineItemReasonService;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -42,15 +42,15 @@ public class StockCardLineItemReasonControllerTest extends BaseWebTest {
   @Test
   public void should_return_201_when_reason_successfully_created() throws Exception {
     //given
-    when(stockCardLineItemReasonService.saveOrUpdate(any(StockCardLineItemReasonDto.class)))
-        .thenReturn(createDto());
+    when(stockCardLineItemReasonService.saveOrUpdate(any(StockCardLineItemReason.class)))
+        .thenReturn(createReason());
 
     //when
     ResultActions resultActions = mvc.perform(MockMvcRequestBuilders
         .post(STOCK_CARD_LINE_ITEM_REASON_API)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
         .contentType(MediaType.APPLICATION_JSON)
-        .content(objectToJsonString(createDto())));
+        .content(objectToJsonString(createReason())));
 
     //then
     resultActions

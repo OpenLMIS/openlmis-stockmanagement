@@ -15,11 +15,11 @@
 
 package org.openlmis.stockmanagement.repository;
 
-import java.util.UUID;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-public interface StockCardLineItemReasonRepository
-        extends PagingAndSortingRepository<StockCardLineItemReason, UUID> {
+import java.util.UUID;
 
+public interface StockCardLineItemReasonRepository
+    extends PagingAndSortingRepository<StockCardLineItemReason, UUID> {
 }

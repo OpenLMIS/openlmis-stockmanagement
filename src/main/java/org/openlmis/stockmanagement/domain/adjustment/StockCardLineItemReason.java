@@ -19,11 +19,13 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import org.openlmis.stockmanagement.domain.BaseEntity;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.openlmis.stockmanagement.domain.BaseEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -86,7 +88,6 @@ public class StockCardLineItemReason extends BaseEntity {
         .build();
   }
 
-
   /**
    * Create physical balance reason.
    *
@@ -99,6 +100,35 @@ public class StockCardLineItemReason extends BaseEntity {
         .name("Balance adjustment")
         .description("Balance adjustment")
         .build();
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (other == null) {
+      return false;
+    }
+    if (other == this) {
+      return true;
+    }
+    if (!(other instanceof StockCardLineItemReason)) {
+      return false;
+    }
+
+    StockCardLineItemReason otherMyClass = (StockCardLineItemReason) other;
+    return this.getName().equals(otherMyClass.getName())
+        && this.getDescription().equals(otherMyClass.getDescription())
+        && this.getReasonType() == otherMyClass.getReasonType()
+        && this.getReasonCategory() == otherMyClass.getReasonCategory()
+        && this.isFreeTextAllowed == otherMyClass.isFreeTextAllowed;
+  }
+
+  @Override
+  public int hashCode() {
+    if (id != null) {
+      return id.hashCode();
+    } else {
+      return super.hashCode();
+    }
   }
 
   @JsonIgnore
@@ -114,5 +144,25 @@ public class StockCardLineItemReason extends BaseEntity {
   @JsonIgnore
   public boolean isAdjustmentReasonCategory() {
     return getReasonCategory() == ReasonCategory.ADJUSTMENT;
+  }
+
+  @JsonIgnore
+  public boolean hasNoName() {
+    return name == null;
+  }
+
+  @JsonIgnore
+  public boolean hasNoType() {
+    return reasonType == null;
+  }
+
+  @JsonIgnore
+  public boolean hasNoCategory() {
+    return reasonCategory == null;
+  }
+
+  @JsonIgnore
+  public boolean hasNoIsFreeTextAllowed() {
+    return isFreeTextAllowed == null;
   }
 }
