@@ -97,7 +97,19 @@ public class ValidReasonAssignmentController {
       @RequestParam("program") UUID program,
       @RequestParam("facilityType") UUID facilityType,
       @RequestBody UUID reasonId) throws InstantiationException, IllegalAccessException {
+    checkIsValidRequest(program, facilityType, reasonId);
 
+    ValidReasonAssignment assignment = reasonAssignmentRepository
+        .findByProgramIdAndFacilityTypeIdAndReasonId(program, facilityType, reasonId);
+
+    if (assignment != null) {
+      return new ResponseEntity<>(assignment, OK);
+    }
+
+    return new ResponseEntity<>(saveAssignment(program, facilityType, reasonId), CREATED);
+  }
+
+  private void checkIsValidRequest(UUID program, UUID facilityType, UUID reasonId) {
     programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(program, facilityType);
     permissionService.canManageReasons();
 
@@ -108,15 +120,6 @@ public class ValidReasonAssignmentController {
     if (!reasonRepository.exists(reasonId)) {
       throw new ValidationMessageException(new Message(ERROR_REASON_NOT_FOUND));
     }
-
-    ValidReasonAssignment assignment = reasonAssignmentRepository
-        .findByProgramIdAndFacilityTypeIdAndReasonId(program, facilityType, reasonId);
-
-    if (assignment != null) {
-      return new ResponseEntity<>(assignment, OK);
-    }
-
-    return new ResponseEntity<>(saveAssignment(program, facilityType, reasonId), CREATED);
   }
 
   private ValidReasonAssignment saveAssignment(UUID program, UUID facilityType, UUID reasonId)
