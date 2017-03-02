@@ -66,7 +66,7 @@ public class ValidReasonAssignmentController {
 
     programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(program, facilityType);
 
-    permissionService.canViewLineItemReasons(program, facilityType);
+    permissionService.canViewReasons(program, facilityType);
 
     List<ValidReasonAssignment> validReasonAssignments =
         validReasonAssignmentRepository.findByProgramIdAndFacilityTypeId(program, facilityType);

@@ -115,7 +115,7 @@ public class PermissionServiceTest {
 
     permissionService.canViewStockSource(program, facilityType);
     permissionService.canViewStockDestinations(program, facilityType);
-    permissionService.canViewLineItemReasons(program, facilityType);
+    permissionService.canViewReasons(program, facilityType);
   }
 
   @Test

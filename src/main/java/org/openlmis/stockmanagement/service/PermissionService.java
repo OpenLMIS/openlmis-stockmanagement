@@ -34,6 +34,8 @@ import java.util.UUID;
 public class PermissionService {
 
   public static final String STOCK_CARD_TEMPLATES_MANAGE = "STOCK_CARD_TEMPLATES_MANAGE";
+  public static final String REASONS_MANAGE = "STOCK_CARD_LINE_ITEM_REASONS_MANAGE";
+
   public static final String STOCK_EVENT_CREATE = "STOCK_EVENT_CREATE";
 
   public static final String STOCK_SOURCES_VIEW = "STOCK_SOURCES_VIEW";
@@ -110,8 +112,12 @@ public class PermissionService {
    * @param program      program ID
    * @param facilityType facility type ID
    */
-  public void canViewLineItemReasons(UUID program, UUID facilityType) {
+  public void canViewReasons(UUID program, UUID facilityType) {
     canViewStockAssignable(STOCK_CARD_LINE_ITEM_REASONS_VIEW, program, facilityType);
+  }
+
+  public void canManageReasons() {
+    hasPermission(REASONS_MANAGE, null, null, null);
   }
 
   private void hasPermission(String rightName, UUID program, UUID facility, UUID warehouse) {
@@ -136,5 +142,4 @@ public class PermissionService {
         user.getId(), right.getId(), program, facility, warehouse
     );
   }
-
 }

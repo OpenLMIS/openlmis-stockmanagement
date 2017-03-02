@@ -122,7 +122,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
     UUID facilityTypeId = randomUUID();
     UUID programId = UUID.fromString("dce17f2e-af3e-40ad-8e00-3496adef44c3");
     doThrow(new PermissionMessageException(new Message("key"))).when(permissionService)
-        .canViewLineItemReasons(programId, facilityTypeId);
+        .canViewReasons(programId, facilityTypeId);
 
     //when
     ResultActions resultActions = mvc.perform(
