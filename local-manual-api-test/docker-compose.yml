@@ -29,14 +29,14 @@ services:
     depends_on: [nginx,auth,referencedata]
 
   auth:
-    image: openlmis/auth:3.0.0-SNAPSHOT
+    image: openlmis/auth:3.0.1-SNAPSHOT
     env_file: .manual-api-test-env
     environment:
       JAVA_OPTS: '-Dflyway.locations=classpath:db/migration,filesystem:/demo-data'
     depends_on: [consul,log,db]
 
   referencedata:
-    image: openlmis/referencedata:3.0.0-SNAPSHOT
+    image: openlmis/referencedata:3.0.1-SNAPSHOT
     env_file: .manual-api-test-env
     environment:
       JAVA_OPTS: '-Dflyway.locations=classpath:db/migration,filesystem:/demo-data'
