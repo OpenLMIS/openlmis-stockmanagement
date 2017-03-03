@@ -27,8 +27,18 @@ public class StockCardLineItemReasonBuilder {
    * @return created reason
    */
   public static StockCardLineItemReason createReason() {
+    return createReason("Donation");
+  }
+
+  /**
+   * Create a stock card line item reason with name.
+   *
+   * @param name reason name
+   * @return created reason
+   */
+  public static StockCardLineItemReason createReason(String name) {
     StockCardLineItemReason reason = new StockCardLineItemReason();
-    reason.setName("Donation");
+    reason.setName(name);
     reason.setDescription("Donation from the donor");
     reason.setReasonType(ReasonType.CREDIT);
     reason.setReasonCategory(ReasonCategory.AD_HOC);

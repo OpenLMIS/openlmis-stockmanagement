@@ -33,6 +33,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.List;
 import java.util.UUID;
 
 @RunWith(SpringRunner.class)
@@ -68,11 +69,35 @@ public class StockCardLineItemReasonServiceTest {
   }
 
   @Test(expected = PermissionMessageException.class)
-  public void should_throw_permission_exception_when_current_user_has_no_permission()
+  public void should_throw_exception_when_user_has_no_permission_to_create_or_update_reason()
       throws Exception {
     doThrow(new PermissionMessageException(new Message("key")))
         .when(permissionService).canManageReasons();
     reasonService.saveOrUpdate(createReason());
+  }
+
+  @Test(expected = PermissionMessageException.class)
+  public void should_throw_exception_when_user_has_no_permission_to_get_reasons() throws Exception {
+    doThrow(new PermissionMessageException(new Message("key")))
+        .when(permissionService).canManageReasons();
+    reasonService.findReasons();
+  }
+
+  @Test
+  public void should_get_all_reasons_when_pass_validation() throws Exception {
+    //given
+    reasonService.saveOrUpdate(createReason("test reason 1"));
+    reasonService.saveOrUpdate(createReason("test reason 2"));
+    reasonService.saveOrUpdate(createReason("test reason 3"));
+
+    //when
+    List<StockCardLineItemReason> reasons = reasonService.findReasons();
+
+    //then
+    assertThat(reasons.size(), is(3));
+    assertThat(reasons.get(0).getName(), is("test reason 1"));
+    assertThat(reasons.get(1).getName(), is("test reason 2"));
+    assertThat(reasons.get(2).getName(), is("test reason 3"));
   }
 
   @Test

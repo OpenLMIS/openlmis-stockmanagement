@@ -56,6 +56,11 @@ public class StockCardLineItemReasonController {
     return new ResponseEntity<>(reasonService.saveOrUpdate(reason), CREATED);
   }
 
+  /**
+   * Retrieve all stock card line item reasons.
+   *
+   * @return list of all reasons.
+   */
   @RequestMapping(value = "stockCardLineItemReasons", method = GET)
   public ResponseEntity<List<StockCardLineItemReason>> getAllReasons() {
     return new ResponseEntity<>(reasonService.findReasons(), OK);
