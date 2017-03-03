@@ -72,14 +72,14 @@ public class ValidReasonAssignmentController {
   @RequestMapping(value = "/validReasons")
   public ResponseEntity<List<StockCardLineItemReason>> getValidReasons(
       @RequestParam("program") UUID program, @RequestParam("facilityType") UUID facilityType) {
-    LOGGER.debug(
-        format("Try to find stock card line item reason with program %s and facility type %s",
-            program.toString(), facilityType.toString()));
+    LOGGER.debug(format(
+        "Try to find stock card line item reason with program %s and facility type %s",
+        program.toString(), facilityType.toString()));
 
     programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(program, facilityType);
     permissionService.canViewReasons(program, facilityType);
 
-    return new ResponseEntity<>(getReasons(program, facilityType), OK);
+    return new ResponseEntity<>(getReasonsBy(program, facilityType), OK);
   }
 
   /**
@@ -96,17 +96,12 @@ public class ValidReasonAssignmentController {
   public ResponseEntity<ValidReasonAssignment> assignReason(
       @RequestParam("program") UUID program,
       @RequestParam("facilityType") UUID facilityType,
-      @RequestBody UUID reasonId) throws InstantiationException, IllegalAccessException {
+      @RequestBody UUID reasonId)
+      throws InstantiationException, IllegalAccessException {
+
     checkIsValidRequest(program, facilityType, reasonId);
 
-    ValidReasonAssignment assignment = reasonAssignmentRepository
-        .findByProgramIdAndFacilityTypeIdAndReasonId(program, facilityType, reasonId);
-
-    if (assignment != null) {
-      return new ResponseEntity<>(assignment, OK);
-    }
-
-    return new ResponseEntity<>(saveAssignment(program, facilityType, reasonId), CREATED);
+    return findExistingOrSaveNew(program, facilityType, reasonId);
   }
 
   private void checkIsValidRequest(UUID program, UUID facilityType, UUID reasonId) {
@@ -122,13 +117,28 @@ public class ValidReasonAssignmentController {
     }
   }
 
+  private ResponseEntity<ValidReasonAssignment> findExistingOrSaveNew(
+      UUID program, UUID facilityType, UUID reasonId)
+      throws IllegalAccessException, InstantiationException {
+    ValidReasonAssignment foundAssignment = reasonAssignmentRepository
+        .findByProgramIdAndFacilityTypeIdAndReasonId(program, facilityType, reasonId);
+
+    if (foundAssignment != null) {
+      return new ResponseEntity<>(foundAssignment, OK);
+    }
+
+    return new ResponseEntity<>(saveAssignment(program, facilityType, reasonId), CREATED);
+  }
+
   private ValidReasonAssignment saveAssignment(UUID program, UUID facilityType, UUID reasonId)
       throws IllegalAccessException, InstantiationException {
-    return reasonAssignmentRepository.save(new ValidReasonAssignment(program, facilityType,
+    return reasonAssignmentRepository.save(new ValidReasonAssignment(
+        program,
+        facilityType,
         fromId(reasonId, StockCardLineItemReason.class)));
   }
 
-  private List<StockCardLineItemReason> getReasons(UUID program, UUID facilityType) {
+  private List<StockCardLineItemReason> getReasonsBy(UUID program, UUID facilityType) {
     return reasonAssignmentRepository
         .findByProgramIdAndFacilityTypeId(program, facilityType)
         .stream().map(ValidReasonAssignment::getReason).collect(toList());
