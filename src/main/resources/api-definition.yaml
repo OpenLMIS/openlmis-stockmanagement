@@ -34,6 +34,12 @@ schemas:
             "type": "array",
             "items": {"type": "object", "$ref": "validSourceDestination"}
         }
+  - validReasonAssignment: !include schemas/validReasonAssignment.json
+  - validReasonAssignments: |
+        {
+            "type": "array",
+            "items": {"type": "object", "$ref": "validReasonAssignment"}
+        }
 
 resourceTypes:
     - collection:
@@ -341,7 +347,7 @@ traits:
             description: Valid reason response
             body:
               application/json:
-                schema: reasons
+                schema: validReasonAssignments
           400:
             description: Facility type or program is not found.
             body:
@@ -373,12 +379,12 @@ traits:
             description: Given reason is already configured.
             body:
               application/json:
-                schema: reason
+                schema: validReasonAssignment
           201:
             description: Given reason is configured.
             body:
               application/json:
-                schema: reason
+                schema: validReasonAssignment
           400:
             description: Reason id is null. Or program or facility type or reason is not found.
             body:

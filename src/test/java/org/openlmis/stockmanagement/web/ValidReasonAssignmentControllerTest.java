@@ -49,7 +49,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.UUID;
 
 public class ValidReasonAssignmentControllerTest extends BaseWebTest {
@@ -70,13 +70,13 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   private StockCardLineItemReasonRepository reasonRepository;
 
   @Test
-  public void get_valid_reason_by_program_and_facility_type() throws Exception {
+  public void get_valid_reason_assignment_by_program_and_facility_type() throws Exception {
     //given
     UUID programId = UUID.randomUUID();
     UUID facilityTypeId = UUID.randomUUID();
 
     when(reasonAssignmentRepository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
-        .thenReturn(Arrays.asList(new ValidReasonAssignment()));
+        .thenReturn(Collections.singletonList(new ValidReasonAssignment()));
 
     //when
     ResultActions resultActions = mvc.perform(
@@ -97,17 +97,23 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
     UUID programId = UUID.randomUUID();
     UUID facilityTypeId = UUID.randomUUID();
     UUID reasonId = UUID.randomUUID();
+    StockCardLineItemReason reason = fromId(reasonId, StockCardLineItemReason.class);
+
+    ValidReasonAssignment validReasonAssignment = new ValidReasonAssignment();
+    validReasonAssignment.setReason(reason);
+    validReasonAssignment.setProgramId(programId);
+    validReasonAssignment.setFacilityTypeId(facilityTypeId);
+
     when(reasonRepository.exists(reasonId)).thenReturn(true);
     when(reasonRepository.findOne(reasonId))
-        .thenReturn(fromId(reasonId, StockCardLineItemReason.class));
+        .thenReturn(reason);
 
     //when
-    ResultActions resultActions = mvc.perform(post(VALID_REASON_API)
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .param(PROGRAM, programId.toString())
-        .param(FACILITY_TYPE, facilityTypeId.toString())
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectToJsonString(reasonId.toString())));
+    ResultActions resultActions = mvc.perform(
+        post(VALID_REASON_API)
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectToJsonString(validReasonAssignment)));
 
     //then
     ArgumentCaptor<ValidReasonAssignment> assignmentCaptor = forClass(ValidReasonAssignment.class);
@@ -128,19 +134,23 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
     UUID programId = UUID.randomUUID();
     UUID facilityTypeId = UUID.randomUUID();
     UUID reasonId = UUID.randomUUID();
-    when(reasonRepository.exists(reasonId)).thenReturn(true);
+    StockCardLineItemReason reason = fromId(reasonId, StockCardLineItemReason.class);
+    ValidReasonAssignment validReasonAssignment = new ValidReasonAssignment();
+    validReasonAssignment.setReason(reason);
+    validReasonAssignment.setProgramId(programId);
+    validReasonAssignment.setFacilityTypeId(facilityTypeId);
 
+    when(reasonRepository.exists(reasonId)).thenReturn(true);
     when(reasonAssignmentRepository
         .findByProgramIdAndFacilityTypeIdAndReasonId(programId, facilityTypeId, reasonId))
         .thenReturn(new ValidReasonAssignment());
 
     //when
-    ResultActions resultActions = mvc.perform(post(VALID_REASON_API)
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .param(PROGRAM, programId.toString())
-        .param(FACILITY_TYPE, facilityTypeId.toString())
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectToJsonString(reasonId.toString())));
+    ResultActions resultActions = mvc.perform(
+        post(VALID_REASON_API)
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectToJsonString(validReasonAssignment)));
 
     //then
     resultActions.andExpect(status().isOk());
@@ -149,17 +159,12 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
 
   @Test
   public void should_return_400_if_reason_id_is_null() throws Exception {
-    //given
-    UUID programId = UUID.randomUUID();
-    UUID facilityTypeId = UUID.randomUUID();
-
     //when
-    ResultActions resultActions = mvc.perform(post(VALID_REASON_API)
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .param(PROGRAM, programId.toString())
-        .param(FACILITY_TYPE, facilityTypeId.toString())
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectToJsonString(null)));
+    ResultActions resultActions = mvc.perform(
+        post(VALID_REASON_API)
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectToJsonString(new ValidReasonAssignment())));
 
     //then
     resultActions.andExpect(status().isBadRequest());
@@ -169,18 +174,17 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   @Test
   public void should_return_400_if_reason_not_exist() throws Exception {
     //given
-    UUID programId = UUID.randomUUID();
-    UUID facilityTypeId = UUID.randomUUID();
     UUID reasonId = UUID.randomUUID();
     when(reasonRepository.findOne(reasonId)).thenReturn(null);
+    ValidReasonAssignment assignment = new ValidReasonAssignment();
+    assignment.setReason(fromId(reasonId, StockCardLineItemReason.class));
 
     //when
-    ResultActions resultActions = mvc.perform(post(VALID_REASON_API)
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .param(PROGRAM, programId.toString())
-        .param(FACILITY_TYPE, facilityTypeId.toString())
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectToJsonString(reasonId)));
+    ResultActions resultActions = mvc.perform(
+        post(VALID_REASON_API)
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectToJsonString(assignment)));
 
     //then
     resultActions.andExpect(status().isBadRequest());

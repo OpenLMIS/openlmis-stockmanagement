@@ -16,7 +16,6 @@
 package org.openlmis.stockmanagement.web;
 
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_ASSIGNMENT_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_ID_EMPTY;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_NOT_FOUND;
@@ -24,9 +23,9 @@ import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.adjustment.ValidReasonAssignment;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
@@ -72,8 +71,8 @@ public class ValidReasonAssignmentController {
    * @param facilityType facility type id.
    * @return A list of valid reason.
    */
-  @RequestMapping(value = "/validReasons")
-  public ResponseEntity<List<StockCardLineItemReason>> getValidReasons(
+  @RequestMapping(value = "/validReasons", method = GET)
+  public ResponseEntity<List<ValidReasonAssignment>> getValidReasons(
       @RequestParam("program") UUID program, @RequestParam("facilityType") UUID facilityType) {
     LOGGER.debug(format(
         "Try to find stock card line item reason with program %s and facility type %s",
@@ -86,7 +85,7 @@ public class ValidReasonAssignmentController {
   }
 
   /**
-   *  Remove a reason assignment.
+   * Remove a reason assignment.
    *
    * @param assignmentId reason assignment id.
    * @return No content status.
@@ -109,61 +108,54 @@ public class ValidReasonAssignmentController {
   /**
    * Assign a reason to program and facility type.
    *
-   * @param program      program id
-   * @param facilityType facility type id
-   * @param reasonId     reason id
    * @return the assigned reason and program and facility type.
    * @throws InstantiationException InstantiationException
    * @throws IllegalAccessException IllegalAccessException
    */
   @RequestMapping(value = "/validReasons", method = POST)
   public ResponseEntity<ValidReasonAssignment> assignReason(
-      @RequestParam("program") UUID program,
-      @RequestParam("facilityType") UUID facilityType,
-      @RequestBody UUID reasonId)
+      @RequestBody ValidReasonAssignment assignment)
       throws InstantiationException, IllegalAccessException {
 
-    checkIsValidRequest(program, facilityType, reasonId);
-
-    return findExistingOrSaveNew(program, facilityType, reasonId);
+    checkIsValidRequest(assignment);
+    return findExistingOrSaveNew(assignment);
   }
 
-  private void checkIsValidRequest(UUID program, UUID facilityType, UUID reasonId) {
-    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(program, facilityType);
+  private void checkIsValidRequest(ValidReasonAssignment assignment) {
+    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(
+        assignment.getProgramId(), assignment.getFacilityTypeId());
+
     permissionService.canManageReasons();
 
-    if (reasonId == null) {
+    if (assignment.getReason() == null || assignment.getReason().getId() == null) {
       throw new ValidationMessageException(new Message(ERROR_REASON_ID_EMPTY));
     }
 
-    if (!reasonRepository.exists(reasonId)) {
+    if (!reasonRepository.exists(assignment.getReason().getId())) {
       throw new ValidationMessageException(new Message(ERROR_REASON_NOT_FOUND));
     }
   }
 
   private ResponseEntity<ValidReasonAssignment> findExistingOrSaveNew(
-      UUID program, UUID facilityType, UUID reasonId)
+      ValidReasonAssignment assignment)
       throws IllegalAccessException, InstantiationException {
+    UUID programId = assignment.getProgramId();
+    UUID facilityTypeId = assignment.getFacilityTypeId();
+    UUID reasonId = assignment.getReason().getId();
+
     ValidReasonAssignment foundAssignment = reasonAssignmentRepository
-        .findByProgramIdAndFacilityTypeIdAndReasonId(program, facilityType, reasonId);
+        .findByProgramIdAndFacilityTypeIdAndReasonId(programId, facilityTypeId, reasonId);
 
     if (foundAssignment != null) {
       return new ResponseEntity<>(foundAssignment, OK);
     }
 
-    return new ResponseEntity<>(saveAssignment(program, facilityType, reasonId), CREATED);
+    return new ResponseEntity<>(reasonAssignmentRepository.save(assignment), CREATED);
   }
 
-  private ValidReasonAssignment saveAssignment(UUID program, UUID facilityType, UUID reasonId)
-      throws IllegalAccessException, InstantiationException {
-    return reasonAssignmentRepository.save(
-        new ValidReasonAssignment(program, facilityType, reasonRepository.findOne(reasonId)));
-  }
-
-  private List<StockCardLineItemReason> getReasonsBy(UUID program, UUID facilityType) {
+  private List<ValidReasonAssignment> getReasonsBy(UUID program, UUID facilityType) {
     return reasonAssignmentRepository
-        .findByProgramIdAndFacilityTypeId(program, facilityType)
-        .stream().map(ValidReasonAssignment::getReason).collect(toList());
+        .findByProgramIdAndFacilityTypeId(program, facilityType);
   }
 
 }
