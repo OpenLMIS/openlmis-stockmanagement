@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.web;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.StockCardLineItemReasonBuilder.createReason;
@@ -31,6 +32,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 
@@ -125,5 +127,27 @@ public class StockCardLineItemReasonControllerTest extends BaseWebTest {
             is(updatedReason.getReasonCategory().toString())))
         .andExpect(jsonPath("$.isFreeTextAllowed",
             is(updatedReason.getIsFreeTextAllowed())));
+  }
+
+  @Test
+  public void should_return_200_when_admin_user_get_all_reasons() throws Exception {
+    //given
+    StockCardLineItemReason reason1 = createReason();
+    reason1.setId(UUID.randomUUID());
+
+    StockCardLineItemReason reason2 = createReason();
+    reason2.setName("Another test reason");
+    reason2.setId(UUID.randomUUID());
+
+    when(stockCardLineItemReasonService.findReasons()).thenReturn(Arrays.asList(reason1, reason2));
+
+    //when
+    ResultActions resultActions = mvc.perform(MockMvcRequestBuilders
+        .get(STOCK_CARD_LINE_ITEM_REASON_API)
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
+
+    //then
+    resultActions.andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(2)));
   }
 }

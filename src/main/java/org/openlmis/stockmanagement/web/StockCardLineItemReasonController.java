@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.web;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.List;
 import java.util.UUID;
 
 @Controller
@@ -52,6 +54,11 @@ public class StockCardLineItemReasonController {
     }
     reason.setId(null);
     return new ResponseEntity<>(reasonService.saveOrUpdate(reason), CREATED);
+  }
+
+  @RequestMapping(value = "stockCardLineItemReasons", method = GET)
+  public ResponseEntity<List<StockCardLineItemReason>> getAllReasons() {
+    return new ResponseEntity<>(reasonService.findReasons(), OK);
   }
 
   /**
