@@ -102,35 +102,6 @@ public class StockCardLineItemReason extends BaseEntity {
         .build();
   }
 
-  @Override
-  public boolean equals(Object other) {
-    if (other == null) {
-      return false;
-    }
-    if (other == this) {
-      return true;
-    }
-    if (!(other instanceof StockCardLineItemReason)) {
-      return false;
-    }
-
-    StockCardLineItemReason otherMyClass = (StockCardLineItemReason) other;
-    return this.getName().equals(otherMyClass.getName())
-        && this.getDescription().equals(otherMyClass.getDescription())
-        && this.getReasonType() == otherMyClass.getReasonType()
-        && this.getReasonCategory() == otherMyClass.getReasonCategory()
-        && this.isFreeTextAllowed == otherMyClass.isFreeTextAllowed;
-  }
-
-  @Override
-  public int hashCode() {
-    if (id != null) {
-      return id.hashCode();
-    } else {
-      return super.hashCode();
-    }
-  }
-
   @JsonIgnore
   public boolean isCreditReasonType() {
     return getReasonType() == ReasonType.CREDIT;

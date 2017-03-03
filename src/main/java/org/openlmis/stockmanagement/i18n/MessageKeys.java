@@ -122,17 +122,20 @@ public abstract class MessageKeys {
       + ".authorization.program.not.supported";
 
   //stock card line item reason
-  public static final String ERROR_LINE_ITEM_REASON_NAME_NOT_FOUND = ERROR_PREFIX
-      + ".lineItem.reason.name.notFound";
+  public static final String ERROR_LINE_ITEM_REASON_NAME_MISSING = ERROR_PREFIX
+      + ".lineItem.reason.name.missing";
 
-  public static final String ERROR_LINE_ITEM_REASON_TYPE_NOT_FOUND = ERROR_PREFIX
-      + ".lineItem.reason.type.notFound";
+  public static final String ERROR_LINE_ITEM_REASON_TYPE_MISSING = ERROR_PREFIX
+      + ".lineItem.reason.type.missing";
 
-  public static final String ERROR_LINE_ITEM_REASON_CATEGORY_NOT_FOUND = ERROR_PREFIX
-      + ".lineItem.reason.category.notFound";
+  public static final String ERROR_LINE_ITEM_REASON_CATEGORY_MISSING = ERROR_PREFIX
+      + ".lineItem.reason.category.missing";
 
-  public static final String ERROR_LINE_ITEM_REASON_ISFREETEXTALLOWED_NOT_FOUND = ERROR_PREFIX
-      + ".lineItem.reason.isFreeTextAllowed.notFound";
+  public static final String ERROR_LINE_ITEM_REASON_ISFREETEXTALLOWED_MISSING = ERROR_PREFIX
+      + ".lineItem.reason.isFreeTextAllowed.missing";
+
+  public static final String ERROR_LINE_ITEM_REASON_ID_NOT_FOUND = ERROR_PREFIX
+      + ".lineItem.reason.id.notFound";
 
   private MessageKeys() {
     throw new UnsupportedOperationException();

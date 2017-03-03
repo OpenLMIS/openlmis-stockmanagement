@@ -39,7 +39,7 @@ public class StockCardLineItemReasonController {
   private StockCardLineItemReasonService reasonService;
 
   /**
-   * Create a new stock card line item reason.
+   * Create a new stock card line item reason. If the id is specified, ID will be ignored.
    *
    * @param reason a stock card line item reason bound to request body
    * @return created stock card line item reason
@@ -47,12 +47,25 @@ public class StockCardLineItemReasonController {
   @RequestMapping(value = "stockCardLineItemReasons", method = POST)
   public ResponseEntity<StockCardLineItemReason> createReason(
       @RequestBody StockCardLineItemReason reason) {
+    if (reasonService.reasonExists(reason)) {
+      return new ResponseEntity<>(reason, OK);
+    }
+    reason.setId(null);
     return new ResponseEntity<>(reasonService.saveOrUpdate(reason), CREATED);
   }
 
+  /**
+   * Update a stock card line item reason.
+   *
+   * @param reason   a stock card line item reason bound to request body
+   * @param reasonId ID of the reason would be updated
+   * @return updated stock card line item reason
+   */
   @RequestMapping(value = "stockCardLineItemReasons/{id}", method = PUT)
   public ResponseEntity<StockCardLineItemReason> updateReason(
       @RequestBody StockCardLineItemReason reason, @PathVariable("id") UUID reasonId) {
+    reasonService.checkUpdateReasonIdExists(reasonId);
+    reason.setId(reasonId);
     return new ResponseEntity<>(reasonService.saveOrUpdate(reason), OK);
   }
 }

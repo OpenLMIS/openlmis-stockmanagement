@@ -61,6 +61,12 @@ public class StockCardLineItemReasonServiceTest {
     reasonService.saveOrUpdate(reason);
   }
 
+  @Test(expected = ValidationMessageException.class)
+  public void should_throw_validation_exception_when_reason_id_not_found_in_db() throws Exception {
+    //given
+    reasonService.checkUpdateReasonIdExists(UUID.randomUUID());
+  }
+
   @Test(expected = PermissionMessageException.class)
   public void should_throw_permission_exception_when_current_user_has_no_permission()
       throws Exception {
@@ -81,20 +87,6 @@ public class StockCardLineItemReasonServiceTest {
   }
 
   @Test
-  public void should_not_create_duplicate_reason() throws Exception {
-    //given: there is an existing reason
-    reasonService.saveOrUpdate(createReason());
-    assertThat(reasonRepository.count(), is(1L));
-
-    //when: try to create a reason with same name type category and isFreeTextAllowed
-    StockCardLineItemReason newReason = createReason();
-    reasonService.saveOrUpdate(newReason);
-
-    //then:
-    assertThat(reasonRepository.count(), is(1L));
-  }
-
-  @Test
   public void should_update_existing_reason() throws Exception {
     //given: there is an existing reason
     reasonService.saveOrUpdate(createReason());
@@ -108,7 +100,7 @@ public class StockCardLineItemReasonServiceTest {
     StockCardLineItemReason updatedReason = reasonService.saveOrUpdate(newReason);
 
     //then
-    assertThat(updatedReason.getIsFreeTextAllowed(), is(false));
+    assertThat(updatedReason.getIsFreeTextAllowed(), is(newReason.getIsFreeTextAllowed()));
     assertThat(reasonRepository.count(), is(1L));
   }
 

@@ -15,11 +15,11 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static java.util.stream.StreamSupport.stream;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_CATEGORY_NOT_FOUND;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_ISFREETEXTALLOWED_NOT_FOUND;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_NAME_NOT_FOUND;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_TYPE_NOT_FOUND;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_CATEGORY_MISSING;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_ID_NOT_FOUND;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_ISFREETEXTALLOWED_MISSING;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_NAME_MISSING;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_TYPE_MISSING;
 
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
@@ -27,6 +27,8 @@ import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 public class StockCardLineItemReasonService {
@@ -46,25 +48,47 @@ public class StockCardLineItemReasonService {
   public StockCardLineItemReason saveOrUpdate(StockCardLineItemReason reason) {
     permissionService.canManageReasons();
     validateRequiredValueNotNull(reason);
-    boolean hasSameReason = stream(reasonRepository.findAll().spliterator(), false)
-        .anyMatch(foundReason -> foundReason.equals(reason));
-
-    if (hasSameReason) {
-      return reason;
-    }
-
     return reasonRepository.save(reason);
+  }
+
+  /**
+   * Check if has same reason in DB.
+   *
+   * @param reason to be checked
+   * @return a boolean for same reason existing
+   */
+  public boolean reasonExists(StockCardLineItemReason reason) {
+    StockCardLineItemReason foundReason = reasonRepository
+        .findByNameAndReasonTypeAndReasonCategoryAndIsFreeTextAllowedAndDescription(
+            reason.getName(),
+            reason.getReasonType(),
+            reason.getReasonCategory(),
+            reason.getIsFreeTextAllowed(),
+            reason.getDescription());
+
+    return foundReason != null;
+  }
+
+  /**
+   * Check if the would be updated reason exists.
+   *
+   * @param reasonId would be updated reason's ID
+   */
+  public void checkUpdateReasonIdExists(UUID reasonId) {
+    if (reasonRepository.findOne(reasonId) == null) {
+      throw new ValidationMessageException(new Message(ERROR_LINE_ITEM_REASON_ID_NOT_FOUND));
+    }
   }
 
   private void validateRequiredValueNotNull(StockCardLineItemReason reason) {
     if (reason.hasNoName()) {
-      throwException(ERROR_LINE_ITEM_REASON_NAME_NOT_FOUND);
+      throwException(ERROR_LINE_ITEM_REASON_NAME_MISSING);
     } else if (reason.hasNoType()) {
-      throwException(ERROR_LINE_ITEM_REASON_TYPE_NOT_FOUND);
+      throwException(ERROR_LINE_ITEM_REASON_TYPE_MISSING);
     } else if (reason.hasNoCategory()) {
-      throwException(ERROR_LINE_ITEM_REASON_CATEGORY_NOT_FOUND);
+      throwException(ERROR_LINE_ITEM_REASON_CATEGORY_MISSING);
     } else if (reason.hasNoIsFreeTextAllowed()) {
-      throwException(ERROR_LINE_ITEM_REASON_ISFREETEXTALLOWED_NOT_FOUND);
+      throwException(ERROR_LINE_ITEM_REASON_ISFREETEXTALLOWED_MISSING);
     }
   }
 
