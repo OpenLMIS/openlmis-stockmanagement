@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.web;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.StockCardLineItemReasonBuilder.createReason;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -26,7 +27,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
+import org.openlmis.stockmanagement.exception.PermissionMessageException;
+import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardLineItemReasonService;
+import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
@@ -42,6 +46,9 @@ public class StockCardLineItemReasonControllerTest extends BaseWebTest {
 
   @MockBean
   private StockCardLineItemReasonService stockCardLineItemReasonService;
+
+  @MockBean
+  private PermissionService permissionService;
 
   @Test
   public void should_return_201_when_reason_successfully_created() throws Exception {
@@ -149,5 +156,34 @@ public class StockCardLineItemReasonControllerTest extends BaseWebTest {
     //then
     resultActions.andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(2)));
+  }
+
+  @Test
+  public void should_return_403_when_user_has_no_permission_to_manage_or_view_reasons()
+      throws Exception {
+    doThrow(new PermissionMessageException(new Message("key")))
+        .when(permissionService).canManageReasons();
+
+    //1.create reason
+    ResultActions postResults = mvc.perform(MockMvcRequestBuilders
+        .post(STOCK_CARD_LINE_ITEM_REASON_API)
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectToJsonString(new StockCardLineItemReason())));
+    postResults.andExpect(status().isForbidden());
+
+    //2.update reason
+    ResultActions putResults = mvc.perform(MockMvcRequestBuilders
+        .put(STOCK_CARD_LINE_ITEM_REASON_API + "/" + UUID.randomUUID().toString())
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectToJsonString(new StockCardLineItemReason())));
+    putResults.andExpect(status().isForbidden());
+
+    //3.view reasons
+    ResultActions getResults = mvc.perform(MockMvcRequestBuilders
+        .get(STOCK_CARD_LINE_ITEM_REASON_API)
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
+    getResults.andExpect(status().isForbidden());
   }
 }

@@ -17,20 +17,16 @@ package org.openlmis.stockmanagement.service;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.doThrow;
 import static org.openlmis.stockmanagement.testutils.StockCardLineItemReasonBuilder.createReason;
 
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
-import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
-import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
@@ -44,9 +40,6 @@ public class StockCardLineItemReasonServiceTest {
 
   @Autowired
   private StockCardLineItemReasonRepository reasonRepository;
-
-  @MockBean
-  private PermissionService permissionService;
 
   @After
   public void tearDown() throws Exception {
@@ -66,21 +59,6 @@ public class StockCardLineItemReasonServiceTest {
   public void should_throw_validation_exception_when_reason_id_not_found_in_db() throws Exception {
     //given
     reasonService.checkUpdateReasonIdExists(UUID.randomUUID());
-  }
-
-  @Test(expected = PermissionMessageException.class)
-  public void should_throw_exception_when_user_has_no_permission_to_create_or_update_reason()
-      throws Exception {
-    doThrow(new PermissionMessageException(new Message("key")))
-        .when(permissionService).canManageReasons();
-    reasonService.saveOrUpdate(createReason());
-  }
-
-  @Test(expected = PermissionMessageException.class)
-  public void should_throw_exception_when_user_has_no_permission_to_get_reasons() throws Exception {
-    doThrow(new PermissionMessageException(new Message("key")))
-        .when(permissionService).canManageReasons();
-    reasonService.findReasons();
   }
 
   @Test

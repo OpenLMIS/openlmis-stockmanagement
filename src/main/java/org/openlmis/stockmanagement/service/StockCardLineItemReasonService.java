@@ -44,16 +44,12 @@ public class StockCardLineItemReasonService {
   @Autowired
   private StockCardLineItemReasonRepository reasonRepository;
 
-  @Autowired
-  private PermissionService permissionService;
-
   /**
    * Find all reasons.
    *
    * @return found reason list
    */
   public List<StockCardLineItemReason> findReasons() {
-    permissionService.canManageReasons();
     return stream(reasonRepository.findAll().spliterator(), false).collect(toList());
   }
 
@@ -64,7 +60,6 @@ public class StockCardLineItemReasonService {
    * @return created reason DTO object
    */
   public StockCardLineItemReason saveOrUpdate(StockCardLineItemReason reason) {
-    permissionService.canManageReasons();
     validateRequiredValueNotNull(reason);
     LOGGER.debug("Is going to save reason");
     return reasonRepository.save(reason);

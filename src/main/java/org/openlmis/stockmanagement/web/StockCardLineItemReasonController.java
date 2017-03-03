@@ -22,6 +22,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
+import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardLineItemReasonService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,9 @@ public class StockCardLineItemReasonController {
   @Autowired
   private StockCardLineItemReasonService reasonService;
 
+  @Autowired
+  private PermissionService permissionService;
+
   /**
    * Create a new stock card line item reason. If the id is specified, ID will be ignored.
    *
@@ -55,6 +59,7 @@ public class StockCardLineItemReasonController {
   public ResponseEntity<StockCardLineItemReason> createReason(
       @RequestBody StockCardLineItemReason reason) {
     LOGGER.debug("Try to create a new stock card line item reason");
+    permissionService.canManageReasons();
     if (reasonService.reasonExists(reason)) {
       LOGGER.debug("Reason exists");
       return new ResponseEntity<>(reason, OK);
@@ -70,6 +75,7 @@ public class StockCardLineItemReasonController {
    */
   @RequestMapping(value = "stockCardLineItemReasons", method = GET)
   public ResponseEntity<List<StockCardLineItemReason>> getAllReasons() {
+    permissionService.canManageReasons();
     return new ResponseEntity<>(reasonService.findReasons(), OK);
   }
 
@@ -83,6 +89,7 @@ public class StockCardLineItemReasonController {
   @RequestMapping(value = "stockCardLineItemReasons/{id}", method = PUT)
   public ResponseEntity<StockCardLineItemReason> updateReason(
       @RequestBody StockCardLineItemReason reason, @PathVariable("id") UUID reasonId) {
+    permissionService.canManageReasons();
     LOGGER.debug("Try to update stock card line item reason with id: ", reasonId.toString());
     reasonService.checkUpdateReasonIdExists(reasonId);
     reason.setId(reasonId);
