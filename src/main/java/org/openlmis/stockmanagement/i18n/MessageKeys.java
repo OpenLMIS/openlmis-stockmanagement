@@ -111,6 +111,9 @@ public abstract class MessageKeys {
   public static final String ERROR_REASON_NOT_FOUND = ERROR_PREFIX
       + ".reason.notFound";
 
+  public static final String ERROR_REASON_ASSIGNMENT_NOT_FOUND = ERROR_PREFIX
+      + ".reasonAssignment.notFound";
+
   //permission error
   public static final String ERROR_NO_FOLLOWING_PERMISSION = ERROR_PREFIX
       + ".authorization.noFollowingPermission";

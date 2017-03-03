@@ -387,6 +387,22 @@ traits:
             description: User is not allowed to configure reason.
             body:
               application/json:
+      /{id}:
+        delete:
+          is: [ secured ]
+          description: Remove a reason assignment from a valid reason assignment list.
+
+          responses:
+            204:
+              description: Given reason assignment has been removed success.
+            400:
+              description: Reason assignment is not found.
+              body:
+                application/json:
+            403:
+              description: User is not allowed to remove reason assignment from the list.
+              body:
+                application/json:
 
   /stockCardLineItemReasons:
       displayName: Stock Card Line Item Reason

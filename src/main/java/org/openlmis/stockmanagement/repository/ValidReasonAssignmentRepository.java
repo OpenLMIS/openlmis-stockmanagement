@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.repository;
 import org.openlmis.stockmanagement.domain.adjustment.ValidReasonAssignment;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -32,4 +33,7 @@ public interface ValidReasonAssignmentRepository extends
       @Param("programId") UUID programId,
       @Param("facilityTypeId") UUID facilityTypeId,
       @Param("reasonId") UUID reasonId);
+
+  @Transactional
+  void deleteById(@Param("id") UUID assignmentId);
 }

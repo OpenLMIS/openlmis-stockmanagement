@@ -17,10 +17,13 @@ package org.openlmis.stockmanagement.web;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_ASSIGNMENT_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_ID_EMPTY;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_NOT_FOUND;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
@@ -36,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -79,6 +83,27 @@ public class ValidReasonAssignmentController {
     permissionService.canViewReasons(program, facilityType);
 
     return new ResponseEntity<>(getReasonsBy(program, facilityType), OK);
+  }
+
+  /**
+   *  Remove a reason assignment.
+   *
+   * @param assignmentId reason assignment id.
+   * @return No content status.
+   */
+  @RequestMapping(value = "/validReasons/{id}", method = DELETE)
+  public ResponseEntity removeReasonAssignment(@PathVariable("id") UUID assignmentId) {
+    LOGGER.debug(format("Try to remove reason assignment %s.", assignmentId));
+
+    permissionService.canManageReasons();
+
+    if (!reasonAssignmentRepository.exists(assignmentId)) {
+      throw new ValidationMessageException(new Message(ERROR_REASON_ASSIGNMENT_NOT_FOUND));
+    }
+
+    reasonAssignmentRepository.deleteById(assignmentId);
+
+    return new ResponseEntity<>(null, NO_CONTENT);
   }
 
   /**

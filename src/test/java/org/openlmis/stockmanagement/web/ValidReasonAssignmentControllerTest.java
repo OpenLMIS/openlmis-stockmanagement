@@ -27,6 +27,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.domain.BaseEntity.fromId;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -245,5 +246,31 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
 
     //then
     resultActions.andExpect(status().isForbidden());
+  }
+
+  @Test
+  public void return_204_when_remove_reason_success() throws Exception {
+    UUID assignmentId = randomUUID();
+    when(reasonAssignmentRepository.exists(assignmentId)).thenReturn(true);
+
+    ResultActions resultActions = mvc.perform(
+        delete(VALID_REASON_API + "/" + assignmentId.toString())
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
+
+    resultActions.andExpect(status().isNoContent());
+    verify(permissionService, times(1)).canManageReasons();
+    verify(reasonAssignmentRepository, times(1)).deleteById(assignmentId);
+  }
+
+  @Test
+  public void return_400_when_reason_is_not_found() throws Exception {
+    UUID assignmentId = randomUUID();
+    when(reasonAssignmentRepository.exists(assignmentId)).thenReturn(false);
+
+    ResultActions resultActions = mvc.perform(
+        delete(VALID_REASON_API + "/" + assignmentId.toString())
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
+
+    resultActions.andExpect(status().isBadRequest());
   }
 }
