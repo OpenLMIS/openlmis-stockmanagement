@@ -108,6 +108,7 @@ public class ValidReasonAssignmentController {
   /**
    * Assign a reason to program and facility type.
    *
+   * @param assignment valid reason assignment.
    * @return the assigned reason and program and facility type.
    * @throws InstantiationException InstantiationException
    * @throws IllegalAccessException IllegalAccessException

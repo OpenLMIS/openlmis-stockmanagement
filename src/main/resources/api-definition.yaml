@@ -361,19 +361,9 @@ traits:
         is: [ secured ]
         description: Configure a reason to program and facility type.
 
-        queryParameters:
-          program:
-            description: Program id
-            type: string
-            required: true
-          facilityType:
-            description: Facility type id
-            type: string
-            required: true
         body:
             application/json:
-              schema: string
-
+              schema: validReasonAssignment
         responses:
           200:
             description: Given reason is already configured.

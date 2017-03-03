@@ -94,15 +94,13 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   @Test
   public void should_assign_reason_to_program_facility_type() throws Exception {
     //given
-    UUID programId = UUID.randomUUID();
-    UUID facilityTypeId = UUID.randomUUID();
     UUID reasonId = UUID.randomUUID();
     StockCardLineItemReason reason = fromId(reasonId, StockCardLineItemReason.class);
 
-    ValidReasonAssignment validReasonAssignment = new ValidReasonAssignment();
-    validReasonAssignment.setReason(reason);
-    validReasonAssignment.setProgramId(programId);
-    validReasonAssignment.setFacilityTypeId(facilityTypeId);
+    ValidReasonAssignment assignment = new ValidReasonAssignment();
+    assignment.setReason(reason);
+    assignment.setProgramId(UUID.randomUUID());
+    assignment.setFacilityTypeId(UUID.randomUUID());
 
     when(reasonRepository.exists(reasonId)).thenReturn(true);
     when(reasonRepository.findOne(reasonId))
@@ -113,7 +111,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
         post(VALID_REASON_API)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectToJsonString(validReasonAssignment)));
+            .content(objectToJsonString(assignment)));
 
     //then
     ArgumentCaptor<ValidReasonAssignment> assignmentCaptor = forClass(ValidReasonAssignment.class);
@@ -123,26 +121,23 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
         .andExpect(status().isCreated());
     verify(reasonAssignmentRepository, times(1)).save(assignmentCaptor.capture());
     assertThat(assignmentCaptor.getValue().getReason().getId(), is(reasonId));
-    verify(programFacilityTypeExistenceService, times(1))
-        .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
+    verify(programFacilityTypeExistenceService, times(1)).checkProgramAndFacilityTypeExist(
+        assignment.getProgramId(), assignment.getFacilityTypeId());
     verify(permissionService, times(1)).canManageReasons();
   }
 
   @Test
   public void should_not_assign_same_reason_twice() throws Exception {
     //given
-    UUID programId = UUID.randomUUID();
-    UUID facilityTypeId = UUID.randomUUID();
     UUID reasonId = UUID.randomUUID();
-    StockCardLineItemReason reason = fromId(reasonId, StockCardLineItemReason.class);
-    ValidReasonAssignment validReasonAssignment = new ValidReasonAssignment();
-    validReasonAssignment.setReason(reason);
-    validReasonAssignment.setProgramId(programId);
-    validReasonAssignment.setFacilityTypeId(facilityTypeId);
+    ValidReasonAssignment assignment = new ValidReasonAssignment();
+    assignment.setReason(fromId(reasonId, StockCardLineItemReason.class));
+    assignment.setProgramId(UUID.randomUUID());
+    assignment.setFacilityTypeId(UUID.randomUUID());
 
     when(reasonRepository.exists(reasonId)).thenReturn(true);
-    when(reasonAssignmentRepository
-        .findByProgramIdAndFacilityTypeIdAndReasonId(programId, facilityTypeId, reasonId))
+    when(reasonAssignmentRepository.findByProgramIdAndFacilityTypeIdAndReasonId(
+        assignment.getProgramId(), assignment.getFacilityTypeId(), reasonId))
         .thenReturn(new ValidReasonAssignment());
 
     //when
@@ -150,7 +145,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
         post(VALID_REASON_API)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectToJsonString(validReasonAssignment)));
+            .content(objectToJsonString(assignment)));
 
     //then
     resultActions.andExpect(status().isOk());
