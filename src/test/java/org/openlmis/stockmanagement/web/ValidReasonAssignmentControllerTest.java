@@ -19,6 +19,7 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -52,6 +53,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.util.Collections;
 import java.util.UUID;
 
+@SuppressWarnings("PMD.TooManyMethods")
 public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   private static final String VALID_REASON_API = "/api/validReasons";
   private static final String PROGRAM = "program";
@@ -95,16 +97,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   public void should_assign_reason_to_program_facility_type() throws Exception {
     //given
     UUID reasonId = UUID.randomUUID();
-    StockCardLineItemReason reason = fromId(reasonId, StockCardLineItemReason.class);
-
-    ValidReasonAssignment assignment = new ValidReasonAssignment();
-    assignment.setReason(reason);
-    assignment.setProgramId(UUID.randomUUID());
-    assignment.setFacilityTypeId(UUID.randomUUID());
-
-    when(reasonRepository.exists(reasonId)).thenReturn(true);
-    when(reasonRepository.findOne(reasonId))
-        .thenReturn(reason);
+    ValidReasonAssignment assignment = mockedValidReasonAssignment(reasonId);
 
     //when
     ResultActions resultActions = mvc.perform(
@@ -124,6 +117,25 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
     verify(programFacilityTypeExistenceService, times(1)).checkProgramAndFacilityTypeExist(
         assignment.getProgramId(), assignment.getFacilityTypeId());
     verify(permissionService, times(1)).canManageReasons();
+  }
+
+  @Test
+  public void should_ignore_assignment_id_when_request_body_specified_it() throws Exception {
+    //given
+    ValidReasonAssignment assignment = mockedValidReasonAssignment(UUID.randomUUID());
+    assignment.setId(UUID.randomUUID());
+
+    //when
+    mvc.perform(post(VALID_REASON_API)
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectToJsonString(assignment)));
+
+    //then
+    ArgumentCaptor<ValidReasonAssignment> assignmentCaptor = forClass(ValidReasonAssignment.class);
+    verify(reasonAssignmentRepository, times(1)).save(assignmentCaptor.capture());
+
+    assertNull(assignmentCaptor.getValue().getId());
   }
 
   @Test
@@ -271,5 +283,20 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
 
     resultActions.andExpect(status().isBadRequest());
+  }
+
+  private ValidReasonAssignment mockedValidReasonAssignment(UUID reasonId)
+      throws IllegalAccessException, InstantiationException {
+    StockCardLineItemReason reason = fromId(reasonId, StockCardLineItemReason.class);
+
+    ValidReasonAssignment assignment = new ValidReasonAssignment();
+    assignment.setReason(reason);
+    assignment.setProgramId(reasonId);
+    assignment.setFacilityTypeId(reasonId);
+
+    when(reasonRepository.exists(assignment.getReason().getId())).thenReturn(true);
+    when(reasonRepository.findOne(assignment.getReason().getId()))
+        .thenReturn(reason);
+    return assignment;
   }
 }
