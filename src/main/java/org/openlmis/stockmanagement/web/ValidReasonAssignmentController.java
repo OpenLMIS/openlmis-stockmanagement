@@ -17,7 +17,6 @@ package org.openlmis.stockmanagement.web;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
-import static org.openlmis.stockmanagement.domain.BaseEntity.fromId;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_ID_EMPTY;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_NOT_FOUND;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -132,10 +131,8 @@ public class ValidReasonAssignmentController {
 
   private ValidReasonAssignment saveAssignment(UUID program, UUID facilityType, UUID reasonId)
       throws IllegalAccessException, InstantiationException {
-    return reasonAssignmentRepository.save(new ValidReasonAssignment(
-        program,
-        facilityType,
-        fromId(reasonId, StockCardLineItemReason.class)));
+    return reasonAssignmentRepository.save(
+        new ValidReasonAssignment(program, facilityType, reasonRepository.findOne(reasonId)));
   }
 
   private List<StockCardLineItemReason> getReasonsBy(UUID program, UUID facilityType) {

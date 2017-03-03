@@ -26,6 +26,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.domain.BaseEntity.fromId;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -34,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.adjustment.ValidReasonAssignment;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
@@ -95,6 +97,8 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
     UUID facilityTypeId = UUID.randomUUID();
     UUID reasonId = UUID.randomUUID();
     when(reasonRepository.exists(reasonId)).thenReturn(true);
+    when(reasonRepository.findOne(reasonId))
+        .thenReturn(fromId(reasonId, StockCardLineItemReason.class));
 
     //when
     ResultActions resultActions = mvc.perform(post(VALID_REASON_API)
