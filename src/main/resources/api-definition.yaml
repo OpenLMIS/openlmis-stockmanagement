@@ -389,7 +389,21 @@ traits:
               application/json:
 
   /stockCardLineItemReasons:
-      displayName: Stock card line item reason
+      displayName: Stock Card Line Item Reason
+      get:
+        is: [ secured ]
+        description: Retrieve all reasons.
+        responses:
+          200:
+            description: Return a list of stock line item reasons.
+            body:
+              application/json:
+                schema: reasons
+          403:
+            description: User does not have permission to manage stock card line item reasons.
+            body:
+              application/json:
+
       post:
         is: [ secured ]
         description: Create a new stock card line item reason.

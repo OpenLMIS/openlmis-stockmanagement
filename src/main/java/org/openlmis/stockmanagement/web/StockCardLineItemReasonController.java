@@ -23,6 +23,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.service.StockCardLineItemReasonService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -37,6 +39,9 @@ import java.util.UUID;
 @RequestMapping("/api")
 public class StockCardLineItemReasonController {
 
+  private static final Logger LOGGER =
+      LoggerFactory.getLogger(StockCardLineItemReasonController.class);
+
   @Autowired
   private StockCardLineItemReasonService reasonService;
 
@@ -49,7 +54,9 @@ public class StockCardLineItemReasonController {
   @RequestMapping(value = "stockCardLineItemReasons", method = POST)
   public ResponseEntity<StockCardLineItemReason> createReason(
       @RequestBody StockCardLineItemReason reason) {
+    LOGGER.debug("Try to create a new stock card line item reason");
     if (reasonService.reasonExists(reason)) {
+      LOGGER.debug("Reason exists");
       return new ResponseEntity<>(reason, OK);
     }
     reason.setId(null);
@@ -76,6 +83,7 @@ public class StockCardLineItemReasonController {
   @RequestMapping(value = "stockCardLineItemReasons/{id}", method = PUT)
   public ResponseEntity<StockCardLineItemReason> updateReason(
       @RequestBody StockCardLineItemReason reason, @PathVariable("id") UUID reasonId) {
+    LOGGER.debug("Try to update stock card line item reason with id: ", reasonId.toString());
     reasonService.checkUpdateReasonIdExists(reasonId);
     reason.setId(reasonId);
     return new ResponseEntity<>(reasonService.saveOrUpdate(reason), OK);

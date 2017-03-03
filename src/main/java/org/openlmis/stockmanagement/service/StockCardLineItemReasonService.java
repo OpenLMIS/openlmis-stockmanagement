@@ -27,6 +27,8 @@ import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.utils.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +37,9 @@ import java.util.UUID;
 
 @Service
 public class StockCardLineItemReasonService {
+
+  private static final Logger LOGGER =
+      LoggerFactory.getLogger(StockCardLineItemReasonService.class);
 
   @Autowired
   private StockCardLineItemReasonRepository reasonRepository;
@@ -61,6 +66,7 @@ public class StockCardLineItemReasonService {
   public StockCardLineItemReason saveOrUpdate(StockCardLineItemReason reason) {
     permissionService.canManageReasons();
     validateRequiredValueNotNull(reason);
+    LOGGER.debug("Is going to save reason");
     return reasonRepository.save(reason);
   }
 
