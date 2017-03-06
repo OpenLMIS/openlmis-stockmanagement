@@ -137,6 +137,9 @@ public abstract class MessageKeys {
   public static final String ERROR_LINE_ITEM_REASON_ISFREETEXTALLOWED_MISSING = ERROR_PREFIX
       + ".lineItem.reason.isFreeTextAllowed.missing";
 
+  public static final String ERROR_LINE_ITEM_REASON_UPDATE_CONTENT_DUPLICATE = ERROR_PREFIX
+      + ".lineItem.reason.update.content.duplicate";
+
   public static final String ERROR_LINE_ITEM_REASON_ID_NOT_FOUND = ERROR_PREFIX
       + ".lineItem.reason.id.notFound";
 

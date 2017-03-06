@@ -15,6 +15,8 @@
 
 package org.openlmis.stockmanagement.domain.adjustment;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import org.hibernate.annotations.Type;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 
@@ -34,6 +36,7 @@ import javax.persistence.Table;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonPropertyOrder({"id"})
 @Table(name = "valid_reason_assignments", schema = "stockmanagement")
 public class ValidReasonAssignment extends BaseEntity {
   @Column(nullable = false)

@@ -186,4 +186,21 @@ public class StockCardLineItemReasonControllerTest extends BaseWebTest {
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
     getResults.andExpect(status().isForbidden());
   }
+
+  @Test
+  public void should_return_400_when_would_be_update_reason_content_exists() throws Exception {
+    //given
+    StockCardLineItemReason reason = createReason();
+    when(stockCardLineItemReasonService.reasonExists(reason)).thenReturn(true);
+
+    //when
+    ResultActions resultActions = mvc.perform(MockMvcRequestBuilders
+        .put(STOCK_CARD_LINE_ITEM_REASON_API + "/" + UUID.randomUUID().toString())
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectToJsonString(reason)));
+
+    //then
+    resultActions.andExpect(status().isBadRequest());
+  }
 }
