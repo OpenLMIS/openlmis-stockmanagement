@@ -143,6 +143,10 @@ public abstract class MessageKeys {
   public static final String ERROR_LINE_ITEM_REASON_ID_NOT_FOUND = ERROR_PREFIX
       + ".lineItem.reason.id.notFound";
 
+  //stock event source destination
+  public static final String ERROR_ORGANIZATION_NAME_MISSING = ERROR_PREFIX
+      + ".organization.name.missing";
+
   private MessageKeys() {
     throw new UnsupportedOperationException();
   }

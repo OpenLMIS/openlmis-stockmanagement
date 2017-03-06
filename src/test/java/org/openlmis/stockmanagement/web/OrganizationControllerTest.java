@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.web;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -24,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.movement.Organization;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
+import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -36,11 +38,15 @@ public class OrganizationControllerTest extends BaseWebTest {
   @MockBean
   private PermissionService permissionService;
 
+  @MockBean
+  private OrganizationRepository organizationRepository;
+
   @Test
   public void should_return_201_when_organization_created_successfully() throws Exception {
     //given
     Organization organization = new Organization();
-    organization.setName("TestOrg");
+    organization.setName("New Org");
+    when(organizationRepository.save(organization)).thenReturn(organization);
 
     //when
     ResultActions resultActions = mvc.perform(post(ORGANIZATION_API)
@@ -68,6 +74,35 @@ public class OrganizationControllerTest extends BaseWebTest {
 
     //then
     resultActions.andExpect(status().isForbidden());
+  }
+
+  @Test
+  public void should_return_200_when_try_to_create_organizations_has_existed() throws Exception {
+    //given
+    Organization organization = new Organization();
+    organization.setName("Test Org");
+    when(organizationRepository.findByName(organization.getName())).thenReturn(organization);
+
+    //when
+    ResultActions resultActions = mvc.perform(post(ORGANIZATION_API)
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectToJsonString(organization)));
+
+    //then
+    resultActions.andExpect(status().isOk());
+  }
+
+  @Test
+  public void should_return_400_when_reason_without_name() throws Exception {
+    //when
+    ResultActions resultActions = mvc.perform(post(ORGANIZATION_API)
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectToJsonString(new Organization())));
+
+    //then
+    resultActions.andExpect(status().isBadRequest());
   }
 
 }

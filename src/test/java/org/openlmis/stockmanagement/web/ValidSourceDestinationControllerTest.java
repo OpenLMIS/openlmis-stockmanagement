@@ -48,7 +48,7 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
   public void should_get_valid_sources_or_destinations_by_program_and_facilityType()
       throws Exception {
     //given
-    ValidSourceDestinationDto sourceDestination = createValidSouceDestinationDto();
+    ValidSourceDestinationDto sourceDestination = createValidSourceDestinationDto();
 
     UUID program = UUID.randomUUID();
     UUID facilityType = UUID.randomUUID();
@@ -103,7 +103,7 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
     resultActions.andExpect(status().isBadRequest());
   }
 
-  private ValidSourceDestinationDto createValidSouceDestinationDto() {
+  private ValidSourceDestinationDto createValidSourceDestinationDto() {
     ValidSourceDestinationDto destinationAssignmentDto = new ValidSourceDestinationDto();
     destinationAssignmentDto.setId(UUID.randomUUID());
     destinationAssignmentDto.setName("CHW");

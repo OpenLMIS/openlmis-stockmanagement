@@ -15,9 +15,13 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_ORGANIZATION_NAME_MISSING;
+
 import org.openlmis.stockmanagement.domain.movement.Organization;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.service.PermissionService;
+import org.openlmis.stockmanagement.utils.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +55,20 @@ public class OrganizationController {
     LOGGER.debug("Try to create a new organization.");
     permissionService.canManageOrganizations();
     organization.setId(null);
+    checkIsValidRequest(organization);
+    if (isDuplicateOrganization(organization)) {
+      return new ResponseEntity<>(organization, HttpStatus.OK);
+    }
     return new ResponseEntity<>(organizationRepository.save(organization), HttpStatus.CREATED);
+  }
+
+  private boolean isDuplicateOrganization(@RequestBody Organization organization) {
+    return organizationRepository.findByName(organization.getName()) != null;
+  }
+
+  private void checkIsValidRequest(@RequestBody Organization organization) {
+    if (organization.getName() == null) {
+      throw new ValidationMessageException(new Message(ERROR_ORGANIZATION_NAME_MISSING));
+    }
   }
 }
