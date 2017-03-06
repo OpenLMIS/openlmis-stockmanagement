@@ -15,8 +15,6 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_CATEGORY_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_ID_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_ISFREETEXTALLOWED_MISSING;
@@ -50,7 +48,7 @@ public class StockCardLineItemReasonService {
    * @return found reason list
    */
   public List<StockCardLineItemReason> findReasons() {
-    return stream(reasonRepository.findAll().spliterator(), false).collect(toList());
+    return reasonRepository.findAll();
   }
 
   /**

@@ -15,36 +15,33 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.StockCardLineItemReasonBuilder.createReason;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 import java.util.UUID;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@RunWith(MockitoJUnitRunner.class)
 public class StockCardLineItemReasonServiceTest {
-  @Autowired
+  @InjectMocks
   private StockCardLineItemReasonService reasonService;
 
-  @Autowired
+  @Mock
   private StockCardLineItemReasonRepository reasonRepository;
-
-  @Before
-  public void setUp() throws Exception {
-    reasonRepository.deleteAll();
-  }
 
   @Test(expected = ValidationMessageException.class)
   public void should_throw_validation_exception_with_unavailable_reason_dto() throws Exception {
@@ -58,15 +55,18 @@ public class StockCardLineItemReasonServiceTest {
   @Test(expected = ValidationMessageException.class)
   public void should_throw_validation_exception_when_reason_id_not_found_in_db() throws Exception {
     //given
-    reasonService.checkUpdateReasonIdExists(UUID.randomUUID());
+    UUID reasonId = UUID.randomUUID();
+    when(reasonRepository.findOne(reasonId)).thenReturn(null);
+    reasonService.checkUpdateReasonIdExists(reasonId);
   }
 
   @Test
   public void should_get_all_reasons_when_pass_validation() throws Exception {
     //given
-    reasonService.saveOrUpdate(createReason("test reason 1"));
-    reasonService.saveOrUpdate(createReason("test reason 2"));
-    reasonService.saveOrUpdate(createReason("test reason 3"));
+    when(reasonRepository.findAll()).thenReturn(
+        asList(createReason("test reason 1"),
+            createReason("test reason 2"),
+            createReason("test reason 3")));
 
     //when
     List<StockCardLineItemReason> reasons = reasonService.findReasons();
@@ -80,31 +80,12 @@ public class StockCardLineItemReasonServiceTest {
 
   @Test
   public void should_save_reason_when_pass_null_value_validation() throws Exception {
-    assertThat(reasonRepository.count(), is(0L));
-
     //when
-    reasonService.saveOrUpdate(createReason());
+    StockCardLineItemReason reason = createReason();
+    reasonService.saveOrUpdate(reason);
 
     //then
-    assertThat(reasonRepository.count(), is(1L));
-  }
-
-  @Test
-  public void should_update_existing_reason() throws Exception {
-    //given: there is an existing reason
-    reasonService.saveOrUpdate(createReason());
-    assertThat(reasonRepository.count(), is(1L));
-    UUID savedReasonId = reasonRepository.findAll().iterator().next().getId();
-
-    //when:
-    StockCardLineItemReason newReason = createReason();
-    newReason.setId(savedReasonId);
-    newReason.setIsFreeTextAllowed(false);
-    StockCardLineItemReason updatedReason = reasonService.saveOrUpdate(newReason);
-
-    //then
-    assertThat(updatedReason.getIsFreeTextAllowed(), is(newReason.getIsFreeTextAllowed()));
-    assertThat(reasonRepository.count(), is(1L));
+    verify(reasonRepository, times(1)).save(reason);
   }
 
 }
