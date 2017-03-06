@@ -35,6 +35,7 @@ public class PermissionService {
 
   public static final String STOCK_CARD_TEMPLATES_MANAGE = "STOCK_CARD_TEMPLATES_MANAGE";
   public static final String REASONS_MANAGE = "STOCK_CARD_LINE_ITEM_REASONS_MANAGE";
+  public static final String ORGANIZATIONS_MANAGE = "ORGANIZATIONS_MANAGE";
 
   public static final String STOCK_EVENT_CREATE = "STOCK_EVENT_CREATE";
 
@@ -118,6 +119,10 @@ public class PermissionService {
 
   public void canManageReasons() {
     hasPermission(REASONS_MANAGE, null, null, null);
+  }
+
+  public void canManageOrganizations() {
+    hasPermission(ORGANIZATIONS_MANAGE, null, null, null);
   }
 
   private void hasPermission(String rightName, UUID program, UUID facility, UUID warehouse) {
