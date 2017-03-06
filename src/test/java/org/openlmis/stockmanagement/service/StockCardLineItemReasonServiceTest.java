@@ -19,7 +19,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.openlmis.stockmanagement.testutils.StockCardLineItemReasonBuilder.createReason;
 
-import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
@@ -41,8 +41,8 @@ public class StockCardLineItemReasonServiceTest {
   @Autowired
   private StockCardLineItemReasonRepository reasonRepository;
 
-  @After
-  public void tearDown() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     reasonRepository.deleteAll();
   }
 
