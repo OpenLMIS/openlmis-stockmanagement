@@ -17,7 +17,9 @@ package org.openlmis.stockmanagement.web;
 
 import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
@@ -27,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -101,5 +104,18 @@ public class ValidSourceDestinationController {
     }
     return new ResponseEntity<>(
         validSourceDestinationService.assignSource(program, facilityType, sourceId), CREATED);
+  }
+
+  /**
+   * Remove a valid source assignment of a program and facility type combination.
+   *
+   * @param assignmentId source assignment ID
+   * @return no content status
+   */
+  @RequestMapping(value = "/validSources/{id}", method = DELETE)
+  public ResponseEntity removeValidSourceAssignment(@PathVariable("id") UUID assignmentId) {
+    LOGGER.debug(format("Try to remove source assignment %s.", assignmentId));
+    validSourceDestinationService.deleteSourceAssignmentById(assignmentId);
+    return new ResponseEntity(null, NO_CONTENT);
   }
 }

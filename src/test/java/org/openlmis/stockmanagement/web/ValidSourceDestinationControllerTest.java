@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_NOT_FOUND;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -43,8 +44,8 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
 
   private static final String PROGRAM = "program";
   private static final String FACILITY_TYPE = "facilityType";
-  private static final String API_VALID_DESTINATIONS = "/api/validDestinations";
-  private static final String API_VALID_SOURCES = "/api/validSources";
+  private static final String API_VALID_DESTINATIONS = "/api/validDestinations/";
+  private static final String API_VALID_SOURCES = "/api/validSources/";
 
   @MockBean
   private ValidSourceDestinationService validSourceDestinationService;
@@ -70,23 +71,6 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
     performSourcesOrDestinations(program, facilityType, sourceDestination, API_VALID_SOURCES);
   }
 
-  private void performSourcesOrDestinations(
-      UUID programId, UUID facilityTypeId,
-      ValidSourceDestinationDto sourceDestinationDto, String uri) throws Exception {
-    ResultActions resultActions = mvc.perform(MockMvcRequestBuilders.get(uri)
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .param(PROGRAM, programId.toString())
-        .param(FACILITY_TYPE, facilityTypeId.toString()));
-
-    //then
-    resultActions.andExpect(status().isOk())
-        .andDo(print())
-        .andExpect(jsonPath("$", hasSize(1)))
-        .andExpect(jsonPath("$[0].id", is(sourceDestinationDto.getId().toString())))
-        .andExpect(jsonPath("$[0].name", is(sourceDestinationDto.getName())))
-        .andExpect(jsonPath("$[0].isFreeTextAllowed", is(true)));
-  }
-
   @Test
   public void should_return_400_when_program_and_facilityType_not_found_in_ref_data()
       throws Exception {
@@ -106,14 +90,6 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
 
     //then
     resultActions.andExpect(status().isBadRequest());
-  }
-
-  private ValidSourceDestinationDto createValidSourceDestinationDto() {
-    ValidSourceDestinationDto destinationAssignmentDto = new ValidSourceDestinationDto();
-    destinationAssignmentDto.setId(UUID.randomUUID());
-    destinationAssignmentDto.setName("CHW");
-    destinationAssignmentDto.setIsFreeTextAllowed(true);
-    return destinationAssignmentDto;
   }
 
   @Test
@@ -178,5 +154,39 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
         .andExpect(jsonPath("$.programId", is(programId.toString())))
         .andExpect(jsonPath("$.facilityTypeId", is(facilityTypeId.toString())))
         .andExpect(jsonPath("$.node.referenceId", is(sourceId.toString())));
+  }
+
+  @Test
+  public void should_return_204_when_source_assignment_removed() throws Exception {
+    UUID assignmentId = UUID.randomUUID();
+    ResultActions resultActions = mvc.perform(
+        delete(API_VALID_SOURCES + assignmentId.toString())
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
+    resultActions.andExpect(status().isNoContent());
+  }
+
+  private void performSourcesOrDestinations(
+      UUID programId, UUID facilityTypeId,
+      ValidSourceDestinationDto sourceDestinationDto, String uri) throws Exception {
+    ResultActions resultActions = mvc.perform(MockMvcRequestBuilders.get(uri)
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .param(PROGRAM, programId.toString())
+        .param(FACILITY_TYPE, facilityTypeId.toString()));
+
+    //then
+    resultActions.andExpect(status().isOk())
+        .andDo(print())
+        .andExpect(jsonPath("$", hasSize(1)))
+        .andExpect(jsonPath("$[0].id", is(sourceDestinationDto.getId().toString())))
+        .andExpect(jsonPath("$[0].name", is(sourceDestinationDto.getName())))
+        .andExpect(jsonPath("$[0].isFreeTextAllowed", is(true)));
+  }
+
+  private ValidSourceDestinationDto createValidSourceDestinationDto() {
+    ValidSourceDestinationDto destinationAssignmentDto = new ValidSourceDestinationDto();
+    destinationAssignmentDto.setId(UUID.randomUUID());
+    destinationAssignmentDto.setName("CHW");
+    destinationAssignmentDto.setIsFreeTextAllowed(true);
+    return destinationAssignmentDto;
   }
 }

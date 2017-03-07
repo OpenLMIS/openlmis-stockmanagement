@@ -22,6 +22,8 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationBuilder.createFacilityDestination;
 import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationBuilder.createFacilitySourceAssignment;
@@ -53,7 +55,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
-@SuppressWarnings("PMD")
+@SuppressWarnings("PMD.TooManyMethods")
 public class ValidSourceDestinationServiceTest {
 
   @InjectMocks
@@ -273,6 +275,35 @@ public class ValidSourceDestinationServiceTest {
     ValidSourceDestinationDto facility = validSources.get(1);
     assertThat(facility.getName(), is("Health Center"));
     assertThat(facility.getIsFreeTextAllowed(), is(false));
+  }
+
+  @Test(expected = PermissionMessageException.class)
+  public void should_throw_permission_exception_when_user_has_no_permission_to_delete_assignment()
+      throws Exception {
+    doThrow(new PermissionMessageException(new Message("key")))
+        .when(permissionService).canManageStockSource();
+    validSourceDestinationService.deleteSourceAssignmentById(randomUUID());
+  }
+
+  @Test(expected = ValidationMessageException.class)
+  public void should_throw_validation_exception_when_try_to_delete_assignment_id_not_exists()
+      throws Exception {
+    UUID assignmentId = randomUUID();
+    when(sourceRepository.exists(assignmentId)).thenReturn(false);
+    validSourceDestinationService.deleteSourceAssignmentById(assignmentId);
+  }
+
+  @Test
+  public void should_delete_source_assignment_by_id() throws Exception {
+    //given
+    UUID assignmentId = randomUUID();
+    when(sourceRepository.exists(assignmentId)).thenReturn(true);
+
+    //when
+    validSourceDestinationService.deleteSourceAssignmentById(assignmentId);
+
+    //then
+    verify(sourceRepository, times(1)).delete(assignmentId);
   }
 
   private Node createNode(UUID sourceId, boolean isRefDataFacility) {

@@ -15,6 +15,8 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_ASSIGNMENT_NOT_FOUND;
+
 import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
@@ -149,6 +151,23 @@ public class ValidSourceDestinationService {
     }
 
     return null;
+  }
+
+  /**
+   * Delete a source assignment by Id.
+   *
+   * @param assignmentId source assignment Id
+   */
+  public void deleteSourceAssignmentById(UUID assignmentId) {
+    permissionService.canManageStockSource();
+    checkSourceAssignmentIdExists(assignmentId);
+    validSourceRepository.delete(assignmentId);
+  }
+
+  private void checkSourceAssignmentIdExists(UUID sourceAssignmentId) {
+    if (!validSourceRepository.exists(sourceAssignmentId)) {
+      throw new ValidationMessageException(new Message(ERROR_SOURCE_ASSIGNMENT_NOT_FOUND));
+    }
   }
 
   private Node findOrCreateNode(UUID sourceId, boolean isRefDataFacility) {
