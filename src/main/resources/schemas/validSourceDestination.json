@@ -6,6 +6,30 @@
     "id": {
       "type": "string"
     },
+    "assignmentId": {
+      "type": "string"
+    },
+    "programId": {
+      "type": "string"
+    },
+    "facilityTypeId": {
+      "type": "string"
+    },
+    "node": {
+      "type": "object",
+      "title": "Node",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "referenceId": {
+          "type": "string"
+        },
+        "isRefDataFacility": {
+          "type":"boolean"
+        }
+      }
+    },
     "name": {
       "type": "string"
     },

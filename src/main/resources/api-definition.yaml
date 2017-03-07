@@ -303,6 +303,41 @@ traits:
               body:
                 application/json:
 
+        post:
+          is: [secured]
+          description: Configure a source to program and facility type.
+          queryParameters:
+            program:
+              description: Program id
+              type: string
+              required: true
+            facilityType:
+              description: Facility type id
+              type: string
+              required: true
+          body:
+              application/json:
+                schema: string
+          responses:
+            200:
+              description: Given source already exist.
+              body:
+                application/json:
+                  schema: validSourceDestination
+            201:
+              description: Given source is configured successfully.
+              body:
+                application/json:
+                  schema: validSourceDestination
+            400:
+              description: Source id is null. Or program or facility type or source is not found.
+              body:
+                application/json:
+            403:
+              description: User is not allowed to configure source.
+              body:
+                application/json:
+
   /reasonTypes:
       get:
         is: [ secured ]
