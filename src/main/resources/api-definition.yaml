@@ -460,7 +460,7 @@ traits:
                 application/json:
                   schema: reason
             400:
-              description: Some reason requires value not found.
+              description: Some reason requires value not found. Or update reason content is a duplicate.
               body:
                 application/json:
             403:
