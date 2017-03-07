@@ -19,12 +19,15 @@ import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.i18n.MessageKeys;
 import org.openlmis.stockmanagement.repository.NodeRepository;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
 import org.openlmis.stockmanagement.repository.ValidSourceAssignmentRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
+import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -108,14 +111,20 @@ public class ValidSourceDestinationService {
     programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(program, facilityType);
 
     if (facilityRefDataService.findOne(sourceId) != null) {
-      ValidSourceAssignment assignment = new ValidSourceAssignment();
-      assignment.setProgramId(program);
-      assignment.setFacilityTypeId(facilityType);
-      assignment.setNode(findOrCreateNode(sourceId));
-      ValidSourceAssignment savedAssignment = validSourceRepository.save(assignment);
-      return createFrom(savedAssignment);
+      return createFrom(createAssignment(program, facilityType, findOrCreateNode(sourceId, true)));
+    } else if (organizationRepository.findOne(sourceId) != null) {
+      return createFrom(createAssignment(program, facilityType, findOrCreateNode(sourceId, false)));
     }
-    return null;
+
+    throw new ValidationMessageException(new Message(MessageKeys.ERROR_SOURCE_NOT_FOUND));
+  }
+
+  private ValidSourceAssignment createAssignment(UUID program, UUID facilityType, Node node) {
+    ValidSourceAssignment assignment = new ValidSourceAssignment();
+    assignment.setProgramId(program);
+    assignment.setFacilityTypeId(facilityType);
+    assignment.setNode(node);
+    return validSourceRepository.save(assignment);
   }
 
   /**
@@ -142,12 +151,12 @@ public class ValidSourceDestinationService {
     return null;
   }
 
-  private Node findOrCreateNode(UUID sourceId) {
+  private Node findOrCreateNode(UUID sourceId, boolean isRefDataFacility) {
     Node node = nodeRepository.findByReferenceId(sourceId);
     if (node == null) {
       node = new Node();
       node.setReferenceId(sourceId);
-      node.setRefDataFacility(true);
+      node.setRefDataFacility(isRefDataFacility);
       return nodeRepository.save(node);
     }
     return node;
