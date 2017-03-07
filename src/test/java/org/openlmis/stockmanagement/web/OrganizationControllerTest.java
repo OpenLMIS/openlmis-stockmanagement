@@ -22,6 +22,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -35,8 +36,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.util.UUID;
+
 public class OrganizationControllerTest extends BaseWebTest {
-  private static final String ORGANIZATION_API = "/api/organizations";
+  private static final String ORGANIZATION_API = "/api/organizations/";
 
   @MockBean
   private PermissionService permissionService;
@@ -79,20 +82,54 @@ public class OrganizationControllerTest extends BaseWebTest {
   }
 
   @Test
+  public void should_return_200_when_organization_update_completed() throws Exception {
+    //given
+    Organization organization = createOrganization("Updated Org");
+    organization.setId(UUID.randomUUID());
+    when(organizationRepository.findOne(organization.getId())).thenReturn(organization);
+    when(organizationRepository.save(organization)).thenReturn(organization);
+
+    //when
+    ResultActions resultActions = mvc.perform(
+        put(ORGANIZATION_API + organization.getId().toString())
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectToJsonString(organization)));
+
+    //then
+    resultActions.andExpect(status().isOk())
+        .andExpect(jsonPath("$.id", is(organization.getId().toString())))
+        .andExpect(jsonPath("$.name", is(organization.getName())));
+  }
+
+  @Test
   public void should_return_403_when_user_has_no_permission_to_manage_organizations()
       throws Exception {
     //given
     doThrow(new PermissionMessageException(new Message("key")))
         .when(permissionService).canManageOrganizations();
+    Organization organization = createOrganization("Would Get 403");
 
-    //when
-    ResultActions resultActions = mvc.perform(post(ORGANIZATION_API)
+    //1. try to create organization
+    ResultActions postResult = mvc.perform(post(ORGANIZATION_API)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
         .contentType(MediaType.APPLICATION_JSON)
-        .content(objectToJsonString(new Organization())));
+        .content(objectToJsonString(organization)));
+    postResult.andExpect(status().isForbidden());
 
-    //then
-    resultActions.andExpect(status().isForbidden());
+    //2. try to update organization
+    ResultActions putResult = mvc.perform(
+        put(ORGANIZATION_API + UUID.randomUUID().toString())
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectToJsonString(organization)));
+    putResult.andExpect(status().isForbidden());
+
+    //3. try to retrieve organizations
+    ResultActions getResult = mvc.perform(get(ORGANIZATION_API)
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .contentType(MediaType.APPLICATION_JSON));
+    getResult.andExpect(status().isForbidden());
   }
 
   @Test
@@ -118,6 +155,25 @@ public class OrganizationControllerTest extends BaseWebTest {
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectToJsonString(new Organization())));
+
+    //then
+    resultActions.andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void should_return_400_when_would_be_updated_organization_content_exists()
+      throws Exception {
+    //given
+    Organization organization = createOrganization("Existing Org");
+    when(organizationRepository.findOne(organization.getId())).thenReturn(organization);
+    when(organizationRepository.findByName(organization.getName())).thenReturn(organization);
+
+    //when
+    ResultActions resultActions = mvc.perform(
+        put(ORGANIZATION_API + organization.getId())
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectToJsonString(organization)));
 
     //then
     resultActions.andExpect(status().isBadRequest());

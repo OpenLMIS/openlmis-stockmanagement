@@ -16,6 +16,8 @@
 package org.openlmis.stockmanagement.web;
 
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_ORGANIZATION_NAME_MISSING;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 
 import org.openlmis.stockmanagement.domain.movement.Organization;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
@@ -25,14 +27,15 @@ import org.openlmis.stockmanagement.utils.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.List;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/api")
@@ -59,9 +62,9 @@ public class OrganizationController {
     organization.setId(null);
     checkIsValidRequest(organization);
     if (isDuplicateOrganization(organization)) {
-      return new ResponseEntity<>(organization, HttpStatus.OK);
+      return new ResponseEntity<>(organization, OK);
     }
-    return new ResponseEntity<>(organizationRepository.save(organization), HttpStatus.CREATED);
+    return new ResponseEntity<>(organizationRepository.save(organization), CREATED);
   }
 
   /**
@@ -72,7 +75,33 @@ public class OrganizationController {
   @RequestMapping(value = "organizations", method = RequestMethod.GET)
   public ResponseEntity<List<Organization>> getAllOrganizations() {
     permissionService.canManageOrganizations();
-    return new ResponseEntity<>(organizationRepository.findAll(), HttpStatus.OK);
+    return new ResponseEntity<>(organizationRepository.findAll(), OK);
+  }
+
+  /**
+   * Update an existing organization.
+   *
+   * @param id           update organization ID
+   * @param organization object bound to request body
+   * @return updated organization
+   */
+  @RequestMapping(value = "organizations/{id}", method = RequestMethod.PUT)
+  public ResponseEntity<Organization> updateOrganization(
+      @PathVariable("id") UUID id, @RequestBody Organization organization) {
+    permissionService.canManageOrganizations();
+    LOGGER.debug("Try to update organization with id: ", id.toString());
+    checkUpdateOrganizationExists(id);
+    organization.setId(id);
+    if (isDuplicateOrganization(organization)) {
+      throw new ValidationMessageException(new Message("key"));
+    }
+    return new ResponseEntity<>(organizationRepository.save(organization), OK);
+  }
+
+  private void checkUpdateOrganizationExists(UUID id) {
+    if (organizationRepository.findOne(id) == null) {
+      throw new ValidationMessageException(new Message("key"));
+    }
   }
 
   private boolean isDuplicateOrganization(@RequestBody Organization organization) {
