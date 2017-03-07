@@ -105,4 +105,10 @@ public class ValidSourceDestinationService {
     return dto;
   }
 
+  public ValidSourceDestinationDto assignSource(UUID program, UUID facilityType, UUID sourceId) {
+    permissionService.canManageStockSource();
+    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(program, facilityType);
+
+    return null;
+  }
 }

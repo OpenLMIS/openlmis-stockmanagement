@@ -16,12 +16,17 @@
 package org.openlmis.stockmanagement.dto;
 
 import lombok.Data;
+import org.openlmis.stockmanagement.domain.movement.Node;
 
 import java.util.UUID;
 
 @Data
 public class ValidSourceDestinationDto {
   private UUID id;
+  private UUID assignmentId;
+  private UUID programId;
+  private UUID facilityTypeId;
+  private Node node;
   private String name;
   private Boolean isFreeTextAllowed;
 }

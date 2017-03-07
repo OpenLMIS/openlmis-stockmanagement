@@ -41,6 +41,8 @@ public class PermissionService {
 
   public static final String STOCK_SOURCES_VIEW = "STOCK_SOURCES_VIEW";
 
+  public static final String STOCK_SOURCES_MANAGE = "STOCK_SOURCES_MANAGE";
+
   public static final String STOCK_DESTINATIONS_VIEW = "STOCK_DESTINATIONS_VIEW";
 
   public static final String STOCK_CARD_LINE_ITEM_REASONS_VIEW
@@ -95,6 +97,10 @@ public class PermissionService {
    */
   public void canViewStockSource(UUID program, UUID facilityType) {
     canViewStockAssignable(STOCK_SOURCES_VIEW, program, facilityType);
+  }
+
+  public void canManageStockSource() {
+    hasPermission(STOCK_SOURCES_MANAGE, null, null, null);
   }
 
   /**

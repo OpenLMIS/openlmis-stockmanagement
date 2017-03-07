@@ -16,7 +16,9 @@
 package org.openlmis.stockmanagement.web;
 
 import static java.lang.String.format;
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
 import org.openlmis.stockmanagement.service.ValidSourceDestinationService;
@@ -25,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -65,7 +68,7 @@ public class ValidSourceDestinationController {
    * @param facilityType facility type ID
    * @return found valid sources.
    */
-  @RequestMapping(value = "validSources")
+  @RequestMapping(value = "/validSources")
   public ResponseEntity<List<ValidSourceDestinationDto>> getValidSources(
       @RequestParam UUID program,
       @RequestParam UUID facilityType) {
@@ -73,5 +76,26 @@ public class ValidSourceDestinationController {
         program.toString(), facilityType.toString()));
     return new ResponseEntity<>(
         validSourceDestinationService.findSources(program, facilityType), OK);
+  }
+
+  /**
+   * Assign a source to program and facility type.
+   *
+   * @param program      program ID
+   * @param facilityType facility type ID
+   * @param sourceId source ID
+   * @return the assigned source and program and facility type.
+   */
+  @RequestMapping(value = "/validSources", method = POST)
+  public ResponseEntity<ValidSourceDestinationDto> assignSource(
+      @RequestParam UUID program,
+      @RequestParam UUID facilityType,
+      @RequestBody UUID sourceId) {
+    LOGGER.debug(format("Try to assign source %s to program %s and facility type %s",
+        sourceId.toString(), program.toString(), facilityType.toString()));
+    ValidSourceDestinationDto validSourceDestinationDto =
+        validSourceDestinationService.assignSource(program, facilityType, sourceId);
+
+    return new ResponseEntity<>(validSourceDestinationDto, CREATED);
   }
 }
