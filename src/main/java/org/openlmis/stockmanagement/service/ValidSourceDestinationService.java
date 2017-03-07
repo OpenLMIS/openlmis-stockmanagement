@@ -19,6 +19,7 @@ import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
+import org.openlmis.stockmanagement.repository.NodeRepository;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
 import org.openlmis.stockmanagement.repository.ValidSourceAssignmentRepository;
@@ -51,6 +52,9 @@ public class ValidSourceDestinationService {
 
   @Autowired
   private OrganizationRepository organizationRepository;
+
+  @Autowired
+  private NodeRepository nodeRepository;
 
   /**
    * Find valid destinations by program ID and facility type ID.
@@ -91,6 +95,64 @@ public class ValidSourceDestinationService {
         .collect(Collectors.toList());
   }
 
+  /**
+   * Assign a source to a program and facility type.
+   *
+   * @param program      program ID
+   * @param facilityType facility type ID
+   * @param sourceId     source ID
+   * @return a valid source destination dto
+   */
+  public ValidSourceDestinationDto assignSource(UUID program, UUID facilityType, UUID sourceId) {
+    permissionService.canManageStockSource();
+    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(program, facilityType);
+
+    if (facilityRefDataService.findOne(sourceId) != null) {
+      ValidSourceAssignment assignment = new ValidSourceAssignment();
+      assignment.setProgramId(program);
+      assignment.setFacilityTypeId(facilityType);
+      assignment.setNode(findOrCreateNode(sourceId));
+      ValidSourceAssignment savedAssignment = validSourceRepository.save(assignment);
+      return createFrom(savedAssignment);
+    }
+    return null;
+  }
+
+  /**
+   * Find existing source assignment.
+   *
+   * @param programId      program ID
+   * @param facilityTypeId facility type ID
+   * @param sourceId       source ID
+   * @return a valid source destination dto
+   */
+  public ValidSourceDestinationDto findByProgramFacilitySource(
+      UUID programId, UUID facilityTypeId, UUID sourceId) {
+    Node foundNode = nodeRepository.findByReferenceId(sourceId);
+    if (foundNode != null) {
+      ValidSourceAssignment foundAssignment =
+          validSourceRepository.findByProgramIdAndFacilityTypeIdAndNodeId(
+              programId, facilityTypeId, foundNode.getId());
+
+      if (foundAssignment != null) {
+        return createFrom(foundAssignment);
+      }
+    }
+
+    return null;
+  }
+
+  private Node findOrCreateNode(UUID sourceId) {
+    Node node = nodeRepository.findByReferenceId(sourceId);
+    if (node == null) {
+      node = new Node();
+      node.setReferenceId(sourceId);
+      node.setRefDataFacility(true);
+      return nodeRepository.save(node);
+    }
+    return node;
+  }
+
   private ValidSourceDestinationDto createDtoFrom(Node node) {
     ValidSourceDestinationDto dto = new ValidSourceDestinationDto();
 
@@ -105,10 +167,14 @@ public class ValidSourceDestinationService {
     return dto;
   }
 
-  public ValidSourceDestinationDto assignSource(UUID program, UUID facilityType, UUID sourceId) {
-    permissionService.canManageStockSource();
-    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(program, facilityType);
+  private ValidSourceDestinationDto createFrom(ValidSourceAssignment assignment) {
+    Node node = assignment.getNode();
 
-    return null;
+    ValidSourceDestinationDto dto = createDtoFrom(node);
+    dto.setNode(node);
+    dto.setAssignmentId(assignment.getId());
+    dto.setProgramId(assignment.getProgramId());
+    dto.setFacilityTypeId(assignment.getFacilityTypeId());
+    return dto;
   }
 }

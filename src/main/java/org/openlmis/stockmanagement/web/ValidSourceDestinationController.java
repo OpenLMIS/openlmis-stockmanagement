@@ -83,7 +83,7 @@ public class ValidSourceDestinationController {
    *
    * @param program      program ID
    * @param facilityType facility type ID
-   * @param sourceId source ID
+   * @param sourceId     source ID
    * @return the assigned source and program and facility type.
    */
   @RequestMapping(value = "/validSources", method = POST)
@@ -93,9 +93,13 @@ public class ValidSourceDestinationController {
       @RequestBody UUID sourceId) {
     LOGGER.debug(format("Try to assign source %s to program %s and facility type %s",
         sourceId.toString(), program.toString(), facilityType.toString()));
-    ValidSourceDestinationDto validSourceDestinationDto =
-        validSourceDestinationService.assignSource(program, facilityType, sourceId);
 
-    return new ResponseEntity<>(validSourceDestinationDto, CREATED);
+    ValidSourceDestinationDto foundAssignmentDto = validSourceDestinationService
+        .findByProgramFacilitySource(program, facilityType, sourceId);
+    if (foundAssignmentDto != null) {
+      return new ResponseEntity<>(foundAssignmentDto, OK);
+    }
+    return new ResponseEntity<>(
+        validSourceDestinationService.assignSource(program, facilityType, sourceId), CREATED);
   }
 }

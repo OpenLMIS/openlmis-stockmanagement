@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 @Service
+@SuppressWarnings("PMD")
 public class PermissionService {
 
   public static final String STOCK_CARD_TEMPLATES_MANAGE = "STOCK_CARD_TEMPLATES_MANAGE";

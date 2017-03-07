@@ -17,9 +17,11 @@ package org.openlmis.stockmanagement.repository;
 
 import org.openlmis.stockmanagement.domain.movement.Node;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
 import java.util.UUID;
 
 public interface NodeRepository extends PagingAndSortingRepository<Node, UUID> {
 
+  Node findByReferenceId(@Param("referenceId") UUID referenceId);
 }

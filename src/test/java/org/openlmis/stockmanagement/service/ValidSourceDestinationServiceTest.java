@@ -16,8 +16,10 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -39,6 +41,7 @@ import org.openlmis.stockmanagement.dto.FacilityDto;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.repository.NodeRepository;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
 import org.openlmis.stockmanagement.repository.ValidSourceAssignmentRepository;
@@ -50,6 +53,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings("PMD")
 public class ValidSourceDestinationServiceTest {
 
   @InjectMocks
@@ -73,12 +77,15 @@ public class ValidSourceDestinationServiceTest {
   @Mock
   private OrganizationRepository organizationRepository;
 
+  @Mock
+  private NodeRepository nodeRepository;
+
   @Test(expected = ValidationMessageException.class)
   public void should_throw_validation_exception_when_program_and_facilityType_not_found()
       throws Exception {
     //given
-    UUID programId = UUID.randomUUID();
-    UUID facilityTypeId = UUID.randomUUID();
+    UUID programId = randomUUID();
+    UUID facilityTypeId = randomUUID();
     doThrow(new ValidationMessageException("errorKey")).when(programFacilityTypeExistenceService)
         .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
@@ -90,8 +97,8 @@ public class ValidSourceDestinationServiceTest {
   public void should_throw_permission_exception_when_user_has_no_permission_to_view_sources()
       throws Exception {
     //given
-    UUID programId = UUID.randomUUID();
-    UUID facilityTypeId = UUID.randomUUID();
+    UUID programId = randomUUID();
+    UUID facilityTypeId = randomUUID();
     doThrow(new PermissionMessageException(new Message("key")))
         .when(permissionService)
         .canViewStockSource(programId, facilityTypeId);
@@ -100,12 +107,63 @@ public class ValidSourceDestinationServiceTest {
     validSourceDestinationService.findSources(programId, facilityTypeId);
   }
 
+  @Test
+  public void should_return_source_dto_when_found_existing_one() throws Exception {
+    UUID programId = randomUUID();
+    UUID facilityTypeId = randomUUID();
+    UUID sourceId = randomUUID();
+
+    Node node = createNode(sourceId);
+    when(nodeRepository.findByReferenceId(sourceId)).thenReturn(node);
+    when(facilityReferenceDataService.findOne(sourceId)).thenReturn(new FacilityDto());
+
+    when(sourceRepository.findByProgramIdAndFacilityTypeIdAndNodeId(
+        programId, facilityTypeId, node.getId()))
+        .thenReturn(createSourceAssignment(programId, facilityTypeId, node));
+
+    //when
+    ValidSourceDestinationDto foundDto = validSourceDestinationService
+        .findByProgramFacilitySource(programId, facilityTypeId, sourceId);
+
+    assertThat(foundDto.getProgramId(), is(programId));
+    assertThat(foundDto.getFacilityTypeId(), is(facilityTypeId));
+    assertThat(foundDto.getNode().getReferenceId(), is(sourceId));
+  }
+
+  @Test
+  public void should_return_source_assignment_when_source_is_a_facility_without_node()
+      throws Exception {
+    //given
+    UUID programId = randomUUID();
+    UUID facilityTypeId = randomUUID();
+    UUID sourceId = randomUUID();
+
+    when(sourceRepository.save(any(ValidSourceAssignment.class))).thenReturn(
+        createSourceAssignment(programId, facilityTypeId, createNode(sourceId)));
+    FacilityDto facilityDto = new FacilityDto();
+    facilityDto.setName("Facility Name");
+    when(facilityReferenceDataService.findOne(sourceId)).thenReturn(facilityDto);
+    when(nodeRepository.findByReferenceId(sourceId)).thenReturn(null);
+
+    //when
+    ValidSourceDestinationDto assignment = validSourceDestinationService
+        .assignSource(programId, facilityTypeId, sourceId);
+
+    //then
+    assertThat(assignment.getProgramId(), is(programId));
+    assertThat(assignment.getFacilityTypeId(), is(facilityTypeId));
+    assertThat(assignment.getIsFreeTextAllowed(), is(false));
+    assertThat(assignment.getName(), is("Facility Name"));
+    assertThat(assignment.getNode().getReferenceId(), is(sourceId));
+    assertThat(assignment.getNode().isRefDataFacility(), is(true));
+  }
+
   @Test(expected = PermissionMessageException.class)
   public void should_throw_permission_exception_when_user_has_no_permission_to_view_destinations()
       throws Exception {
     //given
-    UUID programId = UUID.randomUUID();
-    UUID facilityTypeId = UUID.randomUUID();
+    UUID programId = randomUUID();
+    UUID facilityTypeId = randomUUID();
     doThrow(new PermissionMessageException(new Message("key")))
         .when(permissionService)
         .canViewStockDestinations(programId, facilityTypeId);
@@ -118,8 +176,8 @@ public class ValidSourceDestinationServiceTest {
   public void should_return_list_of_destination_dtos_when_find_valid_destination_assignment()
       throws Exception {
     //given
-    UUID programId = UUID.randomUUID();
-    UUID facilityTypeId = UUID.randomUUID();
+    UUID programId = randomUUID();
+    UUID facilityTypeId = randomUUID();
     doNothing().when(programFacilityTypeExistenceService)
         .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
@@ -150,8 +208,8 @@ public class ValidSourceDestinationServiceTest {
   public void should_return_list_of_source_dtos_when_find_valid_source_assignment()
       throws Exception {
     //given
-    UUID programId = UUID.randomUUID();
-    UUID facilityTypeId = UUID.randomUUID();
+    UUID programId = randomUUID();
+    UUID facilityTypeId = randomUUID();
     doNothing().when(programFacilityTypeExistenceService)
         .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
@@ -178,10 +236,27 @@ public class ValidSourceDestinationServiceTest {
     assertThat(facility.getIsFreeTextAllowed(), is(false));
   }
 
+  private Node createNode(UUID sourceId) {
+    Node node = new Node();
+    node.setReferenceId(sourceId);
+    node.setId(randomUUID());
+    node.setRefDataFacility(true);
+    return node;
+  }
+
+  private ValidSourceAssignment createSourceAssignment(
+      UUID programId, UUID facilityTypeId, Node node) {
+    ValidSourceAssignment assignment = new ValidSourceAssignment();
+    assignment.setNode(node);
+    assignment.setProgramId(programId);
+    assignment.setFacilityTypeId(facilityTypeId);
+    return assignment;
+  }
+
   private Node mockedFacilityNode(String name) {
     FacilityDto facilityDto = new FacilityDto();
     facilityDto.setName(name);
-    facilityDto.setId(UUID.randomUUID());
+    facilityDto.setId(randomUUID());
     when(facilityReferenceDataService.findOne(facilityDto.getId())).thenReturn(facilityDto);
 
     Node node = new Node();
@@ -193,12 +268,12 @@ public class ValidSourceDestinationServiceTest {
   private Node mockedOrganizationNode(String name) {
     Organization organization = new Organization();
     organization.setName(name);
-    organization.setId(UUID.randomUUID());
+    organization.setId(randomUUID());
     when(organizationRepository.findOne(organization.getId())).thenReturn(organization);
 
     Node node = new Node();
     node.setRefDataFacility(false);
-    node.setId(UUID.randomUUID());
+    node.setId(randomUUID());
     node.setReferenceId(organization.getId());
     return node;
   }

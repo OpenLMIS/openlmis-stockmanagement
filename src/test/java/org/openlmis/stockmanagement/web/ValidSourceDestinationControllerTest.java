@@ -117,7 +117,7 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
   }
 
   @Test
-  public void return_200_when_assign_source_successfully() throws Exception {
+  public void return_201_when_assign_source_successfully() throws Exception {
     //given
     UUID programId = UUID.randomUUID();
     UUID facilityTypeId = UUID.randomUUID();
@@ -129,7 +129,8 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
     Node node = new Node();
     node.setReferenceId(sourceId);
     validSourceDestinationDto.setNode(node);
-    when(validSourceDestinationService.assignSource(programId, facilityTypeId, sourceId)).thenReturn(validSourceDestinationDto);
+    when(validSourceDestinationService.assignSource(programId, facilityTypeId, sourceId))
+        .thenReturn(validSourceDestinationDto);
 
     //when
     ResultActions resultActions = mvc.perform(post(API_VALID_SOURCES)
@@ -142,6 +143,38 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
     //then
     resultActions
         .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.programId", is(programId.toString())))
+        .andExpect(jsonPath("$.facilityTypeId", is(facilityTypeId.toString())))
+        .andExpect(jsonPath("$.node.referenceId", is(sourceId.toString())));
+  }
+
+  @Test
+  public void should_return_200_when_source_assignment_already_exist() throws Exception {
+    //given
+    UUID programId = UUID.randomUUID();
+    UUID facilityTypeId = UUID.randomUUID();
+    UUID sourceId = UUID.randomUUID();
+
+    ValidSourceDestinationDto validSourceDestinationDto = new ValidSourceDestinationDto();
+    validSourceDestinationDto.setProgramId(programId);
+    validSourceDestinationDto.setFacilityTypeId(facilityTypeId);
+    Node node = new Node();
+    node.setReferenceId(sourceId);
+    validSourceDestinationDto.setNode(node);
+    when(validSourceDestinationService.findByProgramFacilitySource(
+        programId, facilityTypeId, sourceId)).thenReturn(validSourceDestinationDto);
+
+    //when
+    ResultActions resultActions = mvc.perform(post(API_VALID_SOURCES)
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .param(PROGRAM, programId.toString())
+        .param(FACILITY_TYPE, facilityTypeId.toString())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectToJsonString(sourceId.toString())));
+
+    //then
+    resultActions
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.programId", is(programId.toString())))
         .andExpect(jsonPath("$.facilityTypeId", is(facilityTypeId.toString())))
         .andExpect(jsonPath("$.node.referenceId", is(sourceId.toString())));
