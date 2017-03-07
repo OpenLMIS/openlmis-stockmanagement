@@ -32,6 +32,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/api")
 public class OrganizationController {
@@ -47,7 +49,7 @@ public class OrganizationController {
   /**
    * Create a new organization.
    *
-   * @param organization organization object bound to requist body
+   * @param organization organization object bound to request body
    * @return created organization.
    */
   @RequestMapping(value = "organizations", method = RequestMethod.POST)
@@ -60,6 +62,17 @@ public class OrganizationController {
       return new ResponseEntity<>(organization, HttpStatus.OK);
     }
     return new ResponseEntity<>(organizationRepository.save(organization), HttpStatus.CREATED);
+  }
+
+  /**
+   * Retrieve all organizations.
+   *
+   * @return list of organizations.
+   */
+  @RequestMapping(value = "organizations", method = RequestMethod.GET)
+  public ResponseEntity<List<Organization>> getAllOrganizations() {
+    permissionService.canManageOrganizations();
+    return new ResponseEntity<>(organizationRepository.findAll(), HttpStatus.OK);
   }
 
   private boolean isDuplicateOrganization(@RequestBody Organization organization) {
