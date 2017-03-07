@@ -147,6 +147,12 @@ public abstract class MessageKeys {
   public static final String ERROR_ORGANIZATION_NAME_MISSING = ERROR_PREFIX
       + ".organization.name.missing";
 
+  public static final String ERROR_ORGANIZATION_ID_NOT_FOUND = ERROR_PREFIX
+      + ".organization.id.notFound";
+
+  public static final String ERROR_ORGANIZATION_UPDATE_CONTENT_DUPLICATE = ERROR_PREFIX
+      + ".organization.update.content.duplicate";
+
   private MessageKeys() {
     throw new UnsupportedOperationException();
   }

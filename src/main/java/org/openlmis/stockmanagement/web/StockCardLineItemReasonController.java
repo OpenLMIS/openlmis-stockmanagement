@@ -53,7 +53,7 @@ public class StockCardLineItemReasonController {
   private PermissionService permissionService;
 
   /**
-   * Create a new stock card line item reason. If the id is specified, ID will be ignored.
+   * Create a new stock card line item reason. If the ID is specified, ID will be ignored.
    *
    * @param reason a stock card line item reason bound to request body
    * @return created stock card line item reason

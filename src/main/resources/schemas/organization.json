@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Organization",
+  "properties": {
+    "id": {
+      "type": "string",
+      "required": false
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

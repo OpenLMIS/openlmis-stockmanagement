@@ -15,7 +15,9 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_ORGANIZATION_ID_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_ORGANIZATION_NAME_MISSING;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_ORGANIZATION_UPDATE_CONTENT_DUPLICATE;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
@@ -50,7 +52,7 @@ public class OrganizationController {
   private static final Logger LOGGER = LoggerFactory.getLogger(OrganizationController.class);
 
   /**
-   * Create a new organization.
+   * Create a new organization. If the ID is specified, ID will be ignored.
    *
    * @param organization organization object bound to request body
    * @return created organization.
@@ -60,9 +62,10 @@ public class OrganizationController {
     LOGGER.debug("Try to create a new organization.");
     permissionService.canManageOrganizations();
     organization.setId(null);
-    checkIsValidRequest(organization);
-    if (isDuplicateOrganization(organization)) {
-      return new ResponseEntity<>(organization, OK);
+    checkRequiredFieldsExist(organization);
+    Organization foundOrg = organizationRepository.findByName(organization.getName());
+    if (foundOrg != null) {
+      return new ResponseEntity<>(foundOrg, OK);
     }
     return new ResponseEntity<>(organizationRepository.save(organization), CREATED);
   }
@@ -90,25 +93,31 @@ public class OrganizationController {
       @PathVariable("id") UUID id, @RequestBody Organization organization) {
     permissionService.canManageOrganizations();
     LOGGER.debug("Try to update organization with id: ", id.toString());
-    checkUpdateOrganizationExists(id);
+    checkIsValidUpdateModel(id, organization);
     organization.setId(id);
-    if (isDuplicateOrganization(organization)) {
-      throw new ValidationMessageException(new Message("key"));
-    }
     return new ResponseEntity<>(organizationRepository.save(organization), OK);
   }
 
-  private void checkUpdateOrganizationExists(UUID id) {
-    if (organizationRepository.findOne(id) == null) {
-      throw new ValidationMessageException(new Message("key"));
+  private void checkIsValidUpdateModel(UUID id, Organization organization) {
+    checkUpdateIdExists(id);
+    checkRequiredFieldsExist(organization);
+    checkUpdateOrganizationDuplicate(organization);
+  }
+
+  private void checkUpdateOrganizationDuplicate(Organization organization) {
+    if (organizationRepository.findByName(organization.getName()) != null) {
+      throw new ValidationMessageException(
+          new Message(ERROR_ORGANIZATION_UPDATE_CONTENT_DUPLICATE));
     }
   }
 
-  private boolean isDuplicateOrganization(@RequestBody Organization organization) {
-    return organizationRepository.findByName(organization.getName()) != null;
+  private void checkUpdateIdExists(UUID id) {
+    if (organizationRepository.findOne(id) == null) {
+      throw new ValidationMessageException(new Message(ERROR_ORGANIZATION_ID_NOT_FOUND));
+    }
   }
 
-  private void checkIsValidRequest(@RequestBody Organization organization) {
+  private void checkRequiredFieldsExist(Organization organization) {
     if (organization.getName() == null) {
       throw new ValidationMessageException(new Message(ERROR_ORGANIZATION_NAME_MISSING));
     }

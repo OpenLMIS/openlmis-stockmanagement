@@ -40,6 +40,12 @@ schemas:
             "type": "array",
             "items": {"type": "object", "$ref": "validReasonAssignment"}
         }
+  - organization: !include schemas/organization.json
+  - organizations: |
+        {
+            "type": "array",
+            "items": {"type": "object", "$ref": "organization"}
+        }
 
 resourceTypes:
     - collection:
@@ -429,6 +435,11 @@ traits:
             body:
               application/json:
                 schema: reason
+          200:
+            description: Try to create reason, but there is a same content reason exists.
+            body:
+              application/json:
+                schema: reason
           400:
             description: Some Reason required value not found.
             body:
@@ -460,10 +471,81 @@ traits:
                 application/json:
                   schema: reason
             400:
-              description: Some reason requires value not found. Or update reason content is a duplicate.
+              description: Some reason requires value not found. Or update reason content is duplicate.
               body:
                 application/json:
             403:
               description: User does not have permission to manage stock card line item reasons.
+              body:
+                application/json:
+
+  /organizations:
+      get:
+        is: [ secured ]
+        description: Retrieve all organizations.
+        responses:
+          200:
+            description: Return a list of organizations.
+            body:
+              application/json:
+                schema: organizations
+          403:
+            description: User does not have permission to manage organizations.
+            body:
+              application/json:
+
+      post:
+        is: [ secured ]
+        description: Create a new organization.
+        body:
+          application/json:
+            schema: organization
+
+        responses:
+          201:
+            description: Created a new organization.
+            body:
+              application/json:
+                schema: organization
+          200:
+            description: Try to create organization, but there is a same content organization exists.
+            body:
+              application/json:
+                schema: organization
+          400:
+            description: Some organization required value missing.
+            body:
+              application/json:
+          403:
+            description: User does not have permission to manage organization.
+            body:
+              application/json:
+
+      /{id}:
+        uriParameters:
+          id:
+            displayName: id
+            type: string
+            required: true
+            repeat: false
+        put:
+          is: [ secured ]
+          description: Update an organization.
+          body:
+            application/json:
+              schema: organization
+
+          responses:
+            200:
+              description: Updated an organization.
+              body:
+                application/json:
+                  schema: organization
+            400:
+              description: Some organization requires value missing. Or update organization content is duplicate.
+              body:
+                application/json:
+            403:
+              description: User does not have permission to manage organization.
               body:
                 application/json:
