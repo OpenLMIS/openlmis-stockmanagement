@@ -338,6 +338,24 @@ traits:
               body:
                 application/json:
 
+        /{id}:
+          delete:
+            is: [ secured ]
+            description: Remove a source assignment from a valid source assignment list.
+
+            responses:
+              204:
+                description: Given source assignment has been removed success.
+              400:
+                description: Source assignment is not found.
+                body:
+                  application/json:
+              403:
+                description: User is not allowed to remove source assignment from the list.
+                body:
+                  application/json:
+
+
   /reasonTypes:
       get:
         is: [ secured ]
@@ -471,7 +489,7 @@ traits:
               application/json:
                 schema: reason
           200:
-            description: Try to create reason, but there is a same content reason exists.
+            description: Try to create reason, but there is a same content reason checkSourceAssignmentIdExists.
             body:
               application/json:
                 schema: reason
@@ -543,7 +561,7 @@ traits:
               application/json:
                 schema: organization
           200:
-            description: Try to create organization, but there is a same content organization exists.
+            description: Try to create organization, but there is a same content organization checkSourceAssignmentIdExists.
             body:
               application/json:
                 schema: organization

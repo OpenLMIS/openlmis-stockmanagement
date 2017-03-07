@@ -147,7 +147,7 @@ public abstract class MessageKeys {
   public static final String ERROR_LINE_ITEM_REASON_ID_NOT_FOUND = ERROR_PREFIX
       + ".lineItem.reason.id.notFound";
 
-  //stock event source destination
+  //source destination configuration
   public static final String ERROR_ORGANIZATION_NAME_MISSING = ERROR_PREFIX
       + ".organization.name.missing";
 
@@ -156,6 +156,9 @@ public abstract class MessageKeys {
 
   public static final String ERROR_ORGANIZATION_UPDATE_CONTENT_DUPLICATE = ERROR_PREFIX
       + ".organization.update.content.duplicate";
+
+  public static final String ERROR_SOURCE_ASSIGNMENT_NOT_FOUND = ERROR_PREFIX
+      + ".source.assignment.notFound";
 
   private MessageKeys() {
     throw new UnsupportedOperationException();
