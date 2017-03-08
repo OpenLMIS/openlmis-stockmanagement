@@ -60,7 +60,7 @@ public class StockCardTemplateServiceTest {
 
     stockCardTemplateService.saveOrUpdate(newTemplate);
     StockCardTemplateDto updatedTemplate = stockCardTemplateService
-            .findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
+        .findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
 
     //then
     assertThat(updatedTemplate.getStockCardFields().size(), is(1));
@@ -88,7 +88,7 @@ public class StockCardTemplateServiceTest {
 
     //when: searching for non-existing template
     StockCardTemplateDto dto = stockCardTemplateService
-            .findByProgramIdAndFacilityTypeId(UUID.randomUUID(), UUID.randomUUID());
+        .findByProgramIdAndFacilityTypeId(UUID.randomUUID(), UUID.randomUUID());
 
     //then
     assertNull(dto);
@@ -116,4 +116,21 @@ public class StockCardTemplateServiceTest {
     stockCardTemplateService.saveOrUpdate(templateDto);
   }
 
+  @Test(expected = ValidationMessageException.class)
+  public void should_throw_validation_exception_when_program_id_missing() throws Exception {
+    StockCardTemplateDto templateDto = createTemplateDto();
+    templateDto.setProgramId(null);
+
+    //when
+    stockCardTemplateService.saveOrUpdate(templateDto);
+  }
+
+  @Test(expected = ValidationMessageException.class)
+  public void should_throw_validation_exception_when_facility_type_id_missing() throws Exception {
+    StockCardTemplateDto templateDto = createTemplateDto();
+    templateDto.setFacilityTypeId(null);
+
+    //when
+    stockCardTemplateService.saveOrUpdate(templateDto);
+  }
 }

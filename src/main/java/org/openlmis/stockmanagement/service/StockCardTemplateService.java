@@ -17,6 +17,8 @@ package org.openlmis.stockmanagement.service;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_TYPE_ID_MISSING;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_ID_MISSING;
 
 import org.openlmis.stockmanagement.domain.template.AvailableStockCardFields;
 import org.openlmis.stockmanagement.domain.template.AvailableStockCardLineItemFields;
@@ -24,19 +26,22 @@ import org.openlmis.stockmanagement.domain.template.StockCardTemplate;
 import org.openlmis.stockmanagement.dto.StockCardFieldDto;
 import org.openlmis.stockmanagement.dto.StockCardLineItemFieldDto;
 import org.openlmis.stockmanagement.dto.StockCardTemplateDto;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.AvailableStockCardFieldsRepository;
 import org.openlmis.stockmanagement.repository.AvailableStockCardLineItemFieldsRepository;
 import org.openlmis.stockmanagement.repository.StockCardTemplatesRepository;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
+import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import javax.transaction.Transactional;
 
 /**
  * A service that wraps around repository to provide ability
@@ -65,13 +70,13 @@ public class StockCardTemplateService {
    */
   @Transactional
   public StockCardTemplateDto saveOrUpdate(StockCardTemplateDto templateDto) {
-
+    checkProgramAndFacilityTypeIdNotNull(templateDto);
     StockCardTemplate template = templateDto.toModel(
-            findAllFieldsFrom(cardFieldsRepo).collect(toList()),
-            findAllFieldsFrom(lineItemFieldsRepo).collect(toList()));
+        findAllFieldsFrom(cardFieldsRepo).collect(toList()),
+        findAllFieldsFrom(lineItemFieldsRepo).collect(toList()));
 
     StockCardTemplate found = templateRepository.findByProgramIdAndFacilityTypeId(
-            template.getProgramId(), template.getFacilityTypeId());
+        template.getProgramId(), template.getFacilityTypeId());
 
     if (found != null) {
       template.setId(found.getId());
@@ -92,9 +97,9 @@ public class StockCardTemplateService {
    * @return the found template or null if not found.
    */
   public StockCardTemplateDto findByProgramIdAndFacilityTypeId(
-          UUID programId, UUID facilityTypeId) {
+      UUID programId, UUID facilityTypeId) {
     StockCardTemplate template = templateRepository
-            .findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
+        .findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
     return StockCardTemplateDto.from(template);
   }
 
@@ -105,10 +110,10 @@ public class StockCardTemplateService {
    */
   public StockCardTemplateDto getDefaultStockCardTemplate() {
     List<StockCardFieldDto> cardFieldDtos =
-            convertAllFieldsToDto(cardFieldsRepo, this::convertModelToDefaultDto);
+        convertAllFieldsToDto(cardFieldsRepo, this::convertModelToDefaultDto);
 
     List<StockCardLineItemFieldDto> lineItemFieldDtos =
-            convertAllFieldsToDto(lineItemFieldsRepo, this::convertModelToDefaultDto);
+        convertAllFieldsToDto(lineItemFieldsRepo, this::convertModelToDefaultDto);
 
     StockCardTemplateDto dto = new StockCardTemplateDto();
     dto.setStockCardFields(cardFieldDtos);
@@ -117,11 +122,20 @@ public class StockCardTemplateService {
     return dto;
   }
 
+  private void checkProgramAndFacilityTypeIdNotNull(StockCardTemplateDto templateDto) {
+    if (templateDto.getProgramId() == null) {
+      throw new ValidationMessageException(new Message(ERROR_PROGRAM_ID_MISSING));
+    }
+    if (templateDto.getFacilityTypeId() == null) {
+      throw new ValidationMessageException(new Message(ERROR_FACILITY_TYPE_ID_MISSING));
+    }
+  }
+
   private <F, T> List<T> convertAllFieldsToDto(
-          PagingAndSortingRepository<F, UUID> repo, Function<F, T> converter) {
+      PagingAndSortingRepository<F, UUID> repo, Function<F, T> converter) {
     return findAllFieldsFrom(repo)
-            .map(converter)
-            .collect(toList());
+        .map(converter)
+        .collect(toList());
   }
 
   private <F> Stream<F> findAllFieldsFrom(PagingAndSortingRepository<F, UUID> repo) {
@@ -129,12 +143,12 @@ public class StockCardTemplateService {
   }
 
   private StockCardFieldDto convertModelToDefaultDto(
-          AvailableStockCardFields model) {
+      AvailableStockCardFields model) {
     return new StockCardFieldDto(model.getName(), false, 0);
   }
 
   private StockCardLineItemFieldDto convertModelToDefaultDto(
-          AvailableStockCardLineItemFields model) {
+      AvailableStockCardLineItemFields model) {
     return new StockCardLineItemFieldDto(model.getName(), false, 0);
   }
 }
