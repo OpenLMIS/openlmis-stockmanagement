@@ -124,6 +124,10 @@ public class ValidSourceDestinationService {
     throw new ValidationMessageException(new Message(MessageKeys.ERROR_SOURCE_NOT_FOUND));
   }
 
+  public ValidSourceDestinationDto assignDestination(UUID programId, UUID facilityTypeId, UUID destinationId) {
+    return null;
+  }
+
   /**
    * Find existing source assignment.
    *
@@ -223,5 +227,10 @@ public class ValidSourceDestinationService {
     }
     dto.setIsFreeTextAllowed(!isRefDataFacility);
     return dto;
+  }
+
+  public ValidSourceDestinationDto findByProgramFacilityDestination(UUID programId, UUID facilityTypeId, UUID destiantionId) {
+
+    return null;
   }
 }

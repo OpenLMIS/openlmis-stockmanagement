@@ -20,6 +20,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
@@ -54,7 +55,7 @@ public class ValidSourceDestinationController {
    * @param facilityType facility type ID
    * @return found valid destinations.
    */
-  @RequestMapping(value = "/validDestinations")
+  @RequestMapping(value = "/validDestinations", method = GET)
   public ResponseEntity<List<ValidSourceDestinationDto>> getValidDestinations(
       @RequestParam UUID program,
       @RequestParam UUID facilityType) {
@@ -65,13 +66,38 @@ public class ValidSourceDestinationController {
   }
 
   /**
+   * Assign a destination to a program and facility type.
+   *
+   * @param program       program ID
+   * @param facilityType  facility type ID
+   * @param destinationId destination ID
+   * @return the assigned destination and program and facility type.
+   */
+  @RequestMapping(value = "/validDestinations", method = POST)
+  public ResponseEntity<ValidSourceDestinationDto> assignDestination(
+      @RequestParam UUID program,
+      @RequestParam UUID facilityType,
+      @RequestBody UUID destinationId) {
+    LOGGER.debug(format("Try to assign destination %s to program %s and facility type %s",
+        destinationId.toString(), program.toString(), facilityType.toString()));
+    ValidSourceDestinationDto destinationDto = validSourceDestinationService
+        .findByProgramFacilityDestination(program, facilityType, destinationId);
+    if (destinationDto != null) {
+      return new ResponseEntity<>(destinationDto, OK);
+    }
+
+    return new ResponseEntity<>(validSourceDestinationService.assignDestination(
+        program, facilityType, destinationId), CREATED);
+  }
+
+  /**
    * Get a list of valid sources.
    *
    * @param program      program ID
    * @param facilityType facility type ID
    * @return found valid sources.
    */
-  @RequestMapping(value = "/validSources")
+  @RequestMapping(value = "/validSources", method = GET)
   public ResponseEntity<List<ValidSourceDestinationDto>> getValidSources(
       @RequestParam UUID program,
       @RequestParam UUID facilityType) {

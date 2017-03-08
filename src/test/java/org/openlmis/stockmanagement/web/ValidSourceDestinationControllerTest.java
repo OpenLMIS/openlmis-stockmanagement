@@ -45,8 +45,8 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
 
   private static final String PROGRAM = "program";
   private static final String FACILITY_TYPE = "facilityType";
-  private static final String API_VALID_DESTINATIONS = "/api/validDestinations/";
-  private static final String API_VALID_SOURCES = "/api/validSources/";
+  private static final String API_VALID_DESTINATIONS = "/api/validDestinations";
+  private static final String API_VALID_SOURCES = "/api/validSources";
 
   @MockBean
   private ValidSourceDestinationService validSourceDestinationService;
@@ -126,6 +126,70 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
   }
 
   @Test
+  public void return_201_when_assign_destination_successfully() throws Exception {
+    //given
+    UUID programId = UUID.randomUUID();
+    UUID facilityTypeId = UUID.randomUUID();
+    UUID destinationId = UUID.randomUUID();
+
+    ValidSourceDestinationDto validSourceDestinationDto = new ValidSourceDestinationDto();
+    validSourceDestinationDto.setProgramId(programId);
+    validSourceDestinationDto.setFacilityTypeId(facilityTypeId);
+    Node node = new Node();
+    node.setReferenceId(destinationId);
+    validSourceDestinationDto.setNode(node);
+    when(validSourceDestinationService.assignDestination(programId, facilityTypeId, destinationId))
+        .thenReturn(validSourceDestinationDto);
+
+    //when
+    ResultActions resultActions = mvc.perform(post(API_VALID_DESTINATIONS)
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .param(PROGRAM, programId.toString())
+        .param(FACILITY_TYPE, facilityTypeId.toString())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectToJsonString(destinationId.toString())));
+
+    //then
+    resultActions.andDo(print())
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.programId", is(programId.toString())))
+        .andExpect(jsonPath("$.facilityTypeId", is(facilityTypeId.toString())))
+        .andExpect(jsonPath("$.node.referenceId", is(destinationId.toString())));
+  }
+
+  @Test
+  public void should_return_200_when_destination_assignment_already_exist() throws Exception {
+    //given
+    UUID programId = UUID.randomUUID();
+    UUID facilityTypeId = UUID.randomUUID();
+    UUID destiantionId = UUID.randomUUID();
+
+    ValidSourceDestinationDto validSourceDestinationDto = new ValidSourceDestinationDto();
+    validSourceDestinationDto.setProgramId(programId);
+    validSourceDestinationDto.setFacilityTypeId(facilityTypeId);
+    Node node = new Node();
+    node.setReferenceId(destiantionId);
+    validSourceDestinationDto.setNode(node);
+    when(validSourceDestinationService.findByProgramFacilityDestination(
+        programId, facilityTypeId, destiantionId)).thenReturn(validSourceDestinationDto);
+
+    //when
+    ResultActions resultActions = mvc.perform(post(API_VALID_DESTINATIONS)
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .param(PROGRAM, programId.toString())
+        .param(FACILITY_TYPE, facilityTypeId.toString())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectToJsonString(destiantionId.toString())));
+
+    //then
+    resultActions
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.programId", is(programId.toString())))
+        .andExpect(jsonPath("$.facilityTypeId", is(facilityTypeId.toString())))
+        .andExpect(jsonPath("$.node.referenceId", is(destiantionId.toString())));
+  }
+
+@Test
   public void should_return_200_when_source_assignment_already_exist() throws Exception {
     //given
     UUID programId = randomUUID();
