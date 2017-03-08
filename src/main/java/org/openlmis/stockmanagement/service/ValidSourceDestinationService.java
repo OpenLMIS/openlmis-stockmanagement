@@ -121,14 +121,6 @@ public class ValidSourceDestinationService {
     throw new ValidationMessageException(new Message(MessageKeys.ERROR_SOURCE_NOT_FOUND));
   }
 
-  private ValidSourceAssignment createAssignment(UUID program, UUID facilityType, Node node) {
-    ValidSourceAssignment assignment = new ValidSourceAssignment();
-    assignment.setProgramId(program);
-    assignment.setFacilityTypeId(facilityType);
-    assignment.setNode(node);
-    return validSourceRepository.save(assignment);
-  }
-
   /**
    * Find existing source assignment.
    *
@@ -162,6 +154,14 @@ public class ValidSourceDestinationService {
     permissionService.canManageStockSource();
     checkSourceAssignmentIdExists(assignmentId);
     validSourceRepository.delete(assignmentId);
+  }
+
+  private ValidSourceAssignment createAssignment(UUID program, UUID facilityType, Node node) {
+    ValidSourceAssignment assignment = new ValidSourceAssignment();
+    assignment.setProgramId(program);
+    assignment.setFacilityTypeId(facilityType);
+    assignment.setNode(node);
+    return validSourceRepository.save(assignment);
   }
 
   private void checkSourceAssignmentIdExists(UUID sourceAssignmentId) {
