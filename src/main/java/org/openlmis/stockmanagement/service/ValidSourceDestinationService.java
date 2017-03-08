@@ -112,7 +112,7 @@ public class ValidSourceDestinationService {
    * @return a valid source destination dto
    */
   public ValidSourceDestinationDto assignSource(UUID program, UUID facilityType, UUID sourceId) {
-    permissionService.canManageStockSource();
+    permissionService.canManageStockSources();
     programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(program, facilityType);
 
     if (facilityRefDataService.findOne(sourceId) != null) {
@@ -154,7 +154,7 @@ public class ValidSourceDestinationService {
    * @param assignmentId source assignment Id
    */
   public void deleteSourceAssignmentById(UUID assignmentId) {
-    permissionService.canManageStockSource();
+    permissionService.canManageStockSources();
     checkSourceAssignmentIdExists(assignmentId);
     validSourceRepository.delete(assignmentId);
   }
@@ -165,7 +165,7 @@ public class ValidSourceDestinationService {
    * @param assignmentId destination assignment Id
    */
   public void deleteDestinationAssignmentById(UUID assignmentId) {
-    permissionService.canManageStockSource();
+    permissionService.canManageStockDestinations();
     checkDestinationAssignmentIdExists(assignmentId);
     validDestinationRepository.delete(assignmentId);
   }

@@ -276,6 +276,23 @@ traits:
             body:
               application/json:
 
+      /{id}:
+        delete:
+          is: [ secured ]
+          description: Remove a destination assignment from a valid destination assignment list.
+
+          responses:
+            204:
+              description: Given destination assignment has been removed success.
+            400:
+              description: Destination assignment is not found.
+              body:
+                application/json:
+            403:
+              description: User is not allowed to remove destination assignment from the list.
+              body:
+                application/json:
+
   /validSources:
         get:
           is: [ secured ]

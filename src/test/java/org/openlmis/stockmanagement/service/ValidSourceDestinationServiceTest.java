@@ -281,7 +281,7 @@ public class ValidSourceDestinationServiceTest {
   public void should_throw_permission_exception_when_user_has_no_permission_to_delete_assignment()
       throws Exception {
     doThrow(new PermissionMessageException(new Message("key")))
-        .when(permissionService).canManageStockSource();
+        .when(permissionService).canManageStockSources();
     validSourceDestinationService.deleteSourceAssignmentById(randomUUID());
   }
 
@@ -297,7 +297,7 @@ public class ValidSourceDestinationServiceTest {
   public void should_throw_exception_when_delete_destination_assignment_not_exists()
       throws Exception {
     UUID assignmentId = randomUUID();
-    when(sourceRepository.exists(assignmentId)).thenReturn(false);
+    when(destinationRepository.exists(assignmentId)).thenReturn(false);
     validSourceDestinationService.deleteDestinationAssignmentById(assignmentId);
   }
 

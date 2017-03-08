@@ -35,7 +35,9 @@ import java.util.UUID;
 public class PermissionService {
 
   public static final String STOCK_CARD_TEMPLATES_MANAGE = "STOCK_CARD_TEMPLATES_MANAGE";
+
   public static final String REASONS_MANAGE = "STOCK_CARD_LINE_ITEM_REASONS_MANAGE";
+
   public static final String ORGANIZATIONS_MANAGE = "ORGANIZATIONS_MANAGE";
 
   public static final String STOCK_EVENT_CREATE = "STOCK_EVENT_CREATE";
@@ -43,6 +45,8 @@ public class PermissionService {
   public static final String STOCK_SOURCES_VIEW = "STOCK_SOURCES_VIEW";
 
   public static final String STOCK_SOURCES_MANAGE = "STOCK_SOURCES_MANAGE";
+
+  public static final String STOCK_DESTINATIONS_MANAGE = "STOCK_DESTINATIONS_MANAGE";
 
   public static final String STOCK_DESTINATIONS_VIEW = "STOCK_DESTINATIONS_VIEW";
 
@@ -100,8 +104,18 @@ public class PermissionService {
     canViewStockAssignable(STOCK_SOURCES_VIEW, program, facilityType);
   }
 
-  public void canManageStockSource() {
+  /**
+   * Checks if current user has permission to manage valid sources assignment.
+   */
+  public void canManageStockSources() {
     hasPermission(STOCK_SOURCES_MANAGE, null, null, null);
+  }
+
+  /**
+   * Checks if current user has permission to manage valid destinations assignment.
+   */
+  public void canManageStockDestinations() {
+    hasPermission(STOCK_DESTINATIONS_MANAGE, null, null, null);
   }
 
   /**
