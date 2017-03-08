@@ -276,6 +276,57 @@ traits:
             body:
               application/json:
 
+      post:
+        is: [secured]
+        description: Configure a destination to program and facility type.
+        queryParameters:
+          program:
+            description: Program id
+            type: string
+            required: true
+          facilityType:
+            description: Facility type id
+            type: string
+            required: true
+        body:
+            application/json:
+              schema: string
+        responses:
+          200:
+            description: Given destination already exist.
+            body:
+              application/json:
+                schema: validSourceDestination
+          201:
+            description: Given destination is configured successfully.
+            body:
+              application/json:
+                schema: validSourceDestination
+          400:
+            description: Destination id is null. Or program or facility type or destination is not found.
+            body:
+              application/json:
+          403:
+            description: User is not allowed to configure destination.
+            body:
+              application/json:
+
+      /{id}:
+        delete:
+          is: [ secured ]
+          description: Remove a destination assignment from a valid destination assignment list.
+          responses:
+            204:
+              description: Given destination assignment has been removed success.
+            400:
+              description: Destination assignment is not found.
+              body:
+                application/json:
+            403:
+              description: User is not allowed to remove destination assignment from the list.
+              body:
+                application/json:
+
       /{id}:
         delete:
           is: [ secured ]
