@@ -77,7 +77,7 @@ public class ValidSourceDestinationController {
   public ResponseEntity<ValidSourceDestinationDto> assignDestination(
       @RequestParam UUID program,
       @RequestParam UUID facilityType,
-      @RequestBody UUID destinationId) {
+      @RequestBody UUID destinationId) throws IllegalAccessException, InstantiationException {
     LOGGER.debug(format("Try to assign destination %s to program %s and facility type %s",
         destinationId.toString(), program.toString(), facilityType.toString()));
     ValidSourceDestinationDto destinationDto = validSourceDestinationService
@@ -119,7 +119,7 @@ public class ValidSourceDestinationController {
   public ResponseEntity<ValidSourceDestinationDto> assignSource(
       @RequestParam UUID program,
       @RequestParam UUID facilityType,
-      @RequestBody UUID sourceId) {
+      @RequestBody UUID sourceId) throws IllegalAccessException, InstantiationException {
     LOGGER.debug(format("Try to assign source %s to program %s and facility type %s",
         sourceId.toString(), program.toString(), facilityType.toString()));
 
