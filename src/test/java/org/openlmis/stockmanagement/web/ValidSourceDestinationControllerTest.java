@@ -24,7 +24,6 @@ import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_NOT_FOUND;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -47,6 +46,9 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
   private static final String FACILITY_TYPE = "facilityType";
   private static final String API_VALID_DESTINATIONS = "/api/validDestinations";
   private static final String API_VALID_SOURCES = "/api/validSources";
+  private static final String PROGRAM_EXP = "$.programId";
+  private static final String FACILITY_TYPE_EXP = "$.facilityTypeId";
+  private static final String NODE_REFERENCE_ID_EXP = "$.node.referenceId";
 
   @MockBean
   private ValidSourceDestinationService validSourceDestinationService;
@@ -120,9 +122,9 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
     //then
     resultActions
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.programId", is(programId.toString())))
-        .andExpect(jsonPath("$.facilityTypeId", is(facilityTypeId.toString())))
-        .andExpect(jsonPath("$.node.referenceId", is(sourceId.toString())));
+        .andExpect(jsonPath(PROGRAM_EXP, is(programId.toString())))
+        .andExpect(jsonPath(FACILITY_TYPE_EXP, is(facilityTypeId.toString())))
+        .andExpect(jsonPath(NODE_REFERENCE_ID_EXP, is(sourceId.toString())));
   }
 
   @Test
@@ -150,11 +152,11 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
         .content(objectToJsonString(destinationId.toString())));
 
     //then
-    resultActions.andDo(print())
+    resultActions
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.programId", is(programId.toString())))
-        .andExpect(jsonPath("$.facilityTypeId", is(facilityTypeId.toString())))
-        .andExpect(jsonPath("$.node.referenceId", is(destinationId.toString())));
+        .andExpect(jsonPath(PROGRAM_EXP, is(programId.toString())))
+        .andExpect(jsonPath(FACILITY_TYPE_EXP, is(facilityTypeId.toString())))
+        .andExpect(jsonPath(NODE_REFERENCE_ID_EXP, is(destinationId.toString())));
   }
 
   @Test
@@ -184,12 +186,12 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
     //then
     resultActions
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.programId", is(programId.toString())))
-        .andExpect(jsonPath("$.facilityTypeId", is(facilityTypeId.toString())))
-        .andExpect(jsonPath("$.node.referenceId", is(destiantionId.toString())));
+        .andExpect(jsonPath(PROGRAM_EXP, is(programId.toString())))
+        .andExpect(jsonPath(FACILITY_TYPE_EXP, is(facilityTypeId.toString())))
+        .andExpect(jsonPath(NODE_REFERENCE_ID_EXP, is(destiantionId.toString())));
   }
 
-@Test
+  @Test
   public void should_return_200_when_source_assignment_already_exist() throws Exception {
     //given
     UUID programId = randomUUID();
@@ -216,9 +218,9 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
     //then
     resultActions
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.programId", is(programId.toString())))
-        .andExpect(jsonPath("$.facilityTypeId", is(facilityTypeId.toString())))
-        .andExpect(jsonPath("$.node.referenceId", is(sourceId.toString())));
+        .andExpect(jsonPath(PROGRAM_EXP, is(programId.toString())))
+        .andExpect(jsonPath(FACILITY_TYPE_EXP, is(facilityTypeId.toString())))
+        .andExpect(jsonPath(NODE_REFERENCE_ID_EXP, is(sourceId.toString())));
   }
 
   @Test
@@ -244,8 +246,8 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
         .param(FACILITY_TYPE, facilityTypeId.toString()));
 
     //then
-    resultActions.andExpect(status().isOk())
-        .andDo(print())
+    resultActions
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(1)))
         .andExpect(jsonPath("$[0].id", is(sourceDestinationDto.getId().toString())))
         .andExpect(jsonPath("$[0].name", is(sourceDestinationDto.getName())))

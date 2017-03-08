@@ -50,6 +50,8 @@ public class PermissionService {
 
   public static final String STOCK_DESTINATIONS_VIEW = "STOCK_DESTINATIONS_VIEW";
 
+  public static final String STOCK_DESTINATION_MANAGE = "STOCK_DESTINATION_MANAGE";
+
   public static final String STOCK_CARD_LINE_ITEM_REASONS_VIEW
       = "STOCK_CARD_LINE_ITEM_REASONS_VIEW";
 
@@ -109,6 +111,10 @@ public class PermissionService {
    */
   public void canManageStockSources() {
     hasPermission(STOCK_SOURCES_MANAGE, null, null, null);
+  }
+
+  public void canManageStockDestination() {
+    hasPermission(STOCK_DESTINATION_MANAGE, null, null, null);
   }
 
   /**

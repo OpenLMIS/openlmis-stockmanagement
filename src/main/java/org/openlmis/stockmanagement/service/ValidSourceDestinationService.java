@@ -116,16 +116,38 @@ public class ValidSourceDestinationService {
     programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(program, facilityType);
 
     if (facilityRefDataService.findOne(sourceId) != null) {
-      return createFrom(createAssignment(program, facilityType, findOrCreateNode(sourceId, true)));
+      return createFrom(createSourceAssignment(
+          program, facilityType, findOrCreateNode(sourceId, true)));
     } else if (organizationRepository.findOne(sourceId) != null) {
-      return createFrom(createAssignment(program, facilityType, findOrCreateNode(sourceId, false)));
+      return createFrom(createSourceAssignment(
+          program, facilityType, findOrCreateNode(sourceId, false)));
     }
 
     throw new ValidationMessageException(new Message(MessageKeys.ERROR_SOURCE_NOT_FOUND));
   }
 
-  public ValidSourceDestinationDto assignDestination(UUID programId, UUID facilityTypeId, UUID destinationId) {
-    return null;
+  /**
+   * Assign a destination to a program and facility type.
+   *
+   * @param program       program ID
+   * @param facilityType  facility type ID
+   * @param destinationId destination ID
+   * @return a valid source destination dto
+   */
+  public ValidSourceDestinationDto assignDestination(
+      UUID program, UUID facilityType, UUID destinationId) {
+    permissionService.canManageStockDestination();
+    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(program, facilityType);
+
+    if (facilityRefDataService.findOne(destinationId) != null) {
+      return createFrom(createDestinationAssignment(
+          program, facilityType, findOrCreateNode(destinationId, true)));
+    } else if (organizationRepository.findOne(destinationId) != null) {
+      return createFrom(createDestinationAssignment(
+          program, facilityType, findOrCreateNode(destinationId, false)));
+    }
+
+    throw new ValidationMessageException(new Message(MessageKeys.ERROR_SOURCE_NOT_FOUND));
   }
 
   /**
@@ -138,10 +160,40 @@ public class ValidSourceDestinationService {
    */
   public ValidSourceDestinationDto findByProgramFacilitySource(
       UUID programId, UUID facilityTypeId, UUID sourceId) {
+    permissionService.canManageStockSource();
+    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(programId, facilityTypeId);
+
     Node foundNode = nodeRepository.findByReferenceId(sourceId);
     if (foundNode != null) {
       ValidSourceAssignment foundAssignment =
           validSourceRepository.findByProgramIdAndFacilityTypeIdAndNodeId(
+              programId, facilityTypeId, foundNode.getId());
+
+      if (foundAssignment != null) {
+        return createFrom(foundAssignment);
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Find existing destination assignment.
+   *
+   * @param programId      program ID
+   * @param facilityTypeId facility type ID
+   * @param destinationId  destination ID
+   * @return a valid source destination dto
+   */
+  public ValidSourceDestinationDto findByProgramFacilityDestination(
+      UUID programId, UUID facilityTypeId, UUID destinationId) {
+    permissionService.canManageStockDestination();
+    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(programId, facilityTypeId);
+
+    Node foundNode = nodeRepository.findByReferenceId(destinationId);
+    if (foundNode != null) {
+      ValidDestinationAssignment foundAssignment =
+          validDestinationRepository.findByProgramIdAndFacilityTypeIdAndNodeId(
               programId, facilityTypeId, foundNode.getId());
 
       if (foundAssignment != null) {
@@ -186,7 +238,8 @@ public class ValidSourceDestinationService {
     }
   }
 
-  private ValidSourceAssignment createAssignment(UUID program, UUID facilityType, Node node) {
+  private ValidSourceAssignment createSourceAssignment(
+      UUID program, UUID facilityType, Node node) {
     ValidSourceAssignment assignment = new ValidSourceAssignment();
     assignment.setProgramId(program);
     assignment.setFacilityTypeId(facilityType);
@@ -194,11 +247,20 @@ public class ValidSourceDestinationService {
     return validSourceRepository.save(assignment);
   }
 
-  private Node findOrCreateNode(UUID sourceId, boolean isRefDataFacility) {
-    Node node = nodeRepository.findByReferenceId(sourceId);
+  private ValidDestinationAssignment createDestinationAssignment(
+      UUID program, UUID facilityType, Node node) {
+    ValidDestinationAssignment assignment = new ValidDestinationAssignment();
+    assignment.setProgramId(program);
+    assignment.setFacilityTypeId(facilityType);
+    assignment.setNode(node);
+    return validDestinationRepository.save(assignment);
+  }
+
+  private Node findOrCreateNode(UUID referenceId, boolean isRefDataFacility) {
+    Node node = nodeRepository.findByReferenceId(referenceId);
     if (node == null) {
       node = new Node();
-      node.setReferenceId(sourceId);
+      node.setReferenceId(referenceId);
       node.setRefDataFacility(isRefDataFacility);
       return nodeRepository.save(node);
     }
@@ -227,10 +289,5 @@ public class ValidSourceDestinationService {
     }
     dto.setIsFreeTextAllowed(!isRefDataFacility);
     return dto;
-  }
-
-  public ValidSourceDestinationDto findByProgramFacilityDestination(UUID programId, UUID facilityTypeId, UUID destiantionId) {
-
-    return null;
   }
 }

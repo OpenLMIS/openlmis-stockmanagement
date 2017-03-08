@@ -58,6 +58,9 @@ import java.util.UUID;
 @SuppressWarnings("PMD.TooManyMethods")
 public class ValidSourceDestinationServiceTest {
 
+  private static final String FACILITY_NAME = "Facility Name";
+  private static final String ORGANIZATION_NAME = "NGO No 1";
+
   @InjectMocks
   private ValidSourceDestinationService validSourceDestinationService;
 
@@ -130,6 +133,9 @@ public class ValidSourceDestinationServiceTest {
     assertThat(foundDto.getProgramId(), is(programId));
     assertThat(foundDto.getFacilityTypeId(), is(facilityTypeId));
     assertThat(foundDto.getNode().getReferenceId(), is(sourceId));
+    verify(permissionService, times(1)).canManageStockSource();
+    verify(programFacilityTypeExistenceService, times(1))
+        .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
   }
 
   @Test
@@ -143,7 +149,7 @@ public class ValidSourceDestinationServiceTest {
     when(sourceRepository.save(any(ValidSourceAssignment.class))).thenReturn(
         createSourceAssignment(programId, facilityTypeId, createNode(sourceId, true)));
     FacilityDto facilityDto = new FacilityDto();
-    facilityDto.setName("Facility Name");
+    facilityDto.setName(FACILITY_NAME);
     when(facilityReferenceDataService.findOne(sourceId)).thenReturn(facilityDto);
     when(nodeRepository.findByReferenceId(sourceId)).thenReturn(null);
 
@@ -155,7 +161,7 @@ public class ValidSourceDestinationServiceTest {
     assertThat(assignment.getProgramId(), is(programId));
     assertThat(assignment.getFacilityTypeId(), is(facilityTypeId));
     assertThat(assignment.getIsFreeTextAllowed(), is(false));
-    assertThat(assignment.getName(), is("Facility Name"));
+    assertThat(assignment.getName(), is(FACILITY_NAME));
     assertThat(assignment.getNode().getReferenceId(), is(sourceId));
     assertThat(assignment.getNode().isRefDataFacility(), is(true));
   }
@@ -170,7 +176,7 @@ public class ValidSourceDestinationServiceTest {
     when(sourceRepository.save(any(ValidSourceAssignment.class))).thenReturn(
         createSourceAssignment(programId, facilityTypeId, createNode(sourceId, false)));
     Organization organization = new Organization();
-    organization.setName("NGO No 1");
+    organization.setName(ORGANIZATION_NAME);
     when(organizationRepository.findOne(sourceId)).thenReturn(organization);
     when(nodeRepository.findByReferenceId(sourceId)).thenReturn(null);
 
@@ -182,7 +188,7 @@ public class ValidSourceDestinationServiceTest {
     assertThat(assignment.getProgramId(), is(programId));
     assertThat(assignment.getFacilityTypeId(), is(facilityTypeId));
     assertThat(assignment.getIsFreeTextAllowed(), is(true));
-    assertThat(assignment.getName(), is("NGO No 1"));
+    assertThat(assignment.getName(), is(ORGANIZATION_NAME));
     assertThat(assignment.getNode().getReferenceId(), is(sourceId));
     assertThat(assignment.getNode().isRefDataFacility(), is(false));
   }
@@ -197,6 +203,100 @@ public class ValidSourceDestinationServiceTest {
 
     //when
     validSourceDestinationService.assignSource(randomUUID(), randomUUID(), sourceId);
+  }
+
+  @Test
+  public void should_return_destination_dto_when_found_existing_one() throws Exception {
+    UUID programId = randomUUID();
+    UUID facilityTypeId = randomUUID();
+    UUID destinationId = randomUUID();
+
+    Node node = createNode(destinationId, true);
+    when(nodeRepository.findByReferenceId(destinationId)).thenReturn(node);
+    when(facilityReferenceDataService.findOne(destinationId)).thenReturn(new FacilityDto());
+
+    when(destinationRepository.findByProgramIdAndFacilityTypeIdAndNodeId(
+        programId, facilityTypeId, node.getId()))
+        .thenReturn(createDestinationAssignment(programId, facilityTypeId, node));
+
+    //when
+    ValidSourceDestinationDto foundDto = validSourceDestinationService
+        .findByProgramFacilityDestination(programId, facilityTypeId, destinationId);
+
+    assertThat(foundDto.getProgramId(), is(programId));
+    assertThat(foundDto.getFacilityTypeId(), is(facilityTypeId));
+    assertThat(foundDto.getNode().getReferenceId(), is(destinationId));
+    verify(permissionService, times(1)).canManageStockDestination();
+    verify(programFacilityTypeExistenceService, times(1))
+        .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
+  }
+
+  @Test
+  public void should_return_destination_assignment_when_destination_is_a_facility_without_node()
+      throws Exception {
+    //given
+    UUID programId = randomUUID();
+    UUID facilityTypeId = randomUUID();
+    UUID destinationId = randomUUID();
+
+    when(destinationRepository.save(any(ValidDestinationAssignment.class))).thenReturn(
+        createDestinationAssignment(programId, facilityTypeId, createNode(destinationId, true)));
+    FacilityDto facilityDto = new FacilityDto();
+    facilityDto.setName(FACILITY_NAME);
+    when(facilityReferenceDataService.findOne(destinationId)).thenReturn(facilityDto);
+    when(nodeRepository.findByReferenceId(destinationId)).thenReturn(null);
+
+    //when
+    ValidSourceDestinationDto assignment = validSourceDestinationService
+        .assignDestination(programId, facilityTypeId, destinationId);
+
+    //then
+    assertThat(assignment.getProgramId(), is(programId));
+    assertThat(assignment.getFacilityTypeId(), is(facilityTypeId));
+    assertThat(assignment.getIsFreeTextAllowed(), is(false));
+    assertThat(assignment.getName(), is(FACILITY_NAME));
+    assertThat(assignment.getNode().getReferenceId(), is(destinationId));
+    assertThat(assignment.getNode().isRefDataFacility(), is(true));
+  }
+
+  @Test
+  public void should_return_destination_assignment_when_destination_is_a_organization()
+      throws Exception {
+    //given
+    UUID programId = randomUUID();
+    UUID facilityTypeId = randomUUID();
+    UUID destinationId = randomUUID();
+
+    when(destinationRepository.save(any(ValidDestinationAssignment.class))).thenReturn(
+        createDestinationAssignment(programId, facilityTypeId, createNode(destinationId, false)));
+    Organization organization = new Organization();
+    organization.setName(ORGANIZATION_NAME);
+    when(organizationRepository.findOne(destinationId)).thenReturn(organization);
+    when(nodeRepository.findByReferenceId(destinationId)).thenReturn(null);
+
+    //when
+    ValidSourceDestinationDto assignment = validSourceDestinationService
+        .assignDestination(programId, facilityTypeId, destinationId);
+
+    //then
+    assertThat(assignment.getProgramId(), is(programId));
+    assertThat(assignment.getFacilityTypeId(), is(facilityTypeId));
+    assertThat(assignment.getIsFreeTextAllowed(), is(true));
+    assertThat(assignment.getName(), is(ORGANIZATION_NAME));
+    assertThat(assignment.getNode().getReferenceId(), is(destinationId));
+    assertThat(assignment.getNode().isRefDataFacility(), is(false));
+  }
+
+  @Test(expected = ValidationMessageException.class)
+  public void should_return_400_when_destination_not_found() throws Exception {
+    //given
+    UUID destinationId = randomUUID();
+
+    when(organizationRepository.findOne(destinationId)).thenReturn(null);
+    when(nodeRepository.findByReferenceId(destinationId)).thenReturn(null);
+
+    //when
+    validSourceDestinationService.assignDestination(randomUUID(), randomUUID(), destinationId);
   }
 
   @Test(expected = PermissionMessageException.class)
@@ -327,9 +427,9 @@ public class ValidSourceDestinationServiceTest {
     verify(destinationRepository, times(1)).delete(assignmentId);
   }
 
-  private Node createNode(UUID sourceId, boolean isRefDataFacility) {
+  private Node createNode(UUID referenceId, boolean isRefDataFacility) {
     Node node = new Node();
-    node.setReferenceId(sourceId);
+    node.setReferenceId(referenceId);
     node.setId(randomUUID());
     node.setRefDataFacility(isRefDataFacility);
     return node;
@@ -338,6 +438,15 @@ public class ValidSourceDestinationServiceTest {
   private ValidSourceAssignment createSourceAssignment(
       UUID programId, UUID facilityTypeId, Node node) {
     ValidSourceAssignment assignment = new ValidSourceAssignment();
+    assignment.setNode(node);
+    assignment.setProgramId(programId);
+    assignment.setFacilityTypeId(facilityTypeId);
+    return assignment;
+  }
+
+  private ValidDestinationAssignment createDestinationAssignment(
+      UUID programId, UUID facilityTypeId, Node node) {
+    ValidDestinationAssignment assignment = new ValidDestinationAssignment();
     assignment.setNode(node);
     assignment.setProgramId(programId);
     assignment.setFacilityTypeId(facilityTypeId);
