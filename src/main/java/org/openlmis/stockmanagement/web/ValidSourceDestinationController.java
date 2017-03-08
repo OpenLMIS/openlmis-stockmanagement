@@ -118,4 +118,17 @@ public class ValidSourceDestinationController {
     validSourceDestinationService.deleteSourceAssignmentById(assignmentId);
     return new ResponseEntity(null, NO_CONTENT);
   }
+
+  /**
+   * Remove a valid destination assignment of a program and facility type combination.
+   *
+   * @param assignmentId destination assignment ID
+   * @return no content status
+   */
+  @RequestMapping(value = "/validDestinations/{id}", method = DELETE)
+  public ResponseEntity removeValidDestinationAssignment(@PathVariable("id") UUID assignmentId) {
+    LOGGER.debug(format("Try to remove destination assignment %s.", assignmentId));
+    validSourceDestinationService.deleteDestinationAssignmentById(assignmentId);
+    return new ResponseEntity(null, NO_CONTENT);
+  }
 }

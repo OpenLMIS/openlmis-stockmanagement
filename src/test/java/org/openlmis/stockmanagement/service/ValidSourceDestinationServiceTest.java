@@ -286,11 +286,19 @@ public class ValidSourceDestinationServiceTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void should_throw_validation_exception_when_try_to_delete_assignment_id_not_exists()
+  public void should_throw_exception_when_delete_source_assignment_not_exists()
       throws Exception {
     UUID assignmentId = randomUUID();
     when(sourceRepository.exists(assignmentId)).thenReturn(false);
     validSourceDestinationService.deleteSourceAssignmentById(assignmentId);
+  }
+
+  @Test(expected = ValidationMessageException.class)
+  public void should_throw_exception_when_delete_destination_assignment_not_exists()
+      throws Exception {
+    UUID assignmentId = randomUUID();
+    when(sourceRepository.exists(assignmentId)).thenReturn(false);
+    validSourceDestinationService.deleteDestinationAssignmentById(assignmentId);
   }
 
   @Test
@@ -304,6 +312,19 @@ public class ValidSourceDestinationServiceTest {
 
     //then
     verify(sourceRepository, times(1)).delete(assignmentId);
+  }
+
+  @Test
+  public void should_delete_destination_assignment_by_id() throws Exception {
+    //given
+    UUID assignmentId = randomUUID();
+    when(destinationRepository.exists(assignmentId)).thenReturn(true);
+
+    //when
+    validSourceDestinationService.deleteDestinationAssignmentById(assignmentId);
+
+    //then
+    verify(destinationRepository, times(1)).delete(assignmentId);
   }
 
   private Node createNode(UUID sourceId, boolean isRefDataFacility) {

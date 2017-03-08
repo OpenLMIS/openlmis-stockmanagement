@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_ASSIGNMENT_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_ASSIGNMENT_NOT_FOUND;
 
 import org.openlmis.stockmanagement.domain.movement.Node;
@@ -39,6 +40,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@SuppressWarnings("PMD.TooManyMethods")
 public class ValidSourceDestinationService {
 
   @Autowired
@@ -157,18 +159,35 @@ public class ValidSourceDestinationService {
     validSourceRepository.delete(assignmentId);
   }
 
-  private ValidSourceAssignment createAssignment(UUID program, UUID facilityType, Node node) {
-    ValidSourceAssignment assignment = new ValidSourceAssignment();
-    assignment.setProgramId(program);
-    assignment.setFacilityTypeId(facilityType);
-    assignment.setNode(node);
-    return validSourceRepository.save(assignment);
+  /**
+   * Delete a destination assignment by Id.
+   *
+   * @param assignmentId destination assignment Id
+   */
+  public void deleteDestinationAssignmentById(UUID assignmentId) {
+    permissionService.canManageStockSource();
+    checkDestinationAssignmentIdExists(assignmentId);
+    validDestinationRepository.delete(assignmentId);
+  }
+
+  private void checkDestinationAssignmentIdExists(UUID destinationAssignmentId) {
+    if (!validDestinationRepository.exists(destinationAssignmentId)) {
+      throw new ValidationMessageException(new Message(ERROR_DESTINATION_ASSIGNMENT_NOT_FOUND));
+    }
   }
 
   private void checkSourceAssignmentIdExists(UUID sourceAssignmentId) {
     if (!validSourceRepository.exists(sourceAssignmentId)) {
       throw new ValidationMessageException(new Message(ERROR_SOURCE_ASSIGNMENT_NOT_FOUND));
     }
+  }
+
+  private ValidSourceAssignment createAssignment(UUID program, UUID facilityType, Node node) {
+    ValidSourceAssignment assignment = new ValidSourceAssignment();
+    assignment.setProgramId(program);
+    assignment.setFacilityTypeId(facilityType);
+    assignment.setNode(node);
+    return validSourceRepository.save(assignment);
   }
 
   private Node findOrCreateNode(UUID sourceId, boolean isRefDataFacility) {

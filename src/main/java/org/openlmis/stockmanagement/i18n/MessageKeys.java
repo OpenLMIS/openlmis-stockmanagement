@@ -165,6 +165,9 @@ public abstract class MessageKeys {
   public static final String ERROR_SOURCE_ASSIGNMENT_NOT_FOUND = ERROR_PREFIX
       + ".source.assignment.notFound";
 
+  public static final String ERROR_DESTINATION_ASSIGNMENT_NOT_FOUND = ERROR_PREFIX
+      + ".source.assignment.notFound";
+
   private MessageKeys() {
     throw new UnsupportedOperationException();
   }

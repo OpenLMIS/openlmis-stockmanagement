@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.web;
 
 import static java.util.Collections.singletonList;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.doThrow;
@@ -56,8 +57,8 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
     //given
     ValidSourceDestinationDto sourceDestination = createValidSourceDestinationDto();
 
-    UUID program = UUID.randomUUID();
-    UUID facilityType = UUID.randomUUID();
+    UUID program = randomUUID();
+    UUID facilityType = randomUUID();
     when(validSourceDestinationService.findSources(program, facilityType))
         .thenReturn(singletonList(sourceDestination));
 
@@ -75,8 +76,8 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
   public void should_return_400_when_program_and_facilityType_not_found_in_ref_data()
       throws Exception {
     //given
-    UUID programId = UUID.randomUUID();
-    UUID facilityTypeId = UUID.randomUUID();
+    UUID programId = randomUUID();
+    UUID facilityTypeId = randomUUID();
     doThrow(new ValidationMessageException(
         new Message(ERROR_PROGRAM_NOT_FOUND, programId.toString())))
         .when(validSourceDestinationService)
@@ -95,9 +96,9 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
   @Test
   public void return_201_when_assign_source_successfully() throws Exception {
     //given
-    UUID programId = UUID.randomUUID();
-    UUID facilityTypeId = UUID.randomUUID();
-    UUID sourceId = UUID.randomUUID();
+    UUID programId = randomUUID();
+    UUID facilityTypeId = randomUUID();
+    UUID sourceId = randomUUID();
 
     ValidSourceDestinationDto validSourceDestinationDto = new ValidSourceDestinationDto();
     validSourceDestinationDto.setProgramId(programId);
@@ -127,9 +128,9 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
   @Test
   public void should_return_200_when_source_assignment_already_exist() throws Exception {
     //given
-    UUID programId = UUID.randomUUID();
-    UUID facilityTypeId = UUID.randomUUID();
-    UUID sourceId = UUID.randomUUID();
+    UUID programId = randomUUID();
+    UUID facilityTypeId = randomUUID();
+    UUID sourceId = randomUUID();
 
     ValidSourceDestinationDto validSourceDestinationDto = new ValidSourceDestinationDto();
     validSourceDestinationDto.setProgramId(programId);
@@ -158,11 +159,16 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
 
   @Test
   public void should_return_204_when_source_assignment_removed() throws Exception {
-    UUID assignmentId = UUID.randomUUID();
-    ResultActions resultActions = mvc.perform(
-        delete(API_VALID_SOURCES + assignmentId.toString())
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
-    resultActions.andExpect(status().isNoContent());
+    mvc.perform(delete(API_VALID_SOURCES + randomUUID().toString())
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  public void should_return_204_when_destination_assignment_removed() throws Exception {
+    mvc.perform(delete(API_VALID_DESTINATIONS + randomUUID().toString())
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE))
+        .andExpect(status().isNoContent());
   }
 
   private void performSourcesOrDestinations(
@@ -184,7 +190,7 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
 
   private ValidSourceDestinationDto createValidSourceDestinationDto() {
     ValidSourceDestinationDto destinationAssignmentDto = new ValidSourceDestinationDto();
-    destinationAssignmentDto.setId(UUID.randomUUID());
+    destinationAssignmentDto.setId(randomUUID());
     destinationAssignmentDto.setName("CHW");
     destinationAssignmentDto.setIsFreeTextAllowed(true);
     return destinationAssignmentDto;
