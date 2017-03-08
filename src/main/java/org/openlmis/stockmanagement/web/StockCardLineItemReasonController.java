@@ -15,7 +15,6 @@
 
 package org.openlmis.stockmanagement.web;
 
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_UPDATE_CONTENT_DUPLICATE;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -23,10 +22,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
-import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardLineItemReasonService;
-import org.openlmis.stockmanagement.utils.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,12 +91,9 @@ public class StockCardLineItemReasonController {
       @RequestBody StockCardLineItemReason reason, @PathVariable("id") UUID reasonId) {
     permissionService.canManageReasons();
     LOGGER.debug("Try to update stock card line item reason with id: ", reasonId.toString());
-    reasonService.checkUpdateReasonIdExists(reasonId);
     reason.setId(reasonId);
-    if (reasonService.reasonExists(reason)) {
-      throw new ValidationMessageException(
-          new Message(ERROR_LINE_ITEM_REASON_UPDATE_CONTENT_DUPLICATE));
-    }
+    reasonService.checkUpdateReasonIdExists(reasonId);
+    reasonService.checkUpdateReasonDuplicate(reason);
     return new ResponseEntity<>(reasonService.saveOrUpdate(reason), OK);
   }
 }

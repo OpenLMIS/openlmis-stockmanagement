@@ -60,6 +60,24 @@ public class StockCardLineItemReasonServiceTest {
     reasonService.checkUpdateReasonIdExists(reasonId);
   }
 
+  @Test(expected = ValidationMessageException.class)
+  public void should_throw_validation_exception_when_update_reason_is_duplicate_with_other_one()
+      throws Exception {
+    StockCardLineItemReason updatingReason = createReason();
+    updatingReason.setId(UUID.randomUUID());
+
+    StockCardLineItemReason existingReason = createReason();
+    existingReason.setId(UUID.randomUUID());
+    when(
+        reasonRepository.findByNameAndReasonTypeAndReasonCategoryAndIsFreeTextAllowedAndDescription(
+            updatingReason.getName(), updatingReason.getReasonType(),
+            updatingReason.getReasonCategory(),
+            updatingReason.getIsFreeTextAllowed(), updatingReason.getDescription()))
+        .thenReturn(existingReason);
+
+    reasonService.checkUpdateReasonDuplicate(updatingReason);
+  }
+
   @Test
   public void should_get_all_reasons_when_pass_validation() throws Exception {
     //given

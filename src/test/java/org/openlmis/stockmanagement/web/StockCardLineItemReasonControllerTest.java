@@ -28,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardLineItemReasonService;
 import org.openlmis.stockmanagement.utils.Message;
@@ -191,6 +192,8 @@ public class StockCardLineItemReasonControllerTest extends BaseWebTest {
   public void should_return_400_when_would_be_update_reason_content_exists() throws Exception {
     //given
     StockCardLineItemReason reason = createReason();
+    doThrow(new ValidationMessageException(new Message("key")))
+        .when(stockCardLineItemReasonService).checkUpdateReasonDuplicate(reason);
     when(stockCardLineItemReasonService.reasonExists(reason)).thenReturn(true);
 
     //when

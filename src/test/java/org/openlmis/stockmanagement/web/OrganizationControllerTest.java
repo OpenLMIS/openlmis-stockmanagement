@@ -164,16 +164,17 @@ public class OrganizationControllerTest extends BaseWebTest {
   public void should_return_400_when_would_be_updated_organization_content_exists()
       throws Exception {
     //given
-    Organization organization = createOrganization("Existing Org");
-    when(organizationRepository.findOne(organization.getId())).thenReturn(organization);
-    when(organizationRepository.findByName(organization.getName())).thenReturn(organization);
+    Organization updateOrg = createOrganization("Existing Org Name");
+    when(organizationRepository.findOne(updateOrg.getId())).thenReturn(updateOrg);
+    when(organizationRepository.findByName(updateOrg.getName()))
+        .thenReturn(createOrganization("Existing Org Name"));
 
     //when
     ResultActions resultActions = mvc.perform(
-        put(ORGANIZATION_API + organization.getId())
+        put(ORGANIZATION_API + updateOrg.getId())
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectToJsonString(organization)));
+            .content(objectToJsonString(updateOrg)));
 
     //then
     resultActions.andExpect(status().isBadRequest());

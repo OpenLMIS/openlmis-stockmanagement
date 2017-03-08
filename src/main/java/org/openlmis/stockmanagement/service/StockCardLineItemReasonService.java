@@ -20,6 +20,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REAS
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_ISFREETEXTALLOWED_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_NAME_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_TYPE_MISSING;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_UPDATE_CONTENT_DUPLICATE;
 
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
@@ -70,15 +71,7 @@ public class StockCardLineItemReasonService {
    * @return a boolean for same reason existing
    */
   public boolean reasonExists(StockCardLineItemReason reason) {
-    StockCardLineItemReason foundReason = reasonRepository
-        .findByNameAndReasonTypeAndReasonCategoryAndIsFreeTextAllowedAndDescription(
-            reason.getName(),
-            reason.getReasonType(),
-            reason.getReasonCategory(),
-            reason.getIsFreeTextAllowed(),
-            reason.getDescription());
-
-    return foundReason != null;
+    return foundReasonByContent(reason) != null;
   }
 
   /**
@@ -90,6 +83,31 @@ public class StockCardLineItemReasonService {
     if (reasonRepository.findOne(reasonId) == null) {
       throw new ValidationMessageException(new Message(ERROR_LINE_ITEM_REASON_ID_NOT_FOUND));
     }
+  }
+
+  /**
+   * Check try to update reason to be duplicate with other one.
+   * Throw exception without update itself.
+   *
+   * @param reason would be updated
+   */
+
+  public void checkUpdateReasonDuplicate(StockCardLineItemReason reason) {
+    StockCardLineItemReason foundReason = foundReasonByContent(reason);
+    if (foundReason != null && foundReason.getId() != reason.getId()) {
+      throw new ValidationMessageException(
+          new Message(ERROR_LINE_ITEM_REASON_UPDATE_CONTENT_DUPLICATE));
+    }
+  }
+
+  private StockCardLineItemReason foundReasonByContent(StockCardLineItemReason reason) {
+    return reasonRepository
+        .findByNameAndReasonTypeAndReasonCategoryAndIsFreeTextAllowedAndDescription(
+            reason.getName(),
+            reason.getReasonType(),
+            reason.getReasonCategory(),
+            reason.getIsFreeTextAllowed(),
+            reason.getDescription());
   }
 
   private void validateRequiredValueNotNull(StockCardLineItemReason reason) {

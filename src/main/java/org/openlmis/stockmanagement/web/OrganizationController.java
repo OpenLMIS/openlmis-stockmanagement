@@ -21,6 +21,8 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_ORGANIZATION_U
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
+import com.google.common.base.Strings;
+
 import org.openlmis.stockmanagement.domain.movement.Organization;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
@@ -105,7 +107,8 @@ public class OrganizationController {
   }
 
   private void checkUpdateOrganizationDuplicate(Organization organization) {
-    if (organizationRepository.findByName(organization.getName()) != null) {
+    Organization foundByName = organizationRepository.findByName(organization.getName());
+    if (foundByName != null && foundByName.getId() != organization.getId()) {
       throw new ValidationMessageException(
           new Message(ERROR_ORGANIZATION_UPDATE_CONTENT_DUPLICATE));
     }
@@ -118,7 +121,7 @@ public class OrganizationController {
   }
 
   private void checkRequiredFieldsExist(Organization organization) {
-    if (organization.getName() == null) {
+    if (Strings.isNullOrEmpty(organization.getName())) {
       throw new ValidationMessageException(new Message(ERROR_ORGANIZATION_NAME_MISSING));
     }
   }
