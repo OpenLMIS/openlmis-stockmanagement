@@ -164,6 +164,9 @@ public class ValidSourceDestinationServiceTest {
     assertThat(assignment.getName(), is(FACILITY_NAME));
     assertThat(assignment.getNode().getReferenceId(), is(sourceId));
     assertThat(assignment.getNode().isRefDataFacility(), is(true));
+    verify(permissionService, times(1)).canManageStockSources();
+    verify(programFacilityTypeExistenceService, times(1))
+        .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
   }
 
   @Test
@@ -257,6 +260,9 @@ public class ValidSourceDestinationServiceTest {
     assertThat(assignment.getName(), is(FACILITY_NAME));
     assertThat(assignment.getNode().getReferenceId(), is(destinationId));
     assertThat(assignment.getNode().isRefDataFacility(), is(true));
+    verify(permissionService, times(1)).canManageStockDestinations();
+    verify(programFacilityTypeExistenceService, times(1))
+        .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
   }
 
   @Test

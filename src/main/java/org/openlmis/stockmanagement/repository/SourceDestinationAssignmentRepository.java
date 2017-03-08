@@ -15,9 +15,21 @@
 
 package org.openlmis.stockmanagement.repository;
 
-import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
+import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
-public interface ValidSourceAssignmentRepository extends
-    SourceDestinationAssignmentRepository<ValidSourceAssignment> {
+import java.util.List;
+import java.util.UUID;
 
+@NoRepositoryBean
+public interface SourceDestinationAssignmentRepository<T> extends
+    PagingAndSortingRepository<T, UUID> {
+
+  List<T> findByProgramIdAndFacilityTypeId(
+      @Param("programId") UUID programId, @Param("facilityTypeId") UUID facilityTypeId);
+
+  T findByProgramIdAndFacilityTypeIdAndNodeId(
+      @Param("programId") UUID programId, @Param("facilityTypeId") UUID facilityTypeId,
+      @Param("nodeId") UUID nodeId);
 }
