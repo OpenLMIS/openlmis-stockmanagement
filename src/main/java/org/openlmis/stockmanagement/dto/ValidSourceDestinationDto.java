@@ -23,7 +23,6 @@ import java.util.UUID;
 @Data
 public class ValidSourceDestinationDto {
   private UUID id;
-  private UUID assignmentId;
   private UUID programId;
   private UUID facilityTypeId;
   private Node node;

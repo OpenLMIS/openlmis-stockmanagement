@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.service;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_ASSIGNMENT_NOT_FOUND;
 
 import org.openlmis.stockmanagement.domain.movement.Node;
+import org.openlmis.stockmanagement.domain.movement.SourceDestinationAssignment;
 import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
@@ -76,7 +77,7 @@ public class ValidSourceDestinationService {
     List<ValidSourceAssignment> sourceAssignments =
         validSourceRepository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
     return sourceAssignments.stream()
-        .map(source -> createDtoFrom(source.getNode()))
+        .map(this::createFrom)
         .collect(Collectors.toList());
   }
 
@@ -96,7 +97,7 @@ public class ValidSourceDestinationService {
     List<ValidDestinationAssignment> destinationAssignments =
         validDestinationRepository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
     return destinationAssignments.stream()
-        .map(destination -> createDtoFrom(destination.getNode()))
+        .map(this::createFrom)
         .collect(Collectors.toList());
   }
 
@@ -181,10 +182,20 @@ public class ValidSourceDestinationService {
     return node;
   }
 
-  private ValidSourceDestinationDto createDtoFrom(Node node) {
+  private ValidSourceDestinationDto createFrom(SourceDestinationAssignment assignment) {
+    Node node = assignment.getNode();
+
+    ValidSourceDestinationDto dto = createFrom(node);
+    dto.setId(assignment.getId());
+    dto.setNode(node);
+    dto.setProgramId(assignment.getProgramId());
+    dto.setFacilityTypeId(assignment.getFacilityTypeId());
+    return dto;
+  }
+
+  private ValidSourceDestinationDto createFrom(Node node) {
     ValidSourceDestinationDto dto = new ValidSourceDestinationDto();
 
-    dto.setId(node.getId());
     boolean isRefDataFacility = node.isRefDataFacility();
     if (isRefDataFacility) {
       dto.setName(facilityRefDataService.findOne(node.getReferenceId()).getName());
@@ -192,17 +203,6 @@ public class ValidSourceDestinationService {
       dto.setName(organizationRepository.findOne(node.getReferenceId()).getName());
     }
     dto.setIsFreeTextAllowed(!isRefDataFacility);
-    return dto;
-  }
-
-  private ValidSourceDestinationDto createFrom(ValidSourceAssignment assignment) {
-    Node node = assignment.getNode();
-
-    ValidSourceDestinationDto dto = createDtoFrom(node);
-    dto.setNode(node);
-    dto.setAssignmentId(assignment.getId());
-    dto.setProgramId(assignment.getProgramId());
-    dto.setFacilityTypeId(assignment.getFacilityTypeId());
     return dto;
   }
 }

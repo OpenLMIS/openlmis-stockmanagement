@@ -6,9 +6,6 @@
     "id": {
       "type": "string"
     },
-    "assignmentId": {
-      "type": "string"
-    },
     "programId": {
       "type": "string"
     },

@@ -15,11 +15,28 @@
 
 package org.openlmis.stockmanagement.domain.movement;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import lombok.Data;
+import org.hibernate.annotations.Type;
+import org.openlmis.stockmanagement.domain.BaseEntity;
 
-@Entity
-@Table(name = "valid_destination_assignments", schema = "stockmanagement")
-public class ValidDestinationAssignment extends SourceDestinationAssignment {
+import javax.persistence.Column;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
+import java.util.UUID;
 
+@MappedSuperclass
+@Data
+public class SourceDestinationAssignment extends BaseEntity {
+  @Column(nullable = false)
+  @Type(type = PG_UUID)
+  UUID programId;
+
+  @Column(nullable = false)
+  @Type(type = PG_UUID)
+  UUID facilityTypeId;
+
+  @ManyToOne()
+  @JoinColumn(nullable = false)
+  Node node;
 }
