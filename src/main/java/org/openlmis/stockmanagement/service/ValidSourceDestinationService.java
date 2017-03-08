@@ -22,6 +22,8 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_FOU
 
 import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.domain.movement.SourceDestinationAssignment;
+import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
+import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.NodeRepository;
@@ -101,7 +103,7 @@ public class ValidSourceDestinationService {
 
     permissionService.canManageStockSources();
     return doAssign(program, facilityType, sourceId,
-        ERROR_SOURCE_NOT_FOUND, validSourceRepository);
+        ERROR_SOURCE_NOT_FOUND, ValidSourceAssignment.class, validSourceRepository);
   }
 
   /**
@@ -118,7 +120,7 @@ public class ValidSourceDestinationService {
 
     permissionService.canManageStockDestinations();
     return doAssign(program, facilityType, destinationId,
-        ERROR_DESTINATION_NOT_FOUND, validDestinationRepository);
+        ERROR_DESTINATION_NOT_FOUND, ValidDestinationAssignment.class, validDestinationRepository);
   }
 
   /**
@@ -206,7 +208,7 @@ public class ValidSourceDestinationService {
   }
 
   private <T extends SourceDestinationAssignment> ValidSourceDestinationDto doAssign(
-      UUID program, UUID facilityType, UUID referenceId, String errorKey,
+      UUID program, UUID facilityType, UUID referenceId, String errorKey, Class<T> clazz,
       SourceDestinationAssignmentRepository<T> repository)
       throws IllegalAccessException, InstantiationException {
 
@@ -214,26 +216,26 @@ public class ValidSourceDestinationService {
 
     if (facilityRefDataService.findOne(referenceId) != null) {
       return createFrom(createAssignment(
-          program, facilityType, findOrCreateNode(referenceId, true), repository));
+          program, facilityType, findOrCreateNode(referenceId, true), clazz, repository));
     } else if (organizationRepository.findOne(referenceId) != null) {
       return createFrom(createAssignment(
-          program, facilityType, findOrCreateNode(referenceId, false), repository));
+          program, facilityType, findOrCreateNode(referenceId, false), clazz, repository));
     }
 
     throw new ValidationMessageException(new Message(errorKey));
   }
 
-  private <T extends SourceDestinationAssignment> SourceDestinationAssignment createAssignment(
-      UUID program, UUID facilityType, Node node,
+  private <T extends SourceDestinationAssignment> T createAssignment(
+      UUID program, UUID facilityType, Node node, Class<T> clazz,
       SourceDestinationAssignmentRepository<T> repository)
       throws IllegalAccessException, InstantiationException {
 
-    SourceDestinationAssignment assignment = new SourceDestinationAssignment();
+    T assignment = clazz.newInstance();
     assignment.setProgramId(program);
     assignment.setFacilityTypeId(facilityType);
     assignment.setNode(node);
 
-    return repository.save((T) assignment);
+    return repository.save(assignment);
   }
 
   private Node findOrCreateNode(UUID referenceId, boolean isRefDataFacility) {
