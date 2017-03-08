@@ -23,6 +23,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_NOT_FOUND;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -36,7 +37,6 @@ import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.UUID;
 
@@ -86,7 +86,7 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
         .findDestinations(programId, facilityTypeId);
 
     //when
-    ResultActions resultActions = mvc.perform(MockMvcRequestBuilders.get(API_VALID_DESTINATIONS)
+    ResultActions resultActions = mvc.perform(get(API_VALID_DESTINATIONS)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
         .param(PROGRAM, programId.toString())
         .param(FACILITY_TYPE, facilityTypeId.toString()));
@@ -225,14 +225,14 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
 
   @Test
   public void should_return_204_when_source_assignment_removed() throws Exception {
-    mvc.perform(delete(API_VALID_SOURCES + randomUUID().toString())
+    mvc.perform(delete(API_VALID_SOURCES + "/" + randomUUID().toString())
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE))
         .andExpect(status().isNoContent());
   }
 
   @Test
   public void should_return_204_when_destination_assignment_removed() throws Exception {
-    mvc.perform(delete(API_VALID_DESTINATIONS + randomUUID().toString())
+    mvc.perform(delete(API_VALID_DESTINATIONS + "/" + randomUUID().toString())
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE))
         .andExpect(status().isNoContent());
   }
@@ -240,7 +240,7 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
   private void performSourcesOrDestinations(
       UUID programId, UUID facilityTypeId,
       ValidSourceDestinationDto sourceDestinationDto, String uri) throws Exception {
-    ResultActions resultActions = mvc.perform(MockMvcRequestBuilders.get(uri)
+    ResultActions resultActions = mvc.perform(get(uri)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
         .param(PROGRAM, programId.toString())
         .param(FACILITY_TYPE, facilityTypeId.toString()));
