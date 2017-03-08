@@ -17,6 +17,8 @@ package org.openlmis.stockmanagement.domain.adjustment;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
+import com.google.common.base.Strings;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -119,7 +121,7 @@ public class StockCardLineItemReason extends BaseEntity {
 
   @JsonIgnore
   public boolean hasNoName() {
-    return name == null;
+    return Strings.isNullOrEmpty(name);
   }
 
   @JsonIgnore
