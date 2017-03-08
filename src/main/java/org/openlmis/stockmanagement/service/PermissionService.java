@@ -113,10 +113,6 @@ public class PermissionService {
     hasPermission(STOCK_SOURCES_MANAGE, null, null, null);
   }
 
-  public void canManageStockDestination() {
-    hasPermission(STOCK_DESTINATION_MANAGE, null, null, null);
-  }
-
   /**
    * Checks if current user has permission to manage valid destinations assignment.
    */

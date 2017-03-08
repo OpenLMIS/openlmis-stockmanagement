@@ -133,7 +133,7 @@ public class ValidSourceDestinationServiceTest {
     assertThat(foundDto.getProgramId(), is(programId));
     assertThat(foundDto.getFacilityTypeId(), is(facilityTypeId));
     assertThat(foundDto.getNode().getReferenceId(), is(sourceId));
-    verify(permissionService, times(1)).canManageStockSource();
+    verify(permissionService, times(1)).canManageStockSources();
     verify(programFacilityTypeExistenceService, times(1))
         .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
   }
@@ -226,7 +226,7 @@ public class ValidSourceDestinationServiceTest {
     assertThat(foundDto.getProgramId(), is(programId));
     assertThat(foundDto.getFacilityTypeId(), is(facilityTypeId));
     assertThat(foundDto.getNode().getReferenceId(), is(destinationId));
-    verify(permissionService, times(1)).canManageStockDestination();
+    verify(permissionService, times(1)).canManageStockDestinations();
     verify(programFacilityTypeExistenceService, times(1))
         .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
   }

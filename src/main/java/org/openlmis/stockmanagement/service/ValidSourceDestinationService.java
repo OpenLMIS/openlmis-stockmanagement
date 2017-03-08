@@ -136,7 +136,7 @@ public class ValidSourceDestinationService {
    */
   public ValidSourceDestinationDto assignDestination(
       UUID program, UUID facilityType, UUID destinationId) {
-    permissionService.canManageStockDestination();
+    permissionService.canManageStockDestinations();
     programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(program, facilityType);
 
     if (facilityRefDataService.findOne(destinationId) != null) {
@@ -160,7 +160,7 @@ public class ValidSourceDestinationService {
    */
   public ValidSourceDestinationDto findByProgramFacilitySource(
       UUID programId, UUID facilityTypeId, UUID sourceId) {
-    permissionService.canManageStockSource();
+    permissionService.canManageStockSources();
     programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
     Node foundNode = nodeRepository.findByReferenceId(sourceId);
@@ -187,7 +187,7 @@ public class ValidSourceDestinationService {
    */
   public ValidSourceDestinationDto findByProgramFacilityDestination(
       UUID programId, UUID facilityTypeId, UUID destinationId) {
-    permissionService.canManageStockDestination();
+    permissionService.canManageStockDestinations();
     programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
     Node foundNode = nodeRepository.findByReferenceId(destinationId);
