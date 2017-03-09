@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.service;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_ASSIGNMENT_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_ASSIGNMENT_NOT_FOUND;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_ASSIGNMENT_ID_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_FOUND;
 
 import org.openlmis.stockmanagement.domain.movement.Node;
@@ -97,8 +98,7 @@ public class ValidSourceDestinationService {
    * @return a valid source destination dto
    */
   public ValidSourceDestinationDto assignSource(ValidSourceAssignment assignment) {
-
-    permissionService.canManageStockSources();
+    assignment.setId(null);
     return doAssign(assignment, ERROR_SOURCE_NOT_FOUND, validSourceRepository);
   }
 
@@ -109,8 +109,7 @@ public class ValidSourceDestinationService {
    * @return a valid source destination dto
    */
   public ValidSourceDestinationDto assignDestination(ValidDestinationAssignment assignment) {
-
-    permissionService.canManageStockDestinations();
+    assignment.setId(null);
     return doAssign(assignment, ERROR_DESTINATION_NOT_FOUND, validDestinationRepository);
   }
 
@@ -174,7 +173,8 @@ public class ValidSourceDestinationService {
         facilityTypeId);
     Node node = assignment.getNode();
     if (node == null || node.getReferenceId() == null) {
-      throw new ValidationMessageException(new Message("assignment id missing"));
+      throw new ValidationMessageException(
+          new Message(ERROR_SOURCE_DESTINATION_ASSIGNMENT_ID_MISSING));
     }
     Node foundNode = nodeRepository.findByReferenceId(node.getReferenceId());
     if (foundNode != null) {

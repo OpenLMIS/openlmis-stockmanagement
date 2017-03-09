@@ -69,6 +69,7 @@ public class ValidSourceDestinationController {
 
   /**
    * Assign a destination to a program and facility type.
+   * If valid destination assignment ID is specified, ID will be ignored.
    *
    * @return the assigned destination and program and facility type.
    */
@@ -105,6 +106,7 @@ public class ValidSourceDestinationController {
 
   /**
    * Assign a source to program and facility type.
+   * If valid source assignment ID is specified, ID will be ignored.
    *
    * @return the assigned source and program and facility type.
    */

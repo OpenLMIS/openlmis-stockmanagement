@@ -170,6 +170,9 @@ public abstract class MessageKeys {
   public static final String ERROR_DESTINATION_NOT_FOUND = ERROR_PREFIX
       + ".destination.notFound";
 
+  public static final String ERROR_SOURCE_DESTINATION_ASSIGNMENT_ID_MISSING = ERROR_PREFIX
+      + ".source.destination.assignment.missing";
+
   private MessageKeys() {
     throw new UnsupportedOperationException();
   }
