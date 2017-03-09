@@ -280,17 +280,9 @@ traits:
         is: [secured]
         description: Configure a destination to program and facility type.
         queryParameters:
-          program:
-            description: Program id
-            type: string
-            required: true
-          facilityType:
-            description: Facility type id
-            type: string
-            required: true
         body:
             application/json:
-              schema: string
+              schema: validSourceDestination
         responses:
           200:
             description: Given destination already exist.
@@ -358,17 +350,9 @@ traits:
           is: [secured]
           description: Configure a source to program and facility type.
           queryParameters:
-            program:
-              description: Program id
-              type: string
-              required: true
-            facilityType:
-              description: Facility type id
-              type: string
-              required: true
           body:
               application/json:
-                schema: string
+                schema: validSourceDestination
           responses:
             200:
               description: Given source already exist.

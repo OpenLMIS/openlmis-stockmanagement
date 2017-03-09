@@ -93,6 +93,7 @@ public class ValidSourceDestinationService {
   /**
    * Assign a source to a program and facility type.
    *
+   * @param assignment assignment JPA model
    * @return a valid source destination dto
    */
   public ValidSourceDestinationDto assignSource(ValidSourceAssignment assignment) {
@@ -104,6 +105,7 @@ public class ValidSourceDestinationService {
   /**
    * Assign a destination to a program and facility type.
    *
+   * @param assignment assignment JPA model
    * @return a valid source destination dto
    */
   public ValidSourceDestinationDto assignDestination(ValidDestinationAssignment assignment) {
@@ -115,6 +117,7 @@ public class ValidSourceDestinationService {
   /**
    * Find existing source assignment.
    *
+   * @param assignment assignment JPA model
    * @return a valid source destination dto
    */
   public ValidSourceDestinationDto findByProgramFacilitySource(
@@ -126,6 +129,7 @@ public class ValidSourceDestinationService {
   /**
    * Find existing destination assignment.
    *
+   * @param assignment assignment JPA model
    * @return a valid source destination dto
    */
   public ValidSourceDestinationDto findByProgramFacilityDestination(
