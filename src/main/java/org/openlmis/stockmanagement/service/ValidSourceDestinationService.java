@@ -169,14 +169,7 @@ public class ValidSourceDestinationService {
       T assignment, SourceDestinationAssignmentRepository<T> repository) {
     UUID programId = assignment.getProgramId();
     UUID facilityTypeId = assignment.getFacilityTypeId();
-    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(programId,
-        facilityTypeId);
-    Node node = assignment.getNode();
-    if (node == null || node.getReferenceId() == null) {
-      throw new ValidationMessageException(
-          new Message(ERROR_SOURCE_DESTINATION_ASSIGNMENT_ID_MISSING));
-    }
-    Node foundNode = nodeRepository.findByReferenceId(node.getReferenceId());
+    Node foundNode = findExistingNode(assignment, programId, facilityTypeId);
     if (foundNode != null) {
       T foundAssignment = repository.findByProgramIdAndFacilityTypeIdAndNodeId(
           programId, facilityTypeId, foundNode.getId());
@@ -185,8 +178,19 @@ public class ValidSourceDestinationService {
         return createFrom(foundAssignment);
       }
     }
-
     return null;
+  }
+
+  private <T extends SourceDestinationAssignment> Node findExistingNode(
+      T assignment, UUID programId, UUID facilityTypeId) {
+    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(programId,
+        facilityTypeId);
+    Node node = assignment.getNode();
+    if (node == null || node.getReferenceId() == null) {
+      throw new ValidationMessageException(
+          new Message(ERROR_SOURCE_DESTINATION_ASSIGNMENT_ID_MISSING));
+    }
+    return nodeRepository.findByReferenceId(node.getReferenceId());
   }
 
   private <T extends SourceDestinationAssignment> List<ValidSourceDestinationDto> findAssignments(
