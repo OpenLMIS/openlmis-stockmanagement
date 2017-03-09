@@ -270,7 +270,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
 
     resultActions.andExpect(status().isNoContent());
     verify(permissionService, times(1)).canManageReasons();
-    verify(reasonAssignmentRepository, times(1)).deleteById(assignmentId);
+    verify(reasonAssignmentRepository, times(1)).delete(assignmentId);
   }
 
   @Test

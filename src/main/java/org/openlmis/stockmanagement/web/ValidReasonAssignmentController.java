@@ -99,8 +99,7 @@ public class ValidReasonAssignmentController {
     if (!reasonAssignmentRepository.exists(assignmentId)) {
       throw new ValidationMessageException(new Message(ERROR_REASON_ASSIGNMENT_NOT_FOUND));
     }
-
-    reasonAssignmentRepository.deleteById(assignmentId);
+    reasonAssignmentRepository.delete(assignmentId);
 
     return new ResponseEntity<>(null, NO_CONTENT);
   }
@@ -111,13 +110,10 @@ public class ValidReasonAssignmentController {
    *
    * @param assignment valid reason assignment.
    * @return the assigned reason and program and facility type.
-   * @throws InstantiationException InstantiationException
-   * @throws IllegalAccessException IllegalAccessException
    */
   @RequestMapping(value = "/validReasons", method = POST)
   public ResponseEntity<ValidReasonAssignment> assignReason(
-      @RequestBody ValidReasonAssignment assignment)
-      throws InstantiationException, IllegalAccessException {
+      @RequestBody ValidReasonAssignment assignment) {
     assignment.setId(null);
     checkIsValidRequest(assignment);
     return findExistingOrSaveNew(assignment);
@@ -139,8 +135,7 @@ public class ValidReasonAssignmentController {
   }
 
   private ResponseEntity<ValidReasonAssignment> findExistingOrSaveNew(
-      ValidReasonAssignment assignment)
-      throws IllegalAccessException, InstantiationException {
+      ValidReasonAssignment assignment) {
     UUID programId = assignment.getProgramId();
     UUID facilityTypeId = assignment.getFacilityTypeId();
     UUID reasonId = assignment.getReason().getId();
