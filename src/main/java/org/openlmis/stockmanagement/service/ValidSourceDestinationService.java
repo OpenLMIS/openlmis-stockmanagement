@@ -98,12 +98,11 @@ public class ValidSourceDestinationService {
    * @param sourceId     source ID
    * @return a valid source destination dto
    */
-  public ValidSourceDestinationDto assignSource(UUID program, UUID facilityType, UUID sourceId)
-      throws InstantiationException, IllegalAccessException {
+  public ValidSourceDestinationDto assignSource(UUID program, UUID facilityType, UUID sourceId) {
 
     permissionService.canManageStockSources();
     return doAssign(program, facilityType, sourceId,
-        ERROR_SOURCE_NOT_FOUND, ValidSourceAssignment.class, validSourceRepository);
+        ERROR_SOURCE_NOT_FOUND, new ValidSourceAssignment(), validSourceRepository);
   }
 
   /**
@@ -115,12 +114,11 @@ public class ValidSourceDestinationService {
    * @return a valid source destination dto
    */
   public ValidSourceDestinationDto assignDestination(
-      UUID program, UUID facilityType, UUID destinationId)
-      throws InstantiationException, IllegalAccessException {
+      UUID program, UUID facilityType, UUID destinationId) {
 
     permissionService.canManageStockDestinations();
     return doAssign(program, facilityType, destinationId,
-        ERROR_DESTINATION_NOT_FOUND, ValidDestinationAssignment.class, validDestinationRepository);
+        ERROR_DESTINATION_NOT_FOUND, new ValidDestinationAssignment(), validDestinationRepository);
   }
 
   /**
@@ -208,29 +206,26 @@ public class ValidSourceDestinationService {
   }
 
   private <T extends SourceDestinationAssignment> ValidSourceDestinationDto doAssign(
-      UUID program, UUID facilityType, UUID referenceId, String errorKey, Class<T> clazz,
-      SourceDestinationAssignmentRepository<T> repository)
-      throws IllegalAccessException, InstantiationException {
+      UUID program, UUID facilityType, UUID referenceId, String errorKey, T assignment,
+      SourceDestinationAssignmentRepository<T> repository) {
 
     programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(program, facilityType);
 
     if (facilityRefDataService.findOne(referenceId) != null) {
       return createFrom(createAssignment(
-          program, facilityType, findOrCreateNode(referenceId, true), clazz, repository));
+          program, facilityType, findOrCreateNode(referenceId, true), assignment, repository));
     } else if (organizationRepository.findOne(referenceId) != null) {
       return createFrom(createAssignment(
-          program, facilityType, findOrCreateNode(referenceId, false), clazz, repository));
+          program, facilityType, findOrCreateNode(referenceId, false), assignment, repository));
     }
 
     throw new ValidationMessageException(new Message(errorKey));
   }
 
   private <T extends SourceDestinationAssignment> T createAssignment(
-      UUID program, UUID facilityType, Node node, Class<T> clazz,
-      SourceDestinationAssignmentRepository<T> repository)
-      throws IllegalAccessException, InstantiationException {
+      UUID program, UUID facilityType, Node node, T assignment,
+      SourceDestinationAssignmentRepository<T> repository) {
 
-    T assignment = clazz.newInstance();
     assignment.setProgramId(program);
     assignment.setFacilityTypeId(facilityType);
     assignment.setNode(node);
