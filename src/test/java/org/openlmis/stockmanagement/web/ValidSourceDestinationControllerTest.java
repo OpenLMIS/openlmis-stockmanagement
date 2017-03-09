@@ -22,6 +22,8 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_NOT_FOUND;
+import static org.openlmis.stockmanagement.testutils.ValidDestinationAssignmentBuilder.createDestination;
+import static org.openlmis.stockmanagement.testutils.ValidSourceAssignmentBuilder.createSource;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -29,7 +31,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Test;
-import org.openlmis.stockmanagement.domain.movement.Node;
+import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
+import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.ValidSourceDestinationService;
@@ -101,23 +104,21 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
     UUID programId = randomUUID();
     UUID facilityTypeId = randomUUID();
     UUID sourceId = randomUUID();
+    ValidSourceAssignment assignment = createSource(programId, facilityTypeId, sourceId);
 
     ValidSourceDestinationDto validSourceDestinationDto = new ValidSourceDestinationDto();
     validSourceDestinationDto.setProgramId(programId);
     validSourceDestinationDto.setFacilityTypeId(facilityTypeId);
-    Node node = new Node();
-    node.setReferenceId(sourceId);
-    validSourceDestinationDto.setNode(node);
-    when(validSourceDestinationService.assignSource(programId, facilityTypeId, sourceId))
+    validSourceDestinationDto.setNode(assignment.getNode());
+
+    when(validSourceDestinationService.assignSource(assignment))
         .thenReturn(validSourceDestinationDto);
 
     //when
     ResultActions resultActions = mvc.perform(post(API_VALID_SOURCES)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .param(PROGRAM, programId.toString())
-        .param(FACILITY_TYPE, facilityTypeId.toString())
         .contentType(MediaType.APPLICATION_JSON)
-        .content(objectToJsonString(sourceId.toString())));
+        .content(objectToJsonString(assignment)));
 
     //then
     resultActions
@@ -133,23 +134,22 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
     UUID programId = UUID.randomUUID();
     UUID facilityTypeId = UUID.randomUUID();
     UUID destinationId = UUID.randomUUID();
+    ValidDestinationAssignment assignment = createDestination(
+        programId, facilityTypeId, destinationId);
 
     ValidSourceDestinationDto validSourceDestinationDto = new ValidSourceDestinationDto();
     validSourceDestinationDto.setProgramId(programId);
     validSourceDestinationDto.setFacilityTypeId(facilityTypeId);
-    Node node = new Node();
-    node.setReferenceId(destinationId);
-    validSourceDestinationDto.setNode(node);
-    when(validSourceDestinationService.assignDestination(programId, facilityTypeId, destinationId))
+    validSourceDestinationDto.setNode(assignment.getNode());
+
+    when(validSourceDestinationService.assignDestination(assignment))
         .thenReturn(validSourceDestinationDto);
 
     //when
     ResultActions resultActions = mvc.perform(post(API_VALID_DESTINATIONS)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .param(PROGRAM, programId.toString())
-        .param(FACILITY_TYPE, facilityTypeId.toString())
         .contentType(MediaType.APPLICATION_JSON)
-        .content(objectToJsonString(destinationId.toString())));
+        .content(objectToJsonString(assignment)));
 
     //then
     resultActions
@@ -164,31 +164,29 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
     //given
     UUID programId = UUID.randomUUID();
     UUID facilityTypeId = UUID.randomUUID();
-    UUID destiantionId = UUID.randomUUID();
+    UUID destinationId = UUID.randomUUID();
+    ValidDestinationAssignment assignment = createDestination(
+        programId, facilityTypeId, destinationId);
 
     ValidSourceDestinationDto validSourceDestinationDto = new ValidSourceDestinationDto();
     validSourceDestinationDto.setProgramId(programId);
     validSourceDestinationDto.setFacilityTypeId(facilityTypeId);
-    Node node = new Node();
-    node.setReferenceId(destiantionId);
-    validSourceDestinationDto.setNode(node);
-    when(validSourceDestinationService.findByProgramFacilityDestination(
-        programId, facilityTypeId, destiantionId)).thenReturn(validSourceDestinationDto);
+    validSourceDestinationDto.setNode(assignment.getNode());
+    when(validSourceDestinationService.findByProgramFacilityDestination(assignment))
+        .thenReturn(validSourceDestinationDto);
 
     //when
     ResultActions resultActions = mvc.perform(post(API_VALID_DESTINATIONS)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .param(PROGRAM, programId.toString())
-        .param(FACILITY_TYPE, facilityTypeId.toString())
         .contentType(MediaType.APPLICATION_JSON)
-        .content(objectToJsonString(destiantionId.toString())));
+        .content(objectToJsonString(assignment)));
 
     //then
     resultActions
         .andExpect(status().isOk())
         .andExpect(jsonPath(PROGRAM_EXP, is(programId.toString())))
         .andExpect(jsonPath(FACILITY_TYPE_EXP, is(facilityTypeId.toString())))
-        .andExpect(jsonPath(NODE_REFERENCE_ID_EXP, is(destiantionId.toString())));
+        .andExpect(jsonPath(NODE_REFERENCE_ID_EXP, is(destinationId.toString())));
   }
 
   @Test
@@ -197,23 +195,21 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
     UUID programId = randomUUID();
     UUID facilityTypeId = randomUUID();
     UUID sourceId = randomUUID();
+    ValidSourceAssignment assignment = createSource(programId, facilityTypeId, sourceId);
 
     ValidSourceDestinationDto validSourceDestinationDto = new ValidSourceDestinationDto();
     validSourceDestinationDto.setProgramId(programId);
     validSourceDestinationDto.setFacilityTypeId(facilityTypeId);
-    Node node = new Node();
-    node.setReferenceId(sourceId);
-    validSourceDestinationDto.setNode(node);
-    when(validSourceDestinationService.findByProgramFacilitySource(
-        programId, facilityTypeId, sourceId)).thenReturn(validSourceDestinationDto);
+    validSourceDestinationDto.setNode(assignment.getNode());
+
+    when(validSourceDestinationService.findByProgramFacilitySource(assignment))
+        .thenReturn(validSourceDestinationDto);
 
     //when
     ResultActions resultActions = mvc.perform(post(API_VALID_SOURCES)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .param(PROGRAM, programId.toString())
-        .param(FACILITY_TYPE, facilityTypeId.toString())
         .contentType(MediaType.APPLICATION_JSON)
-        .content(objectToJsonString(sourceId.toString())));
+        .content(objectToJsonString(assignment)));
 
     //then
     resultActions

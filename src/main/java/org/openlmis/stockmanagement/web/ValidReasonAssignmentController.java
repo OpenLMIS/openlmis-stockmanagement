@@ -77,10 +77,8 @@ public class ValidReasonAssignmentController {
     LOGGER.debug(format(
         "Try to find stock card line item reason with program %s and facility type %s",
         program.toString(), facilityType.toString()));
-
-    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(program, facilityType);
     permissionService.canViewReasons(program, facilityType);
-
+    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(program, facilityType);
     return new ResponseEntity<>(getReasonsBy(program, facilityType), OK);
   }
 
@@ -114,6 +112,7 @@ public class ValidReasonAssignmentController {
   @RequestMapping(value = "/validReasons", method = POST)
   public ResponseEntity<ValidReasonAssignment> assignReason(
       @RequestBody ValidReasonAssignment assignment) {
+    permissionService.canManageReasons();
     assignment.setId(null);
     checkIsValidRequest(assignment);
     return findExistingOrSaveNew(assignment);

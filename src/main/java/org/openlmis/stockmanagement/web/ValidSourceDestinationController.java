@@ -23,6 +23,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
+import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
+import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
 import org.openlmis.stockmanagement.service.ValidSourceDestinationService;
 import org.slf4j.Logger;
@@ -68,26 +70,20 @@ public class ValidSourceDestinationController {
   /**
    * Assign a destination to a program and facility type.
    *
-   * @param program       program ID
-   * @param facilityType  facility type ID
-   * @param destinationId destination ID
    * @return the assigned destination and program and facility type.
    */
   @RequestMapping(value = "/validDestinations", method = POST)
   public ResponseEntity<ValidSourceDestinationDto> assignDestination(
-      @RequestParam UUID program,
-      @RequestParam UUID facilityType,
-      @RequestBody UUID destinationId) {
-    LOGGER.debug(format("Try to assign destination %s to program %s and facility type %s",
-        destinationId.toString(), program.toString(), facilityType.toString()));
+      @RequestBody ValidDestinationAssignment assignment) {
+    LOGGER.debug("Try to assign destinations");
     ValidSourceDestinationDto destinationDto = validSourceDestinationService
-        .findByProgramFacilityDestination(program, facilityType, destinationId);
+        .findByProgramFacilityDestination(assignment);
     if (destinationDto != null) {
       return new ResponseEntity<>(destinationDto, OK);
     }
 
-    return new ResponseEntity<>(validSourceDestinationService.assignDestination(
-        program, facilityType, destinationId), CREATED);
+    return new ResponseEntity<>(
+        validSourceDestinationService.assignDestination(assignment), CREATED);
   }
 
   /**
@@ -110,26 +106,19 @@ public class ValidSourceDestinationController {
   /**
    * Assign a source to program and facility type.
    *
-   * @param program      program ID
-   * @param facilityType facility type ID
-   * @param sourceId     source ID
    * @return the assigned source and program and facility type.
    */
   @RequestMapping(value = "/validSources", method = POST)
   public ResponseEntity<ValidSourceDestinationDto> assignSource(
-      @RequestParam UUID program,
-      @RequestParam UUID facilityType,
-      @RequestBody UUID sourceId) {
-    LOGGER.debug(format("Try to assign source %s to program %s and facility type %s",
-        sourceId.toString(), program.toString(), facilityType.toString()));
-
+      @RequestBody ValidSourceAssignment assignment) {
+    LOGGER.debug("Try to assign source");
     ValidSourceDestinationDto foundAssignmentDto = validSourceDestinationService
-        .findByProgramFacilitySource(program, facilityType, sourceId);
+        .findByProgramFacilitySource(assignment);
     if (foundAssignmentDto != null) {
       return new ResponseEntity<>(foundAssignmentDto, OK);
     }
     return new ResponseEntity<>(
-        validSourceDestinationService.assignSource(program, facilityType, sourceId), CREATED);
+        validSourceDestinationService.assignSource(assignment), CREATED);
   }
 
   /**

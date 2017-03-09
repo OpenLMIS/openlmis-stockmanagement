@@ -25,6 +25,8 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.testutils.ValidDestinationAssignmentBuilder.createDestination;
+import static org.openlmis.stockmanagement.testutils.ValidSourceAssignmentBuilder.createSource;
 import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationBuilder.createFacilityDestination;
 import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationBuilder.createFacilitySourceAssignment;
 import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationBuilder.createOrganizationDestination;
@@ -117,7 +119,7 @@ public class ValidSourceDestinationServiceTest {
     UUID programId = randomUUID();
     UUID facilityTypeId = randomUUID();
     UUID sourceId = randomUUID();
-
+    ValidSourceAssignment assignment = createSource(programId, facilityTypeId, sourceId);
     Node node = createNode(sourceId, true);
     when(nodeRepository.findByReferenceId(sourceId)).thenReturn(node);
     when(facilityReferenceDataService.findOne(sourceId)).thenReturn(new FacilityDto());
@@ -128,7 +130,7 @@ public class ValidSourceDestinationServiceTest {
 
     //when
     ValidSourceDestinationDto foundDto = validSourceDestinationService
-        .findByProgramFacilitySource(programId, facilityTypeId, sourceId);
+        .findByProgramFacilitySource(assignment);
 
     assertThat(foundDto.getProgramId(), is(programId));
     assertThat(foundDto.getFacilityTypeId(), is(facilityTypeId));
@@ -152,21 +154,20 @@ public class ValidSourceDestinationServiceTest {
     facilityDto.setName(FACILITY_NAME);
     when(facilityReferenceDataService.findOne(sourceId)).thenReturn(facilityDto);
     when(nodeRepository.findByReferenceId(sourceId)).thenReturn(null);
+    ValidSourceAssignment assignment = createSource(programId, facilityTypeId, sourceId);
 
     //when
-    ValidSourceDestinationDto assignment = validSourceDestinationService
-        .assignSource(programId, facilityTypeId, sourceId);
+    ValidSourceDestinationDto assignmentDto = validSourceDestinationService
+        .assignSource(assignment);
 
     //then
-    assertThat(assignment.getProgramId(), is(programId));
-    assertThat(assignment.getFacilityTypeId(), is(facilityTypeId));
-    assertThat(assignment.getIsFreeTextAllowed(), is(false));
-    assertThat(assignment.getName(), is(FACILITY_NAME));
-    assertThat(assignment.getNode().getReferenceId(), is(sourceId));
-    assertThat(assignment.getNode().isRefDataFacility(), is(true));
+    assertThat(assignmentDto.getProgramId(), is(programId));
+    assertThat(assignmentDto.getFacilityTypeId(), is(facilityTypeId));
+    assertThat(assignmentDto.getIsFreeTextAllowed(), is(false));
+    assertThat(assignmentDto.getName(), is(FACILITY_NAME));
+    assertThat(assignmentDto.getNode().getReferenceId(), is(sourceId));
+    assertThat(assignmentDto.getNode().isRefDataFacility(), is(true));
     verify(permissionService, times(1)).canManageStockSources();
-    verify(programFacilityTypeExistenceService, times(1))
-        .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
   }
 
   @Test
@@ -182,30 +183,33 @@ public class ValidSourceDestinationServiceTest {
     organization.setName(ORGANIZATION_NAME);
     when(organizationRepository.findOne(sourceId)).thenReturn(organization);
     when(nodeRepository.findByReferenceId(sourceId)).thenReturn(null);
+    ValidSourceAssignment assignment = createSource(programId, facilityTypeId, sourceId);
 
     //when
-    ValidSourceDestinationDto assignment = validSourceDestinationService
-        .assignSource(programId, facilityTypeId, sourceId);
+    ValidSourceDestinationDto assignmentDto = validSourceDestinationService
+        .assignSource(assignment);
 
     //then
-    assertThat(assignment.getProgramId(), is(programId));
-    assertThat(assignment.getFacilityTypeId(), is(facilityTypeId));
-    assertThat(assignment.getIsFreeTextAllowed(), is(true));
-    assertThat(assignment.getName(), is(ORGANIZATION_NAME));
-    assertThat(assignment.getNode().getReferenceId(), is(sourceId));
-    assertThat(assignment.getNode().isRefDataFacility(), is(false));
+    assertThat(assignmentDto.getProgramId(), is(programId));
+    assertThat(assignmentDto.getFacilityTypeId(), is(facilityTypeId));
+    assertThat(assignmentDto.getIsFreeTextAllowed(), is(true));
+    assertThat(assignmentDto.getName(), is(ORGANIZATION_NAME));
+    assertThat(assignmentDto.getNode().getReferenceId(), is(sourceId));
+    assertThat(assignmentDto.getNode().isRefDataFacility(), is(false));
   }
 
   @Test(expected = ValidationMessageException.class)
   public void should_return_400_when_source_not_found() throws Exception {
     //given
+    UUID programId = randomUUID();
+    UUID facilityTypeId = randomUUID();
     UUID sourceId = randomUUID();
-
+    ValidSourceAssignment assignment = createSource(programId, facilityTypeId, sourceId);
     when(organizationRepository.findOne(sourceId)).thenReturn(null);
     when(nodeRepository.findByReferenceId(sourceId)).thenReturn(null);
 
     //when
-    validSourceDestinationService.assignSource(randomUUID(), randomUUID(), sourceId);
+    validSourceDestinationService.assignSource(assignment);
   }
 
   @Test
@@ -213,7 +217,8 @@ public class ValidSourceDestinationServiceTest {
     UUID programId = randomUUID();
     UUID facilityTypeId = randomUUID();
     UUID destinationId = randomUUID();
-
+    ValidDestinationAssignment assignment = createDestination(
+        programId, facilityTypeId, destinationId);
     Node node = createNode(destinationId, true);
     when(nodeRepository.findByReferenceId(destinationId)).thenReturn(node);
     when(facilityReferenceDataService.findOne(destinationId)).thenReturn(new FacilityDto());
@@ -224,7 +229,7 @@ public class ValidSourceDestinationServiceTest {
 
     //when
     ValidSourceDestinationDto foundDto = validSourceDestinationService
-        .findByProgramFacilityDestination(programId, facilityTypeId, destinationId);
+        .findByProgramFacilityDestination(assignment);
 
     assertThat(foundDto.getProgramId(), is(programId));
     assertThat(foundDto.getFacilityTypeId(), is(facilityTypeId));
@@ -248,21 +253,21 @@ public class ValidSourceDestinationServiceTest {
     facilityDto.setName(FACILITY_NAME);
     when(facilityReferenceDataService.findOne(destinationId)).thenReturn(facilityDto);
     when(nodeRepository.findByReferenceId(destinationId)).thenReturn(null);
+    ValidDestinationAssignment assignment = createDestination(
+        programId, facilityTypeId, destinationId);
 
     //when
-    ValidSourceDestinationDto assignment = validSourceDestinationService
-        .assignDestination(programId, facilityTypeId, destinationId);
+    ValidSourceDestinationDto assignmentDto = validSourceDestinationService
+        .assignDestination(assignment);
 
     //then
-    assertThat(assignment.getProgramId(), is(programId));
-    assertThat(assignment.getFacilityTypeId(), is(facilityTypeId));
-    assertThat(assignment.getIsFreeTextAllowed(), is(false));
-    assertThat(assignment.getName(), is(FACILITY_NAME));
-    assertThat(assignment.getNode().getReferenceId(), is(destinationId));
-    assertThat(assignment.getNode().isRefDataFacility(), is(true));
+    assertThat(assignmentDto.getProgramId(), is(programId));
+    assertThat(assignmentDto.getFacilityTypeId(), is(facilityTypeId));
+    assertThat(assignmentDto.getIsFreeTextAllowed(), is(false));
+    assertThat(assignmentDto.getName(), is(FACILITY_NAME));
+    assertThat(assignmentDto.getNode().getReferenceId(), is(destinationId));
+    assertThat(assignmentDto.getNode().isRefDataFacility(), is(true));
     verify(permissionService, times(1)).canManageStockDestinations();
-    verify(programFacilityTypeExistenceService, times(1))
-        .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
   }
 
   @Test
@@ -279,30 +284,35 @@ public class ValidSourceDestinationServiceTest {
     organization.setName(ORGANIZATION_NAME);
     when(organizationRepository.findOne(destinationId)).thenReturn(organization);
     when(nodeRepository.findByReferenceId(destinationId)).thenReturn(null);
+    ValidDestinationAssignment assignment = createDestination(
+        programId, facilityTypeId, destinationId);
 
     //when
-    ValidSourceDestinationDto assignment = validSourceDestinationService
-        .assignDestination(programId, facilityTypeId, destinationId);
+    ValidSourceDestinationDto assignmentDto = validSourceDestinationService
+        .assignDestination(assignment);
 
     //then
-    assertThat(assignment.getProgramId(), is(programId));
-    assertThat(assignment.getFacilityTypeId(), is(facilityTypeId));
-    assertThat(assignment.getIsFreeTextAllowed(), is(true));
-    assertThat(assignment.getName(), is(ORGANIZATION_NAME));
-    assertThat(assignment.getNode().getReferenceId(), is(destinationId));
-    assertThat(assignment.getNode().isRefDataFacility(), is(false));
+    assertThat(assignmentDto.getProgramId(), is(programId));
+    assertThat(assignmentDto.getFacilityTypeId(), is(facilityTypeId));
+    assertThat(assignmentDto.getIsFreeTextAllowed(), is(true));
+    assertThat(assignmentDto.getName(), is(ORGANIZATION_NAME));
+    assertThat(assignmentDto.getNode().getReferenceId(), is(destinationId));
+    assertThat(assignmentDto.getNode().isRefDataFacility(), is(false));
   }
 
   @Test(expected = ValidationMessageException.class)
   public void should_return_400_when_destination_not_found() throws Exception {
     //given
+    UUID programId = randomUUID();
+    UUID facilityTypeId = randomUUID();
     UUID destinationId = randomUUID();
-
+    ValidDestinationAssignment assignment = createDestination(
+        programId, facilityTypeId, destinationId);
     when(organizationRepository.findOne(destinationId)).thenReturn(null);
     when(nodeRepository.findByReferenceId(destinationId)).thenReturn(null);
 
     //when
-    validSourceDestinationService.assignDestination(randomUUID(), randomUUID(), destinationId);
+    validSourceDestinationService.assignDestination(assignment);
   }
 
   @Test(expected = PermissionMessageException.class)

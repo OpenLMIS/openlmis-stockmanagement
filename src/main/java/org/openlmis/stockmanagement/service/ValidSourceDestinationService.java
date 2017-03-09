@@ -93,60 +93,45 @@ public class ValidSourceDestinationService {
   /**
    * Assign a source to a program and facility type.
    *
-   * @param program      program ID
-   * @param facilityType facility type ID
-   * @param sourceId     source ID
    * @return a valid source destination dto
    */
-  public ValidSourceDestinationDto assignSource(UUID program, UUID facilityType, UUID sourceId) {
+  public ValidSourceDestinationDto assignSource(ValidSourceAssignment assignment) {
 
     permissionService.canManageStockSources();
-    return doAssign(program, facilityType, sourceId,
-        ERROR_SOURCE_NOT_FOUND, new ValidSourceAssignment(), validSourceRepository);
+    return doAssign(assignment, ERROR_SOURCE_NOT_FOUND, validSourceRepository);
   }
 
   /**
    * Assign a destination to a program and facility type.
    *
-   * @param program       program ID
-   * @param facilityType  facility type ID
-   * @param destinationId destination ID
    * @return a valid source destination dto
    */
-  public ValidSourceDestinationDto assignDestination(
-      UUID program, UUID facilityType, UUID destinationId) {
+  public ValidSourceDestinationDto assignDestination(ValidDestinationAssignment assignment) {
 
     permissionService.canManageStockDestinations();
-    return doAssign(program, facilityType, destinationId,
-        ERROR_DESTINATION_NOT_FOUND, new ValidDestinationAssignment(), validDestinationRepository);
+    return doAssign(assignment, ERROR_DESTINATION_NOT_FOUND, validDestinationRepository);
   }
 
   /**
    * Find existing source assignment.
    *
-   * @param programId      program ID
-   * @param facilityTypeId facility type ID
-   * @param sourceId       source ID
    * @return a valid source destination dto
    */
   public ValidSourceDestinationDto findByProgramFacilitySource(
-      UUID programId, UUID facilityTypeId, UUID sourceId) {
+      ValidSourceAssignment assignment) {
     permissionService.canManageStockSources();
-    return findAssignment(programId, facilityTypeId, sourceId, validSourceRepository);
+    return findAssignment(assignment, validSourceRepository);
   }
 
   /**
    * Find existing destination assignment.
    *
-   * @param programId      program ID
-   * @param facilityTypeId facility type ID
-   * @param destinationId  destination ID
    * @return a valid source destination dto
    */
   public ValidSourceDestinationDto findByProgramFacilityDestination(
-      UUID programId, UUID facilityTypeId, UUID destinationId) {
+      ValidDestinationAssignment assignment) {
     permissionService.canManageStockDestinations();
-    return findAssignment(programId, facilityTypeId, destinationId, validDestinationRepository);
+    return findAssignment(assignment, validDestinationRepository);
   }
 
   /**
@@ -178,11 +163,16 @@ public class ValidSourceDestinationService {
   }
 
   private <T extends SourceDestinationAssignment> ValidSourceDestinationDto findAssignment(
-      UUID programId, UUID facilityTypeId, UUID sourceId,
-      SourceDestinationAssignmentRepository<T> repository) {
-
-    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(programId, facilityTypeId);
-    Node foundNode = nodeRepository.findByReferenceId(sourceId);
+      T assignment, SourceDestinationAssignmentRepository<T> repository) {
+    UUID programId = assignment.getProgramId();
+    UUID facilityTypeId = assignment.getFacilityTypeId();
+    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(programId,
+        facilityTypeId);
+    Node node = assignment.getNode();
+    if (node == null || node.getReferenceId() == null) {
+      throw new ValidationMessageException(new Message("assignment id missing"));
+    }
+    Node foundNode = nodeRepository.findByReferenceId(node.getReferenceId());
     if (foundNode != null) {
       T foundAssignment = repository.findByProgramIdAndFacilityTypeIdAndNodeId(
           programId, facilityTypeId, foundNode.getId());
@@ -206,11 +196,10 @@ public class ValidSourceDestinationService {
   }
 
   private <T extends SourceDestinationAssignment> ValidSourceDestinationDto doAssign(
-      UUID program, UUID facilityType, UUID referenceId, String errorKey, T assignment,
-      SourceDestinationAssignmentRepository<T> repository) {
-
-    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(program, facilityType);
-
+      T assignment, String errorKey, SourceDestinationAssignmentRepository<T> repository) {
+    UUID program = assignment.getProgramId();
+    UUID facilityType = assignment.getFacilityTypeId();
+    UUID referenceId = assignment.getNode().getReferenceId();
     if (facilityRefDataService.findOne(referenceId) != null) {
       return createFrom(createAssignment(
           program, facilityType, findOrCreateNode(referenceId, true), assignment, repository));
