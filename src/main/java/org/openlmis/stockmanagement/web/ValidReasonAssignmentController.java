@@ -121,9 +121,6 @@ public class ValidReasonAssignmentController {
   private void checkIsValidRequest(ValidReasonAssignment assignment) {
     programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(
         assignment.getProgramId(), assignment.getFacilityTypeId());
-
-    permissionService.canManageReasons();
-
     if (assignment.getReason() == null || assignment.getReason().getId() == null) {
       throw new ValidationMessageException(new Message(ERROR_REASON_ID_EMPTY));
     }
