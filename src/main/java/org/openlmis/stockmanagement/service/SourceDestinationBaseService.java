@@ -35,7 +35,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-public class SourceDestinationBaseService {
+public abstract class SourceDestinationBaseService {
 
   @Autowired
   private ProgramFacilityTypeExistenceService programFacilityTypeExistenceService;
@@ -57,7 +57,7 @@ public class SourceDestinationBaseService {
    * @param errorKey     error message key
    * @param <T>          assignment type
    */
-  public <T extends SourceDestinationAssignment> void doDelete(
+  protected <T extends SourceDestinationAssignment> void doDelete(
       UUID assignmentId, SourceDestinationAssignmentRepository<T> repository, String errorKey) {
     if (!repository.exists(assignmentId)) {
       throw new ValidationMessageException(new Message(errorKey));
@@ -73,7 +73,7 @@ public class SourceDestinationBaseService {
    * @param <T>        assignment type
    * @return assignment dto or null if not found.
    */
-  public <T extends SourceDestinationAssignment> ValidSourceDestinationDto findAssignment(
+  protected <T extends SourceDestinationAssignment> ValidSourceDestinationDto findAssignment(
       T assignment, SourceDestinationAssignmentRepository<T> repository) {
     UUID programId = assignment.getProgramId();
     UUID facilityTypeId = assignment.getFacilityTypeId();
@@ -98,7 +98,7 @@ public class SourceDestinationBaseService {
    * @param <T>            assignment type
    * @return a list of assignment dto or empty list if not found.
    */
-  public <T extends SourceDestinationAssignment> List<ValidSourceDestinationDto> findAssignments(
+  protected <T extends SourceDestinationAssignment> List<ValidSourceDestinationDto> findAssignments(
       UUID programId, UUID facilityTypeId,
       SourceDestinationAssignmentRepository<T> repository) {
 
@@ -117,7 +117,7 @@ public class SourceDestinationBaseService {
    * @param <T>        assignment type
    * @return created assignment.
    */
-  public <T extends SourceDestinationAssignment> ValidSourceDestinationDto doAssign(
+  protected <T extends SourceDestinationAssignment> ValidSourceDestinationDto doAssign(
       T assignment, String errorKey, SourceDestinationAssignmentRepository<T> repository) {
     UUID program = assignment.getProgramId();
     UUID facilityType = assignment.getFacilityTypeId();
