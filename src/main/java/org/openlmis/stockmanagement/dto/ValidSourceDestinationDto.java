@@ -15,8 +15,10 @@
 
 package org.openlmis.stockmanagement.dto;
 
-import lombok.Data;
 import org.openlmis.stockmanagement.domain.movement.Node;
+import org.openlmis.stockmanagement.domain.movement.SourceDestinationAssignment;
+
+import lombok.Data;
 
 import java.util.UUID;
 
@@ -28,4 +30,23 @@ public class ValidSourceDestinationDto {
   private Node node;
   private String name;
   private Boolean isFreeTextAllowed;
+
+  /**
+   * Create DTO from JPA model.
+   *
+   * @param assignment JPA model
+   * @param name       facility or organization name
+   * @return created DTO
+   */
+  public static ValidSourceDestinationDto createFrom(
+      SourceDestinationAssignment assignment, String name) {
+    ValidSourceDestinationDto dto = new ValidSourceDestinationDto();
+    dto.setName(name);
+    dto.setIsFreeTextAllowed(!assignment.getNode().isRefDataFacility());
+    dto.setId(assignment.getId());
+    dto.setNode(assignment.getNode());
+    dto.setProgramId(assignment.getProgramId());
+    dto.setFacilityTypeId(assignment.getFacilityTypeId());
+    return dto;
+  }
 }

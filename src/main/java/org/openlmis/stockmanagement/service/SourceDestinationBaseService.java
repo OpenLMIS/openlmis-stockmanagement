@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static org.openlmis.stockmanagement.dto.ValidSourceDestinationDto.createFrom;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_ASSIGNMENT_ID_MISSING;
 
 import org.openlmis.stockmanagement.domain.movement.Node;
@@ -83,7 +84,7 @@ public abstract class SourceDestinationBaseService {
           programId, facilityTypeId, foundNode.getId());
 
       if (foundAssignment != null) {
-        return createFrom(foundAssignment);
+        return createAssignmentDto(foundAssignment);
       }
     }
     return null;
@@ -105,7 +106,7 @@ public abstract class SourceDestinationBaseService {
     programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
     List<T> assignments = repository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
-    return assignments.stream().map(this::createFrom).collect(Collectors.toList());
+    return assignments.stream().map(this::createAssignmentDto).collect(Collectors.toList());
   }
 
   /**
@@ -119,18 +120,20 @@ public abstract class SourceDestinationBaseService {
    */
   protected <T extends SourceDestinationAssignment> ValidSourceDestinationDto doAssign(
       T assignment, String errorKey, SourceDestinationAssignmentRepository<T> repository) {
-    UUID program = assignment.getProgramId();
-    UUID facilityType = assignment.getFacilityTypeId();
     UUID referenceId = assignment.getNode().getReferenceId();
-    if (facilityRefDataService.findOne(referenceId) != null) {
-      return createFrom(createAssignment(
-          program, facilityType, findOrCreateNode(referenceId, true), assignment, repository));
-    } else if (organizationRepository.findOne(referenceId) != null) {
-      return createFrom(createAssignment(
-          program, facilityType, findOrCreateNode(referenceId, false), assignment, repository));
+    if (isFacility(referenceId) || isOrganization(referenceId)) {
+      assignment.setNode(findOrCreateNode(referenceId, isFacility(referenceId)));
+      return createAssignmentDto(repository.save(assignment));
     }
-
     throw new ValidationMessageException(new Message(errorKey));
+  }
+
+  private boolean isOrganization(UUID referenceId) {
+    return organizationRepository.findOne(referenceId) != null;
+  }
+
+  private boolean isFacility(UUID referenceId) {
+    return facilityRefDataService.findOne(referenceId) != null;
   }
 
   private <T extends SourceDestinationAssignment> Node findExistingNode(
@@ -145,17 +148,6 @@ public abstract class SourceDestinationBaseService {
     return nodeRepository.findByReferenceId(node.getReferenceId());
   }
 
-  private <T extends SourceDestinationAssignment> T createAssignment(
-      UUID program, UUID facilityType, Node node, T assignment,
-      SourceDestinationAssignmentRepository<T> repository) {
-
-    assignment.setProgramId(program);
-    assignment.setFacilityTypeId(facilityType);
-    assignment.setNode(node);
-
-    return repository.save(assignment);
-  }
-
   private Node findOrCreateNode(UUID referenceId, boolean isRefDataFacility) {
     Node node = nodeRepository.findByReferenceId(referenceId);
     if (node == null) {
@@ -167,27 +159,12 @@ public abstract class SourceDestinationBaseService {
     return node;
   }
 
-  private ValidSourceDestinationDto createFrom(SourceDestinationAssignment assignment) {
-    Node node = assignment.getNode();
-
-    ValidSourceDestinationDto dto = createFrom(node);
-    dto.setId(assignment.getId());
-    dto.setNode(node);
-    dto.setProgramId(assignment.getProgramId());
-    dto.setFacilityTypeId(assignment.getFacilityTypeId());
-    return dto;
-  }
-
-  private ValidSourceDestinationDto createFrom(Node node) {
-    ValidSourceDestinationDto dto = new ValidSourceDestinationDto();
-
-    boolean isRefDataFacility = node.isRefDataFacility();
-    if (isRefDataFacility) {
-      dto.setName(facilityRefDataService.findOne(node.getReferenceId()).getName());
-    } else {
-      dto.setName(organizationRepository.findOne(node.getReferenceId()).getName());
+  private ValidSourceDestinationDto createAssignmentDto(SourceDestinationAssignment assignment) {
+    UUID referenceId = assignment.getNode().getReferenceId();
+    if (assignment.getNode().isRefDataFacility()) {
+      return createFrom(assignment, facilityRefDataService.findOne(referenceId).getName());
     }
-    dto.setIsFreeTextAllowed(!isRefDataFacility);
-    return dto;
+    return createFrom(assignment, organizationRepository.findOne(referenceId).getName());
   }
+
 }
