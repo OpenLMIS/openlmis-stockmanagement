@@ -15,6 +15,9 @@
 
 package org.openlmis.stockmanagement.dto;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import static java.util.stream.Collectors.toList;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import org.openlmis.stockmanagement.domain.template.AvailableStockCardFields;
@@ -24,9 +27,6 @@ import org.openlmis.stockmanagement.domain.template.StockCardTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-import static java.util.stream.Collectors.toList;
 
 @Data
 @JsonInclude(NON_NULL)
@@ -77,7 +77,7 @@ public class StockCardTemplateDto {
     template.setFacilityTypeId(this.getFacilityTypeId());
     template.setProgramId(this.getProgramId());
 
-    template.setStockCardFields(stockCardFields.stream()
+    template.setStockCardFields(stockCardFields.stream().distinct()
             .map(cardFieldDto -> cardFieldDto.toModel(template, availableCardFields))
             .collect(toList()));
 

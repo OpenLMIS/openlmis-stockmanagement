@@ -19,6 +19,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_TYPE_ID_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_ID_MISSING;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_STOCK_CARD_FIELD_DUPLICATED;
 
 import org.openlmis.stockmanagement.domain.template.AvailableStockCardFields;
 import org.openlmis.stockmanagement.domain.template.AvailableStockCardLineItemFields;
@@ -36,12 +37,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
-
-import javax.transaction.Transactional;
 
 /**
  * A service that wraps around repository to provide ability
@@ -71,6 +71,8 @@ public class StockCardTemplateService {
   @Transactional
   public StockCardTemplateDto saveOrUpdate(StockCardTemplateDto templateDto) {
     checkProgramAndFacilityTypeIdNotNull(templateDto);
+    checkFieldsDuplication(templateDto);
+
     StockCardTemplate template = templateDto.toModel(
         findAllFieldsFrom(cardFieldsRepo).collect(toList()),
         findAllFieldsFrom(lineItemFieldsRepo).collect(toList()));
@@ -128,6 +130,19 @@ public class StockCardTemplateService {
     }
     if (templateDto.getFacilityTypeId() == null) {
       throw new ValidationMessageException(new Message(ERROR_FACILITY_TYPE_ID_MISSING));
+    }
+  }
+
+  private void checkFieldsDuplication(StockCardTemplateDto templateDto) {
+    List<StockCardFieldDto> cardFields = templateDto.getStockCardFields();
+    long cardFieldCount = cardFields.stream().map(StockCardFieldDto::getName).distinct().count();
+
+    List<StockCardLineItemFieldDto> lineItemFields = templateDto.getStockCardLineItemFields();
+    long lineItemFieldCount = lineItemFields.stream()
+        .map(StockCardLineItemFieldDto::getName).distinct().count();
+
+    if (cardFieldCount < cardFields.size() || lineItemFieldCount < lineItemFields.size()) {
+      throw new ValidationMessageException(new Message(ERROR_STOCK_CARD_FIELD_DUPLICATED));
     }
   }
 

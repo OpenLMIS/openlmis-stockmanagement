@@ -25,6 +25,7 @@ import static org.openlmis.stockmanagement.testutils.StockCardTemplateBuilder.cr
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.dto.StockCardFieldDto;
+import org.openlmis.stockmanagement.dto.StockCardLineItemFieldDto;
 import org.openlmis.stockmanagement.dto.StockCardTemplateDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
@@ -132,5 +133,21 @@ public class StockCardTemplateServiceTest {
 
     //when
     stockCardTemplateService.saveOrUpdate(templateDto);
+  }
+
+  @Test(expected = ValidationMessageException.class)
+  public void should_throw_exception_when_card_fields_duplicated() throws Exception {
+    StockCardTemplateDto dto = createTemplateDto();
+    dto.getStockCardFields().add(new StockCardFieldDto("packSize", true, 124));
+
+    stockCardTemplateService.saveOrUpdate(dto);
+  }
+
+  @Test(expected = ValidationMessageException.class)
+  public void should_throw_exception_when_line_item_fields_duplicated() throws Exception {
+    StockCardTemplateDto dto = createTemplateDto();
+    dto.getStockCardLineItemFields().add(new StockCardLineItemFieldDto("documentNo", true, 457));
+
+    stockCardTemplateService.saveOrUpdate(dto);
   }
 }

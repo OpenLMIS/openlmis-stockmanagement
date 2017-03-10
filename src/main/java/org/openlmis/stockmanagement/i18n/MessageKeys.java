@@ -25,6 +25,9 @@ public abstract class MessageKeys {
   public static final String ERROR_STOCK_CARD_FIELD_INVALID =
       ERROR_PREFIX + ".field.invalid";
 
+  public static final String ERROR_STOCK_CARD_FIELD_DUPLICATED =
+      ERROR_PREFIX + ".field.duplicated";
+
   public static final String ERROR_PROGRAM_ID_MISSING =
       ERROR_PREFIX + ".program.id.missing";
   public static final String ERROR_FACILITY_TYPE_ID_MISSING =
