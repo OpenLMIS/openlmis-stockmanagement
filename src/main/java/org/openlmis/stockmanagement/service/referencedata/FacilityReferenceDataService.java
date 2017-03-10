@@ -18,6 +18,8 @@ package org.openlmis.stockmanagement.service.referencedata;
 import org.openlmis.stockmanagement.dto.FacilityDto;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class FacilityReferenceDataService extends BaseReferenceDataService<FacilityDto> {
 
@@ -36,4 +38,7 @@ public class FacilityReferenceDataService extends BaseReferenceDataService<Facil
     return FacilityDto[].class;
   }
 
+  public boolean exists(UUID id) {
+    return id != null && findOne(id) != null;
+  }
 }

@@ -121,19 +121,13 @@ public abstract class SourceDestinationBaseService {
   protected <T extends SourceDestinationAssignment> ValidSourceDestinationDto doAssign(
       T assignment, String errorKey, SourceDestinationAssignmentRepository<T> repository) {
     UUID referenceId = assignment.getNode().getReferenceId();
-    if (isFacility(referenceId) || isOrganization(referenceId)) {
-      assignment.setNode(findOrCreateNode(referenceId, isFacility(referenceId)));
+    boolean isRefFacility = facilityRefDataService.exists(referenceId);
+    boolean isOrganization = organizationRepository.exists(referenceId);
+    if (isRefFacility || isOrganization) {
+      assignment.setNode(findOrCreateNode(referenceId, isRefFacility));
       return createAssignmentDto(repository.save(assignment));
     }
     throw new ValidationMessageException(new Message(errorKey));
-  }
-
-  private boolean isOrganization(UUID referenceId) {
-    return organizationRepository.findOne(referenceId) != null;
-  }
-
-  private boolean isFacility(UUID referenceId) {
-    return facilityRefDataService.findOne(referenceId) != null;
   }
 
   private <T extends SourceDestinationAssignment> Node findExistingNode(

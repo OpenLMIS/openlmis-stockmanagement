@@ -155,13 +155,13 @@ public class SourceDestinationBaseServiceTest {
         createSourceAssignment(programId, facilityTypeId, createNode(sourceId, true)));
     FacilityDto facilityDto = new FacilityDto();
     facilityDto.setName(FACILITY_NAME);
+    when(facilityReferenceDataService.exists(sourceId)).thenReturn(true);
     when(facilityReferenceDataService.findOne(sourceId)).thenReturn(facilityDto);
     when(nodeRepository.findByReferenceId(sourceId)).thenReturn(null);
     ValidSourceAssignment assignment = createSource(programId, facilityTypeId, sourceId);
 
     //when
-    ValidSourceDestinationDto assignmentDto = validSourceService
-        .assignSource(assignment);
+    ValidSourceDestinationDto assignmentDto = validSourceService.assignSource(assignment);
 
     //then
     assertThat(assignmentDto.getProgramId(), is(programId));
@@ -173,7 +173,7 @@ public class SourceDestinationBaseServiceTest {
   }
 
   @Test
-  public void should_return_source_assignment_when_source_is_a_organization() throws Exception {
+  public void should_return_source_assignment_when_source_is_an_organization() throws Exception {
     //given
     UUID programId = randomUUID();
     UUID facilityTypeId = randomUUID();
@@ -183,13 +183,13 @@ public class SourceDestinationBaseServiceTest {
         createSourceAssignment(programId, facilityTypeId, createNode(sourceId, false)));
     Organization organization = new Organization();
     organization.setName(ORGANIZATION_NAME);
+    when(organizationRepository.exists(sourceId)).thenReturn(true);
     when(organizationRepository.findOne(sourceId)).thenReturn(organization);
     when(nodeRepository.findByReferenceId(sourceId)).thenReturn(null);
     ValidSourceAssignment assignment = createSource(programId, facilityTypeId, sourceId);
 
     //when
-    ValidSourceDestinationDto assignmentDto = validSourceService
-        .assignSource(assignment);
+    ValidSourceDestinationDto assignmentDto = validSourceService.assignSource(assignment);
 
     //then
     assertThat(assignmentDto.getProgramId(), is(programId));
@@ -253,14 +253,14 @@ public class SourceDestinationBaseServiceTest {
         createDestinationAssignment(programId, facilityTypeId, createNode(destinationId, true)));
     FacilityDto facilityDto = new FacilityDto();
     facilityDto.setName(FACILITY_NAME);
+    when(facilityReferenceDataService.exists(destinationId)).thenReturn(true);
     when(facilityReferenceDataService.findOne(destinationId)).thenReturn(facilityDto);
     when(nodeRepository.findByReferenceId(destinationId)).thenReturn(null);
     ValidDestinationAssignment assignment = createDestination(
         programId, facilityTypeId, destinationId);
 
     //when
-    ValidSourceDestinationDto assignmentDto = validDestinationService
-        .assignDestination(assignment);
+    ValidSourceDestinationDto assignmentDto = validDestinationService.assignDestination(assignment);
 
     //then
     assertThat(assignmentDto.getProgramId(), is(programId));
@@ -283,14 +283,14 @@ public class SourceDestinationBaseServiceTest {
         createDestinationAssignment(programId, facilityTypeId, createNode(destinationId, false)));
     Organization organization = new Organization();
     organization.setName(ORGANIZATION_NAME);
+    when(organizationRepository.exists(destinationId)).thenReturn(true);
     when(organizationRepository.findOne(destinationId)).thenReturn(organization);
     when(nodeRepository.findByReferenceId(destinationId)).thenReturn(null);
     ValidDestinationAssignment assignment = createDestination(
         programId, facilityTypeId, destinationId);
 
     //when
-    ValidSourceDestinationDto assignmentDto = validDestinationService
-        .assignDestination(assignment);
+    ValidSourceDestinationDto assignmentDto = validDestinationService.assignDestination(assignment);
 
     //then
     assertThat(assignmentDto.getProgramId(), is(programId));
