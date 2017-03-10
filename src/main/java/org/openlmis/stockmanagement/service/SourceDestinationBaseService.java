@@ -15,23 +15,15 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_ASSIGNMENT_NOT_FOUND;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_NOT_FOUND;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_ASSIGNMENT_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_ASSIGNMENT_ID_MISSING;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_FOUND;
 
 import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.domain.movement.SourceDestinationAssignment;
-import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
-import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.NodeRepository;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.repository.SourceDestinationAssignmentRepository;
-import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
-import org.openlmis.stockmanagement.repository.ValidSourceAssignmentRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
 import org.openlmis.stockmanagement.utils.Message;
@@ -43,20 +35,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@SuppressWarnings("PMD.TooManyMethods")
-public class ValidSourceDestinationService {
+public class SourceDestinationBaseService {
 
   @Autowired
   private ProgramFacilityTypeExistenceService programFacilityTypeExistenceService;
-
-  @Autowired
-  private PermissionService permissionService;
-
-  @Autowired
-  private ValidDestinationAssignmentRepository validDestinationRepository;
-
-  @Autowired
-  private ValidSourceAssignmentRepository validSourceRepository;
 
   @Autowired
   private FacilityReferenceDataService facilityRefDataService;
@@ -68,96 +50,14 @@ public class ValidSourceDestinationService {
   private NodeRepository nodeRepository;
 
   /**
-   * Find valid destinations by program ID and facility type ID.
+   * Delete an assignment.
    *
-   * @param programId      program ID
-   * @param facilityTypeId facility type ID
-   * @return valid destination assignment DTOs
+   * @param assignmentId assignment id
+   * @param repository   assignment repository
+   * @param errorKey     error message key
+   * @param <T>          assignment type
    */
-  public List<ValidSourceDestinationDto> findSources(UUID programId, UUID facilityTypeId) {
-    permissionService.canViewStockSource(programId, facilityTypeId);
-    return findAssignments(programId, facilityTypeId, validSourceRepository);
-  }
-
-  /**
-   * Find valid sources by program ID and facility type ID.
-   *
-   * @param programId      program ID
-   * @param facilityTypeId facility type ID
-   * @return valid source assignment DTOs
-   */
-  public List<ValidSourceDestinationDto> findDestinations(UUID programId, UUID facilityTypeId) {
-    permissionService.canViewStockDestinations(programId, facilityTypeId);
-    return findAssignments(programId, facilityTypeId, validDestinationRepository);
-  }
-
-  /**
-   * Assign a source to a program and facility type.
-   *
-   * @param assignment assignment JPA model
-   * @return a valid source destination dto
-   */
-  public ValidSourceDestinationDto assignSource(ValidSourceAssignment assignment) {
-    assignment.setId(null);
-    return doAssign(assignment, ERROR_SOURCE_NOT_FOUND, validSourceRepository);
-  }
-
-  /**
-   * Assign a destination to a program and facility type.
-   *
-   * @param assignment assignment JPA model
-   * @return a valid source destination dto
-   */
-  public ValidSourceDestinationDto assignDestination(ValidDestinationAssignment assignment) {
-    assignment.setId(null);
-    return doAssign(assignment, ERROR_DESTINATION_NOT_FOUND, validDestinationRepository);
-  }
-
-  /**
-   * Find existing source assignment.
-   *
-   * @param assignment assignment JPA model
-   * @return a valid source destination dto
-   */
-  public ValidSourceDestinationDto findByProgramFacilitySource(
-      ValidSourceAssignment assignment) {
-    permissionService.canManageStockSources();
-    return findAssignment(assignment, validSourceRepository);
-  }
-
-  /**
-   * Find existing destination assignment.
-   *
-   * @param assignment assignment JPA model
-   * @return a valid source destination dto
-   */
-  public ValidSourceDestinationDto findByProgramFacilityDestination(
-      ValidDestinationAssignment assignment) {
-    permissionService.canManageStockDestinations();
-    return findAssignment(assignment, validDestinationRepository);
-  }
-
-  /**
-   * Delete a source assignment by Id.
-   *
-   * @param assignmentId source assignment Id
-   */
-  public void deleteSourceAssignmentById(UUID assignmentId) {
-    permissionService.canManageStockSources();
-    doDelete(assignmentId, validSourceRepository, ERROR_SOURCE_ASSIGNMENT_NOT_FOUND);
-  }
-
-  /**
-   * Delete a destination assignment by Id.
-   *
-   * @param assignmentId destination assignment Id
-   */
-  public void deleteDestinationAssignmentById(UUID assignmentId) {
-    permissionService.canManageStockDestinations();
-    doDelete(assignmentId, validDestinationRepository, ERROR_DESTINATION_ASSIGNMENT_NOT_FOUND);
-  }
-
-  private <T extends SourceDestinationAssignment> void doDelete(
+  public <T extends SourceDestinationAssignment> void doDelete(
       UUID assignmentId, SourceDestinationAssignmentRepository<T> repository, String errorKey) {
     if (!repository.exists(assignmentId)) {
       throw new ValidationMessageException(new Message(errorKey));
@@ -165,7 +65,15 @@ public class ValidSourceDestinationService {
     repository.delete(assignmentId);
   }
 
-  private <T extends SourceDestinationAssignment> ValidSourceDestinationDto findAssignment(
+  /**
+   * Try to find an existing assignment.
+   *
+   * @param assignment source or destination assignment
+   * @param repository assignment repository
+   * @param <T>        assignment type
+   * @return assignment dto or null if not found.
+   */
+  public <T extends SourceDestinationAssignment> ValidSourceDestinationDto findAssignment(
       T assignment, SourceDestinationAssignmentRepository<T> repository) {
     UUID programId = assignment.getProgramId();
     UUID facilityTypeId = assignment.getFacilityTypeId();
@@ -181,19 +89,16 @@ public class ValidSourceDestinationService {
     return null;
   }
 
-  private <T extends SourceDestinationAssignment> Node findExistingNode(
-      T assignment, UUID programId, UUID facilityTypeId) {
-    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(programId,
-        facilityTypeId);
-    Node node = assignment.getNode();
-    if (node == null || node.getReferenceId() == null) {
-      throw new ValidationMessageException(
-          new Message(ERROR_SOURCE_DESTINATION_ASSIGNMENT_ID_MISSING));
-    }
-    return nodeRepository.findByReferenceId(node.getReferenceId());
-  }
-
-  private <T extends SourceDestinationAssignment> List<ValidSourceDestinationDto> findAssignments(
+  /**
+   * Get a list of assignments.
+   *
+   * @param programId      program id
+   * @param facilityTypeId facility type id
+   * @param repository     assignment repository
+   * @param <T>            assignment type
+   * @return a list of assignment dto or empty list if not found.
+   */
+  public <T extends SourceDestinationAssignment> List<ValidSourceDestinationDto> findAssignments(
       UUID programId, UUID facilityTypeId,
       SourceDestinationAssignmentRepository<T> repository) {
 
@@ -203,7 +108,16 @@ public class ValidSourceDestinationService {
     return assignments.stream().map(this::createFrom).collect(Collectors.toList());
   }
 
-  private <T extends SourceDestinationAssignment> ValidSourceDestinationDto doAssign(
+  /**
+   * Create a new assignment.
+   *
+   * @param assignment assignment
+   * @param errorKey   error message key
+   * @param repository assignment repository
+   * @param <T>        assignment type
+   * @return created assignment.
+   */
+  public <T extends SourceDestinationAssignment> ValidSourceDestinationDto doAssign(
       T assignment, String errorKey, SourceDestinationAssignmentRepository<T> repository) {
     UUID program = assignment.getProgramId();
     UUID facilityType = assignment.getFacilityTypeId();
@@ -217,6 +131,18 @@ public class ValidSourceDestinationService {
     }
 
     throw new ValidationMessageException(new Message(errorKey));
+  }
+
+  private <T extends SourceDestinationAssignment> Node findExistingNode(
+      T assignment, UUID programId, UUID facilityTypeId) {
+    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(programId,
+        facilityTypeId);
+    Node node = assignment.getNode();
+    if (node == null || node.getReferenceId() == null) {
+      throw new ValidationMessageException(
+          new Message(ERROR_SOURCE_DESTINATION_ASSIGNMENT_ID_MISSING));
+    }
+    return nodeRepository.findByReferenceId(node.getReferenceId());
   }
 
   private <T extends SourceDestinationAssignment> T createAssignment(

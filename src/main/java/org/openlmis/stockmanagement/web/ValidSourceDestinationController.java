@@ -26,7 +26,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
-import org.openlmis.stockmanagement.service.ValidSourceDestinationService;
+import org.openlmis.stockmanagement.service.ValidDestinationService;
+import org.openlmis.stockmanagement.service.ValidSourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,10 @@ public class ValidSourceDestinationController {
       LoggerFactory.getLogger(ValidSourceDestinationController.class);
 
   @Autowired
-  ValidSourceDestinationService validSourceDestinationService;
+  private ValidSourceService validSourceService;
+
+  @Autowired
+  private ValidDestinationService validDestinationService;
 
   /**
    * Get a list of valid destinations.
@@ -64,7 +68,7 @@ public class ValidSourceDestinationController {
     LOGGER.debug(format("Try to find valid destinations with program %s and facility type %s",
         program.toString(), facilityType.toString()));
     return new ResponseEntity<>(
-        validSourceDestinationService.findDestinations(program, facilityType), OK);
+        validDestinationService.findDestinations(program, facilityType), OK);
   }
 
   /**
@@ -77,14 +81,14 @@ public class ValidSourceDestinationController {
   public ResponseEntity<ValidSourceDestinationDto> assignDestination(
       @RequestBody ValidDestinationAssignment assignment) {
     LOGGER.debug("Try to assign destinations");
-    ValidSourceDestinationDto destinationDto = validSourceDestinationService
+    ValidSourceDestinationDto destinationDto = validDestinationService
         .findByProgramFacilityDestination(assignment);
     if (destinationDto != null) {
       return new ResponseEntity<>(destinationDto, OK);
     }
 
     return new ResponseEntity<>(
-        validSourceDestinationService.assignDestination(assignment), CREATED);
+        validDestinationService.assignDestination(assignment), CREATED);
   }
 
   /**
@@ -101,7 +105,7 @@ public class ValidSourceDestinationController {
     LOGGER.debug(format("Try to find valid sources with program %s and facility type %s",
         program.toString(), facilityType.toString()));
     return new ResponseEntity<>(
-        validSourceDestinationService.findSources(program, facilityType), OK);
+        validSourceService.findSources(program, facilityType), OK);
   }
 
   /**
@@ -114,13 +118,13 @@ public class ValidSourceDestinationController {
   public ResponseEntity<ValidSourceDestinationDto> assignSource(
       @RequestBody ValidSourceAssignment assignment) {
     LOGGER.debug("Try to assign source");
-    ValidSourceDestinationDto foundAssignmentDto = validSourceDestinationService
+    ValidSourceDestinationDto foundAssignmentDto = validSourceService
         .findByProgramFacilitySource(assignment);
     if (foundAssignmentDto != null) {
       return new ResponseEntity<>(foundAssignmentDto, OK);
     }
     return new ResponseEntity<>(
-        validSourceDestinationService.assignSource(assignment), CREATED);
+        validSourceService.assignSource(assignment), CREATED);
   }
 
   /**
@@ -132,7 +136,7 @@ public class ValidSourceDestinationController {
   @RequestMapping(value = "/validSources/{id}", method = DELETE)
   public ResponseEntity removeValidSourceAssignment(@PathVariable("id") UUID assignmentId) {
     LOGGER.debug(format("Try to remove source assignment %s.", assignmentId));
-    validSourceDestinationService.deleteSourceAssignmentById(assignmentId);
+    validSourceService.deleteSourceAssignmentById(assignmentId);
     return new ResponseEntity(null, NO_CONTENT);
   }
 
@@ -145,7 +149,7 @@ public class ValidSourceDestinationController {
   @RequestMapping(value = "/validDestinations/{id}", method = DELETE)
   public ResponseEntity removeValidDestinationAssignment(@PathVariable("id") UUID assignmentId) {
     LOGGER.debug(format("Try to remove destination assignment %s.", assignmentId));
-    validSourceDestinationService.deleteDestinationAssignmentById(assignmentId);
+    validDestinationService.deleteDestinationAssignmentById(assignmentId);
     return new ResponseEntity(null, NO_CONTENT);
   }
 }

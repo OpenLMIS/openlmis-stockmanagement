@@ -35,7 +35,8 @@ import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.service.ValidSourceDestinationService;
+import org.openlmis.stockmanagement.service.ValidDestinationService;
+import org.openlmis.stockmanagement.service.ValidSourceService;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -54,7 +55,10 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
   private static final String NODE_REFERENCE_ID_EXP = "$.node.referenceId";
 
   @MockBean
-  private ValidSourceDestinationService validSourceDestinationService;
+  private ValidSourceService validSourceService;
+
+  @MockBean
+  private ValidDestinationService validDestinationService;
 
   @Test
   public void should_get_valid_sources_or_destinations_by_program_and_facilityType()
@@ -64,10 +68,10 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
 
     UUID program = randomUUID();
     UUID facilityType = randomUUID();
-    when(validSourceDestinationService.findSources(program, facilityType))
+    when(validSourceService.findSources(program, facilityType))
         .thenReturn(singletonList(sourceDestination));
 
-    when(validSourceDestinationService.findDestinations(program, facilityType))
+    when(validDestinationService.findDestinations(program, facilityType))
         .thenReturn(singletonList(sourceDestination));
 
     //1. perform valid destinations
@@ -85,7 +89,7 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
     UUID facilityTypeId = randomUUID();
     doThrow(new ValidationMessageException(
         new Message(ERROR_PROGRAM_NOT_FOUND, programId.toString())))
-        .when(validSourceDestinationService)
+        .when(validDestinationService)
         .findDestinations(programId, facilityTypeId);
 
     //when
@@ -111,7 +115,7 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
     validSourceDestinationDto.setFacilityTypeId(facilityTypeId);
     validSourceDestinationDto.setNode(assignment.getNode());
 
-    when(validSourceDestinationService.assignSource(assignment))
+    when(validSourceService.assignSource(assignment))
         .thenReturn(validSourceDestinationDto);
 
     //when
@@ -142,7 +146,7 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
     validSourceDestinationDto.setFacilityTypeId(facilityTypeId);
     validSourceDestinationDto.setNode(assignment.getNode());
 
-    when(validSourceDestinationService.assignDestination(assignment))
+    when(validDestinationService.assignDestination(assignment))
         .thenReturn(validSourceDestinationDto);
 
     //when
@@ -172,7 +176,7 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
     validSourceDestinationDto.setProgramId(programId);
     validSourceDestinationDto.setFacilityTypeId(facilityTypeId);
     validSourceDestinationDto.setNode(assignment.getNode());
-    when(validSourceDestinationService.findByProgramFacilityDestination(assignment))
+    when(validDestinationService.findByProgramFacilityDestination(assignment))
         .thenReturn(validSourceDestinationDto);
 
     //when
@@ -202,7 +206,7 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
     validSourceDestinationDto.setFacilityTypeId(facilityTypeId);
     validSourceDestinationDto.setNode(assignment.getNode());
 
-    when(validSourceDestinationService.findByProgramFacilitySource(assignment))
+    when(validSourceService.findByProgramFacilitySource(assignment))
         .thenReturn(validSourceDestinationDto);
 
     //when

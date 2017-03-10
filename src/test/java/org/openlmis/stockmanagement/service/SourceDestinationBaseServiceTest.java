@@ -58,13 +58,16 @@ import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
 @SuppressWarnings("PMD.TooManyMethods")
-public class ValidSourceDestinationServiceTest {
+public class SourceDestinationBaseServiceTest {
 
   private static final String FACILITY_NAME = "Facility Name";
   private static final String ORGANIZATION_NAME = "NGO No 1";
 
   @InjectMocks
-  private ValidSourceDestinationService validSourceDestinationService;
+  private ValidSourceService validSourceService;
+
+  @InjectMocks
+  private ValidDestinationService validDestinationService;
 
   @Mock
   private FacilityReferenceDataService facilityReferenceDataService;
@@ -97,7 +100,7 @@ public class ValidSourceDestinationServiceTest {
         .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
     //when
-    validSourceDestinationService.findSources(programId, facilityTypeId);
+    validSourceService.findSources(programId, facilityTypeId);
   }
 
   @Test(expected = PermissionMessageException.class)
@@ -111,7 +114,7 @@ public class ValidSourceDestinationServiceTest {
         .canViewStockSource(programId, facilityTypeId);
 
     //when
-    validSourceDestinationService.findSources(programId, facilityTypeId);
+    validSourceService.findSources(programId, facilityTypeId);
   }
 
   @Test
@@ -129,7 +132,7 @@ public class ValidSourceDestinationServiceTest {
         .thenReturn(createSourceAssignment(programId, facilityTypeId, node));
 
     //when
-    ValidSourceDestinationDto foundDto = validSourceDestinationService
+    ValidSourceDestinationDto foundDto = validSourceService
         .findByProgramFacilitySource(assignment);
 
     assertThat(foundDto.getProgramId(), is(programId));
@@ -157,7 +160,7 @@ public class ValidSourceDestinationServiceTest {
     ValidSourceAssignment assignment = createSource(programId, facilityTypeId, sourceId);
 
     //when
-    ValidSourceDestinationDto assignmentDto = validSourceDestinationService
+    ValidSourceDestinationDto assignmentDto = validSourceService
         .assignSource(assignment);
 
     //then
@@ -185,7 +188,7 @@ public class ValidSourceDestinationServiceTest {
     ValidSourceAssignment assignment = createSource(programId, facilityTypeId, sourceId);
 
     //when
-    ValidSourceDestinationDto assignmentDto = validSourceDestinationService
+    ValidSourceDestinationDto assignmentDto = validSourceService
         .assignSource(assignment);
 
     //then
@@ -208,7 +211,7 @@ public class ValidSourceDestinationServiceTest {
     when(nodeRepository.findByReferenceId(sourceId)).thenReturn(null);
 
     //when
-    validSourceDestinationService.assignSource(assignment);
+    validSourceService.assignSource(assignment);
   }
 
   @Test
@@ -227,7 +230,7 @@ public class ValidSourceDestinationServiceTest {
         .thenReturn(createDestinationAssignment(programId, facilityTypeId, node));
 
     //when
-    ValidSourceDestinationDto foundDto = validSourceDestinationService
+    ValidSourceDestinationDto foundDto = validDestinationService
         .findByProgramFacilityDestination(assignment);
 
     assertThat(foundDto.getProgramId(), is(programId));
@@ -256,7 +259,7 @@ public class ValidSourceDestinationServiceTest {
         programId, facilityTypeId, destinationId);
 
     //when
-    ValidSourceDestinationDto assignmentDto = validSourceDestinationService
+    ValidSourceDestinationDto assignmentDto = validDestinationService
         .assignDestination(assignment);
 
     //then
@@ -286,7 +289,7 @@ public class ValidSourceDestinationServiceTest {
         programId, facilityTypeId, destinationId);
 
     //when
-    ValidSourceDestinationDto assignmentDto = validSourceDestinationService
+    ValidSourceDestinationDto assignmentDto = validDestinationService
         .assignDestination(assignment);
 
     //then
@@ -310,7 +313,7 @@ public class ValidSourceDestinationServiceTest {
     when(nodeRepository.findByReferenceId(destinationId)).thenReturn(null);
 
     //when
-    validSourceDestinationService.assignDestination(assignment);
+    validDestinationService.assignDestination(assignment);
   }
 
   @Test(expected = PermissionMessageException.class)
@@ -324,7 +327,7 @@ public class ValidSourceDestinationServiceTest {
         .canViewStockDestinations(programId, facilityTypeId);
 
     //when
-    validSourceDestinationService.findDestinations(programId, facilityTypeId);
+    validDestinationService.findDestinations(programId, facilityTypeId);
   }
 
   @Test
@@ -345,7 +348,7 @@ public class ValidSourceDestinationServiceTest {
 
     //when
     List<ValidSourceDestinationDto> validDestinations =
-        validSourceDestinationService.findDestinations(programId, facilityTypeId);
+        validDestinationService.findDestinations(programId, facilityTypeId);
 
     //then
     assertThat(validDestinations.size(), is(2));
@@ -377,7 +380,7 @@ public class ValidSourceDestinationServiceTest {
 
     //when
     List<ValidSourceDestinationDto> validSources =
-        validSourceDestinationService.findSources(programId, facilityTypeId);
+        validSourceService.findSources(programId, facilityTypeId);
 
     //then
     assertThat(validSources.size(), is(2));
@@ -396,7 +399,7 @@ public class ValidSourceDestinationServiceTest {
       throws Exception {
     doThrow(new PermissionMessageException(new Message("key")))
         .when(permissionService).canManageStockSources();
-    validSourceDestinationService.deleteSourceAssignmentById(randomUUID());
+    validSourceService.deleteSourceAssignmentById(randomUUID());
   }
 
   @Test(expected = ValidationMessageException.class)
@@ -404,7 +407,7 @@ public class ValidSourceDestinationServiceTest {
       throws Exception {
     UUID assignmentId = randomUUID();
     when(sourceRepository.exists(assignmentId)).thenReturn(false);
-    validSourceDestinationService.deleteSourceAssignmentById(assignmentId);
+    validSourceService.deleteSourceAssignmentById(assignmentId);
   }
 
   @Test(expected = ValidationMessageException.class)
@@ -412,7 +415,7 @@ public class ValidSourceDestinationServiceTest {
       throws Exception {
     UUID assignmentId = randomUUID();
     when(destinationRepository.exists(assignmentId)).thenReturn(false);
-    validSourceDestinationService.deleteDestinationAssignmentById(assignmentId);
+    validDestinationService.deleteDestinationAssignmentById(assignmentId);
   }
 
   @Test
@@ -422,7 +425,7 @@ public class ValidSourceDestinationServiceTest {
     when(sourceRepository.exists(assignmentId)).thenReturn(true);
 
     //when
-    validSourceDestinationService.deleteSourceAssignmentById(assignmentId);
+    validSourceService.deleteSourceAssignmentById(assignmentId);
 
     //then
     verify(sourceRepository, times(1)).delete(assignmentId);
@@ -435,7 +438,7 @@ public class ValidSourceDestinationServiceTest {
     when(destinationRepository.exists(assignmentId)).thenReturn(true);
 
     //when
-    validSourceDestinationService.deleteDestinationAssignmentById(assignmentId);
+    validDestinationService.deleteDestinationAssignmentById(assignmentId);
 
     //then
     verify(destinationRepository, times(1)).delete(assignmentId);
