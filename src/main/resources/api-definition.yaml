@@ -675,6 +675,11 @@ traits:
       get:
         is: [ secured ]
         description: Get a draft physical inventory. If draft does not exist, will return a list of all approved products with empty quantity as a starter template.
+        queryParameters:
+          facility:
+            required: true
+          program:
+            required: true
         body:
           application/json:
             schema: physicalInventory
