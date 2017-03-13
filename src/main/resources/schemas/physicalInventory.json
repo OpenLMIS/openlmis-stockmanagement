@@ -1,0 +1,46 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Physical inventory",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "programId": {
+      "type": "string",
+      "description": "Indicates which program the physical inventory is done for. Will be used for all events created from this physical inventory.",
+      "required": true
+    },
+    "facilityId": {
+      "type": "string",
+      "description": "Indicates which facility the physical inventory is done for. Will be used for all events created from this physical inventory.",
+      "required": true
+    },
+    "date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Will be used as occurred date for all events created from this physical inventory.",
+      "required": true
+    },
+    "signature": {
+      "type": "string",
+      "description": "The signature of the operator.",
+      "required": false
+    },
+    "documentNumber": {
+      "type": "string",
+      "description": "",
+      "required": false
+    },
+    "lineItems": {
+      "type": "array",
+      "title": "Physical inventory line items",
+      "required": true,
+      "items": {
+        "type": "object",
+        "title": "Physical inventory line item",
+        "$ref": "physicalInventoryLineItem"
+      }
+    }
+  }
+}

@@ -46,6 +46,8 @@ schemas:
             "type": "array",
             "items": {"type": "object", "$ref": "organization"}
         }
+  - physicalInventoryLineItem: !include schemas/physicalInventoryLineItem.json
+  - physicalInventory: !include schemas/physicalInventory.json
 
 resourceTypes:
     - collection:
@@ -637,3 +639,12 @@ traits:
               description: User does not have permission to manage organization.
               body:
                 application/json:
+
+  /physicalInventories:
+      displayName: Physical inventories.
+      post:
+        is: [ secured ]
+        description: Create a draft physical inventory, or submitt a physical inventory and delete its draft.
+        body:
+          application/json:
+            schema: physicalInventory
