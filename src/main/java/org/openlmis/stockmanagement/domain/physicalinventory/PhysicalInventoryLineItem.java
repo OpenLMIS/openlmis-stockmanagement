@@ -13,7 +13,7 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.domain.physicalInventory;
+package org.openlmis.stockmanagement.domain.physicalinventory;
 
 import org.openlmis.stockmanagement.domain.BaseEntity;
 

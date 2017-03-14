@@ -13,7 +13,7 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.domain.physicalInventory;
+package org.openlmis.stockmanagement.domain.physicalinventory;
 
 import static javax.persistence.CascadeType.ALL;
 import static org.hibernate.annotations.LazyCollectionOption.FALSE;

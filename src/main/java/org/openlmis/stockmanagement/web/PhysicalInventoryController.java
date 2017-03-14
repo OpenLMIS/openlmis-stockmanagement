@@ -35,6 +35,12 @@ import java.util.UUID;
 @RequestMapping("/api")
 public class PhysicalInventoryController {
 
+  /**
+   * Create physical inventory.
+   *
+   * @param physicalInventoryDto physical inventory dto.
+   * @return the created physical inventory's id.
+   */
   @RequestMapping(value = "physicalInventories", method = POST)
   public ResponseEntity<UUID> createPhysicalInventory(
       @RequestBody PhysicalInventoryDto physicalInventoryDto) {

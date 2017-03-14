@@ -38,6 +38,11 @@ public class PhysicalInventoryDto {
 
   private List<PhysicalInventoryLineItemDto> lineItems;
 
+  /**
+   * Convert physical inventory dto to stock event dtos.
+   *
+   * @return converted objects.
+   */
   public List<StockEventDto> toEventDtos() {
     return lineItems.stream()
         .map(lineItem -> {
