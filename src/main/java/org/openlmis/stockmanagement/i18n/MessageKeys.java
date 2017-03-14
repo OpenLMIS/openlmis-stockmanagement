@@ -190,6 +190,9 @@ public abstract class MessageKeys {
   public static final String ERROR_PHYSICAL_INVENTORY_NOT_INCLUDE_ACTIVE_STOCK_CARD =
       PHYSICAL_INVENTORY_ERROR_PREFIX + ".lineItems.not.include.active.stockCard";
 
+  //report
+  public static final String ERROR_GENERATE_REPORT_FAILED = ERROR_PREFIX + ".generateReport.failed";
+
   private MessageKeys() {
     throw new UnsupportedOperationException();
   }
