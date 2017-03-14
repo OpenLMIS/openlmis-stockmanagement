@@ -4,15 +4,11 @@
   "description": "Physical inventory line item",
   "properties": {
     "orderable": {
-      "type": "Object",
+      "type": "object",
       "title": "Orderable",
       "description": "Indicates which orderable this physical inventory line item is for.",
       "required": true,
-      "properties": {
-        "id": {
-          "type": "string"
-        }
-      }
+      "$ref": "orderable"
     },
     "quantity": {
       "type": "integer",
