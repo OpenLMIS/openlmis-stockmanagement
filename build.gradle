@@ -27,6 +27,8 @@ targetCompatibility = 1.8
 repositories {
     mavenCentral()
     jcenter()
+    maven { url "http://jaspersoft.artifactoryonline.com/jaspersoft/third-party-ce-artifacts/" }
+    maven { url "http://jasperreports.sourceforge.net/maven2/" }
 }
 
 dependencies {
@@ -35,7 +37,7 @@ dependencies {
     compile "org.springframework.boot:spring-boot-starter-data-jpa"
     compile "org.springframework.boot:spring-boot-starter-security"
     compile "org.springframework.security.oauth:spring-security-oauth2"
-    compile "org.springframework:spring-test"
+    compile 'org.springframework:spring-context-support'
 
     compile "org.projectlombok:lombok:1.16.8"
     compile "org.postgresql:postgresql:9.4.1208"
@@ -43,11 +45,13 @@ dependencies {
     compile 'org.webjars:swagger-ui:2.2.6'
     compile 'org.apache.commons:commons-lang3:3.4'
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
+    compile "net.sf.jasperreports:jasperreports:6.3.0"
 
     testCompile "junit:junit"
     testCompile "org.mockito:mockito-core:1.+"
     testCompile "org.springframework.boot:spring-boot-starter-test"
     testCompile 'org.springframework.security:spring-security-test'
+    testCompile "org.springframework:spring-test"
 }
 
 idea {
