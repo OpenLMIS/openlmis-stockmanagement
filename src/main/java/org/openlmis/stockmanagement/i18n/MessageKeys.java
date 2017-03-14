@@ -20,6 +20,7 @@ public abstract class MessageKeys {
   private static final String SERVICE_PREFIX = "stockmanagement";
   private static final String ERROR_PREFIX = SERVICE_PREFIX + ".error";
   private static final String EVENT_ERROR_PREFIX = ERROR_PREFIX + ".event";
+  private static final String PHYSICAL_INVENTORY_ERROR_PREFIX = ERROR_PREFIX + ".physicalInventory";
 
   //stock card templates
   public static final String ERROR_STOCK_CARD_FIELD_INVALID =
@@ -175,6 +176,13 @@ public abstract class MessageKeys {
 
   public static final String ERROR_SOURCE_DESTINATION_ASSIGNMENT_ID_MISSING = ERROR_PREFIX
       + ".source.destination.assignment.id.missing";
+
+  //physical inventory
+  public static final String ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING =
+      PHYSICAL_INVENTORY_ERROR_PREFIX + ".lineItems.missing";
+
+  public static final String ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING =
+      PHYSICAL_INVENTORY_ERROR_PREFIX + ".orderable.missing";
 
   private MessageKeys() {
     throw new UnsupportedOperationException();
