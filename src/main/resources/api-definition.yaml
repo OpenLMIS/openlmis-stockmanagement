@@ -680,6 +680,8 @@ traits:
             required: true
           program:
             required: true
-        body:
-          application/json:
-            schema: physicalInventory
+        responses:
+          200:
+            body:
+              application/json:
+                schema: physicalInventory

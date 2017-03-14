@@ -21,7 +21,7 @@
       "description": "Indicates which facility the physical inventory is done for. Will be used for all events created from this physical inventory.",
       "required": true
     },
-    "date": {
+    "occurredDate": {
       "type": "string",
       "format": "date-time",
       "description": "Will be used as occurred date for all events created from this physical inventory.",
