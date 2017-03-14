@@ -15,12 +15,10 @@
 
 package org.openlmis.stockmanagement.domain.physicalinventory;
 
-import static javax.persistence.CascadeType.ALL;
-import static org.hibernate.annotations.LazyCollectionOption.FALSE;
-
-import org.hibernate.annotations.LazyCollection;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
+
+import lombok.Data;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -33,6 +31,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+@Data
 @Entity
 @Table(name = "physical_inventories", schema = "stockmanagement")
 public class PhysicalInventory extends BaseEntity {
@@ -50,10 +49,6 @@ public class PhysicalInventory extends BaseEntity {
 
   private String signature;
   private String documentNumber;
-
-  @LazyCollection(FALSE)
-  @OneToMany(cascade = ALL, mappedBy = "physicalInventory")
-  private List<PhysicalInventoryLineItem> lineItems;
 
   @OneToMany
   @JoinTable(name = "physical_inventory_stock_events",

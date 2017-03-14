@@ -19,6 +19,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -29,6 +30,44 @@ public class PhysicalInventoryDtoTest {
   @Test
   public void should_convert_into_stock_event_dtos() throws Exception {
     //given
+    PhysicalInventoryDto piDto = createInventoryDto();
+
+    //when
+    List<StockEventDto> eventDtos = piDto.toEventDtos();
+
+    //then
+    assertThat(eventDtos.size(), is(1));
+
+    StockEventDto eventDto = eventDtos.get(0);
+    assertThat(eventDto.getProgramId(), is(piDto.getProgramId()));
+    assertThat(eventDto.getFacilityId(), is(piDto.getFacilityId()));
+    assertThat(eventDto.getSignature(), is(piDto.getSignature()));
+    assertThat(eventDto.getDocumentNumber(), is(piDto.getDocumentNumber()));
+    assertThat(eventDto.getOccurredDate(), is(piDto.getOccurredDate()));
+
+    PhysicalInventoryLineItemDto piLineItemDto = piDto.getLineItems().get(0);
+    assertThat(eventDto.getOrderableId(), is(piLineItemDto.getOrderableDto().getId()));
+    assertThat(eventDto.getQuantity(), is(piLineItemDto.getQuantity()));
+  }
+
+  @Test
+  public void should_convert_into_inventory_jpa_model() throws Exception {
+    //given
+    PhysicalInventoryDto piDto = createInventoryDto();
+
+    //when
+    PhysicalInventory inventory = piDto.toPhysicalInventory();
+
+    //then
+    assertThat(inventory.getProgramId(), is(piDto.getProgramId()));
+    assertThat(inventory.getFacilityId(), is(piDto.getFacilityId()));
+    assertThat(inventory.getOccurredDate(), is(piDto.getOccurredDate()));
+    assertThat(inventory.getSignature(), is(piDto.getSignature()));
+    assertThat(inventory.getDocumentNumber(), is(piDto.getDocumentNumber()));
+    assertThat(inventory.getIsDraft(), is(piDto.getIsDraft()));
+  }
+
+  private PhysicalInventoryDto createInventoryDto() {
     PhysicalInventoryDto piDto = new PhysicalInventoryDto();
     piDto.setOccurredDate(ZonedDateTime.now());
     piDto.setFacilityId(UUID.randomUUID());
@@ -36,26 +75,11 @@ public class PhysicalInventoryDtoTest {
     piDto.setSignature("test");
     piDto.setDocumentNumber(null);
 
-    PhysicalInventoryLineItemDto piLineItemDto = new PhysicalInventoryLineItemDto();
-    piLineItemDto.setOrderableDto(OrderableDto.builder().id(UUID.randomUUID()).build());
-    piLineItemDto.setQuantity(123);
+    PhysicalInventoryLineItemDto piLineItemDto1 = new PhysicalInventoryLineItemDto();
+    piLineItemDto1.setOrderableDto(OrderableDto.builder().id(UUID.randomUUID()).build());
+    piLineItemDto1.setQuantity(123);
 
-    piDto.setLineItems(Arrays.asList(piLineItemDto));
-
-    //when
-    List<StockEventDto> eventDtos = piDto.toEventDtos();
-
-    //then
-    assertThat(eventDtos.size(), is(1));
-    StockEventDto eventDto = eventDtos.get(0);
-    assertThat(eventDto.getProgramId(), is(piDto.getProgramId()));
-    assertThat(eventDto.getFacilityId(), is(piDto.getFacilityId()));
-    assertThat(eventDto.getOrderableId(), is(piLineItemDto.getOrderableDto().getId()));
-
-    assertThat(eventDto.getSignature(), is(piDto.getSignature()));
-    assertThat(eventDto.getDocumentNumber(), is(piDto.getDocumentNumber()));
-
-    assertThat(eventDto.getOccurredDate(), is(piDto.getOccurredDate()));
-    assertThat(eventDto.getQuantity(), is(piLineItemDto.getQuantity()));
+    piDto.setLineItems(Arrays.asList(piLineItemDto1));
+    return piDto;
   }
 }

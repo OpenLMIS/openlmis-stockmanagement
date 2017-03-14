@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -54,8 +53,6 @@ public class StockEventProcessor {
    * @param stockEventDto stock event dto.
    * @return the persisted event's id.
    */
-  @Transactional(rollbackFor = {InstantiationException.class, IllegalAccessException.class})
-  //the Transactional annotation MUST be on a PUBLIC method
   public UUID process(StockEventDto stockEventDto)
       throws IllegalAccessException, InstantiationException {
     LOGGER.debug("Process stock event dto");

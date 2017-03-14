@@ -15,18 +15,26 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static org.openlmis.stockmanagement.domain.BaseEntity.fromId;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING;
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
+import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
+import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
 import org.openlmis.stockmanagement.service.PermissionService;
+import org.openlmis.stockmanagement.service.StockEventProcessor;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -40,25 +48,40 @@ public class PhysicalInventoryController {
   @Autowired
   private PermissionService permissionService;
 
+  @Autowired
+  private StockEventProcessor stockEventProcessor;
+
+  @Autowired
+  private PhysicalInventoriesRepository physicalInventoriesRepository;
+
   /**
    * Create physical inventory.
    *
    * @param dto physical inventory dto.
    * @return the created physical inventory's id.
    */
+  @Transactional(rollbackFor = {InstantiationException.class, IllegalAccessException.class})
   @RequestMapping(value = "physicalInventories", method = POST)
-  public ResponseEntity<UUID> createPhysicalInventory(
-      @RequestBody PhysicalInventoryDto dto) {
+  public ResponseEntity<UUID> createPhysicalInventory(@RequestBody PhysicalInventoryDto dto)
+      throws IllegalAccessException, InstantiationException {
     permissionService.canCreateStockEvent(dto.getProgramId(), dto.getFacilityId());
+
     if (!dto.getIsDraft()) {
-      return submitPhysicalInventory(dto);
+      return new ResponseEntity<>(submitPhysicalInventory(dto), CREATED);
     }
     return null;
   }
 
-  private ResponseEntity<UUID> submitPhysicalInventory(PhysicalInventoryDto physicalInventoryDto) {
+  private UUID submitPhysicalInventory(PhysicalInventoryDto physicalInventoryDto)
+      throws InstantiationException, IllegalAccessException {
     validate(physicalInventoryDto);
-    return null;
+
+    PhysicalInventory inventory = physicalInventoryDto.toPhysicalInventory();
+    for (StockEventDto eventDto : physicalInventoryDto.toEventDtos()) {
+      UUID savedEventId = stockEventProcessor.process(eventDto);
+      inventory.getStockEvents().add(fromId(savedEventId, StockEvent.class));
+    }
+    return physicalInventoriesRepository.save(inventory).getId();
   }
 
   private void validate(PhysicalInventoryDto physicalInventoryDto) {

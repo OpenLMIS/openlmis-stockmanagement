@@ -13,28 +13,13 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.domain.physicalinventory;
+package org.openlmis.stockmanagement.repository;
 
-import org.openlmis.stockmanagement.domain.BaseEntity;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
+import org.springframework.data.repository.PagingAndSortingRepository;
 
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
-@Entity
-@Table(name = "physical_inventory_line_items", schema = "stockmanagement")
-public class PhysicalInventoryLineItem extends BaseEntity {
-  @Column(nullable = false)
-  private UUID orderableId;
-
-  @Column(nullable = false)
-  private Integer quantity;
-
-  @ManyToOne()
-  @JoinColumn(nullable = false)
-  private PhysicalInventory physicalInventory;
+public interface PhysicalInventoriesRepository
+    extends PagingAndSortingRepository<PhysicalInventory, UUID> {
 }

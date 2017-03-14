@@ -17,9 +17,12 @@ package org.openlmis.stockmanagement.dto;
 
 import static java.util.stream.Collectors.toList;
 
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
+
 import lombok.Data;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -58,5 +61,22 @@ public class PhysicalInventoryDto {
           return stockEventDto;
         })
         .collect(toList());
+  }
+
+  /**
+   * Convert into physical inventory jpa model.
+   *
+   * @return converted jpa model.
+   */
+  public PhysicalInventory toPhysicalInventory() {
+    PhysicalInventory inventory = new PhysicalInventory();
+    inventory.setProgramId(programId);
+    inventory.setFacilityId(facilityId);
+    inventory.setOccurredDate(occurredDate);
+    inventory.setDocumentNumber(documentNumber);
+    inventory.setSignature(signature);
+    inventory.setIsDraft(isDraft);
+    inventory.setStockEvents(new ArrayList<>());
+    return inventory;
   }
 }
