@@ -92,7 +92,7 @@ public class PhysicalInventoryController {
           new Message(ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING));
     }
     boolean orderableMissing = lineItems.stream()
-        .anyMatch(lineItem -> lineItem.getOrderableDto() == null);
+        .anyMatch(lineItem -> lineItem.getOrderable() == null);
     if (orderableMissing) {
       throw new ValidationMessageException(
           new Message(ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING));
@@ -102,7 +102,7 @@ public class PhysicalInventoryController {
 
   private void checkOrderableDuplication(List<PhysicalInventoryLineItemDto> lineItems) {
     long count = lineItems.stream()
-        .map(lineItem -> lineItem.getOrderableDto().getId()).distinct().count();
+        .map(lineItem -> lineItem.getOrderable().getId()).distinct().count();
     if (count < lineItems.size()) {
       throw new ValidationMessageException(
           new Message(ERROR_PHYSICAL_INVENTORY_ORDERABLE_DUPLICATION));

@@ -46,7 +46,7 @@ public class PhysicalInventoryDtoTest {
     assertThat(eventDto.getOccurredDate(), is(piDto.getOccurredDate()));
 
     PhysicalInventoryLineItemDto piLineItemDto = piDto.getLineItems().get(0);
-    assertThat(eventDto.getOrderableId(), is(piLineItemDto.getOrderableDto().getId()));
+    assertThat(eventDto.getOrderableId(), is(piLineItemDto.getOrderable().getId()));
     assertThat(eventDto.getQuantity(), is(piLineItemDto.getQuantity()));
   }
 
@@ -76,7 +76,7 @@ public class PhysicalInventoryDtoTest {
     piDto.setDocumentNumber(null);
 
     PhysicalInventoryLineItemDto piLineItemDto1 = new PhysicalInventoryLineItemDto();
-    piLineItemDto1.setOrderableDto(OrderableDto.builder().id(UUID.randomUUID()).build());
+    piLineItemDto1.setOrderable(OrderableDto.builder().id(UUID.randomUUID()).build());
     piLineItemDto1.setQuantity(123);
 
     piDto.setLineItems(Arrays.asList(piLineItemDto1));

@@ -98,10 +98,10 @@ public class PhysicalInventoryControllerTest extends BaseWebTest {
 
     UUID orderableId = UUID.randomUUID();
     PhysicalInventoryLineItemDto piLineItemDto1 = new PhysicalInventoryLineItemDto();
-    piLineItemDto1.setOrderableDto(OrderableDto.builder().id(orderableId).build());
+    piLineItemDto1.setOrderable(OrderableDto.builder().id(orderableId).build());
 
     PhysicalInventoryLineItemDto piLineItemDto2 = new PhysicalInventoryLineItemDto();
-    piLineItemDto2.setOrderableDto(OrderableDto.builder().id(orderableId).build());
+    piLineItemDto2.setOrderable(OrderableDto.builder().id(orderableId).build());
 
     piDto.setLineItems(Arrays.asList(piLineItemDto1, piLineItemDto2));
 
@@ -132,7 +132,7 @@ public class PhysicalInventoryControllerTest extends BaseWebTest {
     PhysicalInventoryDto piDto = new PhysicalInventoryDto();
     piDto.setIsDraft(false);
     PhysicalInventoryLineItemDto piLineItemDto = new PhysicalInventoryLineItemDto();
-    piLineItemDto.setOrderableDto(OrderableDto.builder().id(randomUUID()).build());
+    piLineItemDto.setOrderable(OrderableDto.builder().id(randomUUID()).build());
     piDto.setLineItems(singletonList(piLineItemDto));
 
     UUID eventId = UUID.randomUUID();

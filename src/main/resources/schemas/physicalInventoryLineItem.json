@@ -3,10 +3,16 @@
   "$schema": "http://json-schema.org/draft-04/schema",
   "description": "Physical inventory line item",
   "properties": {
-    "orderableId": {
-      "type": "string",
+    "orderable": {
+      "type": "Object",
+      "title": "Orderable",
       "description": "Indicates which orderable this physical inventory line item is for.",
-      "required": true
+      "required": true,
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
     },
     "quantity": {
       "type": "integer",

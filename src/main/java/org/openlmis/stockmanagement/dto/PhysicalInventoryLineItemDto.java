@@ -19,6 +19,6 @@ import lombok.Data;
 
 @Data
 public class PhysicalInventoryLineItemDto {
-  private OrderableDto orderableDto;
+  private OrderableDto orderable;
   private Integer quantity;
 }

@@ -56,7 +56,7 @@ public class PhysicalInventoryDto {
           stockEventDto.setSignature(signature);
           stockEventDto.setDocumentNumber(documentNumber);
 
-          stockEventDto.setOrderableId(lineItem.getOrderableDto().getId());
+          stockEventDto.setOrderableId(lineItem.getOrderable().getId());
           stockEventDto.setQuantity(lineItem.getQuantity());
           return stockEventDto;
         })
