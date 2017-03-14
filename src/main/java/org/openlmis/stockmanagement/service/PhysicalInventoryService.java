@@ -15,11 +15,14 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static java.util.stream.Collectors.toList;
 import static org.openlmis.stockmanagement.domain.BaseEntity.fromId;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_NOT_INCLUDE_ACTIVE_STOCK_CARD;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ORDERABLE_DUPLICATION;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING;
 
+import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
@@ -27,6 +30,7 @@ import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
+import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,6 +46,9 @@ public class PhysicalInventoryService {
 
   @Autowired
   private PhysicalInventoriesRepository physicalInventoriesRepository;
+
+  @Autowired
+  private StockCardRepository stockCardRepository;
 
   /**
    * Try to create physical inventory.
@@ -83,6 +90,22 @@ public class PhysicalInventoryService {
           new Message(ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING));
     }
     checkOrderableDuplication(lineItems);
+    checkIncludeActiveStockCard(dto);
+  }
+
+  private void checkIncludeActiveStockCard(PhysicalInventoryDto dto) {
+    List<UUID> coveredOrderableIds = dto.getLineItems().stream()
+        .map(lineItemDto -> lineItemDto.getOrderable().getId()).collect(toList());
+
+    boolean activeCardMissing = stockCardRepository
+        .findByProgramIdAndFacilityId(dto.getProgramId(), dto.getFacilityId()).stream()
+        .map(StockCard::getOrderableId)
+        .anyMatch(cardOrderableId -> !coveredOrderableIds.contains(cardOrderableId));
+
+    if (activeCardMissing) {
+      throw new ValidationMessageException(
+          new Message(ERROR_PHYSICAL_INVENTORY_NOT_INCLUDE_ACTIVE_STOCK_CARD));
+    }
   }
 
   private void checkOrderableDuplication(List<PhysicalInventoryLineItemDto> lineItems) {

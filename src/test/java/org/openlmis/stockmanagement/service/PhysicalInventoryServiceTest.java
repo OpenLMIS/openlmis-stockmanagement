@@ -31,6 +31,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.dto.OrderableDto;
@@ -39,6 +40,7 @@ import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
+import org.openlmis.stockmanagement.repository.StockCardRepository;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,6 +56,9 @@ public class PhysicalInventoryServiceTest {
 
   @Mock
   private PhysicalInventoriesRepository physicalInventoriesRepository;
+
+  @Mock
+  private StockCardRepository stockCardRepository;
 
   @Test(expected = ValidationMessageException.class)
   public void should_throw_validation_exception_when_line_items_not_exist() throws Exception {
@@ -101,6 +106,35 @@ public class PhysicalInventoryServiceTest {
     piLineItemDto2.setOrderable(orderable2);
 
     piDto.setLineItems(Arrays.asList(piLineItemDto1, piLineItemDto2));
+
+    //when
+    physicalInventoryService.createPhysicalInventory(piDto);
+  }
+
+  @Test(expected = ValidationMessageException.class)
+  public void should_throw_validation_exception_when_active_stock_card_not_included()
+      throws Exception {
+    //given
+    StockCard stockCard1 = new StockCard();
+    UUID orderableId1 = randomUUID();
+    stockCard1.setOrderableId(orderableId1);
+
+    StockCard stockCard2 = new StockCard();
+    UUID orderableId2 = randomUUID();
+    stockCard2.setOrderableId(orderableId2);
+
+    UUID programId = randomUUID();
+    UUID facilityId = randomUUID();
+    when(stockCardRepository.findByProgramIdAndFacilityId(programId, facilityId))
+        .thenReturn(Arrays.asList(stockCard1, stockCard2));
+
+    PhysicalInventoryDto piDto = new PhysicalInventoryDto();
+    piDto.setProgramId(programId);
+    piDto.setFacilityId(facilityId);
+    piDto.setIsDraft(false);
+    PhysicalInventoryLineItemDto piLineItemDto = new PhysicalInventoryLineItemDto();
+    piLineItemDto.setOrderable(OrderableDto.builder().id(orderableId1).build());
+    piDto.setLineItems(singletonList(piLineItemDto));
 
     //when
     physicalInventoryService.createPhysicalInventory(piDto);
