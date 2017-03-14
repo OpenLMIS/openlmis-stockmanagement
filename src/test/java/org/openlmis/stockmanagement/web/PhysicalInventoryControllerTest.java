@@ -26,6 +26,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ORDERABLE_DUPLICATION;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -50,6 +51,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.UUID;
 
 public class PhysicalInventoryControllerTest extends BaseWebTest {
@@ -86,6 +88,25 @@ public class PhysicalInventoryControllerTest extends BaseWebTest {
 
     //error if line item does not have orderable
     testValidation(piDto, ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING);
+  }
+
+  @Test
+  public void should_return_400_if_any_orderable_is_duplicate() throws Exception {
+    //given
+    PhysicalInventoryDto piDto = new PhysicalInventoryDto();
+    piDto.setIsDraft(false);
+
+    UUID orderableId = UUID.randomUUID();
+    PhysicalInventoryLineItemDto piLineItemDto1 = new PhysicalInventoryLineItemDto();
+    piLineItemDto1.setOrderableDto(OrderableDto.builder().id(orderableId).build());
+
+    PhysicalInventoryLineItemDto piLineItemDto2 = new PhysicalInventoryLineItemDto();
+    piLineItemDto2.setOrderableDto(OrderableDto.builder().id(orderableId).build());
+
+    piDto.setLineItems(Arrays.asList(piLineItemDto1, piLineItemDto2));
+
+    //when
+    testValidation(piDto, ERROR_PHYSICAL_INVENTORY_ORDERABLE_DUPLICATION);
   }
 
   @Test

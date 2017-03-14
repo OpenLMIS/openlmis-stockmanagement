@@ -184,6 +184,9 @@ public abstract class MessageKeys {
   public static final String ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING =
       PHYSICAL_INVENTORY_ERROR_PREFIX + ".orderable.missing";
 
+  public static final String ERROR_PHYSICAL_INVENTORY_ORDERABLE_DUPLICATION =
+      PHYSICAL_INVENTORY_ERROR_PREFIX + ".orderable.duplication";
+
   private MessageKeys() {
     throw new UnsupportedOperationException();
   }

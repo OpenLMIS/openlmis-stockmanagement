@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.web;
 
 import static org.openlmis.stockmanagement.domain.BaseEntity.fromId;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ORDERABLE_DUPLICATION;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -95,6 +96,16 @@ public class PhysicalInventoryController {
     if (orderableMissing) {
       throw new ValidationMessageException(
           new Message(ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING));
+    }
+    checkOrderableDuplication(lineItems);
+  }
+
+  private void checkOrderableDuplication(List<PhysicalInventoryLineItemDto> lineItems) {
+    long count = lineItems.stream()
+        .map(lineItem -> lineItem.getOrderableDto().getId()).distinct().count();
+    if (count < lineItems.size()) {
+      throw new ValidationMessageException(
+          new Message(ERROR_PHYSICAL_INVENTORY_ORDERABLE_DUPLICATION));
     }
   }
 
