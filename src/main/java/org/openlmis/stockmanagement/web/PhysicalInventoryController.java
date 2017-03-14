@@ -22,7 +22,9 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.utils.Message;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,17 +37,21 @@ import java.util.UUID;
 @RequestMapping("/api")
 public class PhysicalInventoryController {
 
+  @Autowired
+  private PermissionService permissionService;
+
   /**
    * Create physical inventory.
    *
-   * @param physicalInventoryDto physical inventory dto.
+   * @param dto physical inventory dto.
    * @return the created physical inventory's id.
    */
   @RequestMapping(value = "physicalInventories", method = POST)
   public ResponseEntity<UUID> createPhysicalInventory(
-      @RequestBody PhysicalInventoryDto physicalInventoryDto) {
-    if (!physicalInventoryDto.getIsDraft()) {
-      return submitPhysicalInventory(physicalInventoryDto);
+      @RequestBody PhysicalInventoryDto dto) {
+    permissionService.canCreateStockEvent(dto.getProgramId(), dto.getFacilityId());
+    if (!dto.getIsDraft()) {
+      return submitPhysicalInventory(dto);
     }
     return null;
   }
