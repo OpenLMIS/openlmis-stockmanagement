@@ -409,7 +409,6 @@ traits:
                 body:
                   application/json:
 
-
   /reasonTypes:
       get:
         is: [ secured ]
@@ -661,20 +660,14 @@ traits:
       displayName: Physical inventories.
       post:
         is: [ secured ]
-        description: Create a draft physical inventory, or submitt a physical inventory and delete its draft(if exist).
+        description: Submitt a physical inventory and delete its draft(if exist).
         body:
           application/json:
             schema: physicalInventory
 
         responses:
           201:
-            description: Draft physical inventory created or physical inventory submitted.
-            body:
-              application/json:
-                schema: physicalInventory
-
-          200:
-            description: Draft physical inventory updated.
+            description: Physical inventory submitted.
             body:
               application/json:
                 schema: physicalInventory
@@ -685,20 +678,21 @@ traits:
               Program, facility, orderable or quantity missing,
               Above information exist but not found in ref-data or DB,
               No physical inventory line items provided.
-
             body:
               application/json:
 
-      get:
-        is: [ secured ]
-        description: Get a draft physical inventory. If draft does not exist, will return a list of all approved products with empty quantity as a starter template.
-        queryParameters:
-          facility:
-            required: true
-          program:
-            required: true
-        responses:
-          200:
-            body:
-              application/json:
-                schema: physicalInventory
+      /draft:
+        get:
+          is: [ secured ]
+          description: Get a draft physical inventory. If draft does not exist, will return a list of all approved products with empty quantity as a starter template.
+          queryParameters:
+            facility:
+              required: true
+            program:
+              required: true
+          responses:
+            200:
+              description: Retrieved a draft.
+              body:
+                application/json:
+                  schema: physicalInventory
