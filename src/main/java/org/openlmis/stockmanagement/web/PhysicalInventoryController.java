@@ -16,6 +16,8 @@
 package org.openlmis.stockmanagement.web;
 
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.UUID;
 
@@ -57,6 +60,22 @@ public class PhysicalInventoryController {
     }
 
     return null;
+  }
+
+  /**
+   * Get a draft physical inventory.
+   *
+   * @param program  program ID.
+   * @param facility facility ID.
+   * @return If draft does not exist, will return a list of all approved products with empty
+   * quantity as a starter template.
+   */
+  @RequestMapping(value = "physicalInventories/draft", method = GET)
+  public ResponseEntity<PhysicalInventoryDto> findDraft(
+      @RequestParam UUID program,
+      @RequestParam UUID facility) {
+    permissionService.canCreateStockEvent(program, facility);
+    return new ResponseEntity<>(physicalInventoryService.findDraft(program, facility), OK);
   }
 
 }

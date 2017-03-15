@@ -17,11 +17,14 @@ package org.openlmis.stockmanagement.web;
 
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Test;
@@ -41,6 +44,7 @@ import java.util.UUID;
 
 public class PhysicalInventoryControllerTest extends BaseWebTest {
   private static final String PHYSICAL_INVENTORY_API = "/api/physicalInventories";
+  private static final String PHYSICAL_INVENTORY_DRAFT_API = "/api/physicalInventories/draft";
 
   @MockBean
   private PermissionService permissionService;
@@ -97,6 +101,34 @@ public class PhysicalInventoryControllerTest extends BaseWebTest {
     //then
     resultActions.andExpect(status().isCreated())
         .andExpect(content().string("\"" + inventoryId.toString() + "\""));
+  }
+
+  @Test
+  public void should_return_200_when_found_physical_inventory_draft() throws Exception {
+    //given
+    UUID programId = UUID.randomUUID();
+    UUID facilityId = UUID.randomUUID();
+    PhysicalInventoryDto physicalInventoryDto = PhysicalInventoryDto
+        .builder()
+        .programId(programId)
+        .facilityId(facilityId)
+        .lineItems(singletonList(new PhysicalInventoryLineItemDto()))
+        .build();
+    when(physicalInventoryService.findDraft(programId, facilityId))
+        .thenReturn(physicalInventoryDto);
+
+    //when
+    ResultActions resultActions = mvc.perform(
+        get(PHYSICAL_INVENTORY_DRAFT_API)
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+            .param("program", programId.toString())
+            .param("facility", facilityId.toString())
+            .contentType(MediaType.APPLICATION_JSON));
+
+    //then
+    resultActions
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.lineItems", hasSize(1)));
   }
 
   private ResultActions callApi(PhysicalInventoryDto piDto) throws Exception {
