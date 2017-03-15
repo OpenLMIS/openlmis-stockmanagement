@@ -130,6 +130,28 @@ public class PhysicalInventoryControllerTest extends BaseWebTest {
         .andExpect(jsonPath("$.lineItems", hasSize(1)));
   }
 
+  @Test
+  public void should_return_201_when_saved_physical_inventory_draft() throws Exception {
+    //given
+    PhysicalInventoryDto physicalInventoryDto = PhysicalInventoryDto
+        .builder()
+        .lineItems(singletonList(new PhysicalInventoryLineItemDto()))
+        .build();
+
+    when(physicalInventoryService.saveDraft(physicalInventoryDto)).thenReturn(physicalInventoryDto);
+
+    //when
+    ResultActions resultActions = mvc.perform(
+        post(PHYSICAL_INVENTORY_DRAFT_API)
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectToJsonString(physicalInventoryDto)));
+
+    //then
+    resultActions.andExpect(status().isCreated())
+        .andExpect(jsonPath("$.lineItems", hasSize(1)));
+  }
+
   private ResultActions callApi(PhysicalInventoryDto piDto) throws Exception {
     return mvc.perform(post(PHYSICAL_INVENTORY_API)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)

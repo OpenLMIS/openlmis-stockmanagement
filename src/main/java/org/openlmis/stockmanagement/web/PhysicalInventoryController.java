@@ -72,4 +72,16 @@ public class PhysicalInventoryController {
     return new ResponseEntity<>(physicalInventoryService.findDraft(program, facility), OK);
   }
 
+  /**
+   * Save a draft physical inventory.
+   *
+   * @param dto physical inventory dto.
+   * @return created physical inventory dto.
+   */
+  @RequestMapping(value = "physicalInventories/draft", method = POST)
+  public ResponseEntity<PhysicalInventoryDto> saveDraft(@RequestBody PhysicalInventoryDto dto) {
+    permissionService.canCreateStockEvent(dto.getProgramId(), dto.getFacilityId());
+    return new ResponseEntity<>(physicalInventoryService.saveDraft(dto), CREATED);
+  }
+
 }
