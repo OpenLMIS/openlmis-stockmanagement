@@ -22,7 +22,6 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_GENERATE_REPOR
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperReport;
-import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.exception.JasperReportViewException;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,8 +59,17 @@ public class JasperReportService {
    * @return generated stock card report.
    */
   public ModelAndView getStockCardReportView(UUID stockCardId) {
-    JasperReportsPdfView view = new JasperReportsPdfView();
+    Map<String, Object> params = new HashMap<>();
+    params.put("datasource", singletonList(stockCardService.findStockCardById(stockCardId)));
 
+    JasperReportsPdfView view = new JasperReportsPdfView();
+    compileReport(view);
+
+    view.setApplicationContext(appContext);
+    return new ModelAndView(view, params);
+  }
+
+  private void compileReport(JasperReportsPdfView view) {
     try (InputStream inputStream = getClass().getResourceAsStream(STOCK_CARD_REPORT_URL)) {
       File reportTempFile = createTempFile("stockCardReport_temp", ".jasper");
       JasperReport report = JasperCompileManager.compileReport(inputStream);
@@ -79,14 +87,5 @@ public class JasperReportService {
     } catch (IOException | JRException ex) {
       throw new JasperReportViewException(new Message(ERROR_GENERATE_REPORT_FAILED), ex);
     }
-
-    StockCardDto stockCardDto = stockCardService.findStockCardById(stockCardId);
-
-    Map<String, Object> params = new HashMap<>();
-    params.put("datasource", singletonList(stockCardDto));
-
-    view.setApplicationContext(appContext);
-
-    return new ModelAndView(view, params);
   }
 }
