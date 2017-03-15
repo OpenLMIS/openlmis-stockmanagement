@@ -40,7 +40,6 @@ public class PhysicalInventoryLineItem extends BaseEntity {
   @Column(nullable = false)
   private UUID orderableId;
 
-  @Column(nullable = false)
   private Integer quantity;
 
   @ManyToOne()

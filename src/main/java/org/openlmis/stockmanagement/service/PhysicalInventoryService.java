@@ -70,6 +70,8 @@ public class PhysicalInventoryService {
   public UUID submitPhysicalInventory(PhysicalInventoryDto dto)
       throws IllegalAccessException, InstantiationException {
     validateForSubmit(dto);
+    deleteExistingDraft(dto);
+
     PhysicalInventory inventory = dto.toPhysicalInventoryForSubmit();
     for (StockEventDto eventDto : dto.toEventDtos()) {
       UUID savedEventId = stockEventProcessor.process(eventDto);
@@ -106,14 +108,18 @@ public class PhysicalInventoryService {
    */
   public PhysicalInventoryDto saveDraft(PhysicalInventoryDto dto) {
     validateLineItems(dto);
+    deleteExistingDraft(dto);
+
+    physicalInventoriesRepository.save(dto.toPhysicalInventoryForDraft());
+    return dto;
+  }
+
+  private void deleteExistingDraft(PhysicalInventoryDto dto) {
     PhysicalInventory foundInventory = physicalInventoriesRepository
         .findByProgramIdAndFacilityIdAndIsDraft(dto.getProgramId(), dto.getFacilityId(), true);
     if (foundInventory != null) {
       physicalInventoriesRepository.delete(foundInventory);
     }
-
-    physicalInventoriesRepository.save(dto.toPhysicalInventoryForDraft());
-    return dto;
   }
 
   private PhysicalInventoryDto createEmptyInventory(UUID programId, UUID facilityId) {

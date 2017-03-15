@@ -138,19 +138,13 @@ public class PhysicalInventoryServiceTest {
   @Test
   public void should_associate_inventory_with_created_events() throws Exception {
     //given
-    PhysicalInventoryDto piDto = new PhysicalInventoryDto();
-    PhysicalInventoryLineItemDto piLineItemDto = new PhysicalInventoryLineItemDto();
-    piLineItemDto.setOrderable(OrderableDto.builder().id(randomUUID()).build());
-    piDto.setLineItems(singletonList(piLineItemDto));
+    PhysicalInventoryDto piDto = createInventoryDto();
 
     UUID eventId = UUID.randomUUID();
-    UUID inventoryId = UUID.randomUUID();
-
-    PhysicalInventory inventory = new PhysicalInventory();
-    inventory.setId(inventoryId);
 
     when(stockEventProcessor.process(any(StockEventDto.class))).thenReturn(eventId);
-    when(physicalInventoriesRepository.save(any(PhysicalInventory.class))).thenReturn(inventory);
+    when(physicalInventoriesRepository.save(any(PhysicalInventory.class)))
+        .thenReturn(new PhysicalInventory());
 
     //when
     physicalInventoryService.submitPhysicalInventory(piDto);
@@ -162,5 +156,36 @@ public class PhysicalInventoryServiceTest {
     StockEvent event = inventoryArgumentCaptor.getValue().getStockEvents().get(0);
 
     assertThat(event.getId(), is(eventId));
+  }
+
+  @Test
+  public void should_delete_draft_when_submit_inventory() throws Exception {
+    //given
+    PhysicalInventoryDto piDto = createInventoryDto();
+
+
+    when(physicalInventoriesRepository.save(any(PhysicalInventory.class)))
+        .thenReturn(new PhysicalInventory());
+
+    PhysicalInventory savedDraft = new PhysicalInventory();
+    when(physicalInventoriesRepository
+        .findByProgramIdAndFacilityIdAndIsDraft(piDto.getProgramId(), piDto.getFacilityId(), true))
+        .thenReturn(savedDraft);
+
+    //when
+    physicalInventoryService.submitPhysicalInventory(piDto);
+
+    //then
+    verify(physicalInventoriesRepository, times(1)).delete(savedDraft);
+  }
+
+  private PhysicalInventoryDto createInventoryDto() {
+    PhysicalInventoryDto piDto = new PhysicalInventoryDto();
+    piDto.setProgramId(UUID.randomUUID());
+    piDto.setFacilityId(UUID.randomUUID());
+    PhysicalInventoryLineItemDto piLineItemDto = new PhysicalInventoryLineItemDto();
+    piLineItemDto.setOrderable(OrderableDto.builder().id(randomUUID()).build());
+    piDto.setLineItems(singletonList(piLineItemDto));
+    return piDto;
   }
 }
