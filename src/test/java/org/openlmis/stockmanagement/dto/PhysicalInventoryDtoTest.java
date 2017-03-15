@@ -16,10 +16,12 @@
 package org.openlmis.stockmanagement.dto;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -51,12 +53,12 @@ public class PhysicalInventoryDtoTest {
   }
 
   @Test
-  public void should_convert_into_inventory_jpa_model() throws Exception {
+  public void should_convert_into_inventory_jpa_model_for_submit() throws Exception {
     //given
     PhysicalInventoryDto piDto = createInventoryDto();
 
     //when
-    PhysicalInventory inventory = piDto.toPhysicalInventory();
+    PhysicalInventory inventory = piDto.toPhysicalInventoryForSubmit();
 
     //then
     assertThat(inventory.getProgramId(), is(piDto.getProgramId()));
@@ -65,6 +67,31 @@ public class PhysicalInventoryDtoTest {
     assertThat(inventory.getSignature(), is(piDto.getSignature()));
     assertThat(inventory.getDocumentNumber(), is(piDto.getDocumentNumber()));
     assertThat(inventory.getIsDraft(), is(false));
+    assertThat(inventory.getLineItems(), nullValue());
+  }
+
+  @Test
+  public void should_convert_into_inventory_jpa_model_for_draft() throws Exception {
+    //given
+    PhysicalInventoryDto piDto = createInventoryDto();
+
+    //when
+    PhysicalInventory inventory = piDto.toPhysicalInventoryForDraft();
+
+    //then
+    assertThat(inventory.getProgramId(), is(piDto.getProgramId()));
+    assertThat(inventory.getFacilityId(), is(piDto.getFacilityId()));
+    assertThat(inventory.getOccurredDate(), is(piDto.getOccurredDate()));
+    assertThat(inventory.getSignature(), is(piDto.getSignature()));
+    assertThat(inventory.getDocumentNumber(), is(piDto.getDocumentNumber()));
+
+    assertThat(inventory.getIsDraft(), is(true));
+
+    assertThat(inventory.getLineItems().size(), is(1));
+    PhysicalInventoryLineItemDto piLineItemDto = piDto.getLineItems().get(0);
+    PhysicalInventoryLineItem piLineItem = inventory.getLineItems().get(0);
+    assertThat(piLineItem.getQuantity(), is(piLineItemDto.getQuantity()));
+    assertThat(piLineItem.getOrderableId(), is(piLineItemDto.getOrderable().getId()));
   }
 
   private PhysicalInventoryDto createInventoryDto() {

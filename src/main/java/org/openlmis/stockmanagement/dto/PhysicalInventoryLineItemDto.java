@@ -15,6 +15,9 @@
 
 package org.openlmis.stockmanagement.dto;
 
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,4 +30,17 @@ import lombok.NoArgsConstructor;
 public class PhysicalInventoryLineItemDto {
   private OrderableDto orderable;
   private Integer quantity;
+
+  /**
+   * Convert to jpa model.
+   *
+   * @param inventory inventory jpa model.
+   * @return the converted jpa model.
+   */
+  public PhysicalInventoryLineItem toPhysicalInventoryLineItem(PhysicalInventory inventory) {
+    return PhysicalInventoryLineItem.builder()
+        .orderableId(orderable.getId())
+        .quantity(quantity)
+        .physicalInventory(inventory).build();
+  }
 }

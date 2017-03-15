@@ -16,16 +16,23 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.util.Collections.singletonList;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.ArgumentCaptor.forClass;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
 import org.openlmis.stockmanagement.dto.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.OrderableDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
@@ -84,5 +91,38 @@ public class PhysicalInventoryServiceDraftTest {
     PhysicalInventoryLineItemDto inventoryLineItemDto = inventory.getLineItems().get(0);
     assertThat(inventoryLineItemDto.getOrderable(), is(orderableDto));
     assertThat(inventoryLineItemDto.getQuantity(), nullValue());
+  }
+
+  @Test
+  public void should_save_draft_if_no_saved_draft_is_found() throws Exception {
+    //given
+    UUID programId = UUID.randomUUID();
+    UUID facilityId = UUID.randomUUID();
+
+    when(physicalInventoriesRepository
+        .findByProgramIdAndFacilityIdAndIsDraft(programId, facilityId, true))
+        .thenReturn(null);
+
+    PhysicalInventoryLineItemDto piLineItemDto = PhysicalInventoryLineItemDto
+        .builder()
+        .orderable(OrderableDto.builder().id(randomUUID()).build())
+        .quantity(233)
+        .build();
+    PhysicalInventoryDto piDto = PhysicalInventoryDto
+        .builder()
+        .programId(programId).facilityId(facilityId)
+        .lineItems(singletonList(piLineItemDto))
+        .build();
+
+    //when
+    physicalInventoryService.saveDraft(piDto);
+
+    //then
+    ArgumentCaptor<PhysicalInventory> inventoryArgumentCaptor = forClass(PhysicalInventory.class);
+
+    verify(physicalInventoriesRepository, times(1)).save(inventoryArgumentCaptor.capture());
+    PhysicalInventoryLineItem lineItem = inventoryArgumentCaptor.getValue().getLineItems().get(0);
+    assertThat(lineItem.getQuantity(), is(piLineItemDto.getQuantity()));
+    assertThat(lineItem.getOrderableId(), is(piLineItemDto.getOrderable().getId()));
   }
 }

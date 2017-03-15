@@ -670,7 +670,6 @@ traits:
             description: Physical inventory submitted.
             body:
               application/json:
-                schema: physicalInventory
 
           400:
             description: |
@@ -693,6 +692,20 @@ traits:
           responses:
             200:
               description: Retrieved a draft.
+              body:
+                application/json:
+                  schema: physicalInventory
+
+        post:
+          is: [ secured ]
+          description: Save a draft physical inventory.
+          body:
+            application/json:
+              schema: physicalInventory
+
+          responses:
+            201:
+              description: Draft saved.
               body:
                 application/json:
                   schema: physicalInventory

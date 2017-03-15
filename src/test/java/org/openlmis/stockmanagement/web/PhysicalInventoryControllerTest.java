@@ -73,7 +73,7 @@ public class PhysicalInventoryControllerTest extends BaseWebTest {
   public void should_return_400_when_validation_failed() throws Exception {
     //given
     doThrow(new ValidationMessageException(new Message("key")))
-        .when(physicalInventoryService).createPhysicalInventory(any(PhysicalInventoryDto.class));
+        .when(physicalInventoryService).submitPhysicalInventory(any(PhysicalInventoryDto.class));
 
     //when
     ResultActions resultActions = callApi(new PhysicalInventoryDto());
@@ -91,7 +91,7 @@ public class PhysicalInventoryControllerTest extends BaseWebTest {
     piDto.setLineItems(singletonList(piLineItemDto));
 
     UUID inventoryId = UUID.randomUUID();
-    when(physicalInventoryService.createPhysicalInventory(any(PhysicalInventoryDto.class)))
+    when(physicalInventoryService.submitPhysicalInventory(any(PhysicalInventoryDto.class)))
         .thenReturn(inventoryId);
 
     //when

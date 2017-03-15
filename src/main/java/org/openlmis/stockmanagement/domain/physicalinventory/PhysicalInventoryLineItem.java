@@ -15,52 +15,35 @@
 
 package org.openlmis.stockmanagement.domain.physicalinventory;
 
-import static javax.persistence.CascadeType.ALL;
-import static org.hibernate.annotations.LazyCollectionOption.FALSE;
-
-import org.hibernate.annotations.LazyCollection;
 import org.openlmis.stockmanagement.domain.BaseEntity;
-import org.openlmis.stockmanagement.domain.event.StockEvent;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.OneToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-@Data
 @Entity
-@Table(name = "physical_inventories", schema = "stockmanagement")
-public class PhysicalInventory extends BaseEntity {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Table(name = "physical_inventory_line_items", schema = "stockmanagement")
+public class PhysicalInventoryLineItem extends BaseEntity {
   @Column(nullable = false)
-  private UUID programId;
+  private UUID orderableId;
 
   @Column(nullable = false)
-  private UUID facilityId;
+  private Integer quantity;
 
-  @Column(nullable = false)
-  private Boolean isDraft;
-
-  @Column(nullable = false, columnDefinition = "timestamp")
-  private ZonedDateTime occurredDate;
-
-  private String signature;
-  private String documentNumber;
-
-  @LazyCollection(FALSE)
-  @OneToMany(cascade = ALL, mappedBy = "physicalInventory")
-  private List<PhysicalInventoryLineItem> lineItems;
-
-  @OneToMany
-  @JoinTable(name = "physical_inventory_stock_events",
-      joinColumns = @JoinColumn(name = "physicalinventoryid"),
-      inverseJoinColumns = @JoinColumn(name = "stockeventid"))
-  private List<StockEvent> stockEvents;
+  @ManyToOne()
+  @JoinColumn(nullable = false)
+  private PhysicalInventory physicalInventory;
 }

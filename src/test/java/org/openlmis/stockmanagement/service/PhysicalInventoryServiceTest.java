@@ -65,7 +65,7 @@ public class PhysicalInventoryServiceTest {
     PhysicalInventoryDto piDto = new PhysicalInventoryDto();
     piDto.setLineItems(null);
 
-    physicalInventoryService.createPhysicalInventory(piDto);
+    physicalInventoryService.submitPhysicalInventory(piDto);
   }
 
   @Test(expected = ValidationMessageException.class)
@@ -73,7 +73,7 @@ public class PhysicalInventoryServiceTest {
     PhysicalInventoryDto piDto = new PhysicalInventoryDto();
     piDto.setLineItems(new ArrayList<>());
 
-    physicalInventoryService.createPhysicalInventory(piDto);
+    physicalInventoryService.submitPhysicalInventory(piDto);
   }
 
   @Test(expected = ValidationMessageException.class)
@@ -83,7 +83,7 @@ public class PhysicalInventoryServiceTest {
     PhysicalInventoryLineItemDto piLineItemDto = new PhysicalInventoryLineItemDto();
     piDto.setLineItems(singletonList(piLineItemDto));
 
-    physicalInventoryService.createPhysicalInventory(piDto);
+    physicalInventoryService.submitPhysicalInventory(piDto);
   }
 
   @Test(expected = ValidationMessageException.class)
@@ -104,7 +104,7 @@ public class PhysicalInventoryServiceTest {
     piDto.setLineItems(Arrays.asList(piLineItemDto1, piLineItemDto2));
 
     //when
-    physicalInventoryService.createPhysicalInventory(piDto);
+    physicalInventoryService.submitPhysicalInventory(piDto);
   }
 
   @Test(expected = ValidationMessageException.class)
@@ -132,7 +132,7 @@ public class PhysicalInventoryServiceTest {
     piDto.setLineItems(singletonList(piLineItemDto));
 
     //when
-    physicalInventoryService.createPhysicalInventory(piDto);
+    physicalInventoryService.submitPhysicalInventory(piDto);
   }
 
   @Test
@@ -153,7 +153,7 @@ public class PhysicalInventoryServiceTest {
     when(physicalInventoriesRepository.save(any(PhysicalInventory.class))).thenReturn(inventory);
 
     //when
-    physicalInventoryService.createPhysicalInventory(piDto);
+    physicalInventoryService.submitPhysicalInventory(piDto);
 
     //then
     ArgumentCaptor<PhysicalInventory> inventoryArgumentCaptor = forClass(PhysicalInventory.class);

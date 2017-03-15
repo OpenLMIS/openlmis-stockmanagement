@@ -68,18 +68,37 @@ public class PhysicalInventoryDto {
   }
 
   /**
-   * Convert into physical inventory jpa model.
+   * Convert into physical inventory jpa model for submit.
    *
    * @return converted jpa model.
    */
-  public PhysicalInventory toPhysicalInventory() {
+  public PhysicalInventory toPhysicalInventoryForSubmit() {
+    return toPhysicalInventory(false);
+  }
+
+
+  /**
+   * Convert into physical inventory jpa model for draft.
+   *
+   * @return converted jpa model.
+   */
+  public PhysicalInventory toPhysicalInventoryForDraft() {
+    PhysicalInventory inventory = toPhysicalInventory(true);
+
+    inventory.setLineItems(lineItems.stream()
+        .map(lineItemDto -> lineItemDto.toPhysicalInventoryLineItem(inventory))
+        .collect(toList()));
+    return inventory;
+  }
+
+  private PhysicalInventory toPhysicalInventory(boolean isDraft) {
     PhysicalInventory inventory = new PhysicalInventory();
     inventory.setProgramId(programId);
     inventory.setFacilityId(facilityId);
     inventory.setOccurredDate(occurredDate);
     inventory.setDocumentNumber(documentNumber);
     inventory.setSignature(signature);
-    inventory.setIsDraft(false);
+    inventory.setIsDraft(isDraft);
     inventory.setStockEvents(new ArrayList<>());
     return inventory;
   }

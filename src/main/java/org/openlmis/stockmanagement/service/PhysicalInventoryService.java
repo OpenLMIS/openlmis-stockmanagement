@@ -59,17 +59,22 @@ public class PhysicalInventoryService {
   private OrderableReferenceDataService orderableReferenceDataService;
 
   /**
-   * Try to create physical inventory.
+   * Submit physical inventory.
    *
    * @param dto physical inventory DTO
    * @return created physical inventory JPA model ID
    * @throws IllegalAccessException IllegalAccessException
    * @throws InstantiationException InstantiationException
    */
-  public UUID createPhysicalInventory(PhysicalInventoryDto dto)
+  public UUID submitPhysicalInventory(PhysicalInventoryDto dto)
       throws IllegalAccessException, InstantiationException {
-    validate(dto);
-    return submitPhysicalInventory(dto);
+    validateForSubmit(dto);
+    PhysicalInventory inventory = dto.toPhysicalInventoryForSubmit();
+    for (StockEventDto eventDto : dto.toEventDtos()) {
+      UUID savedEventId = stockEventProcessor.process(eventDto);
+      inventory.getStockEvents().add(fromId(savedEventId, StockEvent.class));
+    }
+    return physicalInventoriesRepository.save(inventory).getId();
   }
 
   /**
@@ -89,54 +94,21 @@ public class PhysicalInventoryService {
     return null;
   }
 
-  private UUID submitPhysicalInventory(PhysicalInventoryDto physicalInventoryDto)
-      throws InstantiationException, IllegalAccessException {
-    PhysicalInventory inventory = physicalInventoryDto.toPhysicalInventory();
-    for (StockEventDto eventDto : physicalInventoryDto.toEventDtos()) {
-      UUID savedEventId = stockEventProcessor.process(eventDto);
-      inventory.getStockEvents().add(fromId(savedEventId, StockEvent.class));
+  /**
+   * Save draft.
+   *
+   * @param dto physical inventory dto.
+   * @return the saved inventory.
+   */
+  public PhysicalInventoryDto saveDraft(PhysicalInventoryDto dto) {
+    validateLineItems(dto);
+    PhysicalInventory foundInventory = physicalInventoriesRepository
+        .findByProgramIdAndFacilityIdAndIsDraft(dto.getProgramId(), dto.getFacilityId(), true);
+    if (foundInventory == null) {
+      physicalInventoriesRepository.save(dto.toPhysicalInventoryForDraft());
+      return dto;
     }
-    return physicalInventoriesRepository.save(inventory).getId();
-  }
-
-  private void validate(PhysicalInventoryDto dto) {
-    List<PhysicalInventoryLineItemDto> lineItems = dto.getLineItems();
-    if (lineItems == null || lineItems.isEmpty()) {
-      throw new ValidationMessageException(
-          new Message(ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING));
-    }
-    boolean orderableMissing = lineItems.stream()
-        .anyMatch(lineItem -> lineItem.getOrderable() == null);
-    if (orderableMissing) {
-      throw new ValidationMessageException(
-          new Message(ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING));
-    }
-    checkOrderableDuplication(lineItems);
-    checkIncludeActiveStockCard(dto);
-  }
-
-  private void checkIncludeActiveStockCard(PhysicalInventoryDto dto) {
-    List<UUID> coveredOrderableIds = dto.getLineItems().stream()
-        .map(lineItemDto -> lineItemDto.getOrderable().getId()).collect(toList());
-
-    boolean activeCardMissing = stockCardRepository
-        .findByProgramIdAndFacilityId(dto.getProgramId(), dto.getFacilityId()).stream()
-        .map(StockCard::getOrderableId)
-        .anyMatch(cardOrderableId -> !coveredOrderableIds.contains(cardOrderableId));
-
-    if (activeCardMissing) {
-      throw new ValidationMessageException(
-          new Message(ERROR_PHYSICAL_INVENTORY_NOT_INCLUDE_ACTIVE_STOCK_CARD));
-    }
-  }
-
-  private void checkOrderableDuplication(List<PhysicalInventoryLineItemDto> lineItems) {
-    long count = lineItems.stream()
-        .map(lineItem -> lineItem.getOrderable().getId()).distinct().count();
-    if (count < lineItems.size()) {
-      throw new ValidationMessageException(
-          new Message(ERROR_PHYSICAL_INVENTORY_ORDERABLE_DUPLICATION));
-    }
+    return null;
   }
 
   private PhysicalInventoryDto createEmptyInventory(UUID programId, UUID facilityId) {
@@ -157,5 +129,49 @@ public class PhysicalInventoryService {
         .map(orderableDto ->
             PhysicalInventoryLineItemDto.builder().orderable(orderableDto).build())
         .collect(toList());
+  }
+
+  private void validateForSubmit(PhysicalInventoryDto dto) {
+    validateLineItems(dto);
+    checkIncludeActiveStockCard(dto);
+  }
+
+  private void validateLineItems(PhysicalInventoryDto dto) {
+    List<PhysicalInventoryLineItemDto> lineItems = dto.getLineItems();
+    if (lineItems == null || lineItems.isEmpty()) {
+      throw new ValidationMessageException(
+          new Message(ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING));
+    }
+    boolean orderableMissing = lineItems.stream()
+        .anyMatch(lineItem -> lineItem.getOrderable() == null);
+    if (orderableMissing) {
+      throw new ValidationMessageException(
+          new Message(ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING));
+    }
+    checkOrderableDuplication(lineItems);
+  }
+
+  private void checkOrderableDuplication(List<PhysicalInventoryLineItemDto> lineItems) {
+    long count = lineItems.stream()
+        .map(lineItem -> lineItem.getOrderable().getId()).distinct().count();
+    if (count < lineItems.size()) {
+      throw new ValidationMessageException(
+          new Message(ERROR_PHYSICAL_INVENTORY_ORDERABLE_DUPLICATION));
+    }
+  }
+
+  private void checkIncludeActiveStockCard(PhysicalInventoryDto dto) {
+    List<UUID> coveredOrderableIds = dto.getLineItems().stream()
+        .map(lineItemDto -> lineItemDto.getOrderable().getId()).collect(toList());
+
+    boolean activeCardMissing = stockCardRepository
+        .findByProgramIdAndFacilityId(dto.getProgramId(), dto.getFacilityId()).stream()
+        .map(StockCard::getOrderableId)
+        .anyMatch(cardOrderableId -> !coveredOrderableIds.contains(cardOrderableId));
+
+    if (activeCardMissing) {
+      throw new ValidationMessageException(
+          new Message(ERROR_PHYSICAL_INVENTORY_NOT_INCLUDE_ACTIVE_STOCK_CARD));
+    }
   }
 }

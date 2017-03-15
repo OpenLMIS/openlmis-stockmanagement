@@ -54,12 +54,7 @@ public class PhysicalInventoryController {
   public ResponseEntity<UUID> createPhysicalInventory(@RequestBody PhysicalInventoryDto dto)
       throws IllegalAccessException, InstantiationException {
     permissionService.canCreateStockEvent(dto.getProgramId(), dto.getFacilityId());
-    UUID physicalInventoryId = physicalInventoryService.createPhysicalInventory(dto);
-    if (physicalInventoryId != null) {
-      return new ResponseEntity<>(physicalInventoryId, CREATED);
-    }
-
-    return null;
+    return new ResponseEntity<>(physicalInventoryService.submitPhysicalInventory(dto), CREATED);
   }
 
   /**
