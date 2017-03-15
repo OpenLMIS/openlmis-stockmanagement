@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.errorhandling;
 
 import org.openlmis.stockmanagement.exception.AuthenticationException;
+import org.openlmis.stockmanagement.exception.JasperReportViewException;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.referencedata.ReferenceDataRetrievalException;
@@ -52,6 +53,13 @@ public class GlobalErrorHandling extends AbstractErrorHandling {
   @ResponseBody
   public ErrorResponse handleRefDataException(ReferenceDataRetrievalException ex) {
     return logErrorAndRespond("Error fetching from reference data", ex);
+  }
+
+  @ExceptionHandler(JasperReportViewException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  @ResponseBody
+  public ErrorResponse handleJasperReportException(JasperReportViewException ex) {
+    return logErrorAndRespond("Error generating jasper report failed", ex);
   }
 
   /**

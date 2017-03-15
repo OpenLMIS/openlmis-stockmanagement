@@ -61,7 +61,6 @@ public class JasperReportService {
    */
   public ModelAndView getStockCardReportView(UUID stockCardId) {
     JasperReportsPdfView view = new JasperReportsPdfView();
-    view.setApplicationContext(appContext);
 
     try (InputStream inputStream = getClass().getResourceAsStream(STOCK_CARD_REPORT_URL)) {
       File reportTempFile = createTempFile("stockCardReport_temp", ".jasper");
@@ -85,6 +84,8 @@ public class JasperReportService {
 
     Map<String, Object> params = new HashMap<>();
     params.put("datasource", singletonList(stockCardDto));
+
+    view.setApplicationContext(appContext);
 
     return new ModelAndView(view, params);
   }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.3.1.final using JasperReports Library version 6.3.1  -->
-<!-- 2017-03-14T17:01:34 -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="StockCard" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="d0829c7a-bf73-4e6e-9b5a-1735ab6c4d7d">
+<!-- 2017-03-15T14:04:49 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="StockCard" pageWidth="802" pageHeight="555" orientation="Landscape" columnWidth="802" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="d0829c7a-bf73-4e6e-9b5a-1735ab6c4d7d">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
 	<import value="org.openlmis.stockmanagement.dto.*"/>
 	<queryString>
@@ -10,13 +10,19 @@
 	<field name="stockOnHand" class="java.lang.Integer">
 		<fieldDescription><![CDATA[stockOnHand]]></fieldDescription>
 	</field>
+	<field name="facility" class="org.openlmis.stockmanagement.dto.FacilityDto">
+		<fieldDescription><![CDATA[facility]]></fieldDescription>
+	</field>
+	<field name="program" class="org.openlmis.stockmanagement.dto.ProgramDto">
+		<fieldDescription><![CDATA[program]]></fieldDescription>
+	</field>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
 	<title>
 		<band height="124" splitType="Stretch">
 			<staticText>
-				<reportElement x="191" y="0" width="420" height="80" uuid="ecab56ef-a62f-486f-bc7d-c1431467efc4"/>
+				<reportElement x="191" y="20" width="420" height="50" uuid="ecab56ef-a62f-486f-bc7d-c1431467efc4"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="SansSerif" size="26" isBold="true"/>
 				</textElement>
@@ -26,24 +32,78 @@
 	</title>
 	<pageHeader>
 		<band height="100" splitType="Stretch">
-			<textField isStretchWithOverflow="true" pattern="">
-				<reportElement x="220" y="16" width="182" height="20" uuid="68d8d341-d519-4cd5-adaf-845085a2b343"/>
+			<staticText>
+				<reportElement x="10" y="0" width="30" height="10" uuid="d88076e4-ce9f-4886-a172-855275a4a5e7">
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{stockOnHand}]]></textFieldExpression>
+				<text><![CDATA[Facility:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" pattern="">
+				<reportElement x="50" y="0" width="100" height="10" uuid="68d8d341-d519-4cd5-adaf-845085a2b343"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{facility}.getName()]]></textFieldExpression>
 			</textField>
-
 			<staticText>
-				<reportElement x="180" y="16" width="87" height="20" uuid="f932b782-290f-45d4-9fdf-f2cc21d3088c">
+				<reportElement x="10" y="20" width="55" height="10" uuid="e70d1a9b-4bcc-460c-8ffe-c238d8d4e9af">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+				</reportElement>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Facility code:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" pattern="">
+				<reportElement x="70" y="20" width="80" height="10" uuid="e28722c1-aff1-4167-af88-1d9b88dc2c81"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{facility}.getCode()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="200" y="0" width="40" height="10" uuid="f932b782-290f-45d4-9fdf-f2cc21d3088c">
 					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Program:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
+				<reportElement x="240" y="0" width="90" height="10" uuid="090f268a-9013-48d7-bf4c-2d082ce82426">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{program}.getName()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="200" y="20" width="40" height="10" uuid="f233a52e-358f-492e-972b-5893cca24c7f">
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 				</reportElement>
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
 				<text><![CDATA[SOH:]]></text>
 			</staticText>
-
+			<textField isStretchWithOverflow="true" pattern="">
+				<reportElement x="230" y="20" width="80" height="10" uuid="83ee175f-b7f6-47ab-97d1-e0e47cbd5ba8"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{stockOnHand}]]></textFieldExpression>
+			</textField>
 		</band>
 	</pageHeader>
 	<columnHeader>
