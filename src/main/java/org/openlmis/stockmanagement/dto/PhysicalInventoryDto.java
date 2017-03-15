@@ -19,7 +19,10 @@ import static java.util.stream.Collectors.toList;
 
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -27,6 +30,9 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class PhysicalInventoryDto {
   private UUID programId;
 

@@ -31,6 +31,8 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
+import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,6 +52,12 @@ public class PhysicalInventoryService {
   @Autowired
   private StockCardRepository stockCardRepository;
 
+  @Autowired
+  private ApprovedProductReferenceDataService approvedProductReferenceDataService;
+
+  @Autowired
+  private OrderableReferenceDataService orderableReferenceDataService;
+
   /**
    * Try to create physical inventory.
    *
@@ -64,6 +72,23 @@ public class PhysicalInventoryService {
       validate(dto);
       return submitPhysicalInventory(dto);
     }
+    return null;
+  }
+
+  /**
+   * Find draft by program and facility.
+   *
+   * @param programId  programId.
+   * @param facilityId facilityId.
+   * @return found draft, or if not found, returns empty draft.
+   */
+  public PhysicalInventoryDto findDraft(UUID programId, UUID facilityId) {
+    PhysicalInventory foundInventory = physicalInventoriesRepository
+        .findByProgramIdAndFacilityIdAndIsDraft(programId, facilityId, true);
+    if (foundInventory == null) {
+      return createEmptyInventory(programId, facilityId);
+    }
+
     return null;
   }
 
@@ -115,5 +140,25 @@ public class PhysicalInventoryService {
       throw new ValidationMessageException(
           new Message(ERROR_PHYSICAL_INVENTORY_ORDERABLE_DUPLICATION));
     }
+  }
+
+  private PhysicalInventoryDto createEmptyInventory(UUID programId, UUID facilityId) {
+    return PhysicalInventoryDto.builder()
+        .programId(programId)
+        .facilityId(facilityId)
+        .lineItems(approvedProductsToInventoryLineItemDto(programId, facilityId))
+        .build();
+  }
+
+  private List<PhysicalInventoryLineItemDto> approvedProductsToInventoryLineItemDto(
+      UUID programId, UUID facilityId) {
+    return approvedProductReferenceDataService
+        .getAllApprovedProducts(programId, facilityId)
+        .stream()
+        .map(approvedProductDto -> orderableReferenceDataService
+            .findOne(approvedProductDto.getProgramOrderable().getOrderableId()))
+        .map(orderableDto ->
+            PhysicalInventoryLineItemDto.builder().orderable(orderableDto).build())
+        .collect(toList());
   }
 }
