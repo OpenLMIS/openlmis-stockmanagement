@@ -94,6 +94,24 @@ public class PhysicalInventoryDtoTest {
     assertThat(piLineItem.getOrderableId(), is(piLineItemDto.getOrderable().getId()));
   }
 
+  @Test
+  public void should_create_dto_from_jpa_model() throws Exception {
+    //given
+    PhysicalInventory inventory = createInventoryDto().toPhysicalInventoryForDraft();
+
+    //when
+    PhysicalInventoryDto dto = PhysicalInventoryDto.from(inventory);
+
+    //then
+    assertThat(dto.getProgramId(), is(inventory.getProgramId()));
+    assertThat(dto.getFacilityId(), is(inventory.getFacilityId()));
+    assertThat(dto.getOccurredDate(), is(inventory.getOccurredDate()));
+    assertThat(dto.getDocumentNumber(), is(inventory.getDocumentNumber()));
+    assertThat(dto.getSignature(), is(inventory.getSignature()));
+
+    assertThat(dto.getLineItems().size(), is(1));
+  }
+
   private PhysicalInventoryDto createInventoryDto() {
     PhysicalInventoryDto piDto = new PhysicalInventoryDto();
     piDto.setOccurredDate(ZonedDateTime.now());

@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.service;
 
 import static java.util.stream.Collectors.toList;
 import static org.openlmis.stockmanagement.domain.BaseEntity.fromId;
+import static org.openlmis.stockmanagement.dto.PhysicalInventoryDto.from;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_NOT_INCLUDE_ACTIVE_STOCK_CARD;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ORDERABLE_DUPLICATION;
@@ -56,7 +57,7 @@ public class PhysicalInventoryService {
   private ApprovedProductReferenceDataService approvedProductReferenceDataService;
 
   @Autowired
-  private OrderableReferenceDataService orderableReferenceDataService;
+  private OrderableReferenceDataService orderableService;
 
   /**
    * Submit physical inventory.
@@ -89,9 +90,12 @@ public class PhysicalInventoryService {
         .findByProgramIdAndFacilityIdAndIsDraft(programId, facilityId, true);
     if (foundInventory == null) {
       return createEmptyInventory(programId, facilityId);
+    } else {
+      PhysicalInventoryDto inventoryDto = from(foundInventory);
+      inventoryDto.getLineItems().forEach(lineItemDto ->
+          lineItemDto.setOrderable(orderableService.findOne(lineItemDto.getOrderable().getId())));
+      return inventoryDto;
     }
-
-    return null;
   }
 
   /**
@@ -124,7 +128,7 @@ public class PhysicalInventoryService {
     return approvedProductReferenceDataService
         .getAllApprovedProducts(programId, facilityId)
         .stream()
-        .map(approvedProductDto -> orderableReferenceDataService
+        .map(approvedProductDto -> orderableService
             .findOne(approvedProductDto.getProgramOrderable().getOrderableId()))
         .map(orderableDto ->
             PhysicalInventoryLineItemDto.builder().orderable(orderableDto).build())

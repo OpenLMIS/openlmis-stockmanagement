@@ -168,12 +168,16 @@ public class PermissionService {
       String rightName, UUID program, UUID facility, UUID warehouse) {
     UserDto user = authenticationHelper.getCurrentUser();
     RightDto right = authenticationHelper.getRight(rightName);
+
+    String refDataErrorMsg;
     try {
       return userReferenceDataService.hasRight(
-          user.getId(), right.getId(), program, facility, warehouse
-      );
-    } catch (HttpClientErrorException e) {
-      throw new PermissionMessageException(new Message(ERROR_PERMISSION_CHECK_FAILED));
+          user.getId(), right.getId(), program, facility, warehouse);
+    } catch (HttpClientErrorException httpException) {
+      refDataErrorMsg = httpException.getMessage();
     }
+
+    throw new PermissionMessageException(
+        new Message(ERROR_PERMISSION_CHECK_FAILED, refDataErrorMsg));
   }
 }

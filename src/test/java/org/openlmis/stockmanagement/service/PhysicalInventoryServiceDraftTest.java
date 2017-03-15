@@ -125,4 +125,42 @@ public class PhysicalInventoryServiceDraftTest {
     assertThat(lineItem.getQuantity(), is(piLineItemDto.getQuantity()));
     assertThat(lineItem.getOrderableId(), is(piLineItemDto.getOrderable().getId()));
   }
+
+  @Test
+  public void should_return_draft_if_saved_draft_is_found() throws Exception {
+    //given
+    UUID programId = randomUUID();
+    UUID facilityId = randomUUID();
+    UUID orderableId = randomUUID();
+
+    PhysicalInventory inventory = createInventory(orderableId);
+
+    when(physicalInventoriesRepository
+        .findByProgramIdAndFacilityIdAndIsDraft(programId, facilityId, true))
+        .thenReturn(inventory);
+
+    OrderableDto orderableDto = new OrderableDto();
+    when(orderableReferenceDataService.findOne(orderableId))
+        .thenReturn(orderableDto);
+
+    //when
+    PhysicalInventoryDto foundDraft = physicalInventoryService.findDraft(programId, facilityId);
+
+    //then
+    PhysicalInventoryLineItemDto lineItemDto = foundDraft.getLineItems().get(0);
+    assertThat(lineItemDto.getOrderable(), is(orderableDto));
+  }
+
+  private PhysicalInventory createInventory(UUID orderableId) {
+    PhysicalInventoryLineItemDto piLineItemDto = PhysicalInventoryLineItemDto
+        .builder()
+        .orderable(OrderableDto.builder().id(orderableId).build())
+        .build();
+    PhysicalInventoryDto piDto = PhysicalInventoryDto
+        .builder()
+        .lineItems(singletonList(piLineItemDto))
+        .build();
+
+    return piDto.toPhysicalInventoryForDraft();
+  }
 }

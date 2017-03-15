@@ -43,4 +43,18 @@ public class PhysicalInventoryLineItemDto {
         .quantity(quantity)
         .physicalInventory(inventory).build();
   }
+
+  /**
+   * Create from jpa model.
+   *
+   * @param lineItem line item jpa model.
+   * @return created dto.
+   */
+  public static PhysicalInventoryLineItemDto from(PhysicalInventoryLineItem lineItem) {
+    return PhysicalInventoryLineItemDto
+        .builder()
+        .quantity(lineItem.getQuantity())
+        .orderable(OrderableDto.builder().id(lineItem.getOrderableId()).build())
+        .build();
+  }
 }

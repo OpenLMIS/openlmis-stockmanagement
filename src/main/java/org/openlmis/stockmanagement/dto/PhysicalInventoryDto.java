@@ -91,6 +91,25 @@ public class PhysicalInventoryDto {
     return inventory;
   }
 
+  /**
+   * Create from jpa model.
+   *
+   * @param inventory inventory jpa model.
+   * @return created dto.
+   */
+  public static PhysicalInventoryDto from(PhysicalInventory inventory) {
+    return PhysicalInventoryDto
+        .builder()
+        .programId(inventory.getProgramId())
+        .facilityId(inventory.getFacilityId())
+        .occurredDate(inventory.getOccurredDate())
+        .documentNumber(inventory.getDocumentNumber())
+        .signature(inventory.getSignature())
+        .lineItems(inventory.getLineItems().stream().map(
+            PhysicalInventoryLineItemDto::from).collect(toList()))
+        .build();
+  }
+
   private PhysicalInventory toPhysicalInventory(boolean isDraft) {
     PhysicalInventory inventory = new PhysicalInventory();
     inventory.setProgramId(programId);
