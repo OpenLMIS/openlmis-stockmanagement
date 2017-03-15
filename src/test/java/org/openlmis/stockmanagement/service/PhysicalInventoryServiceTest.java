@@ -63,7 +63,6 @@ public class PhysicalInventoryServiceTest {
   @Test(expected = ValidationMessageException.class)
   public void should_throw_validation_exception_when_line_items_not_exist() throws Exception {
     PhysicalInventoryDto piDto = new PhysicalInventoryDto();
-    piDto.setIsDraft(false);
     piDto.setLineItems(null);
 
     physicalInventoryService.createPhysicalInventory(piDto);
@@ -72,7 +71,6 @@ public class PhysicalInventoryServiceTest {
   @Test(expected = ValidationMessageException.class)
   public void should_throw_validation_exception_when_line_items_is_empty() throws Exception {
     PhysicalInventoryDto piDto = new PhysicalInventoryDto();
-    piDto.setIsDraft(false);
     piDto.setLineItems(new ArrayList<>());
 
     physicalInventoryService.createPhysicalInventory(piDto);
@@ -82,7 +80,6 @@ public class PhysicalInventoryServiceTest {
   public void should_throw_validation_exception_when_orderable_not_exist() throws Exception {
     //given
     PhysicalInventoryDto piDto = new PhysicalInventoryDto();
-    piDto.setIsDraft(false);
     PhysicalInventoryLineItemDto piLineItemDto = new PhysicalInventoryLineItemDto();
     piDto.setLineItems(singletonList(piLineItemDto));
 
@@ -93,7 +90,6 @@ public class PhysicalInventoryServiceTest {
   public void should_throw_validation_exception_when_orderables_are_duplicate() throws Exception {
     //given
     PhysicalInventoryDto piDto = new PhysicalInventoryDto();
-    piDto.setIsDraft(false);
 
     UUID orderableId1 = UUID.fromString("944ba21e-5ef8-4a83-95bf-09d82a9a5271");
     OrderableDto orderable1 = OrderableDto.builder().id(orderableId1).build();
@@ -131,7 +127,6 @@ public class PhysicalInventoryServiceTest {
     PhysicalInventoryDto piDto = new PhysicalInventoryDto();
     piDto.setProgramId(programId);
     piDto.setFacilityId(facilityId);
-    piDto.setIsDraft(false);
     PhysicalInventoryLineItemDto piLineItemDto = new PhysicalInventoryLineItemDto();
     piLineItemDto.setOrderable(OrderableDto.builder().id(orderableId1).build());
     piDto.setLineItems(singletonList(piLineItemDto));
@@ -144,7 +139,6 @@ public class PhysicalInventoryServiceTest {
   public void should_associate_inventory_with_created_events() throws Exception {
     //given
     PhysicalInventoryDto piDto = new PhysicalInventoryDto();
-    piDto.setIsDraft(false);
     PhysicalInventoryLineItemDto piLineItemDto = new PhysicalInventoryLineItemDto();
     piLineItemDto.setOrderable(OrderableDto.builder().id(randomUUID()).build());
     piDto.setLineItems(singletonList(piLineItemDto));

@@ -67,8 +67,7 @@ public class PhysicalInventoryController {
    *
    * @param program  program ID.
    * @param facility facility ID.
-   * @return If draft does not exist, will return a list of all approved products with empty
-   * quantity as a starter template.
+   * @return returns found draft, if not found, returns empty draft.
    */
   @RequestMapping(value = "physicalInventories/draft", method = GET)
   public ResponseEntity<PhysicalInventoryDto> findDraft(

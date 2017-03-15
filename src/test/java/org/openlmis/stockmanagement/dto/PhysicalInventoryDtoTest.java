@@ -64,7 +64,7 @@ public class PhysicalInventoryDtoTest {
     assertThat(inventory.getOccurredDate(), is(piDto.getOccurredDate()));
     assertThat(inventory.getSignature(), is(piDto.getSignature()));
     assertThat(inventory.getDocumentNumber(), is(piDto.getDocumentNumber()));
-    assertThat(inventory.getIsDraft(), is(piDto.getIsDraft()));
+    assertThat(inventory.getIsDraft(), is(false));
   }
 
   private PhysicalInventoryDto createInventoryDto() {

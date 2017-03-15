@@ -68,11 +68,8 @@ public class PhysicalInventoryService {
    */
   public UUID createPhysicalInventory(PhysicalInventoryDto dto)
       throws IllegalAccessException, InstantiationException {
-    if (!dto.getIsDraft()) {
-      validate(dto);
-      return submitPhysicalInventory(dto);
-    }
-    return null;
+    validate(dto);
+    return submitPhysicalInventory(dto);
   }
 
   /**

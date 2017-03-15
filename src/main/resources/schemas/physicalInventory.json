@@ -6,11 +6,6 @@
     "id": {
       "type": "string"
     },
-    "isDraft": {
-      "type": "boolean",
-      "required": true,
-      "description": "Indicates if this request is trying to save a draft or to submit."
-    },
     "programId": {
       "type": "string",
       "description": "Indicates which program the physical inventory is done for. Will be used for all events created from this physical inventory.",

@@ -86,7 +86,6 @@ public class PhysicalInventoryControllerTest extends BaseWebTest {
   public void should_return_201_when_physical_inventory_successfully_created() throws Exception {
     //given
     PhysicalInventoryDto piDto = new PhysicalInventoryDto();
-    piDto.setIsDraft(false);
     PhysicalInventoryLineItemDto piLineItemDto = new PhysicalInventoryLineItemDto();
     piLineItemDto.setOrderable(OrderableDto.builder().id(randomUUID()).build());
     piDto.setLineItems(singletonList(piLineItemDto));

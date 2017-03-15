@@ -38,8 +38,6 @@ public class PhysicalInventoryDto {
 
   private UUID facilityId;
 
-  private Boolean isDraft;
-
   private ZonedDateTime occurredDate;
 
   private String signature;
@@ -81,7 +79,7 @@ public class PhysicalInventoryDto {
     inventory.setOccurredDate(occurredDate);
     inventory.setDocumentNumber(documentNumber);
     inventory.setSignature(signature);
-    inventory.setIsDraft(isDraft);
+    inventory.setIsDraft(false);
     inventory.setStockEvents(new ArrayList<>());
     return inventory;
   }
