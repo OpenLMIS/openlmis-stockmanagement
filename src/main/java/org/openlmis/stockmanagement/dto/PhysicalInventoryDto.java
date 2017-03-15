@@ -15,7 +15,10 @@
 
 package org.openlmis.stockmanagement.dto;
 
+import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static java.util.stream.Collectors.toList;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 
@@ -38,6 +41,7 @@ public class PhysicalInventoryDto {
 
   private UUID facilityId;
 
+  @JsonFormat(shape = STRING)
   private ZonedDateTime occurredDate;
 
   private String signature;

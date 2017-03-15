@@ -99,7 +99,7 @@ public class PhysicalInventoryService {
   }
 
   /**
-   * Save draft.
+   * Save or update draft.
    *
    * @param dto physical inventory dto.
    * @return the saved inventory.
@@ -108,11 +108,12 @@ public class PhysicalInventoryService {
     validateLineItems(dto);
     PhysicalInventory foundInventory = physicalInventoriesRepository
         .findByProgramIdAndFacilityIdAndIsDraft(dto.getProgramId(), dto.getFacilityId(), true);
-    if (foundInventory == null) {
-      physicalInventoriesRepository.save(dto.toPhysicalInventoryForDraft());
-      return dto;
+    if (foundInventory != null) {
+      physicalInventoriesRepository.delete(foundInventory);
     }
-    return null;
+
+    physicalInventoriesRepository.save(dto.toPhysicalInventoryForDraft());
+    return dto;
   }
 
   private PhysicalInventoryDto createEmptyInventory(UUID programId, UUID facilityId) {
