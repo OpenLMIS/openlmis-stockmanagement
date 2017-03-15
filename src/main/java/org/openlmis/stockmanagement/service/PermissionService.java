@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.service;
 
 
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PERMISSION_CHECK_FAILED;
 
 import org.openlmis.stockmanagement.dto.ResultDto;
 import org.openlmis.stockmanagement.dto.RightDto;
@@ -27,6 +28,7 @@ import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.UUID;
 
@@ -166,8 +168,12 @@ public class PermissionService {
       String rightName, UUID program, UUID facility, UUID warehouse) {
     UserDto user = authenticationHelper.getCurrentUser();
     RightDto right = authenticationHelper.getRight(rightName);
-    return userReferenceDataService.hasRight(
-        user.getId(), right.getId(), program, facility, warehouse
-    );
+    try {
+      return userReferenceDataService.hasRight(
+          user.getId(), right.getId(), program, facility, warehouse
+      );
+    } catch (HttpClientErrorException e) {
+      throw new PermissionMessageException(new Message(ERROR_PERMISSION_CHECK_FAILED));
+    }
   }
 }

@@ -133,6 +133,9 @@ public abstract class MessageKeys {
   public static final String ERROR_PROGRAM_NOT_SUPPORTED = ERROR_PREFIX
       + ".authorization.program.not.supported";
 
+  public static final String ERROR_PERMISSION_CHECK_FAILED = ERROR_PREFIX
+      + ".authorization.failed";
+
   //stock card line item reason
   public static final String ERROR_LINE_ITEM_REASON_NAME_MISSING = ERROR_PREFIX
       + ".lineItem.reason.name.missing";
@@ -193,6 +196,7 @@ public abstract class MessageKeys {
   //report
   public static final String ERROR_GENERATE_REPORT_FAILED = ERROR_PREFIX + ".generateReport.failed";
 
+  //
   private MessageKeys() {
     throw new UnsupportedOperationException();
   }
