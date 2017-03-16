@@ -48,7 +48,7 @@ public class PhysicalInventory extends BaseEntity {
   @Column(nullable = false)
   private Boolean isDraft;
 
-  @Column(nullable = false, columnDefinition = "timestamp")
+  @Column(columnDefinition = "timestamp")
   private ZonedDateTime occurredDate;
 
   private String signature;
