@@ -15,6 +15,10 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static org.junit.rules.ExpectedException.none;
+import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_REASON_NOT_IN_VALID_LIST;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -27,15 +31,11 @@ import org.openlmis.stockmanagement.dto.FacilityTypeDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
-import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
+import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
 import java.util.ArrayList;
 import java.util.UUID;
-
-import static org.junit.rules.ExpectedException.none;
-import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_REASON_NOT_IN_VALID_LIST;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReasonAssignmentValidatorTest {
@@ -45,9 +45,6 @@ public class ReasonAssignmentValidatorTest {
   @Mock
   private ValidReasonAssignmentRepository validReasonAssignmentRepository;
 
-  @Mock
-  private FacilityReferenceDataService facilityReferenceDataService;
-
   @InjectMocks
   private ReasonAssignmentValidator reasonAssignmentValidator;
 
@@ -56,8 +53,8 @@ public class ReasonAssignmentValidatorTest {
     //given
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setReasonId(null);
-    when(facilityReferenceDataService.findOne(stockEventDto.getFacilityId()))
-        .thenReturn(createFacilityDto());
+    stockEventDto.setContext(StockEventProcessContext.builder()
+        .facility(createFacilityDto()).build());
     //when
     reasonAssignmentValidator.validate(stockEventDto);
 
@@ -66,7 +63,7 @@ public class ReasonAssignmentValidatorTest {
 
   @Test
   public void should_throw_error_if_event_reason_id_not_found_in_assignment_list()
-          throws Exception {
+      throws Exception {
     //expect
     expectedEx.expect(ValidationMessageException.class);
     expectedEx.expectMessage(ERROR_EVENT_REASON_NOT_IN_VALID_LIST);
@@ -79,11 +76,10 @@ public class ReasonAssignmentValidatorTest {
 
     UUID programId = stockEventDto.getProgramId();
 
-    when(facilityReferenceDataService.findOne(stockEventDto.getFacilityId()))
-            .thenReturn(facilityDto);
+    stockEventDto.setContext(StockEventProcessContext.builder().facility(facilityDto).build());
     when(validReasonAssignmentRepository
-            .findByProgramIdAndFacilityTypeId(programId, facilityDto.getType().getId()))
-            .thenReturn(new ArrayList<>());
+        .findByProgramIdAndFacilityTypeId(programId, facilityDto.getType().getId()))
+        .thenReturn(new ArrayList<>());
 
     //when
     reasonAssignmentValidator.validate(stockEventDto);
@@ -100,10 +96,10 @@ public class ReasonAssignmentValidatorTest {
 
   @Test
   public void should_not_throw_error_if_event_has_facility_id_not_in_ref_data()
-          throws Exception {
+      throws Exception {
     //given
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
-    when(facilityReferenceDataService.findOne(stockEventDto.getFacilityId())).thenReturn(null);
+    stockEventDto.setContext(new StockEventProcessContext());
 
     //when
     reasonAssignmentValidator.validate(stockEventDto);
@@ -113,9 +109,10 @@ public class ReasonAssignmentValidatorTest {
 
   @Test
   public void should_not_throw_error_if_event_has_no_program_id()
-          throws Exception {
+      throws Exception {
     //given
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    stockEventDto.setContext(new StockEventProcessContext());
     stockEventDto.setProgramId(null);
 
     //when

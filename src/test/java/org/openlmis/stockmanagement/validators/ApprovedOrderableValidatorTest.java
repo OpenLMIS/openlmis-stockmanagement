@@ -15,21 +15,19 @@
 
 package org.openlmis.stockmanagement.validators;
 
-import static org.mockito.Mockito.when;
+import static java.util.Collections.singletonList;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.ProgramOrderableDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
+import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
-import java.util.Collections;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -37,9 +35,6 @@ public class ApprovedOrderableValidatorTest {
 
   @InjectMocks
   private ApprovedOrderableValidator approvedOrderableValidator;
-
-  @Mock
-  private ApprovedProductReferenceDataService approvedProductReferenceDataService;
 
   @Test(expected = ValidationMessageException.class)
   public void stock_event_with_orderable_id_not_in_approved_list_should_not_pass_validation()
@@ -53,9 +48,8 @@ public class ApprovedOrderableValidatorTest {
     ApprovedProductDto approvedProductDto = new ApprovedProductDto();
     approvedProductDto.setProgramOrderable(programOrderableDto);
 
-    when(approvedProductReferenceDataService.getAllApprovedProducts(
-        stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
-        .thenReturn(Collections.singletonList(approvedProductDto));
+    stockEventDto.setContext(StockEventProcessContext.builder()
+        .allApprovedProducts(singletonList(approvedProductDto)).build());
 
     //when:
     approvedOrderableValidator.validate(stockEventDto);
@@ -77,9 +71,8 @@ public class ApprovedOrderableValidatorTest {
     ApprovedProductDto approvedProductDto = new ApprovedProductDto();
     approvedProductDto.setProgramOrderable(programOrderableDto);
 
-    when(approvedProductReferenceDataService.getAllApprovedProducts(
-        stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
-        .thenReturn(Collections.singletonList(approvedProductDto));
+    stockEventDto.setContext(StockEventProcessContext.builder()
+        .allApprovedProducts(singletonList(approvedProductDto)).build());
 
     //when:
     approvedOrderableValidator.validate(stockEventDto);

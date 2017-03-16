@@ -15,6 +15,14 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static java.util.Collections.singletonList;
+import static java.util.stream.StreamSupport.stream;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,18 +36,13 @@ import org.openlmis.stockmanagement.dto.UserDto;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
+import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.UUID;
-
-import static java.util.stream.StreamSupport.stream;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -50,6 +53,9 @@ public class StockEventProcessorTest extends BaseTest {
 
   @MockBean
   private StockEventValidationsService stockEventValidationsService;
+
+  @MockBean
+  private StockEventProcessContextBuilder contextBuilder;
 
   @Autowired
   private StockEventProcessor stockEventProcessor;
@@ -66,6 +72,8 @@ public class StockEventProcessorTest extends BaseTest {
     UserDto userDto = new UserDto();
     userDto.setId(userId);
     when(authenticationHelper.getCurrentUser()).thenReturn(userDto);
+    when(contextBuilder.buildContext(any(StockEventDto.class)))
+        .thenReturn(new StockEventProcessContext());
   }
 
   @After
@@ -76,17 +84,17 @@ public class StockEventProcessorTest extends BaseTest {
 
   @Test
   public void should_not_save_events_if_anything_goes_wrong_in_validations_service()
-          throws Exception {
+      throws Exception {
     //given
     StockEventDto stockEventDto = createStockEventDto();
 
     Mockito.doThrow(new RuntimeException("something wrong from validations service"))
-            .when(stockEventValidationsService)
-            .validate(stockEventDto);
+        .when(stockEventValidationsService)
+        .validate(stockEventDto);
 
     //when
     try {
-      stockEventProcessor.process(stockEventDto);
+      stockEventProcessor.process(singletonList(stockEventDto));
     } catch (RuntimeException ex) {
       //then
       assertEventAndCardAndLineItemTableSize(0);
@@ -102,7 +110,7 @@ public class StockEventProcessorTest extends BaseTest {
     assertEventAndCardAndLineItemTableSize(0);
 
     StockEventDto stockEventDto = createStockEventDto();
-    stockEventProcessor.process(stockEventDto);
+    stockEventProcessor.process(singletonList(stockEventDto));
 
     //then
     assertEventAndCardAndLineItemTableSize(1);
@@ -111,7 +119,7 @@ public class StockEventProcessorTest extends BaseTest {
   private void assertEventAndCardAndLineItemTableSize(long size) {
     Iterable<StockCard> allCards = stockCardRepository.findAll();
     long lineItemsCount = stream(allCards.spliterator(), false)
-            .flatMap(card -> card.getLineItems().stream()).count();
+        .mapToLong(card -> card.getLineItems().size()).sum();
 
     assertThat(allCards.spliterator().getExactSizeIfKnown(), is(size));
     assertThat(lineItemsCount, is(size));

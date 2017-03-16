@@ -15,10 +15,12 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static java.util.Collections.singletonList;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockEventProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,22 +43,26 @@ public class StockEventsController {
   private static final Logger LOGGER = LoggerFactory.getLogger(StockEventsController.class);
 
   @Autowired
+  private PermissionService permissionService;
+
+  @Autowired
   private StockEventProcessor stockEventProcessor;
 
   /**
    * Create stock event.
    *
-   * @param stockEventDto a stock event bound to request body.
+   * @param eventDto a stock event bound to request body.
    * @return created stock event's ID.
    * @throws InstantiationException InstantiationException.
    * @throws IllegalAccessException IllegalAccessException.
    */
   @RequestMapping(value = "stockEvents", method = POST)
   @Transactional(rollbackFor = {InstantiationException.class, IllegalAccessException.class})
-  public ResponseEntity<UUID> createStockEvent(@RequestBody StockEventDto stockEventDto)
+  public ResponseEntity<UUID> createStockEvent(@RequestBody StockEventDto eventDto)
       throws InstantiationException, IllegalAccessException {
     LOGGER.debug("Try to create a stock event");
-    UUID createdEventId = stockEventProcessor.process(stockEventDto);
+    permissionService.canCreateStockEvent(eventDto.getProgramId(), eventDto.getFacilityId());
+    UUID createdEventId = stockEventProcessor.process(singletonList(eventDto)).get(0);
     return new ResponseEntity<>(createdEventId, CREATED);
   }
 

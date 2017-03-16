@@ -23,28 +23,13 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_QUANTITY
 
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.service.referencedata.BaseReferenceDataService;
-import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
-import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
-import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.openlmis.stockmanagement.utils.Message;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
-import java.util.UUID;
 
 @Component(value = "MandatoryFieldsValidator")
 public class MandatoryFieldsValidator implements StockEventValidator {
-
-  @Autowired
-  FacilityReferenceDataService facilityRefDataService;
-
-  @Autowired
-  ProgramReferenceDataService programRefDataService;
-
-  @Autowired
-  OrderableReferenceDataService orderableRefDataService;
 
   @Override
   public void validate(StockEventDto stockEventDto) {
@@ -54,21 +39,20 @@ public class MandatoryFieldsValidator implements StockEventValidator {
     validateQuantity(stockEventDto);
   }
 
-  private void validateFacilityProgramAndOrderable(StockEventDto stockEventDto) {
-    validateByRefDataService(
-        stockEventDto.getFacilityId(), facilityRefDataService, ERROR_EVENT_FACILITY_INVALID);
+  private void validateFacilityProgramAndOrderable(StockEventDto dto) {
+    if (dto.getContext().getFacility() == null) {
+      throw new ValidationMessageException(
+          new Message(ERROR_EVENT_FACILITY_INVALID, dto.getFacilityId()));
+    }
 
-    validateByRefDataService(
-        stockEventDto.getProgramId(), programRefDataService, ERROR_EVENT_PROGRAM_INVALID);
+    if (dto.getContext().getProgram() == null) {
+      throw new ValidationMessageException(
+          new Message(ERROR_EVENT_PROGRAM_INVALID, dto.getProgramId()));
+    }
 
-    validateByRefDataService(
-        stockEventDto.getOrderableId(), orderableRefDataService, ERROR_EVENT_ORDERABLE_INVALID);
-  }
-
-  private void validateByRefDataService(
-      UUID id, BaseReferenceDataService refDataService, String key) {
-    if (id == null || refDataService.findOne(id) == null) {
-      throw new ValidationMessageException(new Message(key, id));
+    if (dto.getOrderableId() == null) {
+      throw new ValidationMessageException(
+          new Message(ERROR_EVENT_ORDERABLE_INVALID, dto.getOrderableId()));
     }
   }
 

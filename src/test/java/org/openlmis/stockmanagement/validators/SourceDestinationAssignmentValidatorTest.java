@@ -15,6 +15,14 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_NOT_IN_VALID_LIST;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_BOTH_PRESENT;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_IN_VALID_LIST;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,25 +35,14 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
 import org.openlmis.stockmanagement.repository.ValidSourceAssignmentRepository;
-import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
+import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
 import java.util.ArrayList;
 import java.util.UUID;
 
-import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_NOT_IN_VALID_LIST;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_BOTH_PRESENT;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_IN_VALID_LIST;
-
 @RunWith(MockitoJUnitRunner.class)
 public class SourceDestinationAssignmentValidatorTest {
-
-  @Mock
-  private FacilityReferenceDataService facilityReferenceDataService;
 
   @Mock
   private ValidSourceAssignmentRepository validSourceAssignmentRepository;
@@ -69,7 +66,7 @@ public class SourceDestinationAssignmentValidatorTest {
     } catch (ValidationMessageException ex) {
       //then
       assertThat(ex.asMessage().toString(), containsString(
-              ERROR_SOURCE_DESTINATION_BOTH_PRESENT));
+          ERROR_SOURCE_DESTINATION_BOTH_PRESENT));
       return;
     }
 
@@ -83,10 +80,10 @@ public class SourceDestinationAssignmentValidatorTest {
     eventDto.setSourceId(UUID.randomUUID());
     eventDto.setDestinationId(null);
 
-    mockFacilityRefDataService(eventDto);
+    createContextWithFacility(eventDto);
     when(validSourceAssignmentRepository
-            .findByProgramIdAndFacilityTypeId(any(UUID.class), any(UUID.class)))
-            .thenReturn(new ArrayList<>());
+        .findByProgramIdAndFacilityTypeId(any(UUID.class), any(UUID.class)))
+        .thenReturn(new ArrayList<>());
 
     //when
     try {
@@ -107,10 +104,10 @@ public class SourceDestinationAssignmentValidatorTest {
     eventDto.setDestinationId(UUID.randomUUID());
     eventDto.setSourceId(null);
 
-    mockFacilityRefDataService(eventDto);
+    createContextWithFacility(eventDto);
     when(validDestinationAssignmentRepository
-            .findByProgramIdAndFacilityTypeId(any(UUID.class), any(UUID.class)))
-            .thenReturn(new ArrayList<>());
+        .findByProgramIdAndFacilityTypeId(any(UUID.class), any(UUID.class)))
+        .thenReturn(new ArrayList<>());
 
     //when
     try {
@@ -134,7 +131,7 @@ public class SourceDestinationAssignmentValidatorTest {
     eventDto.setSourceId(null);
     eventDto.setProgramId(null);
 
-    mockFacilityRefDataService(eventDto);
+    createContextWithFacility(eventDto);
 
     //when
     sourceDestinationAssignmentValidator.validate(eventDto);
@@ -151,8 +148,7 @@ public class SourceDestinationAssignmentValidatorTest {
     eventDto.setDestinationId(UUID.randomUUID());
     eventDto.setSourceId(null);
     eventDto.setFacilityId(null);
-
-    when(facilityReferenceDataService.findOne(eventDto.getFacilityId())).thenReturn(null);
+    eventDto.setContext(new StockEventProcessContext());
 
     //when
     sourceDestinationAssignmentValidator.validate(eventDto);
@@ -160,11 +156,11 @@ public class SourceDestinationAssignmentValidatorTest {
     //then: no error
   }
 
-  private void mockFacilityRefDataService(StockEventDto eventDto) {
+  private void createContextWithFacility(StockEventDto eventDto) {
     FacilityTypeDto facilityTypeDto = new FacilityTypeDto();
     facilityTypeDto.setId(UUID.randomUUID());
     FacilityDto facilityDto = new FacilityDto();
     facilityDto.setType(facilityTypeDto);
-    when(facilityReferenceDataService.findOne(eventDto.getFacilityId())).thenReturn(facilityDto);
+    eventDto.setContext(StockEventProcessContext.builder().facility(facilityDto).build());
   }
 }

@@ -15,6 +15,13 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,22 +43,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class StockEventValidationsServiceTest {
 
   @Autowired
   private StockEventValidationsService stockEventValidationsService;
-
-  @MockBean
-  private PermissionService permissionService;
 
   @MockBean(name = "v1")
   private StockEventValidator validator1;
@@ -95,20 +92,6 @@ public class StockEventValidationsServiceTest {
     doNothing().when(adjustmentReasonValidator).validate(any(StockEventDto.class));
     doNothing().when(quantityValidator).validate(any(StockEventDto.class));
     doNothing().when(reasonAssignmentValidator).validate(any(StockEventDto.class));
-  }
-
-  @Test
-  public void should_validate_current_user_permission() throws Exception {
-    //given:
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
-
-    //when:
-    stockEventValidationsService.validate(stockEventDto);
-
-    //then:
-    verify(permissionService, times(1))
-        .canCreateStockEvent(stockEventDto.getProgramId(), stockEventDto.getFacilityId());
-
   }
 
   @Test

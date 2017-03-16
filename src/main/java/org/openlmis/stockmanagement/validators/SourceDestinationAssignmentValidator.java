@@ -26,7 +26,6 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
 import org.openlmis.stockmanagement.repository.ValidSourceAssignmentRepository;
-import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,9 +35,6 @@ import java.util.UUID;
 
 @Component(value = "SourceDestinationAssignmentValidator")
 public class SourceDestinationAssignmentValidator implements StockEventValidator {
-
-  @Autowired
-  private FacilityReferenceDataService facilityReferenceDataService;
 
   @Autowired
   private ValidSourceAssignmentRepository validSourceAssignmentRepository;
@@ -100,7 +96,7 @@ public class SourceDestinationAssignmentValidator implements StockEventValidator
   }
 
   private UUID getFacilityTypeId(StockEventDto eventDto) {
-    FacilityDto facilityDto = facilityReferenceDataService.findOne(eventDto.getFacilityId());
+    FacilityDto facilityDto = eventDto.getContext().getFacility();
     if (facilityDto != null) {
       return facilityDto.getType().getId();
     }

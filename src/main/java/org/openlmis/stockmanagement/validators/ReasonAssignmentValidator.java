@@ -22,7 +22,6 @@ import org.openlmis.stockmanagement.dto.FacilityDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
-import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,13 +35,10 @@ public class ReasonAssignmentValidator implements StockEventValidator {
   @Autowired
   private ValidReasonAssignmentRepository validReasonAssignmentRepository;
 
-  @Autowired
-  private FacilityReferenceDataService facilityReferenceDataService;
-
   @Override
   public void validate(StockEventDto stockEventDto) {
     LOGGER.debug("Validate reason assignment");
-    FacilityDto facility = facilityReferenceDataService.findOne(stockEventDto.getFacilityId());
+    FacilityDto facility = stockEventDto.getContext().getFacility();
     UUID programId = stockEventDto.getProgramId();
     if (!stockEventDto.hasReason() || facility == null || programId == null) {
       return;

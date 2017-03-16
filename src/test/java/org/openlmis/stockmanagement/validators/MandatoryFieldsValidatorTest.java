@@ -15,33 +15,27 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_FACILITY_INVALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_OCCURRED_DATE_INVALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ORDERABLE_INVALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_PROGRAM_INVALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_QUANTITY_INVALID;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.FacilityDto;
-import org.openlmis.stockmanagement.dto.OrderableDto;
 import org.openlmis.stockmanagement.dto.ProgramDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
-import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
-import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
-import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
+import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_FACILITY_INVALID;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_OCCURRED_DATE_INVALID;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ORDERABLE_INVALID;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_PROGRAM_INVALID;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_QUANTITY_INVALID;
 
 @SuppressWarnings("PMD.TooManyMethods")
 @RunWith(MockitoJUnitRunner.class)
@@ -50,52 +44,33 @@ public class MandatoryFieldsValidatorTest {
   @InjectMocks
   private MandatoryFieldsValidator mandatoryFieldsValidator;
 
-  @Mock
-  private FacilityReferenceDataService facilityReferenceDataService;
-
-  @Mock
-  private ProgramReferenceDataService programReferenceDataService;
-
-  @Mock
-  private OrderableReferenceDataService orderableReferenceDataService;
-
   @Rule
   public ExpectedException expectedEx = ExpectedException.none();
 
+  private StockEventDto stockEventDto;
+
   @Before
   public void setUp() throws Exception {
-    when(facilityReferenceDataService.findOne(any(UUID.class)))
-        .thenReturn(new FacilityDto());
-    when(programReferenceDataService.findOne(any(UUID.class)))
-        .thenReturn(new ProgramDto());
-    when(orderableReferenceDataService.findOne(any(UUID.class)))
-        .thenReturn(new OrderableDto());
-  }
-
-  @Test()
-  public void stock_event_without_facility_should_not_pass_validation() throws Exception {
-    expectFacilityException(null);
+    StockEventProcessContext stockEventContext = StockEventProcessContext.builder()
+        .facility(new FacilityDto())
+        .program(new ProgramDto()).build();
+    stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    stockEventDto.setContext(stockEventContext);
   }
 
   @Test
   public void stock_event_with_incorrect_facility_id_should_not_pass_validation()
       throws Exception {
     UUID facilityId = UUID.randomUUID();
-    when(facilityReferenceDataService.findOne(facilityId)).thenReturn(null);
+    stockEventDto.getContext().setFacility(null);
 
     expectFacilityException(facilityId);
-  }
-
-  @Test()
-  public void stock_event_without_program_should_not_pass_validation()
-      throws Exception {
-    expectProgramException(null);
   }
 
   @Test
   public void stock_event_with_incorrect_program_id_should_not_pass_validation() throws Exception {
     UUID programId = UUID.randomUUID();
-    when(programReferenceDataService.findOne(programId)).thenReturn(null);
+    stockEventDto.getContext().setProgram(null);
 
     expectProgramException(programId);
   }
@@ -106,19 +81,10 @@ public class MandatoryFieldsValidatorTest {
     expectOrderableException(null);
   }
 
-  @Test()
-  public void stock_event_with_incorrect_orderable_id_should_not_pass_validation()
-      throws Exception {
-    UUID orderableId = UUID.randomUUID();
-    when(orderableReferenceDataService.findOne(orderableId)).thenReturn(null);
-
-    expectOrderableException(orderableId);
-  }
-
   @Test
   public void stock_event_with_facility_program_orderable_should_pass_validation()
       throws Exception {
-    mandatoryFieldsValidator.validate(StockEventDtoBuilder.createStockEventDto());
+    mandatoryFieldsValidator.validate(stockEventDto);
   }
 
   @Test()
@@ -135,7 +101,7 @@ public class MandatoryFieldsValidatorTest {
 
   @Test
   public void stock_event_with_right_occurred_date_should_pass_validation() throws Exception {
-    mandatoryFieldsValidator.validate(StockEventDtoBuilder.createStockEventDto());
+    mandatoryFieldsValidator.validate(stockEventDto);
   }
 
   @Test()
@@ -150,12 +116,11 @@ public class MandatoryFieldsValidatorTest {
 
   @Test
   public void stock_event_with_positive_or_zero_quantity_should_pass_validation() throws Exception {
-    mandatoryFieldsValidator.validate(StockEventDtoBuilder.createStockEventDto());
+    mandatoryFieldsValidator.validate(stockEventDto);
   }
 
   private void expectFacilityException(UUID facilityId) {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setFacilityId(facilityId);
 
     //when
@@ -166,7 +131,6 @@ public class MandatoryFieldsValidatorTest {
 
   private void expectProgramException(UUID programId) {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setProgramId(programId);
 
     //when
@@ -177,7 +141,6 @@ public class MandatoryFieldsValidatorTest {
 
   private void expectOrderableException(UUID orderableId) {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setOrderableId(orderableId);
 
     //when
@@ -188,7 +151,6 @@ public class MandatoryFieldsValidatorTest {
 
   private void expectOccurredDateException(ZonedDateTime occurredDate) {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setOccurredDate(occurredDate);
 
     //when
@@ -199,7 +161,6 @@ public class MandatoryFieldsValidatorTest {
 
   private void expectQuantityException(Integer quantity) {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setQuantity(quantity);
 
     //when

@@ -15,20 +15,7 @@
 
 package org.openlmis.stockmanagement.web;
 
-import org.junit.Test;
-import org.mockito.Mockito;
-import org.openlmis.stockmanagement.dto.StockEventDto;
-import org.openlmis.stockmanagement.exception.PermissionMessageException;
-import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.service.StockEventProcessor;
-import org.openlmis.stockmanagement.utils.Message;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-
-import java.util.UUID;
-
+import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
@@ -39,9 +26,27 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.exception.PermissionMessageException;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.service.PermissionService;
+import org.openlmis.stockmanagement.service.StockEventProcessor;
+import org.openlmis.stockmanagement.utils.Message;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+
+import java.util.UUID;
+
 public class StockEventsControllerTest extends BaseWebTest {
 
   private static final String CREATE_STOCK_EVENT_API = "/api/stockEvents";
+
+  @MockBean
+  private PermissionService permissionService;
 
   @MockBean
   private StockEventProcessor stockEventProcessor;
@@ -50,7 +55,8 @@ public class StockEventsControllerTest extends BaseWebTest {
   public void should_return_201_when_event_successfully_created() throws Exception {
     //given
     UUID uuid = UUID.randomUUID();
-    when(stockEventProcessor.process(any(StockEventDto.class))).thenReturn(uuid);
+    when(stockEventProcessor.process(singletonList(any(StockEventDto.class))))
+        .thenReturn(singletonList(uuid));
 
     //when
     ResultActions resultActions = mvc.perform(post(CREATE_STOCK_EVENT_API)
@@ -69,8 +75,7 @@ public class StockEventsControllerTest extends BaseWebTest {
     //given
     Mockito.doThrow(new PermissionMessageException(
         new Message(ERROR_NO_FOLLOWING_PERMISSION, STOCK_EVENT_CREATE)))
-        .when(stockEventProcessor)
-        .process(any());
+        .when(permissionService).canCreateStockEvent(any(UUID.class), any(UUID.class));
 
     //when
     ResultActions resultActions = mvc.perform(post(CREATE_STOCK_EVENT_API)
@@ -86,8 +91,7 @@ public class StockEventsControllerTest extends BaseWebTest {
   public void should_return_400_when_validation_fails() throws Exception {
     //given
     Mockito.doThrow(new ValidationMessageException(new Message(ERROR_STOCK_EVENT_REASON_NOT_MATCH)))
-        .when(stockEventProcessor)
-        .process(any());
+        .when(stockEventProcessor).process(singletonList(any()));
 
     //when
     ResultActions resultActions = mvc.perform(post(CREATE_STOCK_EVENT_API)

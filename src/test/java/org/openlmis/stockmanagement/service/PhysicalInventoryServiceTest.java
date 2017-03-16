@@ -37,13 +37,13 @@ import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.dto.OrderableDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
-import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -142,7 +142,7 @@ public class PhysicalInventoryServiceTest {
 
     UUID eventId = UUID.randomUUID();
 
-    when(stockEventProcessor.process(any(StockEventDto.class))).thenReturn(eventId);
+    when(stockEventProcessor.process(any(List.class))).thenReturn(singletonList(eventId));
     when(physicalInventoriesRepository.save(any(PhysicalInventory.class)))
         .thenReturn(new PhysicalInventory());
 

@@ -28,13 +28,14 @@ import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
-import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.utils.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +44,8 @@ import java.util.UUID;
 
 @Service
 public class PhysicalInventoryService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(PhysicalInventoryService.class);
 
   @Autowired
   private StockEventProcessor stockEventProcessor;
@@ -62,20 +65,21 @@ public class PhysicalInventoryService {
   /**
    * Submit physical inventory.
    *
-   * @param dto physical inventory DTO
+   * @param inventoryDto physical inventory DTO
    * @return created physical inventory JPA model ID
    * @throws IllegalAccessException IllegalAccessException
    * @throws InstantiationException InstantiationException
    */
-  public UUID submitPhysicalInventory(PhysicalInventoryDto dto)
+  public UUID submitPhysicalInventory(PhysicalInventoryDto inventoryDto)
       throws IllegalAccessException, InstantiationException {
-    validateForSubmit(dto);
-    deleteExistingDraft(dto);
+    validateForSubmit(inventoryDto);
+    deleteExistingDraft(inventoryDto);
 
-    PhysicalInventory inventory = dto.toPhysicalInventoryForSubmit();
-    for (StockEventDto eventDto : dto.toEventDtos()) {
-      UUID savedEventId = stockEventProcessor.process(eventDto);
-      inventory.getStockEvents().add(fromId(savedEventId, StockEvent.class));
+    LOGGER.info("submit physical inventory, items count: " + inventoryDto.getLineItems().size());
+    List<UUID> eventIds = stockEventProcessor.process(inventoryDto.toEventDtos());
+    PhysicalInventory inventory = inventoryDto.toPhysicalInventoryForSubmit();
+    for (UUID eventId : eventIds) {
+      inventory.getStockEvents().add(fromId(eventId, StockEvent.class));
     }
     return physicalInventoriesRepository.save(inventory).getId();
   }

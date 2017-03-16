@@ -13,32 +13,27 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.service;
+package org.openlmis.stockmanagement.util;
 
+import org.openlmis.stockmanagement.dto.ApprovedProductDto;
+import org.openlmis.stockmanagement.dto.FacilityDto;
+import org.openlmis.stockmanagement.dto.ProgramDto;
+import org.openlmis.stockmanagement.dto.UserDto;
 
-import org.openlmis.stockmanagement.dto.StockEventDto;
-import org.openlmis.stockmanagement.validators.StockEventValidator;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@Service
-public class StockEventValidationsService {
-
-  @Autowired
-  private List<StockEventValidator> stockEventValidators;
-
-  /**
-   * Validate stock event with permission service and all validators.
-   *
-   * @param stockEventDto the event to be validated.
-   */
-  public void validate(StockEventDto stockEventDto)
-      throws InstantiationException, IllegalAccessException {
-    for (StockEventValidator validator : stockEventValidators) {
-      validator.validate(stockEventDto);
-    }
-  }
-
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class StockEventProcessContext {
+  private UserDto currentUser;
+  private ProgramDto program;
+  private FacilityDto facility;
+  private List<ApprovedProductDto> allApprovedProducts;
 }

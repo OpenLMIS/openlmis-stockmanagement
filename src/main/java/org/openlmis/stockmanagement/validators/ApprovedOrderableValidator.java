@@ -21,9 +21,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_ORDERABLE_NOT_
 import org.openlmis.stockmanagement.dto.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.utils.Message;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -31,9 +29,6 @@ import java.util.UUID;
 
 @Component(value = "ApprovedOrderableValidator")
 public class ApprovedOrderableValidator implements StockEventValidator {
-
-  @Autowired
-  private ApprovedProductReferenceDataService approvedProductReferenceDataService;
 
   /**
    * Validate if the orderable in stock event is in the approved list.
@@ -51,7 +46,7 @@ public class ApprovedOrderableValidator implements StockEventValidator {
     }
 
     boolean isFoundInApprovedList = tryToFindInApprovedList(stockEventDto,
-        approvedProductReferenceDataService.getAllApprovedProducts(program, facility));
+        stockEventDto.getContext().getAllApprovedProducts());
 
     if (!isFoundInApprovedList) {
       throw new ValidationMessageException(
@@ -66,11 +61,5 @@ public class ApprovedOrderableValidator implements StockEventValidator {
           UUID orderableId = product.getProgramOrderable().getOrderableId();
           return orderableId.equals(stockEventDto.getOrderableId());
         });
-  }
-
-  private Collection<ApprovedProductDto> getApprovedList(
-      UUID facilityId, UUID programId, boolean fullSupply) {
-    return approvedProductReferenceDataService
-        .getApprovedProducts(facilityId, programId, fullSupply);
   }
 }

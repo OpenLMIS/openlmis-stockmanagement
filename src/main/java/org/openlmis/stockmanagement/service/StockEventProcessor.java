@@ -18,12 +18,14 @@ package org.openlmis.stockmanagement.service;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
-import org.openlmis.stockmanagement.util.AuthenticationHelper;
+import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -36,7 +38,7 @@ public class StockEventProcessor {
   private static final Logger LOGGER = LoggerFactory.getLogger(StockEventProcessor.class);
 
   @Autowired
-  private AuthenticationHelper authenticationHelper;
+  private StockEventProcessContextBuilder contextBuilder;
 
   @Autowired
   private StockEventValidationsService stockEventValidationsService;
@@ -48,22 +50,29 @@ public class StockEventProcessor {
   private StockEventsRepository stockEventsRepository;
 
   /**
-   * Validate and persist event and its line items.
+   * Validate and persist events and its line items.
    *
-   * @param stockEventDto stock event dto.
-   * @return the persisted event's id.
+   * @param eventDtos stock event dtos.
+   * @return the persisted event ids.
    */
-  public UUID process(StockEventDto stockEventDto)
+  public List<UUID> process(List<StockEventDto> eventDtos)
       throws IllegalAccessException, InstantiationException {
-    LOGGER.debug("Process stock event dto");
-    stockEventValidationsService.validate(stockEventDto);
+    StockEventProcessContext context = contextBuilder.buildContext(eventDtos.get(0));
 
-    return saveEventAndGenerateLineItems(stockEventDto);
+    List<UUID> eventIds = new ArrayList<>();
+    for (int i = 0; i < eventDtos.size(); i++) {
+      StockEventDto eventDto = eventDtos.get(i);
+      LOGGER.debug("Process stock event dto " + i);
+      eventDto.setContext(context);
+      stockEventValidationsService.validate(eventDto);
+      eventIds.add(saveEventAndGenerateLineItems(eventDto));
+    }
+    return eventIds;
   }
 
   private UUID saveEventAndGenerateLineItems(StockEventDto stockEventDto)
       throws InstantiationException, IllegalAccessException {
-    UUID currentUserId = authenticationHelper.getCurrentUser().getId();
+    UUID currentUserId = UUID.randomUUID();
 
     StockEvent stockEvent = stockEventDto.toEvent(currentUserId);
     UUID savedEventId = stockEventsRepository.save(stockEvent).getId();

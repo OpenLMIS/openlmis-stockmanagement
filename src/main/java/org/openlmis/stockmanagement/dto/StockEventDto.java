@@ -21,6 +21,7 @@ import static org.openlmis.stockmanagement.domain.BaseEntity.fromId;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.movement.Node;
+import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -53,6 +54,8 @@ public class StockEventDto {
   private String destinationFreeText;
 
   private String documentNumber;
+
+  private StockEventProcessContext context;
 
   /**
    * Convert dto to jpa model.
