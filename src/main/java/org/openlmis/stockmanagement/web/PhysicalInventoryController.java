@@ -78,6 +78,7 @@ public class PhysicalInventoryController {
    * @param dto physical inventory dto.
    * @return created physical inventory dto.
    */
+  @Transactional
   @RequestMapping(value = "physicalInventories/draft", method = POST)
   public ResponseEntity<PhysicalInventoryDto> saveDraft(@RequestBody PhysicalInventoryDto dto) {
     permissionService.canCreateStockEvent(dto.getProgramId(), dto.getFacilityId());
