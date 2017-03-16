@@ -50,7 +50,8 @@ public class JasperReportService {
   @Autowired
   private StockCardService stockCardService;
 
-  private static final String STOCK_CARD_REPORT_URL = "/jasperTemplates/stockCard.jrxml";
+  private static final String CARD_REPORT_URL = "/jasperTemplates/stockCard.jrxml";
+  private static final String CARD_SUMMARY_REPORT_URL = "/jasperTemplates/stockCardSummary.jrxml";
 
   /**
    * Generate stock card report in PDF format.
@@ -69,8 +70,12 @@ public class JasperReportService {
     return new ModelAndView(view, params);
   }
 
+  public ModelAndView getStockCardSummariesReportView(UUID program, UUID facility) {
+    return null;
+  }
+
   private void compileReport(JasperReportsPdfView view) {
-    try (InputStream inputStream = getClass().getResourceAsStream(STOCK_CARD_REPORT_URL)) {
+    try (InputStream inputStream = getClass().getResourceAsStream(CARD_REPORT_URL)) {
       File reportTempFile = createTempFile("stockCardReport_temp", ".jasper");
       JasperReport report = JasperCompileManager.compileReport(inputStream);
 

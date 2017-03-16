@@ -219,16 +219,38 @@ traits:
             body:
               application/json:
                 schema: stockCardSummaries
-
           404:
             description: No stock cards were found that matches given facility and program.
             body:
               application/json:
-
           403:
             description: User does not have permission to view stock cards of given facility and program.
             body:
               application/json:
+      /print:
+        get:
+          is: [ secured ]
+          description: Get stock card summary report in PDF format to print.
+          queryParameters:
+            facility:
+              required: true
+              description: Facility id
+            program:
+              required: true
+              description: Program id
+          responses:
+            200:
+              description: Stock card summary report generated successfully.
+              body:
+                application/pdf:
+            404:
+              description: No stock cards were found that matches given facility and program.
+              body:
+                application/json:
+            403:
+              description: User does not have permission to get stock card summary report.
+              body:
+                application/json:
 
   /stockCards/{id}:
       get:

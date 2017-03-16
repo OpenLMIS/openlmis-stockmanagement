@@ -16,12 +16,14 @@
 package org.openlmis.stockmanagement.web;
 
 import org.openlmis.stockmanagement.service.JasperReportService;
+import org.openlmis.stockmanagement.service.PermissionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -31,10 +33,13 @@ import java.util.UUID;
 @RequestMapping("/api")
 public class ReportsController {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(ReportsController.class);
+
   @Autowired
   private JasperReportService reportService;
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ReportsController.class);
+  @Autowired
+  private PermissionService permissionService;
 
   /**
    * Get stock card report in PDF format.
@@ -45,8 +50,25 @@ public class ReportsController {
   @RequestMapping(value = "/stockCards/{id}/print")
   @ResponseBody
   public ModelAndView getStockCard(@PathVariable("id") UUID stockCardId) {
-    LOGGER.debug("Try to generate stock card report with id: " + stockCardId);
+    LOGGER.info("Try to generate stock card report with id: " + stockCardId);
 
     return reportService.getStockCardReportView(stockCardId);
+  }
+
+
+  /**
+   * Get stock card summaries report by program and facility.
+   *
+   * @return generated PDF report
+   */
+  @RequestMapping(value = "/stockCardSummaries/print")
+  @ResponseBody
+  public ModelAndView getStockCardSummaries(
+      @RequestParam("program") UUID program,
+      @RequestParam("facility") UUID facility) {
+    LOGGER.info("Try to generate stock card summaries report by program %s and facility %s.",
+        program.toString(), facility.toString());
+    permissionService.canViewStockCard(program, facility);
+    return reportService.getStockCardSummariesReportView(program, facility);
   }
 }

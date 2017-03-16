@@ -15,25 +15,32 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static java.lang.String.format;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Test;
 import org.openlmis.stockmanagement.service.JasperReportService;
+import org.openlmis.stockmanagement.service.PermissionService;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.UUID;
 
 public class ReportsControllerTest extends BaseWebTest {
 
-  private static final String STOCK_CARD_REPORT = "/api/stockCards/%s/print";
+  private static final String CARD_REPORT = "/api/stockCards/%s/print";
+  private static final String CARD_SUMMARY_REPORT = "/api/stockCardSummaries/print";
 
   @MockBean
   private JasperReportService reportService;
+
+  @MockBean
+  private PermissionService permissionService;
 
   @Test
   public void return_200_when_stock_card_report_generated() throws Exception {
@@ -43,12 +50,29 @@ public class ReportsControllerTest extends BaseWebTest {
         .thenReturn(new ModelAndView("stockCardReportPDF"));
 
     //when
-    ResultActions resultActions = mvc.perform(
-        get(String.format(STOCK_CARD_REPORT, stockCardId.toString()))
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
+    ResultActions resultActions = mvc.perform(get(format(CARD_REPORT, stockCardId.toString()))
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
 
     //then
-    resultActions.andDo(MockMvcResultHandlers.print())
-        .andExpect(status().isOk());
+    resultActions.andExpect(status().isOk());
+  }
+
+  @Test
+  public void return_200_when_stock_card_summary_report_generated() throws Exception {
+    //given
+    UUID program = UUID.randomUUID();
+    UUID facility = UUID.randomUUID();
+    when(reportService.getStockCardSummariesReportView(program, facility))
+        .thenReturn(new ModelAndView("stockCardSummaryReportPDF"));
+
+    //when
+    ResultActions resultActions = mvc.perform(get(CARD_SUMMARY_REPORT)
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .param("program", program.toString())
+        .param("facility", facility.toString()));
+
+    //then
+    resultActions.andExpect(status().isOk());
+    verify(permissionService, times(1)).canViewStockCard(program, facility);
   }
 }
