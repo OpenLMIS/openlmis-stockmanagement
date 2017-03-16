@@ -15,6 +15,8 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+
 import org.openlmis.stockmanagement.service.JasperReportService;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.slf4j.Logger;
@@ -47,7 +49,7 @@ public class ReportsController {
    * @param stockCardId stock card id.
    * @return generated PDF report
    */
-  @RequestMapping(value = "/stockCards/{id}/print")
+  @RequestMapping(value = "/stockCards/{id}/print", method = GET)
   @ResponseBody
   public ModelAndView getStockCard(@PathVariable("id") UUID stockCardId) {
     LOGGER.info("Try to generate stock card report with id: " + stockCardId);
@@ -61,7 +63,7 @@ public class ReportsController {
    *
    * @return generated PDF report
    */
-  @RequestMapping(value = "/stockCardSummaries/print")
+  @RequestMapping(value = "/stockCardSummaries/print", method = GET)
   @ResponseBody
   public ModelAndView getStockCardSummaries(
       @RequestParam("program") UUID program,

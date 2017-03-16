@@ -22,6 +22,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_GENERATE_REPOR
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperReport;
+import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.exception.JasperReportViewException;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -50,6 +52,9 @@ public class JasperReportService {
   @Autowired
   private StockCardService stockCardService;
 
+  @Autowired
+  private StockCardSummariesService stockCardSummariesService;
+
   private static final String CARD_REPORT_URL = "/jasperTemplates/stockCard.jrxml";
   private static final String CARD_SUMMARY_REPORT_URL = "/jasperTemplates/stockCardSummary.jrxml";
 
@@ -60,23 +65,42 @@ public class JasperReportService {
    * @return generated stock card report.
    */
   public ModelAndView getStockCardReportView(UUID stockCardId) {
+    StockCardDto stockCardDto = stockCardService.findStockCardById(stockCardId);
     Map<String, Object> params = new HashMap<>();
-    params.put("datasource", singletonList(stockCardService.findStockCardById(stockCardId)));
+    params.put("datasource", singletonList(stockCardDto));
 
+    return generateReport(CARD_REPORT_URL, params);
+  }
+
+  /**
+   * Generate stock card summary report in PDF format.
+   *
+   * @param program  program id
+   * @param facility facility id
+   * @return generated stock card summary report.
+   */
+  public ModelAndView getStockCardSummariesReportView(UUID program, UUID facility) {
+    List<StockCardDto> stockCards = stockCardSummariesService.findStockCards(program, facility);
+    StockCardDto firstCard = stockCards.get(0);
+    Map<String, Object> params = new HashMap<>();
+    params.put("stockCardSummaries", stockCards);
+    params.put("program", firstCard.getProgram());
+    params.put("facility", firstCard.getFacility());
+
+    return generateReport(CARD_SUMMARY_REPORT_URL, params);
+  }
+
+  private ModelAndView generateReport(String templateUrl, Map<String, Object> params) {
     JasperReportsPdfView view = new JasperReportsPdfView();
-    compileReport(view);
+    compileReport(view, templateUrl);
 
     view.setApplicationContext(appContext);
     return new ModelAndView(view, params);
   }
 
-  public ModelAndView getStockCardSummariesReportView(UUID program, UUID facility) {
-    return null;
-  }
-
-  private void compileReport(JasperReportsPdfView view) {
-    try (InputStream inputStream = getClass().getResourceAsStream(CARD_REPORT_URL)) {
-      File reportTempFile = createTempFile("stockCardReport_temp", ".jasper");
+  private void compileReport(JasperReportsPdfView view, String templateUrl) {
+    try (InputStream inputStream = getClass().getResourceAsStream(templateUrl)) {
+      File reportTempFile = createTempFile("report_temp", ".jasper");
       JasperReport report = JasperCompileManager.compileReport(inputStream);
 
       try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
