@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -31,25 +32,23 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.openlmis.stockmanagement.BaseTest;
 import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.UserDto;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
-import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.List;
 import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class StockEventProcessorTest extends BaseTest {
-
-  @MockBean
-  private AuthenticationHelper authenticationHelper;
 
   @MockBean
   private StockEventValidationsService stockEventValidationsService;
@@ -66,14 +65,19 @@ public class StockEventProcessorTest extends BaseTest {
   @Autowired
   private StockCardRepository stockCardRepository;
 
+  private UUID userId;
+
   @Before
   public void setUp() throws Exception {
-    UUID userId = UUID.randomUUID();
+    userId = UUID.randomUUID();
     UserDto userDto = new UserDto();
     userDto.setId(userId);
-    when(authenticationHelper.getCurrentUser()).thenReturn(userDto);
+
+    StockEventProcessContext eventProcessContext = new StockEventProcessContext();
+    eventProcessContext.setCurrentUser(userDto);
+
     when(contextBuilder.buildContext(any(StockEventDto.class)))
-        .thenReturn(new StockEventProcessContext());
+        .thenReturn(eventProcessContext);
   }
 
   @After
@@ -118,11 +122,15 @@ public class StockEventProcessorTest extends BaseTest {
 
   private void assertEventAndCardAndLineItemTableSize(long size) {
     Iterable<StockCard> allCards = stockCardRepository.findAll();
-    long lineItemsCount = stream(allCards.spliterator(), false)
-        .mapToLong(card -> card.getLineItems().size()).sum();
+    List<StockCardLineItem> allLineItems = stream(allCards.spliterator(), false)
+        .flatMap(stockCard -> stockCard.getLineItems().stream())
+        .collect(toList());
 
+    if (!allLineItems.isEmpty()) {
+      assertThat(allLineItems.get(0).getUserId(), is(userId));
+    }
     assertThat(allCards.spliterator().getExactSizeIfKnown(), is(size));
-    assertThat(lineItemsCount, is(size));
+    assertThat((long) allLineItems.size(), is(size));
     assertThat(stockEventsRepository.count(), is(size));
   }
 }

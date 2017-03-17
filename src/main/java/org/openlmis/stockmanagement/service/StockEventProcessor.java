@@ -76,15 +76,15 @@ public class StockEventProcessor {
     return eventIds;
   }
 
-  private UUID saveEventAndGenerateLineItems(StockEventDto stockEventDto)
+  private UUID saveEventAndGenerateLineItems(StockEventDto eventDto)
       throws InstantiationException, IllegalAccessException {
-    UUID currentUserId = UUID.randomUUID();
+    UUID currentUserId = eventDto.getContext().getCurrentUser().getId();
 
-    StockEvent stockEvent = stockEventDto.toEvent(currentUserId);
+    StockEvent stockEvent = eventDto.toEvent(currentUserId);
     UUID savedEventId = stockEventsRepository.save(stockEvent).getId();
     LOGGER.debug("Saved stock event with id " + savedEventId);
 
-    stockCardService.saveFromEvent(stockEventDto, savedEventId, currentUserId);
+    stockCardService.saveFromEvent(eventDto, savedEventId, currentUserId);
 
     return savedEventId;
   }
