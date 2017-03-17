@@ -85,7 +85,9 @@ public abstract class StockCardBaseService {
     cardDto.setProgram(program);
     cardDto.setOrderable(orderable);
     List<StockCardLineItemDto> lineItems = cardDto.getLineItems();
-    cardDto.setLastUpdate(lineItems.get(lineItems.size() - 1).getLineItem().getOccurredDate());
+    if (lineItems.size() > 0) {
+      cardDto.setLastUpdate(lineItems.get(lineItems.size() - 1).getLineItem().getOccurredDate());
+    }
 
     assignSourceDestinationForLineItems(cardDto);
 
