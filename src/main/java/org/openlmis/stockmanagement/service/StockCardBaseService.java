@@ -25,6 +25,7 @@ import org.openlmis.stockmanagement.dto.FacilityDto;
 import org.openlmis.stockmanagement.dto.OrderableDto;
 import org.openlmis.stockmanagement.dto.ProgramDto;
 import org.openlmis.stockmanagement.dto.StockCardDto;
+import org.openlmis.stockmanagement.dto.StockCardLineItemDto;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
@@ -83,6 +84,8 @@ public abstract class StockCardBaseService {
     cardDto.setFacility(facility);
     cardDto.setProgram(program);
     cardDto.setOrderable(orderable);
+    List<StockCardLineItemDto> lineItems = cardDto.getLineItems();
+    cardDto.setLastUpdate(lineItems.get(lineItems.size() - 1).getLineItem().getOccurredDate());
 
     assignSourceDestinationForLineItems(cardDto);
 

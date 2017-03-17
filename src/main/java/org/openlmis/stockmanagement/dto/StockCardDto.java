@@ -23,6 +23,7 @@ import lombok.Builder;
 import lombok.Data;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,6 +38,7 @@ public class StockCardDto {
   private FacilityDto facility;
   private ProgramDto program;
   private OrderableDto orderable;
+  private ZonedDateTime lastUpdate;
 
   @JsonInclude(NON_NULL)
   private List<StockCardLineItemDto> lineItems;

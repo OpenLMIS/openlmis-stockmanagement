@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.3.1.final using JasperReports Library version 6.3.1  -->
-<!-- 2017-03-17T11:43:26 -->
+<!-- 2017-03-17T14:19:48 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="StockCardSummary" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" whenResourceMissingType="Empty" uuid="d0829c7a-bf73-4e6e-9b5a-1735ab6c4d7d">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -77,6 +77,7 @@
 		<field name="program" class="org.openlmis.stockmanagement.dto.ProgramDto"/>
 		<field name="orderable" class="org.openlmis.stockmanagement.dto.OrderableDto"/>
 		<field name="stockOnHand" class="java.lang.Integer"/>
+		<field name="lastUpdate" class="java.time.ZonedDateTime"/>
 	</subDataset>
 	<parameter name="program" class="org.openlmis.stockmanagement.dto.ProgramDto" isForPrompting="false"/>
 	<parameter name="facility" class="org.openlmis.stockmanagement.dto.FacilityDto" isForPrompting="false"/>
@@ -310,7 +311,12 @@
 								<text><![CDATA[Last update]]></text>
 							</staticText>
 						</jr:columnHeader>
-						<jr:detailCell style="Table 1_TD" height="30"/>
+						<jr:detailCell style="Table 1_TD" height="30">
+							<textField>
+								<reportElement x="0" y="0" width="117" height="30" uuid="e8a313ec-9db5-4892-9671-fc221c5e6abd"/>
+								<textFieldExpression><![CDATA[$F{lastUpdate}.toLocalDate().toString()]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
 					</jr:column>
 					<jr:column width="65" uuid="c844b425-61d2-4c3b-b580-7c907854ec8d">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
