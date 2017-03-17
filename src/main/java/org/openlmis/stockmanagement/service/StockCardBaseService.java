@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.service;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
@@ -85,7 +86,7 @@ public abstract class StockCardBaseService {
     cardDto.setProgram(program);
     cardDto.setOrderable(orderable);
     List<StockCardLineItemDto> lineItems = cardDto.getLineItems();
-    if (lineItems.size() > 0) {
+    if (!isEmpty(lineItems)) {
       cardDto.setLastUpdate(lineItems.get(lineItems.size() - 1).getLineItem().getOccurredDate());
     }
 

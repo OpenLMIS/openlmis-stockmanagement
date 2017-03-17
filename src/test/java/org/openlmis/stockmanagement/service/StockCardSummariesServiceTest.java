@@ -15,8 +15,9 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static java.time.ZoneOffset.UTC;
+import static java.time.ZonedDateTime.of;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
@@ -32,6 +33,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.dto.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.OrderableDto;
 import org.openlmis.stockmanagement.dto.ProgramOrderableDto;
@@ -111,27 +113,32 @@ public class StockCardSummariesServiceTest {
     String idPropertyName = "id";
     String lineItemsPropertyName = "lineItems";
     String stockOnHandPropertyName = "stockOnHand";
+    String lastUpdatePropertyName = "lastUpdate";
 
     assertThat(cardDtos, hasItem(allOf(
         hasProperty(orderablePropertyName, is(orderable1)),
         hasProperty(idPropertyName, notNullValue()),
         hasProperty(stockOnHandPropertyName, notNullValue()),
+        hasProperty(lastUpdatePropertyName, is(of(2017, 3, 18, 15, 10, 31, 100, UTC))),
         hasProperty(lineItemsPropertyName, nullValue()))));
     assertThat(cardDtos, hasItem(allOf(
         hasProperty(orderablePropertyName, is(orderable3)),
         hasProperty(idPropertyName, notNullValue()),
         hasProperty(stockOnHandPropertyName, notNullValue()),
+        hasProperty(lastUpdatePropertyName, is(of(2017, 3, 18, 15, 10, 31, 100, UTC))),
         hasProperty(lineItemsPropertyName, nullValue()))));
 
     assertThat(cardDtos, hasItem(allOf(
         hasProperty(orderablePropertyName, is(orderable2)),
         hasProperty(idPropertyName, nullValue()),
         hasProperty(stockOnHandPropertyName, nullValue()),
+        hasProperty(lastUpdatePropertyName, nullValue()),
         hasProperty(lineItemsPropertyName, nullValue()))));
     assertThat(cardDtos, hasItem(allOf(
         hasProperty(orderablePropertyName, is(orderable4)),
         hasProperty(idPropertyName, nullValue()),
         hasProperty(stockOnHandPropertyName, nullValue()),
+        hasProperty(lastUpdatePropertyName, nullValue()),
         hasProperty(lineItemsPropertyName, nullValue()))));
   }
 
@@ -145,7 +152,17 @@ public class StockCardSummariesServiceTest {
     StockCard stockCard = new StockCard();
     stockCard.setOrderableId(orderableId);
     stockCard.setId(cardId);
-    stockCard.setLineItems(emptyList());
+    StockCardLineItem lineItem1 = StockCardLineItem.builder()
+        .occurredDate(of(2017, 3, 17, 15, 10, 31, 100, UTC))
+        .processedDate(of(2017, 3, 17, 15, 10, 31, 100, UTC))
+        .quantity(1)
+        .build();
+    StockCardLineItem lineItem2 = StockCardLineItem.builder()
+        .occurredDate(of(2017, 3, 18, 15, 10, 31, 100, UTC))
+        .processedDate(of(2017, 3, 18, 15, 10, 31, 100, UTC))
+        .quantity(1)
+        .build();
+    stockCard.setLineItems(asList(lineItem1, lineItem2, lineItem1));
     return stockCard;
   }
 
