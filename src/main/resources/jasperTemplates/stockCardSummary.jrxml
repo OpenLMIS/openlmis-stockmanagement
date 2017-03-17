@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.3.1.final using JasperReports Library version 6.3.1  -->
-<!-- 2017-03-16T15:10:17 -->
+<!-- 2017-03-17T11:43:26 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="StockCardSummary" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" whenResourceMissingType="Empty" uuid="d0829c7a-bf73-4e6e-9b5a-1735ab6c4d7d">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -70,7 +70,6 @@
 		</box>
 	</style>
 	<subDataset name="summaryDataset" uuid="ae304191-3438-4962-8ef9-3c2d74be4f9a">
-		<parameter name="stockCardSummaries" class="java.lang.String"/>
 		<queryString>
 			<![CDATA[]]>
 		</queryString>
@@ -191,10 +190,30 @@
 			</textField>
 		</band>
 	</columnHeader>
-	<detail>
-		<band height="316" splitType="Stretch">
+	<pageFooter>
+		<band height="54" splitType="Stretch">
+			<textField pattern="yyyy-MM-dd HH:mm:ss">
+				<reportElement x="10" y="30" width="120" height="15" uuid="93290a78-3c39-4e2b-8f2f-638d0fb3267c"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="510" y="30" width="40" height="15" uuid="ee62efa8-b6f7-4de5-8ede-1ac3db0020cd">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="550" y="30" width="40" height="15" uuid="fbe34c63-7cfe-41e9-98dd-f1d379e7338c"/>
+				<textElement textAlignment="Left"/>
+				<textFieldExpression><![CDATA[" of " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="64">
 			<componentElement>
-				<reportElement x="0" y="0" width="595" height="200" uuid="0a547141-8154-45c5-9011-aca83001f1c9">
+				<reportElement x="10" y="4" width="580" height="60" uuid="0a547141-8154-45c5-9011-aca83001f1c9">
 					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
 					<property name="com.jaspersoft.studio.table.style.table_header" value="Table 1_TH"/>
 					<property name="com.jaspersoft.studio.table.style.column_header" value="Table 1_CH"/>
@@ -218,7 +237,7 @@
 						<jr:detailCell style="Table 1_TD" height="30">
 							<textField>
 								<reportElement x="0" y="0" width="93" height="30" uuid="b1604e69-79e0-4933-8ee5-51d6cce5061f"/>
-								<textFieldExpression><![CDATA[$F{program}.getCode()]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{orderable}.getProductCode()]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -236,6 +255,10 @@
 						<jr:detailCell style="Table 1_TD" height="30">
 							<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.HorizontalRowLayout"/>
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<textField>
+								<reportElement x="0" y="0" width="110" height="30" uuid="469bc4d2-785e-4ac7-81ab-df1bff6c2525"/>
+								<textFieldExpression><![CDATA[$F{orderable}.getName()]]></textFieldExpression>
+							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="105" uuid="aece0ada-49f5-4a52-95f6-4567a7d8c9dd">
@@ -251,6 +274,10 @@
 						</jr:columnHeader>
 						<jr:detailCell style="Table 1_TD" height="30">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<textField>
+								<reportElement x="0" y="0" width="105" height="30" uuid="624e834f-d046-4881-a936-88b40ef263bd"/>
+								<textFieldExpression><![CDATA[$F{program}.getName()]]></textFieldExpression>
+							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="105" uuid="6d50f71d-da27-4166-bb53-b518393a48ee">
@@ -266,6 +293,10 @@
 						</jr:columnHeader>
 						<jr:detailCell style="Table 1_TD" height="30">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<textField>
+								<reportElement x="0" y="0" width="105" height="30" uuid="9abf6368-8b9c-4cc1-9e71-69cb90044263"/>
+								<textFieldExpression><![CDATA[$F{facility}.getName()]]></textFieldExpression>
+							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="117" uuid="7309737e-e6a7-44ba-bf6d-92b7cc64ef12">
@@ -302,25 +333,5 @@
 				</jr:table>
 			</componentElement>
 		</band>
-	</detail>
-	<pageFooter>
-		<band height="54" splitType="Stretch">
-			<textField pattern="yyyy-MM-dd HH:mm:ss">
-				<reportElement x="10" y="30" width="120" height="15" uuid="93290a78-3c39-4e2b-8f2f-638d0fb3267c"/>
-				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="510" y="30" width="40" height="15" uuid="ee62efa8-b6f7-4de5-8ede-1ac3db0020cd">
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-				</reportElement>
-				<textElement textAlignment="Right"/>
-				<textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER}]]></textFieldExpression>
-			</textField>
-			<textField evaluationTime="Report">
-				<reportElement x="550" y="30" width="40" height="15" uuid="fbe34c63-7cfe-41e9-98dd-f1d379e7338c"/>
-				<textElement textAlignment="Left"/>
-				<textFieldExpression><![CDATA[" of " + $V{PAGE_NUMBER}]]></textFieldExpression>
-			</textField>
-		</band>
-	</pageFooter>
+	</summary>
 </jasperReport>
