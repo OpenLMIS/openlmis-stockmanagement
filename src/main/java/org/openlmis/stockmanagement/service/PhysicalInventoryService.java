@@ -23,7 +23,6 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVEN
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ORDERABLE_DUPLICATION;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING;
 
-import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
@@ -76,6 +75,7 @@ public class PhysicalInventoryService {
     deleteExistingDraft(inventoryDto);
 
     LOGGER.info("submit physical inventory, items count: " + inventoryDto.getLineItems().size());
+
     List<UUID> eventIds = stockEventProcessor.process(inventoryDto.toEventDtos());
     PhysicalInventory inventory = inventoryDto.toPhysicalInventoryForSubmit();
     for (UUID eventId : eventIds) {
@@ -180,8 +180,7 @@ public class PhysicalInventoryService {
         .map(lineItemDto -> lineItemDto.getOrderable().getId()).collect(toList());
 
     boolean activeCardMissing = stockCardRepository
-        .findByProgramIdAndFacilityId(dto.getProgramId(), dto.getFacilityId()).stream()
-        .map(StockCard::getOrderableId)
+        .getStockCardOrderableIdsBy(dto.getProgramId(), dto.getFacilityId()).stream()
         .anyMatch(cardOrderableId -> !coveredOrderableIds.contains(cardOrderableId));
 
     if (activeCardMissing) {

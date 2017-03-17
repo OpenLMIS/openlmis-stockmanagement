@@ -21,6 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,7 +32,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.dto.OrderableDto;
@@ -43,7 +43,6 @@ import org.openlmis.stockmanagement.repository.StockCardRepository;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -111,18 +110,13 @@ public class PhysicalInventoryServiceTest {
   public void should_throw_validation_exception_when_active_stock_card_not_included()
       throws Exception {
     //given
-    StockCard stockCard1 = new StockCard();
     UUID orderableId1 = randomUUID();
-    stockCard1.setOrderableId(orderableId1);
-
-    StockCard stockCard2 = new StockCard();
     UUID orderableId2 = randomUUID();
-    stockCard2.setOrderableId(orderableId2);
 
     UUID programId = randomUUID();
     UUID facilityId = randomUUID();
-    when(stockCardRepository.findByProgramIdAndFacilityId(programId, facilityId))
-        .thenReturn(Arrays.asList(stockCard1, stockCard2));
+    when(stockCardRepository.getStockCardOrderableIdsBy(programId, facilityId))
+        .thenReturn(Arrays.asList(orderableId1, orderableId2));
 
     PhysicalInventoryDto piDto = new PhysicalInventoryDto();
     piDto.setProgramId(programId);
@@ -142,7 +136,7 @@ public class PhysicalInventoryServiceTest {
 
     UUID eventId = UUID.randomUUID();
 
-    when(stockEventProcessor.process(any(List.class))).thenReturn(singletonList(eventId));
+    when(stockEventProcessor.process(anyObject())).thenReturn(singletonList(eventId));
     when(physicalInventoriesRepository.save(any(PhysicalInventory.class)))
         .thenReturn(new PhysicalInventory());
 

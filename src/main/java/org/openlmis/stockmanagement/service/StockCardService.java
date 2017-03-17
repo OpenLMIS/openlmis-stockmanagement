@@ -17,17 +17,21 @@ package org.openlmis.stockmanagement.service;
 
 import static java.util.Collections.singletonList;
 import static org.openlmis.stockmanagement.domain.card.StockCard.createStockCardFrom;
+import static org.openlmis.stockmanagement.domain.card.StockCard.newInstanceById;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemsFrom;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.repository.StockCardLineItemRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -36,7 +40,10 @@ public class StockCardService extends StockCardBaseService {
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCardService.class);
 
   @Autowired
-  private StockCardRepository stockCardRepository;
+  private StockCardRepository cardRepository;
+
+  @Autowired
+  private StockCardLineItemRepository stockCardLineItemRepository;
 
   @Autowired
   private PermissionService permissionService;
@@ -55,9 +62,10 @@ public class StockCardService extends StockCardBaseService {
 
     StockCard stockCard = findExistingOrCreateNewCard(stockEventDto, savedEventId);
 
-    createLineItemsFrom(stockEventDto, stockCard, savedEventId, currentUserId);
-    stockCardRepository.save(stockCard);
-    LOGGER.debug("Stock card/line item saved");
+    List<StockCardLineItem> lineItems =
+        createLineItemsFrom(stockEventDto, stockCard, savedEventId, currentUserId);
+    stockCardLineItemRepository.save(lineItems);
+    LOGGER.debug("Stock card line item(s) saved");
   }
 
   /**
@@ -67,7 +75,7 @@ public class StockCardService extends StockCardBaseService {
    * @return the found stock card.
    */
   public StockCardDto findStockCardById(UUID stockCardId) {
-    StockCard foundCard = stockCardRepository.findOne(stockCardId);
+    StockCard foundCard = cardRepository.findOne(stockCardId);
     if (foundCard == null) {
       return null;
     }
@@ -77,20 +85,20 @@ public class StockCardService extends StockCardBaseService {
     return createStockCardDtos(singletonList(foundCard)).get(0);
   }
 
-  private StockCard findExistingOrCreateNewCard(StockEventDto stockEventDto, UUID savedEventId)
+  private StockCard findExistingOrCreateNewCard(StockEventDto eventDto, UUID savedEventId)
       throws InstantiationException, IllegalAccessException {
 
-    StockCard foundCard = stockCardRepository.findByProgramIdAndFacilityIdAndOrderableId(
-        stockEventDto.getProgramId(),
-        stockEventDto.getFacilityId(),
-        stockEventDto.getOrderableId());
+    UUID foundCardId = cardRepository.getStockCardIdBy(
+        eventDto.getProgramId(), eventDto.getFacilityId(), eventDto.getOrderableId());
 
-    if (foundCard != null) {
+    if (foundCardId != null) {
       LOGGER.debug("Found existing stock card");
-      return foundCard;
+      return newInstanceById(foundCardId);
     } else {
       LOGGER.debug("Creating new stock card");
-      return createStockCardFrom(stockEventDto, savedEventId);
+      StockCard newCard = createStockCardFrom(eventDto, savedEventId);
+      return cardRepository.save(newCard);
     }
   }
+
 }

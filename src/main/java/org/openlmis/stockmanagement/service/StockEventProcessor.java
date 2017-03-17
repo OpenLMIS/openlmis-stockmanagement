@@ -15,6 +15,8 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static java.lang.System.currentTimeMillis;
+
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
@@ -61,11 +63,15 @@ public class StockEventProcessor {
 
     List<UUID> eventIds = new ArrayList<>();
     for (int i = 0; i < eventDtos.size(); i++) {
+      LOGGER.debug("Start processing stock event dto " + (i + 1));
+      final long startTime = currentTimeMillis();
+
       StockEventDto eventDto = eventDtos.get(i);
-      LOGGER.debug("Process stock event dto " + i);
       eventDto.setContext(context);
       stockEventValidationsService.validate(eventDto);
       eventIds.add(saveEventAndGenerateLineItems(eventDto));
+
+      LOGGER.info("Finished in " + (currentTimeMillis() - startTime) + " milliseconds");
     }
     return eventIds;
   }

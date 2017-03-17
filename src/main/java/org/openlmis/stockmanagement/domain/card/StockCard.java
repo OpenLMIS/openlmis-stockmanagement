@@ -88,6 +88,19 @@ public class StockCard extends BaseEntity {
   }
 
   /**
+   * Create a new instance of stock card with given id.
+   *
+   * @param foundCardId the stock card id.
+   * @return the created instance.
+   */
+  public static StockCard newInstanceById(UUID foundCardId) {
+    StockCard stockCard = new StockCard();
+    stockCard.setId(foundCardId);
+    stockCard.setLineItems(new ArrayList<>());
+    return stockCard;
+  }
+
+  /**
    * Calculate stock on hand for each line item and the card itself.
    */
   public void calculateStockOnHand() {

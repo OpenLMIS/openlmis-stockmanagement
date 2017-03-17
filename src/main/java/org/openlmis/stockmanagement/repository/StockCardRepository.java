@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.repository;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
@@ -25,6 +26,14 @@ import java.util.UUID;
 
 public interface StockCardRepository extends
     PagingAndSortingRepository<StockCard, UUID> {
+
+  String selectId = "select s.id ";
+  String selectOrderableId = "select s.orderableId ";
+
+  String fromStockCards = "from org.openlmis.stockmanagement.domain.card.StockCard s ";
+
+  String matchByProgramAndFacility = "where s.programId = ?1 and s.facilityId = ?2 ";
+  String matchByOrderable = "and s.orderableId = ?3";
 
   StockCard findByProgramIdAndFacilityIdAndOrderableId(
       @Param("programId") UUID programId,
@@ -36,4 +45,13 @@ public interface StockCardRepository extends
       @Param("facilityId") UUID facilityId);
 
   StockCard findByOriginEvent(@Param("originEventId") StockEvent stockEvent);
+
+  //the following is for performance optimization
+  //when saving a new stock card line item, only need to find existing card id
+  //fetching the whole card including line items takes too long
+  @Query(value = selectId + fromStockCards + matchByProgramAndFacility + matchByOrderable)
+  UUID getStockCardIdBy(UUID programId, UUID facilityId, UUID orderableId);
+
+  @Query(value = selectOrderableId + fromStockCards + matchByProgramAndFacility)
+  List<UUID> getStockCardOrderableIdsBy(UUID programId, UUID facilityId);
 }
