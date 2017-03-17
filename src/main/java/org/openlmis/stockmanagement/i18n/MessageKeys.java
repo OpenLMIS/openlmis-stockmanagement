@@ -196,7 +196,6 @@ public abstract class MessageKeys {
   //report
   public static final String ERROR_GENERATE_REPORT_FAILED = ERROR_PREFIX + ".generateReport.failed";
 
-  //
   private MessageKeys() {
     throw new UnsupportedOperationException();
   }

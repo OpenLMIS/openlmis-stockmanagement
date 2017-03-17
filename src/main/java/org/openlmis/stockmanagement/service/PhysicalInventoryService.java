@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.UUID;
@@ -153,7 +154,7 @@ public class PhysicalInventoryService {
 
   private void validateLineItems(PhysicalInventoryDto dto) {
     List<PhysicalInventoryLineItemDto> lineItems = dto.getLineItems();
-    if (lineItems == null || lineItems.isEmpty()) {
+    if (CollectionUtils.isEmpty(lineItems)) {
       throw new ValidationMessageException(
           new Message(ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING));
     }

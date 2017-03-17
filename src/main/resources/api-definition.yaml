@@ -702,6 +702,11 @@ traits:
             body:
               application/json:
 
+          403:
+            description: User does not have permission to sumbit physical inventory.
+            body:
+              application/json:
+
       /draft:
         get:
           is: [ secured ]
@@ -718,6 +723,11 @@ traits:
                 application/json:
                   schema: physicalInventory
 
+            403:
+              description: User does not have permission to view draft physical inventory.
+              body:
+                application/json:
+
         post:
           is: [ secured ]
           description: Save a draft physical inventory.
@@ -731,3 +741,8 @@ traits:
               body:
                 application/json:
                   schema: physicalInventory
+
+            403:
+              description: User does not have permission to save draft physical inventory.
+              body:
+                application/json:
