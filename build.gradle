@@ -38,6 +38,7 @@ dependencies {
     compile "org.springframework.boot:spring-boot-starter-security"
     compile "org.springframework.security.oauth:spring-security-oauth2"
     compile 'org.springframework:spring-context-support'
+    compile 'org.hibernate:hibernate-java8'
 
     compile "org.projectlombok:lombok:1.16.8"
     compile "org.postgresql:postgresql:9.4.1208"
@@ -208,9 +209,9 @@ test {
 }
 
 //enable the lines below if you need to debug spring running in docker
-//bootRun {
-//    jvmArgs = ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"]
-//}
+bootRun {
+    jvmArgs = ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"]
+}
 
 apply from: "documentation.gradle"
 integrationTest {
