@@ -682,7 +682,7 @@ traits:
       displayName: Physical inventories.
       post:
         is: [ secured ]
-        description: Submitt a physical inventory and delete its draft(if exist).
+        description: Submit a physical inventory and delete its draft(if exist).
         body:
           application/json:
             schema: physicalInventory
