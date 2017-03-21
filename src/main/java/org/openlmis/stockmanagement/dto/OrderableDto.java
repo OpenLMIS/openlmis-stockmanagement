@@ -32,8 +32,8 @@ import java.util.UUID;
 public class OrderableDto {
   private UUID id;
   private String productCode;
-  private String name;
-  private long packSize;
+  private String fullProductName;
+  private long netContent;
   private long packRoundingThreshold;
   private boolean roundToZero;
   private Set<ProgramOrderableDto> programs;
@@ -47,12 +47,12 @@ public class OrderableDto {
    * @return the number of packs that should be ordered.
    */
   public long packsToOrder(long dispensingUnits) {
-    if (dispensingUnits <= 0 || packSize == 0) {
+    if (dispensingUnits <= 0 || netContent == 0) {
       return 0;
     }
 
-    long packsToOrder = dispensingUnits / packSize;
-    long remainderQuantity = dispensingUnits % packSize;
+    long packsToOrder = dispensingUnits / netContent;
+    long remainderQuantity = dispensingUnits % netContent;
 
     if (remainderQuantity > 0 && remainderQuantity > packRoundingThreshold) {
       packsToOrder += 1;

@@ -258,7 +258,7 @@
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<textField>
 								<reportElement x="0" y="0" width="110" height="30" uuid="469bc4d2-785e-4ac7-81ab-df1bff6c2525"/>
-								<textFieldExpression><![CDATA[$F{orderable}.getName()]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{orderable}.getFullProductName()]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>

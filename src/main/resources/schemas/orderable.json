@@ -3,7 +3,7 @@
   "$schema": "http://json-schema.org/draft-04/schema",
   "description": "A single orderable.",
   "properties": {
-    "packSize": {
+    "netContent": {
       "type": "integer"
     },
     "dispensable": {
@@ -24,7 +24,7 @@
     "packRoundingThreshold": {
       "type": "integer"
     },
-    "name": {
+    "fullProductName": {
       "type": "string"
     },
     "id": {

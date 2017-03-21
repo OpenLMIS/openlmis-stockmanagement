@@ -224,7 +224,7 @@
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{orderable}.getName()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{orderable}.getFullProductName()]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>
