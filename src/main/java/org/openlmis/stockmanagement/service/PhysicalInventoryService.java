@@ -131,6 +131,7 @@ public class PhysicalInventoryService {
     return PhysicalInventoryDto.builder()
         .programId(programId)
         .facilityId(facilityId)
+        .isStarter(true)
         .lineItems(approvedProductsToInventoryLineItemDto(programId, facilityId))
         .build();
   }

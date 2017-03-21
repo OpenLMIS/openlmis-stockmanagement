@@ -32,6 +32,11 @@
       "description": "",
       "required": false
     },
+    "isStarter": {
+      "type": "boolean",
+      "description": "The boolean value of the draft is a starter template.",
+      "required": false
+    },
     "lineItems": {
       "type": "array",
       "title": "Physical inventory line items, each will become an event when submitted.",

@@ -86,6 +86,7 @@ public class PhysicalInventoryServiceDraftTest {
     //then
     assertThat(inventory.getProgramId(), is(programId));
     assertThat(inventory.getFacilityId(), is(facilityId));
+    assertThat(inventory.getIsStarter(), is(true));
     assertThat(inventory.getLineItems().size(), is(1));
 
     PhysicalInventoryLineItemDto inventoryLineItemDto = inventory.getLineItems().get(0);

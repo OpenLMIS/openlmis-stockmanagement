@@ -47,6 +47,8 @@ public class PhysicalInventoryDto {
   private String signature;
   private String documentNumber;
 
+  private Boolean isStarter;
+
   private List<PhysicalInventoryLineItemDto> lineItems;
 
   /**
@@ -109,6 +111,7 @@ public class PhysicalInventoryDto {
         .occurredDate(inventory.getOccurredDate())
         .documentNumber(inventory.getDocumentNumber())
         .signature(inventory.getSignature())
+        .isStarter(false)
         .lineItems(inventory.getLineItems().stream().map(
             PhysicalInventoryLineItemDto::from).collect(toList()))
         .build();

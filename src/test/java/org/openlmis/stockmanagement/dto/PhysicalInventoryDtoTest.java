@@ -108,6 +108,7 @@ public class PhysicalInventoryDtoTest {
     assertThat(dto.getOccurredDate(), is(inventory.getOccurredDate()));
     assertThat(dto.getDocumentNumber(), is(inventory.getDocumentNumber()));
     assertThat(dto.getSignature(), is(inventory.getSignature()));
+    assertThat(dto.getIsStarter(), is(false));
 
     assertThat(dto.getLineItems().size(), is(1));
   }
