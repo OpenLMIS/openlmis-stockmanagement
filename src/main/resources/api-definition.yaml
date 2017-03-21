@@ -48,6 +48,7 @@ schemas:
         }
   - physicalInventoryLineItem: !include schemas/physicalInventoryLineItem.json
   - physicalInventory: !include schemas/physicalInventory.json
+  - localizedMessage: !include schemas/localizedMessage.json
 
 resourceTypes:
     - collection:
@@ -135,6 +136,9 @@ traits:
           404:
             description: Stock card template not found for the given query parameter.
           400:
+            body:
+              application/json:
+                  schema: localizedMessage
             description: Provided query parameters are not correctly formatted.
 
       post:
@@ -148,6 +152,9 @@ traits:
             description: Indicates that stock card template has been created.
           400:
             description: Indicates that request body is not correctly formated(incorrect fileds names, non-existing program or facility ids, etc).
+            body:
+              application/json:
+                  schema: localizedMessage
 
   /stockEvents:
       post:
@@ -167,11 +174,13 @@ traits:
             description: Failed to process stock event due to validation error.
             body:
               application/json:
+                  schema: localizedMessage
 
           403:
             description: User does not have permission to create stock events for given facility and program.
             body:
               application/json:
+                  schema: localizedMessage
 
   /stockCards:
       get:
@@ -201,6 +210,7 @@ traits:
             description: User does not have permission to view stock cards of given facility and program.
             body:
               application/json:
+                  schema: localizedMessage
 
   /stockCardSummaries:
       get:
@@ -227,6 +237,7 @@ traits:
             description: User does not have permission to view stock cards of given facility and program.
             body:
               application/json:
+                  schema: localizedMessage
       /print:
         get:
           is: [ secured ]
@@ -251,6 +262,7 @@ traits:
               description: User does not have permission to get stock card summary report.
               body:
                 application/json:
+                  schema: localizedMessage
 
   /stockCards/{id}:
       get:
@@ -272,6 +284,7 @@ traits:
             description: User does not have permission to view stock card.
             body:
               application/json:
+                  schema: localizedMessage
 
       /print:
         get:
@@ -289,6 +302,7 @@ traits:
               description: User does not have permission to get stock card report.
               body:
                 application/json:
+                  schema: localizedMessage
 
   /validDestinations:
       get:
@@ -311,11 +325,13 @@ traits:
             description: Program or facility type does not exist.
             body:
               application/json:
+                  schema: localizedMessage
 
           403:
             description: User does not have permission to view valid destination.
             body:
               application/json:
+                  schema: localizedMessage
 
       post:
         is: [secured]
@@ -339,10 +355,12 @@ traits:
             description: Destination id is null. Or program or facility type or destination is not found.
             body:
               application/json:
+                  schema: localizedMessage
           403:
             description: User is not allowed to configure destination.
             body:
               application/json:
+                  schema: localizedMessage
 
       /{id}:
         delete:
@@ -355,10 +373,12 @@ traits:
               description: Destination assignment is not found.
               body:
                 application/json:
+                  schema: localizedMessage
             403:
               description: User is not allowed to remove destination assignment from the list.
               body:
                 application/json:
+                  schema: localizedMessage
 
   /validSources:
         get:
@@ -381,11 +401,13 @@ traits:
               description: Program or facility type does not exist.
               body:
                 application/json:
+                  schema: localizedMessage
 
             403:
               description: User does not have permission to view valid sources.
               body:
                 application/json:
+                  schema: localizedMessage
 
         post:
           is: [secured]
@@ -409,10 +431,12 @@ traits:
               description: Source id is null. Or program or facility type or source is not found.
               body:
                 application/json:
+                  schema: localizedMessage
             403:
               description: User is not allowed to configure source.
               body:
                 application/json:
+                  schema: localizedMessage
 
         /{id}:
           delete:
@@ -426,10 +450,12 @@ traits:
                 description: Source assignment is not found.
                 body:
                   application/json:
+                    schema: localizedMessage
               403:
                 description: User is not allowed to remove source assignment from the list.
                 body:
                   application/json:
+                    schema: localizedMessage
 
   /reasonTypes:
       get:
@@ -445,6 +471,7 @@ traits:
             description: User does not have permission to manage reasons.
             body:
               application/json:
+                  schema: localizedMessage
 
   /reasonCategories:
       get:
@@ -460,6 +487,7 @@ traits:
             description: User does not have permission to manage reasons.
             body:
               application/json:
+                  schema: localizedMessage
 
   /validReasons:
       get:
@@ -549,6 +577,7 @@ traits:
             description: User does not have permission to manage stock card line item reasons.
             body:
               application/json:
+                  schema: localizedMessage
 
       post:
         is: [ secured ]
@@ -572,10 +601,12 @@ traits:
             description: Some Reason required value not found.
             body:
               application/json:
+                  schema: localizedMessage
           403:
             description: User does not have permission to manage stock card line item reasons.
             body:
               application/json:
+                  schema: localizedMessage
 
       /{id}:
         uriParameters:
@@ -602,10 +633,12 @@ traits:
               description: Some reason requires value not found. Or update reason content is duplicate.
               body:
                 application/json:
+                  schema: localizedMessage
             403:
               description: User does not have permission to manage stock card line item reasons.
               body:
                 application/json:
+                  schema: localizedMessage
 
   /organizations:
       get:
@@ -621,6 +654,7 @@ traits:
             description: User does not have permission to manage organizations.
             body:
               application/json:
+                  schema: localizedMessage
 
       post:
         is: [ secured ]
@@ -644,10 +678,12 @@ traits:
             description: Some organization required value missing.
             body:
               application/json:
+                  schema: localizedMessage
           403:
             description: User does not have permission to manage organization.
             body:
               application/json:
+                  schema: localizedMessage
 
       /{id}:
         uriParameters:
@@ -673,10 +709,12 @@ traits:
               description: Some organization requires value missing. Or update organization content is duplicate.
               body:
                 application/json:
+                  schema: localizedMessage
             403:
               description: User does not have permission to manage organization.
               body:
                 application/json:
+                  schema: localizedMessage
 
   /physicalInventories:
       displayName: Physical inventories.
@@ -701,11 +739,13 @@ traits:
               No physical inventory line items provided.
             body:
               application/json:
+                  schema: localizedMessage
 
           403:
             description: User does not have permission to sumbit physical inventory.
             body:
               application/json:
+                  schema: localizedMessage
 
       /draft:
         get:
@@ -727,6 +767,7 @@ traits:
               description: User does not have permission to view draft physical inventory.
               body:
                 application/json:
+                  schema: localizedMessage
 
         post:
           is: [ secured ]
@@ -746,3 +787,4 @@ traits:
               description: User does not have permission to save draft physical inventory.
               body:
                 application/json:
+                    schema: localizedMessage
