@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
-import org.openlmis.stockmanagement.dto.ApprovedProductDto;
+import org.openlmis.stockmanagement.dto.OrderableDto;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
@@ -31,7 +31,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Service
 public class StockCardSummariesService extends StockCardBaseService {
@@ -39,10 +41,10 @@ public class StockCardSummariesService extends StockCardBaseService {
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCardSummariesService.class);
 
   @Autowired
-  private ApprovedProductReferenceDataService approvedProductRefDataService;
+  private ApprovedProductReferenceDataService approvedProductService;
 
   @Autowired
-  private StockCardRepository stockCardRepository;
+  private StockCardRepository cardRepository;
 
   /**
    * Find stock card by program id and facility id.
@@ -52,59 +54,51 @@ public class StockCardSummariesService extends StockCardBaseService {
    * @return found stock cards, will include approved products without stock cards.
    */
   public List<StockCardDto> findStockCards(UUID programId, UUID facilityId) {
+    List<StockCard> cards = cardRepository.findByProgramIdAndFacilityId(programId, facilityId);
 
-    List<StockCard> existingCards = stockCardRepository
-        .findByProgramIdAndFacilityId(programId, facilityId);
+    LOGGER.info("Calling ref data to get approved orderables");
+    Map<UUID, OrderableDto> approvedMap = approvedProductService
+        .getApprovedOrderablesMap(programId, facilityId);
 
-    List<ApprovedProductDto> allApprovedProducts = approvedProductRefDataService
-        .getAllApprovedProducts(programId, facilityId);
+    //create dummy(fake/not persisted) cards for approved orderables that don't have cards yet
+    Stream<StockCard> dummyCards = createDummyCards(programId, facilityId, cards, approvedMap);
 
-    List<ApprovedProductDto> productsWithNoCards =
-        filterProductsWithoutCards(allApprovedProducts, existingCards);
-    return createCardDtosWithNoLineItems(programId, facilityId, existingCards, productsWithNoCards);
+    List<StockCardDto> dtos = createDtos(concat(cards.stream(), dummyCards).collect(toList()));
+    return assignOrderableRemoveLineItems(dtos, approvedMap);
   }
 
-  private List<StockCardDto> createCardDtosWithNoLineItems(
-      UUID programId, UUID facilityId, List<StockCard> existingStockCards,
-      List<ApprovedProductDto> productsWithoutCards) {
+  private List<StockCardDto> assignOrderableRemoveLineItems(List<StockCardDto> dtos,
+                                                            Map<UUID, OrderableDto> approvedMap) {
+    dtos.forEach(dto -> {
+      dto.setOrderable(approvedMap.get(dto.getOrderable().getId()));
+      //line items are not needed in summary
+      //remove them after re-calculation is done(in base class)
+      dto.setLineItems(null);
+    });
+    return dtos;
+  }
 
-    List<StockCardDto> productCardDtos =
-        productsToCardDtos(programId, facilityId, productsWithoutCards);
-    List<StockCardDto> existingCardDtos = createStockCardDtos(existingStockCards);
+  private Stream<StockCard> createDummyCards(UUID programId, UUID facilityId,
+                                             List<StockCard> existingCards,
+                                             Map<UUID, OrderableDto> approvedOrderablesMap) {
+    List<OrderableDto> orderablesWithNoCards =
+        filterProductsWithoutCards(approvedOrderablesMap.values(), existingCards);
 
-    List<StockCardDto> allCardDtos = concat(existingCardDtos.stream(), productCardDtos.stream())
+    return orderablesWithNoCards.stream()
+        .map(orderableDto -> StockCard.builder()
+            .programId(programId)
+            .facilityId(facilityId)
+            .orderableId(orderableDto.getId())
+            .lineItems(emptyList())//dummy cards don't have line items
+            .build());
+  }
+
+  private List<OrderableDto> filterProductsWithoutCards(
+      Collection<OrderableDto> approvedOrderables, List<StockCard> stockCards) {
+    return approvedOrderables.stream()
+        .filter(approvedOrderable -> stockCards.stream().noneMatch(
+            stockCard -> stockCard.getOrderableId().equals(approvedOrderable.getId())))
         .collect(toList());
-    allCardDtos.forEach(cardDto -> cardDto.setLineItems(null));
-
-    LOGGER.debug("Found all cards summaries");
-    return allCardDtos;
-  }
-
-  private List<ApprovedProductDto> filterProductsWithoutCards(
-      List<ApprovedProductDto> approvedProductDtos, List<StockCard> stockCards) {
-    return approvedProductDtos.stream()
-        .filter(approvedProductDto -> stockCards.stream()
-            .noneMatch(stockCard -> stockCard.getOrderableId()
-                .equals(approvedProductDto.getProgramOrderable().getOrderableId())))
-        .collect(toList());
-  }
-
-  private List<StockCardDto> productsToCardDtos(
-      UUID programId, UUID facilityId,
-      Collection<ApprovedProductDto> approvedProducts) {
-    List<StockCard> cards = approvedProducts
-        .stream().map(approvedProduct -> {
-          StockCard card = new StockCard();
-          card.setLineItems(emptyList());
-          card.setProgramId(programId);
-          card.setFacilityId(facilityId);
-          card.setOrderableId(approvedProduct.getProgramOrderable().getOrderableId());
-          return card;
-        }).collect(toList());
-
-    List<StockCardDto> productCardDtos = createStockCardDtos(cards);
-    productCardDtos.forEach(productCardDto -> productCardDto.setStockOnHand(null));
-    return productCardDtos;
   }
 
 }

@@ -32,11 +32,16 @@ public class ProgramOrderableDto {
   private String orderableCode;
   private boolean active;
 
+  /**
+   * Convert program orderable dto to orderable dto.
+   *
+   * @return the converted dto.
+   */
   public OrderableDto toOrderableDto() {
     return OrderableDto.builder()
         .id(orderableId)
-        .name(orderableFullProductName)
-        .productCode(orderableFullProductName)
+        .fullProductName(orderableFullProductName)
+        .productCode(orderableCode)
         .build();
   }
 }

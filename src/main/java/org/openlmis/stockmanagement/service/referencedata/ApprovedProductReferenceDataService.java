@@ -83,10 +83,17 @@ public class ApprovedProductReferenceDataService extends
     return concat(fullSupply.stream(), nonFullSupply.stream()).collect(toList());
   }
 
+  /**
+   * Get all approved orderables in a orderable id -> orderable map. This is convenient method when
+   * we need to assign orderable dto to stock management domain model turned dtos.
+   *
+   * @param programId  programId.
+   * @param facilityId facilityId.
+   * @return all approved orderables.
+   */
   public Map<UUID, OrderableDto> getApprovedOrderablesMap(UUID programId, UUID facilityId) {
     return
-        getAllApprovedProducts(programId, facilityId)
-            .stream().collect(toMap(
+        getAllApprovedProducts(programId, facilityId).stream().collect(toMap(
             approvedProduct -> approvedProduct.getProgramOrderable().getOrderableId(),
             approvedProduct -> approvedProduct.getProgramOrderable().toOrderableDto()));
   }

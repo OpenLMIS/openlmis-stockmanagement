@@ -22,10 +22,15 @@ import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createL
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
+import org.openlmis.stockmanagement.domain.movement.Node;
+import org.openlmis.stockmanagement.dto.FacilityDto;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.repository.StockCardLineItemRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
+import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,13 +45,22 @@ public class StockCardService extends StockCardBaseService {
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCardService.class);
 
   @Autowired
+  private PermissionService permissionService;
+
+  @Autowired
+  private OrderableReferenceDataService orderableRefDataService;
+
+  @Autowired
+  private FacilityReferenceDataService facilityRefDataService;
+
+  @Autowired
   private StockCardRepository cardRepository;
 
   @Autowired
-  private StockCardLineItemRepository stockCardLineItemRepository;
+  private OrganizationRepository organizationRepository;
 
   @Autowired
-  private PermissionService permissionService;
+  private StockCardLineItemRepository stockCardLineItemRepository;
 
   /**
    * Generate stock card line items and stock cards based on event, and persist them.
@@ -79,10 +93,14 @@ public class StockCardService extends StockCardBaseService {
     if (foundCard == null) {
       return null;
     }
-    LOGGER.debug("Stock card found");
 
+    LOGGER.debug("Stock card found");
     permissionService.canViewStockCard(foundCard.getProgramId(), foundCard.getFacilityId());
-    return createStockCardDtos(singletonList(foundCard)).get(0);
+
+    StockCardDto stockCardDto = createDtos(singletonList(foundCard)).get(0);
+    stockCardDto.setOrderable(orderableRefDataService.findOne(foundCard.getOrderableId()));
+    assignSourceDestinationForLineItems(stockCardDto);
+    return stockCardDto;
   }
 
   private StockCard findExistingOrCreateNewCard(StockEventDto eventDto, UUID savedEventId)
@@ -101,4 +119,24 @@ public class StockCardService extends StockCardBaseService {
     }
   }
 
+  private void assignSourceDestinationForLineItems(StockCardDto stockCardDto) {
+    stockCardDto.getLineItems().forEach(lineItemDto -> {
+      StockCardLineItem lineItem = lineItemDto.getLineItem();
+      lineItemDto.setSource(getFromRefDataOrConvertOrg(lineItem.getSource()));
+      lineItemDto.setDestination(getFromRefDataOrConvertOrg(lineItem.getDestination()));
+    });
+  }
+
+  private FacilityDto getFromRefDataOrConvertOrg(Node node) {
+    if (node == null) {
+      return null;
+    }
+
+    if (node.isRefDataFacility()) {
+      LOGGER.debug("Calling ref data to retrieve facility info for line item");
+      return facilityRefDataService.findOne(node.getReferenceId());
+    } else {
+      return FacilityDto.createFrom(organizationRepository.findOne(node.getReferenceId()));
+    }
+  }
 }

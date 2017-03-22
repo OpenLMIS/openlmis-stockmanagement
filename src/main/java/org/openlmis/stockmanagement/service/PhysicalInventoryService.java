@@ -25,13 +25,13 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVEN
 
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
+import org.openlmis.stockmanagement.dto.OrderableDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
-import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.utils.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +40,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -58,9 +59,6 @@ public class PhysicalInventoryService {
 
   @Autowired
   private ApprovedProductReferenceDataService approvedProductReferenceDataService;
-
-  @Autowired
-  private OrderableReferenceDataService orderableService;
 
   /**
    * Submit physical inventory.
@@ -98,10 +96,7 @@ public class PhysicalInventoryService {
     if (foundInventory == null) {
       return createEmptyInventory(programId, facilityId);
     } else {
-      PhysicalInventoryDto inventoryDto = from(foundInventory);
-      inventoryDto.getLineItems().forEach(lineItemDto ->
-          lineItemDto.setOrderable(orderableService.findOne(lineItemDto.getOrderable().getId())));
-      return inventoryDto;
+      return assignOrderables(from(foundInventory));
     }
   }
 

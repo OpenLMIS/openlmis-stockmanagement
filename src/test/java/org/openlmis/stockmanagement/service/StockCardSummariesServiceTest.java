@@ -27,6 +27,8 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableMap;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -34,14 +36,11 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
-import org.openlmis.stockmanagement.dto.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.OrderableDto;
-import org.openlmis.stockmanagement.dto.ProgramOrderableDto;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
-import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 
 import java.util.List;
@@ -52,9 +51,6 @@ public class StockCardSummariesServiceTest {
 
   @Mock
   private ApprovedProductReferenceDataService approvedProductReferenceDataService;
-
-  @Mock
-  private OrderableReferenceDataService orderableRefDataService;
 
   @Mock
   @SuppressWarnings("PMD")
@@ -78,30 +74,25 @@ public class StockCardSummariesServiceTest {
     UUID orderable3Id = UUID.randomUUID();
     UUID orderable4Id = UUID.randomUUID();
 
+    OrderableDto orderable1 = createOrderableDto(orderable1Id);
+    OrderableDto orderable2 = createOrderableDto(orderable2Id);
+    OrderableDto orderable3 = createOrderableDto(orderable3Id);
+    OrderableDto orderable4 = createOrderableDto(orderable4Id);
+
     UUID programId = UUID.randomUUID();
     UUID facilityId = UUID.randomUUID();
-
     when(approvedProductReferenceDataService
-        .getAllApprovedProducts(programId, facilityId))
-        .thenReturn(asList(
-            createApprovedProductDto(orderable1Id),
-            createApprovedProductDto(orderable2Id),
-            createApprovedProductDto(orderable3Id),
-            createApprovedProductDto(orderable4Id)));
+        .getApprovedOrderablesMap(programId, facilityId))
+        .thenReturn(ImmutableMap.of(
+            orderable1Id, orderable1,
+            orderable2Id, orderable2,
+            orderable3Id, orderable3,
+            orderable4Id, orderable4
+        ));
 
     when(stockCardRepository.findByProgramIdAndFacilityId(programId, facilityId)).thenReturn(asList(
         createStockCard(orderable1Id, UUID.randomUUID()),
         createStockCard(orderable3Id, UUID.randomUUID())));
-
-    OrderableDto orderable1 = createOrderable(orderable1Id);
-    OrderableDto orderable2 = createOrderable(orderable2Id);
-    OrderableDto orderable3 = createOrderable(orderable3Id);
-    OrderableDto orderable4 = createOrderable(orderable4Id);
-
-    when(orderableRefDataService.findOne(orderable1Id)).thenReturn(orderable1);
-    when(orderableRefDataService.findOne(orderable2Id)).thenReturn(orderable2);
-    when(orderableRefDataService.findOne(orderable3Id)).thenReturn(orderable3);
-    when(orderableRefDataService.findOne(orderable4Id)).thenReturn(orderable4);
 
     //when
     List<StockCardDto> cardDtos = stockCardSummariesService.findStockCards(programId, facilityId);
@@ -142,12 +133,6 @@ public class StockCardSummariesServiceTest {
         hasProperty(lineItemsPropertyName, nullValue()))));
   }
 
-  private OrderableDto createOrderable(UUID orderableId) {
-    OrderableDto orderableDto = new OrderableDto();
-    orderableDto.setId(orderableId);
-    return orderableDto;
-  }
-
   private StockCard createStockCard(UUID orderableId, UUID cardId) {
     StockCard stockCard = new StockCard();
     stockCard.setOrderableId(orderableId);
@@ -166,11 +151,7 @@ public class StockCardSummariesServiceTest {
     return stockCard;
   }
 
-  private ApprovedProductDto createApprovedProductDto(UUID orderableId) {
-    ProgramOrderableDto programOrderable = new ProgramOrderableDto();
-    programOrderable.setOrderableId(orderableId);
-    ApprovedProductDto approvedProductDto = new ApprovedProductDto();
-    approvedProductDto.setProgramOrderable(programOrderable);
-    return approvedProductDto;
+  private OrderableDto createOrderableDto(UUID orderableId) {
+    return OrderableDto.builder().id(orderableId).build();
   }
 }

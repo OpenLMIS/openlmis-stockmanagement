@@ -20,6 +20,7 @@ import static java.util.stream.Collectors.toList;
 import static javax.persistence.CascadeType.ALL;
 import static org.hibernate.annotations.LazyCollectionOption.FALSE;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.annotations.LazyCollection;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
@@ -28,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -48,6 +50,7 @@ import javax.persistence.Transient;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Table(name = "stock_cards", schema = "stockmanagement")
 public class StockCard extends BaseEntity {
 
@@ -69,7 +72,7 @@ public class StockCard extends BaseEntity {
   private List<StockCardLineItem> lineItems;
 
   @Transient
-  private Integer stockOnHand;
+  private Integer stockOnHand = null;
 
   /**
    * Create stock card from stock event dto.
@@ -104,8 +107,11 @@ public class StockCard extends BaseEntity {
    * Calculate stock on hand for each line item and the card itself.
    */
   public void calculateStockOnHand() {
-    reorderLineItemsByDates();
+    if (CollectionUtils.isEmpty(lineItems)) {
+      return;
+    }
 
+    reorderLineItemsByDates();
     int previousSoh = 0;
     for (StockCardLineItem lineItem : getLineItems()) {
       lineItem.calculateStockOnHand(previousSoh);
