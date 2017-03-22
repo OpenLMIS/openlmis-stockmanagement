@@ -25,6 +25,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableMap;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -33,14 +35,11 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
-import org.openlmis.stockmanagement.dto.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.OrderableDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
-import org.openlmis.stockmanagement.dto.ProgramOrderableDto;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
-import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 
 import java.util.UUID;
 
@@ -55,9 +54,6 @@ public class PhysicalInventoryServiceDraftTest {
   @Mock
   private ApprovedProductReferenceDataService approvedProductReferenceDataService;
 
-  @Mock
-  private OrderableReferenceDataService orderableReferenceDataService;
-
   @Test
   public void should_generate_empty_draft_if_no_saved_draft_is_found() throws Exception {
     //given
@@ -69,16 +65,10 @@ public class PhysicalInventoryServiceDraftTest {
         .thenReturn(null);
 
     UUID orderableId = UUID.randomUUID();
-    ProgramOrderableDto programOrderable = new ProgramOrderableDto();
-    programOrderable.setOrderableId(orderableId);
-    ApprovedProductDto approvedProductDto = new ApprovedProductDto();
-    approvedProductDto.setProgramOrderable(programOrderable);
+    OrderableDto orderableDto = OrderableDto.builder().id(orderableId).build();
 
-    when(approvedProductReferenceDataService.getAllApprovedProducts(programId, facilityId))
-        .thenReturn(singletonList(approvedProductDto));
-
-    OrderableDto orderableDto = new OrderableDto();
-    when(orderableReferenceDataService.findOne(orderableId)).thenReturn(orderableDto);
+    when(approvedProductReferenceDataService.getApprovedOrderablesMap(programId, facilityId))
+        .thenReturn(ImmutableMap.of(orderableId, orderableDto));
 
     //when
     PhysicalInventoryDto inventory = physicalInventoryService.findDraft(programId, facilityId);
@@ -160,9 +150,10 @@ public class PhysicalInventoryServiceDraftTest {
         .findByProgramIdAndFacilityIdAndIsDraft(programId, facilityId, true))
         .thenReturn(inventory);
 
-    OrderableDto orderableDto = new OrderableDto();
-    when(orderableReferenceDataService.findOne(orderableId))
-        .thenReturn(orderableDto);
+    OrderableDto orderableDto = OrderableDto.builder().id(orderableId).build();
+    when(approvedProductReferenceDataService
+        .getApprovedOrderablesMap(inventory.getProgramId(), inventory.getFacilityId()))
+        .thenReturn(ImmutableMap.of(orderableId, orderableDto));
 
     //when
     PhysicalInventoryDto foundDraft = physicalInventoryService.findDraft(programId, facilityId);

@@ -15,18 +15,28 @@
 
 package org.openlmis.stockmanagement.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ProgramOrderableDto {
-  private UUID programId;
   private UUID orderableId;
-  private UUID orderableDisplayCategoryId;
-  private String orderableCategoryDisplayName;
-  private Integer orderableCategoryDisplayOrder;
-  private Boolean active;
-  private Boolean fullSupply;
-  private Integer displayOrder;
+  private String orderableFullProductName;
+  private String orderableCode;
+  private boolean active;
+
+  public OrderableDto toOrderableDto() {
+    return OrderableDto.builder()
+        .id(orderableId)
+        .name(orderableFullProductName)
+        .productCode(orderableFullProductName)
+        .build();
+  }
 }

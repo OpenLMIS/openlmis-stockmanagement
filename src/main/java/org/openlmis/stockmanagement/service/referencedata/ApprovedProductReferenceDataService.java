@@ -16,9 +16,11 @@
 package org.openlmis.stockmanagement.service.referencedata;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Stream.concat;
 
 import org.openlmis.stockmanagement.dto.ApprovedProductDto;
+import org.openlmis.stockmanagement.dto.OrderableDto;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -79,5 +81,13 @@ public class ApprovedProductReferenceDataService extends
         getApprovedProducts(facilityId, programId, false);
 
     return concat(fullSupply.stream(), nonFullSupply.stream()).collect(toList());
+  }
+
+  public Map<UUID, OrderableDto> getApprovedOrderablesMap(UUID programId, UUID facilityId) {
+    return
+        getAllApprovedProducts(programId, facilityId)
+            .stream().collect(toMap(
+            approvedProduct -> approvedProduct.getProgramOrderable().getOrderableId(),
+            approvedProduct -> approvedProduct.getProgramOrderable().toOrderableDto()));
   }
 }

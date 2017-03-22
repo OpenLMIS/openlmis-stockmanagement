@@ -119,6 +119,15 @@ public class PhysicalInventoryService {
     return dto;
   }
 
+  private PhysicalInventoryDto assignOrderables(PhysicalInventoryDto inventoryDto) {
+    Map<UUID, OrderableDto> orderablesMap = approvedProductReferenceDataService
+        .getApprovedOrderablesMap(inventoryDto.getProgramId(), inventoryDto.getFacilityId());
+
+    inventoryDto.getLineItems().forEach(lineItemDto ->
+        lineItemDto.setOrderable(orderablesMap.get(lineItemDto.getOrderable().getId())));
+    return inventoryDto;
+  }
+
   private void deleteExistingDraft(PhysicalInventoryDto dto) {
     PhysicalInventory foundInventory = physicalInventoriesRepository
         .findByProgramIdAndFacilityIdAndIsDraft(dto.getProgramId(), dto.getFacilityId(), true);
@@ -132,20 +141,13 @@ public class PhysicalInventoryService {
         .programId(programId)
         .facilityId(facilityId)
         .isStarter(true)
-        .lineItems(approvedProductsToInventoryLineItemDto(programId, facilityId))
+        .lineItems(approvedProductReferenceDataService
+            .getApprovedOrderablesMap(programId, facilityId).values()
+            .stream()
+            .map(orderableDto -> PhysicalInventoryLineItemDto.builder()
+                .orderable(orderableDto).build())
+            .collect(toList()))
         .build();
-  }
-
-  private List<PhysicalInventoryLineItemDto> approvedProductsToInventoryLineItemDto(
-      UUID programId, UUID facilityId) {
-    return approvedProductReferenceDataService
-        .getAllApprovedProducts(programId, facilityId)
-        .stream()
-        .map(approvedProductDto -> orderableService
-            .findOne(approvedProductDto.getProgramOrderable().getOrderableId()))
-        .map(orderableDto ->
-            PhysicalInventoryLineItemDto.builder().orderable(orderableDto).build())
-        .collect(toList());
   }
 
   private void validateForSubmit(PhysicalInventoryDto dto) {
