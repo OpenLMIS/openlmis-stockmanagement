@@ -40,6 +40,7 @@ import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -51,7 +52,10 @@ import javax.persistence.Transient;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "stock_cards", schema = "stockmanagement")
+@Table(name = "stock_cards", schema = "stockmanagement",
+    indexes = @Index(columnList = "facilityId,programId,orderableId"))
+//the above line creates an index, it'll make select statements faster
+//especially for getStockCardIdBy method of StockCardRepository
 public class StockCard extends BaseEntity {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCard.class);
