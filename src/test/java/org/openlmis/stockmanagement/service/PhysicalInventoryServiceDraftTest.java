@@ -38,6 +38,7 @@ import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLi
 import org.openlmis.stockmanagement.dto.OrderableDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
+import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 
@@ -54,6 +55,9 @@ public class PhysicalInventoryServiceDraftTest {
   @Mock
   private ApprovedProductReferenceDataService approvedProductReferenceDataService;
 
+  @Mock
+  private StockCardSummariesService stockCardSummariesService;
+
   @Test
   public void should_generate_empty_draft_if_no_saved_draft_is_found() throws Exception {
     //given
@@ -64,11 +68,9 @@ public class PhysicalInventoryServiceDraftTest {
         .findByProgramIdAndFacilityIdAndIsDraft(programId, facilityId, true))
         .thenReturn(null);
 
-    UUID orderableId = UUID.randomUUID();
-    OrderableDto orderableDto = OrderableDto.builder().id(orderableId).build();
-
-    when(approvedProductReferenceDataService.getApprovedOrderablesMap(programId, facilityId))
-        .thenReturn(ImmutableMap.of(orderableId, orderableDto));
+    OrderableDto orderableDto = new OrderableDto();
+    when(stockCardSummariesService.findStockCards(programId, facilityId)).thenReturn(
+        singletonList(StockCardDto.builder().orderable(orderableDto).stockOnHand(233).build()));
 
     //when
     PhysicalInventoryDto inventory = physicalInventoryService.findDraft(programId, facilityId);
@@ -82,6 +84,7 @@ public class PhysicalInventoryServiceDraftTest {
     PhysicalInventoryLineItemDto inventoryLineItemDto = inventory.getLineItems().get(0);
     assertThat(inventoryLineItemDto.getOrderable(), is(orderableDto));
     assertThat(inventoryLineItemDto.getQuantity(), nullValue());
+    assertThat(inventoryLineItemDto.getStockOnHand(), is(233));
   }
 
   @Test

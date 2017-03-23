@@ -29,6 +29,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class PhysicalInventoryLineItemDto {
   private OrderableDto orderable;
+  private Integer stockOnHand;
   private Integer quantity;
 
   /**

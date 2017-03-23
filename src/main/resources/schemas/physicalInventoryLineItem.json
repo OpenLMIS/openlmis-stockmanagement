@@ -10,9 +10,13 @@
       "required": true,
       "$ref": "orderable"
     },
+    "stockOnHand": {
+      "type": "integer",
+      "description": "Indicates previous stock on hand for an orderable."
+    },
     "quantity": {
       "type": "integer",
-      "description": "Indicates stock on hand for an orderable.",
+      "description": "Indicates current stock on hand for an orderable.",
       "required": true
     }
   }

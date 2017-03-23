@@ -60,6 +60,9 @@ public class PhysicalInventoryService {
   @Autowired
   private ApprovedProductReferenceDataService approvedProductReferenceDataService;
 
+  @Autowired
+  private StockCardSummariesService stockCardSummariesService;
+
   /**
    * Submit physical inventory.
    *
@@ -136,11 +139,11 @@ public class PhysicalInventoryService {
         .programId(programId)
         .facilityId(facilityId)
         .isStarter(true)
-        .lineItems(approvedProductReferenceDataService
-            .getApprovedOrderablesMap(programId, facilityId).values()
-            .stream()
-            .map(orderableDto -> PhysicalInventoryLineItemDto.builder()
-                .orderable(orderableDto).build())
+        .lineItems(stockCardSummariesService.findStockCards(programId, facilityId).stream()
+            .map(stockCardDto -> PhysicalInventoryLineItemDto.builder()
+                .orderable(stockCardDto.getOrderable())
+                .stockOnHand(stockCardDto.getStockOnHand())
+                .build())
             .collect(toList()))
         .build();
   }

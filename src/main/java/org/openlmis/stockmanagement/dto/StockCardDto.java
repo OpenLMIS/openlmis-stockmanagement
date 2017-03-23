@@ -19,9 +19,13 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static java.util.stream.Collectors.toList;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import org.openlmis.stockmanagement.domain.card.StockCard;
+
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import org.openlmis.stockmanagement.domain.card.StockCard;
+import lombok.NoArgsConstructor;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -29,6 +33,8 @@ import java.util.UUID;
 
 @Builder
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class StockCardDto {
 
   @JsonInclude(NON_NULL)
