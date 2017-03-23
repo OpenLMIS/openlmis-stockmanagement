@@ -30,6 +30,7 @@ import lombok.NoArgsConstructor;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Data
@@ -82,7 +83,6 @@ public class PhysicalInventoryDto {
     return toPhysicalInventory(false);
   }
 
-
   /**
    * Convert into physical inventory jpa model for draft.
    *
@@ -96,6 +96,7 @@ public class PhysicalInventoryDto {
         .collect(toList()));
     return inventory;
   }
+
 
   /**
    * Create from jpa model.
@@ -115,6 +116,32 @@ public class PhysicalInventoryDto {
         .lineItems(inventory.getLineItems().stream().map(
             PhysicalInventoryLineItemDto::from).collect(toList()))
         .build();
+  }
+
+  /**
+   * Assign orderable and stock on hand and quantity to physical inventory line item DTOs.
+   *
+   * @param stockCards list stock card DTOs.
+   */
+  public void assignValuesToLineItems(
+      List<StockCardDto> stockCards) {
+    this.setLineItems(stockCards.stream()
+        .map(stockCardDto -> PhysicalInventoryLineItemDto.builder()
+            .orderable(stockCardDto.getOrderable())
+            .stockOnHand(stockCardDto.getStockOnHand())
+            .quantity(findSavedDraftQuantity(stockCardDto))
+            .build())
+        .collect(toList()));
+  }
+
+  private Integer findSavedDraftQuantity(StockCardDto stockCardDto) {
+    Optional<PhysicalInventoryLineItemDto> foundItem = this.getLineItems().stream()
+        .filter(lineItemDto -> {
+          UUID itemOrderableId = lineItemDto.getOrderable().getId();
+          UUID cardOrderableId = stockCardDto.getOrderable().getId();
+          return itemOrderableId.equals(cardOrderableId);
+        }).findFirst();
+    return foundItem.map(PhysicalInventoryLineItemDto::getQuantity).orElse(null);
   }
 
   private PhysicalInventory toPhysicalInventory(boolean isDraft) {

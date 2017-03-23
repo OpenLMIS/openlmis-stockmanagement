@@ -17,7 +17,6 @@ package org.openlmis.stockmanagement.service;
 
 import static java.util.stream.Collectors.toList;
 import static org.openlmis.stockmanagement.domain.BaseEntity.fromId;
-import static org.openlmis.stockmanagement.dto.PhysicalInventoryDto.from;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_NOT_INCLUDE_ACTIVE_STOCK_CARD;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ORDERABLE_DUPLICATION;
@@ -25,13 +24,12 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVEN
 
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
-import org.openlmis.stockmanagement.dto.OrderableDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
+import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
-import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.utils.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +38,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -56,9 +53,6 @@ public class PhysicalInventoryService {
 
   @Autowired
   private StockCardRepository stockCardRepository;
-
-  @Autowired
-  private ApprovedProductReferenceDataService approvedProductReferenceDataService;
 
   @Autowired
   private StockCardSummariesService stockCardSummariesService;
@@ -99,7 +93,7 @@ public class PhysicalInventoryService {
     if (foundInventory == null) {
       return createEmptyInventory(programId, facilityId);
     } else {
-      return assignOrderables(from(foundInventory));
+      return assignOrderables(PhysicalInventoryDto.from(foundInventory));
     }
   }
 
@@ -118,11 +112,9 @@ public class PhysicalInventoryService {
   }
 
   private PhysicalInventoryDto assignOrderables(PhysicalInventoryDto inventoryDto) {
-    Map<UUID, OrderableDto> orderablesMap = approvedProductReferenceDataService
-        .getApprovedOrderablesMap(inventoryDto.getProgramId(), inventoryDto.getFacilityId());
-
-    inventoryDto.getLineItems().forEach(lineItemDto ->
-        lineItemDto.setOrderable(orderablesMap.get(lineItemDto.getOrderable().getId())));
+    List<StockCardDto> stockCards = stockCardSummariesService
+        .findStockCards(inventoryDto.getProgramId(), inventoryDto.getFacilityId());
+    inventoryDto.assignValuesToLineItems(stockCards);
     return inventoryDto;
   }
 

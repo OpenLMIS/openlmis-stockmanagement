@@ -25,8 +25,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.ImmutableMap;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -40,7 +38,6 @@ import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
-import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 
 import java.util.UUID;
 
@@ -51,9 +48,6 @@ public class PhysicalInventoryServiceDraftTest {
 
   @Mock
   private PhysicalInventoriesRepository physicalInventoriesRepository;
-
-  @Mock
-  private ApprovedProductReferenceDataService approvedProductReferenceDataService;
 
   @Mock
   private StockCardSummariesService stockCardSummariesService;
@@ -147,16 +141,15 @@ public class PhysicalInventoryServiceDraftTest {
     UUID facilityId = randomUUID();
     UUID orderableId = randomUUID();
 
-    PhysicalInventory inventory = createInventory(orderableId);
+    PhysicalInventory inventory = createInventory(orderableId, programId, facilityId);
 
     when(physicalInventoriesRepository
         .findByProgramIdAndFacilityIdAndIsDraft(programId, facilityId, true))
         .thenReturn(inventory);
 
     OrderableDto orderableDto = OrderableDto.builder().id(orderableId).build();
-    when(approvedProductReferenceDataService
-        .getApprovedOrderablesMap(inventory.getProgramId(), inventory.getFacilityId()))
-        .thenReturn(ImmutableMap.of(orderableId, orderableDto));
+    when(stockCardSummariesService.findStockCards(programId, facilityId)).thenReturn(
+        singletonList(StockCardDto.builder().orderable(orderableDto).stockOnHand(233).build()));
 
     //when
     PhysicalInventoryDto foundDraft = physicalInventoryService.findDraft(programId, facilityId);
@@ -164,10 +157,11 @@ public class PhysicalInventoryServiceDraftTest {
     //then
     PhysicalInventoryLineItemDto lineItemDto = foundDraft.getLineItems().get(0);
     assertThat(lineItemDto.getOrderable(), is(orderableDto));
+    assertThat(lineItemDto.getStockOnHand(), is(233));
   }
 
-  private PhysicalInventory createInventory(UUID orderableId) {
-    PhysicalInventory inventory = createInventoryDto(randomUUID(), randomUUID())
+  private PhysicalInventory createInventory(UUID orderableId, UUID programId, UUID facilityId) {
+    PhysicalInventory inventory = createInventoryDto(programId, facilityId)
         .toPhysicalInventoryForDraft();
     inventory.getLineItems().get(0).setOrderableId(orderableId);
     return inventory;
