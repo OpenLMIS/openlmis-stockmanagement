@@ -15,9 +15,11 @@
 
 package org.openlmis.stockmanagement.dto;
 
+import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static java.util.stream.Collectors.toList;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
@@ -44,6 +46,8 @@ public class StockCardDto {
   private FacilityDto facility;
   private ProgramDto program;
   private OrderableDto orderable;
+
+  @JsonFormat(shape = STRING)
   private ZonedDateTime lastUpdate;
 
   @JsonInclude(NON_NULL)
