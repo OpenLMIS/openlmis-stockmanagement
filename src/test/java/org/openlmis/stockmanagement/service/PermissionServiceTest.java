@@ -21,8 +21,6 @@ import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARD_LINE_ITEM_REASONS_VIEW;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARD_TEMPLATES_MANAGE;
-import static org.openlmis.stockmanagement.service.PermissionService.STOCK_DESTINATIONS_VIEW;
-import static org.openlmis.stockmanagement.service.PermissionService.STOCK_SOURCES_VIEW;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -86,8 +84,6 @@ public class PermissionServiceTest {
     when(authenticationHelper.getRight(STOCK_CARD_TEMPLATES_MANAGE))
         .thenReturn(manageStockCardTemplatesRight);
 
-    when(authenticationHelper.getRight(STOCK_SOURCES_VIEW)).thenReturn(new RightDto());
-    when(authenticationHelper.getRight(STOCK_DESTINATIONS_VIEW)).thenReturn(new RightDto());
     when(authenticationHelper.getRight(STOCK_CARD_LINE_ITEM_REASONS_VIEW))
         .thenReturn(new RightDto());
   }
@@ -113,19 +109,7 @@ public class PermissionServiceTest {
     UUID program = UUID.randomUUID();
     UUID facilityType = UUID.randomUUID();
 
-    permissionService.canViewStockSource(program, facilityType);
-    permissionService.canViewStockDestinations(program, facilityType);
     permissionService.canViewReasons(program, facilityType);
-  }
-
-  @Test
-  public void cannotViewStockSources() throws Exception {
-    checkViewRight(STOCK_SOURCES_VIEW);
-  }
-
-  @Test
-  public void cannotViewStockDestinations() throws Exception {
-    checkViewRight(STOCK_DESTINATIONS_VIEW);
   }
 
   @Test
@@ -142,8 +126,6 @@ public class PermissionServiceTest {
         new Message(ERROR_NO_FOLLOWING_PERMISSION, rightName)))
         .when(programFacilityTypePermissionService)
         .checkProgramFacility(program, facilityType);
-
-    permissionService.canViewStockDestinations(program, facilityType);
   }
 
   private void hasRight(UUID rightId, boolean assign) {

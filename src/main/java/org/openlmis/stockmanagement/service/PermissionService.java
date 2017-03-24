@@ -42,15 +42,9 @@ public class PermissionService {
 
   public static final String ORGANIZATIONS_MANAGE = "ORGANIZATIONS_MANAGE";
 
-  public static final String STOCK_SOURCES_VIEW = "STOCK_SOURCES_VIEW";
-
   public static final String STOCK_SOURCES_MANAGE = "STOCK_SOURCES_MANAGE";
 
   public static final String STOCK_DESTINATIONS_MANAGE = "STOCK_DESTINATIONS_MANAGE";
-
-  public static final String STOCK_DESTINATIONS_VIEW = "STOCK_DESTINATIONS_VIEW";
-
-  public static final String STOCK_DESTINATION_MANAGE = "STOCK_DESTINATION_MANAGE";
 
   public static final String STOCK_CARD_LINE_ITEM_REASONS_VIEW
       = "STOCK_CARD_LINE_ITEM_REASONS_VIEW";
@@ -111,16 +105,6 @@ public class PermissionService {
   }
 
   /**
-   * Checks if current user has permission to view stock sources.
-   *
-   * @param program      program ID
-   * @param facilityType facility type ID
-   */
-  public void canViewStockSource(UUID program, UUID facilityType) {
-    canViewStockAssignable(STOCK_SOURCES_VIEW, program, facilityType);
-  }
-
-  /**
    * Checks if current user has permission to manage valid sources assignment.
    */
   public void canManageStockSources() {
@@ -132,16 +116,6 @@ public class PermissionService {
    */
   public void canManageStockDestinations() {
     hasPermission(STOCK_DESTINATIONS_MANAGE, null, null, null);
-  }
-
-  /**
-   * Checks if current user has permission to view stock destinations.
-   *
-   * @param program      program ID
-   * @param facilityType facility type ID
-   */
-  public void canViewStockDestinations(UUID program, UUID facilityType) {
-    canViewStockAssignable(STOCK_DESTINATIONS_VIEW, program, facilityType);
   }
 
   /**

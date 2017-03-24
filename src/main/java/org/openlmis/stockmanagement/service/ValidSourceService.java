@@ -44,7 +44,6 @@ public class ValidSourceService extends SourceDestinationBaseService {
    * @return valid destination assignment DTOs
    */
   public List<ValidSourceDestinationDto> findSources(UUID programId, UUID facilityTypeId) {
-    permissionService.canViewStockSource(programId, facilityTypeId);
     return findAssignments(programId, facilityTypeId, validSourceRepository);
   }
 

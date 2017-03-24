@@ -103,20 +103,6 @@ public class SourceDestinationBaseServiceTest {
     validSourceService.findSources(programId, facilityTypeId);
   }
 
-  @Test(expected = PermissionMessageException.class)
-  public void should_throw_permission_exception_when_user_has_no_permission_to_view_sources()
-      throws Exception {
-    //given
-    UUID programId = randomUUID();
-    UUID facilityTypeId = randomUUID();
-    doThrow(new PermissionMessageException(new Message("key")))
-        .when(permissionService)
-        .canViewStockSource(programId, facilityTypeId);
-
-    //when
-    validSourceService.findSources(programId, facilityTypeId);
-  }
-
   @Test
   public void should_return_source_dto_when_found_existing_one() throws Exception {
     UUID programId = randomUUID();
@@ -314,20 +300,6 @@ public class SourceDestinationBaseServiceTest {
 
     //when
     validDestinationService.assignDestination(assignment);
-  }
-
-  @Test(expected = PermissionMessageException.class)
-  public void should_throw_permission_exception_when_user_has_no_permission_to_view_destinations()
-      throws Exception {
-    //given
-    UUID programId = randomUUID();
-    UUID facilityTypeId = randomUUID();
-    doThrow(new PermissionMessageException(new Message("key")))
-        .when(permissionService)
-        .canViewStockDestinations(programId, facilityTypeId);
-
-    //when
-    validDestinationService.findDestinations(programId, facilityTypeId);
   }
 
   @Test
