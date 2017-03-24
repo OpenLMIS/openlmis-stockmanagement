@@ -60,7 +60,7 @@ public class PermissionService {
   public static final String STOCK_ADJUST = "STOCK_ADJUST";
 
   //assumption: if a user can view requisition then we assume this user can view stock card too.
-  public static final String STOCK_CARD_VIEW = "REQUISITION_VIEW";
+  public static final String STOCK_CARDS_VIEW = "STOCK_CARDS_VIEW";
 
   @Autowired
   private AuthenticationHelper authenticationHelper;
@@ -107,7 +107,7 @@ public class PermissionService {
    * @param facilityId facility id.
    */
   public void canViewStockCard(UUID programId, UUID facilityId) {
-    hasPermission(STOCK_CARD_VIEW, programId, facilityId, null);
+    hasPermission(STOCK_CARDS_VIEW, programId, facilityId, null);
   }
 
   /**
