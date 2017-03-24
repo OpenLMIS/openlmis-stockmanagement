@@ -49,6 +49,11 @@ schemas:
   - physicalInventoryLineItem: !include schemas/physicalInventoryLineItem.json
   - physicalInventory: !include schemas/physicalInventory.json
   - localizedMessage: !include schemas/localizedMessage.json
+  - uuid: |
+      {
+        "type": "string",
+        "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+      }
 
 resourceTypes:
     - collection:
@@ -135,6 +140,9 @@ traits:
                 schema: stockCardTemplate
           404:
             description: Stock card template not found for the given query parameter.
+            body:
+              application/json:
+                schema: localizedMessage
           400:
             body:
               application/json:
@@ -150,6 +158,9 @@ traits:
         responses:
           201:
             description: Indicates that stock card template has been created.
+            body:
+              application/json:
+                schema: stockCardTemplate
           400:
             description: Indicates that request body is not correctly formated(incorrect fileds names, non-existing program or facility ids, etc).
             body:
@@ -169,6 +180,7 @@ traits:
             description: Stock event has been processed with no validatoin error or persistence error.
             body:
               application/json:
+                schema: uuid
 
           400:
             description: Failed to process stock event due to validation error.
@@ -205,6 +217,7 @@ traits:
             description: No stock cards were found that matches given facility and program.
             body:
               application/json:
+                schema: localizedMessage
 
           403:
             description: User does not have permission to view stock cards of given facility and program.
@@ -233,11 +246,12 @@ traits:
             description: No stock cards were found that matches given facility and program.
             body:
               application/json:
+                schema: localizedMessage
           403:
             description: User does not have permission to view stock cards of given facility and program.
             body:
               application/json:
-                  schema: localizedMessage
+                schema: localizedMessage
       /print:
         get:
           is: [ secured ]
@@ -258,6 +272,7 @@ traits:
               description: No stock cards were found that matches given facility and program.
               body:
                 application/json:
+                  schema: localizedMessage
             403:
               description: User does not have permission to get stock card summary report.
               body:
@@ -279,12 +294,13 @@ traits:
             description: Stock card with given id does not exist.
             body:
               application/json:
+                schema: localizedMessage
 
           403:
             description: User does not have permission to view stock card.
             body:
               application/json:
-                  schema: localizedMessage
+                schema: localizedMessage
 
       /print:
         get:
@@ -514,10 +530,12 @@ traits:
             description: Facility type or program is not found.
             body:
               application/json:
+                schema: localizedMessage
           403:
             description: Facility type given is no match with home facility or given program is not supported by home facility.
             body:
               application/json:
+                schema: localizedMessage
 
       post:
         is: [ secured ]
@@ -541,10 +559,12 @@ traits:
             description: Reason id is null. Or program or facility type or reason is not found.
             body:
               application/json:
+                schema: localizedMessage
           403:
             description: User is not allowed to configure reason.
             body:
               application/json:
+                schema: localizedMessage
       /{id}:
         delete:
           is: [ secured ]
@@ -557,10 +577,12 @@ traits:
               description: Reason assignment is not found.
               body:
                 application/json:
+                  schema: localizedMessage
             403:
               description: User is not allowed to remove reason assignment from the list.
               body:
                 application/json:
+                  schema: localizedMessage
 
   /stockCardLineItemReasons:
       displayName: Stock Card Line Item Reason
@@ -730,6 +752,7 @@ traits:
             description: Physical inventory submitted.
             body:
               application/json:
+                schema: uuid
 
           400:
             description: |
