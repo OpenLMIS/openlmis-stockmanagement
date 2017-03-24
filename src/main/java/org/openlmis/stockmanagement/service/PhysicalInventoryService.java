@@ -93,7 +93,7 @@ public class PhysicalInventoryService {
     if (foundInventory == null) {
       return createEmptyInventory(programId, facilityId);
     } else {
-      return assignOrderables(PhysicalInventoryDto.from(foundInventory));
+      return assignOrderablesAndSoh(PhysicalInventoryDto.from(foundInventory));
     }
   }
 
@@ -111,10 +111,10 @@ public class PhysicalInventoryService {
     return dto;
   }
 
-  private PhysicalInventoryDto assignOrderables(PhysicalInventoryDto inventoryDto) {
+  private PhysicalInventoryDto assignOrderablesAndSoh(PhysicalInventoryDto inventoryDto) {
     List<StockCardDto> stockCards = stockCardSummariesService
         .findStockCards(inventoryDto.getProgramId(), inventoryDto.getFacilityId());
-    inventoryDto.assignValuesToLineItems(stockCards);
+    inventoryDto.mergeWith(stockCards);
     return inventoryDto;
   }
 

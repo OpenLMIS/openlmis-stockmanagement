@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.dto;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -30,7 +31,7 @@ import lombok.NoArgsConstructor;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.UUID;
 
 @Data
@@ -119,29 +120,24 @@ public class PhysicalInventoryDto {
   }
 
   /**
-   * Assign orderable and stock on hand and quantity to physical inventory line item DTOs.
+   * Merge quantities saved in physical inventory line item dtos with soh in stock card dtos.
+   * And Assign orderable to physical inventory line item dtos.
    *
    * @param stockCards list stock card DTOs.
    */
-  public void assignValuesToLineItems(
+  public void mergeWith(
       List<StockCardDto> stockCards) {
+    Map<UUID, Integer> savedQuantities = this.lineItems.stream().collect(toMap(
+        lineItem -> lineItem.getOrderable().getId(),
+        PhysicalInventoryLineItemDto::getQuantity));
+
     this.setLineItems(stockCards.stream()
         .map(stockCardDto -> PhysicalInventoryLineItemDto.builder()
             .orderable(stockCardDto.getOrderable())
             .stockOnHand(stockCardDto.getStockOnHand())
-            .quantity(findSavedDraftQuantity(stockCardDto))
+            .quantity(savedQuantities.get(stockCardDto.getOrderable().getId()))
             .build())
         .collect(toList()));
-  }
-
-  private Integer findSavedDraftQuantity(StockCardDto stockCardDto) {
-    Optional<PhysicalInventoryLineItemDto> foundItem = this.getLineItems().stream()
-        .filter(lineItemDto -> {
-          UUID itemOrderableId = lineItemDto.getOrderable().getId();
-          UUID cardOrderableId = stockCardDto.getOrderable().getId();
-          return itemOrderableId.equals(cardOrderableId);
-        }).findFirst();
-    return foundItem.map(PhysicalInventoryLineItemDto::getQuantity).orElse(null);
   }
 
   private PhysicalInventory toPhysicalInventory(boolean isDraft) {
