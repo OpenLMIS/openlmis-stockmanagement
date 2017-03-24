@@ -62,9 +62,6 @@ public class PermissionService {
   @Autowired
   private UserReferenceDataService userReferenceDataService;
 
-  @Autowired
-  private ProgramFacilityTypePermissionService programFacilityTypePermissionService;
-
   /**
    * Checks if current user has permission to submit a stock card template.
    *
@@ -118,16 +115,6 @@ public class PermissionService {
     hasPermission(STOCK_DESTINATIONS_MANAGE, null, null, null);
   }
 
-  /**
-   * Checks if current user has permission to view stock card line item reasons.
-   *
-   * @param program      program ID
-   * @param facilityType facility type ID
-   */
-  public void canViewReasons(UUID program, UUID facilityType) {
-    canViewStockAssignable(STOCK_CARD_LINE_ITEM_REASONS_VIEW, program, facilityType);
-  }
-
   public void canManageReasons() {
     hasPermission(REASONS_MANAGE, null, null, null);
   }
@@ -140,13 +127,6 @@ public class PermissionService {
     ResultDto<Boolean> result = getRightResult(rightName, program, facility, warehouse);
     if (null == result || !result.getResult()) {
       throw new PermissionMessageException(new Message(ERROR_NO_FOLLOWING_PERMISSION, rightName));
-    }
-  }
-
-  private void canViewStockAssignable(String rightName, UUID program, UUID facilityType) {
-    ResultDto<Boolean> result = getRightResult(rightName, null, null, null);
-    if (null == result || !result.getResult()) {
-      programFacilityTypePermissionService.checkProgramFacility(program, facilityType);
     }
   }
 

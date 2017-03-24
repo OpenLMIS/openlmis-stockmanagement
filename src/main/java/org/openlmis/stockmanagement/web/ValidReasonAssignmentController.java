@@ -77,7 +77,6 @@ public class ValidReasonAssignmentController {
     LOGGER.debug(format(
         "Try to find stock card line item reason with program %s and facility type %s",
         program.toString(), facilityType.toString()));
-    permissionService.canViewReasons(program, facilityType);
     programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(program, facilityType);
     return new ResponseEntity<>(getReasonsBy(program, facilityType), OK);
   }
