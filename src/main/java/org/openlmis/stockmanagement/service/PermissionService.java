@@ -42,8 +42,6 @@ public class PermissionService {
 
   public static final String ORGANIZATIONS_MANAGE = "ORGANIZATIONS_MANAGE";
 
-  public static final String STOCK_EVENT_CREATE = "STOCK_EVENT_CREATE";
-
   public static final String STOCK_SOURCES_VIEW = "STOCK_SOURCES_VIEW";
 
   public static final String STOCK_SOURCES_MANAGE = "STOCK_SOURCES_MANAGE";
@@ -56,6 +54,10 @@ public class PermissionService {
 
   public static final String STOCK_CARD_LINE_ITEM_REASONS_VIEW
       = "STOCK_CARD_LINE_ITEM_REASONS_VIEW";
+
+  public static final String STOCK_INVENTORIES_EDIT = "STOCK_INVENTORIES_EDIT";
+
+  public static final String STOCK_ADJUST = "STOCK_ADJUST";
 
   //assumption: if a user can view requisition then we assume this user can view stock card too.
   public static final String STOCK_CARD_VIEW = "REQUISITION_VIEW";
@@ -79,13 +81,23 @@ public class PermissionService {
   }
 
   /**
-   * Checks if current user has permission to create a stock event.
+   * Checks if current user has permission to do physical inventory.
    *
    * @param programId  program id.
    * @param facilityId facility id.
    */
-  public void canCreateStockEvent(UUID programId, UUID facilityId) {
-    hasPermission(STOCK_EVENT_CREATE, programId, facilityId, null);
+  public void canEditPhysicalInventory(UUID programId, UUID facilityId) {
+    hasPermission(STOCK_INVENTORIES_EDIT, programId, facilityId, null);
+  }
+
+  /**
+   * Checks if current user has permission to make stock adjustment.
+   *
+   * @param programId  program id.
+   * @param facilityId facility id.
+   */
+  public void canMakeAdjustment(UUID programId, UUID facilityId) {
+    hasPermission(STOCK_ADJUST, programId, facilityId, null);
   }
 
   /**

@@ -59,7 +59,7 @@ public class PhysicalInventoryController {
       throws IllegalAccessException, InstantiationException {
     long startTime = System.currentTimeMillis();
 
-    permissionService.canCreateStockEvent(dto.getProgramId(), dto.getFacilityId());
+    permissionService.canEditPhysicalInventory(dto.getProgramId(), dto.getFacilityId());
     UUID uuid = physicalInventoryService.submitPhysicalInventory(dto);
 
     LOGGER.info("Finished in " + (System.currentTimeMillis() - startTime) + " milliseconds");
@@ -77,7 +77,7 @@ public class PhysicalInventoryController {
   public ResponseEntity<PhysicalInventoryDto> findDraft(
       @RequestParam UUID program,
       @RequestParam UUID facility) {
-    permissionService.canCreateStockEvent(program, facility);
+    permissionService.canEditPhysicalInventory(program, facility);
     return new ResponseEntity<>(physicalInventoryService.findDraft(program, facility), OK);
   }
 
@@ -90,7 +90,7 @@ public class PhysicalInventoryController {
   @Transactional
   @RequestMapping(value = "physicalInventories/draft", method = POST)
   public ResponseEntity<PhysicalInventoryDto> saveDraft(@RequestBody PhysicalInventoryDto dto) {
-    permissionService.canCreateStockEvent(dto.getProgramId(), dto.getFacilityId());
+    permissionService.canEditPhysicalInventory(dto.getProgramId(), dto.getFacilityId());
     return new ResponseEntity<>(physicalInventoryService.saveDraft(dto), CREATED);
   }
 

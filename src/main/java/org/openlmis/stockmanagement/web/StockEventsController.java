@@ -16,12 +16,15 @@
 package org.openlmis.stockmanagement.web;
 
 import static java.util.Collections.singletonList;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockEventProcessor;
+import org.openlmis.stockmanagement.utils.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,9 +64,19 @@ public class StockEventsController {
   public ResponseEntity<UUID> createStockEvent(@RequestBody StockEventDto eventDto)
       throws InstantiationException, IllegalAccessException {
     LOGGER.debug("Try to create a stock event");
-    permissionService.canCreateStockEvent(eventDto.getProgramId(), eventDto.getFacilityId());
+    rejectIfIssueOrReceive(eventDto);
+    permissionService.canEditPhysicalInventory(eventDto.getProgramId(), eventDto.getFacilityId());
     UUID createdEventId = stockEventProcessor.process(singletonList(eventDto)).get(0);
     return new ResponseEntity<>(createdEventId, CREATED);
+  }
+
+  //this method blocks user from doing issue/receive.
+  //this block will be removed when we support issue/receive.
+  private void rejectIfIssueOrReceive(StockEventDto eventDto) {
+    if (eventDto.hasSource() || eventDto.hasDestination()) {
+      throw new PermissionMessageException(
+          new Message(ERROR_NO_FOLLOWING_PERMISSION, "Issue/Receive blocked for now"));
+    }
   }
 
 }

@@ -20,7 +20,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_STOCK_EVENT_REASON_NOT_MATCH;
-import static org.openlmis.stockmanagement.service.PermissionService.STOCK_EVENT_CREATE;
+import static org.openlmis.stockmanagement.service.PermissionService.STOCK_ADJUST;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -59,10 +59,13 @@ public class StockEventsControllerTest extends BaseWebTest {
         .thenReturn(singletonList(uuid));
 
     //when
+    StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.setSourceId(null);
+    stockEventDto.setDestinationId(null);
     ResultActions resultActions = mvc.perform(post(CREATE_STOCK_EVENT_API)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
         .contentType(MediaType.APPLICATION_JSON)
-        .content(objectToJsonString(createStockEventDto())));
+        .content(objectToJsonString(stockEventDto)));
 
     //then
     resultActions.andDo(MockMvcResultHandlers.print())
@@ -74,8 +77,8 @@ public class StockEventsControllerTest extends BaseWebTest {
   public void should_return_403_when_user_has_not_permission() throws Exception {
     //given
     Mockito.doThrow(new PermissionMessageException(
-        new Message(ERROR_NO_FOLLOWING_PERMISSION, STOCK_EVENT_CREATE)))
-        .when(permissionService).canCreateStockEvent(any(UUID.class), any(UUID.class));
+        new Message(ERROR_NO_FOLLOWING_PERMISSION, STOCK_ADJUST)))
+        .when(permissionService).canEditPhysicalInventory(any(UUID.class), any(UUID.class));
 
     //when
     ResultActions resultActions = mvc.perform(post(CREATE_STOCK_EVENT_API)
@@ -85,6 +88,17 @@ public class StockEventsControllerTest extends BaseWebTest {
 
     //then
     resultActions.andExpect(status().isForbidden());
+  }
+
+  @Test
+  public void should_return_403_when_user_try_to_issue_or_receive() throws Exception {
+    StockEventDto receiveEventDto = new StockEventDto();
+    receiveEventDto.setSourceId(UUID.randomUUID());
+    shouldReject(receiveEventDto);
+
+    StockEventDto issueEventDto = new StockEventDto();
+    issueEventDto.setDestinationId(UUID.randomUUID());
+    shouldReject(issueEventDto);
   }
 
   @Test
@@ -101,5 +115,16 @@ public class StockEventsControllerTest extends BaseWebTest {
 
     //then
     resultActions.andExpect(status().isBadRequest());
+  }
+
+  private void shouldReject(StockEventDto eventDto) throws Exception {
+    //when
+    ResultActions resultActions = mvc.perform(post(CREATE_STOCK_EVENT_API)
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectToJsonString(eventDto)));
+
+    //then
+    resultActions.andExpect(status().isForbidden());
   }
 }

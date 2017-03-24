@@ -60,7 +60,7 @@ public class PhysicalInventoryControllerTest extends BaseWebTest {
     piDto.setFacilityId(randomUUID());
     doThrow(new PermissionMessageException(new Message("permission error")))
         .when(permissionService)
-        .canCreateStockEvent(piDto.getProgramId(), piDto.getFacilityId());
+        .canEditPhysicalInventory(piDto.getProgramId(), piDto.getFacilityId());
 
     //when
     ResultActions resultActions = callApi(piDto);
