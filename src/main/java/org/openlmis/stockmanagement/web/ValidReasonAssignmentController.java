@@ -31,6 +31,7 @@ import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
 import org.openlmis.stockmanagement.service.PermissionService;
+import org.openlmis.stockmanagement.service.ProgramFacilityTypePermissionService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
 import org.openlmis.stockmanagement.utils.Message;
 import org.slf4j.Logger;
@@ -49,6 +50,9 @@ import java.util.UUID;
 @Controller
 @RequestMapping("/api")
 public class ValidReasonAssignmentController {
+
+  @Autowired
+  private ProgramFacilityTypePermissionService programFacilityTypePermissionService;
 
   @Autowired
   private StockCardLineItemReasonRepository reasonRepository;
@@ -77,7 +81,7 @@ public class ValidReasonAssignmentController {
     LOGGER.debug(format(
         "Try to find stock card line item reason with program %s and facility type %s",
         program.toString(), facilityType.toString()));
-    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(program, facilityType);
+    programFacilityTypePermissionService.checkHomeFacilitySupport(program, facilityType);
     return new ResponseEntity<>(getReasonsBy(program, facilityType), OK);
   }
 

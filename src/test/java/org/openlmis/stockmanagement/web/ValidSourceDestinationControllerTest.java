@@ -35,6 +35,7 @@ import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.service.ProgramFacilityTypePermissionService;
 import org.openlmis.stockmanagement.service.ValidDestinationService;
 import org.openlmis.stockmanagement.service.ValidSourceService;
 import org.openlmis.stockmanagement.utils.Message;
@@ -55,6 +56,9 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
   private static final String NODE_REFERENCE_ID_EXP = "$.node.referenceId";
 
   @MockBean
+  private ProgramFacilityTypePermissionService programFacilityTypePermissionService;
+
+  @MockBean
   private ValidSourceService validSourceService;
 
   @MockBean
@@ -64,7 +68,11 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
   public void should_get_valid_sources_or_destinations_by_program_and_facilityType()
       throws Exception {
     //given
-    ValidSourceDestinationDto sourceDestination = createValidSourceDestinationDto();
+    ValidSourceDestinationDto destinationAssignmentDto = new ValidSourceDestinationDto();
+    destinationAssignmentDto.setId(randomUUID());
+    destinationAssignmentDto.setName("CHW");
+    destinationAssignmentDto.setIsFreeTextAllowed(true);
+    ValidSourceDestinationDto sourceDestination = destinationAssignmentDto;
 
     UUID program = randomUUID();
     UUID facilityType = randomUUID();
@@ -91,6 +99,28 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
         new Message(ERROR_PROGRAM_NOT_FOUND, programId.toString())))
         .when(validDestinationService)
         .findDestinations(programId, facilityTypeId);
+
+    //when
+    ResultActions resultActions = mvc.perform(get(API_VALID_DESTINATIONS)
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .param(PROGRAM, programId.toString())
+        .param(FACILITY_TYPE, facilityTypeId.toString()));
+
+    //then
+    resultActions.andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void should_return_400_when_home_facility_check_fails()
+      throws Exception {
+    //given
+    UUID programId = randomUUID();
+    UUID facilityTypeId = randomUUID();
+
+    doThrow(new ValidationMessageException(
+        new Message("some error", programId.toString())))
+        .when(programFacilityTypePermissionService)
+        .checkHomeFacilitySupport(programId, facilityTypeId);
 
     //when
     ResultActions resultActions = mvc.perform(get(API_VALID_DESTINATIONS)
@@ -252,13 +282,5 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
         .andExpect(jsonPath("$[0].id", is(sourceDestinationDto.getId().toString())))
         .andExpect(jsonPath("$[0].name", is(sourceDestinationDto.getName())))
         .andExpect(jsonPath("$[0].isFreeTextAllowed", is(true)));
-  }
-
-  private ValidSourceDestinationDto createValidSourceDestinationDto() {
-    ValidSourceDestinationDto destinationAssignmentDto = new ValidSourceDestinationDto();
-    destinationAssignmentDto.setId(randomUUID());
-    destinationAssignmentDto.setName("CHW");
-    destinationAssignmentDto.setIsFreeTextAllowed(true);
-    return destinationAssignmentDto;
   }
 }

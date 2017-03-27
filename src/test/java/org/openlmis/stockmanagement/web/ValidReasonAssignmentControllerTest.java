@@ -43,6 +43,7 @@ import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
 import org.openlmis.stockmanagement.service.PermissionService;
+import org.openlmis.stockmanagement.service.ProgramFacilityTypePermissionService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -51,11 +52,13 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.util.Collections;
 import java.util.UUID;
 
-@SuppressWarnings("PMD.TooManyMethods")
 public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   private static final String VALID_REASON_API = "/api/validReasons";
   private static final String PROGRAM = "program";
   private static final String FACILITY_TYPE = "facilityType";
+
+  @MockBean
+  private ProgramFacilityTypePermissionService programFacilityTypePermissionService;
 
   @MockBean
   private ValidReasonAssignmentRepository reasonAssignmentRepository;
@@ -197,34 +200,14 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   }
 
   @Test
-  public void return_400_when_program_not_found() throws Exception {
+  public void return_400_when_home_facility_support_check_fails() throws Exception {
     //given
     //not exist in demo data
     UUID programId = randomUUID();
     UUID facilityTypeId = UUID.fromString("ac1d268b-ce10-455f-bf87-9c667da8f060");
 
-    doThrow(new ValidationMessageException("errorKey")).when(programFacilityTypeExistenceService)
-        .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
-
-    //when
-    ResultActions resultActions = mvc.perform(
-        get(VALID_REASON_API)
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param(PROGRAM, programId.toString())
-            .param(FACILITY_TYPE, facilityTypeId.toString()));
-
-    //then
-    resultActions.andExpect(status().isBadRequest());
-  }
-
-  @Test
-  public void return_400_when_facility_type_not_found() throws Exception {
-    //given
-    //not exist in demo data
-    UUID facilityTypeId = randomUUID();
-    UUID programId = UUID.fromString("dce17f2e-af3e-40ad-8e00-3496adef44c3");
-    doThrow(new ValidationMessageException("errorKey")).when(programFacilityTypeExistenceService)
-        .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
+    doThrow(new ValidationMessageException("errorKey")).when(programFacilityTypePermissionService)
+        .checkHomeFacilitySupport(programId, facilityTypeId);
 
     //when
     ResultActions resultActions = mvc.perform(

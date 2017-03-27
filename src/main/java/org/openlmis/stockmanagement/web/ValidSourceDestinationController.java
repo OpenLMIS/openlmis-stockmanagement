@@ -26,6 +26,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
+import org.openlmis.stockmanagement.service.ProgramFacilityTypePermissionService;
 import org.openlmis.stockmanagement.service.ValidDestinationService;
 import org.openlmis.stockmanagement.service.ValidSourceService;
 import org.slf4j.Logger;
@@ -49,6 +50,9 @@ public class ValidSourceDestinationController {
       LoggerFactory.getLogger(ValidSourceDestinationController.class);
 
   @Autowired
+  private ProgramFacilityTypePermissionService programFacilityTypePermissionService;
+
+  @Autowired
   private ValidSourceService validSourceService;
 
   @Autowired
@@ -67,6 +71,7 @@ public class ValidSourceDestinationController {
       @RequestParam UUID facilityType) {
     LOGGER.debug(format("Try to find valid destinations with program %s and facility type %s",
         program.toString(), facilityType.toString()));
+    programFacilityTypePermissionService.checkHomeFacilitySupport(program, facilityType);
     return new ResponseEntity<>(
         validDestinationService.findDestinations(program, facilityType), OK);
   }
@@ -104,6 +109,7 @@ public class ValidSourceDestinationController {
       @RequestParam UUID facilityType) {
     LOGGER.debug(format("Try to find valid sources with program %s and facility type %s",
         program.toString(), facilityType.toString()));
+    programFacilityTypePermissionService.checkHomeFacilitySupport(program, facilityType);
     return new ResponseEntity<>(
         validSourceService.findSources(program, facilityType), OK);
   }
