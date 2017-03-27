@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public abstract class BaseReferenceDataService<T> extends BaseCommunicationService {
+public abstract class BaseReferenceDataService<T> extends BaseCommunicationService<T> {
 
   private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -49,7 +49,7 @@ public abstract class BaseReferenceDataService<T> extends BaseCommunicationServi
    * @return Requesting reference data object.
    */
   public T findOne(UUID id) {
-    String url = getReferenceDataUrl() + getUrl() + id;
+    String url = getServiceUrl() + getUrl() + id;
 
     RestTemplate restTemplate = new RestTemplate();
     Map<String, String> params = new HashMap<>();
@@ -95,7 +95,7 @@ public abstract class BaseReferenceDataService<T> extends BaseCommunicationServi
   }
 
   <P> ResultDto<P> getValue(String resourceUrl, Map<String, Object> parameters, Class<P> type) {
-    String url = getReferenceDataUrl() + getUrl() + resourceUrl;
+    String url = getServiceUrl() + getUrl() + resourceUrl;
     Map<String, Object> params = new HashMap<>();
     params.putAll(parameters);
     params.put(ACCESS_TOKEN, obtainAccessToken());
@@ -113,7 +113,7 @@ public abstract class BaseReferenceDataService<T> extends BaseCommunicationServi
 
   private Collection<T> findAllWithMethod(String resourceUrl, Map<String, Object> uriParameters,
                                           Map<String, Object> payload, HttpMethod method) {
-    String url = getReferenceDataUrl() + getUrl() + resourceUrl;
+    String url = getServiceUrl() + getUrl() + resourceUrl;
     RestTemplate restTemplate = new RestTemplate();
 
     Map<String, Object> params = new HashMap<>();
@@ -136,12 +136,11 @@ public abstract class BaseReferenceDataService<T> extends BaseCommunicationServi
 
   protected abstract String getUrl();
 
-
   protected abstract Class<T> getResultClass();
 
   protected abstract Class<T[]> getArrayResultClass();
 
-  protected String getReferenceDataUrl() {
+  protected String getServiceUrl() {
     return referenceDataUrl;
   }
 

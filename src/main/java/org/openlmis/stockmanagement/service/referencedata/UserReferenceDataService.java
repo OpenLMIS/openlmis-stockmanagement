@@ -17,13 +17,12 @@ package org.openlmis.stockmanagement.service.referencedata;
 
 import org.openlmis.stockmanagement.dto.ResultDto;
 import org.openlmis.stockmanagement.dto.UserDto;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -56,12 +55,11 @@ public class UserReferenceDataService extends BaseReferenceDataService<UserDto> 
    * @return UserDto containing user's data, or null if such user was not found.
    */
   public UserDto findUser(String name) {
-    Map<String, Object> requestBody = new HashMap<>();
-    requestBody.put("username", name);
+    Map<String, Object> payload = new HashMap<>();
+    payload.put("username", name);
 
-    List<UserDto> users = new ArrayList<>(postFindAll("search", Collections.emptyMap(),
-            requestBody));
-    return users.isEmpty() ? null : users.get(0);
+    Page<UserDto> users = getPage("search", Collections.emptyMap(), payload);
+    return users.getContent().isEmpty() ? null : users.getContent().get(0);
   }
 
   /**

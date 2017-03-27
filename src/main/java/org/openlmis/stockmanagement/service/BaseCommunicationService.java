@@ -16,7 +16,10 @@
 package org.openlmis.stockmanagement.service;
 
 import org.apache.commons.codec.binary.Base64;
+import org.openlmis.stockmanagement.util.DynamicPageTypeReference;
+import org.openlmis.stockmanagement.util.PageImplRepresentation;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -29,10 +32,18 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class BaseCommunicationService {
+public abstract class BaseCommunicationService<T> {
   protected static final String ACCESS_TOKEN = "access_token";
 
   protected RestOperations restTemplate = new RestTemplate();
+
+  protected abstract String getServiceUrl();
+
+  protected abstract String getUrl();
+
+  protected abstract Class<T> getResultClass();
+
+  protected abstract Class<T[]> getArrayResultClass();
 
   @Value("${auth.server.clientId}")
   private String clientId;
@@ -76,4 +87,48 @@ public abstract class BaseCommunicationService {
     return builder.build(true).toUri();
   }
 
+  protected Page<T> getPage(String resourceUrl, Map<String, Object> parameters) {
+    return getPage(resourceUrl, parameters, null, HttpMethod.GET, getResultClass());
+  }
+
+  /**
+   * Return all reference data T objects for Page that need to be retrieved with POST request.
+   *
+   * @param resourceUrl Endpoint url.
+   * @param parameters  Map of query parameters.
+   * @param payload     body to include with the outgoing request.
+   * @return Page of reference data T objects.
+   */
+  protected Page<T> getPage(String resourceUrl, Map<String, Object> parameters, Object payload) {
+    return getPage(resourceUrl, parameters, payload, HttpMethod.POST, getResultClass());
+  }
+
+  protected <P> Page<P> getPage(String resourceUrl, Map<String, Object> parameters, Object payload,
+                                HttpMethod method, Class<P> type) {
+    String url = getServiceUrl() + getUrl() + resourceUrl;
+
+    Map<String, Object> params = new HashMap<>();
+    params.put(ACCESS_TOKEN, obtainAccessToken());
+    params.putAll(parameters);
+
+    ResponseEntity<PageImplRepresentation<P>> response;
+
+    if (HttpMethod.GET == method) {
+      response = restTemplate.exchange(
+              buildUri(url, params),
+              HttpMethod.GET,
+              null,
+              new DynamicPageTypeReference<>(type)
+      );
+    } else {
+      response = restTemplate.exchange(
+              buildUri(url, params),
+              HttpMethod.POST,
+              new HttpEntity<>(payload),
+              new DynamicPageTypeReference<>(type)
+      );
+    }
+
+    return response.getBody();
+  }
 }
