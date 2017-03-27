@@ -37,20 +37,14 @@ import java.util.UUID;
 public class PermissionService {
 
   public static final String STOCK_CARD_TEMPLATES_MANAGE = "STOCK_CARD_TEMPLATES_MANAGE";
-
+  public static final String STOCK_ORGANIZATIONS_MANAGE = "STOCK_ORGANIZATIONS_MANAGE";
   public static final String REASONS_MANAGE = "STOCK_CARD_LINE_ITEM_REASONS_MANAGE";
-
-  public static final String ORGANIZATIONS_MANAGE = "ORGANIZATIONS_MANAGE";
-
   public static final String STOCK_SOURCES_MANAGE = "STOCK_SOURCES_MANAGE";
-
   public static final String STOCK_DESTINATIONS_MANAGE = "STOCK_DESTINATIONS_MANAGE";
 
   public static final String STOCK_INVENTORIES_EDIT = "STOCK_INVENTORIES_EDIT";
-
   public static final String STOCK_ADJUST = "STOCK_ADJUST";
 
-  //assumption: if a user can view requisition then we assume this user can view stock card too.
   public static final String STOCK_CARDS_VIEW = "STOCK_CARDS_VIEW";
 
   @Autowired
@@ -120,7 +114,7 @@ public class PermissionService {
   }
 
   public void canManageOrganizations() {
-    hasPermission(ORGANIZATIONS_MANAGE, null, null, null);
+    hasPermission(STOCK_ORGANIZATIONS_MANAGE, null, null, null);
   }
 
   /**
