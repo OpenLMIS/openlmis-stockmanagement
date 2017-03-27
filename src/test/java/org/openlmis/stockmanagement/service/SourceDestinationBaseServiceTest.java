@@ -43,7 +43,6 @@ import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.FacilityDto;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
-import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.NodeRepository;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
@@ -51,7 +50,6 @@ import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentReposit
 import org.openlmis.stockmanagement.repository.ValidSourceAssignmentRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
-import org.openlmis.stockmanagement.utils.Message;
 
 import java.util.List;
 import java.util.UUID;
@@ -74,9 +72,6 @@ public class SourceDestinationBaseServiceTest {
 
   @Mock
   private ProgramFacilityTypeExistenceService programFacilityTypeExistenceService;
-
-  @Mock
-  private PermissionService permissionService;
 
   @Mock
   private ValidDestinationAssignmentRepository destinationRepository;
@@ -124,7 +119,6 @@ public class SourceDestinationBaseServiceTest {
     assertThat(foundDto.getProgramId(), is(programId));
     assertThat(foundDto.getFacilityTypeId(), is(facilityTypeId));
     assertThat(foundDto.getNode().getReferenceId(), is(sourceId));
-    verify(permissionService, times(1)).canManageStockSources();
     verify(programFacilityTypeExistenceService, times(1))
         .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
   }
@@ -222,7 +216,6 @@ public class SourceDestinationBaseServiceTest {
     assertThat(foundDto.getProgramId(), is(programId));
     assertThat(foundDto.getFacilityTypeId(), is(facilityTypeId));
     assertThat(foundDto.getNode().getReferenceId(), is(destinationId));
-    verify(permissionService, times(1)).canManageStockDestinations();
     verify(programFacilityTypeExistenceService, times(1))
         .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
   }
@@ -364,14 +357,6 @@ public class SourceDestinationBaseServiceTest {
     ValidSourceDestinationDto facility = validSources.get(1);
     assertThat(facility.getName(), is("Health Center"));
     assertThat(facility.getIsFreeTextAllowed(), is(false));
-  }
-
-  @Test(expected = PermissionMessageException.class)
-  public void should_throw_permission_exception_when_user_has_no_permission_to_delete_assignment()
-      throws Exception {
-    doThrow(new PermissionMessageException(new Message("key")))
-        .when(permissionService).canManageStockSources();
-    validSourceService.deleteSourceAssignmentById(randomUUID());
   }
 
   @Test(expected = ValidationMessageException.class)

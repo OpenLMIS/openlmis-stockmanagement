@@ -65,7 +65,7 @@ public class StockEventsController {
       throws InstantiationException, IllegalAccessException {
     LOGGER.debug("Try to create a stock event");
     rejectIfIssueOrReceive(eventDto);
-    permissionService.canEditPhysicalInventory(eventDto.getProgramId(), eventDto.getFacilityId());
+    permissionService.canMakeAdjustment(eventDto.getProgramId(), eventDto.getFacilityId());
     UUID createdEventId = stockEventProcessor.process(singletonList(eventDto)).get(0);
     return new ResponseEntity<>(createdEventId, CREATED);
   }

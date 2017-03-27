@@ -46,9 +46,6 @@ public class PermissionService {
 
   public static final String STOCK_DESTINATIONS_MANAGE = "STOCK_DESTINATIONS_MANAGE";
 
-  public static final String STOCK_CARD_LINE_ITEM_REASONS_VIEW
-      = "STOCK_CARD_LINE_ITEM_REASONS_VIEW";
-
   public static final String STOCK_INVENTORIES_EDIT = "STOCK_INVENTORIES_EDIT";
 
   public static final String STOCK_ADJUST = "STOCK_ADJUST";
@@ -61,6 +58,9 @@ public class PermissionService {
 
   @Autowired
   private UserReferenceDataService userReferenceDataService;
+
+  @Autowired
+  private ProgramFacilityTypePermissionService programFacilityTypePermissionService;
 
   /**
    * Checks if current user has permission to submit a stock card template.
@@ -123,10 +123,50 @@ public class PermissionService {
     hasPermission(ORGANIZATIONS_MANAGE, null, null, null);
   }
 
+  /**
+   * Check if user can view valid reasons. Admin with manage right can view all, regular users can
+   * only view the ones that match their home facility.
+   *
+   * @param program      program id.
+   * @param facilityType facility type id.
+   */
+  public void canViewValidReasons(UUID program, UUID facilityType) {
+    canViewStockAssignable(REASONS_MANAGE, program, facilityType);
+  }
+
+  /**
+   * Check if user can view valid sources. Admin with manage right can view all, regular users can
+   * only view the ones that match their home facility.
+   *
+   * @param program      program id.
+   * @param facilityType facility type id.
+   */
+  public void canViewValidSources(UUID program, UUID facilityType) {
+    canViewStockAssignable(STOCK_SOURCES_MANAGE, program, facilityType);
+  }
+
+  /**
+   * Check if user can view valid destinations. Admin with manage right can view all, regular users
+   * can only view the ones that match their home facility.
+   *
+   * @param program      program id.
+   * @param facilityType facility type id.
+   */
+  public void canViewValidDestinations(UUID program, UUID facilityType) {
+    canViewStockAssignable(STOCK_DESTINATIONS_MANAGE, program, facilityType);
+  }
+
   private void hasPermission(String rightName, UUID program, UUID facility, UUID warehouse) {
     ResultDto<Boolean> result = getRightResult(rightName, program, facility, warehouse);
     if (null == result || !result.getResult()) {
       throw new PermissionMessageException(new Message(ERROR_NO_FOLLOWING_PERMISSION, rightName));
+    }
+  }
+
+  private void canViewStockAssignable(String rightName, UUID program, UUID facilityType) {
+    ResultDto<Boolean> result = getRightResult(rightName, null, null, null);
+    if (null == result || !result.getResult()) {
+      programFacilityTypePermissionService.checkHomeFacilitySupport(program, facilityType);
     }
   }
 

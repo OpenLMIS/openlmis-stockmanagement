@@ -78,7 +78,7 @@ public class StockEventsControllerTest extends BaseWebTest {
     //given
     Mockito.doThrow(new PermissionMessageException(
         new Message(ERROR_NO_FOLLOWING_PERMISSION, STOCK_ADJUST)))
-        .when(permissionService).canEditPhysicalInventory(any(UUID.class), any(UUID.class));
+        .when(permissionService).canMakeAdjustment(any(UUID.class), any(UUID.class));
 
     //when
     ResultActions resultActions = mvc.perform(post(CREATE_STOCK_EVENT_API)

@@ -26,7 +26,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
-import org.openlmis.stockmanagement.service.ProgramFacilityTypePermissionService;
+import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.ValidDestinationService;
 import org.openlmis.stockmanagement.service.ValidSourceService;
 import org.slf4j.Logger;
@@ -50,7 +50,7 @@ public class ValidSourceDestinationController {
       LoggerFactory.getLogger(ValidSourceDestinationController.class);
 
   @Autowired
-  private ProgramFacilityTypePermissionService programFacilityTypePermissionService;
+  private PermissionService permissionService;
 
   @Autowired
   private ValidSourceService validSourceService;
@@ -71,7 +71,7 @@ public class ValidSourceDestinationController {
       @RequestParam UUID facilityType) {
     LOGGER.debug(format("Try to find valid destinations with program %s and facility type %s",
         program.toString(), facilityType.toString()));
-    programFacilityTypePermissionService.checkHomeFacilitySupport(program, facilityType);
+    permissionService.canViewValidDestinations(program, facilityType);
     return new ResponseEntity<>(
         validDestinationService.findDestinations(program, facilityType), OK);
   }
@@ -86,6 +86,8 @@ public class ValidSourceDestinationController {
   public ResponseEntity<ValidSourceDestinationDto> assignDestination(
       @RequestBody ValidDestinationAssignment assignment) {
     LOGGER.debug("Try to assign destinations");
+    permissionService.canManageStockDestinations();
+
     ValidSourceDestinationDto destinationDto = validDestinationService
         .findByProgramFacilityDestination(assignment);
     if (destinationDto != null) {
@@ -109,7 +111,7 @@ public class ValidSourceDestinationController {
       @RequestParam UUID facilityType) {
     LOGGER.debug(format("Try to find valid sources with program %s and facility type %s",
         program.toString(), facilityType.toString()));
-    programFacilityTypePermissionService.checkHomeFacilitySupport(program, facilityType);
+    permissionService.canViewValidDestinations(program, facilityType);
     return new ResponseEntity<>(
         validSourceService.findSources(program, facilityType), OK);
   }
@@ -124,6 +126,8 @@ public class ValidSourceDestinationController {
   public ResponseEntity<ValidSourceDestinationDto> assignSource(
       @RequestBody ValidSourceAssignment assignment) {
     LOGGER.debug("Try to assign source");
+    permissionService.canManageStockSources();
+
     ValidSourceDestinationDto foundAssignmentDto = validSourceService
         .findByProgramFacilitySource(assignment);
     if (foundAssignmentDto != null) {
@@ -142,6 +146,7 @@ public class ValidSourceDestinationController {
   @RequestMapping(value = "/validSources/{id}", method = DELETE)
   public ResponseEntity removeValidSourceAssignment(@PathVariable("id") UUID assignmentId) {
     LOGGER.debug(format("Try to remove source assignment %s.", assignmentId));
+    permissionService.canManageStockSources();
     validSourceService.deleteSourceAssignmentById(assignmentId);
     return new ResponseEntity(null, NO_CONTENT);
   }
@@ -155,6 +160,7 @@ public class ValidSourceDestinationController {
   @RequestMapping(value = "/validDestinations/{id}", method = DELETE)
   public ResponseEntity removeValidDestinationAssignment(@PathVariable("id") UUID assignmentId) {
     LOGGER.debug(format("Try to remove destination assignment %s.", assignmentId));
+    permissionService.canManageStockDestinations();
     validDestinationService.deleteDestinationAssignmentById(assignmentId);
     return new ResponseEntity(null, NO_CONTENT);
   }

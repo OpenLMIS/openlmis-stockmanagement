@@ -31,9 +31,6 @@ import java.util.UUID;
 public class ValidSourceService extends SourceDestinationBaseService {
 
   @Autowired
-  private PermissionService permissionService;
-
-  @Autowired
   private ValidSourceAssignmentRepository validSourceRepository;
 
   /**
@@ -66,7 +63,6 @@ public class ValidSourceService extends SourceDestinationBaseService {
    */
   public ValidSourceDestinationDto findByProgramFacilitySource(
       ValidSourceAssignment assignment) {
-    permissionService.canManageStockSources();
     return findAssignment(assignment, validSourceRepository);
   }
 
@@ -76,7 +72,6 @@ public class ValidSourceService extends SourceDestinationBaseService {
    * @param assignmentId source assignment Id
    */
   public void deleteSourceAssignmentById(UUID assignmentId) {
-    permissionService.canManageStockSources();
     doDelete(assignmentId, validSourceRepository, ERROR_SOURCE_ASSIGNMENT_NOT_FOUND);
   }
 

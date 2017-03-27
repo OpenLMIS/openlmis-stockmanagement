@@ -31,9 +31,6 @@ import java.util.UUID;
 public class ValidDestinationService extends SourceDestinationBaseService {
 
   @Autowired
-  private PermissionService permissionService;
-
-  @Autowired
   private ValidDestinationAssignmentRepository validDestinationRepository;
 
   /**
@@ -66,7 +63,6 @@ public class ValidDestinationService extends SourceDestinationBaseService {
    */
   public ValidSourceDestinationDto findByProgramFacilityDestination(
       ValidDestinationAssignment assignment) {
-    permissionService.canManageStockDestinations();
     return findAssignment(assignment, validDestinationRepository);
   }
 
@@ -76,7 +72,6 @@ public class ValidDestinationService extends SourceDestinationBaseService {
    * @param assignmentId destination assignment Id
    */
   public void deleteDestinationAssignmentById(UUID assignmentId) {
-    permissionService.canManageStockDestinations();
     doDelete(assignmentId, validDestinationRepository, ERROR_DESTINATION_ASSIGNMENT_NOT_FOUND);
   }
 

@@ -18,7 +18,10 @@ package org.openlmis.stockmanagement.service;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
+import static org.openlmis.stockmanagement.service.PermissionService.REASONS_MANAGE;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARD_TEMPLATES_MANAGE;
+import static org.openlmis.stockmanagement.service.PermissionService.STOCK_DESTINATIONS_MANAGE;
+import static org.openlmis.stockmanagement.service.PermissionService.STOCK_SOURCES_MANAGE;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -67,8 +70,6 @@ public class PermissionServiceTest {
 
   @Before
   public void setUp() {
-
-
     when(user.getId()).thenReturn(userId);
 
     when(manageStockCardTemplatesRight.getId()).thenReturn(manageStockCardTemplatesRightId);
@@ -77,6 +78,10 @@ public class PermissionServiceTest {
 
     when(authenticationHelper.getRight(STOCK_CARD_TEMPLATES_MANAGE))
         .thenReturn(manageStockCardTemplatesRight);
+
+    when(authenticationHelper.getRight(STOCK_SOURCES_MANAGE)).thenReturn(new RightDto());
+    when(authenticationHelper.getRight(STOCK_DESTINATIONS_MANAGE)).thenReturn(new RightDto());
+    when(authenticationHelper.getRight(REASONS_MANAGE)).thenReturn(new RightDto());
   }
 
   @Test
@@ -94,8 +99,19 @@ public class PermissionServiceTest {
     permissionService.canCreateStockCardTemplate();
   }
 
-  private void hasRight(UUID rightId, boolean assign) {
-    ResultDto<Boolean> resultDto = new ResultDto<>(assign);
+  @Test
+  public void admin_can_view_all_valid_reasons_sources_destinations() throws Exception {
+    //given
+    hasRight(null, true);//null right id is in the mocked right dtos
+
+    //when
+    permissionService.canViewValidReasons(UUID.randomUUID(), UUID.randomUUID());
+    permissionService.canViewValidSources(UUID.randomUUID(), UUID.randomUUID());
+    permissionService.canViewValidDestinations(UUID.randomUUID(), UUID.randomUUID());
+  }
+
+  private void hasRight(UUID rightId, boolean hasRight) {
+    ResultDto<Boolean> resultDto = new ResultDto<>(hasRight);
     when(userReferenceDataService
         .hasRight(userId, rightId, null, null, null)
     ).thenReturn(resultDto);

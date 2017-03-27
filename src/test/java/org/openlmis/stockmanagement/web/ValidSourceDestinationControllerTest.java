@@ -35,7 +35,7 @@ import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.service.ProgramFacilityTypePermissionService;
+import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.ValidDestinationService;
 import org.openlmis.stockmanagement.service.ValidSourceService;
 import org.openlmis.stockmanagement.utils.Message;
@@ -56,13 +56,13 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
   private static final String NODE_REFERENCE_ID_EXP = "$.node.referenceId";
 
   @MockBean
-  private ProgramFacilityTypePermissionService programFacilityTypePermissionService;
-
-  @MockBean
   private ValidSourceService validSourceService;
 
   @MockBean
   private ValidDestinationService validDestinationService;
+
+  @MockBean
+  private PermissionService permissionService;
 
   @Test
   public void should_get_valid_sources_or_destinations_by_program_and_facilityType()
@@ -90,37 +90,15 @@ public class ValidSourceDestinationControllerTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_400_when_program_and_facilityType_not_found_in_ref_data()
+  public void should_return_400_when_permission_check_fails()
       throws Exception {
     //given
     UUID programId = randomUUID();
     UUID facilityTypeId = randomUUID();
     doThrow(new ValidationMessageException(
         new Message(ERROR_PROGRAM_NOT_FOUND, programId.toString())))
-        .when(validDestinationService)
-        .findDestinations(programId, facilityTypeId);
-
-    //when
-    ResultActions resultActions = mvc.perform(get(API_VALID_DESTINATIONS)
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .param(PROGRAM, programId.toString())
-        .param(FACILITY_TYPE, facilityTypeId.toString()));
-
-    //then
-    resultActions.andExpect(status().isBadRequest());
-  }
-
-  @Test
-  public void should_return_400_when_home_facility_check_fails()
-      throws Exception {
-    //given
-    UUID programId = randomUUID();
-    UUID facilityTypeId = randomUUID();
-
-    doThrow(new ValidationMessageException(
-        new Message("some error", programId.toString())))
-        .when(programFacilityTypePermissionService)
-        .checkHomeFacilitySupport(programId, facilityTypeId);
+        .when(permissionService)
+        .canViewValidDestinations(programId, facilityTypeId);
 
     //when
     ResultActions resultActions = mvc.perform(get(API_VALID_DESTINATIONS)
