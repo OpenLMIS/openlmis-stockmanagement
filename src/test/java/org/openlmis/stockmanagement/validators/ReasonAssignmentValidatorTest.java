@@ -28,7 +28,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.FacilityDto;
 import org.openlmis.stockmanagement.dto.FacilityTypeDto;
-import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventDto2;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
@@ -46,12 +46,12 @@ public class ReasonAssignmentValidatorTest {
   private ValidReasonAssignmentRepository validReasonAssignmentRepository;
 
   @InjectMocks
-  private ReasonAssignmentValidator reasonAssignmentValidator;
+  private ReasonAssignmentValidator2 reasonAssignmentValidator;
 
   @Test
   public void should_not_throw_error_if_event_has_no_reason_id() throws Exception {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    StockEventDto2 stockEventDto = StockEventDtoBuilder.createStockEventDto2();
     stockEventDto.setReasonId(null);
     stockEventDto.setContext(StockEventProcessContext.builder()
         .facility(createFacilityDto()).build());
@@ -69,7 +69,7 @@ public class ReasonAssignmentValidatorTest {
     expectedEx.expectMessage(ERROR_EVENT_REASON_NOT_IN_VALID_LIST);
 
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    StockEventDto2 stockEventDto = StockEventDtoBuilder.createStockEventDto2();
     stockEventDto.setReasonId(UUID.randomUUID());
 
     FacilityDto facilityDto = createFacilityDto();
@@ -98,7 +98,7 @@ public class ReasonAssignmentValidatorTest {
   public void should_not_throw_error_if_event_has_facility_id_not_in_ref_data()
       throws Exception {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    StockEventDto2 stockEventDto = StockEventDtoBuilder.createStockEventDto2();
     stockEventDto.setContext(new StockEventProcessContext());
 
     //when
@@ -111,7 +111,7 @@ public class ReasonAssignmentValidatorTest {
   public void should_not_throw_error_if_event_has_no_program_id()
       throws Exception {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    StockEventDto2 stockEventDto = StockEventDtoBuilder.createStockEventDto2();
     stockEventDto.setContext(new StockEventProcessContext());
     stockEventDto.setProgramId(null);
 
