@@ -15,14 +15,13 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
+import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto2;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -33,10 +32,10 @@ import org.mockito.Mockito;
 import org.openlmis.stockmanagement.BaseTest;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
-import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventDto2;
 import org.openlmis.stockmanagement.dto.UserDto;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
-import org.openlmis.stockmanagement.repository.StockEventsRepository;
+import org.openlmis.stockmanagement.repository.StockEventsRepository2;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -51,16 +50,16 @@ import java.util.UUID;
 public class StockEventProcessorTest extends BaseTest {
 
   @MockBean
-  private StockEventValidationsService stockEventValidationsService;
+  private StockEventValidationsService2 stockEventValidationsService;
 
   @MockBean
   private StockEventProcessContextBuilder contextBuilder;
 
   @Autowired
-  private StockEventProcessor stockEventProcessor;
+  private StockEventProcessor2 stockEventProcessor;
 
   @Autowired
-  private StockEventsRepository stockEventsRepository;
+  private StockEventsRepository2 stockEventsRepository;
 
   @Autowired
   private StockCardRepository stockCardRepository;
@@ -76,7 +75,7 @@ public class StockEventProcessorTest extends BaseTest {
     StockEventProcessContext eventProcessContext = new StockEventProcessContext();
     eventProcessContext.setCurrentUser(userDto);
 
-    when(contextBuilder.buildContext(any(StockEventDto.class)))
+    when(contextBuilder.buildContext2(any(StockEventDto2.class)))
         .thenReturn(eventProcessContext);
   }
 
@@ -90,7 +89,7 @@ public class StockEventProcessorTest extends BaseTest {
   public void should_not_save_events_if_anything_goes_wrong_in_validations_service()
       throws Exception {
     //given
-    StockEventDto stockEventDto = createStockEventDto();
+    StockEventDto2 stockEventDto = createStockEventDto2();
 
     Mockito.doThrow(new RuntimeException("something wrong from validations service"))
         .when(stockEventValidationsService)
@@ -98,7 +97,7 @@ public class StockEventProcessorTest extends BaseTest {
 
     //when
     try {
-      stockEventProcessor.process(singletonList(stockEventDto));
+      stockEventProcessor.process(stockEventDto);
     } catch (RuntimeException ex) {
       //then
       assertEventAndCardAndLineItemTableSize(0);
@@ -113,8 +112,8 @@ public class StockEventProcessorTest extends BaseTest {
     //when
     assertEventAndCardAndLineItemTableSize(0);
 
-    StockEventDto stockEventDto = createStockEventDto();
-    stockEventProcessor.process(singletonList(stockEventDto));
+    StockEventDto2 stockEventDto = createStockEventDto2();
+    stockEventProcessor.process(stockEventDto);
 
     //then
     assertEventAndCardAndLineItemTableSize(1);

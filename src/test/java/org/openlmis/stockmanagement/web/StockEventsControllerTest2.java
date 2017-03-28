@@ -15,7 +15,6 @@
 
 package org.openlmis.stockmanagement.web;
 
-import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
@@ -57,7 +56,7 @@ public class StockEventsControllerTest2 extends BaseWebTest {
     //given
     UUID uuid = UUID.randomUUID();
     when(stockEventProcessor.process(any(StockEventDto2.class)))
-        .thenReturn(singletonList(uuid));
+        .thenReturn(uuid);
 
     //when
     StockEventDto2 stockEventDto = createStockEventDto2();

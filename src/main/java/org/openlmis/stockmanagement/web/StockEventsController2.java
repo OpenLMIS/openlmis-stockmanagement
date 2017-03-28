@@ -65,7 +65,7 @@ public class StockEventsController2 {
     LOGGER.debug("Try to create a stock event");
     rejectIfIssueOrReceive(eventDto);
     permissionService.canMakeAdjustment(eventDto.getProgramId(), eventDto.getFacilityId());
-    UUID createdEventId = stockEventProcessor.process(eventDto).get(0);
+    UUID createdEventId = stockEventProcessor.process(eventDto);
     return new ResponseEntity<>(createdEventId, CREATED);
   }
 

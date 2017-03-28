@@ -15,10 +15,14 @@
 
 package org.openlmis.stockmanagement.service;
 
+import org.openlmis.stockmanagement.domain.event.StockEvent2;
 import org.openlmis.stockmanagement.dto.StockEventDto2;
+import org.openlmis.stockmanagement.repository.StockEventsRepository2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -28,9 +32,45 @@ import java.util.UUID;
 @Service
 public class StockEventProcessor2 {
 
-  public List<UUID> process(StockEventDto2 eventDto)
+  private static final Logger LOGGER = LoggerFactory.getLogger(StockEventProcessor.class);
+
+  @Autowired
+  private StockEventProcessContextBuilder contextBuilder;
+
+  @Autowired
+  private StockEventValidationsService2 stockEventValidationsService;
+
+  @Autowired
+  private StockCardService2 stockCardService;
+
+  @Autowired
+  private StockEventsRepository2 stockEventsRepository;
+
+  /**
+   * Validate and persist event and create stock card and line items from it.
+   *
+   * @param eventDto stock event dto.
+   * @return the persisted event ids.
+   */
+
+  public UUID process(StockEventDto2 eventDto)
       throws IllegalAccessException, InstantiationException {
-    return null;
+    eventDto.setContext(contextBuilder.buildContext2(eventDto));
+    stockEventValidationsService.validate(eventDto);
+    return saveEventAndGenerateLineItems(eventDto);
+  }
+
+  private UUID saveEventAndGenerateLineItems(StockEventDto2 eventDto)
+      throws InstantiationException, IllegalAccessException {
+    UUID currentUserId = eventDto.getContext().getCurrentUser().getId();
+
+    StockEvent2 stockEvent = eventDto.toEvent(currentUserId);
+    UUID savedEventId = stockEventsRepository.save(stockEvent).getId();
+    LOGGER.debug("Saved stock event with id " + savedEventId);
+
+    stockCardService.saveFromEvent(eventDto, savedEventId, currentUserId);
+
+    return savedEventId;
   }
 
 }

@@ -81,7 +81,7 @@ public class StockCardService2 extends StockCardBaseService {
       stockCardLineItemRepository.save(lineItem);
     }
 
-    LOGGER.debug("Stock card line item(s) saved");
+    LOGGER.debug("Stock cards and line items saved");
   }
 
   /**
