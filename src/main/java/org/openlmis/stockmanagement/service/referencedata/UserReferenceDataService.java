@@ -55,8 +55,7 @@ public class UserReferenceDataService extends BaseReferenceDataService<UserDto> 
    * @return UserDto containing user's data, or null if such user was not found.
    */
   public UserDto findUser(String name) {
-    Map<String, Object> payload = new HashMap<>();
-    payload.put("username", name);
+    Map<String, Object> payload = Collections.singletonMap("username", name);
 
     Page<UserDto> users = getPage("search", Collections.emptyMap(), payload);
     return users.getContent().isEmpty() ? null : users.getContent().get(0);
