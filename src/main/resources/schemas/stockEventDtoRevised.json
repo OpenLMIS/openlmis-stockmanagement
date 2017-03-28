@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "sourceId": {
+      "type": "string",
+      "description": "Indicates where orderables are received from. Can not be present along with destination id."
+    },
+    "facilityId": {
+      "type": "string",
+      "description": "Part of identifier of stock card. Indicates in which facility this event occurred."
+    },
+    "signature": {
+      "type": "string",
+      "description": "The signature of the operator."
+    },
+    "documentNumber": {
+      "type": "string",
+      "description": ""
+    },
+    "destinationId": {
+      "type": "string",
+      "description": "During the 'ISSUE' event, destinationId indicates where orderables are issued to. Can not be present along with source id."
+    },
+    "destinationFreeText": {
+      "type": "string",
+      "description": "Remark of the destination. Only allowed when destination id is present and destination id does not point to a facility in ref-data."
+    },
+    "reasonId": {
+      "type": "string",
+      "description": "Allowed for 'ISSUE', 'RECEIVE' and 'ADJUSTMENT' events, not allowed for 'PHYSICAL INVENTORY' events."
+    },
+    "reasonFreeText": {
+      "type": "string",
+      "description": "Remark of reason. Only allowed when reason id is present and the reason is configured by implementer or admin to allow free text."
+    },
+    "sourceFreeText": {
+      "type": "string",
+      "description": "Remark of the source. Only allowed when source id is present and source id does not point to a facility in ref-data."
+    },
+    "programId": {
+      "type": "string",
+      "description": "Part of identifier of stock card. Indicates under which program the target stock card is."
+    },
+    "occurredDate": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The date and time(including time zone) when this event occurred"
+    },
+    "lineItems": {
+      "type": "array",
+      "title": "Line items of stock event, each of a different orderable.",
+      "required": true,
+      "items": {
+        "type": "object",
+        "title": "Stock event line item",
+        "$ref": "stockEventLineItemDto"
+      }
+    }
+  },
+  "required": [
+    "facilityId",
+    "programId",
+    "lineItems",
+    "occurredDate"
+  ]
+}

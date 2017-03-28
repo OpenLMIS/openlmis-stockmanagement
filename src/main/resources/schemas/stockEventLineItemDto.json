@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Line item of a stock event",
+  "properties": {
+    "orderableId": {
+      "type": "string",
+      "title": "Orderable id",
+      "description": "Indicates which orderable this line item is for.",
+      "required": true
+    },
+    "quantity": {
+      "type": "integer",
+      "description": "Indicates quantity of movement. Not allowed to be negative",
+      "required": true
+    }
+  }
+}
