@@ -26,7 +26,7 @@ import org.openlmis.stockmanagement.BaseTest;
 import org.openlmis.stockmanagement.domain.adjustment.ReasonCategory;
 import org.openlmis.stockmanagement.domain.adjustment.ReasonType;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
-import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventDto2;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
@@ -42,7 +42,7 @@ import java.util.UUID;
 public class AdjustmentReasonValidatorTest extends BaseTest {
 
   @Autowired
-  private AdjustmentReasonValidator adjustmentReasonValidator;
+  private AdjustmentReasonValidator2 adjustmentReasonValidator;
 
   @Autowired
   private StockCardLineItemReasonRepository reasonRepository;
@@ -61,7 +61,7 @@ public class AdjustmentReasonValidatorTest extends BaseTest {
         .isFreeTextAllowed(true)
         .name("Balance Adjustment")
         .build();
-    StockEventDto stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
+    StockEventDto2 stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto2();
     stockEventDto.setReasonId(reasonRepository.save(reason).getId());
 
     expectedEx.expect(ValidationMessageException.class);
@@ -84,7 +84,7 @@ public class AdjustmentReasonValidatorTest extends BaseTest {
         .name("Credit Ad_hoc")
         .isFreeTextAllowed(false)
         .build();
-    StockEventDto stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
+    StockEventDto2 stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto2();
     stockEventDto.setReasonId(reasonRepository.save(reason).getId());
 
     expectedEx.expect(ValidationMessageException.class);
@@ -99,7 +99,7 @@ public class AdjustmentReasonValidatorTest extends BaseTest {
   public void should_not_throw_exception_if_event_has_no_source_destination_reason_id()
       throws Exception {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
+    StockEventDto2 stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto2();
     stockEventDto.setReasonId(null);
 
     //when
@@ -110,7 +110,7 @@ public class AdjustmentReasonValidatorTest extends BaseTest {
   public void should_not_throw_error_for_event_with_no_source_destination_and_reason_not_in_db()
       throws Exception {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
+    StockEventDto2 stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto2();
     stockEventDto.setReasonId(UUID.randomUUID());
 
     //when
@@ -120,7 +120,7 @@ public class AdjustmentReasonValidatorTest extends BaseTest {
   @Test
   public void should_not_throw_error_for_event_with_no_reason_id() throws Exception {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    StockEventDto2 stockEventDto = StockEventDtoBuilder.createStockEventDto2();
     stockEventDto.setReasonId(null);
 
     //when

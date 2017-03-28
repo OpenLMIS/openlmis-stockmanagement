@@ -96,4 +96,16 @@ public class StockEventDtoBuilder {
     stockEventDto.setDestinationId(null);
     return stockEventDto;
   }
+
+  /**
+   * Create stock event dto object without source and destination for testing.
+   *
+   * @return created dto object.
+   */
+  public static StockEventDto2 createNoSourceDestinationStockEventDto2() {
+    StockEventDto2 stockEventDto = createStockEventDto2();
+    stockEventDto.setSourceId(null);
+    stockEventDto.setDestinationId(null);
+    return stockEventDto;
+  }
 }
