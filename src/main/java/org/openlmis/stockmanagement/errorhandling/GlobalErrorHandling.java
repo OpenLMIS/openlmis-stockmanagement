@@ -19,7 +19,7 @@ import org.openlmis.stockmanagement.exception.AuthenticationException;
 import org.openlmis.stockmanagement.exception.JasperReportViewException;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.service.referencedata.ReferenceDataRetrievalException;
+import org.openlmis.stockmanagement.service.DataRetrievalException;
 import org.openlmis.stockmanagement.util.ErrorResponse;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.http.HttpStatus;
@@ -48,10 +48,10 @@ public class GlobalErrorHandling extends AbstractErrorHandling {
     return getLocalizedMessage(ex);
   }
 
-  @ExceptionHandler(ReferenceDataRetrievalException.class)
+  @ExceptionHandler(DataRetrievalException.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   @ResponseBody
-  public ErrorResponse handleRefDataException(ReferenceDataRetrievalException ex) {
+  public ErrorResponse handleRefDataException(DataRetrievalException ex) {
     return logErrorAndRespond("Error fetching from reference data", ex);
   }
 

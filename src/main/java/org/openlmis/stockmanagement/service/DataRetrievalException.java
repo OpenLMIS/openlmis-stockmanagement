@@ -13,7 +13,7 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.service.referencedata;
+package org.openlmis.stockmanagement.service;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -22,7 +22,7 @@ import org.springframework.http.HttpStatus;
  * Signals we were unable to retrieve reference data
  * due to a communication error.
  */
-public class ReferenceDataRetrievalException extends RuntimeException {
+public class DataRetrievalException extends RuntimeException {
 
   @Getter
   private String resource;
@@ -39,8 +39,8 @@ public class ReferenceDataRetrievalException extends RuntimeException {
    * @param status the http status that was returned
    * @param response the response from referencedata service
    */
-  public ReferenceDataRetrievalException(String resource,
-                                         HttpStatus status, String response) {
+  public DataRetrievalException(String resource,
+                                HttpStatus status, String response) {
     super(String.format("Unable to retrieve %s. Error code: %d, response message: %s",
             resource, status.value(), response));
     this.resource = resource;
