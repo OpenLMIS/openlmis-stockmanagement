@@ -29,10 +29,10 @@ import org.openlmis.stockmanagement.domain.adjustment.ReasonCategory;
 import org.openlmis.stockmanagement.domain.adjustment.ReasonType;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventDto2;
-import org.openlmis.stockmanagement.dto.StockEventLineItem;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;

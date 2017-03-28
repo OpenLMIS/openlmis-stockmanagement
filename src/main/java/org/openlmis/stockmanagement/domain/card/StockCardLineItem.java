@@ -29,10 +29,11 @@ import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.adjustment.ReasonType;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.domain.event.StockEvent2;
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventDto2;
-import org.openlmis.stockmanagement.dto.StockEventLineItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,8 +73,12 @@ public class StockCardLineItem extends BaseEntity {
   private StockCard stockCard;
 
   @ManyToOne()
-  @JoinColumn(nullable = false)
+  @JoinColumn(nullable = true)
   private StockEvent originEvent;
+
+  @ManyToOne()
+  @JoinColumn(nullable = true)
+  private StockEvent2 originEvent2;
 
   @Column(nullable = false)
   private Integer quantity;
@@ -125,6 +130,7 @@ public class StockCardLineItem extends BaseEntity {
     StockCardLineItem lineItem = new StockCardLineItem(
         stockCard,
         fromId(savedEventId, StockEvent.class),
+        null,
         eventDto.getQuantity(),
         fromId(eventDto.getReasonId(), StockCardLineItemReason.class),
         eventDto.getSourceFreeText(), eventDto.getDestinationFreeText(),
@@ -153,7 +159,8 @@ public class StockCardLineItem extends BaseEntity {
       throws InstantiationException, IllegalAccessException {
     StockCardLineItem cardLineItem = new StockCardLineItem(
         stockCard,
-        fromId(savedEventId, StockEvent.class),
+        null,
+        fromId(savedEventId, StockEvent2.class),
         eventLineItem.getQuantity(),
         fromId(eventDto.getReasonId(), StockCardLineItemReason.class),
         eventDto.getSourceFreeText(), eventDto.getDestinationFreeText(),

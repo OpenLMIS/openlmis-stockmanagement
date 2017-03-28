@@ -24,8 +24,8 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ORDERABL
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_PROGRAM_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_QUANTITY_INVALID;
 
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto2;
-import org.openlmis.stockmanagement.dto.StockEventLineItem;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.stereotype.Component;
@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-@Component(value = "MandatoryFieldsValidator")
+@Component(value = "MandatoryFieldsValidator2")
 public class MandatoryFieldsValidator2 implements StockEventValidator2 {
 
   @Override

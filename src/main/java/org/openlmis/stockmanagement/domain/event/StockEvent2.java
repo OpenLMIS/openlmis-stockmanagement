@@ -15,27 +15,25 @@
 
 package org.openlmis.stockmanagement.domain.event;
 
+import static javax.persistence.CascadeType.ALL;
+
 import org.openlmis.stockmanagement.domain.BaseEntity;
-import org.openlmis.stockmanagement.domain.JsonBlobConverter;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.movement.Node;
-import org.openlmis.stockmanagement.dto.StockEventLineItem;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -79,9 +77,6 @@ public class StockEvent2 extends BaseEntity {
 
   private String documentNumber;
 
-  @Column(columnDefinition = "jsonb")
-  @Convert(converter = JsonBlobConverter.class)
-  @Getter
-  @Setter
+  @OneToMany(cascade = ALL, mappedBy = "stockEvent")
   private List<StockEventLineItem> lineItems;
 }

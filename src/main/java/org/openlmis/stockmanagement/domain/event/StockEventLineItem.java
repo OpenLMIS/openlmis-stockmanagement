@@ -13,14 +13,27 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.dto;
+package org.openlmis.stockmanagement.domain.event;
+
+import org.openlmis.stockmanagement.domain.BaseEntity;
 
 import lombok.Data;
 
 import java.util.UUID;
 
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
 @Data
-public class StockEventLineItem {
+@Entity
+@Table(name = "stock_event_line_items", schema = "stockmanagement")
+public class StockEventLineItem extends BaseEntity {
   private Integer quantity;
   private UUID orderableId;
+
+  @ManyToOne()
+  @JoinColumn(nullable = false)
+  private StockEvent2 stockEvent;
 }

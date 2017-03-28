@@ -21,8 +21,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.testutils.DatesUtil.oneHourEarlier;
-import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
+import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto2;
 
 import org.junit.After;
 import org.junit.Test;
@@ -30,20 +29,19 @@ import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.BaseTest;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
-import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.domain.event.StockEvent2;
 import org.openlmis.stockmanagement.dto.FacilityDto;
 import org.openlmis.stockmanagement.dto.OrderableDto;
 import org.openlmis.stockmanagement.dto.ProgramDto;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockCardLineItemDto;
-import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventDto2;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
-import org.openlmis.stockmanagement.repository.StockEventsRepository;
+import org.openlmis.stockmanagement.repository.StockEventsRepository2;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
-import org.openlmis.stockmanagement.testutils.DatesUtil;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +49,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -60,10 +57,10 @@ import java.util.UUID;
 public class StockCardServiceTest extends BaseTest {
 
   @Autowired
-  private StockCardService stockCardService;
+  private StockCardService2 stockCardService;
 
   @Autowired
-  private StockEventsRepository stockEventsRepository;
+  private StockEventsRepository2 stockEventsRepository;
 
   @Autowired
   private StockCardRepository stockCardRepository;
@@ -91,24 +88,25 @@ public class StockCardServiceTest extends BaseTest {
       throws Exception {
     //given
     UUID userId = UUID.randomUUID();
-    StockEventDto stockEventDto = createStockEventDto();
-    StockEvent savedEvent = save(stockEventDto, userId);
+    StockEventDto2 stockEventDto = createStockEventDto2();
+    StockEvent2 savedEvent = save(stockEventDto, userId);
 
     //when
     stockCardService.saveFromEvent(stockEventDto, savedEvent.getId(), userId);
 
     //then
-    StockCard savedCard = stockCardRepository.findByOriginEvent(savedEvent);
+    StockCard savedCard = stockCardRepository.findByOriginEvent2(savedEvent);
     StockCardLineItem firstLineItem = savedCard.getLineItems().get(0);
 
     assertThat(firstLineItem.getUserId(), is(userId));
     assertThat(firstLineItem.getSource().isRefDataFacility(), is(true));
     assertThat(firstLineItem.getDestination().isRefDataFacility(), is(false));
 
-    assertThat(firstLineItem.getStockCard().getOriginEvent().getId(), is(savedEvent.getId()));
+    assertThat(firstLineItem.getStockCard().getOriginEvent2().getId(), is(savedEvent.getId()));
     assertThat(firstLineItem.getStockCard().getFacilityId(), is(savedEvent.getFacilityId()));
     assertThat(firstLineItem.getStockCard().getProgramId(), is(savedEvent.getProgramId()));
-    assertThat(firstLineItem.getStockCard().getOrderableId(), is(savedEvent.getOrderableId()));
+    UUID orderableId = savedEvent.getLineItems().get(0).getOrderableId();
+    assertThat(firstLineItem.getStockCard().getOrderableId(), is(orderableId));
   }
 
   @Test
@@ -116,28 +114,29 @@ public class StockCardServiceTest extends BaseTest {
       throws Exception {
     //given
     //1. there is an existing event that caused a stock card to exist
-    StockEventDto existingEventDto = createStockEventDto();
-    StockEvent existingEvent = save(existingEventDto, UUID.randomUUID());
+    StockEventDto2 existingEventDto = createStockEventDto2();
+    StockEvent2 existingEvent = save(existingEventDto, UUID.randomUUID());
+    UUID orderableId = existingEventDto.getLineItems().get(0).getOrderableId();
 
     //2. and there is a new event coming
     UUID userId = UUID.randomUUID();
-    StockEventDto newEventDto = createStockEventDto();
+    StockEventDto2 newEventDto = createStockEventDto2();
     newEventDto.setProgramId(existingEventDto.getProgramId());
     newEventDto.setFacilityId(existingEventDto.getFacilityId());
-    newEventDto.setOrderableId(existingEventDto.getOrderableId());
+    newEventDto.getLineItems().get(0).setOrderableId(orderableId);
 
     //when
     long cardAmountBeforeSave = stockCardRepository.count();
-    StockEvent savedNewEvent = save(newEventDto, userId);
+    StockEvent2 savedNewEvent = save(newEventDto, userId);
     long cardAmountAfterSave = stockCardRepository.count();
 
     //then
-    StockCard savedCard = stockCardRepository.findByOriginEvent(existingEvent);
+    StockCard savedCard = stockCardRepository.findByOriginEvent2(existingEvent);
     List<StockCardLineItem> lineItems = savedCard.getLineItems();
     StockCardLineItem latestLineItem = lineItems.get(lineItems.size() - 1);
 
     assertThat(cardAmountAfterSave, is(cardAmountBeforeSave));
-    assertThat(latestLineItem.getOriginEvent().getId(), is(savedNewEvent.getId()));
+    assertThat(latestLineItem.getOriginEvent2().getId(), is(savedNewEvent.getId()));
     assertThat(latestLineItem.getStockCard().getId(), is(savedCard.getId()));
     assertThat(latestLineItem.getUserId(), is(userId));
   }
@@ -147,7 +146,7 @@ public class StockCardServiceTest extends BaseTest {
       throws Exception {
     //given
     UUID userId = UUID.randomUUID();
-    StockEventDto stockEventDto = createStockEventDto();
+    StockEventDto2 stockEventDto = createStockEventDto2();
 
     //1. mock ref data service
     FacilityDto cardFacility = new FacilityDto();
@@ -162,14 +161,15 @@ public class StockCardServiceTest extends BaseTest {
 
     when(programReferenceDataService.findOne(stockEventDto.getProgramId()))
         .thenReturn(programDto);
-    when(orderableReferenceDataService.findOne(stockEventDto.getOrderableId()))
+    when(orderableReferenceDataService
+        .findOne(stockEventDto.getLineItems().get(0).getOrderableId()))
         .thenReturn(orderableDto);
 
     //2. there is an existing stock card with line items
-    StockEvent savedEvent = save(stockEventDto, userId);
+    StockEvent2 savedEvent = save(stockEventDto, userId);
 
     //when
-    StockCard savedCard = stockCardRepository.findByOriginEvent(savedEvent);
+    StockCard savedCard = stockCardRepository.findByOriginEvent2(savedEvent);
     StockCardDto foundCardDto = stockCardService.findStockCardById(savedCard.getId());
 
     //then
@@ -183,51 +183,19 @@ public class StockCardServiceTest extends BaseTest {
   }
 
   @Test
-  public void should_order_line_items_by_occurred_then_processed() throws Exception {
-    //given
-    ZonedDateTime baseDate = DatesUtil.getBaseDateTime();
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
-
-    //1 event
-    stockEventDto.setOccurredDate(baseDate);
-
-    //2 event
-    stockEventDto.setOccurredDate(baseDate);
-
-    //3 event
-    stockEventDto.setOccurredDate(oneHourEarlier(baseDate));
-
-    //save them in the reverse order, so that processed date order is 3,2,1
-    final StockEvent event3 = save(stockEventDto, UUID.randomUUID());
-    final StockEvent event2 = save(stockEventDto, UUID.randomUUID());
-    final StockEvent event1 = save(stockEventDto, UUID.randomUUID());
-
-    //when
-    UUID cardId = stockCardRepository.findByOriginEvent(event3).getId();
-    StockCardDto card = stockCardService.findStockCardById(cardId);
-
-    //then
-    assertThat(card.getLineItems().size(), is(3));
-
-    assertThat(getEventIdOfNthLineItem(card, 1), is(event3.getId()));
-    assertThat(getEventIdOfNthLineItem(card, 2), is(event2.getId()));
-    assertThat(getEventIdOfNthLineItem(card, 3), is(event1.getId()));
-  }
-
-  @Test
   public void should_get_stock_card_with_calculated_soh_when_find_stock_card() throws Exception {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    StockEventDto2 stockEventDto = StockEventDtoBuilder.createStockEventDto2();
     stockEventDto.setSourceId(null);
     stockEventDto.setDestinationId(null);
-    StockEvent savedEvent = save(stockEventDto, UUID.randomUUID());
+    StockEvent2 savedEvent = save(stockEventDto, UUID.randomUUID());
 
     //when
-    UUID cardId = stockCardRepository.findByOriginEvent(savedEvent).getId();
+    UUID cardId = stockCardRepository.findByOriginEvent2(savedEvent).getId();
     StockCardDto card = stockCardService.findStockCardById(cardId);
 
     //then
-    assertThat(card.getStockOnHand(), is(stockEventDto.getQuantity()));
+    assertThat(card.getStockOnHand(), is(stockEventDto.getLineItems().get(0).getQuantity()));
   }
 
   @Test
@@ -244,19 +212,19 @@ public class StockCardServiceTest extends BaseTest {
   public void should_throw_permission_exception_if_user_has_no_permission_to_view_card()
       throws Exception {
     //given
-    StockEvent savedEvent = save(createStockEventDto(), UUID.randomUUID());
+    StockEvent2 savedEvent = save(createStockEventDto2(), UUID.randomUUID());
     doThrow(new PermissionMessageException(new Message("some error")))
         .when(permissionService)
         .canViewStockCard(savedEvent.getProgramId(), savedEvent.getFacilityId());
 
     //when
-    UUID savedCardId = stockCardRepository.findByOriginEvent(savedEvent).getId();
+    UUID savedCardId = stockCardRepository.findByOriginEvent2(savedEvent).getId();
     stockCardService.findStockCardById(savedCardId);
   }
 
-  private StockEvent save(StockEventDto eventDto, UUID userId)
+  private StockEvent2 save(StockEventDto2 eventDto, UUID userId)
       throws InstantiationException, IllegalAccessException {
-    StockEvent savedEvent = stockEventsRepository
+    StockEvent2 savedEvent = stockEventsRepository
         .save(eventDto.toEvent(UUID.randomUUID()));
     stockCardService.saveFromEvent(eventDto, savedEvent.getId(), userId);
     return savedEvent;

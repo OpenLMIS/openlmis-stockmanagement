@@ -17,9 +17,9 @@ package org.openlmis.stockmanagement.testutils;
 
 import static java.util.Collections.singletonList;
 
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventDto2;
-import org.openlmis.stockmanagement.dto.StockEventLineItem;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
