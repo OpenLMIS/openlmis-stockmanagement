@@ -22,7 +22,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVEN
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ORDERABLE_DUPLICATION;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING;
 
-import org.openlmis.stockmanagement.domain.event.StockEvent2;
+import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
@@ -46,7 +46,7 @@ public class PhysicalInventoryService {
   private static final Logger LOGGER = LoggerFactory.getLogger(PhysicalInventoryService.class);
 
   @Autowired
-  private StockEventProcessor2 stockEventProcessor;
+  private StockEventProcessor stockEventProcessor;
 
   @Autowired
   private PhysicalInventoriesRepository physicalInventoriesRepository;
@@ -72,9 +72,9 @@ public class PhysicalInventoryService {
 
     LOGGER.info("submit physical inventory, items count: " + inventoryDto.getLineItems().size());
 
-    UUID eventIds = stockEventProcessor.process(inventoryDto.toEventDto());
+    UUID eventId = stockEventProcessor.process(inventoryDto.toEventDto());
     PhysicalInventory inventory = inventoryDto.toPhysicalInventoryForSubmit();
-    inventory.setStockEvent(fromId(eventIds, StockEvent2.class));
+    inventory.setStockEvent(fromId(eventId, StockEvent.class));
     return physicalInventoriesRepository.save(inventory).getId();
   }
 

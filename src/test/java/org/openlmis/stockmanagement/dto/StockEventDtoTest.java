@@ -44,7 +44,7 @@ public class StockEventDtoTest {
     assertThat(event.getReasonFreeText(), is(stockEventDto.getReasonFreeText()));
     assertThat(event.getSignature(), is(stockEventDto.getSignature()));
 
-    assertThat(event.getQuantity(), is(stockEventDto.getQuantity()));
+    assertThat(event.getLineItems(), is(stockEventDto.getLineItems()));
     assertThat(event.getReason().getId(), is(stockEventDto.getReasonId()));
 
     assertThat(event.getSource().getId(), is(stockEventDto.getSourceId()));
@@ -52,7 +52,6 @@ public class StockEventDtoTest {
 
     assertThat(event.getProgramId(), is(stockEventDto.getProgramId()));
     assertThat(event.getFacilityId(), is(stockEventDto.getFacilityId()));
-    assertThat(event.getOrderableId(), is(stockEventDto.getOrderableId()));
 
     assertThat(event.getOccurredDate(), is(stockEventDto.getOccurredDate()));
 
@@ -62,6 +61,8 @@ public class StockEventDtoTest {
     long between = SECONDS.between(processedDate, ZonedDateTime.now());
 
     assertThat(between, lessThan(2L));
+
+    assertThat(event.getLineItems(), is(stockEventDto.getLineItems()));
   }
 
 }

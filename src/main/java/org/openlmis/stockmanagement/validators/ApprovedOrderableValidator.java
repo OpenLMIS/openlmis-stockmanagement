@@ -15,9 +15,11 @@
 
 package org.openlmis.stockmanagement.validators;
 
-import static java.util.stream.StreamSupport.stream;
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_ORDERABLE_NOT_IN_APPROVED_LIST;
 
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
@@ -25,6 +27,7 @@ import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 @Component(value = "ApprovedOrderableValidator")
@@ -41,25 +44,29 @@ public class ApprovedOrderableValidator implements StockEventValidator {
     LOGGER.debug("Validate approved product reference data service");
     UUID facility = stockEventDto.getFacilityId();
     UUID program = stockEventDto.getProgramId();
-    if (stockEventDto.getOrderableId() == null || facility == null || program == null) {
+    if (isEmpty(stockEventDto.getLineItems()) || facility == null || program == null) {
       return;
     }
 
-    boolean isFoundInApprovedList = tryToFindInApprovedList(stockEventDto,
-        stockEventDto.getContext().getAllApprovedProducts());
+    List<UUID> nonApprovedIds =
+        findNonApprovedIds(stockEventDto, stockEventDto.getContext().getAllApprovedProducts());
 
-    if (!isFoundInApprovedList) {
+    if (!isEmpty(nonApprovedIds)) {
       throw new ValidationMessageException(
-          new Message(ERROR_ORDERABLE_NOT_IN_APPROVED_LIST, stockEventDto.getOrderableId()));
+          new Message(ERROR_ORDERABLE_NOT_IN_APPROVED_LIST, nonApprovedIds));
     }
   }
 
-  private boolean tryToFindInApprovedList(StockEventDto stockEventDto,
-                                          Collection<ApprovedProductDto> approvedProductDtos) {
-    return stream(approvedProductDtos.spliterator(), false)
-        .anyMatch(product -> {
-          UUID orderableId = product.getProgramOrderable().getOrderableId();
-          return orderableId.equals(stockEventDto.getOrderableId());
-        });
+  private List<UUID> findNonApprovedIds(StockEventDto stockEventDto,
+                                        Collection<ApprovedProductDto> approvedProductDtos) {
+    List<UUID> approvedIds = approvedProductDtos.stream()
+        .map(approvedProduct -> approvedProduct.getProgramOrderable().getOrderableId())
+        .collect(toList());
+
+    return stockEventDto.getLineItems().stream()
+        .map(StockEventLineItem::getOrderableId)
+        .filter(id -> !approvedIds.contains(id))
+        .collect(toList());
+
   }
 }

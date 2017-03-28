@@ -36,7 +36,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
-import org.openlmis.stockmanagement.dto.StockEventDto2;
+import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
@@ -53,7 +53,7 @@ public class ReceiveIssueReasonValidatorTest {
   private StockCardLineItemReasonRepository reasonRepository;
 
   @InjectMocks
-  private ReceiveIssueReasonValidator2 receiveIssueReasonValidator;
+  private ReceiveIssueReasonValidator receiveIssueReasonValidator;
 
   private StockCardLineItemReason creditAdhocReason;
   private StockCardLineItemReason debitAdhocReason;
@@ -71,7 +71,7 @@ public class ReceiveIssueReasonValidatorTest {
   @Test
   public void event_that_has_source_but_no_reason_should_pass() throws Exception {
     //given
-    StockEventDto2 stockEventDto = StockEventDtoBuilder.createStockEventDto2();
+    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setSourceId(UUID.randomUUID());
     stockEventDto.setDestinationId(null);
     stockEventDto.setReasonId(null);
@@ -85,7 +85,7 @@ public class ReceiveIssueReasonValidatorTest {
   @Test
   public void event_that_has_destination_but_no_reason_should_pass() throws Exception {
     //given
-    StockEventDto2 stockEventDto = StockEventDtoBuilder.createStockEventDto2();
+    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setDestinationId(UUID.randomUUID());
     stockEventDto.setSourceId(null);
     stockEventDto.setReasonId(null);
@@ -99,7 +99,7 @@ public class ReceiveIssueReasonValidatorTest {
   @Test
   public void event_that_has_source_and_a_reason_of_credit_should_pass() throws Exception {
     //given
-    StockEventDto2 stockEventDto = StockEventDtoBuilder.createStockEventDto2();
+    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setSourceId(UUID.randomUUID());
     stockEventDto.setDestinationId(null);
     stockEventDto.setReasonId(UUID.randomUUID());
@@ -115,7 +115,7 @@ public class ReceiveIssueReasonValidatorTest {
   @Test
   public void event_that_has_destination_and_a_reason_of_debit_should_pass() throws Exception {
     //given
-    StockEventDto2 stockEventDto = StockEventDtoBuilder.createStockEventDto2();
+    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setDestinationId(UUID.randomUUID());
     stockEventDto.setSourceId(null);
     //the following is a debit reason
@@ -131,7 +131,7 @@ public class ReceiveIssueReasonValidatorTest {
 
   @Test
   public void event_that_has_source_and_a_reason_of_debit_should_not_pass() throws Exception {
-    StockEventDto2 stockEventDto = StockEventDtoBuilder.createStockEventDto2();
+    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setSourceId(UUID.randomUUID());
     stockEventDto.setDestinationId(null);
     stockEventDto.setReasonId(UUID.randomUUID());
@@ -140,7 +140,7 @@ public class ReceiveIssueReasonValidatorTest {
 
   @Test
   public void event_that_has_destination_and_a_reason_of_credit_should_not_pass() throws Exception {
-    StockEventDto2 stockEventDto = StockEventDtoBuilder.createStockEventDto2();
+    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setDestinationId(UUID.randomUUID());
     stockEventDto.setSourceId(null);
     stockEventDto.setReasonId(UUID.randomUUID());
@@ -151,7 +151,7 @@ public class ReceiveIssueReasonValidatorTest {
   @Test
   public void event_that_has_source_and_a_reason_of_non_adhoc_category_should_not_pass()
       throws Exception {
-    StockEventDto2 stockEventDto = StockEventDtoBuilder.createStockEventDto2();
+    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setSourceId(UUID.randomUUID());
     stockEventDto.setDestinationId(null);
     stockEventDto.setReasonId(UUID.randomUUID());
@@ -162,7 +162,7 @@ public class ReceiveIssueReasonValidatorTest {
   @Test
   public void event_that_has_destination_and_a_reason_of_non_adhoc_category_should_not_pass()
       throws Exception {
-    StockEventDto2 stockEventDto = StockEventDtoBuilder.createStockEventDto2();
+    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setDestinationId(UUID.randomUUID());
     stockEventDto.setSourceId(null);
     stockEventDto.setReasonId(UUID.randomUUID());
@@ -170,7 +170,7 @@ public class ReceiveIssueReasonValidatorTest {
     testErrorCase(ERROR_EVENT_ISSUE_REASON_CATEGORY_INVALID, stockEventDto, debitNonAdhocReason);
   }
 
-  private void testErrorCase(String errorKey, StockEventDto2 stockEventDto,
+  private void testErrorCase(String errorKey, StockEventDto stockEventDto,
                              StockCardLineItemReason mockedReason) {
     //expect
     expectedEx.expect(ValidationMessageException.class);

@@ -17,7 +17,6 @@ package org.openlmis.stockmanagement.repository;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
-import org.openlmis.stockmanagement.domain.event.StockEvent2;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -46,8 +45,6 @@ public interface StockCardRepository extends
       @Param("facilityId") UUID facilityId);
 
   StockCard findByOriginEvent(@Param("originEventId") StockEvent stockEvent);
-
-  StockCard findByOriginEvent2(@Param("originEventId2") StockEvent2 stockEvent);
 
   //the following is for performance optimization
   //when saving a new stock card line item, only need to find existing card id

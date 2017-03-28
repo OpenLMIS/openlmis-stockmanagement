@@ -35,7 +35,7 @@ public class PhysicalInventoryDtoTest {
     PhysicalInventoryDto piDto = createInventoryDto();
 
     //when
-    StockEventDto2 eventDto = piDto.toEventDto();
+    StockEventDto eventDto = piDto.toEventDto();
 
     //then
     assertThat(eventDto.getProgramId(), is(piDto.getProgramId()));

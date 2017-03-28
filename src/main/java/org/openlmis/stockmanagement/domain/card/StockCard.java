@@ -24,10 +24,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.annotations.LazyCollection;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
-import org.openlmis.stockmanagement.domain.event.StockEvent2;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
-import org.openlmis.stockmanagement.dto.StockEventDto2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,12 +62,8 @@ public class StockCard extends BaseEntity {
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCard.class);
 
   @ManyToOne()
-  @JoinColumn(nullable = true)
+  @JoinColumn(nullable = false)
   private StockEvent originEvent;
-
-  @ManyToOne()
-  @JoinColumn(nullable = true)
-  private StockEvent2 originEvent2;
 
   @Column(nullable = false)
   private UUID facilityId;
@@ -94,26 +88,10 @@ public class StockCard extends BaseEntity {
    * @throws InstantiationException InstantiationException.
    * @throws IllegalAccessException IllegalAccessException.
    */
-  public static StockCard createStockCardFrom(StockEventDto stockEventDto, UUID savedEventId)
+  public static StockCard createStockCardFrom(StockEventDto stockEventDto,
+                                              StockEventLineItem eventLineItem, UUID savedEventId)
       throws InstantiationException, IllegalAccessException {
-    return new StockCard(fromId(savedEventId, StockEvent.class), null,
-        stockEventDto.getFacilityId(), stockEventDto.getProgramId(),
-        stockEventDto.getOrderableId(), new ArrayList<>(), 0);
-  }
-
-  /**
-   * Create stock card from stock event dto.
-   *
-   * @param stockEventDto the origin event dto.
-   * @param savedEventId  the saved event id.
-   * @return the created stock card.
-   * @throws InstantiationException InstantiationException.
-   * @throws IllegalAccessException IllegalAccessException.
-   */
-  public static StockCard createStockCardFrom2(StockEventDto2 stockEventDto,
-                                               StockEventLineItem eventLineItem, UUID savedEventId)
-      throws InstantiationException, IllegalAccessException {
-    return new StockCard(null, fromId(savedEventId, StockEvent2.class),
+    return new StockCard(fromId(savedEventId, StockEvent.class),
         stockEventDto.getFacilityId(), stockEventDto.getProgramId(),
         eventLineItem.getOrderableId(), new ArrayList<>(), 0);
   }

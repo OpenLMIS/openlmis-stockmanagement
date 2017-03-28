@@ -35,5 +35,5 @@ public class StockEventLineItem extends BaseEntity {
 
   @ManyToOne()
   @JoinColumn(nullable = false)
-  private StockEvent2 stockEvent;
+  private StockEvent stockEvent;
 }

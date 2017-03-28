@@ -20,7 +20,7 @@ import static org.hibernate.annotations.LazyCollectionOption.FALSE;
 
 import org.hibernate.annotations.LazyCollection;
 import org.openlmis.stockmanagement.domain.BaseEntity;
-import org.openlmis.stockmanagement.domain.event.StockEvent2;
+import org.openlmis.stockmanagement.domain.event.StockEvent;
 
 import lombok.Data;
 
@@ -58,5 +58,5 @@ public class PhysicalInventory extends BaseEntity {
   private List<PhysicalInventoryLineItem> lineItems;
 
   @OneToOne
-  private StockEvent2 stockEvent;
+  private StockEvent stockEvent;
 }

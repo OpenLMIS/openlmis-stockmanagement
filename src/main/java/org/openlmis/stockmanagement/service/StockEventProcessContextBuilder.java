@@ -18,7 +18,6 @@ package org.openlmis.stockmanagement.service;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import org.openlmis.stockmanagement.dto.StockEventDto;
-import org.openlmis.stockmanagement.dto.StockEventDto2;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
@@ -54,26 +53,6 @@ public class StockEventProcessContextBuilder {
    * @return a context object that includes all needed ref data.
    */
   public StockEventProcessContext buildContext(StockEventDto eventDto) {
-    LOGGER.info("build stock event process context");
-    UUID programId = eventDto.getProgramId();
-    UUID facilityId = eventDto.getFacilityId();
-
-    return StockEventProcessContext.builder()
-        .currentUser(authenticationHelper.getCurrentUser())
-        .program(programService.findOne(programId))
-        .facility(facilityService.findOne(facilityId))
-        .allApprovedProducts(approvedProductService.getAllApprovedProducts(programId, facilityId))
-        .build();
-  }
-
-  /**
-   * Before processing events, put all needed ref data into context so we don't have to do frequent
-   * network requests.
-   *
-   * @param eventDto event dto.
-   * @return a context object that includes all needed ref data.
-   */
-  public StockEventProcessContext buildContext2(StockEventDto2 eventDto) {
     LOGGER.info("build stock event process context");
     UUID programId = eventDto.getProgramId();
     UUID facilityId = eventDto.getFacilityId();

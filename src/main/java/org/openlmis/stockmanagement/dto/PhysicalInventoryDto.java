@@ -58,8 +58,8 @@ public class PhysicalInventoryDto {
    *
    * @return converted objects.
    */
-  public StockEventDto2 toEventDto() {
-    StockEventDto2 stockEventDto = new StockEventDto2();
+  public StockEventDto toEventDto() {
+    StockEventDto stockEventDto = new StockEventDto();
     stockEventDto.setFacilityId(facilityId);
     stockEventDto.setProgramId(programId);
     stockEventDto.setOccurredDate(occurredDate);

@@ -15,19 +15,14 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static java.lang.System.currentTimeMillis;
-
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
-import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -52,28 +47,17 @@ public class StockEventProcessor {
   private StockEventsRepository stockEventsRepository;
 
   /**
-   * Validate and persist events and its line items.
+   * Validate and persist event and create stock card and line items from it.
    *
-   * @param eventDtos stock event dtos.
+   * @param eventDto stock event dto.
    * @return the persisted event ids.
    */
-  public List<UUID> process(List<StockEventDto> eventDtos)
+
+  public UUID process(StockEventDto eventDto)
       throws IllegalAccessException, InstantiationException {
-    StockEventProcessContext context = contextBuilder.buildContext(eventDtos.get(0));
-
-    List<UUID> eventIds = new ArrayList<>();
-    for (int i = 0; i < eventDtos.size(); i++) {
-      LOGGER.debug("Start processing stock event dto " + (i + 1));
-      final long startTime = currentTimeMillis();
-
-      StockEventDto eventDto = eventDtos.get(i);
-      eventDto.setContext(context);
-      stockEventValidationsService.validate(eventDto);
-      eventIds.add(saveEventAndGenerateLineItems(eventDto));
-
-      LOGGER.info("Finished in " + (currentTimeMillis() - startTime) + " milliseconds");
-    }
-    return eventIds;
+    eventDto.setContext(contextBuilder.buildContext(eventDto));
+    stockEventValidationsService.validate(eventDto);
+    return saveEventAndGenerateLineItems(eventDto);
   }
 
   private UUID saveEventAndGenerateLineItems(StockEventDto eventDto)

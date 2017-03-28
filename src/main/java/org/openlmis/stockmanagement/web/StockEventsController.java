@@ -15,7 +15,6 @@
 
 package org.openlmis.stockmanagement.web;
 
-import static java.util.Collections.singletonList;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -66,7 +65,7 @@ public class StockEventsController {
     LOGGER.debug("Try to create a stock event");
     rejectIfIssueOrReceive(eventDto);
     permissionService.canMakeAdjustment(eventDto.getProgramId(), eventDto.getFacilityId());
-    UUID createdEventId = stockEventProcessor.process(singletonList(eventDto)).get(0);
+    UUID createdEventId = stockEventProcessor.process(eventDto);
     return new ResponseEntity<>(createdEventId, CREATED);
   }
 

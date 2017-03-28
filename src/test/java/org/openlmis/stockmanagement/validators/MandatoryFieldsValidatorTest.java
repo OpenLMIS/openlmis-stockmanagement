@@ -33,7 +33,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.FacilityDto;
 import org.openlmis.stockmanagement.dto.ProgramDto;
-import org.openlmis.stockmanagement.dto.StockEventDto2;
+import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
@@ -46,19 +46,19 @@ import java.util.UUID;
 public class MandatoryFieldsValidatorTest {
 
   @InjectMocks
-  private MandatoryFieldsValidator2 mandatoryFieldsValidator;
+  private MandatoryFieldsValidator mandatoryFieldsValidator;
 
   @Rule
   public ExpectedException expectedEx = ExpectedException.none();
 
-  private StockEventDto2 stockEventDto;
+  private StockEventDto stockEventDto;
 
   @Before
   public void setUp() throws Exception {
     StockEventProcessContext stockEventContext = StockEventProcessContext.builder()
         .facility(new FacilityDto())
         .program(new ProgramDto()).build();
-    stockEventDto = StockEventDtoBuilder.createStockEventDto2();
+    stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setContext(stockEventContext);
   }
 

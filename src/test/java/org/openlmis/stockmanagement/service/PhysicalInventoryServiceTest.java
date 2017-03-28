@@ -32,7 +32,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.openlmis.stockmanagement.domain.event.StockEvent2;
+import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.dto.OrderableDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
@@ -51,7 +51,7 @@ public class PhysicalInventoryServiceTest {
   private PhysicalInventoryService physicalInventoryService;
 
   @Mock
-  private StockEventProcessor2 stockEventProcessor;
+  private StockEventProcessor stockEventProcessor;
 
   @Mock
   private PhysicalInventoriesRepository physicalInventoriesRepository;
@@ -147,7 +147,7 @@ public class PhysicalInventoryServiceTest {
     ArgumentCaptor<PhysicalInventory> inventoryArgumentCaptor = forClass(PhysicalInventory.class);
 
     verify(physicalInventoriesRepository, times(1)).save(inventoryArgumentCaptor.capture());
-    StockEvent2 event = inventoryArgumentCaptor.getValue().getStockEvent();
+    StockEvent event = inventoryArgumentCaptor.getValue().getStockEvent();
 
     assertThat(event.getId(), is(eventId));
   }

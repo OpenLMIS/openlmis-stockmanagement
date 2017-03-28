@@ -19,24 +19,19 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertThat;
-import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemFrom2;
-import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemsFrom;
+import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemFrom;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
-import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto2;
 
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.adjustment.ReasonCategory;
 import org.openlmis.stockmanagement.domain.adjustment.ReasonType;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
-import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.dto.StockEventDto;
-import org.openlmis.stockmanagement.dto.StockEventDto2;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public class StockCardLineItemTest {
@@ -44,61 +39,18 @@ public class StockCardLineItemTest {
   @Test
   public void should_create_line_item_from_stock_event() throws Exception {
     //given
-    StockEvent event = new StockEvent();
-    event.setId(UUID.randomUUID());
-
     StockCard stockCard = new StockCard();
-    stockCard.setOriginEvent(event);
     stockCard.setLineItems(new ArrayList<>());
 
     //when
     StockEventDto eventDto = createStockEventDto();
-    UUID userId = UUID.randomUUID();
-    List<StockCardLineItem> lineItems =
-        createLineItemsFrom(eventDto, stockCard, event.getId(), userId);
-    StockCardLineItem lineItem = lineItems.get(0);
-
-    //then
-    assertThat(lineItem.getSourceFreeText(), is(eventDto.getSourceFreeText()));
-    assertThat(lineItem.getDestinationFreeText(), is(eventDto.getDestinationFreeText()));
-    assertThat(lineItem.getReasonFreeText(), is(eventDto.getReasonFreeText()));
-    assertThat(lineItem.getDocumentNumber(), is(eventDto.getDocumentNumber()));
-    assertThat(lineItem.getSignature(), is(eventDto.getSignature()));
-
-    assertThat(lineItem.getQuantity(), is(eventDto.getQuantity()));
-    assertThat(lineItem.getReason().getId(), is(eventDto.getReasonId()));
-
-    assertThat(lineItem.getSource().getId(), is(eventDto.getSourceId()));
-    assertThat(lineItem.getDestination().getId(), is(eventDto.getDestinationId()));
-
-    assertThat(lineItem.getOccurredDate(), is(eventDto.getOccurredDate()));
-
-    assertThat(lineItem.getStockCard(), is(stockCard));
-    assertThat(lineItem.getOriginEvent().getId(), is(event.getId()));
-
-    assertThat(lineItem.getUserId(), is(userId));
-
-    ZonedDateTime processedDate = lineItem.getProcessedDate();
-    long between = SECONDS.between(processedDate, ZonedDateTime.now());
-
-    assertThat(between, lessThan(2L));
-  }
-
-  @Test
-  public void should_create_line_item_from_stock_event2() throws Exception {
-    //given
-    StockCard stockCard = new StockCard();
-    stockCard.setLineItems(new ArrayList<>());
-
-    //when
-    StockEventDto2 eventDto = createStockEventDto2();
     StockEventLineItem stockEventLineItem = new StockEventLineItem();
 
     UUID userId = UUID.randomUUID();
     UUID eventId = UUID.randomUUID();
 
     StockCardLineItem cardLineItem =
-        createLineItemFrom2(eventDto, stockEventLineItem, stockCard, eventId, userId);
+        createLineItemFrom(eventDto, stockEventLineItem, stockCard, eventId, userId);
 
     //then
     assertThat(cardLineItem.getSourceFreeText(), is(eventDto.getSourceFreeText()));

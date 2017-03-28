@@ -21,7 +21,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto2;
+import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
 
 import org.junit.After;
 import org.junit.Test;
@@ -29,16 +29,16 @@ import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.BaseTest;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
-import org.openlmis.stockmanagement.domain.event.StockEvent2;
+import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.FacilityDto;
 import org.openlmis.stockmanagement.dto.OrderableDto;
 import org.openlmis.stockmanagement.dto.ProgramDto;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockCardLineItemDto;
-import org.openlmis.stockmanagement.dto.StockEventDto2;
+import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
-import org.openlmis.stockmanagement.repository.StockEventsRepository2;
+import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
@@ -57,10 +57,10 @@ import java.util.UUID;
 public class StockCardServiceTest extends BaseTest {
 
   @Autowired
-  private StockCardService2 stockCardService;
+  private StockCardService stockCardService;
 
   @Autowired
-  private StockEventsRepository2 stockEventsRepository;
+  private StockEventsRepository stockEventsRepository;
 
   @Autowired
   private StockCardRepository stockCardRepository;
@@ -88,21 +88,21 @@ public class StockCardServiceTest extends BaseTest {
       throws Exception {
     //given
     UUID userId = UUID.randomUUID();
-    StockEventDto2 stockEventDto = createStockEventDto2();
-    StockEvent2 savedEvent = save(stockEventDto, userId);
+    StockEventDto stockEventDto = createStockEventDto();
+    StockEvent savedEvent = save(stockEventDto, userId);
 
     //when
     stockCardService.saveFromEvent(stockEventDto, savedEvent.getId(), userId);
 
     //then
-    StockCard savedCard = stockCardRepository.findByOriginEvent2(savedEvent);
+    StockCard savedCard = stockCardRepository.findByOriginEvent(savedEvent);
     StockCardLineItem firstLineItem = savedCard.getLineItems().get(0);
 
     assertThat(firstLineItem.getUserId(), is(userId));
     assertThat(firstLineItem.getSource().isRefDataFacility(), is(true));
     assertThat(firstLineItem.getDestination().isRefDataFacility(), is(false));
 
-    assertThat(firstLineItem.getStockCard().getOriginEvent2().getId(), is(savedEvent.getId()));
+    assertThat(firstLineItem.getStockCard().getOriginEvent().getId(), is(savedEvent.getId()));
     assertThat(firstLineItem.getStockCard().getFacilityId(), is(savedEvent.getFacilityId()));
     assertThat(firstLineItem.getStockCard().getProgramId(), is(savedEvent.getProgramId()));
     UUID orderableId = savedEvent.getLineItems().get(0).getOrderableId();
@@ -114,12 +114,12 @@ public class StockCardServiceTest extends BaseTest {
       throws Exception {
     //given
     //1. there is an existing event that caused a stock card to exist
-    StockEventDto2 existingEventDto = createStockEventDto2();
-    final StockEvent2 existingEvent = save(existingEventDto, UUID.randomUUID());
+    StockEventDto existingEventDto = createStockEventDto();
+    final StockEvent existingEvent = save(existingEventDto, UUID.randomUUID());
     UUID orderableId = existingEventDto.getLineItems().get(0).getOrderableId();
 
     //2. and there is a new event coming
-    StockEventDto2 newEventDto = createStockEventDto2();
+    StockEventDto newEventDto = createStockEventDto();
     newEventDto.setProgramId(existingEventDto.getProgramId());
     newEventDto.setFacilityId(existingEventDto.getFacilityId());
     newEventDto.getLineItems().get(0).setOrderableId(orderableId);
@@ -127,16 +127,16 @@ public class StockCardServiceTest extends BaseTest {
     //when
     long cardAmountBeforeSave = stockCardRepository.count();
     UUID userId = UUID.randomUUID();
-    StockEvent2 savedNewEvent = save(newEventDto, userId);
+    StockEvent savedNewEvent = save(newEventDto, userId);
     long cardAmountAfterSave = stockCardRepository.count();
 
     //then
-    StockCard savedCard = stockCardRepository.findByOriginEvent2(existingEvent);
+    StockCard savedCard = stockCardRepository.findByOriginEvent(existingEvent);
     List<StockCardLineItem> lineItems = savedCard.getLineItems();
     StockCardLineItem latestLineItem = lineItems.get(lineItems.size() - 1);
 
     assertThat(cardAmountAfterSave, is(cardAmountBeforeSave));
-    assertThat(latestLineItem.getOriginEvent2().getId(), is(savedNewEvent.getId()));
+    assertThat(latestLineItem.getOriginEvent().getId(), is(savedNewEvent.getId()));
     assertThat(latestLineItem.getStockCard().getId(), is(savedCard.getId()));
     assertThat(latestLineItem.getUserId(), is(userId));
   }
@@ -146,7 +146,7 @@ public class StockCardServiceTest extends BaseTest {
       throws Exception {
     //given
     UUID userId = UUID.randomUUID();
-    StockEventDto2 stockEventDto = createStockEventDto2();
+    StockEventDto stockEventDto = createStockEventDto();
 
     //1. mock ref data service
     FacilityDto cardFacility = new FacilityDto();
@@ -166,10 +166,10 @@ public class StockCardServiceTest extends BaseTest {
         .thenReturn(orderableDto);
 
     //2. there is an existing stock card with line items
-    StockEvent2 savedEvent = save(stockEventDto, userId);
+    StockEvent savedEvent = save(stockEventDto, userId);
 
     //when
-    StockCard savedCard = stockCardRepository.findByOriginEvent2(savedEvent);
+    StockCard savedCard = stockCardRepository.findByOriginEvent(savedEvent);
     StockCardDto foundCardDto = stockCardService.findStockCardById(savedCard.getId());
 
     //then
@@ -185,13 +185,13 @@ public class StockCardServiceTest extends BaseTest {
   @Test
   public void should_get_stock_card_with_calculated_soh_when_find_stock_card() throws Exception {
     //given
-    StockEventDto2 stockEventDto = StockEventDtoBuilder.createStockEventDto2();
+    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setSourceId(null);
     stockEventDto.setDestinationId(null);
-    StockEvent2 savedEvent = save(stockEventDto, UUID.randomUUID());
+    StockEvent savedEvent = save(stockEventDto, UUID.randomUUID());
 
     //when
-    UUID cardId = stockCardRepository.findByOriginEvent2(savedEvent).getId();
+    UUID cardId = stockCardRepository.findByOriginEvent(savedEvent).getId();
     StockCardDto card = stockCardService.findStockCardById(cardId);
 
     //then
@@ -212,19 +212,19 @@ public class StockCardServiceTest extends BaseTest {
   public void should_throw_permission_exception_if_user_has_no_permission_to_view_card()
       throws Exception {
     //given
-    StockEvent2 savedEvent = save(createStockEventDto2(), UUID.randomUUID());
+    StockEvent savedEvent = save(createStockEventDto(), UUID.randomUUID());
     doThrow(new PermissionMessageException(new Message("some error")))
         .when(permissionService)
         .canViewStockCard(savedEvent.getProgramId(), savedEvent.getFacilityId());
 
     //when
-    UUID savedCardId = stockCardRepository.findByOriginEvent2(savedEvent).getId();
+    UUID savedCardId = stockCardRepository.findByOriginEvent(savedEvent).getId();
     stockCardService.findStockCardById(savedCardId);
   }
 
-  private StockEvent2 save(StockEventDto2 eventDto, UUID userId)
+  private StockEvent save(StockEventDto eventDto, UUID userId)
       throws InstantiationException, IllegalAccessException {
-    StockEvent2 savedEvent = stockEventsRepository
+    StockEvent savedEvent = stockEventsRepository
         .save(eventDto.toEvent(UUID.randomUUID()));
     stockCardService.saveFromEvent(eventDto, savedEvent.getId(), userId);
     return savedEvent;

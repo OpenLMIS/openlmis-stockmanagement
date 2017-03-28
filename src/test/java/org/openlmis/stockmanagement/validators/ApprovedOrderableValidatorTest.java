@@ -23,7 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.ProgramOrderableDto;
-import org.openlmis.stockmanagement.dto.StockEventDto2;
+import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
@@ -34,13 +34,13 @@ import java.util.UUID;
 public class ApprovedOrderableValidatorTest {
 
   @InjectMocks
-  private ApprovedOrderableValidator2 approvedOrderableValidator;
+  private ApprovedOrderableValidator approvedOrderableValidator;
 
   @Test(expected = ValidationMessageException.class)
   public void stock_event_with_orderable_id_not_in_approved_list_should_not_pass_validation()
       throws Exception {
     //given:
-    StockEventDto2 stockEventDto = StockEventDtoBuilder.createStockEventDto2();
+    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
 
     ProgramOrderableDto programOrderableDto = new ProgramOrderableDto();
     programOrderableDto.setOrderableId(UUID.randomUUID());
@@ -62,7 +62,7 @@ public class ApprovedOrderableValidatorTest {
     String orderableIdString = "d8290082-f9fa-4a37-aefb-a3d76ff805a8";
     UUID orderableId = UUID.fromString(orderableIdString);
 
-    StockEventDto2 stockEventDto = StockEventDtoBuilder.createStockEventDto2();
+    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.getLineItems().get(0).setOrderableId(orderableId);
 
     ProgramOrderableDto programOrderableDto = new ProgramOrderableDto();
@@ -82,14 +82,14 @@ public class ApprovedOrderableValidatorTest {
   public void should_not_throw_validation_exception_if_event_has_no_program_and_facility_id()
       throws Exception {
     //given
-    StockEventDto2 stockEventDto = StockEventDtoBuilder.createStockEventDto2();
+    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setProgramId(null);
 
     //when
     approvedOrderableValidator.validate(stockEventDto);
 
     //given
-    stockEventDto = StockEventDtoBuilder.createStockEventDto2();
+    stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setFacilityId(null);
 
     //when

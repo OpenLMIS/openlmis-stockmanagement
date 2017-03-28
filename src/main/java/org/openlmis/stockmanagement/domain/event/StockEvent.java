@@ -15,6 +15,8 @@
 
 package org.openlmis.stockmanagement.domain.event;
 
+import static javax.persistence.CascadeType.ALL;
+
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.movement.Node;
@@ -24,12 +26,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -39,9 +43,6 @@ import javax.persistence.Table;
 @Table(name = "stock_events", schema = "stockmanagement")
 public class StockEvent extends BaseEntity {
 
-  @Column(nullable = false)
-  private Integer quantity;
-
   @ManyToOne()
   @JoinColumn()
   private StockCardLineItemReason reason;
@@ -50,8 +51,6 @@ public class StockEvent extends BaseEntity {
   private UUID facilityId;
   @Column(nullable = false)
   private UUID programId;
-  @Column(nullable = false)
-  private UUID orderableId;
 
   @Column(nullable = false)
   private UUID userId;
@@ -77,4 +76,7 @@ public class StockEvent extends BaseEntity {
   private String destinationFreeText;
 
   private String documentNumber;
+
+  @OneToMany(cascade = ALL, mappedBy = "stockEvent")
+  private List<StockEventLineItem> lineItems;
 }

@@ -21,5 +21,5 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import java.util.UUID;
 
 public interface StockEventsRepository extends
-        PagingAndSortingRepository<StockEvent, UUID> {
+    PagingAndSortingRepository<StockEvent, UUID> {
 }

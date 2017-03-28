@@ -15,7 +15,6 @@
 
 package org.openlmis.stockmanagement.web;
 
-import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
@@ -55,13 +54,14 @@ public class StockEventsControllerTest extends BaseWebTest {
   public void should_return_201_when_event_successfully_created() throws Exception {
     //given
     UUID uuid = UUID.randomUUID();
-    when(stockEventProcessor.process(singletonList(any(StockEventDto.class))))
-        .thenReturn(singletonList(uuid));
+    when(stockEventProcessor.process(any(StockEventDto.class)))
+        .thenReturn(uuid);
 
     //when
     StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.setSourceId(null);
     stockEventDto.setDestinationId(null);
+
     ResultActions resultActions = mvc.perform(post(CREATE_STOCK_EVENT_API)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
         .contentType(MediaType.APPLICATION_JSON)
@@ -80,14 +80,7 @@ public class StockEventsControllerTest extends BaseWebTest {
         new Message(ERROR_NO_FOLLOWING_PERMISSION, STOCK_ADJUST)))
         .when(permissionService).canMakeAdjustment(any(UUID.class), any(UUID.class));
 
-    //when
-    ResultActions resultActions = mvc.perform(post(CREATE_STOCK_EVENT_API)
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectToJsonString(new StockEventDto())));
-
-    //then
-    resultActions.andExpect(status().isForbidden());
+    shouldReject(new StockEventDto());
   }
 
   @Test
@@ -105,7 +98,7 @@ public class StockEventsControllerTest extends BaseWebTest {
   public void should_return_400_when_validation_fails() throws Exception {
     //given
     Mockito.doThrow(new ValidationMessageException(new Message(ERROR_STOCK_EVENT_REASON_NOT_MATCH)))
-        .when(stockEventProcessor).process(singletonList(any()));
+        .when(stockEventProcessor).process(any());
 
     //when
     ResultActions resultActions = mvc.perform(post(CREATE_STOCK_EVENT_API)

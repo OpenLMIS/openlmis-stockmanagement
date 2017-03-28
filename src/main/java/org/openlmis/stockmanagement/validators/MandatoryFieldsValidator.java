@@ -15,18 +15,23 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_FACILITY_INVALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_NO_LINE_ITEMS;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_OCCURRED_DATE_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ORDERABLE_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_PROGRAM_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_QUANTITY_INVALID;
 
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 
 @Component(value = "MandatoryFieldsValidator")
 public class MandatoryFieldsValidator implements StockEventValidator {
@@ -34,12 +39,12 @@ public class MandatoryFieldsValidator implements StockEventValidator {
   @Override
   public void validate(StockEventDto stockEventDto) {
     LOGGER.debug("Validate mandatory fields");
-    validateFacilityProgramAndOrderable(stockEventDto);
+    validateFacilityProgramAndOrderables(stockEventDto);
     validateOccurredDate(stockEventDto);
     validateQuantity(stockEventDto);
   }
 
-  private void validateFacilityProgramAndOrderable(StockEventDto dto) {
+  private void validateFacilityProgramAndOrderables(StockEventDto dto) {
     if (dto.getContext().getFacility() == null) {
       throw new ValidationMessageException(
           new Message(ERROR_EVENT_FACILITY_INVALID, dto.getFacilityId()));
@@ -50,17 +55,27 @@ public class MandatoryFieldsValidator implements StockEventValidator {
           new Message(ERROR_EVENT_PROGRAM_INVALID, dto.getProgramId()));
     }
 
-    if (dto.getOrderableId() == null) {
+    if (isEmpty(dto.getLineItems())) {
       throw new ValidationMessageException(
-          new Message(ERROR_EVENT_ORDERABLE_INVALID, dto.getOrderableId()));
+          new Message(ERROR_EVENT_NO_LINE_ITEMS, dto.getLineItems()));
+    }
+
+    boolean nullOrderableId = dto.getLineItems().stream()
+        .anyMatch(lineItem -> lineItem.getOrderableId() == null);
+    if (nullOrderableId) {
+      throw new ValidationMessageException(
+          new Message(ERROR_EVENT_ORDERABLE_INVALID, null));
     }
   }
 
   private void validateQuantity(StockEventDto stockEventDto) {
-    Integer quantity = stockEventDto.getQuantity();
-    if (quantity == null || quantity < 0) {
+    List<StockEventLineItem> invalidQuantities = stockEventDto.getLineItems().stream()
+        .filter(q -> q.getQuantity() == null || q.getQuantity() < 0)
+        .collect(toList());
+
+    if (!isEmpty(invalidQuantities)) {
       throw new ValidationMessageException(
-          new Message(ERROR_EVENT_QUANTITY_INVALID, quantity));
+          new Message(ERROR_EVENT_QUANTITY_INVALID, invalidQuantities));
     }
   }
 
