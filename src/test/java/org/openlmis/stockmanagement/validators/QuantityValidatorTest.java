@@ -29,7 +29,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.movement.Node;
-import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventDto2;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
@@ -47,7 +47,7 @@ public class QuantityValidatorTest {
   public ExpectedException expectedEx = none();
 
   @InjectMocks
-  private QuantityValidator quantityValidator;
+  private QuantityValidator2 quantityValidator;
 
   @Mock
   private StockCardRepository stockCardRepository;
@@ -59,25 +59,17 @@ public class QuantityValidatorTest {
   public void should_not_throw_validation_exception_if_event_has_no_destination_or_debit_reason()
       throws Exception {
     //given
-    StockEventDto stockEventDto = new StockEventDto();
-    stockEventDto.setQuantity(200);
-
-    StockCard stockCard = StockCard.createStockCardFrom(stockEventDto, UUID.randomUUID());
-    when(stockCardRepository
-        .findByProgramIdAndFacilityIdAndOrderableId(stockEventDto.getProgramId(),
-            stockEventDto.getFacilityId(), stockEventDto.getOrderableId()))
-        .thenReturn(stockCard);
+    StockEventDto2 stockEventDto = new StockEventDto2();
 
     //when
     quantityValidator.validate(stockEventDto);
-
   }
 
   @Test
   public void should_not_throw_validation_exception_if_event_reason_id_is_not_found()
       throws Exception {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    StockEventDto2 stockEventDto = StockEventDtoBuilder.createStockEventDto2();
     stockEventDto.setDestinationId(null);
     when(reasonRepository.findOne(stockEventDto.getReasonId())).thenReturn(null);
 
@@ -106,25 +98,25 @@ public class QuantityValidatorTest {
     StockCard card = new StockCard();
     card.setLineItems(lineItems);
 
-    StockEventDto stockEventDto = createDebitEventDto(day2, 5);
+    StockEventDto2 stockEventDto = createDebitEventDto(day2, 5);
 
     when(stockCardRepository
         .findByProgramIdAndFacilityIdAndOrderableId(
             stockEventDto.getProgramId(),
             stockEventDto.getFacilityId(),
-            stockEventDto.getOrderableId()))
+            stockEventDto.getLineItems().get(0).getOrderableId()))
         .thenReturn(card);
 
     //when
     quantityValidator.validate(stockEventDto);
   }
 
-  private StockEventDto createDebitEventDto(ZonedDateTime day2, int quantity) {
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+  private StockEventDto2 createDebitEventDto(ZonedDateTime day2, int quantity) {
+    StockEventDto2 stockEventDto = StockEventDtoBuilder.createStockEventDto2();
     stockEventDto.setSourceId(null);
     stockEventDto.setDestinationId(UUID.randomUUID());
     stockEventDto.setOccurredDate(day2);
-    stockEventDto.setQuantity(quantity);
+    stockEventDto.getLineItems().get(0).setQuantity(quantity);
     return stockEventDto;
   }
 

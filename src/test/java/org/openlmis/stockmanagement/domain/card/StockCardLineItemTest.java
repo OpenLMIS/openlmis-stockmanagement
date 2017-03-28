@@ -19,8 +19,10 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertThat;
+import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemFrom2;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemsFrom;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
+import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto2;
 
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.adjustment.ReasonCategory;
@@ -29,6 +31,8 @@ import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventDto2;
+import org.openlmis.stockmanagement.dto.StockEventLineItem;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -75,6 +79,48 @@ public class StockCardLineItemTest {
     assertThat(lineItem.getUserId(), is(userId));
 
     ZonedDateTime processedDate = lineItem.getProcessedDate();
+    long between = SECONDS.between(processedDate, ZonedDateTime.now());
+
+    assertThat(between, lessThan(2L));
+  }
+
+  @Test
+  public void should_create_line_item_from_stock_event2() throws Exception {
+    //given
+    StockCard stockCard = new StockCard();
+    stockCard.setLineItems(new ArrayList<>());
+
+    //when
+    StockEventDto2 eventDto = createStockEventDto2();
+    StockEventLineItem stockEventLineItem = new StockEventLineItem();
+
+    UUID userId = UUID.randomUUID();
+    UUID eventId = UUID.randomUUID();
+
+    StockCardLineItem cardLineItem =
+        createLineItemFrom2(eventDto, stockEventLineItem, stockCard, eventId, userId);
+
+    //then
+    assertThat(cardLineItem.getSourceFreeText(), is(eventDto.getSourceFreeText()));
+    assertThat(cardLineItem.getDestinationFreeText(), is(eventDto.getDestinationFreeText()));
+    assertThat(cardLineItem.getReasonFreeText(), is(eventDto.getReasonFreeText()));
+    assertThat(cardLineItem.getDocumentNumber(), is(eventDto.getDocumentNumber()));
+    assertThat(cardLineItem.getSignature(), is(eventDto.getSignature()));
+
+    assertThat(cardLineItem.getQuantity(), is(stockEventLineItem.getQuantity()));
+    assertThat(cardLineItem.getReason().getId(), is(eventDto.getReasonId()));
+
+    assertThat(cardLineItem.getSource().getId(), is(eventDto.getSourceId()));
+    assertThat(cardLineItem.getDestination().getId(), is(eventDto.getDestinationId()));
+
+    assertThat(cardLineItem.getOccurredDate(), is(eventDto.getOccurredDate()));
+
+    assertThat(cardLineItem.getStockCard(), is(stockCard));
+    assertThat(cardLineItem.getOriginEvent().getId(), is(eventId));
+
+    assertThat(cardLineItem.getUserId(), is(userId));
+
+    ZonedDateTime processedDate = cardLineItem.getProcessedDate();
     long between = SECONDS.between(processedDate, ZonedDateTime.now());
 
     assertThat(between, lessThan(2L));
