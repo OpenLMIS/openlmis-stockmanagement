@@ -21,6 +21,7 @@ import static java.util.stream.Collectors.toMap;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 
 import lombok.AllArgsConstructor;
@@ -29,7 +30,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -58,21 +58,23 @@ public class PhysicalInventoryDto {
    *
    * @return converted objects.
    */
-  public List<StockEventDto> toEventDtos() {
-    return lineItems.stream()
-        .map(lineItem -> {
-          StockEventDto stockEventDto = new StockEventDto();
-          stockEventDto.setFacilityId(facilityId);
-          stockEventDto.setProgramId(programId);
-          stockEventDto.setOccurredDate(occurredDate);
-          stockEventDto.setSignature(signature);
-          stockEventDto.setDocumentNumber(documentNumber);
+  public StockEventDto2 toEventDto() {
+    StockEventDto2 stockEventDto = new StockEventDto2();
+    stockEventDto.setFacilityId(facilityId);
+    stockEventDto.setProgramId(programId);
+    stockEventDto.setOccurredDate(occurredDate);
+    stockEventDto.setSignature(signature);
+    stockEventDto.setDocumentNumber(documentNumber);
 
-          stockEventDto.setOrderableId(lineItem.getOrderable().getId());
-          stockEventDto.setQuantity(lineItem.getQuantity());
-          return stockEventDto;
-        })
-        .collect(toList());
+    stockEventDto.setLineItems(lineItems.stream()
+        .map(lineItem -> {
+          StockEventLineItem eventLineItem = new StockEventLineItem();
+          eventLineItem.setOrderableId(lineItem.getOrderable().getId());
+          eventLineItem.setQuantity(lineItem.getQuantity());
+          return eventLineItem;
+        }).collect(toList()));
+
+    return stockEventDto;
   }
 
   /**
@@ -148,7 +150,6 @@ public class PhysicalInventoryDto {
     inventory.setDocumentNumber(documentNumber);
     inventory.setSignature(signature);
     inventory.setIsDraft(isDraft);
-    inventory.setStockEvents(new ArrayList<>());
     return inventory;
   }
 }

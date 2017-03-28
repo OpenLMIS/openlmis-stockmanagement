@@ -20,27 +20,24 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 public class PhysicalInventoryDtoTest {
   @Test
-  public void should_convert_into_stock_event_dtos() throws Exception {
+  public void should_convert_into_stock_event_dto() throws Exception {
     //given
     PhysicalInventoryDto piDto = createInventoryDto();
 
     //when
-    List<StockEventDto> eventDtos = piDto.toEventDtos();
+    StockEventDto2 eventDto = piDto.toEventDto();
 
     //then
-    assertThat(eventDtos.size(), is(1));
-
-    StockEventDto eventDto = eventDtos.get(0);
     assertThat(eventDto.getProgramId(), is(piDto.getProgramId()));
     assertThat(eventDto.getFacilityId(), is(piDto.getFacilityId()));
     assertThat(eventDto.getSignature(), is(piDto.getSignature()));
@@ -48,8 +45,9 @@ public class PhysicalInventoryDtoTest {
     assertThat(eventDto.getOccurredDate(), is(piDto.getOccurredDate()));
 
     PhysicalInventoryLineItemDto piLineItemDto = piDto.getLineItems().get(0);
-    assertThat(eventDto.getOrderableId(), is(piLineItemDto.getOrderable().getId()));
-    assertThat(eventDto.getQuantity(), is(piLineItemDto.getQuantity()));
+    StockEventLineItem eventLineItem = eventDto.getLineItems().get(0);
+    assertThat(eventLineItem.getOrderableId(), is(piLineItemDto.getOrderable().getId()));
+    assertThat(eventLineItem.getQuantity(), is(piLineItemDto.getQuantity()));
   }
 
   @Test

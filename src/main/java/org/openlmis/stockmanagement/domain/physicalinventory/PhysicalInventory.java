@@ -20,7 +20,7 @@ import static org.hibernate.annotations.LazyCollectionOption.FALSE;
 
 import org.hibernate.annotations.LazyCollection;
 import org.openlmis.stockmanagement.domain.BaseEntity;
-import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.domain.event.StockEvent2;
 
 import lombok.Data;
 
@@ -30,9 +30,8 @@ import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Data
@@ -58,9 +57,6 @@ public class PhysicalInventory extends BaseEntity {
   @OneToMany(cascade = ALL, mappedBy = "physicalInventory")
   private List<PhysicalInventoryLineItem> lineItems;
 
-  @OneToMany
-  @JoinTable(name = "physical_inventory_stock_events",
-      joinColumns = @JoinColumn(name = "physicalinventoryid"),
-      inverseJoinColumns = @JoinColumn(name = "stockeventid"))
-  private List<StockEvent> stockEvents;
+  @OneToOne
+  private StockEvent2 stockEvent;
 }

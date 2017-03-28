@@ -25,19 +25,19 @@ import static org.mockito.Mockito.verify;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventDto2;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 import org.openlmis.stockmanagement.utils.Message;
-import org.openlmis.stockmanagement.validators.AdjustmentReasonValidator;
-import org.openlmis.stockmanagement.validators.ApprovedOrderableValidator;
-import org.openlmis.stockmanagement.validators.FreeTextValidator;
-import org.openlmis.stockmanagement.validators.MandatoryFieldsValidator;
-import org.openlmis.stockmanagement.validators.QuantityValidator;
-import org.openlmis.stockmanagement.validators.ReasonAssignmentValidator;
-import org.openlmis.stockmanagement.validators.ReceiveIssueReasonValidator;
-import org.openlmis.stockmanagement.validators.SourceDestinationAssignmentValidator;
-import org.openlmis.stockmanagement.validators.StockEventValidator;
+import org.openlmis.stockmanagement.validators.AdjustmentReasonValidator2;
+import org.openlmis.stockmanagement.validators.ApprovedOrderableValidator2;
+import org.openlmis.stockmanagement.validators.FreeTextValidator2;
+import org.openlmis.stockmanagement.validators.MandatoryFieldsValidator2;
+import org.openlmis.stockmanagement.validators.QuantityValidator2;
+import org.openlmis.stockmanagement.validators.ReasonAssignmentValidator2;
+import org.openlmis.stockmanagement.validators.ReceiveIssueReasonValidator2;
+import org.openlmis.stockmanagement.validators.SourceDestinationAssignmentValidator2;
+import org.openlmis.stockmanagement.validators.StockEventValidator2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -48,56 +48,56 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class StockEventValidationsServiceTest {
 
   @Autowired
-  private StockEventValidationsService stockEventValidationsService;
+  private StockEventValidationsService2 stockEventValidationsService;
 
   @MockBean(name = "v1")
-  private StockEventValidator validator1;
+  private StockEventValidator2 validator1;
 
   @MockBean(name = "v2")
-  private StockEventValidator validator2;
+  private StockEventValidator2 validator2;
 
   @MockBean
-  private ApprovedOrderableValidator approvedOrderableValidator;
+  private ApprovedOrderableValidator2 approvedOrderableValidator;
 
   @MockBean
-  private SourceDestinationAssignmentValidator sourceDestinationAssignmentValidator;
+  private SourceDestinationAssignmentValidator2 sourceDestinationAssignmentValidator;
 
   @MockBean
-  private MandatoryFieldsValidator mandatoryFieldsValidator;
+  private MandatoryFieldsValidator2 mandatoryFieldsValidator;
 
   @MockBean
-  private ReceiveIssueReasonValidator receiveIssueReasonValidator;
+  private ReceiveIssueReasonValidator2 receiveIssueReasonValidator;
 
   @MockBean
-  private AdjustmentReasonValidator adjustmentReasonValidator;
+  private AdjustmentReasonValidator2 adjustmentReasonValidator;
 
   @MockBean
-  private FreeTextValidator freeTextValidator;
+  private FreeTextValidator2 freeTextValidator;
 
   @MockBean
-  private QuantityValidator quantityValidator;
+  private QuantityValidator2 quantityValidator;
 
   @MockBean
-  private ReasonAssignmentValidator reasonAssignmentValidator;
+  private ReasonAssignmentValidator2 reasonAssignmentValidator;
 
   @Before
   public void setUp() throws Exception {
     //make real validators do nothing because
     //we only want to test the aggregation here
-    doNothing().when(approvedOrderableValidator).validate(any(StockEventDto.class));
-    doNothing().when(sourceDestinationAssignmentValidator).validate(any(StockEventDto.class));
-    doNothing().when(mandatoryFieldsValidator).validate(any(StockEventDto.class));
-    doNothing().when(freeTextValidator).validate(any(StockEventDto.class));
-    doNothing().when(receiveIssueReasonValidator).validate(any(StockEventDto.class));
-    doNothing().when(adjustmentReasonValidator).validate(any(StockEventDto.class));
-    doNothing().when(quantityValidator).validate(any(StockEventDto.class));
-    doNothing().when(reasonAssignmentValidator).validate(any(StockEventDto.class));
+    doNothing().when(approvedOrderableValidator).validate(any(StockEventDto2.class));
+    doNothing().when(sourceDestinationAssignmentValidator).validate(any(StockEventDto2.class));
+    doNothing().when(mandatoryFieldsValidator).validate(any(StockEventDto2.class));
+    doNothing().when(freeTextValidator).validate(any(StockEventDto2.class));
+    doNothing().when(receiveIssueReasonValidator).validate(any(StockEventDto2.class));
+    doNothing().when(adjustmentReasonValidator).validate(any(StockEventDto2.class));
+    doNothing().when(quantityValidator).validate(any(StockEventDto2.class));
+    doNothing().when(reasonAssignmentValidator).validate(any(StockEventDto2.class));
   }
 
   @Test
   public void should_validate_with_all_implementations_of_validators() throws Exception {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    StockEventDto2 stockEventDto = StockEventDtoBuilder.createStockEventDto2();
 
     //when:
     stockEventValidationsService.validate(stockEventDto);
@@ -110,7 +110,7 @@ public class StockEventValidationsServiceTest {
   @Test
   public void should_not_run_next_validator_if_previous_validator_failed() throws Exception {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    StockEventDto2 stockEventDto = StockEventDtoBuilder.createStockEventDto2();
     doThrow(new ValidationMessageException(new Message("some error")))
         .when(validator1).validate(stockEventDto);
 

@@ -115,11 +115,10 @@ public class StockCardServiceTest extends BaseTest {
     //given
     //1. there is an existing event that caused a stock card to exist
     StockEventDto2 existingEventDto = createStockEventDto2();
-    StockEvent2 existingEvent = save(existingEventDto, UUID.randomUUID());
+    final StockEvent2 existingEvent = save(existingEventDto, UUID.randomUUID());
     UUID orderableId = existingEventDto.getLineItems().get(0).getOrderableId();
 
     //2. and there is a new event coming
-    UUID userId = UUID.randomUUID();
     StockEventDto2 newEventDto = createStockEventDto2();
     newEventDto.setProgramId(existingEventDto.getProgramId());
     newEventDto.setFacilityId(existingEventDto.getFacilityId());
@@ -127,6 +126,7 @@ public class StockCardServiceTest extends BaseTest {
 
     //when
     long cardAmountBeforeSave = stockCardRepository.count();
+    UUID userId = UUID.randomUUID();
     StockEvent2 savedNewEvent = save(newEventDto, userId);
     long cardAmountAfterSave = stockCardRepository.count();
 
