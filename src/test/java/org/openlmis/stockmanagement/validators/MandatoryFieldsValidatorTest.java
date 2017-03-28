@@ -15,7 +15,9 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static java.util.Collections.emptyList;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_FACILITY_INVALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_NO_LINE_ITEMS;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_OCCURRED_DATE_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ORDERABLE_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_PROGRAM_INVALID;
@@ -30,11 +32,13 @@ import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.FacilityDto;
 import org.openlmis.stockmanagement.dto.ProgramDto;
-import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventDto2;
+import org.openlmis.stockmanagement.dto.StockEventLineItem;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @SuppressWarnings("PMD.TooManyMethods")
@@ -42,19 +46,19 @@ import java.util.UUID;
 public class MandatoryFieldsValidatorTest {
 
   @InjectMocks
-  private MandatoryFieldsValidator mandatoryFieldsValidator;
+  private MandatoryFieldsValidator2 mandatoryFieldsValidator;
 
   @Rule
   public ExpectedException expectedEx = ExpectedException.none();
 
-  private StockEventDto stockEventDto;
+  private StockEventDto2 stockEventDto;
 
   @Before
   public void setUp() throws Exception {
     StockEventProcessContext stockEventContext = StockEventProcessContext.builder()
         .facility(new FacilityDto())
         .program(new ProgramDto()).build();
-    stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    stockEventDto = StockEventDtoBuilder.createStockEventDto2();
     stockEventDto.setContext(stockEventContext);
   }
 
@@ -119,6 +123,22 @@ public class MandatoryFieldsValidatorTest {
     mandatoryFieldsValidator.validate(stockEventDto);
   }
 
+  @Test
+  public void should_not_pass_if_no_line_items() throws Exception {
+    expectLineItemsError(null);
+  }
+
+  @Test
+  public void should_not_pass_if_empty_line_items() throws Exception {
+    expectLineItemsError(emptyList());
+  }
+
+  private void expectLineItemsError(List<StockEventLineItem> lineItems) {
+    stockEventDto.setLineItems(lineItems);
+    expectedEx.expectMessage(ERROR_EVENT_NO_LINE_ITEMS);
+    mandatoryFieldsValidator.validate(stockEventDto);
+  }
+
   private void expectFacilityException(UUID facilityId) {
     //given
     stockEventDto.setFacilityId(facilityId);
@@ -141,7 +161,7 @@ public class MandatoryFieldsValidatorTest {
 
   private void expectOrderableException(UUID orderableId) {
     //given
-    stockEventDto.setOrderableId(orderableId);
+    stockEventDto.getLineItems().get(0).setOrderableId(orderableId);
 
     //when
     String suffix = orderableId != null ? orderableId.toString() : "";
@@ -161,11 +181,11 @@ public class MandatoryFieldsValidatorTest {
 
   private void expectQuantityException(Integer quantity) {
     //given
-    stockEventDto.setQuantity(quantity);
+    List<StockEventLineItem> lineItems = stockEventDto.getLineItems();
+    lineItems.get(0).setQuantity(quantity);
 
     //when
-    String suffix = quantity != null ? quantity.toString() : "";
-    expectedEx.expectMessage(ERROR_EVENT_QUANTITY_INVALID + ": " + suffix);
+    expectedEx.expectMessage(ERROR_EVENT_QUANTITY_INVALID + ": " + lineItems);
     mandatoryFieldsValidator.validate(stockEventDto);
   }
 }

@@ -85,6 +85,9 @@ public abstract class MessageKeys {
   public static final String ERROR_EVENT_ORDERABLE_INVALID = EVENT_ERROR_PREFIX
       + ".orderableId.invalid";
 
+  public static final String ERROR_EVENT_NO_LINE_ITEMS = EVENT_ERROR_PREFIX
+      + ".no.lineItems";
+
   //stock events creation: adjustment reason
   public static final String ERROR_EVENT_ADJUSTMENT_REASON_TYPE_INVALID = EVENT_ERROR_PREFIX
       + ".adjustment.reason.type.invalid";

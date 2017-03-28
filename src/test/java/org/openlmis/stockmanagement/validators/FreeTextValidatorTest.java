@@ -36,7 +36,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.movement.Node;
-import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventDto2;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.NodeRepository;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
@@ -47,7 +47,7 @@ import java.util.UUID;
 public class FreeTextValidatorTest {
 
   @InjectMocks
-  FreeTextValidator freeTextValidator;
+  FreeTextValidator2 freeTextValidator;
 
   @Mock
   NodeRepository nodeRepository;
@@ -62,7 +62,7 @@ public class FreeTextValidatorTest {
 
   @Test
   public void should_fail_when_source_not_exist_but_source_free_text_exist() throws Exception {
-    StockEventDto eventDto = new StockEventDto();
+    StockEventDto2 eventDto = new StockEventDto2();
     eventDto.setSourceId(null);
     eventDto.setSourceFreeText("source free text");
 
@@ -80,7 +80,7 @@ public class FreeTextValidatorTest {
   @Test
   public void should_fail_when_destination_not_exist_but_destination_free_text_exist()
       throws Exception {
-    StockEventDto eventDto = new StockEventDto();
+    StockEventDto2 eventDto = new StockEventDto2();
     eventDto.setDestinationId(null);
     eventDto.setDestinationFreeText("destination free text");
 
@@ -97,7 +97,7 @@ public class FreeTextValidatorTest {
 
   @Test
   public void should_fail_when_reason_not_exist_but_reason_free_text_exist() throws Exception {
-    StockEventDto eventDto = new StockEventDto();
+    StockEventDto2 eventDto = new StockEventDto2();
     eventDto.setReasonId(null);
     eventDto.setReasonFreeText("reason free text");
 
@@ -114,7 +114,7 @@ public class FreeTextValidatorTest {
 
   @Test
   public void should_fail_when_event_has_both_source_and_destination_free_text() throws Exception {
-    StockEventDto eventDto = new StockEventDto();
+    StockEventDto2 eventDto = new StockEventDto2();
     eventDto.setReasonId(randomUUID());
     eventDto.setDestinationId(randomUUID());
     eventDto.setSourceFreeText("source free text");
@@ -139,7 +139,7 @@ public class FreeTextValidatorTest {
     when(nodeRepository.findOne(sourceId)).thenReturn(mockNode);
     when(mockNode.isRefDataFacility()).thenReturn(true);
 
-    StockEventDto eventDto = new StockEventDto();
+    StockEventDto2 eventDto = new StockEventDto2();
     eventDto.setSourceId(sourceId);
     eventDto.setSourceFreeText("source free text");
 
@@ -161,7 +161,7 @@ public class FreeTextValidatorTest {
     when(nodeRepository.findOne(destinationId)).thenReturn(mockNode);
     when(mockNode.isRefDataFacility()).thenReturn(true);
 
-    StockEventDto eventDto = new StockEventDto();
+    StockEventDto2 eventDto = new StockEventDto2();
     eventDto.setDestinationId(destinationId);
     eventDto.setDestinationFreeText("destination free text");
 
@@ -182,7 +182,7 @@ public class FreeTextValidatorTest {
     when(stockCardLineItemReasonRepository.findOne(any(UUID.class))).thenReturn(mockReason);
     when(mockReason.getIsFreeTextAllowed()).thenReturn(false);
 
-    StockEventDto eventDto = new StockEventDto();
+    StockEventDto2 eventDto = new StockEventDto2();
     eventDto.setReasonId(fromString("e3fc3cf3-da18-44b0-a220-77c985202e06"));
     eventDto.setReasonFreeText("reason free text");
 
