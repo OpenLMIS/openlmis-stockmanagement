@@ -21,7 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 
 import java.util.UUID;
 
@@ -33,8 +33,9 @@ public class JasperReportServiceTest {
   @Mock
   private StockCardService stockCardService;
 
-  @Test(expected = ValidationMessageException.class)
-  public void should_throw_validation_exception_when_stock_card_not_found() throws Exception {
+  @Test(expected = ResourceNotFoundException.class)
+  public void should_throw_resource_not_found_exception_when_stock_card_not_exists()
+      throws Exception {
     //given
     UUID stockCardId = UUID.randomUUID();
     Mockito.when(stockCardService.findStockCardById(stockCardId)).thenReturn(null);

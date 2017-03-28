@@ -23,9 +23,10 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REPORT_ID_NOT_
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperReport;
+
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.exception.JasperReportViewException;
-import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -69,7 +70,7 @@ public class JasperReportService {
   public ModelAndView getStockCardReportView(UUID stockCardId) {
     StockCardDto stockCardDto = stockCardService.findStockCardById(stockCardId);
     if (stockCardDto == null) {
-      throw new ValidationMessageException(new Message(ERROR_REPORT_ID_NOT_FOUND));
+      throw new ResourceNotFoundException(new Message(ERROR_REPORT_ID_NOT_FOUND));
     }
     Map<String, Object> params = new HashMap<>();
     params.put("datasource", singletonList(stockCardDto));

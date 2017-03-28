@@ -321,15 +321,17 @@ traits:
             200:
               body:
                 application/pdf:
-            400:
-              description: Stock card with given id does not exist, can not get report.
-              body:
-                application/json:
+
             403:
               description: User does not have permission to get stock card report.
               body:
                 application/json:
                   schema: localizedMessage
+
+            404:
+              description: Stock card with given id does not exist, can not get report.
+              body:
+                application/json:
 
   /validDestinations:
       get:

@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.errorhandling;
 import org.openlmis.stockmanagement.exception.AuthenticationException;
 import org.openlmis.stockmanagement.exception.JasperReportViewException;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
+import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.DataRetrievalException;
 import org.openlmis.stockmanagement.util.ErrorResponse;
@@ -60,6 +61,13 @@ public class GlobalErrorHandling extends AbstractErrorHandling {
   @ResponseBody
   public ErrorResponse handleJasperReportException(JasperReportViewException ex) {
     return logErrorAndRespond("Error generating jasper report failed", ex);
+  }
+
+  @ExceptionHandler(ResourceNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseBody
+  public Message.LocalizedMessage handleResourceNotFoundException(ResourceNotFoundException ex) {
+    return getLocalizedMessage(ex);
   }
 
   /**
