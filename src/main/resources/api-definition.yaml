@@ -321,8 +321,8 @@ traits:
             200:
               body:
                 application/pdf:
-            404:
-              description: Stock card with given id does not exist.
+            400:
+              description: Stock card with given id does not exist, can not get report.
               body:
                 application/json:
             403:

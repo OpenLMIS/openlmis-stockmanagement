@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.web;
 
 import static java.lang.String.format;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,8 +24,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Test;
+import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.service.JasperReportService;
 import org.openlmis.stockmanagement.service.PermissionService;
+import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.servlet.ModelAndView;
@@ -74,5 +77,23 @@ public class ReportsControllerTest extends BaseWebTest {
     //then
     resultActions.andExpect(status().isOk());
     verify(permissionService, times(1)).canViewStockCard(program, facility);
+  }
+
+  @Test
+  public void return_403_when_user_has_no_permission_to_view_stock_card() throws Exception {
+    //given
+    UUID programId = UUID.randomUUID();
+    UUID facilityId = UUID.randomUUID();
+    doThrow(new PermissionMessageException(new Message("key"))).when(permissionService)
+        .canViewStockCard(programId, facilityId);
+
+    //when
+    ResultActions resultActions = mvc.perform(get(CARD_SUMMARY_REPORT)
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+        .param("program", programId.toString())
+        .param("facility", facilityId.toString()));
+
+    //then
+    resultActions.andExpect(status().isForbidden());
   }
 }
