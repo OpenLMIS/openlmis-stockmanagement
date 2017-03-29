@@ -19,7 +19,6 @@ import static java.util.stream.Collectors.toList;
 import static org.openlmis.stockmanagement.domain.BaseEntity.fromId;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_NOT_INCLUDE_ACTIVE_STOCK_CARD;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ORDERABLE_DUPLICATION;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING;
 
 import org.openlmis.stockmanagement.domain.event.StockEvent;
@@ -67,7 +66,8 @@ public class PhysicalInventoryService {
    */
   public UUID submitPhysicalInventory(PhysicalInventoryDto inventoryDto)
       throws IllegalAccessException, InstantiationException {
-    validateForSubmit(inventoryDto);
+    validateLineItems(inventoryDto);
+    checkIncludeActiveStockCard(inventoryDto);
     deleteExistingDraft(inventoryDto);
 
     LOGGER.info("submit physical inventory, items count: " + inventoryDto.getLineItems().size());
@@ -129,18 +129,13 @@ public class PhysicalInventoryService {
         .programId(programId)
         .facilityId(facilityId)
         .isStarter(true)
-        .lineItems(stockCardSummariesService.findStockCards(programId, facilityId).stream()
-            .map(stockCardDto -> PhysicalInventoryLineItemDto.builder()
+        .lineItems(stockCardSummariesService.findStockCards(programId, facilityId)
+            .stream().map(stockCardDto -> PhysicalInventoryLineItemDto.builder()
                 .orderable(stockCardDto.getOrderable())
                 .stockOnHand(stockCardDto.getStockOnHand())
                 .build())
             .collect(toList()))
         .build();
-  }
-
-  private void validateForSubmit(PhysicalInventoryDto dto) {
-    validateLineItems(dto);
-    checkIncludeActiveStockCard(dto);
   }
 
   private void validateLineItems(PhysicalInventoryDto dto) {
@@ -154,16 +149,6 @@ public class PhysicalInventoryService {
     if (orderableMissing) {
       throw new ValidationMessageException(
           new Message(ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING));
-    }
-    checkOrderableDuplication(lineItems);
-  }
-
-  private void checkOrderableDuplication(List<PhysicalInventoryLineItemDto> lineItems) {
-    long count = lineItems.stream()
-        .map(lineItem -> lineItem.getOrderable().getId()).distinct().count();
-    if (count < lineItems.size()) {
-      throw new ValidationMessageException(
-          new Message(ERROR_PHYSICAL_INVENTORY_ORDERABLE_DUPLICATION));
     }
   }
 

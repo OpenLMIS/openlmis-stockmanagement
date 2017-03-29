@@ -86,27 +86,6 @@ public class PhysicalInventoryServiceTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void should_throw_validation_exception_when_orderables_are_duplicate() throws Exception {
-    //given
-    PhysicalInventoryDto piDto = new PhysicalInventoryDto();
-
-    UUID orderableId1 = UUID.fromString("944ba21e-5ef8-4a83-95bf-09d82a9a5271");
-    OrderableDto orderable1 = OrderableDto.builder().id(orderableId1).build();
-    PhysicalInventoryLineItemDto piLineItemDto1 = new PhysicalInventoryLineItemDto();
-    piLineItemDto1.setOrderable(orderable1);
-
-    UUID orderableId2 = UUID.fromString("944ba21e-5ef8-4a83-95bf-09d82a9a5271");
-    OrderableDto orderable2 = OrderableDto.builder().id(orderableId2).build();
-    PhysicalInventoryLineItemDto piLineItemDto2 = new PhysicalInventoryLineItemDto();
-    piLineItemDto2.setOrderable(orderable2);
-
-    piDto.setLineItems(Arrays.asList(piLineItemDto1, piLineItemDto2));
-
-    //when
-    physicalInventoryService.submitPhysicalInventory(piDto);
-  }
-
-  @Test(expected = ValidationMessageException.class)
   public void should_throw_validation_exception_when_active_stock_card_not_included()
       throws Exception {
     //given
