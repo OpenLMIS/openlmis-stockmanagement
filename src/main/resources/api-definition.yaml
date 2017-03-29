@@ -24,7 +24,6 @@ schemas:
   - geographicZone: !include schemas/geographicZone.json
   - stockCardTemplate: !include schemas/stockCardTemplate.json
   - stockEventDto: !include schemas/stockEventDto.json
-  - stockEventDtoRevised: !include schemas/stockEventDtoRevised.json
   - stockEventLineItemDto: !include schemas/stockEventLineItemDto.json
 
   - stockCards: !include schemas/stockCards.json
@@ -173,7 +172,7 @@ traits:
   /stockEvents:
       post:
         is: [ secured ]
-        description: Create a new stock event.
+        description: Create a new stock event with one or more orderables.
         body:
           application/json:
             schema: stockEventDto
@@ -196,14 +195,6 @@ traits:
             body:
               application/json:
                   schema: localizedMessage
-
-  /stockEventsRevised:
-      post:
-        is: [ secured ]
-        description: NOT IMPLEMENTED YET, ONLY FOR CODE REVIEW PURPOSES, WILL BECOME stockEvents AND REPLACE physicalInventory. Create a new stock event with one or more orderables.
-        body:
-          application/json:
-            schema: stockEventDtoRevised
 
   /stockCards:
       get:
