@@ -17,7 +17,6 @@ package org.openlmis.stockmanagement.dto;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -30,6 +29,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -129,9 +129,10 @@ public class PhysicalInventoryDto {
    */
   public void mergeWith(
       List<StockCardDto> stockCards) {
-    Map<UUID, Integer> savedQuantities = this.lineItems.stream().collect(toMap(
-        lineItem -> lineItem.getOrderable().getId(),
-        PhysicalInventoryLineItemDto::getQuantity));
+    Map<UUID, Integer> savedQuantities = this.lineItems.stream()
+        .collect(HashMap::new,
+            (map, lineItem) -> map.put(lineItem.getOrderable().getId(), lineItem.getQuantity()),
+            HashMap::putAll);
 
     this.setLineItems(stockCards.stream()
         .map(stockCardDto -> PhysicalInventoryLineItemDto.builder()

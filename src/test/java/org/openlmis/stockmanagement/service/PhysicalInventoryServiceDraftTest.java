@@ -171,7 +171,7 @@ public class PhysicalInventoryServiceDraftTest {
     PhysicalInventoryLineItemDto piLineItemDto = PhysicalInventoryLineItemDto
         .builder()
         .orderable(OrderableDto.builder().id(randomUUID()).build())
-        .quantity(233)
+        .quantity(null)//quantity is allowed to be null
         .build();
     return PhysicalInventoryDto
         .builder()
