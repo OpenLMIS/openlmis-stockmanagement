@@ -153,7 +153,8 @@ public class PermissionService {
   private void hasPermission(String rightName, UUID program, UUID facility, UUID warehouse) {
     ResultDto<Boolean> result = getRightResult(rightName, program, facility, warehouse);
     if (null == result || !result.getResult()) {
-      throw new PermissionMessageException(new Message(ERROR_NO_FOLLOWING_PERMISSION, rightName));
+      throw new PermissionMessageException(
+          new Message(ERROR_NO_FOLLOWING_PERMISSION, rightName, program, facility));
     }
   }
 
