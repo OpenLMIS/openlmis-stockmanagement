@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 
 @Service
 public class JasperReportService {
@@ -86,15 +87,20 @@ public class JasperReportService {
    * @return generated stock card summary report.
    */
   public ModelAndView getStockCardSummariesReportView(UUID program, UUID facility) {
-    List<StockCardDto> stockCards = stockCardSummariesService.findStockCards(program, facility);
-    StockCardDto firstCard = stockCards.get(0);
+    List<StockCardDto> cards = stockCardSummariesService.findStockCards(program, facility);
+    StockCardDto firstCard = cards.get(0);
     Map<String, Object> params = new HashMap<>();
-    params.put("stockCardSummaries", stockCards);
+    params.put("stockCardSummaries", cards);
     params.put("program", firstCard.getProgram());
-
+    params.put("showProgram", getCount(cards, card -> card.getProgram().getId().toString()) > 1);
     params.put("facility", firstCard.getFacility());
+    params.put("showFacility", getCount(cards, card -> card.getFacility().getId().toString()) > 1);
 
     return generateReport(CARD_SUMMARY_REPORT_URL, params);
+  }
+
+  private long getCount(List<StockCardDto> stockCards, Function<StockCardDto, String> mapper) {
+    return stockCards.stream().map(mapper).distinct().count();
   }
 
   private ModelAndView generateReport(String templateUrl, Map<String, Object> params) {
