@@ -116,6 +116,10 @@ public abstract class MessageKeys {
   public static final String ERROR_EVENT_REASON_NOT_IN_VALID_LIST = EVENT_ERROR_PREFIX
       + ".reason.not.in.validList";
 
+  //stock events creation: orderable duplication
+  public static final String ERROR_EVENT_ORDERABLE_DUPLICATION = EVENT_ERROR_PREFIX
+      + ".orderable.duplication";
+
   //reason configuration
   public static final String ERROR_REASON_ID_EMPTY = ERROR_PREFIX
       + ".reason.id.isEmpty";
