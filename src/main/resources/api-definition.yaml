@@ -153,7 +153,11 @@ traits:
 
       post:
         is: [ secured ]
-        description: Create stock card template for a facility-type&program combination.
+        description: |
+          Create stock card template for a facility-type&program combination.
+          This is for administrators only.
+          It requires the permission STOCK_CARD_TEMPLATES_MANAGE.
+
         body:
           application/json:
             schema: stockCardTemplate
@@ -592,7 +596,12 @@ traits:
       displayName: Stock Card Line Item Reason
       get:
         is: [ secured ]
-        description: Retrieve all reasons.
+        description: |
+          Retrieve all reasons.
+          This is for administrators only.
+          It requires the permission STOCK_CARD_LINE_ITEM_REASONS_MANAGE.
+          Regular users can get the list of reasons they can use through /api/validReasons.
+
         responses:
           200:
             description: Return a list of stock line item reasons.
@@ -669,7 +678,11 @@ traits:
   /organizations:
       get:
         is: [ secured ]
-        description: Retrieve all organizations.
+        description: |
+          Retrieve all organizations.
+          This is for administrators only.
+          It requires the permission STOCK_ORGANIZATIONS_MANAGE.
+          Regular users can get the list of sources or destinations they can use through /api/validSources and /api/validDestinations.
         responses:
           200:
             description: Return a list of organizations.
