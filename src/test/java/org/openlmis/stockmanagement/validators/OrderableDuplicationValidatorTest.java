@@ -50,7 +50,8 @@ public class OrderableDuplicationValidatorTest {
 
     UUID orderableId = UUID.randomUUID();
     orderableLineItem1.setOrderableId(orderableId);
-    orderableLineItem2.setOrderableId(orderableId);
+    //same uuid string, different object, make sure the code recognize them as same uuid
+    orderableLineItem2.setOrderableId(UUID.fromString(orderableId.toString()));
 
     StockEventDto eventDto = new StockEventDto();
     eventDto.setLineItems(new ArrayList<>());

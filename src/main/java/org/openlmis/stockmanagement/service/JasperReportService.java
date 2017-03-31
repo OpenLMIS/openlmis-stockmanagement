@@ -91,9 +91,12 @@ public class JasperReportService {
     StockCardDto firstCard = cards.get(0);
     Map<String, Object> params = new HashMap<>();
     params.put("stockCardSummaries", cards);
+
     params.put("program", firstCard.getProgram());
-    params.put("showProgram", getCount(cards, card -> card.getProgram().getId().toString()) > 1);
     params.put("facility", firstCard.getFacility());
+    //right now, each report can only be about one program, one facility
+    //in the future we may want to support one reprot for multiple programs
+    params.put("showProgram", getCount(cards, card -> card.getProgram().getId().toString()) > 1);
     params.put("showFacility", getCount(cards, card -> card.getFacility().getId().toString()) > 1);
 
     return generateReport(CARD_SUMMARY_REPORT_URL, params);

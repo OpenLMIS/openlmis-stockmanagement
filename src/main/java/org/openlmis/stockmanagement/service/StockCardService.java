@@ -74,7 +74,7 @@ public class StockCardService extends StockCardBaseService {
   public void saveFromEvent(StockEventDto stockEventDto, UUID savedEventId, UUID currentUserId)
       throws IllegalAccessException, InstantiationException {
     for (StockEventLineItem eventLineItem : stockEventDto.getLineItems()) {
-      StockCard stockCard = findExistingOrCreateNewCard(stockEventDto, eventLineItem, savedEventId);
+      StockCard stockCard = findOrCreateCard(stockEventDto, eventLineItem, savedEventId);
 
       StockCardLineItem lineItem =
           createLineItemFrom(stockEventDto, eventLineItem, stockCard, savedEventId, currentUserId);
@@ -105,8 +105,8 @@ public class StockCardService extends StockCardBaseService {
     return stockCardDto;
   }
 
-  private StockCard findExistingOrCreateNewCard(StockEventDto eventDto,
-                                                StockEventLineItem eventLineItem, UUID savedEventId)
+  private StockCard findOrCreateCard(StockEventDto eventDto,
+                                     StockEventLineItem eventLineItem, UUID savedEventId)
       throws InstantiationException, IllegalAccessException {
 
     UUID foundCardId = cardRepository.getStockCardIdBy(
