@@ -29,7 +29,7 @@ services:
     build: .
     image: openlmis/stockmanagement
   db:
-    image: openlmis/postgres:9.4
+    image: openlmis/postgres:9.6
     env_file: .env
   log:
     image: openlmis/rsyslog:1

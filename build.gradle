@@ -41,7 +41,7 @@ dependencies {
     compile 'org.hibernate:hibernate-java8'
 
     compile "org.projectlombok:lombok:1.16.8"
-    compile "org.postgresql:postgresql:9.4.1208"
+    compile "org.postgresql:postgresql:42.0.0"
     compile "com.github.tomakehurst:wiremock:1.58"
     compile 'org.webjars:swagger-ui:2.2.6'
     compile 'org.apache.commons:commons-lang3:3.4'
