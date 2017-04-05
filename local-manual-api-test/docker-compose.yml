@@ -43,7 +43,7 @@ services:
     depends_on: [consul,log,db]
 
   db:
-    image: openlmis/postgres:9.4
+    image: openlmis/postgres:9.6
     ports:
       - "5432:5432"
     env_file: .manual-api-test-env
