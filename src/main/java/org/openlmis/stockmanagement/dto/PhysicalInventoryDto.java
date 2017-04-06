@@ -118,6 +118,11 @@ public class PhysicalInventoryDto {
         .collect(toList()));
   }
 
+  /**
+   * Create physical inventory dto object from stock event dto object.
+   * @param eventDto event dto.
+   * @return created physical inventory dto.
+   */
   public static PhysicalInventoryDto fromEventDto(StockEventDto eventDto) {
     return PhysicalInventoryDto.builder()
         .programId(eventDto.getProgramId())

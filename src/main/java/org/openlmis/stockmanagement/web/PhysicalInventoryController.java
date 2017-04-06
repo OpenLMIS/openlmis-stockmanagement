@@ -15,7 +15,6 @@
 
 package org.openlmis.stockmanagement.web;
 
-import static org.slf4j.LoggerFactory.getLogger;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -24,7 +23,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.PhysicalInventoryService;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -38,8 +36,6 @@ import java.util.UUID;
 @Controller
 @RequestMapping("/api")
 public class PhysicalInventoryController {
-
-  private static final Logger LOGGER = getLogger(PhysicalInventoryController.class);
 
   @Autowired
   private PermissionService permissionService;

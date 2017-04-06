@@ -26,7 +26,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.Test;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
-import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.PhysicalInventoryService;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -37,9 +36,6 @@ import java.util.UUID;
 public class PhysicalInventoryControllerTest extends BaseWebTest {
   private static final String PHYSICAL_INVENTORY_API = "/api/physicalInventories";
   private static final String PHYSICAL_INVENTORY_DRAFT_API = "/api/physicalInventories/draft";
-
-  @MockBean
-  private PermissionService permissionService;
 
   @MockBean
   private PhysicalInventoryService physicalInventoryService;
