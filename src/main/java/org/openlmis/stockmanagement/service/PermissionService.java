@@ -81,7 +81,7 @@ public class PermissionService {
    * @param programId  program id.
    * @param facilityId facility id.
    */
-  public void canMakeAdjustment(UUID programId, UUID facilityId) {
+  public void canAdjustStock(UUID programId, UUID facilityId) {
     hasPermission(STOCK_ADJUST, programId, facilityId, null);
   }
 

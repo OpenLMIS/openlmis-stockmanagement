@@ -74,11 +74,24 @@ public class StockEventsControllerTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_403_when_user_has_not_permission() throws Exception {
+  public void should_return_403_when_user_has_no_permission_to_adjust_stock() throws Exception {
     //given
     Mockito.doThrow(new PermissionMessageException(
         new Message(ERROR_NO_FOLLOWING_PERMISSION, STOCK_ADJUST)))
-        .when(permissionService).canMakeAdjustment(any(UUID.class), any(UUID.class));
+        .when(permissionService).canAdjustStock(any(UUID.class), any(UUID.class));
+
+    StockEventDto eventDto = new StockEventDto();
+    eventDto.setReasonId(UUID.randomUUID());
+    shouldReject(eventDto);
+  }
+
+  @Test
+  public void should_return_403_when_user_has_no_permission_to_perform_physical_inventory()
+      throws Exception {
+    //given
+    Mockito.doThrow(new PermissionMessageException(
+        new Message(ERROR_NO_FOLLOWING_PERMISSION, STOCK_ADJUST)))
+        .when(permissionService).canEditPhysicalInventory(any(UUID.class), any(UUID.class));
 
     shouldReject(new StockEventDto());
   }

@@ -99,4 +99,8 @@ public class StockEventDto {
   public boolean hasReasonFreeText() {
     return this.reasonFreeText != null;
   }
+
+  public boolean isPhysicalInventory() {
+    return !hasReason() && !hasDestination() && !hasSource();
+  }
 }

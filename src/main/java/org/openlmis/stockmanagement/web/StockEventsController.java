@@ -63,10 +63,22 @@ public class StockEventsController {
   public ResponseEntity<UUID> createStockEvent(@RequestBody StockEventDto eventDto)
       throws InstantiationException, IllegalAccessException {
     LOGGER.debug("Try to create a stock event");
-    rejectIfIssueOrReceive(eventDto);
-    permissionService.canMakeAdjustment(eventDto.getProgramId(), eventDto.getFacilityId());
+    checkPermission(eventDto);
     UUID createdEventId = stockEventProcessor.process(eventDto);
     return new ResponseEntity<>(createdEventId, CREATED);
+  }
+
+  private void checkPermission(@RequestBody StockEventDto eventDto) {
+    rejectIfIssueOrReceive(eventDto);
+
+    UUID programId = eventDto.getProgramId();
+    UUID facilityId = eventDto.getFacilityId();
+
+    if (eventDto.isPhysicalInventory()) {
+      permissionService.canEditPhysicalInventory(programId, facilityId);
+    } else {
+      permissionService.canAdjustStock(programId, facilityId);
+    }
   }
 
   //this method blocks user from doing issue/receive.
