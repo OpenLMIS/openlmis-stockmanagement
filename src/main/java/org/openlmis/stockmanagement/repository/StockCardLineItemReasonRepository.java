@@ -15,8 +15,6 @@
 
 package org.openlmis.stockmanagement.repository;
 
-import org.openlmis.stockmanagement.domain.adjustment.ReasonCategory;
-import org.openlmis.stockmanagement.domain.adjustment.ReasonType;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -28,12 +26,6 @@ public interface StockCardLineItemReasonRepository extends
     PagingAndSortingRepository<StockCardLineItemReason, UUID> {
   List<StockCardLineItemReason> findAll();
 
-  StockCardLineItemReason
-      findByNameAndReasonTypeAndReasonCategoryAndIsFreeTextAllowedAndDescription(
-      @Param("name") String name,
-      @Param("reasonType") ReasonType reasonType,
-      @Param("reasonCategory") ReasonCategory reasonCategory,
-      @Param("isFreeTextAllowed") Boolean isFreeTextAllowed,
-      @Param("description") String description);
+  StockCardLineItemReason findByName(@Param("name") String name);
 
 }

@@ -60,6 +60,7 @@ public class StockCardLineItemReasonService {
    */
   public StockCardLineItemReason saveOrUpdate(StockCardLineItemReason reason) {
     validateRequiredValueNotNull(reason);
+    validateReasonNameDuplicate(reason);
     LOGGER.debug("Is going to save reason");
     return reasonRepository.save(reason);
   }
@@ -71,7 +72,7 @@ public class StockCardLineItemReasonService {
    * @return a boolean for same reason existing
    */
   public boolean reasonExists(StockCardLineItemReason reason) {
-    return foundReasonByContent(reason) != null;
+    return reasonRepository.findByName(reason.getName()) != null;
   }
 
   /**
@@ -91,23 +92,12 @@ public class StockCardLineItemReasonService {
    *
    * @param reason would be updated
    */
-
-  public void checkUpdateReasonDuplicate(StockCardLineItemReason reason) {
-    StockCardLineItemReason foundReason = foundReasonByContent(reason);
-    if (foundReason != null && foundReason.getId() != reason.getId()) {
+  public void validateReasonNameDuplicate(StockCardLineItemReason reason) {
+    StockCardLineItemReason foundReason = reasonRepository.findByName(reason.getName());
+    if (foundReason != null) {
       throw new ValidationMessageException(
           new Message(ERROR_LINE_ITEM_REASON_UPDATE_CONTENT_DUPLICATE));
     }
-  }
-
-  private StockCardLineItemReason foundReasonByContent(StockCardLineItemReason reason) {
-    return reasonRepository
-        .findByNameAndReasonTypeAndReasonCategoryAndIsFreeTextAllowedAndDescription(
-            reason.getName(),
-            reason.getReasonType(),
-            reason.getReasonCategory(),
-            reason.getIsFreeTextAllowed(),
-            reason.getDescription());
   }
 
   private void validateRequiredValueNotNull(StockCardLineItemReason reason) {

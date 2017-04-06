@@ -193,7 +193,7 @@ public class StockCardLineItemReasonControllerTest extends BaseWebTest {
     //given
     StockCardLineItemReason reason = createReason();
     doThrow(new ValidationMessageException(new Message("key")))
-        .when(stockCardLineItemReasonService).checkUpdateReasonDuplicate(reason);
+        .when(stockCardLineItemReasonService).validateReasonNameDuplicate(reason);
     when(stockCardLineItemReasonService.reasonExists(reason)).thenReturn(true);
 
     //when

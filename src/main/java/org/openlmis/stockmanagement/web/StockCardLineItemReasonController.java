@@ -93,7 +93,7 @@ public class StockCardLineItemReasonController {
     LOGGER.debug("Try to update stock card line item reason with id: ", reasonId.toString());
     reason.setId(reasonId);
     reasonService.checkUpdateReasonIdExists(reasonId);
-    reasonService.checkUpdateReasonDuplicate(reason);
+    reasonService.validateReasonNameDuplicate(reason);
     return new ResponseEntity<>(reasonService.saveOrUpdate(reason), OK);
   }
 }
