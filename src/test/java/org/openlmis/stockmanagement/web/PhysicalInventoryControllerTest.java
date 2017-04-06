@@ -17,6 +17,8 @@ package org.openlmis.stockmanagement.web;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -26,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.Test;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
+import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.PhysicalInventoryService;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -40,6 +43,9 @@ public class PhysicalInventoryControllerTest extends BaseWebTest {
   @MockBean
   private PhysicalInventoryService physicalInventoryService;
 
+  @MockBean
+  private PermissionService permissionService;
+
   @Test
   public void should_return_200_when_found_physical_inventory_draft() throws Exception {
     //given
@@ -53,6 +59,7 @@ public class PhysicalInventoryControllerTest extends BaseWebTest {
         .build();
     when(physicalInventoryService.findDraft(programId, facilityId))
         .thenReturn(physicalInventoryDto);
+    doNothing().when(permissionService).canEditPhysicalInventory(programId, facilityId);
 
     //when
     ResultActions resultActions = mvc.perform(
@@ -77,6 +84,7 @@ public class PhysicalInventoryControllerTest extends BaseWebTest {
         .build();
 
     when(physicalInventoryService.saveDraft(physicalInventoryDto)).thenReturn(physicalInventoryDto);
+    doNothing().when(permissionService).canEditPhysicalInventory(any(), any());
 
     //when
     ResultActions resultActions = mvc.perform(
