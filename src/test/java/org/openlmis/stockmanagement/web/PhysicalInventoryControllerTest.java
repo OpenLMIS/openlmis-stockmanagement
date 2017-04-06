@@ -16,26 +16,18 @@
 package org.openlmis.stockmanagement.web;
 
 import static java.util.Collections.singletonList;
-import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Test;
-import org.openlmis.stockmanagement.dto.OrderableDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
-import org.openlmis.stockmanagement.exception.PermissionMessageException;
-import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.PhysicalInventoryService;
-import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
@@ -51,56 +43,6 @@ public class PhysicalInventoryControllerTest extends BaseWebTest {
 
   @MockBean
   private PhysicalInventoryService physicalInventoryService;
-
-  @Test
-  public void should_return_403_if_user_not_has_permission() throws Exception {
-    //given
-    PhysicalInventoryDto piDto = new PhysicalInventoryDto();
-    piDto.setProgramId(randomUUID());
-    piDto.setFacilityId(randomUUID());
-    doThrow(new PermissionMessageException(new Message("permission error")))
-        .when(permissionService)
-        .canEditPhysicalInventory(piDto.getProgramId(), piDto.getFacilityId());
-
-    //when
-    ResultActions resultActions = callApi(piDto);
-
-    //then
-    resultActions.andExpect(status().isForbidden());
-  }
-
-  @Test
-  public void should_return_400_when_validation_failed() throws Exception {
-    //given
-    doThrow(new ValidationMessageException(new Message("key")))
-        .when(physicalInventoryService).submitPhysicalInventory(any(PhysicalInventoryDto.class));
-
-    //when
-    ResultActions resultActions = callApi(new PhysicalInventoryDto());
-
-    //then
-    resultActions.andExpect(status().isBadRequest());
-  }
-
-  @Test
-  public void should_return_201_when_physical_inventory_successfully_created() throws Exception {
-    //given
-    PhysicalInventoryDto piDto = new PhysicalInventoryDto();
-    PhysicalInventoryLineItemDto piLineItemDto = new PhysicalInventoryLineItemDto();
-    piLineItemDto.setOrderable(OrderableDto.builder().id(randomUUID()).build());
-    piDto.setLineItems(singletonList(piLineItemDto));
-
-    UUID inventoryId = UUID.randomUUID();
-    when(physicalInventoryService.submitPhysicalInventory(any(PhysicalInventoryDto.class)))
-        .thenReturn(inventoryId);
-
-    //when
-    ResultActions resultActions = callApi(piDto);
-
-    //then
-    resultActions.andExpect(status().isCreated())
-        .andExpect(content().string("\"" + inventoryId.toString() + "\""));
-  }
 
   @Test
   public void should_return_200_when_found_physical_inventory_draft() throws Exception {

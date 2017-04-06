@@ -20,7 +20,6 @@ import static java.util.stream.Collectors.toList;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 
 import lombok.AllArgsConstructor;
@@ -52,30 +51,6 @@ public class PhysicalInventoryDto {
   private Boolean isStarter;
 
   private List<PhysicalInventoryLineItemDto> lineItems;
-
-  /**
-   * Convert physical inventory dto to stock event dtos.
-   *
-   * @return converted objects.
-   */
-  public StockEventDto toEventDto() {
-    StockEventDto stockEventDto = new StockEventDto();
-    stockEventDto.setFacilityId(facilityId);
-    stockEventDto.setProgramId(programId);
-    stockEventDto.setOccurredDate(occurredDate);
-    stockEventDto.setSignature(signature);
-    stockEventDto.setDocumentNumber(documentNumber);
-
-    stockEventDto.setLineItems(lineItems.stream()
-        .map(lineItem -> {
-          StockEventLineItem eventLineItem = new StockEventLineItem();
-          eventLineItem.setOrderableId(lineItem.getOrderable().getId());
-          eventLineItem.setQuantity(lineItem.getQuantity());
-          return eventLineItem;
-        }).collect(toList()));
-
-    return stockEventDto;
-  }
 
   /**
    * Convert into physical inventory jpa model for submit.
@@ -141,6 +116,16 @@ public class PhysicalInventoryDto {
             .quantity(savedQuantities.get(stockCardDto.getOrderable().getId()))
             .build())
         .collect(toList()));
+  }
+
+  public static PhysicalInventoryDto fromEventDto(StockEventDto eventDto) {
+    return PhysicalInventoryDto.builder()
+        .programId(eventDto.getProgramId())
+        .facilityId(eventDto.getFacilityId())
+        .signature(eventDto.getSignature())
+        .documentNumber(eventDto.getDocumentNumber())
+        .occurredDate(eventDto.getOccurredDate())
+        .build();
   }
 
   private PhysicalInventory toPhysicalInventory(boolean isDraft) {

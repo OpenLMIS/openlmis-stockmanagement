@@ -34,6 +34,7 @@ import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.UserDto;
+import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
@@ -64,6 +65,9 @@ public class StockEventProcessorTest extends BaseTest {
   @Autowired
   private StockCardRepository stockCardRepository;
 
+  @Autowired
+  private PhysicalInventoriesRepository physicalInventoriesRepository;
+
   private UUID userId;
 
   @Before
@@ -81,6 +85,7 @@ public class StockEventProcessorTest extends BaseTest {
 
   @After
   public void tearDown() throws Exception {
+    physicalInventoriesRepository.deleteAll();
     stockCardRepository.deleteAll();
     stockEventsRepository.deleteAll();
   }
@@ -109,14 +114,31 @@ public class StockEventProcessorTest extends BaseTest {
 
   @Test
   public void should_save_event_and_line_items_when_validation_service_passes() throws Exception {
-    //when
     assertEventAndCardAndLineItemTableSize(0);
-
     StockEventDto stockEventDto = createStockEventDto();
+
+    //when
     stockEventProcessor.process(stockEventDto);
 
     //then
     assertEventAndCardAndLineItemTableSize(1);
+  }
+
+  @Test
+  public void should_persist_physical_inventory_when_event_is_about_physical_inventory()
+      throws Exception {
+    //given
+    StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.setReasonId(null);
+    stockEventDto.setSourceId(null);
+    stockEventDto.setDestinationId(null);
+
+    //when
+    stockEventProcessor.process(stockEventDto);
+
+    //then
+    assertEventAndCardAndLineItemTableSize(1);
+    assertThat(physicalInventoriesRepository.count(), is(1L));
   }
 
   private void assertEventAndCardAndLineItemTableSize(long size) {

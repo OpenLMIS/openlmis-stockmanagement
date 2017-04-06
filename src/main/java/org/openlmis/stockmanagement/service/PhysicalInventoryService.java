@@ -18,7 +18,6 @@ package org.openlmis.stockmanagement.service;
 import static java.util.stream.Collectors.toList;
 import static org.openlmis.stockmanagement.domain.BaseEntity.fromId;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_NOT_INCLUDE_ACTIVE_STOCK_CARD;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING;
 
 import org.openlmis.stockmanagement.domain.event.StockEvent;
@@ -28,7 +27,6 @@ import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
-import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.utils.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,37 +43,29 @@ public class PhysicalInventoryService {
   private static final Logger LOGGER = LoggerFactory.getLogger(PhysicalInventoryService.class);
 
   @Autowired
-  private StockEventProcessor stockEventProcessor;
-
-  @Autowired
   private PhysicalInventoriesRepository physicalInventoriesRepository;
-
-  @Autowired
-  private StockCardRepository stockCardRepository;
 
   @Autowired
   private StockCardSummariesService stockCardSummariesService;
 
   /**
-   * Submit physical inventory.
+   * Persist physical inventory, with an event id.
    *
-   * @param inventoryDto physical inventory DTO
-   * @return created physical inventory JPA model ID
-   * @throws IllegalAccessException IllegalAccessException
-   * @throws InstantiationException InstantiationException
+   * @param inventoryDto inventoryDto.
+   * @param eventId      eventId.
+   * @throws IllegalAccessException IllegalAccessException.
+   * @throws InstantiationException InstantiationException.
    */
-  public UUID submitPhysicalInventory(PhysicalInventoryDto inventoryDto)
+  public void submitPhysicalInventory(PhysicalInventoryDto inventoryDto, UUID eventId)
       throws IllegalAccessException, InstantiationException {
-    validateLineItems(inventoryDto);
-    checkIncludeActiveStockCard(inventoryDto);
+    LOGGER.info("submit physical inventory");
+
     deleteExistingDraft(inventoryDto);
 
-    LOGGER.info("submit physical inventory, items count: " + inventoryDto.getLineItems().size());
-
-    UUID eventId = stockEventProcessor.process(inventoryDto.toEventDto());
     PhysicalInventory inventory = inventoryDto.toPhysicalInventoryForSubmit();
     inventory.setStockEvent(fromId(eventId, StockEvent.class));
-    return physicalInventoriesRepository.save(inventory).getId();
+
+    physicalInventoriesRepository.save(inventory);
   }
 
   /**
@@ -109,19 +99,19 @@ public class PhysicalInventoryService {
     return dto;
   }
 
-  private PhysicalInventoryDto assignOrderablesAndSoh(PhysicalInventoryDto inventoryDto) {
-    List<StockCardDto> stockCards = stockCardSummariesService
-        .findStockCards(inventoryDto.getProgramId(), inventoryDto.getFacilityId());
-    inventoryDto.mergeWith(stockCards);
-    return inventoryDto;
-  }
-
   private void deleteExistingDraft(PhysicalInventoryDto dto) {
     PhysicalInventory foundInventory = physicalInventoriesRepository
         .findByProgramIdAndFacilityIdAndIsDraft(dto.getProgramId(), dto.getFacilityId(), true);
     if (foundInventory != null) {
       physicalInventoriesRepository.delete(foundInventory);
     }
+  }
+
+  private PhysicalInventoryDto assignOrderablesAndSoh(PhysicalInventoryDto inventoryDto) {
+    List<StockCardDto> stockCards = stockCardSummariesService
+        .findStockCards(inventoryDto.getProgramId(), inventoryDto.getFacilityId());
+    inventoryDto.mergeWith(stockCards);
+    return inventoryDto;
   }
 
   private PhysicalInventoryDto createEmptyInventory(UUID programId, UUID facilityId) {
@@ -149,20 +139,6 @@ public class PhysicalInventoryService {
     if (orderableMissing) {
       throw new ValidationMessageException(
           new Message(ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING));
-    }
-  }
-
-  private void checkIncludeActiveStockCard(PhysicalInventoryDto dto) {
-    List<UUID> coveredOrderableIds = dto.getLineItems().stream()
-        .map(lineItemDto -> lineItemDto.getOrderable().getId()).collect(toList());
-
-    boolean activeCardMissing = stockCardRepository
-        .getStockCardOrderableIdsBy(dto.getProgramId(), dto.getFacilityId()).stream()
-        .anyMatch(cardOrderableId -> !coveredOrderableIds.contains(cardOrderableId));
-
-    if (activeCardMissing) {
-      throw new ValidationMessageException(
-          new Message(ERROR_PHYSICAL_INVENTORY_NOT_INCLUDE_ACTIVE_STOCK_CARD));
     }
   }
 }

@@ -15,6 +15,8 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static org.openlmis.stockmanagement.dto.PhysicalInventoryDto.fromEventDto;
+
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
@@ -36,13 +38,12 @@ public class StockEventProcessor {
 
   @Autowired
   private StockEventProcessContextBuilder contextBuilder;
-
   @Autowired
   private StockEventValidationsService stockEventValidationsService;
-
+  @Autowired
+  private PhysicalInventoryService physicalInventoryService;
   @Autowired
   private StockCardService stockCardService;
-
   @Autowired
   private StockEventsRepository stockEventsRepository;
 
@@ -68,8 +69,10 @@ public class StockEventProcessor {
     UUID savedEventId = stockEventsRepository.save(stockEvent).getId();
     LOGGER.debug("Saved stock event with id " + savedEventId);
 
+    if (eventDto.isPhysicalInventory()) {
+      physicalInventoryService.submitPhysicalInventory(fromEventDto(eventDto), savedEventId);
+    }
     stockCardService.saveFromEvent(eventDto, savedEventId, currentUserId);
-
     return savedEventId;
   }
 

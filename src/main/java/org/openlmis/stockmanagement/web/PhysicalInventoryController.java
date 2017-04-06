@@ -48,25 +48,6 @@ public class PhysicalInventoryController {
   private PhysicalInventoryService physicalInventoryService;
 
   /**
-   * Create physical inventory.
-   *
-   * @param dto physical inventory dto.
-   * @return the created physical inventory's id.
-   */
-  @Transactional(rollbackFor = {InstantiationException.class, IllegalAccessException.class})
-  @RequestMapping(value = "physicalInventories", method = POST)
-  public ResponseEntity<UUID> createPhysicalInventory(@RequestBody PhysicalInventoryDto dto)
-      throws IllegalAccessException, InstantiationException {
-    long startTime = System.currentTimeMillis();
-
-    permissionService.canEditPhysicalInventory(dto.getProgramId(), dto.getFacilityId());
-    UUID uuid = physicalInventoryService.submitPhysicalInventory(dto);
-
-    LOGGER.info("Finished in " + (System.currentTimeMillis() - startTime) + " milliseconds");
-    return new ResponseEntity<>(uuid, CREATED);
-  }
-
-  /**
    * Get a draft physical inventory.
    *
    * @param program  program ID.

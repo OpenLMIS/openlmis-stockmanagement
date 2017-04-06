@@ -756,37 +756,6 @@ traits:
                   schema: localizedMessage
 
   /physicalInventories:
-      displayName: Physical inventories.
-      post:
-        is: [ secured ]
-        description: Submit a physical inventory and delete its draft(if exist).
-        body:
-          application/json:
-            schema: physicalInventory
-
-        responses:
-          201:
-            description: Physical inventory submitted.
-            body:
-              application/json:
-                schema: uuid
-
-          400:
-            description: |
-              Validation failed. Reasons could be:
-              Program, facility, orderable or quantity missing,
-              Above information exist but not found in ref-data or DB,
-              No physical inventory line items provided.
-            body:
-              application/json:
-                  schema: localizedMessage
-
-          403:
-            description: User does not have permission to sumbit physical inventory.
-            body:
-              application/json:
-                  schema: localizedMessage
-
       /draft:
         get:
           is: [ secured ]

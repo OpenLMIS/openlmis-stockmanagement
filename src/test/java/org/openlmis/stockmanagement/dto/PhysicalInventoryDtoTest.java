@@ -20,9 +20,9 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
+import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -30,24 +30,19 @@ import java.util.UUID;
 
 public class PhysicalInventoryDtoTest {
   @Test
-  public void should_convert_into_stock_event_dto() throws Exception {
+  public void should_convert_from_stock_event_dto() throws Exception {
     //given
-    PhysicalInventoryDto piDto = createInventoryDto();
+    StockEventDto eventDto = StockEventDtoBuilder.createStockEventDto();
 
     //when
-    StockEventDto eventDto = piDto.toEventDto();
+    PhysicalInventoryDto piDto = PhysicalInventoryDto.fromEventDto(eventDto);
 
     //then
-    assertThat(eventDto.getProgramId(), is(piDto.getProgramId()));
-    assertThat(eventDto.getFacilityId(), is(piDto.getFacilityId()));
-    assertThat(eventDto.getSignature(), is(piDto.getSignature()));
-    assertThat(eventDto.getDocumentNumber(), is(piDto.getDocumentNumber()));
-    assertThat(eventDto.getOccurredDate(), is(piDto.getOccurredDate()));
-
-    PhysicalInventoryLineItemDto piLineItemDto = piDto.getLineItems().get(0);
-    StockEventLineItem eventLineItem = eventDto.getLineItems().get(0);
-    assertThat(eventLineItem.getOrderableId(), is(piLineItemDto.getOrderable().getId()));
-    assertThat(eventLineItem.getQuantity(), is(piLineItemDto.getQuantity()));
+    assertThat(piDto.getProgramId(), is(eventDto.getProgramId()));
+    assertThat(piDto.getFacilityId(), is(eventDto.getFacilityId()));
+    assertThat(piDto.getSignature(), is(eventDto.getSignature()));
+    assertThat(piDto.getDocumentNumber(), is(eventDto.getDocumentNumber()));
+    assertThat(piDto.getOccurredDate(), is(eventDto.getOccurredDate()));
   }
 
   @Test
