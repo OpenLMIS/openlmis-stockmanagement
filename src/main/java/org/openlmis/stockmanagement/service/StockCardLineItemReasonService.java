@@ -18,9 +18,9 @@ package org.openlmis.stockmanagement.service;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_CATEGORY_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_ID_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_ISFREETEXTALLOWED_MISSING;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_NAME_DUPLICATE;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_NAME_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_TYPE_MISSING;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_UPDATE_CONTENT_DUPLICATE;
 
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
@@ -66,16 +66,6 @@ public class StockCardLineItemReasonService {
   }
 
   /**
-   * Check if has same reason in DB.
-   *
-   * @param reason to be checked
-   * @return a boolean for same reason existing
-   */
-  public boolean reasonExists(StockCardLineItemReason reason) {
-    return reasonRepository.findByName(reason.getName()) != null;
-  }
-
-  /**
    * Check if the would be updated reason exists.
    *
    * @param reasonId would be updated reason's ID
@@ -96,7 +86,7 @@ public class StockCardLineItemReasonService {
     StockCardLineItemReason foundReason = reasonRepository.findByName(reason.getName());
     if (foundReason != null) {
       throw new ValidationMessageException(
-          new Message(ERROR_LINE_ITEM_REASON_UPDATE_CONTENT_DUPLICATE));
+          new Message(ERROR_LINE_ITEM_REASON_NAME_DUPLICATE));
     }
   }
 

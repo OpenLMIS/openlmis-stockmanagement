@@ -627,13 +627,8 @@ traits:
             body:
               application/json:
                 schema: reason
-          200:
-            description: Try to create reason, but there is a same content reason checkSourceAssignmentIdExists.
-            body:
-              application/json:
-                schema: reason
           400:
-            description: Some Reason required value not found.
+            description: Some Reason required value not found or reason name is duplicate.
             body:
               application/json:
                   schema: localizedMessage

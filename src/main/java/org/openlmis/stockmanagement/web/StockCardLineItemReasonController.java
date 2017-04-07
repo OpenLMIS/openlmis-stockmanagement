@@ -60,10 +60,6 @@ public class StockCardLineItemReasonController {
       @RequestBody StockCardLineItemReason reason) {
     LOGGER.debug("Try to create a new stock card line item reason");
     permissionService.canManageReasons();
-    if (reasonService.reasonExists(reason)) {
-      LOGGER.debug("Reason exists");
-      return new ResponseEntity<>(reason, OK);
-    }
     reason.setId(null);
     return new ResponseEntity<>(reasonService.saveOrUpdate(reason), CREATED);
   }
@@ -93,7 +89,6 @@ public class StockCardLineItemReasonController {
     LOGGER.debug("Try to update stock card line item reason with id: ", reasonId.toString());
     reason.setId(reasonId);
     reasonService.checkUpdateReasonIdExists(reasonId);
-    reasonService.validateReasonNameDuplicate(reason);
     return new ResponseEntity<>(reasonService.saveOrUpdate(reason), OK);
   }
 }

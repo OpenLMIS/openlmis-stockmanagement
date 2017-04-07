@@ -28,7 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
-import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardLineItemReasonService;
 import org.openlmis.stockmanagement.utils.Message;
@@ -55,7 +54,6 @@ public class StockCardLineItemReasonControllerTest extends BaseWebTest {
   public void should_return_201_when_reason_successfully_created() throws Exception {
     //given
     StockCardLineItemReason createdReason = createReason();
-    when(stockCardLineItemReasonService.reasonExists(createdReason)).thenReturn(false);
     when(stockCardLineItemReasonService.saveOrUpdate(any(StockCardLineItemReason.class)))
         .thenReturn(createdReason);
 
@@ -70,32 +68,6 @@ public class StockCardLineItemReasonControllerTest extends BaseWebTest {
     resultActions
         .andDo(print())
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.name", is(createdReason.getName())))
-        .andExpect(jsonPath("$.description", is(createdReason.getDescription())))
-        .andExpect(jsonPath("$.reasonType",
-            is(createdReason.getReasonType().toString())))
-        .andExpect(jsonPath("$.reasonCategory",
-            is(createdReason.getReasonCategory().toString())))
-        .andExpect(jsonPath("$.isFreeTextAllowed",
-            is(createdReason.getIsFreeTextAllowed())));
-  }
-
-  @Test
-  public void should_return_200_when_try_to_create_reason_has_existed() throws Exception {
-    StockCardLineItemReason createdReason = createReason();
-    when(stockCardLineItemReasonService.reasonExists(createdReason)).thenReturn(true);
-
-    //when
-    ResultActions resultActions = mvc.perform(MockMvcRequestBuilders
-        .post(STOCK_CARD_LINE_ITEM_REASON_API)
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectToJsonString(createdReason)));
-
-    //then
-    resultActions
-        .andDo(print())
-        .andExpect(status().isOk())
         .andExpect(jsonPath("$.name", is(createdReason.getName())))
         .andExpect(jsonPath("$.description", is(createdReason.getDescription())))
         .andExpect(jsonPath("$.reasonType",
@@ -186,24 +158,5 @@ public class StockCardLineItemReasonControllerTest extends BaseWebTest {
         .get(STOCK_CARD_LINE_ITEM_REASON_API)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
     getResults.andExpect(status().isForbidden());
-  }
-
-  @Test
-  public void should_return_400_when_would_be_update_reason_content_exists() throws Exception {
-    //given
-    StockCardLineItemReason reason = createReason();
-    doThrow(new ValidationMessageException(new Message("key")))
-        .when(stockCardLineItemReasonService).validateReasonNameDuplicate(reason);
-    when(stockCardLineItemReasonService.reasonExists(reason)).thenReturn(true);
-
-    //when
-    ResultActions resultActions = mvc.perform(MockMvcRequestBuilders
-        .put(STOCK_CARD_LINE_ITEM_REASON_API + "/" + UUID.randomUUID().toString())
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectToJsonString(reason)));
-
-    //then
-    resultActions.andExpect(status().isBadRequest());
   }
 }
