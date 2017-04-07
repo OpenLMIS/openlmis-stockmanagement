@@ -17,7 +17,6 @@ package org.openlmis.stockmanagement.web;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.transaction.annotation.Isolation.SERIALIZABLE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
@@ -30,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -58,7 +56,6 @@ public class StockCardLineItemReasonController {
    * @return created stock card line item reason
    */
   @RequestMapping(value = "stockCardLineItemReasons", method = POST)
-  @Transactional(isolation = SERIALIZABLE)
   public ResponseEntity<StockCardLineItemReason> createReason(
       @RequestBody StockCardLineItemReason reason) {
     LOGGER.debug("Try to create a new stock card line item reason");

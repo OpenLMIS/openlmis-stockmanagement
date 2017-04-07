@@ -44,7 +44,7 @@ import javax.persistence.Table;
 @JsonInclude(NON_NULL)
 public class StockCardLineItemReason extends BaseEntity {
 
-  @Column(nullable = false, columnDefinition = TEXT_COLUMN_DEFINITION)
+  @Column(nullable = false, unique = true, columnDefinition = TEXT_COLUMN_DEFINITION)
   private String name;
 
   @Column(columnDefinition = TEXT_COLUMN_DEFINITION)
