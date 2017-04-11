@@ -66,6 +66,7 @@ public class StockCardLineItemReasonServiceTest {
     //given
     StockCardLineItemReason creatingReason = createReason();
     StockCardLineItemReason existingReason = createReason();
+    existingReason.setId(UUID.randomUUID());
     when(reasonRepository.findByName(creatingReason.getName())).thenReturn(existingReason);
 
     //when

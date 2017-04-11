@@ -85,7 +85,7 @@ public class StockCardLineItemReasonService {
   private void validateReasonNameDuplicate(StockCardLineItemReason reason) {
     StockCardLineItemReason foundReason = reasonRepository.findByName(reason.getName());
     if (foundReason != null) {
-      boolean isUpdatingItself = reason.getId() != null && foundReason.getId() == reason.getId();
+      boolean isUpdatingItself = foundReason.getId() == reason.getId();
       if (isUpdatingItself) {
         return;
       }
