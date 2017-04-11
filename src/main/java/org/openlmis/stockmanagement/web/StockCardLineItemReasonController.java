@@ -71,7 +71,6 @@ public class StockCardLineItemReasonController {
    */
   @RequestMapping(value = "stockCardLineItemReasons", method = GET)
   public ResponseEntity<List<StockCardLineItemReason>> getAllReasons() {
-    permissionService.canManageReasons();
     return new ResponseEntity<>(reasonService.findReasons(), OK);
   }
 

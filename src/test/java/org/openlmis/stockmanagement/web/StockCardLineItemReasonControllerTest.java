@@ -110,7 +110,7 @@ public class StockCardLineItemReasonControllerTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_200_when_admin_user_get_all_reasons() throws Exception {
+  public void should_return_200_when_user_get_all_reasons() throws Exception {
     //given
     StockCardLineItemReason reason1 = createReason();
     reason1.setId(UUID.randomUUID());
@@ -132,7 +132,7 @@ public class StockCardLineItemReasonControllerTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_403_when_user_has_no_permission_to_manage_or_view_reasons()
+  public void should_return_403_when_user_has_no_permission_to_manage_reasons()
       throws Exception {
     doThrow(new PermissionMessageException(new Message("key")))
         .when(permissionService).canManageReasons();
@@ -152,11 +152,5 @@ public class StockCardLineItemReasonControllerTest extends BaseWebTest {
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectToJsonString(new StockCardLineItemReason())));
     putResults.andExpect(status().isForbidden());
-
-    //3.view reasons
-    ResultActions getResults = mvc.perform(MockMvcRequestBuilders
-        .get(STOCK_CARD_LINE_ITEM_REASON_API)
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
-    getResults.andExpect(status().isForbidden());
   }
 }

@@ -598,9 +598,6 @@ traits:
         is: [ secured ]
         description: |
           Retrieve all reasons.
-          This is for administrators only.
-          It requires the permission STOCK_CARD_LINE_ITEM_REASONS_MANAGE.
-          Regular users can get the list of reasons they can use through /api/validReasons.
 
         responses:
           200:
@@ -608,11 +605,6 @@ traits:
             body:
               application/json:
                 schema: reasons
-          403:
-            description: User does not have permission to manage stock card line item reasons.
-            body:
-              application/json:
-                  schema: localizedMessage
 
       post:
         is: [ secured ]
