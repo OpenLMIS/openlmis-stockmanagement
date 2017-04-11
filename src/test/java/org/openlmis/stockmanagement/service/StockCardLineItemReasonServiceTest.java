@@ -61,7 +61,7 @@ public class StockCardLineItemReasonServiceTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void should_throw_validation_exception_when_reason_name_is_duplicate_with_other_one()
+  public void should_throw_exception_when_creating_reason_name_is_duplicate_with_other_one()
       throws Exception {
     //given
     StockCardLineItemReason creatingReason = createReason();
@@ -70,6 +70,20 @@ public class StockCardLineItemReasonServiceTest {
 
     //when
     reasonService.saveOrUpdate(creatingReason);
+  }
+
+  @Test(expected = ValidationMessageException.class)
+  public void should_throw_exception_when_updating_reason_name_is_duplicate_with_other_one()
+      throws Exception {
+    //given
+    StockCardLineItemReason updatingReason = createReason();
+    updatingReason.setId(UUID.randomUUID());
+    StockCardLineItemReason existingReason = createReason();
+    existingReason.setId(UUID.randomUUID());
+    when(reasonRepository.findByName(updatingReason.getName())).thenReturn(existingReason);
+
+    //when
+    reasonService.saveOrUpdate(updatingReason);
   }
 
   @Test

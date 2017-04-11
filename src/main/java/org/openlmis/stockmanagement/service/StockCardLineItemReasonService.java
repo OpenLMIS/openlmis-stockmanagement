@@ -82,11 +82,14 @@ public class StockCardLineItemReasonService {
    *
    * @param reason would be updated
    */
-  public void validateReasonNameDuplicate(StockCardLineItemReason reason) {
+  private void validateReasonNameDuplicate(StockCardLineItemReason reason) {
     StockCardLineItemReason foundReason = reasonRepository.findByName(reason.getName());
     if (foundReason != null) {
-      throw new ValidationMessageException(
-          new Message(ERROR_LINE_ITEM_REASON_NAME_DUPLICATE));
+      boolean isUpdatingItself = reason.getId() != null && foundReason.getId() == reason.getId();
+      if (isUpdatingItself) {
+        return;
+      }
+      throw new ValidationMessageException(new Message(ERROR_LINE_ITEM_REASON_NAME_DUPLICATE));
     }
   }
 
