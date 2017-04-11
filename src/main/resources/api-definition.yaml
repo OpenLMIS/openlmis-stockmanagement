@@ -200,37 +200,6 @@ traits:
               application/json:
                   schema: localizedMessage
 
-  /stockCards:
-      get:
-        is: [ secured ]
-        description: \[TBD\] Get a list of stock cards of a facility, with full details of each stock card.
-        queryParameters:
-          facility:
-            required: true
-            description: Facility id, indicates the facility that the queried stock cards should belong to.
-          program:
-            required: false
-            description: When provided, returns stock cards under this program.
-
-        responses:
-          200:
-            description: Returns stock cards that matche given facility and program.
-            body:
-              application/json:
-                schema: stockCards
-
-          404:
-            description: No stock cards were found that matches given facility and program.
-            body:
-              application/json:
-                schema: localizedMessage
-
-          403:
-            description: User does not have permission to view stock cards of given facility and program.
-            body:
-              application/json:
-                  schema: localizedMessage
-
   /stockCardSummaries:
       get:
         is: [ secured ]
