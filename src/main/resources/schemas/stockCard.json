@@ -20,6 +20,9 @@
     "stockOnHand": {
       "type": "integer"
     },
+    "lastUpdate": {
+      "type": "date"
+    },
     "program": {
       "type": "object",
       "title": "Program",
