@@ -117,6 +117,19 @@ traits:
                   required: true
                   repeat: false
 
+    - paginated:
+          queryParameters:
+              page:
+                  description: The page number which should be displayed. Note that the first page is numbered zero rather than one. Additionally, negative and undefined valued are interpreted as zero.
+                  type: integer
+                  required: false
+                  repeat: false
+              size:
+                  description: The desired size of each page. This specifies the maximum number of values that should be returned by the server. Zero, undefined, and negative values should result in all possible values being returned.
+                  type: integer
+                  required: false
+                  repeat: false
+
 /api:
 
   /stockCardTemplates:
@@ -202,7 +215,7 @@ traits:
 
   /stockCardSummaries:
       get:
-        is: [ secured ]
+        is: [ secured, paginated ]
         description: Get summaries of stock cards, which contains SOH, product name, and other essential information. This will NOT return any line items. (This could be used by front end for list view.)
         queryParameters:
           facility:

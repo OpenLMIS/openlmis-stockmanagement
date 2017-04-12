@@ -26,16 +26,19 @@ import org.openlmis.stockmanagement.service.StockCardSummariesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;
 
-@Controller
+@RestController
 @RequestMapping("/api")
 public class StockCardsController {
 
@@ -76,15 +79,14 @@ public class StockCardsController {
    * @return Stock card summaries.
    */
   @RequestMapping(value = "/stockCardSummaries")
-  public ResponseEntity<List<StockCardDto>> getStockCardSummaries(
-      @RequestParam() UUID program,
-      @RequestParam() UUID facility) {
+  public Page<StockCardDto> getStockCardSummaries(
+      @RequestParam() UUID program, @RequestParam() UUID facility, Pageable pageable) {
     LOGGER.debug("Try to find stock card summaries");
     permissionService.canViewStockCard(program, facility);
 
     List<StockCardDto> stockCards = stockCardSummariesService
-        .findStockCards(program, facility, ExistingStockCardsOnly);
-    return new ResponseEntity<>(stockCards, OK);
+        .findStockCards(program, facility, ExistingStockCardsOnly, pageable);
+    return new PageImpl<>(stockCards);
   }
 
 }

@@ -28,6 +28,8 @@ import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferen
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -38,6 +40,8 @@ import java.util.stream.Stream;
 
 @Service
 public class StockCardSummariesService extends StockCardBaseService {
+
+  public static Pageable ALL = new PageRequest(0, Integer.MAX_VALUE);
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCardSummariesService.class);
 
@@ -53,11 +57,13 @@ public class StockCardSummariesService extends StockCardBaseService {
    * @param programId    program id.
    * @param facilityId   facility id.
    * @param searchOption enum option that indicates either to include approved products
+   * @param pageable     indicate which page of stock cards to get
    * @return found stock cards.
    */
   public List<StockCardDto> findStockCards(UUID programId, UUID facilityId,
-                                           SearchOptions searchOption) {
-    List<StockCard> cards = cardRepository.findByProgramIdAndFacilityId(programId, facilityId);
+                                           SearchOptions searchOption, Pageable pageable) {
+    List<StockCard> cards = cardRepository
+        .findByProgramIdAndFacilityId(programId, facilityId, pageable);
 
     LOGGER.info("Calling ref data to get approved orderables");
     Map<UUID, OrderableDto> approvedMap = approvedProductService

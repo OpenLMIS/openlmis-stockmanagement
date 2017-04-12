@@ -26,6 +26,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.service.StockCardSummariesService.ALL;
 import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.ExistingStockCardsOnly;
 import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.IncludeApprovedOrderables;
 
@@ -92,13 +93,14 @@ public class StockCardSummariesServiceTest {
             orderable4Id, orderable4
         ));
 
-    when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId)).thenReturn(asList(
-        createStockCard(orderable1Id, UUID.randomUUID()),
-        createStockCard(orderable3Id, UUID.randomUUID())));
+    when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId, ALL))
+        .thenReturn(asList(
+            createStockCard(orderable1Id, UUID.randomUUID()),
+            createStockCard(orderable3Id, UUID.randomUUID())));
 
     //when
     List<StockCardDto> cardDtos = stockCardSummariesService
-        .findStockCards(programId, facilityId, IncludeApprovedOrderables);
+        .findStockCards(programId, facilityId, IncludeApprovedOrderables, ALL);
 
     //then
     assertThat(cardDtos.size(), is(4));
@@ -161,13 +163,14 @@ public class StockCardSummariesServiceTest {
             orderable4Id, orderable4
         ));
 
-    when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId)).thenReturn(asList(
-        createStockCard(orderable1Id, UUID.randomUUID()),
-        createStockCard(orderable3Id, UUID.randomUUID())));
+    when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId, ALL))
+        .thenReturn(asList(
+            createStockCard(orderable1Id, UUID.randomUUID()),
+            createStockCard(orderable3Id, UUID.randomUUID())));
 
     //when
     List<StockCardDto> cardDtos = stockCardSummariesService
-        .findStockCards(programId, facilityId, ExistingStockCardsOnly);
+        .findStockCards(programId, facilityId, ExistingStockCardsOnly, ALL);
 
     //then
     assertThat(cardDtos.size(), is(2));

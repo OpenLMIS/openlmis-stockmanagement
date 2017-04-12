@@ -209,9 +209,9 @@ test {
 }
 
 //enable the lines below if you need to debug spring running in docker
-//bootRun {
-//    jvmArgs = ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"]
-//}
+bootRun {
+    jvmArgs = ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"]
+}
 
 apply from: "documentation.gradle"
 integrationTest {

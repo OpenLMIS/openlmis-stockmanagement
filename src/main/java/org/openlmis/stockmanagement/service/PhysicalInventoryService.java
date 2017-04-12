@@ -19,6 +19,7 @@ import static java.util.stream.Collectors.toList;
 import static org.openlmis.stockmanagement.domain.BaseEntity.fromId;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING;
+import static org.openlmis.stockmanagement.service.StockCardSummariesService.ALL;
 import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.IncludeApprovedOrderables;
 
 import org.openlmis.stockmanagement.domain.event.StockEvent;
@@ -113,7 +114,7 @@ public class PhysicalInventoryService {
     UUID facilityId = inventoryDto.getFacilityId();
 
     List<StockCardDto> cards = stockCardSummariesService
-        .findStockCards(programId, facilityId, IncludeApprovedOrderables);
+        .findStockCards(programId, facilityId, IncludeApprovedOrderables, ALL);
     inventoryDto.mergeWith(cards);
 
     return inventoryDto;
@@ -121,7 +122,7 @@ public class PhysicalInventoryService {
 
   private PhysicalInventoryDto createEmptyInventory(UUID programId, UUID facilityId) {
     List<StockCardDto> stockCards = stockCardSummariesService
-        .findStockCards(programId, facilityId, IncludeApprovedOrderables);
+        .findStockCards(programId, facilityId, IncludeApprovedOrderables, ALL);
 
     return PhysicalInventoryDto.builder()
         .programId(programId)
