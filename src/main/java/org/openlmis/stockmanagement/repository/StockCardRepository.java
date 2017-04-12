@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.repository;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -41,7 +42,7 @@ public interface StockCardRepository extends
       @Param("facilityId") UUID facilityId,
       @Param("orderableId") UUID orderableId);
 
-  List<StockCard> findByProgramIdAndFacilityId(
+  Page<StockCard> findByProgramIdAndFacilityId(
       @Param("programId") UUID programId,
       @Param("facilityId") UUID facilityId,
       Pageable pageable);

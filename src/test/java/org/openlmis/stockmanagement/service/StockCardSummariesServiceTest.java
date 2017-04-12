@@ -18,6 +18,8 @@ package org.openlmis.stockmanagement.service;
 import static java.time.ZoneOffset.UTC;
 import static java.time.ZonedDateTime.of;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
@@ -45,7 +47,11 @@ import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -94,13 +100,13 @@ public class StockCardSummariesServiceTest {
         ));
 
     when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId, ALL))
-        .thenReturn(asList(
+        .thenReturn(new PageImpl<>(asList(
             createStockCard(orderable1Id, UUID.randomUUID()),
-            createStockCard(orderable3Id, UUID.randomUUID())));
+            createStockCard(orderable3Id, UUID.randomUUID()))));
 
     //when
     List<StockCardDto> cardDtos = stockCardSummariesService
-        .findStockCards(programId, facilityId, IncludeApprovedOrderables, ALL);
+        .findStockCards(programId, facilityId, IncludeApprovedOrderables);
 
     //then
     assertThat(cardDtos.size(), is(4));
@@ -164,13 +170,13 @@ public class StockCardSummariesServiceTest {
         ));
 
     when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId, ALL))
-        .thenReturn(asList(
+        .thenReturn(new PageImpl<>(asList(
             createStockCard(orderable1Id, UUID.randomUUID()),
-            createStockCard(orderable3Id, UUID.randomUUID())));
+            createStockCard(orderable3Id, UUID.randomUUID()))));
 
     //when
     List<StockCardDto> cardDtos = stockCardSummariesService
-        .findStockCards(programId, facilityId, ExistingStockCardsOnly, ALL);
+        .findStockCards(programId, facilityId, ExistingStockCardsOnly);
 
     //then
     assertThat(cardDtos.size(), is(2));
@@ -193,6 +199,30 @@ public class StockCardSummariesServiceTest {
         hasProperty(stockOnHandPropertyName, notNullValue()),
         hasProperty(lastUpdatePropertyName, is(of(2017, 3, 18, 15, 10, 31, 100, UTC))),
         hasProperty(lineItemsPropertyName, nullValue()))));
+  }
+
+  @Test
+  public void should_return_page_of_stock_cards() throws Exception {
+    //given
+    UUID programId = UUID.randomUUID();
+    UUID facilityId = UUID.randomUUID();
+    PageRequest pageRequest = new PageRequest(0, 1);
+
+    StockCard card = new StockCard();
+    card.setLineItems(emptyList());
+    when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId, pageRequest))
+        .thenReturn(new PageImpl<>(Collections.singletonList(card), pageRequest, 10));
+
+    when(approvedProductReferenceDataService.getApprovedOrderablesMap(programId, facilityId))
+        .thenReturn(emptyMap());
+
+    //when
+    Page<StockCardDto> stockCards = stockCardSummariesService
+        .findStockCards(programId, facilityId, pageRequest);
+
+    //then
+    assertThat(stockCards.getContent().size(), is(1));
+    assertThat(stockCards.getTotalElements(), is(10L));
   }
 
   private StockCard createStockCard(UUID orderableId, UUID cardId) {

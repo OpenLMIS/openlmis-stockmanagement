@@ -24,7 +24,6 @@ import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.service.StockCardSummariesService.ALL;
 import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.IncludeApprovedOrderables;
 
 import org.junit.Test;
@@ -66,7 +65,7 @@ public class PhysicalInventoryServiceDraftTest {
 
     OrderableDto orderableDto = new OrderableDto();
     when(stockCardSummariesService
-        .findStockCards(programId, facilityId, IncludeApprovedOrderables, ALL)).thenReturn(
+        .findStockCards(programId, facilityId, IncludeApprovedOrderables)).thenReturn(
         singletonList(StockCardDto.builder().orderable(orderableDto).stockOnHand(233).build()));
 
     //when
@@ -152,7 +151,7 @@ public class PhysicalInventoryServiceDraftTest {
 
     OrderableDto orderableDto = OrderableDto.builder().id(orderableId).build();
     when(stockCardSummariesService
-        .findStockCards(programId, facilityId, IncludeApprovedOrderables, ALL)).thenReturn(
+        .findStockCards(programId, facilityId, IncludeApprovedOrderables)).thenReturn(
         singletonList(StockCardDto.builder().orderable(orderableDto).stockOnHand(233).build()));
 
     //when

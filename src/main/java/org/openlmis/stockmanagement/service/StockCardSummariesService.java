@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static java.lang.Integer.MAX_VALUE;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
@@ -28,6 +29,8 @@ import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferen
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -41,7 +44,7 @@ import java.util.stream.Stream;
 @Service
 public class StockCardSummariesService extends StockCardBaseService {
 
-  public static Pageable ALL = new PageRequest(0, Integer.MAX_VALUE);
+  public static final PageRequest ALL = new PageRequest(0, MAX_VALUE);
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCardSummariesService.class);
 
@@ -52,18 +55,17 @@ public class StockCardSummariesService extends StockCardBaseService {
   private StockCardRepository cardRepository;
 
   /**
-   * Find stock card by program id and facility id.
+   * Find all stock cards by program id and facility id.
    *
    * @param programId    program id.
    * @param facilityId   facility id.
    * @param searchOption enum option that indicates either to include approved products
-   * @param pageable     indicate which page of stock cards to get
    * @return found stock cards.
    */
   public List<StockCardDto> findStockCards(UUID programId, UUID facilityId,
-                                           SearchOptions searchOption, Pageable pageable) {
-    List<StockCard> cards = cardRepository
-        .findByProgramIdAndFacilityId(programId, facilityId, pageable);
+                                           SearchOptions searchOption) {
+    Page<StockCard> cards = cardRepository
+        .findByProgramIdAndFacilityId(programId, facilityId, ALL);
 
     LOGGER.info("Calling ref data to get approved orderables");
     Map<UUID, OrderableDto> approvedMap = approvedProductService
@@ -71,10 +73,32 @@ public class StockCardSummariesService extends StockCardBaseService {
 
     //create dummy(fake/not persisted) cards for approved orderables that don't have cards yet
     Stream<StockCard> dummyCards =
-        createDummyCards(programId, facilityId, cards, approvedMap, searchOption);
+        createDummyCards(programId, facilityId, cards.getContent(), approvedMap, searchOption);
 
-    List<StockCardDto> dtos = createDtos(concat(cards.stream(), dummyCards).collect(toList()));
+    List<StockCardDto> dtos =
+        createDtos(concat(cards.getContent().stream(), dummyCards).collect(toList()));
     return assignOrderableRemoveLineItems(dtos, approvedMap);
+  }
+
+  /**
+   * Get a page of stock cards.
+   *
+   * @param programId  program id.
+   * @param facilityId facility id.
+   * @param pageable   page object.
+   * @return page of stock cards.
+   */
+  public Page<StockCardDto> findStockCards(UUID programId, UUID facilityId, Pageable pageable) {
+    Page<StockCard> cards = cardRepository
+        .findByProgramIdAndFacilityId(programId, facilityId, pageable);
+
+    LOGGER.info("Calling ref data to get approved orderables");
+    Map<UUID, OrderableDto> approvedMap = approvedProductService
+        .getApprovedOrderablesMap(programId, facilityId);
+
+    List<StockCardDto> stockCardDtos =
+        assignOrderableRemoveLineItems(createDtos(cards.getContent()), approvedMap);
+    return new PageImpl<>(stockCardDtos, pageable, cards.getTotalElements());
   }
 
   private List<StockCardDto> assignOrderableRemoveLineItems(List<StockCardDto> dtos,
