@@ -19,7 +19,7 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.IncludeApprovedOrderables;
+import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.ExistingStockCardsOnly;
 import static org.openlmis.stockmanagement.testutils.StockCardDtoBuilder.createStockCardDto;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -132,8 +132,8 @@ public class StockCardzControllerTest extends BaseWebTest {
     UUID programId = UUID.randomUUID();
     UUID facilityId = UUID.randomUUID();
 
-    when(stockCardSummariesService.findStockCards(programId, facilityId, IncludeApprovedOrderables)).thenReturn(
-        singletonList(StockCardDtoBuilder.createStockCardDto()));
+    when(stockCardSummariesService.findStockCards(programId, facilityId, ExistingStockCardsOnly))
+        .thenReturn(singletonList(StockCardDtoBuilder.createStockCardDto()));
 
     ResultActions resultActions = mvc.perform(
         get(API_STOCK_CARD_SUMMARIES)

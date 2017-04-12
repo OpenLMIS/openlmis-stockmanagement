@@ -53,8 +53,7 @@ public class StockCardSummariesService extends StockCardBaseService {
    * @param programId    program id.
    * @param facilityId   facility id.
    * @param searchOption enum option that indicates either to include approved products
-   * @return found stock cards, will include approved products without stock cards if indicated by
-   * last parameter.
+   * @return found stock cards.
    */
   public List<StockCardDto> findStockCards(UUID programId, UUID facilityId,
                                            SearchOptions searchOption) {

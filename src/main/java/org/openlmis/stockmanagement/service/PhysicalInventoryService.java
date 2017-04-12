@@ -109,23 +109,28 @@ public class PhysicalInventoryService {
   }
 
   private PhysicalInventoryDto assignOrderablesAndSoh(PhysicalInventoryDto inventoryDto) {
-    List<StockCardDto> stockCards = stockCardSummariesService
-        .findStockCards(inventoryDto.getProgramId(), inventoryDto.getFacilityId(), IncludeApprovedOrderables);
-    inventoryDto.mergeWith(stockCards);
+    UUID programId = inventoryDto.getProgramId();
+    UUID facilityId = inventoryDto.getFacilityId();
+
+    List<StockCardDto> cards = stockCardSummariesService
+        .findStockCards(programId, facilityId, IncludeApprovedOrderables);
+    inventoryDto.mergeWith(cards);
+
     return inventoryDto;
   }
 
   private PhysicalInventoryDto createEmptyInventory(UUID programId, UUID facilityId) {
+    List<StockCardDto> stockCards = stockCardSummariesService
+        .findStockCards(programId, facilityId, IncludeApprovedOrderables);
+
     return PhysicalInventoryDto.builder()
         .programId(programId)
         .facilityId(facilityId)
         .isStarter(true)
-        .lineItems(stockCardSummariesService.findStockCards(programId, facilityId, IncludeApprovedOrderables)
-            .stream().map(stockCardDto -> PhysicalInventoryLineItemDto.builder()
-                .orderable(stockCardDto.getOrderable())
-                .stockOnHand(stockCardDto.getStockOnHand())
-                .build())
-            .collect(toList()))
+        .lineItems(stockCards.stream().map(stockCardDto -> PhysicalInventoryLineItemDto.builder()
+            .orderable(stockCardDto.getOrderable())
+            .stockOnHand(stockCardDto.getStockOnHand())
+            .build()).collect(toList()))
         .build();
   }
 
