@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.service;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
+import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.ExistingStockCardsOnly;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.dto.OrderableDto;
@@ -52,7 +53,8 @@ public class StockCardSummariesService extends StockCardBaseService {
    * @param programId    program id.
    * @param facilityId   facility id.
    * @param searchOption enum option that indicates either to include approved products
-   * @return found stock cards, will include approved products without stock cards.
+   * @return found stock cards, will include approved products without stock cards if indicated by
+   * last parameter.
    */
   public List<StockCardDto> findStockCards(UUID programId, UUID facilityId,
                                            SearchOptions searchOption) {
@@ -63,7 +65,8 @@ public class StockCardSummariesService extends StockCardBaseService {
         .getApprovedOrderablesMap(programId, facilityId);
 
     //create dummy(fake/not persisted) cards for approved orderables that don't have cards yet
-    Stream<StockCard> dummyCards = createDummyCards(programId, facilityId, cards, approvedMap);
+    Stream<StockCard> dummyCards =
+        createDummyCards(programId, facilityId, cards, approvedMap, searchOption);
 
     List<StockCardDto> dtos = createDtos(concat(cards.stream(), dummyCards).collect(toList()));
     return assignOrderableRemoveLineItems(dtos, approvedMap);
@@ -82,11 +85,14 @@ public class StockCardSummariesService extends StockCardBaseService {
 
   private Stream<StockCard> createDummyCards(UUID programId, UUID facilityId,
                                              List<StockCard> existingCards,
-                                             Map<UUID, OrderableDto> approvedOrderablesMap) {
-    List<OrderableDto> orderablesWithNoCards =
-        filterProductsWithoutCards(approvedOrderablesMap.values(), existingCards);
+                                             Map<UUID, OrderableDto> approvedOrderablesMap,
+                                             SearchOptions searchOption) {
+    if (searchOption == ExistingStockCardsOnly) {
+      return Stream.empty();//do not create dummy cards when option says so.
+    }
 
-    return orderablesWithNoCards.stream()
+    return filterProductsWithoutCards(approvedOrderablesMap.values(), existingCards)
+        .stream()
         .map(orderableDto -> StockCard.builder()
             .programId(programId)
             .facilityId(facilityId)

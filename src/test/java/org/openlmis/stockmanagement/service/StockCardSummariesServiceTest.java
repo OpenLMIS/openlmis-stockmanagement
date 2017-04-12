@@ -26,6 +26,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.ExistingStockCardsOnly;
 import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.IncludeApprovedOrderables;
 
 import com.google.common.collect.ImmutableMap;
@@ -62,13 +63,13 @@ public class StockCardSummariesServiceTest {
   private ProgramReferenceDataService programRefDataService;
 
   @Mock
-  private StockCardRepository stockCardRepository;
+  private StockCardRepository cardRepository;
 
   @InjectMocks
   private StockCardSummariesService stockCardSummariesService;
 
   @Test
-  public void should_contain_existing_stock_cards() throws Exception {
+  public void should_contain_existing_stock_cards_and_approved_orderables() throws Exception {
     //given
     UUID orderable1Id = UUID.randomUUID();
     UUID orderable2Id = UUID.randomUUID();
@@ -91,12 +92,13 @@ public class StockCardSummariesServiceTest {
             orderable4Id, orderable4
         ));
 
-    when(stockCardRepository.findByProgramIdAndFacilityId(programId, facilityId)).thenReturn(asList(
+    when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId)).thenReturn(asList(
         createStockCard(orderable1Id, UUID.randomUUID()),
         createStockCard(orderable3Id, UUID.randomUUID())));
 
     //when
-    List<StockCardDto> cardDtos = stockCardSummariesService.findStockCards(programId, facilityId, IncludeApprovedOrderables);
+    List<StockCardDto> cardDtos = stockCardSummariesService
+        .findStockCards(programId, facilityId, IncludeApprovedOrderables);
 
     //then
     assertThat(cardDtos.size(), is(4));
@@ -131,6 +133,62 @@ public class StockCardSummariesServiceTest {
         hasProperty(idPropertyName, nullValue()),
         hasProperty(stockOnHandPropertyName, nullValue()),
         hasProperty(lastUpdatePropertyName, nullValue()),
+        hasProperty(lineItemsPropertyName, nullValue()))));
+  }
+
+  @Test
+  public void should_contain_existing_stock_cards_only_when_indicated_by_parameter()
+      throws Exception {
+    //given
+    UUID orderable1Id = UUID.randomUUID();
+    UUID orderable2Id = UUID.randomUUID();
+    UUID orderable3Id = UUID.randomUUID();
+    UUID orderable4Id = UUID.randomUUID();
+
+    OrderableDto orderable1 = createOrderableDto(orderable1Id);
+    OrderableDto orderable2 = createOrderableDto(orderable2Id);
+    OrderableDto orderable3 = createOrderableDto(orderable3Id);
+    OrderableDto orderable4 = createOrderableDto(orderable4Id);
+
+    UUID programId = UUID.randomUUID();
+    UUID facilityId = UUID.randomUUID();
+    when(approvedProductReferenceDataService
+        .getApprovedOrderablesMap(programId, facilityId))
+        .thenReturn(ImmutableMap.of(
+            orderable1Id, orderable1,
+            orderable2Id, orderable2,
+            orderable3Id, orderable3,
+            orderable4Id, orderable4
+        ));
+
+    when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId)).thenReturn(asList(
+        createStockCard(orderable1Id, UUID.randomUUID()),
+        createStockCard(orderable3Id, UUID.randomUUID())));
+
+    //when
+    List<StockCardDto> cardDtos = stockCardSummariesService
+        .findStockCards(programId, facilityId, ExistingStockCardsOnly);
+
+    //then
+    assertThat(cardDtos.size(), is(2));
+
+    String orderablePropertyName = "orderable";
+    String idPropertyName = "id";
+    String lineItemsPropertyName = "lineItems";
+    String stockOnHandPropertyName = "stockOnHand";
+    String lastUpdatePropertyName = "lastUpdate";
+
+    assertThat(cardDtos, hasItem(allOf(
+        hasProperty(orderablePropertyName, is(orderable1)),
+        hasProperty(idPropertyName, notNullValue()),
+        hasProperty(stockOnHandPropertyName, notNullValue()),
+        hasProperty(lastUpdatePropertyName, is(of(2017, 3, 18, 15, 10, 31, 100, UTC))),
+        hasProperty(lineItemsPropertyName, nullValue()))));
+    assertThat(cardDtos, hasItem(allOf(
+        hasProperty(orderablePropertyName, is(orderable3)),
+        hasProperty(idPropertyName, notNullValue()),
+        hasProperty(stockOnHandPropertyName, notNullValue()),
+        hasProperty(lastUpdatePropertyName, is(of(2017, 3, 18, 15, 10, 31, 100, UTC))),
         hasProperty(lineItemsPropertyName, nullValue()))));
   }
 
