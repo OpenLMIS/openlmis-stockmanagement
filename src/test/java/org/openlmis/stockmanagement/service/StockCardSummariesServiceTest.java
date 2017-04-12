@@ -26,6 +26,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.IncludeApprovedOrderables;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -95,7 +96,7 @@ public class StockCardSummariesServiceTest {
         createStockCard(orderable3Id, UUID.randomUUID())));
 
     //when
-    List<StockCardDto> cardDtos = stockCardSummariesService.findStockCards(programId, facilityId);
+    List<StockCardDto> cardDtos = stockCardSummariesService.findStockCards(programId, facilityId, IncludeApprovedOrderables);
 
     //then
     assertThat(cardDtos.size(), is(4));

@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.IncludeApprovedOrderables;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 
@@ -80,7 +81,7 @@ public class StockCardsController {
       @RequestParam() UUID facility) {
     LOGGER.debug("Try to find stock card summaries");
     permissionService.canViewStockCard(program, facility);
-    return new ResponseEntity<>(stockCardSummariesService.findStockCards(program, facility), OK);
+    return new ResponseEntity<>(stockCardSummariesService.findStockCards(program, facility, IncludeApprovedOrderables), OK);
   }
 
 }

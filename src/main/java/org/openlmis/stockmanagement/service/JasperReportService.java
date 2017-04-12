@@ -19,6 +19,7 @@ import static java.io.File.createTempFile;
 import static java.util.Collections.singletonList;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_GENERATE_REPORT_FAILED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REPORT_ID_NOT_FOUND;
+import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.IncludeApprovedOrderables;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
@@ -87,7 +88,7 @@ public class JasperReportService {
    * @return generated stock card summary report.
    */
   public ModelAndView getStockCardSummariesReportView(UUID program, UUID facility) {
-    List<StockCardDto> cards = stockCardSummariesService.findStockCards(program, facility);
+    List<StockCardDto> cards = stockCardSummariesService.findStockCards(program, facility, IncludeApprovedOrderables);
     StockCardDto firstCard = cards.get(0);
     Map<String, Object> params = new HashMap<>();
     params.put("stockCardSummaries", cards);

@@ -49,11 +49,13 @@ public class StockCardSummariesService extends StockCardBaseService {
   /**
    * Find stock card by program id and facility id.
    *
-   * @param programId  program id.
-   * @param facilityId facility id.
+   * @param programId    program id.
+   * @param facilityId   facility id.
+   * @param searchOption enum option that indicates either to include approved products
    * @return found stock cards, will include approved products without stock cards.
    */
-  public List<StockCardDto> findStockCards(UUID programId, UUID facilityId) {
+  public List<StockCardDto> findStockCards(UUID programId, UUID facilityId,
+                                           SearchOptions searchOption) {
     List<StockCard> cards = cardRepository.findByProgramIdAndFacilityId(programId, facilityId);
 
     LOGGER.info("Calling ref data to get approved orderables");
@@ -99,6 +101,11 @@ public class StockCardSummariesService extends StockCardBaseService {
         .filter(approvedOrderable -> stockCards.stream().noneMatch(
             stockCard -> stockCard.getOrderableId().equals(approvedOrderable.getId())))
         .collect(toList());
+  }
+
+  public enum SearchOptions {
+    IncludeApprovedOrderables,
+    ExistingStockCardsOnly
   }
 
 }
