@@ -18,7 +18,7 @@ services:
     depends_on: [consul]
 
   stockmanagement:
-    image: openlmis/dev:1
+    image: openlmis/dev:2
     ports:
       - "5005:5005"
       - "8080:8080"

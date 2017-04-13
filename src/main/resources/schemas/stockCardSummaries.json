@@ -1,8 +1,31 @@
 {
-  "type": "array",
-  "items": {
-    "type": "object",
-    "title": "StockCardSummary",
-    "$ref": "stockCardSummary"
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Stock card summaries without any line items.",
+  "properties": {
+    "content": {
+      "type": "array",
+      "title": "Stock cards.",
+      "items": {
+        "type": "object",
+        "title": "Stock card",
+        "$ref": "stockCard"
+      }
+    },
+    "totalElements": {
+      "type": "integer"
+    },
+    "totalPages": {
+      "type": "integer"
+    },
+    "numberOfElements": {
+      "type": "integer"
+    },
+    "size": {
+      "type": "integer"
+    },
+    "number": {
+      "type": "integer"
+    }
   }
 }

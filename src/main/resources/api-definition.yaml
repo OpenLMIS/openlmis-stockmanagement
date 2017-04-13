@@ -28,7 +28,6 @@ schemas:
 
   - stockCards: !include schemas/stockCards.json
   - stockCard: !include schemas/stockCard.json
-  - stockCardSummary: !include schemas/stockCardSummary.json
   - stockCardSummaries: !include schemas/stockCardSummaries.json
   - validSourceDestination: !include schemas/validSourceDestination.json
   - validSourceDestinations: |
