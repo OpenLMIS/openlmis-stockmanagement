@@ -133,7 +133,7 @@ public class StockCardzControllerTest extends BaseWebTest {
     UUID programId = UUID.randomUUID();
     UUID facilityId = UUID.randomUUID();
 
-    PageRequest pageable = new PageRequest(0, 20);
+    PageRequest pageable = new PageRequest(0, Integer.MAX_VALUE);
     when(stockCardSummariesService
         .findStockCards(programId, facilityId, pageable))
         .thenReturn(new PageImpl<>(singletonList(StockCardDtoBuilder.createStockCardDto())));
