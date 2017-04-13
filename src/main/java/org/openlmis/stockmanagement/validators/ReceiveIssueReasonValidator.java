@@ -15,7 +15,6 @@
 
 package org.openlmis.stockmanagement.validators;
 
-import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.domain.adjustment.ReasonCategory.AD_HOC;
 import static org.openlmis.stockmanagement.domain.adjustment.ReasonType.CREDIT;
 import static org.openlmis.stockmanagement.domain.adjustment.ReasonType.DEBIT;
@@ -67,7 +66,7 @@ public class ReceiveIssueReasonValidator implements StockEventValidator {
 
   private void checkReason(StockEventDto eventDto, ReasonType expectedReasonType,
                            String typeErrorKey, String categoryErrorKey) {
-    if (!isEmpty(eventDto.getLineItems())) {
+    if (eventDto.hasLineItems()) {
       eventDto.getLineItems().forEach(lineItem -> {
         UUID reasonId = lineItem.getReasonId();
         if (reasonId != null) {

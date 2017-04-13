@@ -16,7 +16,6 @@
 package org.openlmis.stockmanagement.validators;
 
 import static java.util.stream.Collectors.toSet;
-import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ORDERABLE_DUPLICATION;
 
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
@@ -34,7 +33,7 @@ public class OrderableDuplicationValidator implements StockEventValidator {
   @Override
   public void validate(StockEventDto stockEventDto)
       throws IllegalAccessException, InstantiationException {
-    if (isEmpty(stockEventDto.getLineItems())) {
+    if (!stockEventDto.hasLineItems()) {
       return;
     }
 

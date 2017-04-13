@@ -55,7 +55,7 @@ public class MandatoryFieldsValidator implements StockEventValidator {
           new Message(ERROR_EVENT_PROGRAM_INVALID, dto.getProgramId()));
     }
 
-    if (isEmpty(dto.getLineItems())) {
+    if (!dto.hasLineItems()) {
       throw new ValidationMessageException(
           new Message(ERROR_EVENT_NO_LINE_ITEMS, dto.getLineItems()));
     }
@@ -80,7 +80,7 @@ public class MandatoryFieldsValidator implements StockEventValidator {
   }
 
   private void validateOccurredDate(StockEventDto stockEventDto) {
-    if (!isEmpty(stockEventDto.getLineItems())) {
+    if (stockEventDto.hasLineItems()) {
       stockEventDto.getLineItems().forEach(lineItem -> {
         ZonedDateTime occurredDate = lineItem.getOccurredDate();
         if (occurredDate == null || occurredDate.isAfter(ZonedDateTime.now())) {

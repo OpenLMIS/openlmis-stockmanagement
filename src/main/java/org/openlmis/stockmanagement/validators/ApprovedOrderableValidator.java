@@ -44,7 +44,7 @@ public class ApprovedOrderableValidator implements StockEventValidator {
     LOGGER.debug("Validate approved product reference data service");
     UUID facility = stockEventDto.getFacilityId();
     UUID program = stockEventDto.getProgramId();
-    if (isEmpty(stockEventDto.getLineItems()) || facility == null || program == null) {
+    if (!stockEventDto.hasLineItems() || facility == null || program == null) {
       return;
     }
 

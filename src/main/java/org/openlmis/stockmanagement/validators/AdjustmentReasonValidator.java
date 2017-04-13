@@ -15,7 +15,6 @@
 
 package org.openlmis.stockmanagement.validators;
 
-import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_REASON_CATEGORY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_REASON_TYPE_INVALID;
 
@@ -38,7 +37,7 @@ public class AdjustmentReasonValidator implements StockEventValidator {
   public void validate(StockEventDto stockEventDto) {
     LOGGER.debug("Validate adjustment reason");
     boolean hasSourceOrDestination = stockEventDto.hasSource() || stockEventDto.hasDestination();
-    if (hasSourceOrDestination || isEmpty(stockEventDto.getLineItems())) {
+    if (hasSourceOrDestination || !stockEventDto.hasLineItems()) {
       return;
     }
 

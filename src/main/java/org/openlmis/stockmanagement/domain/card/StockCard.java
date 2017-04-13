@@ -18,9 +18,9 @@ package org.openlmis.stockmanagement.domain.card;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static javax.persistence.CascadeType.ALL;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.hibernate.annotations.LazyCollectionOption.FALSE;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.annotations.LazyCollection;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
@@ -113,7 +113,7 @@ public class StockCard extends BaseEntity {
    * Calculate stock on hand for each line item and the card itself.
    */
   public void calculateStockOnHand() {
-    if (CollectionUtils.isEmpty(lineItems)) {
+    if (isEmpty(lineItems)) {
       return;
     }
 

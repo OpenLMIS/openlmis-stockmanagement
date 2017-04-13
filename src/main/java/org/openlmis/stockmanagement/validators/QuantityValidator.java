@@ -16,7 +16,6 @@
 package org.openlmis.stockmanagement.validators;
 
 import static java.util.stream.Collectors.groupingBy;
-import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH;
 
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
@@ -49,7 +48,7 @@ public class QuantityValidator implements StockEventValidator {
   public void validate(StockEventDto stockEventDto)
       throws IllegalAccessException, InstantiationException {
     LOGGER.debug("Validate quantity");
-    if (isEmpty(stockEventDto.getLineItems())) {
+    if (!stockEventDto.hasLineItems()) {
       return;
     }
 

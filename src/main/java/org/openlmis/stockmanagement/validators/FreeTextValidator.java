@@ -15,7 +15,6 @@
 
 package org.openlmis.stockmanagement.validators;
 
-import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_FREE_TEXT_NOT_ALLOWED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_FREE_TEXT_NOT_ALLOWED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_FREE_TEXT_BOTH_PRESENT;
@@ -75,7 +74,7 @@ public class FreeTextValidator implements StockEventValidator {
   }
 
   private void checkReasonFreeText(StockEventDto stockEventDto) {
-    if (!isEmpty(stockEventDto.getLineItems())) {
+    if (stockEventDto.hasLineItems()) {
       stockEventDto.getLineItems().forEach(lineItem -> {
         UUID reasonId = lineItem.getReasonId();
         String freeText = lineItem.getReasonFreeText();

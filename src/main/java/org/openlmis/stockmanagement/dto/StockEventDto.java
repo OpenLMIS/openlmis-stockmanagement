@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.dto;
 
 import static java.time.ZonedDateTime.now;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.domain.BaseEntity.fromId;
 
 import org.openlmis.stockmanagement.domain.event.StockEvent;
@@ -94,5 +95,9 @@ public class StockEventDto {
     boolean noReason = getLineItems() != null
         && getLineItems().stream().noneMatch(StockEventLineItem::hasReason);
     return noReason && !hasDestination() && !hasSource();
+  }
+
+  public boolean hasLineItems() {
+    return !isEmpty(getLineItems());
   }
 }
