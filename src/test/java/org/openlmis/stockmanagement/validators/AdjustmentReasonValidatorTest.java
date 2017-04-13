@@ -62,7 +62,7 @@ public class AdjustmentReasonValidatorTest extends BaseTest {
         .name("Balance Adjustment")
         .build();
     StockEventDto stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
-    stockEventDto.setReasonId(reasonRepository.save(reason).getId());
+    stockEventDto.getLineItems().get(0).setReasonId(reasonRepository.save(reason).getId());
 
     expectedEx.expect(ValidationMessageException.class);
     expectedEx.expectMessage(
@@ -85,7 +85,7 @@ public class AdjustmentReasonValidatorTest extends BaseTest {
         .isFreeTextAllowed(false)
         .build();
     StockEventDto stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
-    stockEventDto.setReasonId(reasonRepository.save(reason).getId());
+    stockEventDto.getLineItems().get(0).setReasonId(reasonRepository.save(reason).getId());
 
     expectedEx.expect(ValidationMessageException.class);
     expectedEx.expectMessage(
@@ -100,7 +100,7 @@ public class AdjustmentReasonValidatorTest extends BaseTest {
       throws Exception {
     //given
     StockEventDto stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
-    stockEventDto.setReasonId(null);
+    stockEventDto.getLineItems().get(0).setReasonId(null);
 
     //when
     adjustmentReasonValidator.validate(stockEventDto);
@@ -111,7 +111,7 @@ public class AdjustmentReasonValidatorTest extends BaseTest {
       throws Exception {
     //given
     StockEventDto stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
-    stockEventDto.setReasonId(UUID.randomUUID());
+    stockEventDto.getLineItems().get(0).setReasonId(UUID.randomUUID());
 
     //when
     adjustmentReasonValidator.validate(stockEventDto);
@@ -121,7 +121,7 @@ public class AdjustmentReasonValidatorTest extends BaseTest {
   public void should_not_throw_error_for_event_with_no_reason_id() throws Exception {
     //given
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
-    stockEventDto.setReasonId(null);
+    stockEventDto.getLineItems().get(0).setReasonId(null);
 
     //when
     adjustmentReasonValidator.validate(stockEventDto);

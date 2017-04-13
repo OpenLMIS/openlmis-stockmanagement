@@ -19,6 +19,7 @@ import org.openlmis.stockmanagement.domain.BaseEntity;
 
 import lombok.Data;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import javax.persistence.Entity;
@@ -33,7 +34,20 @@ public class StockEventLineItem extends BaseEntity {
   private Integer quantity;
   private UUID orderableId;
 
+  private UUID reasonId;
+  private String reasonFreeText;
+
+  private ZonedDateTime occurredDate;
+
   @ManyToOne()
   @JoinColumn(nullable = false)
   private StockEvent stockEvent;
+
+  public boolean hasReason() {
+    return this.reasonId != null;
+  }
+
+  public boolean hasReasonFreeText() {
+    return this.reasonFreeText != null;
+  }
 }

@@ -171,7 +171,7 @@ public class MandatoryFieldsValidatorTest {
 
   private void expectOccurredDateException(ZonedDateTime occurredDate) {
     //given
-    stockEventDto.setOccurredDate(occurredDate);
+    stockEventDto.getLineItems().get(0).setOccurredDate(occurredDate);
 
     //when
     String suffix = occurredDate != null ? occurredDate.toString() : "";

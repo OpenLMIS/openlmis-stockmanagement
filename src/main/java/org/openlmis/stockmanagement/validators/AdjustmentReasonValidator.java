@@ -15,10 +15,12 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_REASON_CATEGORY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_REASON_TYPE_INVALID;
 
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
@@ -36,12 +38,21 @@ public class AdjustmentReasonValidator implements StockEventValidator {
   public void validate(StockEventDto stockEventDto) {
     LOGGER.debug("Validate adjustment reason");
     boolean hasSourceOrDestination = stockEventDto.hasSource() || stockEventDto.hasDestination();
-    if (!stockEventDto.hasReason() || hasSourceOrDestination) {
+    if (hasSourceOrDestination || isEmpty(stockEventDto.getLineItems())) {
       return;
     }
-    //this validator does not care if reason id not found in db
-    //that is handled by other validators
-    StockCardLineItemReason foundReason = reasonRepository.findOne(stockEventDto.getReasonId());
+
+    stockEventDto.getLineItems().forEach(lineItem -> {
+      //this validator does not care if reason id not found in db
+      //that is handled by other validators
+      if (lineItem.hasReason()) {
+        validateReason(lineItem);
+      }
+    });
+  }
+
+  private void validateReason(StockEventLineItem lineItem) {
+    StockCardLineItemReason foundReason = reasonRepository.findOne(lineItem.getReasonId());
     if (foundReason != null) {
       validReasonType(foundReason);
       validReasonCategory(foundReason);

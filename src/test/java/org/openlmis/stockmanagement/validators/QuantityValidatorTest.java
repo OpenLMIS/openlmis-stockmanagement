@@ -71,7 +71,8 @@ public class QuantityValidatorTest {
     //given
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setDestinationId(null);
-    when(reasonRepository.findOne(stockEventDto.getReasonId())).thenReturn(null);
+    when(reasonRepository.findOne(stockEventDto.getLineItems().get(0).getReasonId()))
+        .thenReturn(null);
 
     //when
     quantityValidator.validate(stockEventDto);
@@ -115,8 +116,8 @@ public class QuantityValidatorTest {
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setSourceId(null);
     stockEventDto.setDestinationId(UUID.randomUUID());
-    stockEventDto.setOccurredDate(day2);
     stockEventDto.getLineItems().get(0).setQuantity(quantity);
+    stockEventDto.getLineItems().get(0).setOccurredDate(day2);
     return stockEventDto;
   }
 

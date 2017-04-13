@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.domain.card;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertThat;
@@ -45,9 +46,10 @@ public class StockCardLineItemTest {
     //when
     StockEventDto eventDto = createStockEventDto();
     StockEventLineItem stockEventLineItem = new StockEventLineItem();
+    stockEventLineItem.setReasonId(randomUUID());
 
-    UUID userId = UUID.randomUUID();
-    UUID eventId = UUID.randomUUID();
+    UUID userId = randomUUID();
+    UUID eventId = randomUUID();
 
     StockCardLineItem cardLineItem =
         createLineItemFrom(eventDto, stockEventLineItem, stockCard, eventId, userId);
@@ -55,17 +57,17 @@ public class StockCardLineItemTest {
     //then
     assertThat(cardLineItem.getSourceFreeText(), is(eventDto.getSourceFreeText()));
     assertThat(cardLineItem.getDestinationFreeText(), is(eventDto.getDestinationFreeText()));
-    assertThat(cardLineItem.getReasonFreeText(), is(eventDto.getReasonFreeText()));
+    assertThat(cardLineItem.getReasonFreeText(), is(stockEventLineItem.getReasonFreeText()));
     assertThat(cardLineItem.getDocumentNumber(), is(eventDto.getDocumentNumber()));
     assertThat(cardLineItem.getSignature(), is(eventDto.getSignature()));
 
     assertThat(cardLineItem.getQuantity(), is(stockEventLineItem.getQuantity()));
-    assertThat(cardLineItem.getReason().getId(), is(eventDto.getReasonId()));
+    assertThat(cardLineItem.getReason().getId(), is(stockEventLineItem.getReasonId()));
 
     assertThat(cardLineItem.getSource().getId(), is(eventDto.getSourceId()));
     assertThat(cardLineItem.getDestination().getId(), is(eventDto.getDestinationId()));
 
-    assertThat(cardLineItem.getOccurredDate(), is(eventDto.getOccurredDate()));
+    assertThat(cardLineItem.getOccurredDate(), is(stockEventLineItem.getOccurredDate()));
 
     assertThat(cardLineItem.getStockCard(), is(stockCard));
     assertThat(cardLineItem.getOriginEvent().getId(), is(eventId));

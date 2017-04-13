@@ -70,7 +70,7 @@ public class MandatoryFieldsValidator implements StockEventValidator {
 
   private void validateQuantity(StockEventDto stockEventDto) {
     List<StockEventLineItem> invalidQuantities = stockEventDto.getLineItems().stream()
-        .filter(q -> q.getQuantity() == null || q.getQuantity() < 0)
+        .filter(lineItem -> lineItem.getQuantity() == null || lineItem.getQuantity() < 0)
         .collect(toList());
 
     if (!isEmpty(invalidQuantities)) {
@@ -80,10 +80,14 @@ public class MandatoryFieldsValidator implements StockEventValidator {
   }
 
   private void validateOccurredDate(StockEventDto stockEventDto) {
-    ZonedDateTime occurredDate = stockEventDto.getOccurredDate();
-    if (occurredDate == null || occurredDate.isAfter(ZonedDateTime.now())) {
-      throw new ValidationMessageException(
-          new Message(ERROR_EVENT_OCCURRED_DATE_INVALID, occurredDate));
+    if (!isEmpty(stockEventDto.getLineItems())) {
+      stockEventDto.getLineItems().forEach(lineItem -> {
+        ZonedDateTime occurredDate = lineItem.getOccurredDate();
+        if (occurredDate == null || occurredDate.isAfter(ZonedDateTime.now())) {
+          throw new ValidationMessageException(
+              new Message(ERROR_EVENT_OCCURRED_DATE_INVALID, occurredDate));
+        }
+      });
     }
   }
 }

@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.domain.adjustment.ReasonCategory.AD_HOC;
 import static org.openlmis.stockmanagement.domain.adjustment.ReasonType.CREDIT;
 import static org.openlmis.stockmanagement.domain.adjustment.ReasonType.DEBIT;
@@ -44,9 +45,6 @@ public class ReceiveIssueReasonValidator implements StockEventValidator {
   @Override
   public void validate(StockEventDto eventDto) {
     LOGGER.debug("Validate receive and issue reason");
-    if (!eventDto.hasReason()) {
-      return;
-    }
     if (eventDto.hasSource()) {
       checkReceiveReason(eventDto);
     }
@@ -69,13 +67,19 @@ public class ReceiveIssueReasonValidator implements StockEventValidator {
 
   private void checkReason(StockEventDto eventDto, ReasonType expectedReasonType,
                            String typeErrorKey, String categoryErrorKey) {
-    UUID reasonId = eventDto.getReasonId();
-    StockCardLineItemReason foundReason = reasonRepository.findOne(reasonId);
-    //this validator does not care if reason id points to something in DB
-    //that is handled by other validators
-    if (foundReason != null) {
-      checkReasonType(expectedReasonType, typeErrorKey, reasonId, foundReason);
-      checkReasonCategory(categoryErrorKey, reasonId, foundReason);
+    if (!isEmpty(eventDto.getLineItems())) {
+      eventDto.getLineItems().forEach(lineItem -> {
+        UUID reasonId = lineItem.getReasonId();
+        if (reasonId != null) {
+          StockCardLineItemReason foundReason = reasonRepository.findOne(reasonId);
+          //this validator does not care if reason id points to something in DB
+          //that is handled by other validators
+          if (foundReason != null) {
+            checkReasonType(expectedReasonType, typeErrorKey, reasonId, foundReason);
+            checkReasonCategory(categoryErrorKey, reasonId, foundReason);
+          }
+        }
+      });
     }
   }
 

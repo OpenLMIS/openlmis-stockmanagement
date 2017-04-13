@@ -74,7 +74,7 @@ public class ReceiveIssueReasonValidatorTest {
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setSourceId(UUID.randomUUID());
     stockEventDto.setDestinationId(null);
-    stockEventDto.setReasonId(null);
+    stockEventDto.getLineItems().get(0).setReasonId(null);
 
     //when
     receiveIssueReasonValidator.validate(stockEventDto);
@@ -88,7 +88,7 @@ public class ReceiveIssueReasonValidatorTest {
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setDestinationId(UUID.randomUUID());
     stockEventDto.setSourceId(null);
-    stockEventDto.setReasonId(null);
+    stockEventDto.getLineItems().get(0).setReasonId(null);
 
     //when
     receiveIssueReasonValidator.validate(stockEventDto);
@@ -102,9 +102,10 @@ public class ReceiveIssueReasonValidatorTest {
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setSourceId(UUID.randomUUID());
     stockEventDto.setDestinationId(null);
-    stockEventDto.setReasonId(UUID.randomUUID());
+    stockEventDto.getLineItems().get(0).setReasonId(UUID.randomUUID());
 
-    when(reasonRepository.findOne(stockEventDto.getReasonId())).thenReturn(creditAdhocReason);
+    when(reasonRepository.findOne(stockEventDto.getLineItems().get(0).getReasonId()))
+        .thenReturn(creditAdhocReason);
 
     //when
     receiveIssueReasonValidator.validate(stockEventDto);
@@ -119,9 +120,10 @@ public class ReceiveIssueReasonValidatorTest {
     stockEventDto.setDestinationId(UUID.randomUUID());
     stockEventDto.setSourceId(null);
     //the following is a debit reason
-    stockEventDto.setReasonId(UUID.randomUUID());
+    stockEventDto.getLineItems().get(0).setReasonId(UUID.randomUUID());
 
-    when(reasonRepository.findOne(stockEventDto.getReasonId())).thenReturn(debitAdhocReason);
+    when(reasonRepository.findOne(stockEventDto.getLineItems().get(0).getReasonId()))
+        .thenReturn(debitAdhocReason);
 
     //when
     receiveIssueReasonValidator.validate(stockEventDto);
@@ -134,7 +136,7 @@ public class ReceiveIssueReasonValidatorTest {
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setSourceId(UUID.randomUUID());
     stockEventDto.setDestinationId(null);
-    stockEventDto.setReasonId(UUID.randomUUID());
+    stockEventDto.getLineItems().get(0).setReasonId(UUID.randomUUID());
     testErrorCase(ERROR_EVENT_RECEIVE_REASON_TYPE_INVALID, stockEventDto, debitAdhocReason);
   }
 
@@ -143,7 +145,7 @@ public class ReceiveIssueReasonValidatorTest {
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setDestinationId(UUID.randomUUID());
     stockEventDto.setSourceId(null);
-    stockEventDto.setReasonId(UUID.randomUUID());
+    stockEventDto.getLineItems().get(0).setReasonId(UUID.randomUUID());
 
     testErrorCase(ERROR_EVENT_ISSUE_REASON_TYPE_INVALID, stockEventDto, creditAdhocReason);
   }
@@ -154,7 +156,7 @@ public class ReceiveIssueReasonValidatorTest {
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setSourceId(UUID.randomUUID());
     stockEventDto.setDestinationId(null);
-    stockEventDto.setReasonId(UUID.randomUUID());
+    stockEventDto.getLineItems().get(0).setReasonId(UUID.randomUUID());
 
     testErrorCase(ERROR_EVENT_RECEIVE_REASON_CATEGORY_INVALID, stockEventDto, creditNonAdhocReason);
   }
@@ -165,7 +167,7 @@ public class ReceiveIssueReasonValidatorTest {
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setDestinationId(UUID.randomUUID());
     stockEventDto.setSourceId(null);
-    stockEventDto.setReasonId(UUID.randomUUID());
+    stockEventDto.getLineItems().get(0).setReasonId(UUID.randomUUID());
 
     testErrorCase(ERROR_EVENT_ISSUE_REASON_CATEGORY_INVALID, stockEventDto, debitNonAdhocReason);
   }
@@ -178,7 +180,8 @@ public class ReceiveIssueReasonValidatorTest {
 
     //given
 
-    when(reasonRepository.findOne(stockEventDto.getReasonId())).thenReturn(mockedReason);
+    when(reasonRepository.findOne(stockEventDto.getLineItems().get(0).getReasonId()))
+        .thenReturn(mockedReason);
 
     //when
     receiveIssueReasonValidator.validate(stockEventDto);

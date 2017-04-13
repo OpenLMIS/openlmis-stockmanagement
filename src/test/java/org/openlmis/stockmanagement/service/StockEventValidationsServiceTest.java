@@ -35,7 +35,6 @@ import org.openlmis.stockmanagement.validators.FreeTextValidator;
 import org.openlmis.stockmanagement.validators.MandatoryFieldsValidator;
 import org.openlmis.stockmanagement.validators.OrderableDuplicationValidator;
 import org.openlmis.stockmanagement.validators.QuantityValidator;
-import org.openlmis.stockmanagement.validators.ReasonAssignmentValidator;
 import org.openlmis.stockmanagement.validators.ReceiveIssueReasonValidator;
 import org.openlmis.stockmanagement.validators.SourceDestinationAssignmentValidator;
 import org.openlmis.stockmanagement.validators.StockEventValidator;
@@ -79,9 +78,6 @@ public class StockEventValidationsServiceTest {
   private QuantityValidator quantityValidator;
 
   @MockBean
-  private ReasonAssignmentValidator reasonAssignmentValidator;
-
-  @MockBean
   private OrderableDuplicationValidator orderableDuplicationValidator;
 
   @Before
@@ -95,7 +91,6 @@ public class StockEventValidationsServiceTest {
     doNothing().when(receiveIssueReasonValidator).validate(any(StockEventDto.class));
     doNothing().when(adjustmentReasonValidator).validate(any(StockEventDto.class));
     doNothing().when(quantityValidator).validate(any(StockEventDto.class));
-    doNothing().when(reasonAssignmentValidator).validate(any(StockEventDto.class));
     doNothing().when(orderableDuplicationValidator).validate(any(StockEventDto.class));
   }
 

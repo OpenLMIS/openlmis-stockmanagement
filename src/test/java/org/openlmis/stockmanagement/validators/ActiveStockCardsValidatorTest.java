@@ -50,7 +50,7 @@ public class ActiveStockCardsValidatorTest {
 
     //given
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
-    stockEventDto.setReasonId(null);
+    stockEventDto.getLineItems().get(0).setReasonId(null);
     stockEventDto.setSourceId(null);
     stockEventDto.setDestinationId(null);
 

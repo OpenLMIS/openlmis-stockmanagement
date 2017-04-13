@@ -42,7 +42,7 @@ public class PhysicalInventoryDtoTest {
     assertThat(piDto.getFacilityId(), is(eventDto.getFacilityId()));
     assertThat(piDto.getSignature(), is(eventDto.getSignature()));
     assertThat(piDto.getDocumentNumber(), is(eventDto.getDocumentNumber()));
-    assertThat(piDto.getOccurredDate(), is(eventDto.getOccurredDate()));
+    assertThat(piDto.getOccurredDate(), is(eventDto.getLineItems().get(0).getOccurredDate()));
   }
 
   @Test

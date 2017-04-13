@@ -41,19 +41,15 @@ public class StockEventDtoTest {
     assertThat(event.getSourceFreeText(), is(stockEventDto.getSourceFreeText()));
     assertThat(event.getDestinationFreeText(), is(stockEventDto.getDestinationFreeText()));
     assertThat(event.getDocumentNumber(), is(stockEventDto.getDocumentNumber()));
-    assertThat(event.getReasonFreeText(), is(stockEventDto.getReasonFreeText()));
     assertThat(event.getSignature(), is(stockEventDto.getSignature()));
 
     assertThat(event.getLineItems(), is(stockEventDto.getLineItems()));
-    assertThat(event.getReason().getId(), is(stockEventDto.getReasonId()));
 
     assertThat(event.getSource().getId(), is(stockEventDto.getSourceId()));
     assertThat(event.getDestination().getId(), is(stockEventDto.getDestinationId()));
 
     assertThat(event.getProgramId(), is(stockEventDto.getProgramId()));
     assertThat(event.getFacilityId(), is(stockEventDto.getFacilityId()));
-
-    assertThat(event.getOccurredDate(), is(stockEventDto.getOccurredDate()));
 
     assertThat(event.getUserId(), is(userId));
 

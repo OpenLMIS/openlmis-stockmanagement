@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_STOCK_EVENT_REASON_NOT_MATCH;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_ADJUST;
+import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createNoSourceDestinationStockEventDto;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -80,8 +81,7 @@ public class StockEventsControllerTest extends BaseWebTest {
         new Message(ERROR_NO_FOLLOWING_PERMISSION, STOCK_ADJUST)))
         .when(permissionService).canAdjustStock(any(UUID.class), any(UUID.class));
 
-    StockEventDto eventDto = new StockEventDto();
-    eventDto.setReasonId(UUID.randomUUID());
+    StockEventDto eventDto = createNoSourceDestinationStockEventDto();
     shouldReject(eventDto);
   }
 
@@ -93,7 +93,9 @@ public class StockEventsControllerTest extends BaseWebTest {
         new Message(ERROR_NO_FOLLOWING_PERMISSION, STOCK_ADJUST)))
         .when(permissionService).canEditPhysicalInventory(any(UUID.class), any(UUID.class));
 
-    shouldReject(new StockEventDto());
+    StockEventDto dto = createNoSourceDestinationStockEventDto();
+    dto.getLineItems().get(0).setReasonId(null);
+    shouldReject(dto);
   }
 
   @Test

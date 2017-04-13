@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_FREE_TEXT_NOT_ALLOWED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_FREE_TEXT_NOT_ALLOWED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_FREE_TEXT_BOTH_PRESENT;
@@ -74,17 +75,21 @@ public class FreeTextValidator implements StockEventValidator {
   }
 
   private void checkReasonFreeText(StockEventDto stockEventDto) {
-    UUID reasonId = stockEventDto.getReasonId();
-    String freeText = stockEventDto.getReasonFreeText();
-    if (stockEventDto.hasReason()) {
-      StockCardLineItemReason reason = stockCardLineItemReasonRepository.findOne(reasonId);
+    if (!isEmpty(stockEventDto.getLineItems())) {
+      stockEventDto.getLineItems().forEach(lineItem -> {
+        UUID reasonId = lineItem.getReasonId();
+        String freeText = lineItem.getReasonFreeText();
+        if (lineItem.hasReason()) {
+          StockCardLineItemReason reason = stockCardLineItemReasonRepository.findOne(reasonId);
 
-      if (null != reason && !reason.getIsFreeTextAllowed() && stockEventDto.hasReasonFreeText()) {
-        throwError(ERROR_REASON_FREE_TEXT_NOT_ALLOWED, reasonId, freeText);
-      }
-    } else if (freeText != null) {
-      //reason free text exist but reason id is null
-      throwError(ERROR_REASON_FREE_TEXT_NOT_ALLOWED, reasonId, freeText);
+          if (null != reason && !reason.getIsFreeTextAllowed() && lineItem.hasReasonFreeText()) {
+            throwError(ERROR_REASON_FREE_TEXT_NOT_ALLOWED, reasonId, freeText);
+          }
+        } else if (freeText != null) {
+          //reason free text exist but reason id is null
+          throwError(ERROR_REASON_FREE_TEXT_NOT_ALLOWED, reasonId, freeText);
+        }
+      });
     }
   }
 

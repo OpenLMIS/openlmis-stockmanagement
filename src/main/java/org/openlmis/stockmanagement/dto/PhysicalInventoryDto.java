@@ -120,6 +120,7 @@ public class PhysicalInventoryDto {
 
   /**
    * Create physical inventory dto object from stock event dto object.
+   *
    * @param eventDto event dto.
    * @return created physical inventory dto.
    */
@@ -129,7 +130,7 @@ public class PhysicalInventoryDto {
         .facilityId(eventDto.getFacilityId())
         .signature(eventDto.getSignature())
         .documentNumber(eventDto.getDocumentNumber())
-        .occurredDate(eventDto.getOccurredDate())
+        .occurredDate(eventDto.getLineItems().get(0).getOccurredDate())
         .build();
   }
 

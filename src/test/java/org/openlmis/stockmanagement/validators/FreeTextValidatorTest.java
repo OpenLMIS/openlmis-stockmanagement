@@ -40,6 +40,7 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.NodeRepository;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
+import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 
 import java.util.UUID;
 
@@ -97,9 +98,9 @@ public class FreeTextValidatorTest {
 
   @Test
   public void should_fail_when_reason_not_exist_but_reason_free_text_exist() throws Exception {
-    StockEventDto eventDto = new StockEventDto();
-    eventDto.setReasonId(null);
-    eventDto.setReasonFreeText("reason free text");
+    StockEventDto eventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
+    eventDto.getLineItems().get(0).setReasonId(null);
+    eventDto.getLineItems().get(0).setReasonFreeText("reason free text");
 
     try {
       freeTextValidator.validate(eventDto);
@@ -114,8 +115,8 @@ public class FreeTextValidatorTest {
 
   @Test
   public void should_fail_when_event_has_both_source_and_destination_free_text() throws Exception {
-    StockEventDto eventDto = new StockEventDto();
-    eventDto.setReasonId(randomUUID());
+    StockEventDto eventDto = StockEventDtoBuilder.createStockEventDto();
+    eventDto.getLineItems().get(0).setReasonId(randomUUID());
     eventDto.setDestinationId(randomUUID());
     eventDto.setSourceFreeText("source free text");
     eventDto.setDestinationFreeText("destination free text");
@@ -182,9 +183,9 @@ public class FreeTextValidatorTest {
     when(stockCardLineItemReasonRepository.findOne(any(UUID.class))).thenReturn(mockReason);
     when(mockReason.getIsFreeTextAllowed()).thenReturn(false);
 
-    StockEventDto eventDto = new StockEventDto();
-    eventDto.setReasonId(fromString("e3fc3cf3-da18-44b0-a220-77c985202e06"));
-    eventDto.setReasonFreeText("reason free text");
+    StockEventDto eventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
+    eventDto.getLineItems().get(0).setReasonId(fromString("e3fc3cf3-da18-44b0-a220-77c985202e06"));
+    eventDto.getLineItems().get(0).setReasonFreeText("reason free text");
 
     try {
       freeTextValidator.validate(eventDto);

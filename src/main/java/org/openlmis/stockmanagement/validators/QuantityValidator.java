@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static java.util.stream.Collectors.groupingBy;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH;
 
@@ -30,6 +31,9 @@ import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Component(value = "QuantityValidator")
@@ -45,30 +49,35 @@ public class QuantityValidator implements StockEventValidator {
   public void validate(StockEventDto stockEventDto)
       throws IllegalAccessException, InstantiationException {
     LOGGER.debug("Validate quantity");
-    boolean isDebitEvent = stockEventDto.hasDestination() || hasDebitReason(stockEventDto);
-    if (!isDebitEvent || isEmpty(stockEventDto.getLineItems())) {
+    if (isEmpty(stockEventDto.getLineItems())) {
       return;
     }
 
-    for (StockEventLineItem lineItem : stockEventDto.getLineItems()) {
-      validateQuantity(stockEventDto, lineItem);
+    Map<UUID, List<StockEventLineItem>> sameOrderableGroups = stockEventDto.getLineItems().stream()
+        .collect(groupingBy(StockEventLineItem::getOrderableId));
+
+    for (List<StockEventLineItem> group : sameOrderableGroups.values()) {
+      boolean anyDebitInGroup = group.stream().anyMatch(this::hasDebitReason);
+      if (stockEventDto.hasDestination() || anyDebitInGroup) {
+        validateQuantity(stockEventDto, group);
+      }
     }
   }
 
-  private void validateQuantity(StockEventDto eventDto, StockEventLineItem lineItem)
+  private void validateQuantity(StockEventDto eventDto, List<StockEventLineItem> group)
       throws IllegalAccessException, InstantiationException {
     StockCard foundCard =
-        tryFindCard(eventDto.getProgramId(), eventDto.getFacilityId(), lineItem);
+        tryFindCard(eventDto.getProgramId(), eventDto.getFacilityId(), group.get(0));
 
     //create line item from event line item and add it to stock card for recalculation
-    StockCardLineItem itemToBe = calculateStockOnHand(eventDto, lineItem, foundCard);
+    List<StockCardLineItem> itemsToBe = calculateStockOnHand(eventDto, group, foundCard);
     foundCard.getLineItems().forEach(item -> {
       if (item.getStockOnHand() < 0) {
-        throwQuantityError(lineItem.getQuantity());
+        throwQuantityError(group);
       }
     });
-    //remove the line item from card to avoid jpa persistence
-    foundCard.getLineItems().remove(itemToBe);
+    //remove the line items from card to avoid jpa persistence
+    foundCard.getLineItems().removeAll(itemsToBe);
   }
 
   private StockCard tryFindCard(UUID programId, UUID facilityId, StockEventLineItem lineItem) {
@@ -76,31 +85,34 @@ public class QuantityValidator implements StockEventValidator {
     StockCard foundCard = stockCardRepository
         .findByProgramIdAndFacilityIdAndOrderableId(programId, facilityId, orderableId);
     if (foundCard == null) {
-      //first movement should not be debit
-      throwQuantityError(lineItem.getQuantity());
+      foundCard = new StockCard();
+      foundCard.setLineItems(new ArrayList<>());
     }
     return foundCard;
   }
 
-  private void throwQuantityError(Integer quantity) {
+  private void throwQuantityError(List<StockEventLineItem> group) {
     throw new ValidationMessageException(
-        new Message(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH, quantity));
+        new Message(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH, group));
   }
 
-  private StockCardLineItem calculateStockOnHand(StockEventDto eventDto,
-                                                 StockEventLineItem lineItemDto,
-                                                 StockCard foundCard)
+  private List<StockCardLineItem> calculateStockOnHand(StockEventDto eventDto,
+                                                       List<StockEventLineItem> group,
+                                                       StockCard foundCard)
       throws InstantiationException, IllegalAccessException {
-    StockCardLineItem itemToBe = StockCardLineItem
-        .createLineItemFrom(eventDto, lineItemDto, foundCard, null, null);
+    List<StockCardLineItem> lineItemsToBe = new ArrayList<>();
+    for (StockEventLineItem lineItem : group) {
+      lineItemsToBe.add(StockCardLineItem
+          .createLineItemFrom(eventDto, lineItem, foundCard, null, null));
+    }
 
     foundCard.calculateStockOnHand();
-    return itemToBe;
+    return lineItemsToBe;
   }
 
-  private boolean hasDebitReason(StockEventDto stockEventDto) {
-    if (stockEventDto.hasReason()) {
-      StockCardLineItemReason reason = reasonRepository.findOne(stockEventDto.getReasonId());
+  private boolean hasDebitReason(StockEventLineItem lineItem) {
+    if (lineItem.hasReason()) {
+      StockCardLineItemReason reason = reasonRepository.findOne(lineItem.getReasonId());
       return reason != null && reason.isDebitReasonType();
     }
     return false;
