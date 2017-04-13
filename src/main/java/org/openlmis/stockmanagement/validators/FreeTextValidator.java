@@ -76,17 +76,17 @@ public class FreeTextValidator implements StockEventValidator {
   private void checkReasonFreeText(StockEventDto stockEventDto) {
     if (stockEventDto.hasLineItems()) {
       stockEventDto.getLineItems().forEach(lineItem -> {
-        UUID reasonId = lineItem.getReasonId();
         String freeText = lineItem.getReasonFreeText();
         if (lineItem.hasReason()) {
-          StockCardLineItemReason reason = stockCardLineItemReasonRepository.findOne(reasonId);
+          StockCardLineItemReason reason = stockCardLineItemReasonRepository
+              .findOne(lineItem.getReasonId());
 
           if (null != reason && !reason.getIsFreeTextAllowed() && lineItem.hasReasonFreeText()) {
-            throwError(ERROR_REASON_FREE_TEXT_NOT_ALLOWED, reasonId, freeText);
+            throwError(ERROR_REASON_FREE_TEXT_NOT_ALLOWED, lineItem.getReasonId(), freeText);
           }
         } else if (freeText != null) {
           //reason free text exist but reason id is null
-          throwError(ERROR_REASON_FREE_TEXT_NOT_ALLOWED, reasonId, freeText);
+          throwError(ERROR_REASON_FREE_TEXT_NOT_ALLOWED, lineItem.getReasonId(), freeText);
         }
       });
     }

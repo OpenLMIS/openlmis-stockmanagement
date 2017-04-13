@@ -92,7 +92,7 @@ public class StockEventDto {
    * @return boolean value that represent if this event is physical inventory.
    */
   public boolean isPhysicalInventory() {
-    boolean noReason = getLineItems() != null
+    boolean noReason = hasLineItems()
         && getLineItems().stream().noneMatch(StockEventLineItem::hasReason);
     return noReason && !hasDestination() && !hasSource();
   }
