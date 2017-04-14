@@ -54,4 +54,8 @@ public class StockEventLineItem extends BaseEntity {
   public boolean hasReasonFreeText() {
     return this.reasonFreeText != null;
   }
+
+  public boolean hasLot() {
+    return this.lotId != null;
+  }
 }

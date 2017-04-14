@@ -17,9 +17,12 @@ package org.openlmis.stockmanagement.service;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
+import org.openlmis.stockmanagement.dto.LotDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
@@ -27,7 +30,10 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Service
 public class StockEventProcessContextBuilder {
@@ -44,6 +50,9 @@ public class StockEventProcessContextBuilder {
 
   @Autowired
   private ApprovedProductReferenceDataService approvedProductService;
+
+  @Autowired
+  private LotReferenceDataService lotReferenceDataService;
 
   /**
    * Before processing events, put all needed ref data into context so we don't have to do frequent
@@ -62,6 +71,17 @@ public class StockEventProcessContextBuilder {
         .program(programService.findOne(programId))
         .facility(facilityService.findOne(facilityId))
         .allApprovedProducts(approvedProductService.getAllApprovedProducts(programId, facilityId))
+        .lots(getLots(eventDto))
         .build();
+  }
+
+  private Map<UUID, LotDto> getLots(StockEventDto eventDto) {
+    Stream<UUID> lotIds = eventDto.getLineItems().stream()
+        .filter(item -> item.getLotId() != null)
+        .map(StockEventLineItem::getLotId);
+
+    return lotIds.collect(HashMap::new,
+        (map, lotId) -> map.put(lotId, lotReferenceDataService.findOne(lotId)),
+        HashMap::putAll);
   }
 }

@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.util;
 
 import org.openlmis.stockmanagement.dto.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.FacilityDto;
+import org.openlmis.stockmanagement.dto.LotDto;
 import org.openlmis.stockmanagement.dto.ProgramDto;
 import org.openlmis.stockmanagement.dto.UserDto;
 
@@ -26,6 +27,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -36,4 +39,5 @@ public class StockEventProcessContext {
   private ProgramDto program;
   private FacilityDto facility;
   private List<ApprovedProductDto> allApprovedProducts;
+  private Map<UUID, LotDto> lots;
 }

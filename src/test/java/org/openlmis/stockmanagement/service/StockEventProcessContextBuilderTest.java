@@ -26,21 +26,23 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.FacilityDto;
+import org.openlmis.stockmanagement.dto.LotDto;
 import org.openlmis.stockmanagement.dto.ProgramDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.UserDto;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StockEventProcessContextBuilderTest {
-
 
   @Mock
   private AuthenticationHelper authenticationHelper;
@@ -52,6 +54,9 @@ public class StockEventProcessContextBuilderTest {
   private ProgramReferenceDataService programService;
 
   @Mock
+  private LotReferenceDataService lotReferenceDataService;
+
+  @Mock
   private ApprovedProductReferenceDataService approvedProductService;
 
   @InjectMocks
@@ -60,12 +65,16 @@ public class StockEventProcessContextBuilderTest {
   @Test
   public void should_build_context_with_ref_data_needed_by_processor() throws Exception {
     //given
+    UUID lotId = UUID.randomUUID();
+
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    stockEventDto.getLineItems().get(0).setLotId(lotId);
 
     UserDto userDto = new UserDto();
     ProgramDto programDto = new ProgramDto();
     FacilityDto facilityDto = new FacilityDto();
     ArrayList<ApprovedProductDto> approvedProductDtos = new ArrayList<>();
+
 
     when(authenticationHelper.getCurrentUser()).thenReturn(userDto);
     when(programService.findOne(stockEventDto.getProgramId())).thenReturn(programDto);
@@ -73,6 +82,8 @@ public class StockEventProcessContextBuilderTest {
     when(approvedProductService
         .getAllApprovedProducts(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
         .thenReturn(approvedProductDtos);
+    LotDto lot = new LotDto();
+    when(lotReferenceDataService.findOne(lotId)).thenReturn(lot);
 
     //when
     StockEventProcessContext context = contextBuilder.buildContext(stockEventDto);
@@ -82,5 +93,6 @@ public class StockEventProcessContextBuilderTest {
     assertThat(context.getProgram(), is(programDto));
     assertThat(context.getFacility(), is(facilityDto));
     assertThat(context.getAllApprovedProducts(), is(approvedProductDtos));
+    assertThat(context.getLots().get(lotId), is(lot));
   }
 }

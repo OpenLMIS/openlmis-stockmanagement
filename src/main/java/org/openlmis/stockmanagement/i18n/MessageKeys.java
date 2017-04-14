@@ -120,6 +120,11 @@ public abstract class MessageKeys {
   public static final String ERROR_EVENT_ORDERABLE_DUPLICATION = EVENT_ERROR_PREFIX
       + ".orderable.duplication";
 
+  //stock events creation: orderable duplication
+  public static final String ERROR_EVENT_LOT_NOT_EXIST = EVENT_ERROR_PREFIX + ".lot.not.exist";
+  public static final String ERROR_EVENT_LOT_ORDERABLE_NOT_MATCH = EVENT_ERROR_PREFIX
+      + ".lot.not.match.orderable";
+
   //reason configuration
   public static final String ERROR_REASON_ID_EMPTY = ERROR_PREFIX
       + ".reason.id.isEmpty";
