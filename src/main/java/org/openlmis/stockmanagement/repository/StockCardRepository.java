@@ -31,6 +31,7 @@ public interface StockCardRepository extends
 
   String selectId = "select s.id ";
   String selectOrderableId = "select s.orderableId ";
+  String selectLotId = "select s.lotId ";
 
   String fromStockCards = "from org.openlmis.stockmanagement.domain.card.StockCard s ";
 
@@ -65,4 +66,7 @@ public interface StockCardRepository extends
 
   @Query(value = selectOrderableId + fromStockCards + matchByProgramAndFacility)
   List<UUID> getStockCardOrderableIdsBy(UUID programId, UUID facilityId);
+
+  @Query(value = selectLotId + fromStockCards + matchByProgramAndFacility)
+  List<UUID> getStockCardLotIdsBy(UUID programId, UUID facilityId);
 }

@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_NOT_INCLUDE_ACTIVE_STOCK_CARD;
 
@@ -30,7 +31,6 @@ import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 
 import java.util.Arrays;
-import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ActiveStockCardsValidatorTest {
@@ -45,7 +45,7 @@ public class ActiveStockCardsValidatorTest {
   private ActiveStockCardsValidator activeStockCardsValidator;
 
   @Test
-  public void should_throw_exception_if_existing_card_not_covered() throws Exception {
+  public void should_throw_exception_if_existing_card_orderable_not_covered() throws Exception {
     expectedEx.expectMessage(ERROR_PHYSICAL_INVENTORY_NOT_INCLUDE_ACTIVE_STOCK_CARD);
 
     //given
@@ -56,7 +56,30 @@ public class ActiveStockCardsValidatorTest {
 
     when(stockCardRepository
         .getStockCardOrderableIdsBy(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
-        .thenReturn(Arrays.asList(UUID.randomUUID()));
+        .thenReturn(Arrays.asList(randomUUID()));
+
+    //when
+    activeStockCardsValidator.validate(stockEventDto);
+  }
+
+  @Test
+  public void should_throw_exception_if_existing_card_lot_not_covered() throws Exception {
+    expectedEx.expectMessage(ERROR_PHYSICAL_INVENTORY_NOT_INCLUDE_ACTIVE_STOCK_CARD);
+
+    //given
+    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    stockEventDto.getLineItems().get(0).setReasonId(null);
+    stockEventDto.getLineItems().get(0).setLotId(randomUUID());
+    stockEventDto.setSourceId(null);
+    stockEventDto.setDestinationId(null);
+
+    when(stockCardRepository
+        .getStockCardOrderableIdsBy(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
+        .thenReturn(Arrays.asList(stockEventDto.getLineItems().get(0).getOrderableId()));
+
+    when(stockCardRepository
+        .getStockCardLotIdsBy(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
+        .thenReturn(Arrays.asList(randomUUID()));
 
     //when
     activeStockCardsValidator.validate(stockEventDto);
