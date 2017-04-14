@@ -33,7 +33,7 @@ public class OrderableDuplicationValidator implements StockEventValidator {
   @Override
   public void validate(StockEventDto stockEventDto)
       throws IllegalAccessException, InstantiationException {
-    if (!stockEventDto.hasLineItems()) {
+    if (!stockEventDto.hasLineItems() || !stockEventDto.isPhysicalInventory()) {
       return;
     }
 

@@ -63,13 +63,13 @@ public class QuantityValidator implements StockEventValidator {
     }
   }
 
-  private void validateQuantity(StockEventDto eventDto, List<StockEventLineItem> group)
-      throws IllegalAccessException, InstantiationException {
+  private void validateQuantity(StockEventDto stockEventDto, List<StockEventLineItem> group)
+      throws InstantiationException, IllegalAccessException {
     StockCard foundCard =
-        tryFindCard(eventDto.getProgramId(), eventDto.getFacilityId(), group.get(0));
+        tryFindCard(stockEventDto.getProgramId(), stockEventDto.getFacilityId(), group.get(0));
 
     //create line item from event line item and add it to stock card for recalculation
-    List<StockCardLineItem> itemsToBe = calculateStockOnHand(eventDto, group, foundCard);
+    List<StockCardLineItem> itemsToBe = calculateStockOnHand(stockEventDto, group, foundCard);
     foundCard.getLineItems().forEach(item -> {
       if (item.getStockOnHand() < 0) {
         throwQuantityError(group);
@@ -101,19 +101,25 @@ public class QuantityValidator implements StockEventValidator {
       throws InstantiationException, IllegalAccessException {
     List<StockCardLineItem> lineItemsToBe = new ArrayList<>();
     for (StockEventLineItem lineItem : group) {
-      lineItemsToBe.add(StockCardLineItem
-          .createLineItemFrom(eventDto, lineItem, foundCard, null, null));
+      StockCardLineItem stockCardLineItem = StockCardLineItem
+          .createLineItemFrom(eventDto, lineItem, foundCard, null, null);
+      stockCardLineItem.setReason(findReason(lineItem.getReasonId()));
+      lineItemsToBe.add(stockCardLineItem);
     }
 
     foundCard.calculateStockOnHand();
     return lineItemsToBe;
   }
 
-  private boolean hasDebitReason(StockEventLineItem lineItem) {
-    if (lineItem.hasReason()) {
-      StockCardLineItemReason reason = reasonRepository.findOne(lineItem.getReasonId());
-      return reason != null && reason.isDebitReasonType();
+  private StockCardLineItemReason findReason(UUID reasonId) {
+    if (reasonId != null) {
+      return reasonRepository.findOne(reasonId);
     }
-    return false;
+    return null;
+  }
+
+  private boolean hasDebitReason(StockEventLineItem lineItem) {
+    StockCardLineItemReason reason = findReason(lineItem.getReasonId());
+    return reason != null && reason.isDebitReasonType();
   }
 }
