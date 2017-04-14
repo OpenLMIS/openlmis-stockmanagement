@@ -102,10 +102,11 @@ public class QuantityValidatorTest {
     StockEventDto stockEventDto = createDebitEventDto(day2, 5);
 
     when(stockCardRepository
-        .findByProgramIdAndFacilityIdAndOrderableId(
+        .findByProgramIdAndFacilityIdAndOrderableIdAndLotId(
             stockEventDto.getProgramId(),
             stockEventDto.getFacilityId(),
-            stockEventDto.getLineItems().get(0).getOrderableId()))
+            stockEventDto.getLineItems().get(0).getOrderableId(),
+            stockEventDto.getLineItems().get(0).getLotId()))
         .thenReturn(card);
 
     //when

@@ -39,10 +39,11 @@ public interface StockCardRepository extends
   String matchByLot = "and s.lotId = ?4";
   String noLot = "and s.lotId IS NULL";
 
-  StockCard findByProgramIdAndFacilityIdAndOrderableId(
+  StockCard findByProgramIdAndFacilityIdAndOrderableIdAndLotId(
       @Param("programId") UUID programId,
       @Param("facilityId") UUID facilityId,
-      @Param("orderableId") UUID orderableId);
+      @Param("orderableId") UUID orderableId,
+      @Param("lotId") UUID lotId);
 
   Page<StockCard> findByProgramIdAndFacilityId(
       @Param("programId") UUID programId,

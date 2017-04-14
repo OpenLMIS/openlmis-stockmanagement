@@ -52,8 +52,8 @@ public class QuantityValidator implements StockEventValidator {
       return;
     }
 
-    Map<UUID, List<StockEventLineItem>> sameOrderableGroups = stockEventDto.getLineItems().stream()
-        .collect(groupingBy(StockEventLineItem::getOrderableId));
+    Map<String, List<StockEventLineItem>> sameOrderableGroups = stockEventDto.getLineItems().stream()
+        .collect(groupingBy(StockEventLineItem::orderableAndLotString));
 
     for (List<StockEventLineItem> group : sameOrderableGroups.values()) {
       boolean anyDebitInGroup = group.stream().anyMatch(this::hasDebitReason);
@@ -80,9 +80,9 @@ public class QuantityValidator implements StockEventValidator {
   }
 
   private StockCard tryFindCard(UUID programId, UUID facilityId, StockEventLineItem lineItem) {
-    UUID orderableId = lineItem.getOrderableId();
     StockCard foundCard = stockCardRepository
-        .findByProgramIdAndFacilityIdAndOrderableId(programId, facilityId, orderableId);
+        .findByProgramIdAndFacilityIdAndOrderableIdAndLotId(programId, facilityId,
+            lineItem.getOrderableId(), lineItem.getLotId());
     if (foundCard == null) {
       foundCard = new StockCard();
       foundCard.setLineItems(new ArrayList<>());

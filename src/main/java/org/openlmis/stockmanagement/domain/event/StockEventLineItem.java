@@ -58,4 +58,10 @@ public class StockEventLineItem extends BaseEntity {
   public boolean hasLot() {
     return this.lotId != null;
   }
+
+  public String orderableAndLotString() {
+    String orderableIdString = orderableId == null ? "" : orderableId.toString();
+    String lotIdString = lotId == null ? "" : lotId.toString();
+    return orderableIdString + lotIdString;
+  }
 }
