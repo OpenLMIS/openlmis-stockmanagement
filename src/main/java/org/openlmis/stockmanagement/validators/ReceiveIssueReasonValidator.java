@@ -15,7 +15,7 @@
 
 package org.openlmis.stockmanagement.validators;
 
-import static org.openlmis.stockmanagement.domain.adjustment.ReasonCategory.AD_HOC;
+import static org.openlmis.stockmanagement.domain.adjustment.ReasonCategory.TRANSFER;
 import static org.openlmis.stockmanagement.domain.adjustment.ReasonType.CREDIT;
 import static org.openlmis.stockmanagement.domain.adjustment.ReasonType.DEBIT;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ISSUE_REASON_CATEGORY_INVALID;
@@ -92,7 +92,7 @@ public class ReceiveIssueReasonValidator implements StockEventValidator {
   private void checkReasonCategory(String categoryErrorKey, UUID reasonId,
                                    StockCardLineItemReason foundReason) {
     ReasonCategory reasonCategory = foundReason.getReasonCategory();
-    if (reasonCategory != AD_HOC) {
+    if (reasonCategory != TRANSFER) {
       throw new ValidationMessageException(new Message(categoryErrorKey, reasonId, reasonCategory));
     }
   }

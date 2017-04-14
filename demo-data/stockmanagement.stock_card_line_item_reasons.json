@@ -3,7 +3,7 @@
     "id": "e3fc3cf3-da18-44b0-a220-77c985202e06",
     "name": "Transfer In",
     "description": "Transfer In",
-    "reasonCategory": "ADJUSTMENT",
+    "reasonCategory": "TRANSFER",
     "reasonType": "CREDIT",
     "isFreeTextAllowed": false
   },
@@ -11,23 +11,23 @@
     "id": "c1fc3cf3-da18-44b0-a220-77c985202e06",
     "name": "Transfer Out",
     "description": "Transfer Out",
-    "reasonCategory": "ADJUSTMENT",
+    "reasonCategory": "TRANSFER",
     "reasonType": "DEBIT",
     "isFreeTextAllowed": false
   },
   {
     "id": "279d55bd-42e3-438c-a63d-9c021b185dae",
-    "name": "Donation",
-    "description": "Donation",
-    "reasonCategory": "AD_HOC",
+    "name": "Clinic return",
+    "description": "Clinic return",
+    "reasonCategory": "ADJUSTMENT",
     "reasonType": "CREDIT",
     "isFreeTextAllowed": true
   },
   {
     "id": "5b09202e-b8a7-4f77-9e0e-8156f8efc613",
-    "name": "Top Up",
-    "description": "Top Up",
-    "reasonCategory": "AD_HOC",
+    "name": "Damage",
+    "description": "Damage",
+    "reasonCategory": "ADJUSTMENT",
     "reasonType": "DEBIT",
     "isFreeTextAllowed": true
   }

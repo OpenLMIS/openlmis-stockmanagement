@@ -32,7 +32,7 @@
       "type": "string",
       "required": true,
       "enum": [
-        "AD_HOC",
+        "TRANSFER",
         "ADJUSTMENT",
         "PHYSICAL_INVENTORY"
       ]

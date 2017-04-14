@@ -17,7 +17,7 @@ package org.openlmis.stockmanagement.web;
 
 import static java.util.Arrays.asList;
 import static org.openlmis.stockmanagement.domain.adjustment.ReasonCategory.ADJUSTMENT;
-import static org.openlmis.stockmanagement.domain.adjustment.ReasonCategory.AD_HOC;
+import static org.openlmis.stockmanagement.domain.adjustment.ReasonCategory.TRANSFER;
 import static org.openlmis.stockmanagement.domain.adjustment.ReasonType.CREDIT;
 import static org.openlmis.stockmanagement.domain.adjustment.ReasonType.DEBIT;
 
@@ -47,6 +47,6 @@ public class ReasonConfigurationOptionsController {
   @RequestMapping(value = "/reasonCategories", method = RequestMethod.GET)
   public List<ReasonCategory> getReasonCategories() {
     permissionService.canManageReasons();
-    return asList(AD_HOC, ADJUSTMENT);
+    return asList(TRANSFER, ADJUSTMENT);
   }
 }

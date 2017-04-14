@@ -63,7 +63,7 @@ public class ReasonConfigurationOptionsControllerTest extends BaseWebTest {
     resultActions
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(2)))
-        .andExpect(jsonPath("$.[0]", is("AD_HOC")))
+        .andExpect(jsonPath("$.[0]", is("TRANSFER")))
         .andExpect(jsonPath("$.[1]", is("ADJUSTMENT")));
   }
 

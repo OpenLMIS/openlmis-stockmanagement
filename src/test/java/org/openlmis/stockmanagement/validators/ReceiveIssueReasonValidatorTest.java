@@ -18,7 +18,7 @@ package org.openlmis.stockmanagement.validators;
 import static org.junit.rules.ExpectedException.none;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.domain.adjustment.ReasonCategory.ADJUSTMENT;
-import static org.openlmis.stockmanagement.domain.adjustment.ReasonCategory.AD_HOC;
+import static org.openlmis.stockmanagement.domain.adjustment.ReasonCategory.TRANSFER;
 import static org.openlmis.stockmanagement.domain.adjustment.ReasonType.CREDIT;
 import static org.openlmis.stockmanagement.domain.adjustment.ReasonType.DEBIT;
 import static org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason.builder;
@@ -62,8 +62,8 @@ public class ReceiveIssueReasonValidatorTest {
 
   @Before
   public void setUp() throws Exception {
-    creditAdhocReason = builder().reasonType(CREDIT).reasonCategory(AD_HOC).build();
-    debitAdhocReason = builder().reasonType(DEBIT).reasonCategory(AD_HOC).build();
+    creditAdhocReason = builder().reasonType(CREDIT).reasonCategory(TRANSFER).build();
+    debitAdhocReason = builder().reasonType(DEBIT).reasonCategory(TRANSFER).build();
     creditNonAdhocReason = builder().reasonType(CREDIT).reasonCategory(ADJUSTMENT).build();
     debitNonAdhocReason = builder().reasonType(DEBIT).reasonCategory(ADJUSTMENT).build();
   }

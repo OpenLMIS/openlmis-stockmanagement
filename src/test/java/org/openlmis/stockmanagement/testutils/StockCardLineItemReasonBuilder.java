@@ -41,7 +41,7 @@ public class StockCardLineItemReasonBuilder {
     reason.setName(name);
     reason.setDescription("Donation from the donor");
     reason.setReasonType(ReasonType.CREDIT);
-    reason.setReasonCategory(ReasonCategory.AD_HOC);
+    reason.setReasonCategory(ReasonCategory.TRANSFER);
     reason.setIsFreeTextAllowed(true);
     return reason;
   }

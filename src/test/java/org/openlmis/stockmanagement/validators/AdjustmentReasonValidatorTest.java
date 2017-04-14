@@ -80,7 +80,7 @@ public class AdjustmentReasonValidatorTest extends BaseTest {
     StockCardLineItemReason reason = StockCardLineItemReason
         .builder()
         .reasonType(ReasonType.CREDIT)
-        .reasonCategory(ReasonCategory.AD_HOC)
+        .reasonCategory(ReasonCategory.TRANSFER)
         .name("Credit Ad_hoc")
         .isFreeTextAllowed(false)
         .build();
