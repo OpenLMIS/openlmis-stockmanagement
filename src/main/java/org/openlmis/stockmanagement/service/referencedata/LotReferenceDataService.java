@@ -16,7 +16,11 @@
 package org.openlmis.stockmanagement.service.referencedata;
 
 import org.openlmis.stockmanagement.dto.LotDto;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.UUID;
 
 @Service
 public class LotReferenceDataService extends BaseReferenceDataService<LotDto> {
@@ -33,5 +37,17 @@ public class LotReferenceDataService extends BaseReferenceDataService<LotDto> {
   @Override
   protected Class<LotDto[]> getArrayResultClass() {
     return LotDto[].class;
+  }
+
+  /**
+   * Search for lots under a specific trade item.
+   *
+   * @param tradeItemId trade item id.
+   * @return found page of lots.
+   */
+  public Page<LotDto> search(UUID tradeItemId) {
+    HashMap<String, Object> params = new HashMap<>();
+    params.put("tradeIdemId", tradeItemId);
+    return getPage("search", params);
   }
 }
