@@ -78,7 +78,7 @@ public class StockEventProcessContextBuilder {
   private Map<UUID, LotDto> getLots(StockEventDto eventDto) {
     Stream<UUID> lotIds = eventDto.getLineItems().stream()
         .filter(item -> item.getLotId() != null)
-        .map(StockEventLineItem::getLotId);
+        .map(StockEventLineItem::getLotId).distinct();
 
     return lotIds.collect(HashMap::new,
         (map, lotId) -> map.put(lotId, lotReferenceDataService.findOne(lotId)),
