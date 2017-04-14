@@ -31,13 +31,17 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "stock_event_line_items", schema = "stockmanagement")
 public class StockEventLineItem extends BaseEntity {
-  private Integer quantity;
+
+  private UUID lotId;
   private UUID orderableId;
+
+  private Integer quantity;
+
+  private ZonedDateTime occurredDate;
 
   private UUID reasonId;
   private String reasonFreeText;
 
-  private ZonedDateTime occurredDate;
 
   @ManyToOne()
   @JoinColumn(nullable = false)

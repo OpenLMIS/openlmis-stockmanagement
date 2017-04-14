@@ -71,6 +71,8 @@ public class StockCard extends BaseEntity {
   private UUID programId;
   @Column(nullable = false)
   private UUID orderableId;
+  @Column
+  private UUID lotId;
 
   @LazyCollection(FALSE)
   @OneToMany(cascade = ALL, mappedBy = "stockCard")
@@ -93,7 +95,8 @@ public class StockCard extends BaseEntity {
       throws InstantiationException, IllegalAccessException {
     return new StockCard(fromId(savedEventId, StockEvent.class),
         stockEventDto.getFacilityId(), stockEventDto.getProgramId(),
-        eventLineItem.getOrderableId(), new ArrayList<>(), 0);
+        eventLineItem.getOrderableId(), eventLineItem.getLotId(),
+        new ArrayList<>(), 0);
   }
 
   /**

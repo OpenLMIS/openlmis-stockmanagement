@@ -35,7 +35,9 @@ public interface StockCardRepository extends
   String fromStockCards = "from org.openlmis.stockmanagement.domain.card.StockCard s ";
 
   String matchByProgramAndFacility = "where s.programId = ?1 and s.facilityId = ?2 ";
-  String matchByOrderable = "and s.orderableId = ?3";
+  String matchByOrderable = "and s.orderableId = ?3 ";
+  String matchByLot = "and s.lotId = ?4";
+  String noLot = "and s.lotId IS NULL";
 
   StockCard findByProgramIdAndFacilityIdAndOrderableId(
       @Param("programId") UUID programId,
@@ -52,8 +54,13 @@ public interface StockCardRepository extends
   //the following is for performance optimization
   //when saving a new stock card line item, only need to find existing card id
   //fetching the whole card including line items takes too long
-  @Query(value = selectId + fromStockCards + matchByProgramAndFacility + matchByOrderable)
-  UUID getStockCardIdBy(UUID programId, UUID facilityId, UUID orderableId);
+  @Query(value = selectId + fromStockCards
+      + matchByProgramAndFacility + matchByOrderable + matchByLot)
+  UUID getStockCardIdByWithNoLot(UUID programId, UUID facilityId, UUID orderableId, UUID lotId);
+
+  @Query(value = selectId + fromStockCards
+      + matchByProgramAndFacility + matchByOrderable + noLot)
+  UUID getStockCardIdByWithNoLot(UUID programId, UUID facilityId, UUID orderableId);
 
   @Query(value = selectOrderableId + fromStockCards + matchByProgramAndFacility)
   List<UUID> getStockCardOrderableIdsBy(UUID programId, UUID facilityId);

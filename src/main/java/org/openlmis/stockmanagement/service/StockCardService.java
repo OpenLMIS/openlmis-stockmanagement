@@ -109,8 +109,7 @@ public class StockCardService extends StockCardBaseService {
                                      StockEventLineItem eventLineItem, UUID savedEventId)
       throws InstantiationException, IllegalAccessException {
 
-    UUID foundCardId = cardRepository.getStockCardIdBy(
-        eventDto.getProgramId(), eventDto.getFacilityId(), eventLineItem.getOrderableId());
+    UUID foundCardId = findCard(eventDto, eventLineItem);
 
     if (foundCardId != null) {
       LOGGER.debug("Found existing stock card");
@@ -120,6 +119,20 @@ public class StockCardService extends StockCardBaseService {
       StockCard newCard = createStockCardFrom(eventDto, eventLineItem, savedEventId);
       return cardRepository.save(newCard);
     }
+  }
+
+  private UUID findCard(StockEventDto eventDto, StockEventLineItem eventLineItem) {
+    UUID foundCardId;
+    if (eventLineItem.getLotId() == null) {
+      foundCardId = cardRepository.getStockCardIdByWithNoLot(
+          eventDto.getProgramId(), eventDto.getFacilityId(),
+          eventLineItem.getOrderableId());
+    } else {
+      foundCardId = cardRepository.getStockCardIdByWithNoLot(
+          eventDto.getProgramId(), eventDto.getFacilityId(),
+          eventLineItem.getOrderableId(), eventLineItem.getLotId());
+    }
+    return foundCardId;
   }
 
   private void assignSourceDestinationForLineItems(StockCardDto stockCardDto) {
