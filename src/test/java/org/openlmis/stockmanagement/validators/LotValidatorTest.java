@@ -25,11 +25,9 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.LotDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
-import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
 import java.util.HashMap;
@@ -40,9 +38,6 @@ public class LotValidatorTest {
 
   @Rule
   public ExpectedException expectedEx = ExpectedException.none();
-
-  @Mock
-  private LotReferenceDataService lotReferenceDataService;
 
   @InjectMocks
   private LotValidator lotValidator;

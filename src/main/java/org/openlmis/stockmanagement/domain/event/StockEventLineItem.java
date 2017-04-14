@@ -59,6 +59,11 @@ public class StockEventLineItem extends BaseEntity {
     return this.lotId != null;
   }
 
+  /**
+   * Combine orderable id and lot id as string. Useful for grouping.
+   *
+   * @return combined ids as string.
+   */
   public String orderableAndLotString() {
     String orderableIdString = orderableId == null ? "" : orderableId.toString();
     String lotIdString = lotId == null ? "" : lotId.toString();
