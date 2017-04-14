@@ -17,11 +17,14 @@ package org.openlmis.stockmanagement.dto;
 
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
+import org.openlmis.stockmanagement.util.OrderableAndLotIdToString;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -29,6 +32,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class PhysicalInventoryLineItemDto {
   private OrderableDto orderable;
+  private LotDto lot;
   private Integer stockOnHand;
   private Integer quantity;
 
@@ -41,6 +45,7 @@ public class PhysicalInventoryLineItemDto {
   public PhysicalInventoryLineItem toPhysicalInventoryLineItem(PhysicalInventory inventory) {
     return PhysicalInventoryLineItem.builder()
         .orderableId(orderable.getId())
+        .lotId(lotId())
         .quantity(quantity)
         .physicalInventory(inventory).build();
   }
@@ -56,6 +61,15 @@ public class PhysicalInventoryLineItemDto {
         .builder()
         .quantity(lineItem.getQuantity())
         .orderable(OrderableDto.builder().id(lineItem.getOrderableId()).build())
+        .lot(lineItem.getLotId() == null ? null : LotDto.builder().id(lineItem.getLotId()).build())
         .build();
+  }
+
+  public String orderableAndLotString() {
+    return OrderableAndLotIdToString.idsToString(orderable.getId(), lotId());
+  }
+
+  private UUID lotId() {
+    return lot == null ? null : lot.getId();
   }
 }

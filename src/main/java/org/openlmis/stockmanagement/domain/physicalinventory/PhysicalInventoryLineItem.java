@@ -39,6 +39,7 @@ import javax.persistence.Table;
 public class PhysicalInventoryLineItem extends BaseEntity {
   @Column(nullable = false)
   private UUID orderableId;
+  private UUID lotId;
 
   private Integer quantity;
 

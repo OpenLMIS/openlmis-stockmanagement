@@ -13,27 +13,22 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.dto;
+package org.openlmis.stockmanagement.util;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
-@Getter
-@Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class LotDto {
-  private UUID id;
-  private String lotCode;
-  private boolean active;
-  private UUID tradeItemId;
-  private ZonedDateTime expirationDate;
-  private ZonedDateTime manufactureDate;
+public class OrderableAndLotIdToString {
+
+  /**
+   * Create string representation of orderable id and lot id.
+   *
+   * @param orderableId orderable id.
+   * @param lotId       lot it.
+   * @return the created string representation.
+   */
+  public static String idsToString(UUID orderableId, UUID lotId) {
+    String orderableIdString = orderableId == null ? "" : orderableId.toString();
+    String lotIdString = lotId == null ? "" : lotId.toString();
+    return orderableIdString + lotIdString;
+  }
 }

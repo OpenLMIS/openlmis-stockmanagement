@@ -129,6 +129,7 @@ public class PhysicalInventoryService {
         .isStarter(true)
         .lineItems(stockCards.stream().map(stockCardDto -> PhysicalInventoryLineItemDto.builder()
             .orderable(stockCardDto.getOrderable())
+            .lot(stockCardDto.getLot())
             .stockOnHand(stockCardDto.getStockOnHand())
             .build()).collect(toList()))
         .build();

@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.util.UUID.fromString;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNull;
@@ -31,6 +32,7 @@ import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.FacilityDto;
+import org.openlmis.stockmanagement.dto.LotDto;
 import org.openlmis.stockmanagement.dto.OrderableDto;
 import org.openlmis.stockmanagement.dto.ProgramDto;
 import org.openlmis.stockmanagement.dto.StockCardDto;
@@ -40,6 +42,7 @@ import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
@@ -75,6 +78,9 @@ public class StockCardServiceTest extends BaseTest {
   private OrderableReferenceDataService orderableReferenceDataService;
 
   @MockBean
+  private LotReferenceDataService lotReferenceDataService;
+
+  @MockBean
   private PermissionService permissionService;
 
   @After
@@ -87,7 +93,7 @@ public class StockCardServiceTest extends BaseTest {
   public void should_save_stock_card_line_items_and_create_stock_card_for_first_movement()
       throws Exception {
     //given
-    UUID userId = UUID.randomUUID();
+    UUID userId = randomUUID();
     StockEventDto stockEventDto = createStockEventDto();
     StockEvent savedEvent = save(stockEventDto, userId);
 
@@ -115,7 +121,7 @@ public class StockCardServiceTest extends BaseTest {
     //given
     //1. there is an existing event that caused a stock card to exist
     StockEventDto existingEventDto = createStockEventDto();
-    final StockEvent existingEvent = save(existingEventDto, UUID.randomUUID());
+    final StockEvent existingEvent = save(existingEventDto, randomUUID());
     UUID orderableId = existingEventDto.getLineItems().get(0).getOrderableId();
 
     //2. and there is a new event coming
@@ -126,7 +132,7 @@ public class StockCardServiceTest extends BaseTest {
 
     //when
     long cardAmountBeforeSave = stockCardRepository.count();
-    UUID userId = UUID.randomUUID();
+    UUID userId = randomUUID();
     StockEvent savedNewEvent = save(newEventDto, userId);
     long cardAmountAfterSave = stockCardRepository.count();
 
@@ -145,14 +151,16 @@ public class StockCardServiceTest extends BaseTest {
   public void should_get_refdata_and_convert_organizations_when_find_stock_card()
       throws Exception {
     //given
-    UUID userId = UUID.randomUUID();
+    UUID userId = randomUUID();
     StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.getLineItems().get(0).setLotId(randomUUID());
 
     //1. mock ref data service
     FacilityDto cardFacility = new FacilityDto();
     FacilityDto sourceFacility = new FacilityDto();
     ProgramDto programDto = new ProgramDto();
     OrderableDto orderableDto = new OrderableDto();
+    LotDto lotDto = new LotDto();
 
     when(facilityReferenceDataService.findOne(stockEventDto.getFacilityId()))
         .thenReturn(cardFacility);
@@ -164,6 +172,9 @@ public class StockCardServiceTest extends BaseTest {
     when(orderableReferenceDataService
         .findOne(stockEventDto.getLineItems().get(0).getOrderableId()))
         .thenReturn(orderableDto);
+    when(lotReferenceDataService
+        .findOne(stockEventDto.getLineItems().get(0).getLotId()))
+        .thenReturn(lotDto);
 
     //2. there is an existing stock card with line items
     StockEvent savedEvent = save(stockEventDto, userId);
@@ -176,6 +187,7 @@ public class StockCardServiceTest extends BaseTest {
     assertThat(foundCardDto.getFacility(), is(cardFacility));
     assertThat(foundCardDto.getProgram(), is(programDto));
     assertThat(foundCardDto.getOrderable(), is(orderableDto));
+    assertThat(foundCardDto.getLot(), is(lotDto));
 
     StockCardLineItemDto lineItemDto = foundCardDto.getLineItems().get(0);
     assertThat(lineItemDto.getSource(), is(sourceFacility));
@@ -188,7 +200,7 @@ public class StockCardServiceTest extends BaseTest {
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setSourceId(null);
     stockEventDto.setDestinationId(null);
-    StockEvent savedEvent = save(stockEventDto, UUID.randomUUID());
+    StockEvent savedEvent = save(stockEventDto, randomUUID());
 
     //when
     UUID cardId = stockCardRepository.findByOriginEvent(savedEvent).getId();
@@ -201,7 +213,7 @@ public class StockCardServiceTest extends BaseTest {
   @Test
   public void should_return_null_when_can_not_find_stock_card_by_id() throws Exception {
     //when
-    UUID nonExistingCardId = UUID.randomUUID();
+    UUID nonExistingCardId = randomUUID();
     StockCardDto cardDto = stockCardService.findStockCardById(nonExistingCardId);
 
     //then
@@ -212,7 +224,7 @@ public class StockCardServiceTest extends BaseTest {
   public void should_throw_permission_exception_if_user_has_no_permission_to_view_card()
       throws Exception {
     //given
-    StockEvent savedEvent = save(createStockEventDto(), UUID.randomUUID());
+    StockEvent savedEvent = save(createStockEventDto(), randomUUID());
     doThrow(new PermissionMessageException(new Message("some error")))
         .when(permissionService)
         .canViewStockCard(savedEvent.getProgramId(), savedEvent.getFacilityId());
@@ -225,7 +237,7 @@ public class StockCardServiceTest extends BaseTest {
   private StockEvent save(StockEventDto eventDto, UUID userId)
       throws InstantiationException, IllegalAccessException {
     StockEvent savedEvent = stockEventsRepository
-        .save(eventDto.toEvent(UUID.randomUUID()));
+        .save(eventDto.toEvent(randomUUID()));
     stockCardService.saveFromEvent(eventDto, savedEvent.getId(), userId);
     return savedEvent;
   }

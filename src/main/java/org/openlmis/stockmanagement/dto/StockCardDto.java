@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.dto;
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static java.util.stream.Collectors.toList;
+import static org.openlmis.stockmanagement.util.OrderableAndLotIdToString.idsToString;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -46,6 +47,7 @@ public class StockCardDto {
   private FacilityDto facility;
   private ProgramDto program;
   private OrderableDto orderable;
+  private LotDto lot;
 
   @JsonFormat(shape = STRING)
   private ZonedDateTime lastUpdate;
@@ -68,5 +70,9 @@ public class StockCardDto {
         .lineItems(lineItemDtos)
         .stockOnHand(stockCard.getStockOnHand())
         .build();
+  }
+
+  public String orderableAndLotString() {
+    return idsToString(orderable.getId(), lot == null ? null : lot.getId());
   }
 }

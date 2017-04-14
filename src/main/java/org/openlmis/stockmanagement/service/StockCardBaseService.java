@@ -26,6 +26,7 @@ import org.openlmis.stockmanagement.dto.ProgramDto;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockCardLineItemDto;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,8 @@ import java.util.List;
 /**
  * This base class is in charge of:
  * 1. assign facility and program to stock card dto
- * 2.re-calculating soh for stock card and line items
+ * 2. re-calculating soh for stock card and line items
+ * 3. assign lot to stock card dto
  * It does not handle assigning orderable dto to stock card dto, that is expected to be done in sub
  * classes, potentially in different ways. It also does not handle assigning facility dto to line
  * items, that is not needed by all sub classes.
@@ -52,6 +54,9 @@ public abstract class StockCardBaseService {
 
   @Autowired
   private ProgramReferenceDataService programRefDataService;
+
+  @Autowired
+  private LotReferenceDataService lotReferenceDataService;
 
   protected List<StockCardDto> createDtos(List<StockCard> stockCards) {
     if (stockCards.isEmpty()) {
@@ -78,6 +83,9 @@ public abstract class StockCardBaseService {
     cardDto.setFacility(facility);
     cardDto.setProgram(program);
     cardDto.setOrderable(OrderableDto.builder().id(card.getOrderableId()).build());
+    if (card.hasLot()) {
+      cardDto.setLot(lotReferenceDataService.findOne(card.getLotId()));
+    }
     List<StockCardLineItemDto> lineItems = cardDto.getLineItems();
     if (!isEmpty(lineItems)) {
       cardDto.setLastUpdate(lineItems.get(lineItems.size() - 1).getLineItem().getOccurredDate());

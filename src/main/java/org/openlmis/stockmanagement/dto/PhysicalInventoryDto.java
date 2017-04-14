@@ -104,16 +104,17 @@ public class PhysicalInventoryDto {
    */
   public void mergeWith(
       List<StockCardDto> stockCards) {
-    Map<UUID, Integer> savedQuantities = this.lineItems.stream()
+    Map<String, Integer> savedQuantities = this.lineItems.stream()
         .collect(HashMap::new,
-            (map, lineItem) -> map.put(lineItem.getOrderable().getId(), lineItem.getQuantity()),
+            (map, lineItem) -> map.put(lineItem.orderableAndLotString(), lineItem.getQuantity()),
             HashMap::putAll);
 
     this.setLineItems(stockCards.stream()
         .map(stockCardDto -> PhysicalInventoryLineItemDto.builder()
             .orderable(stockCardDto.getOrderable())
+            .lot(stockCardDto.getLot())
             .stockOnHand(stockCardDto.getStockOnHand())
-            .quantity(savedQuantities.get(stockCardDto.getOrderable().getId()))
+            .quantity(savedQuantities.get(stockCardDto.orderableAndLotString()))
             .build())
         .collect(toList()));
   }
