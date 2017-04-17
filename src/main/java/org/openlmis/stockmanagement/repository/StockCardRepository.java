@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.repository;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.util.OrderableLotIdentity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -30,8 +31,8 @@ public interface StockCardRepository extends
     PagingAndSortingRepository<StockCard, UUID> {
 
   String selectId = "select s.id ";
-  String selectOrderableId = "select s.orderableId ";
-  String selectLotId = "select s.lotId ";
+  String selectIdentity = "select new "
+      + "org.openlmis.stockmanagement.util.OrderableLotIdentity(s.orderableId, s.lotId) ";
 
   String fromStockCards = "from org.openlmis.stockmanagement.domain.card.StockCard s ";
 
@@ -51,6 +52,10 @@ public interface StockCardRepository extends
       @Param("facilityId") UUID facilityId,
       Pageable pageable);
 
+  List<StockCard> findByProgramIdAndFacilityId(
+      @Param("programId") UUID programId,
+      @Param("facilityId") UUID facilityId);
+
   StockCard findByOriginEvent(@Param("originEventId") StockEvent stockEvent);
 
   //the following is for performance optimization
@@ -58,15 +63,12 @@ public interface StockCardRepository extends
   //fetching the whole card including line items takes too long
   @Query(value = selectId + fromStockCards
       + matchByProgramAndFacility + matchByOrderable + matchByLot)
-  UUID getStockCardIdByWithNoLot(UUID programId, UUID facilityId, UUID orderableId, UUID lotId);
+  UUID getStockCardIdWithLot(UUID programId, UUID facilityId, UUID orderableId, UUID lotId);
 
   @Query(value = selectId + fromStockCards
       + matchByProgramAndFacility + matchByOrderable + noLot)
-  UUID getStockCardIdByWithNoLot(UUID programId, UUID facilityId, UUID orderableId);
+  UUID getStockCardIdWithNoLot(UUID programId, UUID facilityId, UUID orderableId);
 
-  @Query(value = selectOrderableId + fromStockCards + matchByProgramAndFacility)
-  List<UUID> getStockCardOrderableIdsBy(UUID programId, UUID facilityId);
-
-  @Query(value = selectLotId + fromStockCards + matchByProgramAndFacility)
-  List<UUID> getStockCardLotIdsBy(UUID programId, UUID facilityId);
+  @Query(value = selectIdentity + fromStockCards + matchByProgramAndFacility)
+  List<OrderableLotIdentity> getIdentitiesBy(UUID programId, UUID facilityId);
 }

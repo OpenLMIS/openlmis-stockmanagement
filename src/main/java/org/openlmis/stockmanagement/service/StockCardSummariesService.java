@@ -15,7 +15,6 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static java.lang.Integer.MAX_VALUE;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -35,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -49,8 +47,6 @@ import java.util.stream.Stream;
 
 @Service
 public class StockCardSummariesService extends StockCardBaseService {
-
-  public static final PageRequest ALL = new PageRequest(0, MAX_VALUE);
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCardSummariesService.class);
 
@@ -73,8 +69,8 @@ public class StockCardSummariesService extends StockCardBaseService {
    */
   public List<StockCardDto> findStockCards(UUID programId, UUID facilityId,
                                            SearchOptions searchOption) {
-    Page<StockCard> cards = cardRepository
-        .findByProgramIdAndFacilityId(programId, facilityId, ALL);
+    List<StockCard> cards = cardRepository
+        .findByProgramIdAndFacilityId(programId, facilityId);
 
     LOGGER.info("Calling ref data to get approved orderables");
 
@@ -82,11 +78,11 @@ public class StockCardSummariesService extends StockCardBaseService {
         approvedProductService.getAllApprovedProducts(programId, facilityId));
 
     //create dummy(fake/not persisted) cards for approved orderables that don't have cards yet
-    Stream<StockCard> dummyCards = createDummyCards(programId, facilityId, cards.getContent(),
+    Stream<StockCard> dummyCards = createDummyCards(programId, facilityId, cards,
         orderableLotsMap.values(), searchOption);
 
     List<StockCardDto> dtos =
-        createDtos(concat(cards.getContent().stream(), dummyCards).collect(toList()));
+        createDtos(concat(cards.stream(), dummyCards).collect(toList()));
     return assignOrderableLotRemoveLineItems(dtos, orderableLotsMap);
   }
 

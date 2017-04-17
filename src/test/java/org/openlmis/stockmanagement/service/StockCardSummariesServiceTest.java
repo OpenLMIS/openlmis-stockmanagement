@@ -20,6 +20,7 @@ import static java.time.ZonedDateTime.of;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
@@ -29,11 +30,9 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.service.StockCardSummariesService.ALL;
 import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.ExistingStockCardsOnly;
 import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.IncludeApprovedOrderables;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -41,6 +40,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
+import org.openlmis.stockmanagement.dto.LotDto;
 import org.openlmis.stockmanagement.dto.OrderableDto;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
@@ -78,44 +78,52 @@ public class StockCardSummariesServiceTest {
   @InjectMocks
   private StockCardSummariesService stockCardSummariesService;
 
-  @Before
-  public void setUp() throws Exception {
-    when(lotReferenceDataService.search(any(UUID.class)))
-        .thenReturn(new PageImpl<>(emptyList()));
-  }
-
   @Test
-  public void should_contain_existing_stock_cards_and_approved_orderables() throws Exception {
+  public void should_contain_existing_stock_cards_and_approved_orderables_and_lots()
+      throws Exception {
     //given
-    UUID orderable1Id = UUID.randomUUID();
-    UUID orderable2Id = UUID.randomUUID();
-    UUID orderable3Id = UUID.randomUUID();
-    UUID orderable4Id = UUID.randomUUID();
+    UUID orderable1Id = randomUUID();
+    UUID orderable2Id = randomUUID();
+    UUID orderable3Id = randomUUID();
+    UUID orderable4Id = randomUUID();
 
     OrderableDto orderable1 = createOrderableDto(orderable1Id);
     OrderableDto orderable2 = createOrderableDto(orderable2Id);
     OrderableDto orderable3 = createOrderableDto(orderable3Id);
     OrderableDto orderable4 = createOrderableDto(orderable4Id);
 
-    UUID programId = UUID.randomUUID();
-    UUID facilityId = UUID.randomUUID();
+    UUID programId = randomUUID();
+    UUID facilityId = randomUUID();
+
     when(approvedProductReferenceDataService
         .getAllApprovedProducts(programId, facilityId))
         .thenReturn(asList(orderable1, orderable2, orderable3, orderable4));
 
-    when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId, ALL))
-        .thenReturn(new PageImpl<>(asList(
-            createStockCard(orderable1Id, UUID.randomUUID()),
-            createStockCard(orderable3Id, UUID.randomUUID()))));
+    when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId))
+        .thenReturn(asList(
+            createStockCard(orderable1Id, randomUUID()),
+            createStockCard(orderable3Id, randomUUID())));
+
+    LotDto lotDto = new LotDto();
+    lotDto.setId(randomUUID());
+    when(lotReferenceDataService.search(orderable1Id))
+        .thenReturn(new PageImpl<>(singletonList(lotDto)));
+    when(lotReferenceDataService.search(orderable2Id))
+        .thenReturn(new PageImpl<>(emptyList()));
+    when(lotReferenceDataService.search(orderable3Id))
+        .thenReturn(new PageImpl<>(emptyList()));
+    when(lotReferenceDataService.search(orderable4Id))
+        .thenReturn(new PageImpl<>(emptyList()));
 
     //when
     List<StockCardDto> cardDtos = stockCardSummariesService
         .findStockCards(programId, facilityId, IncludeApprovedOrderables);
 
     //then
-    assertThat(cardDtos.size(), is(4));
+    assertThat(cardDtos.size(), is(5));
 
     String orderablePropertyName = "orderable";
+    String lotPropertyName = "lot";
     String idPropertyName = "id";
     String lineItemsPropertyName = "lineItems";
     String stockOnHandPropertyName = "stockOnHand";
@@ -123,12 +131,14 @@ public class StockCardSummariesServiceTest {
 
     assertThat(cardDtos, hasItem(allOf(
         hasProperty(orderablePropertyName, is(orderable1)),
+        hasProperty(lotPropertyName, is(nullValue())),
         hasProperty(idPropertyName, notNullValue()),
         hasProperty(stockOnHandPropertyName, notNullValue()),
         hasProperty(lastUpdatePropertyName, is(of(2017, 3, 18, 15, 10, 31, 100, UTC))),
         hasProperty(lineItemsPropertyName, nullValue()))));
     assertThat(cardDtos, hasItem(allOf(
         hasProperty(orderablePropertyName, is(orderable3)),
+        hasProperty(lotPropertyName, is(nullValue())),
         hasProperty(idPropertyName, notNullValue()),
         hasProperty(stockOnHandPropertyName, notNullValue()),
         hasProperty(lastUpdatePropertyName, is(of(2017, 3, 18, 15, 10, 31, 100, UTC))),
@@ -136,12 +146,22 @@ public class StockCardSummariesServiceTest {
 
     assertThat(cardDtos, hasItem(allOf(
         hasProperty(orderablePropertyName, is(orderable2)),
+        hasProperty(lotPropertyName, is(nullValue())),
         hasProperty(idPropertyName, nullValue()),
         hasProperty(stockOnHandPropertyName, nullValue()),
         hasProperty(lastUpdatePropertyName, nullValue()),
         hasProperty(lineItemsPropertyName, nullValue()))));
     assertThat(cardDtos, hasItem(allOf(
         hasProperty(orderablePropertyName, is(orderable4)),
+        hasProperty(lotPropertyName, is(nullValue())),
+        hasProperty(idPropertyName, nullValue()),
+        hasProperty(stockOnHandPropertyName, nullValue()),
+        hasProperty(lastUpdatePropertyName, nullValue()),
+        hasProperty(lineItemsPropertyName, nullValue()))));
+
+    assertThat(cardDtos, hasItem(allOf(
+        hasProperty(orderablePropertyName, is(orderable1)),
+        hasProperty(lotPropertyName, is(lotDto)),
         hasProperty(idPropertyName, nullValue()),
         hasProperty(stockOnHandPropertyName, nullValue()),
         hasProperty(lastUpdatePropertyName, nullValue()),
@@ -152,26 +172,29 @@ public class StockCardSummariesServiceTest {
   public void should_contain_existing_stock_cards_only_when_indicated_by_parameter()
       throws Exception {
     //given
-    UUID orderable1Id = UUID.randomUUID();
-    UUID orderable2Id = UUID.randomUUID();
-    UUID orderable3Id = UUID.randomUUID();
-    UUID orderable4Id = UUID.randomUUID();
+    UUID orderable1Id = randomUUID();
+    UUID orderable2Id = randomUUID();
+    UUID orderable3Id = randomUUID();
+    UUID orderable4Id = randomUUID();
 
     OrderableDto orderable1 = createOrderableDto(orderable1Id);
     OrderableDto orderable2 = createOrderableDto(orderable2Id);
     OrderableDto orderable3 = createOrderableDto(orderable3Id);
     OrderableDto orderable4 = createOrderableDto(orderable4Id);
 
-    UUID programId = UUID.randomUUID();
-    UUID facilityId = UUID.randomUUID();
+    UUID programId = randomUUID();
+    UUID facilityId = randomUUID();
     when(approvedProductReferenceDataService
         .getAllApprovedProducts(programId, facilityId))
         .thenReturn(asList(orderable1, orderable2, orderable3, orderable4));
 
-    when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId, ALL))
-        .thenReturn(new PageImpl<>(asList(
-            createStockCard(orderable1Id, UUID.randomUUID()),
-            createStockCard(orderable3Id, UUID.randomUUID()))));
+    when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId))
+        .thenReturn(asList(
+            createStockCard(orderable1Id, randomUUID()),
+            createStockCard(orderable3Id, randomUUID())));
+
+    when(lotReferenceDataService.search(any(UUID.class)))
+        .thenReturn(new PageImpl<>(emptyList()));
 
     //when
     List<StockCardDto> cardDtos = stockCardSummariesService
@@ -203,8 +226,8 @@ public class StockCardSummariesServiceTest {
   @Test
   public void should_return_page_of_stock_cards() throws Exception {
     //given
-    UUID programId = UUID.randomUUID();
-    UUID facilityId = UUID.randomUUID();
+    UUID programId = randomUUID();
+    UUID facilityId = randomUUID();
     PageRequest pageRequest = new PageRequest(0, 1);
 
     StockCard card = new StockCard();
@@ -214,6 +237,9 @@ public class StockCardSummariesServiceTest {
 
     when(approvedProductReferenceDataService.getAllApprovedProducts(programId, facilityId))
         .thenReturn(singletonList(new OrderableDto()));
+
+    when(lotReferenceDataService.search(any(UUID.class)))
+        .thenReturn(new PageImpl<>(emptyList()));
 
     //when
     Page<StockCardDto> stockCards = stockCardSummariesService

@@ -30,6 +30,7 @@ public class PhysicalInventoryLineItemDtoTest {
     PhysicalInventoryLineItem lineItem = PhysicalInventoryLineItem.builder()
         .quantity(123)
         .orderableId(UUID.randomUUID())
+        .lotId(UUID.randomUUID())
         .build();
 
     //when
@@ -38,5 +39,6 @@ public class PhysicalInventoryLineItemDtoTest {
     //then
     assertThat(lineItemDto.getQuantity(), is(lineItem.getQuantity()));
     assertThat(lineItemDto.getOrderable().getId(), is(lineItem.getOrderableId()));
+    assertThat(lineItemDto.getLot().getId(), is(lineItem.getLotId()));
   }
 }

@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_NOT_INCLUDE_ACTIVE_STOCK_CARD;
@@ -29,8 +30,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
-
-import java.util.Arrays;
+import org.openlmis.stockmanagement.util.OrderableLotIdentity;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ActiveStockCardsValidatorTest {
@@ -55,8 +55,8 @@ public class ActiveStockCardsValidatorTest {
     stockEventDto.setDestinationId(null);
 
     when(stockCardRepository
-        .getStockCardOrderableIdsBy(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
-        .thenReturn(Arrays.asList(randomUUID()));
+        .getIdentitiesBy(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
+        .thenReturn(singletonList(new OrderableLotIdentity(randomUUID(), randomUUID())));
 
     //when
     activeStockCardsValidator.validate(stockEventDto);
@@ -74,12 +74,8 @@ public class ActiveStockCardsValidatorTest {
     stockEventDto.setDestinationId(null);
 
     when(stockCardRepository
-        .getStockCardOrderableIdsBy(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
-        .thenReturn(Arrays.asList(stockEventDto.getLineItems().get(0).getOrderableId()));
-
-    when(stockCardRepository
-        .getStockCardLotIdsBy(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
-        .thenReturn(Arrays.asList(randomUUID()));
+        .getIdentitiesBy(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
+        .thenReturn(singletonList(new OrderableLotIdentity(randomUUID(), randomUUID())));
 
     //when
     activeStockCardsValidator.validate(stockEventDto);

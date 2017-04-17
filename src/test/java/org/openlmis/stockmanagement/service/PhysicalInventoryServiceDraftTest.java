@@ -34,6 +34,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
+import org.openlmis.stockmanagement.dto.LotDto;
 import org.openlmis.stockmanagement.dto.OrderableDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
@@ -64,9 +65,13 @@ public class PhysicalInventoryServiceDraftTest {
         .thenReturn(null);
 
     OrderableDto orderableDto = new OrderableDto();
+    LotDto lotDto = new LotDto();
     when(stockCardSummariesService
         .findStockCards(programId, facilityId, IncludeApprovedOrderables)).thenReturn(
-        singletonList(StockCardDto.builder().orderable(orderableDto).stockOnHand(233).build()));
+        singletonList(StockCardDto.builder()
+            .orderable(orderableDto)
+            .lot(lotDto)
+            .stockOnHand(233).build()));
 
     //when
     PhysicalInventoryDto inventory = physicalInventoryService.findDraft(programId, facilityId);
@@ -79,6 +84,7 @@ public class PhysicalInventoryServiceDraftTest {
 
     PhysicalInventoryLineItemDto inventoryLineItemDto = inventory.getLineItems().get(0);
     assertThat(inventoryLineItemDto.getOrderable(), is(orderableDto));
+    assertThat(inventoryLineItemDto.getLot(), is(lotDto));
     assertThat(inventoryLineItemDto.getQuantity(), nullValue());
     assertThat(inventoryLineItemDto.getStockOnHand(), is(233));
   }

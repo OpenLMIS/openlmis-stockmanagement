@@ -22,13 +22,12 @@ import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
+import org.openlmis.stockmanagement.util.OrderableLotIdentity;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 
 @Component(value = "ActiveStockCardsValidator")
 public class ActiveStockCardsValidator implements StockEventValidator {
@@ -49,32 +48,18 @@ public class ActiveStockCardsValidator implements StockEventValidator {
   }
 
   private void checkAllStockCardsCovered(StockEventDto stockEventDto) {
-    boolean activeCardMissing = isOrderableMissing(stockEventDto) || isLotMissing(stockEventDto);
+    List<OrderableLotIdentity> coveredIdentities = stockEventDto.getLineItems().stream()
+        .map(StockEventLineItem::orderableAndLotIdentity)
+        .collect(toList());
 
-    if (activeCardMissing) {
+    boolean anyMissing = stockCardRepository
+        .getIdentitiesBy(stockEventDto.getProgramId(), stockEventDto.getFacilityId())
+        .stream().anyMatch(identity -> !coveredIdentities.contains(identity));
+
+    if (anyMissing) {
       throw new ValidationMessageException(
           new Message(ERROR_PHYSICAL_INVENTORY_NOT_INCLUDE_ACTIVE_STOCK_CARD));
     }
-  }
-
-  private boolean isLotMissing(StockEventDto stockEventDto) {
-    List<UUID> includedLotIds = stockEventDto.getLineItems().stream()
-        .filter(lineItem -> lineItem.getLotId() != null)
-        .map(StockEventLineItem::getLotId).collect(toList());
-
-    return stockCardRepository
-        .getStockCardLotIdsBy(stockEventDto.getProgramId(), stockEventDto.getFacilityId())
-        .stream().filter(Objects::nonNull)
-        .anyMatch(cardLotId -> !includedLotIds.contains(cardLotId));
-  }
-
-  private boolean isOrderableMissing(StockEventDto stockEventDto) {
-    List<UUID> includedOrderableIds = stockEventDto.getLineItems().stream()
-        .map(StockEventLineItem::getOrderableId).collect(toList());
-
-    return stockCardRepository
-        .getStockCardOrderableIdsBy(stockEventDto.getProgramId(), stockEventDto.getFacilityId())
-        .stream().anyMatch(cardOrderableId -> !includedOrderableIds.contains(cardOrderableId));
   }
 
 }

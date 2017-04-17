@@ -67,6 +67,5 @@ public class ApprovedOrderableValidator implements StockEventValidator {
         .map(StockEventLineItem::getOrderableId)
         .filter(id -> !approvedIds.contains(id))
         .collect(toList());
-
   }
 }

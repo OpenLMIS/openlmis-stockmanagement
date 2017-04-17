@@ -130,10 +130,6 @@ public class StockCard extends BaseEntity {
     LOGGER.debug("Calculated stock on hand: " + previousSoh);
   }
 
-  public boolean hasLot() {
-    return this.lotId != null;
-  }
-
   private void reorderLineItemsByDates() {
     Comparator<StockCardLineItem> byOccurred =
         comparing(StockCardLineItem::getOccurredDate);
