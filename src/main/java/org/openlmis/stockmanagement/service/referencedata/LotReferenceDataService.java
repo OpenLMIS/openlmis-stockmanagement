@@ -15,8 +15,12 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
+import static java.util.Collections.emptyList;
+
 import org.openlmis.stockmanagement.dto.LotDto;
+import org.openlmis.stockmanagement.service.DataRetrievalException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -48,6 +52,10 @@ public class LotReferenceDataService extends BaseReferenceDataService<LotDto> {
   public Page<LotDto> search(UUID tradeItemId) {
     HashMap<String, Object> params = new HashMap<>();
     params.put("tradeIdemId", tradeItemId);
-    return getPage("search", params);
+    try {
+      return getPage("search", params);
+    } catch (DataRetrievalException ex) {
+      return new PageImpl<>(emptyList());
+    }
   }
 }

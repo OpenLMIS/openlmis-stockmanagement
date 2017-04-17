@@ -15,6 +15,10 @@
 
 package org.openlmis.stockmanagement.dto;
 
+import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,6 +38,8 @@ public class LotDto {
   private String lotCode;
   private boolean active;
   private UUID tradeItemId;
+  @JsonFormat(shape = STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
   private ZonedDateTime expirationDate;
+  @JsonFormat(shape = STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
   private ZonedDateTime manufactureDate;
 }
