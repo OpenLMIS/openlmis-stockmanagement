@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.validators;
 
 import static java.util.stream.Collectors.groupingBy;
+import static org.openlmis.stockmanagement.domain.adjustment.ReasonCategory.PHYSICAL_INVENTORY;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH;
 
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
@@ -75,6 +76,16 @@ public class QuantityValidator implements StockEventValidator {
         throwQuantityError(group);
       }
     });
+    avoidPersistence(foundCard, itemsToBe);
+  }
+
+  private void avoidPersistence(StockCard foundCard, List<StockCardLineItem> itemsToBe) {
+    //during recalculating soh, physical inventory line items will be assigned a reason
+    //those reasons does not exist in DB, they are from physicalCredit and physicalDebit methods
+    //remove their reason assignment after recalculation to avoid jpa persistence
+    foundCard.getLineItems().stream()
+        .filter(lineItem -> lineItem.getReason().getReasonCategory() == PHYSICAL_INVENTORY)
+        .forEach(lineItem -> lineItem.setReason(null));
     //remove the line items from card to avoid jpa persistence
     foundCard.getLineItems().removeAll(itemsToBe);
   }
