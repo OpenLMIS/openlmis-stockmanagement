@@ -19,7 +19,7 @@ import static java.time.ZoneOffset.UTC;
 import static java.time.ZonedDateTime.of;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
@@ -27,13 +27,13 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.service.StockCardSummariesService.ALL;
 import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.ExistingStockCardsOnly;
 import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.IncludeApprovedOrderables;
 
-import com.google.common.collect.ImmutableMap;
-
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -46,12 +46,12 @@ import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -70,10 +70,19 @@ public class StockCardSummariesServiceTest {
   private ProgramReferenceDataService programRefDataService;
 
   @Mock
+  private LotReferenceDataService lotReferenceDataService;
+
+  @Mock
   private StockCardRepository cardRepository;
 
   @InjectMocks
   private StockCardSummariesService stockCardSummariesService;
+
+  @Before
+  public void setUp() throws Exception {
+    when(lotReferenceDataService.search(any(UUID.class)))
+        .thenReturn(new PageImpl<>(emptyList()));
+  }
 
   @Test
   public void should_contain_existing_stock_cards_and_approved_orderables() throws Exception {
@@ -91,13 +100,8 @@ public class StockCardSummariesServiceTest {
     UUID programId = UUID.randomUUID();
     UUID facilityId = UUID.randomUUID();
     when(approvedProductReferenceDataService
-        .getApprovedOrderablesMap(programId, facilityId))
-        .thenReturn(ImmutableMap.of(
-            orderable1Id, orderable1,
-            orderable2Id, orderable2,
-            orderable3Id, orderable3,
-            orderable4Id, orderable4
-        ));
+        .getAllApprovedProducts(programId, facilityId))
+        .thenReturn(asList(orderable1, orderable2, orderable3, orderable4));
 
     when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId, ALL))
         .thenReturn(new PageImpl<>(asList(
@@ -161,13 +165,8 @@ public class StockCardSummariesServiceTest {
     UUID programId = UUID.randomUUID();
     UUID facilityId = UUID.randomUUID();
     when(approvedProductReferenceDataService
-        .getApprovedOrderablesMap(programId, facilityId))
-        .thenReturn(ImmutableMap.of(
-            orderable1Id, orderable1,
-            orderable2Id, orderable2,
-            orderable3Id, orderable3,
-            orderable4Id, orderable4
-        ));
+        .getAllApprovedProducts(programId, facilityId))
+        .thenReturn(asList(orderable1, orderable2, orderable3, orderable4));
 
     when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId, ALL))
         .thenReturn(new PageImpl<>(asList(
@@ -211,10 +210,10 @@ public class StockCardSummariesServiceTest {
     StockCard card = new StockCard();
     card.setLineItems(emptyList());
     when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId, pageRequest))
-        .thenReturn(new PageImpl<>(Collections.singletonList(card), pageRequest, 10));
+        .thenReturn(new PageImpl<>(singletonList(card), pageRequest, 10));
 
-    when(approvedProductReferenceDataService.getApprovedOrderablesMap(programId, facilityId))
-        .thenReturn(emptyMap());
+    when(approvedProductReferenceDataService.getAllApprovedProducts(programId, facilityId))
+        .thenReturn(singletonList(new OrderableDto()));
 
     //when
     Page<StockCardDto> stockCards = stockCardSummariesService

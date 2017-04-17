@@ -24,9 +24,9 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.openlmis.stockmanagement.dto.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.FacilityDto;
 import org.openlmis.stockmanagement.dto.LotDto;
+import org.openlmis.stockmanagement.dto.OrderableDto;
 import org.openlmis.stockmanagement.dto.ProgramDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.UserDto;
@@ -73,8 +73,7 @@ public class StockEventProcessContextBuilderTest {
     UserDto userDto = new UserDto();
     ProgramDto programDto = new ProgramDto();
     FacilityDto facilityDto = new FacilityDto();
-    ArrayList<ApprovedProductDto> approvedProductDtos = new ArrayList<>();
-
+    ArrayList<OrderableDto> approvedProductDtos = new ArrayList<>();
 
     when(authenticationHelper.getCurrentUser()).thenReturn(userDto);
     when(programService.findOne(stockEventDto.getProgramId())).thenReturn(programDto);

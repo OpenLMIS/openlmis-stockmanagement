@@ -21,8 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.openlmis.stockmanagement.dto.ApprovedProductDto;
-import org.openlmis.stockmanagement.dto.ProgramOrderableDto;
+import org.openlmis.stockmanagement.dto.OrderableDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
@@ -42,14 +41,11 @@ public class ApprovedOrderableValidatorTest {
     //given:
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
 
-    ProgramOrderableDto programOrderableDto = new ProgramOrderableDto();
-    programOrderableDto.setOrderableId(UUID.randomUUID());
-
-    ApprovedProductDto approvedProductDto = new ApprovedProductDto();
-    approvedProductDto.setProgramOrderable(programOrderableDto);
+    OrderableDto orderableDto = new OrderableDto();
+    orderableDto.setId(UUID.randomUUID());
 
     stockEventDto.setContext(StockEventProcessContext.builder()
-        .allApprovedProducts(singletonList(approvedProductDto)).build());
+        .allApprovedProducts(singletonList(orderableDto)).build());
 
     //when:
     approvedOrderableValidator.validate(stockEventDto);
@@ -65,14 +61,11 @@ public class ApprovedOrderableValidatorTest {
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.getLineItems().get(0).setOrderableId(orderableId);
 
-    ProgramOrderableDto programOrderableDto = new ProgramOrderableDto();
-    programOrderableDto.setOrderableId(UUID.fromString(orderableIdString));
-
-    ApprovedProductDto approvedProductDto = new ApprovedProductDto();
-    approvedProductDto.setProgramOrderable(programOrderableDto);
+    OrderableDto orderableDto = new OrderableDto();
+    orderableDto.setId(UUID.fromString(orderableIdString));
 
     stockEventDto.setContext(StockEventProcessContext.builder()
-        .allApprovedProducts(singletonList(approvedProductDto)).build());
+        .allApprovedProducts(singletonList(orderableDto)).build());
 
     //when:
     approvedOrderableValidator.validate(stockEventDto);

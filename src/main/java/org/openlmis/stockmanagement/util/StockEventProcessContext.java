@@ -15,9 +15,9 @@
 
 package org.openlmis.stockmanagement.util;
 
-import org.openlmis.stockmanagement.dto.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.FacilityDto;
 import org.openlmis.stockmanagement.dto.LotDto;
+import org.openlmis.stockmanagement.dto.OrderableDto;
 import org.openlmis.stockmanagement.dto.ProgramDto;
 import org.openlmis.stockmanagement.dto.UserDto;
 
@@ -38,6 +38,6 @@ public class StockEventProcessContext {
   private UserDto currentUser;
   private ProgramDto program;
   private FacilityDto facility;
-  private List<ApprovedProductDto> allApprovedProducts;
+  private List<OrderableDto> allApprovedProducts;
   private Map<UUID, LotDto> lots;
 }

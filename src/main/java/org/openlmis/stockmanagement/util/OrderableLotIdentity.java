@@ -32,14 +32,19 @@ public class OrderableLotIdentity {
   }
 
   @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-
-    OrderableLotIdentity that = (OrderableLotIdentity) o;
-
-    if (orderableId != null ? !orderableId.equals(that.orderableId) : that.orderableId != null)
+  public boolean equals(Object object) {
+    if (this == object) {
+      return true;
+    }
+    if (object == null || getClass() != object.getClass()) {
       return false;
+    }
+
+    OrderableLotIdentity that = (OrderableLotIdentity) object;
+
+    if (orderableId != null ? !orderableId.equals(that.orderableId) : that.orderableId != null) {
+      return false;
+    }
     return lotId != null ? lotId.equals(that.lotId) : that.lotId == null;
   }
 

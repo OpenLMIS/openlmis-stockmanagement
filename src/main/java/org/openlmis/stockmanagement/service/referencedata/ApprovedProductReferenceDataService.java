@@ -16,7 +16,6 @@
 package org.openlmis.stockmanagement.service.referencedata;
 
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Stream.concat;
 
 import org.openlmis.stockmanagement.dto.ApprovedProductDto;
@@ -73,28 +72,16 @@ public class ApprovedProductReferenceDataService extends
    * @param programId  id of the program
    * @return a collection of approved products matching the search criteria.
    */
-  public List<ApprovedProductDto> getAllApprovedProducts(UUID programId, UUID facilityId) {
+  public List<OrderableDto> getAllApprovedProducts(UUID programId, UUID facilityId) {
     Collection<ApprovedProductDto> fullSupply =
         getApprovedProducts(facilityId, programId, true);
 
     Collection<ApprovedProductDto> nonFullSupply =
         getApprovedProducts(facilityId, programId, false);
 
-    return concat(fullSupply.stream(), nonFullSupply.stream()).collect(toList());
+    return concat(fullSupply.stream(), nonFullSupply.stream())
+        .map(approvedProduct -> approvedProduct.getProgramOrderable().toOrderableDto())
+        .collect(toList());
   }
 
-  /**
-   * Get all approved orderables in a orderable id -> orderable map. This is convenient method when
-   * we need to assign orderable dto to stock management domain model turned dtos.
-   *
-   * @param programId  programId.
-   * @param facilityId facilityId.
-   * @return all approved orderables.
-   */
-  public Map<UUID, OrderableDto> getApprovedOrderablesMap(UUID programId, UUID facilityId) {
-    return
-        getAllApprovedProducts(programId, facilityId).stream().collect(toMap(
-            approvedProduct -> approvedProduct.getProgramOrderable().getOrderableId(),
-            approvedProduct -> approvedProduct.getProgramOrderable().toOrderableDto()));
-  }
 }
