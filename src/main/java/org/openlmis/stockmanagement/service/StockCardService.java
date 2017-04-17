@@ -31,6 +31,7 @@ import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.repository.StockCardLineItemRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,9 @@ public class StockCardService extends StockCardBaseService {
 
   @Autowired
   private FacilityReferenceDataService facilityRefDataService;
+
+  @Autowired
+  private LotReferenceDataService lotReferenceDataService;
 
   @Autowired
   private StockCardRepository cardRepository;
@@ -99,10 +103,13 @@ public class StockCardService extends StockCardBaseService {
     LOGGER.debug("Stock card found");
     permissionService.canViewStockCard(foundCard.getProgramId(), foundCard.getFacilityId());
 
-    StockCardDto stockCardDto = createDtos(singletonList(foundCard)).get(0);
-    stockCardDto.setOrderable(orderableRefDataService.findOne(foundCard.getOrderableId()));
-    assignSourceDestinationForLineItems(stockCardDto);
-    return stockCardDto;
+    StockCardDto cardDto = createDtos(singletonList(foundCard)).get(0);
+    cardDto.setOrderable(orderableRefDataService.findOne(foundCard.getOrderableId()));
+    if (cardDto.getLot().getId() != null) {
+      cardDto.setLot(lotReferenceDataService.findOne(cardDto.getLot().getId()));
+    }
+    assignSourceDestinationForLineItems(cardDto);
+    return cardDto;
   }
 
   private StockCard findOrCreateCard(StockEventDto eventDto,
