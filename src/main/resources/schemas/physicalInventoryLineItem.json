@@ -10,6 +10,13 @@
       "required": true,
       "$ref": "orderable"
     },
+    "lot": {
+      "type": "object",
+      "title": "Lot",
+      "description": "Indicates which lot this physical inventory line item is for.",
+      "required": false,
+      "$ref": "lot"
+    },
     "stockOnHand": {
       "type": "integer",
       "description": "Indicates previous stock on hand for an orderable."

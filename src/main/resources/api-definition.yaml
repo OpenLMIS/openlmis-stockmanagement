@@ -13,6 +13,7 @@ schemas:
   - program: !include schemas/program.json
   - facility: !include schemas/facility.json
   - orderable: !include schemas/orderable.json
+  - lot: !include schemas/lot.json
   - lineItem: !include schemas/lineItem.json
   - facilityType: !include schemas/facilityType.json
   - reason: !include schemas/reason.json
@@ -26,7 +27,6 @@ schemas:
   - stockEventDto: !include schemas/stockEventDto.json
   - stockEventLineItemDto: !include schemas/stockEventLineItemDto.json
 
-  - stockCards: !include schemas/stockCards.json
   - stockCard: !include schemas/stockCard.json
   - stockCardSummaries: !include schemas/stockCardSummaries.json
   - validSourceDestination: !include schemas/validSourceDestination.json

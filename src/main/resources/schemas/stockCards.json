@@ -1,9 +1,0 @@
-{
-  "type": "array",
-  "$schema": "http://json-schema.org/draft-04/schema",
-  "items": {
-    "type": "object",
-    "title": "StockCard",
-    "$ref": "stockCard"
-  }
-}

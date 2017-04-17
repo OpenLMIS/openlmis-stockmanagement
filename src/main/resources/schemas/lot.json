@@ -1,0 +1,36 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "title": "Lot DTO",
+  "description": "A single lot DTO",
+  "properties": {
+    "id": {
+      "type": "string",
+      "title": "id"
+    },
+    "lotCode": {
+      "type": "string",
+      "title": "lotCode"
+    },
+    "expirationDate": {
+      "type": "string",
+      "title": "expirationDate"
+    },
+    "manufactureDate": {
+      "type": "string",
+      "title": "manufactureDate"
+    },
+    "tradeItemId": {
+      "type": "string",
+      "title": "tradeItemId"
+    },
+    "active": {
+      "type": "boolean",
+      "title": "active"
+    }
+  },
+  "required": [
+    "lotCode",
+    "tradeItemId"
+  ]
+}

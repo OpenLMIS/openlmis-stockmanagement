@@ -17,6 +17,11 @@
       "title": "Orderable",
       "$ref": "orderable"
     },
+    "lot": {
+      "type": "object",
+      "title": "Lot",
+      "$ref": "lot"
+    },
     "stockOnHand": {
       "type": "integer"
     },
