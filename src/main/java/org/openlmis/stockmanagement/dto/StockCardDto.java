@@ -18,12 +18,12 @@ package org.openlmis.stockmanagement.dto;
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static java.util.stream.Collectors.toList;
-import static org.openlmis.stockmanagement.util.OrderableAndLotIdToString.idsToString;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.util.OrderableLotIdentity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -72,7 +72,7 @@ public class StockCardDto {
         .build();
   }
 
-  public String orderableAndLotString() {
-    return idsToString(orderable.getId(), lot == null ? null : lot.getId());
+  public OrderableLotIdentity orderableLotIdentity() {
+    return new OrderableLotIdentity(orderable.getId(), lot == null ? null : lot.getId());
   }
 }

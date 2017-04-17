@@ -21,6 +21,7 @@ import static java.util.stream.Collectors.toList;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
+import org.openlmis.stockmanagement.util.OrderableLotIdentity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -104,9 +105,9 @@ public class PhysicalInventoryDto {
    */
   public void mergeWith(
       List<StockCardDto> stockCards) {
-    Map<String, Integer> savedQuantities = this.lineItems.stream()
+    Map<OrderableLotIdentity, Integer> savedQuantities = this.lineItems.stream()
         .collect(HashMap::new,
-            (map, lineItem) -> map.put(lineItem.orderableAndLotString(), lineItem.getQuantity()),
+            (map, lineItem) -> map.put(lineItem.orderableLotIdentity(), lineItem.getQuantity()),
             HashMap::putAll);
 
     this.setLineItems(stockCards.stream()
@@ -114,7 +115,7 @@ public class PhysicalInventoryDto {
             .orderable(stockCardDto.getOrderable())
             .lot(stockCardDto.getLot())
             .stockOnHand(stockCardDto.getStockOnHand())
-            .quantity(savedQuantities.get(stockCardDto.orderableAndLotString()))
+            .quantity(savedQuantities.get(stockCardDto.orderableLotIdentity()))
             .build())
         .collect(toList()));
   }

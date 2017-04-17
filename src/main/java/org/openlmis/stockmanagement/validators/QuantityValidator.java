@@ -27,6 +27,7 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
+import org.openlmis.stockmanagement.util.OrderableLotIdentity;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -53,8 +54,9 @@ public class QuantityValidator implements StockEventValidator {
       return;
     }
 
-    Map<String, List<StockEventLineItem>> sameOrderableGroups = stockEventDto.getLineItems()
-        .stream().collect(groupingBy(StockEventLineItem::orderableAndLotString));
+    Map<OrderableLotIdentity, List<StockEventLineItem>> sameOrderableGroups = stockEventDto
+        .getLineItems().stream()
+        .collect(groupingBy(StockEventLineItem::orderableAndLotIdentity));
 
     for (List<StockEventLineItem> group : sameOrderableGroups.values()) {
       boolean anyDebitInGroup = group.stream().anyMatch(this::hasDebitReason);

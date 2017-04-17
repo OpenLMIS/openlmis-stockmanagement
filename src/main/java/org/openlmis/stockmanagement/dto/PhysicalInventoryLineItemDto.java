@@ -17,7 +17,7 @@ package org.openlmis.stockmanagement.dto;
 
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
-import org.openlmis.stockmanagement.util.OrderableAndLotIdToString;
+import org.openlmis.stockmanagement.util.OrderableLotIdentity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -65,8 +65,8 @@ public class PhysicalInventoryLineItemDto {
         .build();
   }
 
-  public String orderableAndLotString() {
-    return OrderableAndLotIdToString.idsToString(orderable.getId(), lotId());
+  public OrderableLotIdentity orderableLotIdentity() {
+    return new OrderableLotIdentity(orderable.getId(), lotId());
   }
 
   private UUID lotId() {

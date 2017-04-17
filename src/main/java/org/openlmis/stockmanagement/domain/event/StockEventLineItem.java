@@ -15,9 +15,8 @@
 
 package org.openlmis.stockmanagement.domain.event;
 
-import static org.openlmis.stockmanagement.util.OrderableAndLotIdToString.idsToString;
-
 import org.openlmis.stockmanagement.domain.BaseEntity;
+import org.openlmis.stockmanagement.util.OrderableLotIdentity;
 
 import lombok.Data;
 
@@ -61,13 +60,8 @@ public class StockEventLineItem extends BaseEntity {
     return this.lotId != null;
   }
 
-  /**
-   * Combine orderable id and lot id as string. Useful for grouping.
-   *
-   * @return combined ids as string.
-   */
-  public String orderableAndLotString() {
-    return idsToString(orderableId, lotId);
+  public OrderableLotIdentity orderableAndLotIdentity() {
+    return new OrderableLotIdentity(orderableId, lotId);
   }
 
 }

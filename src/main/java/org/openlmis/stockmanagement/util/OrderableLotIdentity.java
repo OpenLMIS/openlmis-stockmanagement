@@ -15,20 +15,38 @@
 
 package org.openlmis.stockmanagement.util;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.UUID;
 
-public class OrderableAndLotIdToString {
+@Getter
+@Setter
+public class OrderableLotIdentity {
+  private UUID orderableId;
+  private UUID lotId;
 
-  /**
-   * Create string representation of orderable id and lot id.
-   *
-   * @param orderableId orderable id.
-   * @param lotId       lot it.
-   * @return the created string representation.
-   */
-  public static String idsToString(UUID orderableId, UUID lotId) {
-    String orderableIdString = orderableId == null ? "" : orderableId.toString();
-    String lotIdString = lotId == null ? "" : lotId.toString();
-    return orderableIdString + lotIdString;
+  public OrderableLotIdentity(UUID orderableId, UUID lotId) {
+    this.orderableId = orderableId;
+    this.lotId = lotId;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    OrderableLotIdentity that = (OrderableLotIdentity) o;
+
+    if (orderableId != null ? !orderableId.equals(that.orderableId) : that.orderableId != null)
+      return false;
+    return lotId != null ? lotId.equals(that.lotId) : that.lotId == null;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = orderableId != null ? orderableId.hashCode() : 0;
+    result = 31 * result + (lotId != null ? lotId.hashCode() : 0);
+    return result;
   }
 }
