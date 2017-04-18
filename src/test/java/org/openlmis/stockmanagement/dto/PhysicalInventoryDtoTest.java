@@ -15,6 +15,8 @@
 
 package org.openlmis.stockmanagement.dto;
 
+import static java.util.Collections.singletonList;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
@@ -106,16 +108,42 @@ public class PhysicalInventoryDtoTest {
     assertThat(dto.getLineItems().size(), is(1));
   }
 
+  @Test
+  public void should_merge_with_stock_card_dtos() throws Exception {
+    //given
+    UUID orderableId = randomUUID();
+    StockCardDto cardDto = StockCardDto.builder()
+        .orderable(OrderableDto.builder().id(orderableId).build())
+        .stockOnHand(111).build();
+
+    PhysicalInventoryLineItemDto inventoryLineItemDto =
+        PhysicalInventoryLineItemDto.builder()
+            .orderable(OrderableDto.builder().id(orderableId).build())
+            .quantity(222)
+            .build();
+    PhysicalInventoryDto inventoryDto = PhysicalInventoryDto.builder()
+        .lineItems(singletonList(inventoryLineItemDto))
+        .build();
+
+    //when
+    inventoryDto.mergeWith(singletonList(cardDto));
+
+    //then
+    assertThat(inventoryDto.getLineItems().size(), is(1));
+    assertThat(inventoryDto.getLineItems().get(0).getStockOnHand(), is(111));
+    assertThat(inventoryDto.getLineItems().get(0).getQuantity(), is(222));
+  }
+
   private PhysicalInventoryDto createInventoryDto() {
     PhysicalInventoryDto piDto = new PhysicalInventoryDto();
     piDto.setOccurredDate(ZonedDateTime.now());
-    piDto.setFacilityId(UUID.randomUUID());
-    piDto.setProgramId(UUID.randomUUID());
+    piDto.setFacilityId(randomUUID());
+    piDto.setProgramId(randomUUID());
     piDto.setSignature("test");
     piDto.setDocumentNumber(null);
 
     PhysicalInventoryLineItemDto piLineItemDto1 = new PhysicalInventoryLineItemDto();
-    piLineItemDto1.setOrderable(OrderableDto.builder().id(UUID.randomUUID()).build());
+    piLineItemDto1.setOrderable(OrderableDto.builder().id(randomUUID()).build());
     piLineItemDto1.setQuantity(123);
 
     piDto.setLineItems(Arrays.asList(piLineItemDto1));
