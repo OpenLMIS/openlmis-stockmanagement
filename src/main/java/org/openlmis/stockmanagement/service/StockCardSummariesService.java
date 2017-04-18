@@ -95,6 +95,8 @@ public class StockCardSummariesService extends StockCardBaseService {
    * @return page of stock cards.
    */
   public Page<StockCardDto> findStockCards(UUID programId, UUID facilityId, Pageable pageable) {
+    //Currently this method has not been used,
+    // but might be used in the future when do back end pagination
     Page<StockCard> cards = cardRepository
         .findByProgramIdAndFacilityId(programId, facilityId, pageable);
 

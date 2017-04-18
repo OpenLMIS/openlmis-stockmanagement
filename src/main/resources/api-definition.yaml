@@ -214,7 +214,7 @@ traits:
 
   /stockCardSummaries:
       get:
-        is: [ secured, paginated ]
+        is: [ secured ]
         description: Get summaries of stock cards, which contains SOH, product name, and other essential information. This will NOT return any line items. (This could be used by front end for list view.)
         queryParameters:
           facility:
@@ -223,6 +223,9 @@ traits:
           program:
             required: true
             description: Program id, indicates the program that the queries stock card summaries is under.
+          searchOption:
+            required: false
+            description: Indicates the result should include all approved products or not. Deafult value is "ExistingStockCardsOnly".
 
         responses:
           200:

@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.ExistingStockCardsOnly;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 
@@ -22,18 +23,17 @@ import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardService;
 import org.openlmis.stockmanagement.service.StockCardSummariesService;
+import org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -77,13 +77,19 @@ public class StockCardsController {
    * @return Stock card summaries.
    */
   @RequestMapping(value = "/stockCardSummaries")
-  public Page<StockCardDto> getStockCardSummaries(
+  public ResponseEntity<List<StockCardDto>> getStockCardSummaries(
       @RequestParam() UUID program, @RequestParam() UUID facility,
-      @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable) {
+      @RequestParam(required = false) SearchOptions searchOption
+  ) {
     LOGGER.debug("Try to find stock card summaries");
     permissionService.canViewStockCard(program, facility);
 
-    return stockCardSummariesService.findStockCards(program, facility, pageable);
+    if (searchOption == null) {
+      searchOption = ExistingStockCardsOnly;
+    }
+
+    return new ResponseEntity<>(stockCardSummariesService.findStockCards(
+        program, facility, searchOption), OK);
   }
 
 }

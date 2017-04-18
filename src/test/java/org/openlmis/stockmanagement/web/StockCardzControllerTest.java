@@ -20,6 +20,8 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.ExistingStockCardsOnly;
+import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.IncludeApprovedOrderables;
 import static org.openlmis.stockmanagement.testutils.StockCardDtoBuilder.createStockCardDto;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -36,8 +38,6 @@ import org.openlmis.stockmanagement.service.StockCardSummariesService;
 import org.openlmis.stockmanagement.testutils.StockCardDtoBuilder;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.UUID;
@@ -121,6 +121,7 @@ public class StockCardzControllerTest extends BaseWebTest {
         get(API_STOCK_CARD_SUMMARIES)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
             .param("program", programId.toString())
+            .param("searchOption", IncludeApprovedOrderables.toString())
             .param("facility", facilityId.toString()));
 
     //then
@@ -133,10 +134,9 @@ public class StockCardzControllerTest extends BaseWebTest {
     UUID programId = UUID.randomUUID();
     UUID facilityId = UUID.randomUUID();
 
-    PageRequest pageable = new PageRequest(0, Integer.MAX_VALUE);
     when(stockCardSummariesService
-        .findStockCards(programId, facilityId, pageable))
-        .thenReturn(new PageImpl<>(singletonList(StockCardDtoBuilder.createStockCardDto())));
+        .findStockCards(programId, facilityId, ExistingStockCardsOnly))
+        .thenReturn(singletonList(StockCardDtoBuilder.createStockCardDto()));
 
     ResultActions resultActions = mvc.perform(
         get(API_STOCK_CARD_SUMMARIES)
@@ -145,7 +145,6 @@ public class StockCardzControllerTest extends BaseWebTest {
             .param("facility", facilityId.toString()));
 
     resultActions.andExpect(status().isOk())
-        .andDo(print())
-        .andExpect(jsonPath("$.content", hasSize(1)));
+        .andExpect(jsonPath("$", hasSize(1)));
   }
 }
