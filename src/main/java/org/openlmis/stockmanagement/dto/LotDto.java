@@ -38,8 +38,8 @@ public class LotDto {
   private String lotCode;
   private boolean active;
   private UUID tradeItemId;
-  @JsonFormat(shape = STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+  @JsonFormat(shape = STRING)
   private ZonedDateTime expirationDate;
-  @JsonFormat(shape = STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+  @JsonFormat(shape = STRING)
   private ZonedDateTime manufactureDate;
 }
