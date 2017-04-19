@@ -117,8 +117,8 @@ public abstract class MessageKeys {
       + ".reason.not.in.validList";
 
   //stock events creation: orderable duplication
-  public static final String ERROR_EVENT_ORDERABLE_DUPLICATION = EVENT_ERROR_PREFIX
-      + ".orderable.duplication";
+  public static final String ERROR_EVENT_ORDERABLE_LOT_DUPLICATION = EVENT_ERROR_PREFIX
+      + ".orderable.and.lot.duplication";
 
   //stock events creation: orderable duplication
   public static final String ERROR_EVENT_LOT_NOT_EXIST = EVENT_ERROR_PREFIX + ".lot.not.exist";
