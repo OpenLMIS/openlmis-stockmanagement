@@ -106,14 +106,14 @@ public class StockCardSummariesServiceTest {
 
     LotDto lotDto = new LotDto();
     lotDto.setId(randomUUID());
-    when(lotReferenceDataService.search(orderable1Id))
-        .thenReturn(new PageImpl<>(singletonList(lotDto)));
-    when(lotReferenceDataService.search(orderable2Id))
-        .thenReturn(new PageImpl<>(emptyList()));
-    when(lotReferenceDataService.search(orderable3Id))
-        .thenReturn(new PageImpl<>(emptyList()));
-    when(lotReferenceDataService.search(orderable4Id))
-        .thenReturn(new PageImpl<>(emptyList()));
+    when(lotReferenceDataService.getAllLotsOf(orderable1Id))
+        .thenReturn(singletonList(lotDto));
+    when(lotReferenceDataService.getAllLotsOf(orderable2Id))
+        .thenReturn(emptyList());
+    when(lotReferenceDataService.getAllLotsOf(orderable3Id))
+        .thenReturn(emptyList());
+    when(lotReferenceDataService.getAllLotsOf(orderable4Id))
+        .thenReturn(emptyList());
 
     //when
     List<StockCardDto> cardDtos = stockCardSummariesService
@@ -193,8 +193,8 @@ public class StockCardSummariesServiceTest {
             createStockCard(orderable1Id, randomUUID()),
             createStockCard(orderable3Id, randomUUID())));
 
-    when(lotReferenceDataService.search(any(UUID.class)))
-        .thenReturn(new PageImpl<>(emptyList()));
+    when(lotReferenceDataService.getAllLotsOf(any(UUID.class)))
+        .thenReturn(emptyList());
 
     //when
     List<StockCardDto> cardDtos = stockCardSummariesService
@@ -238,8 +238,8 @@ public class StockCardSummariesServiceTest {
     when(approvedProductReferenceDataService.getAllApprovedProducts(programId, facilityId))
         .thenReturn(singletonList(new OrderableDto()));
 
-    when(lotReferenceDataService.search(any(UUID.class)))
-        .thenReturn(new PageImpl<>(emptyList()));
+    when(lotReferenceDataService.getAllLotsOf(any(UUID.class)))
+        .thenReturn(emptyList());
 
     //when
     Page<StockCardDto> stockCards = stockCardSummariesService

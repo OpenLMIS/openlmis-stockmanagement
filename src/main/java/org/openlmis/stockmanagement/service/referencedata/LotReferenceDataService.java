@@ -23,7 +23,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -49,12 +51,33 @@ public class LotReferenceDataService extends BaseReferenceDataService<LotDto> {
    * @param tradeItemId trade item id.
    * @return found page of lots.
    */
-  public Page<LotDto> search(UUID tradeItemId) {
+  public List<LotDto> getAllLotsOf(UUID tradeItemId) {
+    List<LotDto> allLots = new ArrayList<>();
+
+    int pageNumber = 0;
+    boolean isLastPage = false;
+
+    while (!isLastPage) {
+      Page<LotDto> onePage = getOnePage(tradeItemId, pageNumber);
+      allLots.addAll(onePage.getContent());
+
+      pageNumber++;
+      isLastPage = onePage.isLast();
+    }
+
+    return allLots;
+  }
+
+  private Page<LotDto> getOnePage(UUID tradeItemId, int pageNumber) {
     HashMap<String, Object> params = new HashMap<>();
     params.put("tradeIdemId", tradeItemId);
+    params.put("page", pageNumber);
     try {
       return getPage("search", params);
     } catch (DataRetrievalException ex) {
+      //this is a workaround, this exception happens when the trade item id parameter is
+      //a commodity type, this will be removed after ref-data tells us either an orderable is
+      //trade item or commodity type.
       return new PageImpl<>(emptyList());
     }
   }
