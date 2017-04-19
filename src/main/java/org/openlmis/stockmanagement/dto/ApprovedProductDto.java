@@ -22,5 +22,5 @@ import java.util.UUID;
 @Data
 public class ApprovedProductDto {
   private UUID id;
-  private ProgramOrderableDto programOrderable;
+  private OrderableDto orderable;
 }

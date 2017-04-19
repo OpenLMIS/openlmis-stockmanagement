@@ -25,7 +25,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Getter
@@ -39,7 +39,7 @@ public class LotDto {
   private boolean active;
   private UUID tradeItemId;
   @JsonFormat(shape = STRING)
-  private ZonedDateTime expirationDate;
+  private LocalDate expirationDate;
   @JsonFormat(shape = STRING)
-  private ZonedDateTime manufactureDate;
+  private LocalDate manufactureDate;
 }
