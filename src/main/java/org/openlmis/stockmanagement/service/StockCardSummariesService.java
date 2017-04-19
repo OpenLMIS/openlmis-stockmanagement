@@ -145,9 +145,9 @@ public class StockCardSummariesService extends StockCardBaseService {
   private List<OrderableLot> filterOrderableLotsWithoutCards(
       Collection<OrderableLot> orderableLots, List<StockCard> stockCards) {
     return orderableLots.stream()
-        .filter(orderableLot -> stockCards.stream().noneMatch(stockCard ->
-            stockCard.getOrderableId().equals(orderableLot.getOrderable().getId())
-                && stockCard.getLotId() == orderableLot.getLotId()))
+        .filter(orderableLot ->
+            stockCards.stream().noneMatch(stockCard ->
+                stockCard.orderableLotIdentity().equals(orderableLot.orderableLotIdentity())))
         .collect(toList());
   }
 

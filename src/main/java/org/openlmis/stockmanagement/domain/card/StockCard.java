@@ -26,6 +26,7 @@ import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.util.OrderableLotIdentity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,6 +111,10 @@ public class StockCard extends BaseEntity {
     stockCard.setId(foundCardId);
     stockCard.setLineItems(new ArrayList<>());
     return stockCard;
+  }
+
+  public OrderableLotIdentity orderableLotIdentity() {
+    return new OrderableLotIdentity(orderableId, lotId);
   }
 
   /**
