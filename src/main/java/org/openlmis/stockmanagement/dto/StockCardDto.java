@@ -75,4 +75,8 @@ public class StockCardDto {
   public OrderableLotIdentity orderableLotIdentity() {
     return new OrderableLotIdentity(orderable.getId(), lot == null ? null : lot.getId());
   }
+
+  public boolean hasLot() {
+    return lot != null && lot.getId() != null;
+  }
 }

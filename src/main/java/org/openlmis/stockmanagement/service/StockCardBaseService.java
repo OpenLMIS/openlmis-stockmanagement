@@ -79,7 +79,9 @@ public abstract class StockCardBaseService {
     cardDto.setFacility(facility);
     cardDto.setProgram(program);
     cardDto.setOrderable(OrderableDto.builder().id(card.getOrderableId()).build());
-    cardDto.setLot(LotDto.builder().id(card.getLotId()).build());
+    if (card.getLotId() != null) {
+      cardDto.setLot(LotDto.builder().id(card.getLotId()).build());
+    }
     List<StockCardLineItemDto> lineItems = cardDto.getLineItems();
     if (!isEmpty(lineItems)) {
       cardDto.setLastUpdate(lineItems.get(lineItems.size() - 1).getLineItem().getOccurredDate());

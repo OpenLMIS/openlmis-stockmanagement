@@ -105,7 +105,7 @@ public class StockCardService extends StockCardBaseService {
 
     StockCardDto cardDto = createDtos(singletonList(foundCard)).get(0);
     cardDto.setOrderable(orderableRefDataService.findOne(foundCard.getOrderableId()));
-    if (cardDto.getLot().getId() != null) {
+    if (cardDto.hasLot()) {
       cardDto.setLot(lotReferenceDataService.findOne(cardDto.getLot().getId()));
     }
     assignSourceDestinationForLineItems(cardDto);
