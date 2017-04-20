@@ -225,7 +225,10 @@ traits:
             description: Program id, indicates the program that the queries stock card summaries is under.
           searchOption:
             required: false
-            description: Indicates the result should include all approved products or not. Deafult value is "ExistingStockCardsOnly".
+            description: |
+              Indicates the result should include all approved products or not.
+              Deafult value is "ExistingStockCardsOnly", so that you can only get existing stock cards.
+              And you can Indicate "IncludeApprovedOrderables" to get all approved orderables of the program and facility combination.
 
         responses:
           200:
