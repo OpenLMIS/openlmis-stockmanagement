@@ -34,7 +34,7 @@ public class OrderableLotDuplicationValidator implements StockEventValidator {
   public void validate(StockEventDto stockEventDto)
       throws IllegalAccessException, InstantiationException {
     //duplication is not allow in physical inventory, but is allowed in adjustment
-    if (!stockEventDto.hasLineItems() || stockEventDto.isPhysicalInventory()) {
+    if (!stockEventDto.hasLineItems() || !stockEventDto.isPhysicalInventory()) {
       return;
     }
 
