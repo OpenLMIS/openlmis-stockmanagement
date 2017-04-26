@@ -30,7 +30,8 @@ public class LotValidator implements StockEventValidator {
   @Override
   public void validate(StockEventDto stockEventDto)
       throws IllegalAccessException, InstantiationException {
-    if (!stockEventDto.hasDestination()) {
+    LOGGER.info("validating lot");
+    if (!stockEventDto.hasLineItems()) {
       return;
     }
 
