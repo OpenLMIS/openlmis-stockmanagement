@@ -2,10 +2,6 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "sourceId": {
-      "type": "string",
-      "description": "Indicates where orderables are received from. Can not be present along with destination id."
-    },
     "facilityId": {
       "type": "string",
       "description": "Part of identifier of stock card. Indicates in which facility this event occurred."
@@ -17,18 +13,6 @@
     "documentNumber": {
       "type": "string",
       "description": ""
-    },
-    "destinationId": {
-      "type": "string",
-      "description": "During the 'ISSUE' event, destinationId indicates where orderables are issued to. Can not be present along with source id."
-    },
-    "destinationFreeText": {
-      "type": "string",
-      "description": "Remark of the destination. Only allowed when destination id is present and destination id does not point to a facility in ref-data."
-    },
-    "sourceFreeText": {
-      "type": "string",
-      "description": "Remark of the source. Only allowed when source id is present and source id does not point to a facility in ref-data."
     },
     "programId": {
       "type": "string",
