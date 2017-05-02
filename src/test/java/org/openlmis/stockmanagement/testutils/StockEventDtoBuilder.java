@@ -33,13 +33,8 @@ public class StockEventDtoBuilder {
   public static StockEventDto createStockEventDto() {
     StockEventDto stockEventDto = new StockEventDto();
 
-    stockEventDto.setSourceFreeText("a");
-    stockEventDto.setDestinationFreeText("b");
     stockEventDto.setDocumentNumber("c");
     stockEventDto.setSignature("e");
-
-    stockEventDto.setSourceId(UUID.fromString("0bd28568-43f1-4836-934d-ec5fb11398e8"));
-    stockEventDto.setDestinationId(UUID.fromString("087e81f6-a74d-4bba-9d01-16e0d64e9609"));
 
     stockEventDto.setProgramId(UUID.randomUUID());
     stockEventDto.setFacilityId(UUID.randomUUID());
@@ -50,6 +45,10 @@ public class StockEventDtoBuilder {
     eventLineItemDto.setQuantity(1);
     eventLineItemDto.setOrderableId(UUID.randomUUID());
     eventLineItemDto.setOccurredDate(ZonedDateTime.now());
+    eventLineItemDto.setSourceId(UUID.fromString("0bd28568-43f1-4836-934d-ec5fb11398e8"));
+    eventLineItemDto.setDestinationId(UUID.fromString("087e81f6-a74d-4bba-9d01-16e0d64e9609"));
+    eventLineItemDto.setSourceFreeText("a");
+    eventLineItemDto.setDestinationFreeText("b");
 
     stockEventDto.setLineItems(singletonList(eventLineItemDto));
     return stockEventDto;
@@ -62,10 +61,11 @@ public class StockEventDtoBuilder {
    */
   public static StockEventDto createNoSourceDestinationStockEventDto() {
     StockEventDto stockEventDto = createStockEventDto();
-    stockEventDto.setSourceId(null);
-    stockEventDto.setDestinationId(null);
-    stockEventDto.setSourceFreeText(null);
-    stockEventDto.setDestinationFreeText(null);
+    StockEventLineItem stockEventLineItem = stockEventDto.getLineItems().get(0);
+    stockEventLineItem.setSourceId(null);
+    stockEventLineItem.setDestinationId(null);
+    stockEventLineItem.setSourceFreeText(null);
+    stockEventLineItem.setDestinationFreeText(null);
     return stockEventDto;
   }
 }

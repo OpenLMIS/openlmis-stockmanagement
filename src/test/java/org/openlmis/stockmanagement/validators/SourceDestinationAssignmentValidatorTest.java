@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_NOT_IN_VALID_LIST;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_BOTH_PRESENT;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_IN_VALID_LIST;
+import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -35,7 +36,6 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
 import org.openlmis.stockmanagement.repository.ValidSourceAssignmentRepository;
-import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
 import java.util.ArrayList;
@@ -56,9 +56,9 @@ public class SourceDestinationAssignmentValidatorTest {
   @Test
   public void should_not_pass_when_event_has_both_source_and_destination() throws Exception {
     //given
-    StockEventDto eventDto = StockEventDtoBuilder.createStockEventDto();
-    eventDto.setSourceId(UUID.randomUUID());
-    eventDto.setDestinationId(UUID.randomUUID());
+    StockEventDto eventDto = createStockEventDto();
+    eventDto.getLineItems().get(0).setSourceId(UUID.randomUUID());
+    eventDto.getLineItems().get(0).setDestinationId(UUID.randomUUID());
 
     //when
     try {
@@ -76,9 +76,9 @@ public class SourceDestinationAssignmentValidatorTest {
   @Test
   public void should_not_pass_when_event_has_source_not_in_valid_list() throws Exception {
     //given
-    StockEventDto eventDto = StockEventDtoBuilder.createStockEventDto();
-    eventDto.setSourceId(UUID.randomUUID());
-    eventDto.setDestinationId(null);
+    StockEventDto eventDto = createStockEventDto();
+    eventDto.getLineItems().get(0).setSourceId(UUID.randomUUID());
+    eventDto.getLineItems().get(0).setDestinationId(null);
 
     createContextWithFacility(eventDto);
     when(validSourceAssignmentRepository
@@ -100,9 +100,9 @@ public class SourceDestinationAssignmentValidatorTest {
   @Test
   public void should_not_pass_when_event_has_destination_not_in_valid_list() throws Exception {
     //given
-    StockEventDto eventDto = StockEventDtoBuilder.createStockEventDto();
-    eventDto.setDestinationId(UUID.randomUUID());
-    eventDto.setSourceId(null);
+    StockEventDto eventDto = createStockEventDto();
+    eventDto.getLineItems().get(0).setDestinationId(UUID.randomUUID());
+    eventDto.getLineItems().get(0).setSourceId(null);
 
     createContextWithFacility(eventDto);
     when(validDestinationAssignmentRepository
@@ -126,10 +126,10 @@ public class SourceDestinationAssignmentValidatorTest {
   //that is handled in other validators
   public void should_pass_if_program_missing() throws Exception {
     //given
-    StockEventDto eventDto = StockEventDtoBuilder.createStockEventDto();
-    eventDto.setDestinationId(UUID.randomUUID());
-    eventDto.setSourceId(null);
+    StockEventDto eventDto = createStockEventDto();
     eventDto.setProgramId(null);
+    eventDto.getLineItems().get(0).setDestinationId(UUID.randomUUID());
+    eventDto.getLineItems().get(0).setSourceId(null);
 
     createContextWithFacility(eventDto);
 
@@ -144,10 +144,10 @@ public class SourceDestinationAssignmentValidatorTest {
   //that is handled in other validators
   public void should_pass_if_facility_not_found_in_ref_data() throws Exception {
     //given
-    StockEventDto eventDto = StockEventDtoBuilder.createStockEventDto();
-    eventDto.setDestinationId(UUID.randomUUID());
-    eventDto.setSourceId(null);
+    StockEventDto eventDto = createStockEventDto();
     eventDto.setFacilityId(null);
+    eventDto.getLineItems().get(0).setDestinationId(UUID.randomUUID());
+    eventDto.getLineItems().get(0).setSourceId(null);
     eventDto.setContext(new StockEventProcessContext());
 
     //when

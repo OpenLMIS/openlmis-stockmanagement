@@ -21,6 +21,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINA
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_FREE_TEXT_NOT_ALLOWED;
 
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.movement.Node;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
@@ -44,20 +45,26 @@ public class FreeTextValidator implements StockEventValidator {
   @Override
   public void validate(StockEventDto stockEventDto) {
     LOGGER.debug("Validate free text");
-    checkSourceDestinationFreeTextBothPresent(stockEventDto);
+    if (!stockEventDto.hasLineItems()) {
+      return;
+    }
 
-    checkNodeFreeText(stockEventDto.getSourceId(), stockEventDto.getSourceFreeText(),
-        ERROR_SOURCE_FREE_TEXT_NOT_ALLOWED);
-    checkNodeFreeText(stockEventDto.getDestinationId(), stockEventDto.getDestinationFreeText(),
-        ERROR_DESTINATION_FREE_TEXT_NOT_ALLOWED);
+    stockEventDto.getLineItems().forEach(eventLineItem -> {
+      checkSourceDestinationFreeTextBothPresent(eventLineItem);
 
-    checkReasonFreeText(stockEventDto);
+      checkNodeFreeText(eventLineItem.getSourceId(), eventLineItem.getSourceFreeText(),
+          ERROR_SOURCE_FREE_TEXT_NOT_ALLOWED);
+      checkNodeFreeText(eventLineItem.getDestinationId(), eventLineItem.getDestinationFreeText(),
+          ERROR_DESTINATION_FREE_TEXT_NOT_ALLOWED);
+
+      checkReasonFreeText(eventLineItem);
+    });
   }
 
-  private void checkSourceDestinationFreeTextBothPresent(StockEventDto stockEventDto) {
-    if (stockEventDto.hasSourceFreeText() && stockEventDto.hasDestinationFreeText()) {
+  private void checkSourceDestinationFreeTextBothPresent(StockEventLineItem eventLineItem) {
+    if (eventLineItem.hasSourceFreeText() && eventLineItem.hasDestinationFreeText()) {
       throwError(ERROR_SOURCE_DESTINATION_FREE_TEXT_BOTH_PRESENT,
-          stockEventDto.getSourceFreeText(), stockEventDto.getDestinationFreeText());
+          eventLineItem.getSourceFreeText(), eventLineItem.getDestinationFreeText());
     }
   }
 
@@ -73,22 +80,18 @@ public class FreeTextValidator implements StockEventValidator {
     }
   }
 
-  private void checkReasonFreeText(StockEventDto stockEventDto) {
-    if (stockEventDto.hasLineItems()) {
-      stockEventDto.getLineItems().forEach(lineItem -> {
-        String freeText = lineItem.getReasonFreeText();
-        if (lineItem.hasReason()) {
-          StockCardLineItemReason reason = stockCardLineItemReasonRepository
-              .findOne(lineItem.getReasonId());
+  private void checkReasonFreeText(StockEventLineItem lineItem) {
+    String freeText = lineItem.getReasonFreeText();
+    if (lineItem.hasReason()) {
+      StockCardLineItemReason reason = stockCardLineItemReasonRepository
+          .findOne(lineItem.getReasonId());
 
-          if (null != reason && !reason.getIsFreeTextAllowed() && lineItem.hasReasonFreeText()) {
-            throwError(ERROR_REASON_FREE_TEXT_NOT_ALLOWED, lineItem.getReasonId(), freeText);
-          }
-        } else if (freeText != null) {
-          //reason free text exist but reason id is null
-          throwError(ERROR_REASON_FREE_TEXT_NOT_ALLOWED, lineItem.getReasonId(), freeText);
-        }
-      });
+      if (null != reason && !reason.getIsFreeTextAllowed() && lineItem.hasReasonFreeText()) {
+        throwError(ERROR_REASON_FREE_TEXT_NOT_ALLOWED, lineItem.getReasonId(), freeText);
+      }
+    } else if (freeText != null) {
+      //reason free text exist but reason id is null
+      throwError(ERROR_REASON_FREE_TEXT_NOT_ALLOWED, lineItem.getReasonId(), freeText);
     }
   }
 

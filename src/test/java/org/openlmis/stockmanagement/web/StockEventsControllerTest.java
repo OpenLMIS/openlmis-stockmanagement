@@ -60,8 +60,8 @@ public class StockEventsControllerTest extends BaseWebTest {
 
     //when
     StockEventDto stockEventDto = createStockEventDto();
-    stockEventDto.setSourceId(null);
-    stockEventDto.setDestinationId(null);
+    stockEventDto.getLineItems().get(0).setSourceId(null);
+    stockEventDto.getLineItems().get(0).setDestinationId(null);
 
     ResultActions resultActions = mvc.perform(post(CREATE_STOCK_EVENT_API)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
@@ -100,12 +100,12 @@ public class StockEventsControllerTest extends BaseWebTest {
 
   @Test
   public void should_return_403_when_user_try_to_issue_or_receive() throws Exception {
-    StockEventDto receiveEventDto = new StockEventDto();
-    receiveEventDto.setSourceId(UUID.randomUUID());
+    StockEventDto receiveEventDto = createStockEventDto();
+    receiveEventDto.getLineItems().get(0).setSourceId(UUID.randomUUID());
     shouldReject(receiveEventDto);
 
-    StockEventDto issueEventDto = new StockEventDto();
-    issueEventDto.setDestinationId(UUID.randomUUID());
+    StockEventDto issueEventDto = createStockEventDto();
+    issueEventDto.getLineItems().get(0).setDestinationId(UUID.randomUUID());
     shouldReject(issueEventDto);
   }
 

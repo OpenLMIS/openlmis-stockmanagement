@@ -18,7 +18,6 @@ package org.openlmis.stockmanagement.domain.event;
 import static javax.persistence.CascadeType.ALL;
 
 import org.openlmis.stockmanagement.domain.BaseEntity;
-import org.openlmis.stockmanagement.domain.movement.Node;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,8 +29,6 @@ import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -50,21 +47,10 @@ public class StockEvent extends BaseEntity {
   @Column(nullable = false)
   private UUID userId;
 
-  @ManyToOne()
-  @JoinColumn()
-  private Node source;
-
-  @ManyToOne()
-  @JoinColumn()
-  private Node destination;
-
   @Column(nullable = false, columnDefinition = "timestamp")
   private ZonedDateTime processedDate;
 
   private String signature;
-
-  private String sourceFreeText;
-  private String destinationFreeText;
 
   private String documentNumber;
 

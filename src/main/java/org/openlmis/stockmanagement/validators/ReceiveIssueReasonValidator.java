@@ -26,6 +26,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_RECEIVE_
 import org.openlmis.stockmanagement.domain.adjustment.ReasonCategory;
 import org.openlmis.stockmanagement.domain.adjustment.ReasonType;
 import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
@@ -44,40 +45,43 @@ public class ReceiveIssueReasonValidator implements StockEventValidator {
   @Override
   public void validate(StockEventDto eventDto) {
     LOGGER.debug("Validate receive and issue reason");
-    if (eventDto.hasSource()) {
-      checkReceiveReason(eventDto);
+
+    if (!eventDto.hasLineItems()) {
+      return;
     }
-    if (eventDto.hasDestination()) {
-      checkIssueReason(eventDto);
-    }
+
+    eventDto.getLineItems().forEach(eventLineItem -> {
+      if (eventLineItem.hasSource()) {
+        checkReceiveReason(eventLineItem);
+      }
+      if (eventLineItem.hasDestination()) {
+        checkIssueReason(eventLineItem);
+      }
+    });
   }
 
-  private void checkReceiveReason(StockEventDto eventDto) {
-    checkReason(eventDto, CREDIT,
+  private void checkReceiveReason(StockEventLineItem eventLineItem) {
+    checkReason(eventLineItem, CREDIT,
         ERROR_EVENT_RECEIVE_REASON_TYPE_INVALID,
         ERROR_EVENT_RECEIVE_REASON_CATEGORY_INVALID);
   }
 
-  private void checkIssueReason(StockEventDto eventDto) {
-    checkReason(eventDto, DEBIT,
+  private void checkIssueReason(StockEventLineItem stockEventLineItem) {
+    checkReason(stockEventLineItem, DEBIT,
         ERROR_EVENT_ISSUE_REASON_TYPE_INVALID,
         ERROR_EVENT_ISSUE_REASON_CATEGORY_INVALID);
   }
 
-  private void checkReason(StockEventDto eventDto, ReasonType expectedReasonType,
+  private void checkReason(StockEventLineItem lineItem, ReasonType expectedReasonType,
                            String typeErrorKey, String categoryErrorKey) {
-    if (eventDto.hasLineItems()) {
-      eventDto.getLineItems().forEach(lineItem -> {
-        if (lineItem.hasReason()) {
-          StockCardLineItemReason foundReason = reasonRepository.findOne(lineItem.getReasonId());
-          //this validator does not care if reason id points to something in DB
-          //that is handled by other validators
-          if (foundReason != null) {
-            checkReasonType(expectedReasonType, typeErrorKey, lineItem.getReasonId(), foundReason);
-            checkReasonCategory(categoryErrorKey, lineItem.getReasonId(), foundReason);
-          }
-        }
-      });
+    if (lineItem.hasReason()) {
+      StockCardLineItemReason foundReason = reasonRepository.findOne(lineItem.getReasonId());
+      //this validator does not care if reason id points to something in DB
+      //that is handled by other validators
+      if (foundReason != null) {
+        checkReasonType(expectedReasonType, typeErrorKey, lineItem.getReasonId(), foundReason);
+        checkReasonCategory(categoryErrorKey, lineItem.getReasonId(), foundReason);
+      }
     }
   }
 

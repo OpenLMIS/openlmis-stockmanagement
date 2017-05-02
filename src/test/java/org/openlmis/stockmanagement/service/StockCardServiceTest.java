@@ -198,8 +198,8 @@ public class StockCardServiceTest extends BaseTest {
   public void should_get_stock_card_with_calculated_soh_when_find_stock_card() throws Exception {
     //given
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
-    stockEventDto.setSourceId(null);
-    stockEventDto.setDestinationId(null);
+    stockEventDto.getLineItems().get(0).setSourceId(null);
+    stockEventDto.getLineItems().get(0).setDestinationId(null);
     StockEvent savedEvent = save(stockEventDto, randomUUID());
 
     //when

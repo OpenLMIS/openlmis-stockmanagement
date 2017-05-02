@@ -43,6 +43,11 @@ public class StockEventLineItem extends BaseEntity {
   private UUID reasonId;
   private String reasonFreeText;
 
+  private UUID sourceId;
+  private UUID destinationId;
+
+  private String sourceFreeText;
+  private String destinationFreeText;
 
   @ManyToOne()
   @JoinColumn(nullable = false)
@@ -64,4 +69,19 @@ public class StockEventLineItem extends BaseEntity {
     return new OrderableLotIdentity(orderableId, lotId);
   }
 
+  public boolean hasDestinationFreeText() {
+    return this.destinationFreeText != null;
+  }
+
+  public boolean hasSourceFreeText() {
+    return this.sourceFreeText != null;
+  }
+
+  public boolean hasSource() {
+    return this.sourceId != null;
+  }
+
+  public boolean hasDestination() {
+    return this.destinationId != null;
+  }
 }

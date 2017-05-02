@@ -130,8 +130,8 @@ public class StockEventProcessorTest extends BaseTest {
     //given
     StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.getLineItems().get(0).setReasonId(null);
-    stockEventDto.setSourceId(null);
-    stockEventDto.setDestinationId(null);
+    stockEventDto.getLineItems().get(0).setSourceId(null);
+    stockEventDto.getLineItems().get(0).setDestinationId(null);
 
     //when
     stockEventProcessor.process(stockEventDto);

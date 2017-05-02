@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.validators;
 import static org.junit.rules.ExpectedException.none;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH;
+import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -33,7 +34,6 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
-import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -69,8 +69,8 @@ public class QuantityValidatorTest {
   public void should_not_throw_validation_exception_if_event_reason_id_is_not_found()
       throws Exception {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
-    stockEventDto.setDestinationId(null);
+    StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.getLineItems().get(0).setDestinationId(null);
     when(reasonRepository.findOne(stockEventDto.getLineItems().get(0).getReasonId()))
         .thenReturn(null);
 
@@ -114,9 +114,9 @@ public class QuantityValidatorTest {
   }
 
   private StockEventDto createDebitEventDto(ZonedDateTime day2, int quantity) {
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
-    stockEventDto.setSourceId(null);
-    stockEventDto.setDestinationId(UUID.randomUUID());
+    StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.getLineItems().get(0).setSourceId(null);
+    stockEventDto.getLineItems().get(0).setDestinationId(UUID.randomUUID());
     stockEventDto.getLineItems().get(0).setQuantity(quantity);
     stockEventDto.getLineItems().get(0).setOccurredDate(day2);
     return stockEventDto;

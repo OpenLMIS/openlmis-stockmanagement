@@ -19,6 +19,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_NO
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_BOTH_PRESENT;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_IN_VALID_LIST;
 
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.FacilityDto;
@@ -26,6 +27,7 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
 import org.openlmis.stockmanagement.repository.ValidSourceAssignmentRepository;
+import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -45,58 +47,64 @@ public class SourceDestinationAssignmentValidator implements StockEventValidator
   @Override
   public void validate(StockEventDto eventDto) {
     LOGGER.debug("Validate source and destination assignment");
-    checkSourceDestinationBothPresent(eventDto);
-    checkIsValidAssignment(eventDto);
+    if (!eventDto.hasLineItems()) {
+      return;
+    }
+
+    eventDto.getLineItems().forEach(eventLineItem -> {
+      checkSourceDestinationBothPresent(eventLineItem);
+      checkIsValidAssignment(eventLineItem, eventDto);
+    });
   }
 
-  private void checkIsValidAssignment(StockEventDto eventDto) {
-    UUID facilityTypeId = getFacilityTypeId(eventDto);
+  private void checkIsValidAssignment(StockEventLineItem eventLineItem, StockEventDto eventDto) {
+    UUID facilityTypeId = getFacilityTypeId(eventDto.getContext());
     UUID programId = eventDto.getProgramId();
     //this validator does not care if program missing or facility not found in ref data
     //that is handled in other validators
     if (facilityTypeId != null && programId != null) {
-      if (eventDto.hasSource()) {
-        checkSourceAssignment(eventDto, facilityTypeId, programId);
+      if (eventLineItem.hasSource()) {
+        checkSourceAssignment(eventLineItem, facilityTypeId, programId);
       }
-      if (eventDto.hasDestination()) {
-        checkDestinationAssignment(eventDto, facilityTypeId, programId);
+      if (eventLineItem.hasDestination()) {
+        checkDestinationAssignment(eventLineItem, facilityTypeId, programId);
       }
     }
   }
 
-  private void checkSourceDestinationBothPresent(StockEventDto eventDto) {
-    if (eventDto.hasSource() && eventDto.hasDestination()) {
+  private void checkSourceDestinationBothPresent(StockEventLineItem eventLineItem) {
+    if (eventLineItem.hasSource() && eventLineItem.hasDestination()) {
       throwError(ERROR_SOURCE_DESTINATION_BOTH_PRESENT,
-          eventDto.getSourceId(), eventDto.getDestinationId());
+          eventLineItem.getSourceId(), eventLineItem.getDestinationId());
     }
   }
 
-  private void checkSourceAssignment(StockEventDto eventDto,
+  private void checkSourceAssignment(StockEventLineItem eventLineItem,
                                      UUID facilityTypeId, UUID programId) {
     List<ValidSourceAssignment> sourceAssignments = validSourceAssignmentRepository
         .findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
 
     boolean isInValidList = sourceAssignments.stream().anyMatch(validSourceAssignment ->
-        validSourceAssignment.getNode().getId().equals(eventDto.getSourceId()));
+        validSourceAssignment.getNode().getId().equals(eventLineItem.getSourceId()));
     if (!isInValidList) {
-      throwError(ERROR_SOURCE_NOT_IN_VALID_LIST, eventDto.getSourceId());
+      throwError(ERROR_SOURCE_NOT_IN_VALID_LIST, eventLineItem.getSourceId());
     }
   }
 
-  private void checkDestinationAssignment(StockEventDto eventDto,
+  private void checkDestinationAssignment(StockEventLineItem eventLineItem,
                                           UUID facilityTypeId, UUID programId) {
     List<ValidDestinationAssignment> sourceAssignments = validDestinationAssignmentRepository
         .findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
 
     boolean isInValidList = sourceAssignments.stream().anyMatch(validSourceAssignment ->
-        validSourceAssignment.getNode().getId().equals(eventDto.getDestinationId()));
+        validSourceAssignment.getNode().getId().equals(eventLineItem.getDestinationId()));
     if (!isInValidList) {
-      throwError(ERROR_DESTINATION_NOT_IN_VALID_LIST, eventDto.getDestinationId());
+      throwError(ERROR_DESTINATION_NOT_IN_VALID_LIST, eventLineItem.getDestinationId());
     }
   }
 
-  private UUID getFacilityTypeId(StockEventDto eventDto) {
-    FacilityDto facilityDto = eventDto.getContext().getFacility();
+  private UUID getFacilityTypeId(StockEventProcessContext context) {
+    FacilityDto facilityDto = context.getFacility();
     if (facilityDto != null) {
       return facilityDto.getType().getId();
     }

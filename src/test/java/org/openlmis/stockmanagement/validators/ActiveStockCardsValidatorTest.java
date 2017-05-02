@@ -19,6 +19,7 @@ import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_NOT_INCLUDE_ACTIVE_STOCK_CARD;
+import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createNoSourceDestinationStockEventDto;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -29,7 +30,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
-import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 import org.openlmis.stockmanagement.util.OrderableLotIdentity;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -49,10 +49,8 @@ public class ActiveStockCardsValidatorTest {
     expectedEx.expectMessage(ERROR_PHYSICAL_INVENTORY_NOT_INCLUDE_ACTIVE_STOCK_CARD);
 
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    StockEventDto stockEventDto = createNoSourceDestinationStockEventDto();
     stockEventDto.getLineItems().get(0).setReasonId(null);
-    stockEventDto.setSourceId(null);
-    stockEventDto.setDestinationId(null);
 
     when(stockCardRepository
         .getIdentitiesBy(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
@@ -67,11 +65,9 @@ public class ActiveStockCardsValidatorTest {
     expectedEx.expectMessage(ERROR_PHYSICAL_INVENTORY_NOT_INCLUDE_ACTIVE_STOCK_CARD);
 
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    StockEventDto stockEventDto = createNoSourceDestinationStockEventDto();
     stockEventDto.getLineItems().get(0).setReasonId(null);
     stockEventDto.getLineItems().get(0).setLotId(randomUUID());
-    stockEventDto.setSourceId(null);
-    stockEventDto.setDestinationId(null);
 
     when(stockCardRepository
         .getIdentitiesBy(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))

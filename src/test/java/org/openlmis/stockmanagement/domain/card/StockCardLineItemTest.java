@@ -45,29 +45,28 @@ public class StockCardLineItemTest {
 
     //when
     StockEventDto eventDto = createStockEventDto();
-    StockEventLineItem stockEventLineItem = new StockEventLineItem();
-    stockEventLineItem.setReasonId(randomUUID());
+    StockEventLineItem eventLineItem = eventDto.getLineItems().get(0);
 
     UUID userId = randomUUID();
     UUID eventId = randomUUID();
 
     StockCardLineItem cardLineItem =
-        createLineItemFrom(eventDto, stockEventLineItem, stockCard, eventId, userId);
+        createLineItemFrom(eventDto, eventLineItem, stockCard, eventId, userId);
 
     //then
-    assertThat(cardLineItem.getSourceFreeText(), is(eventDto.getSourceFreeText()));
-    assertThat(cardLineItem.getDestinationFreeText(), is(eventDto.getDestinationFreeText()));
-    assertThat(cardLineItem.getReasonFreeText(), is(stockEventLineItem.getReasonFreeText()));
+    assertThat(cardLineItem.getSourceFreeText(), is(eventLineItem.getSourceFreeText()));
+    assertThat(cardLineItem.getDestinationFreeText(), is(eventLineItem.getDestinationFreeText()));
+    assertThat(cardLineItem.getReasonFreeText(), is(eventLineItem.getReasonFreeText()));
     assertThat(cardLineItem.getDocumentNumber(), is(eventDto.getDocumentNumber()));
     assertThat(cardLineItem.getSignature(), is(eventDto.getSignature()));
 
-    assertThat(cardLineItem.getQuantity(), is(stockEventLineItem.getQuantity()));
-    assertThat(cardLineItem.getReason().getId(), is(stockEventLineItem.getReasonId()));
+    assertThat(cardLineItem.getQuantity(), is(eventLineItem.getQuantity()));
+    assertThat(cardLineItem.getReason().getId(), is(eventLineItem.getReasonId()));
 
-    assertThat(cardLineItem.getSource().getId(), is(eventDto.getSourceId()));
-    assertThat(cardLineItem.getDestination().getId(), is(eventDto.getDestinationId()));
+    assertThat(cardLineItem.getSource().getId(), is(eventLineItem.getSourceId()));
+    assertThat(cardLineItem.getDestination().getId(), is(eventLineItem.getDestinationId()));
 
-    assertThat(cardLineItem.getOccurredDate(), is(stockEventLineItem.getOccurredDate()));
+    assertThat(cardLineItem.getOccurredDate(), is(eventLineItem.getOccurredDate()));
 
     assertThat(cardLineItem.getStockCard(), is(stockCard));
     assertThat(cardLineItem.getOriginEvent().getId(), is(eventId));

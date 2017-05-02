@@ -26,6 +26,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ISSUE_RE
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ISSUE_REASON_TYPE_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_RECEIVE_REASON_CATEGORY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_RECEIVE_REASON_TYPE_INVALID;
+import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -39,7 +40,6 @@ import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
-import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 
 import java.util.UUID;
 
@@ -71,9 +71,9 @@ public class ReceiveIssueReasonValidatorTest {
   @Test
   public void event_that_has_source_but_no_reason_should_pass() throws Exception {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
-    stockEventDto.setSourceId(UUID.randomUUID());
-    stockEventDto.setDestinationId(null);
+    StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.getLineItems().get(0).setSourceId(UUID.randomUUID());
+    stockEventDto.getLineItems().get(0).setDestinationId(null);
     stockEventDto.getLineItems().get(0).setReasonId(null);
 
     //when
@@ -85,9 +85,9 @@ public class ReceiveIssueReasonValidatorTest {
   @Test
   public void event_that_has_destination_but_no_reason_should_pass() throws Exception {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
-    stockEventDto.setDestinationId(UUID.randomUUID());
-    stockEventDto.setSourceId(null);
+    StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.getLineItems().get(0).setDestinationId(UUID.randomUUID());
+    stockEventDto.getLineItems().get(0).setSourceId(null);
     stockEventDto.getLineItems().get(0).setReasonId(null);
 
     //when
@@ -99,9 +99,9 @@ public class ReceiveIssueReasonValidatorTest {
   @Test
   public void event_that_has_source_and_a_reason_of_credit_should_pass() throws Exception {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
-    stockEventDto.setSourceId(UUID.randomUUID());
-    stockEventDto.setDestinationId(null);
+    StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.getLineItems().get(0).setSourceId(UUID.randomUUID());
+    stockEventDto.getLineItems().get(0).setDestinationId(null);
     stockEventDto.getLineItems().get(0).setReasonId(UUID.randomUUID());
 
     when(reasonRepository.findOne(stockEventDto.getLineItems().get(0).getReasonId()))
@@ -116,9 +116,9 @@ public class ReceiveIssueReasonValidatorTest {
   @Test
   public void event_that_has_destination_and_a_reason_of_debit_should_pass() throws Exception {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
-    stockEventDto.setDestinationId(UUID.randomUUID());
-    stockEventDto.setSourceId(null);
+    StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.getLineItems().get(0).setDestinationId(UUID.randomUUID());
+    stockEventDto.getLineItems().get(0).setSourceId(null);
     //the following is a debit reason
     stockEventDto.getLineItems().get(0).setReasonId(UUID.randomUUID());
 
@@ -133,18 +133,18 @@ public class ReceiveIssueReasonValidatorTest {
 
   @Test
   public void event_that_has_source_and_a_reason_of_debit_should_not_pass() throws Exception {
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
-    stockEventDto.setSourceId(UUID.randomUUID());
-    stockEventDto.setDestinationId(null);
+    StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.getLineItems().get(0).setSourceId(UUID.randomUUID());
+    stockEventDto.getLineItems().get(0).setDestinationId(null);
     stockEventDto.getLineItems().get(0).setReasonId(UUID.randomUUID());
     testErrorCase(ERROR_EVENT_RECEIVE_REASON_TYPE_INVALID, stockEventDto, debitAdhocReason);
   }
 
   @Test
   public void event_that_has_destination_and_a_reason_of_credit_should_not_pass() throws Exception {
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
-    stockEventDto.setDestinationId(UUID.randomUUID());
-    stockEventDto.setSourceId(null);
+    StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.getLineItems().get(0).setDestinationId(UUID.randomUUID());
+    stockEventDto.getLineItems().get(0).setSourceId(null);
     stockEventDto.getLineItems().get(0).setReasonId(UUID.randomUUID());
 
     testErrorCase(ERROR_EVENT_ISSUE_REASON_TYPE_INVALID, stockEventDto, creditAdhocReason);
@@ -153,9 +153,9 @@ public class ReceiveIssueReasonValidatorTest {
   @Test
   public void event_that_has_source_and_a_reason_of_non_adhoc_category_should_not_pass()
       throws Exception {
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
-    stockEventDto.setSourceId(UUID.randomUUID());
-    stockEventDto.setDestinationId(null);
+    StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.getLineItems().get(0).setSourceId(UUID.randomUUID());
+    stockEventDto.getLineItems().get(0).setDestinationId(null);
     stockEventDto.getLineItems().get(0).setReasonId(UUID.randomUUID());
 
     testErrorCase(ERROR_EVENT_RECEIVE_REASON_CATEGORY_INVALID, stockEventDto, creditNonAdhocReason);
@@ -164,9 +164,9 @@ public class ReceiveIssueReasonValidatorTest {
   @Test
   public void event_that_has_destination_and_a_reason_of_non_adhoc_category_should_not_pass()
       throws Exception {
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
-    stockEventDto.setDestinationId(UUID.randomUUID());
-    stockEventDto.setSourceId(null);
+    StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.getLineItems().get(0).setDestinationId(UUID.randomUUID());
+    stockEventDto.getLineItems().get(0).setSourceId(null);
     stockEventDto.getLineItems().get(0).setReasonId(UUID.randomUUID());
 
     testErrorCase(ERROR_EVENT_ISSUE_REASON_CATEGORY_INVALID, stockEventDto, debitNonAdhocReason);
