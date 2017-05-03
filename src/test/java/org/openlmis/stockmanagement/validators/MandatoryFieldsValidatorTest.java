@@ -19,6 +19,7 @@ import static java.util.Collections.emptyList;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_FACILITY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_NO_LINE_ITEMS;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_OCCURRED_DATE_INVALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_OCCURRED_DATE_IN_FUTURE;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ORDERABLE_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_PROGRAM_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_QUANTITY_INVALID;
@@ -94,13 +95,15 @@ public class MandatoryFieldsValidatorTest {
   @Test()
   public void stock_event_without_occurred_date_should_not_pass_validation()
       throws Exception {
-    expectOccurredDateException(null);
+    expectOccurredDateException(null,
+        ERROR_EVENT_OCCURRED_DATE_INVALID);
   }
 
   @Test()
   public void stock_event_with_future_occurred_date_should_not_pass_validation() throws Exception {
     //given
-    expectOccurredDateException(ZonedDateTime.now().plusDays(1));
+    expectOccurredDateException(ZonedDateTime.now().plusDays(1),
+        ERROR_EVENT_OCCURRED_DATE_IN_FUTURE);
   }
 
   @Test
@@ -169,13 +172,13 @@ public class MandatoryFieldsValidatorTest {
     mandatoryFieldsValidator.validate(stockEventDto);
   }
 
-  private void expectOccurredDateException(ZonedDateTime occurredDate) {
+  private void expectOccurredDateException(ZonedDateTime occurredDate, String errorKey) {
     //given
     stockEventDto.getLineItems().get(0).setOccurredDate(occurredDate);
 
     //when
     String suffix = occurredDate != null ? occurredDate.toString() : "";
-    expectedEx.expectMessage(ERROR_EVENT_OCCURRED_DATE_INVALID + ": " + suffix);
+    expectedEx.expectMessage(errorKey + ": " + suffix);
     mandatoryFieldsValidator.validate(stockEventDto);
   }
 

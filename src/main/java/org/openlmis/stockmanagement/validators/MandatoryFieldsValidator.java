@@ -20,6 +20,7 @@ import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_FACILITY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_NO_LINE_ITEMS;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_OCCURRED_DATE_INVALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_OCCURRED_DATE_IN_FUTURE;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ORDERABLE_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_PROGRAM_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_QUANTITY_INVALID;
@@ -83,9 +84,15 @@ public class MandatoryFieldsValidator implements StockEventValidator {
     if (stockEventDto.hasLineItems()) {
       stockEventDto.getLineItems().forEach(lineItem -> {
         ZonedDateTime occurredDate = lineItem.getOccurredDate();
-        if (occurredDate == null || occurredDate.isAfter(ZonedDateTime.now())) {
+        if (occurredDate == null) {
           throw new ValidationMessageException(
               new Message(ERROR_EVENT_OCCURRED_DATE_INVALID, occurredDate));
+        } else if (occurredDate.isAfter(ZonedDateTime.now())) {
+          //If the following error happens and the users have not chosen a future date in their
+          //browser, ask them to visit "https://time.is", and see if there is a time drift on
+          //the client machine. If so, ask them to re-sync their computer's time setting.
+          throw new ValidationMessageException(
+              new Message(ERROR_EVENT_OCCURRED_DATE_IN_FUTURE, occurredDate));
         }
       });
     }
