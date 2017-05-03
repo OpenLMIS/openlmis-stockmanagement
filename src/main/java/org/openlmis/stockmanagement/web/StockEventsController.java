@@ -15,15 +15,12 @@
 
 package org.openlmis.stockmanagement.web;
 
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import org.openlmis.stockmanagement.dto.StockEventDto;
-import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockEventProcessor;
-import org.openlmis.stockmanagement.utils.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,24 +66,15 @@ public class StockEventsController {
   }
 
   private void checkPermission(@RequestBody StockEventDto eventDto) {
-    rejectIfIssueOrReceive(eventDto);
-
     UUID programId = eventDto.getProgramId();
     UUID facilityId = eventDto.getFacilityId();
 
     if (eventDto.isPhysicalInventory()) {
       permissionService.canEditPhysicalInventory(programId, facilityId);
     } else {
+      //we check adjust permission for both adjustment and issue/receive
+      //this may change in the future
       permissionService.canAdjustStock(programId, facilityId);
-    }
-  }
-
-  //this method blocks user from doing issue/receive.
-  //this block will be removed when we support issue/receive.
-  private void rejectIfIssueOrReceive(StockEventDto eventDto) {
-    if (eventDto.hasSource() || eventDto.hasDestination()) {
-      throw new PermissionMessageException(
-          new Message(ERROR_NO_FOLLOWING_PERMISSION, "Issue/Receive blocked for now"));
     }
   }
 

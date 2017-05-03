@@ -99,17 +99,6 @@ public class StockEventsControllerTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_403_when_user_try_to_issue_or_receive() throws Exception {
-    StockEventDto receiveEventDto = createStockEventDto();
-    receiveEventDto.getLineItems().get(0).setSourceId(UUID.randomUUID());
-    shouldReject(receiveEventDto);
-
-    StockEventDto issueEventDto = createStockEventDto();
-    issueEventDto.getLineItems().get(0).setDestinationId(UUID.randomUUID());
-    shouldReject(issueEventDto);
-  }
-
-  @Test
   public void should_return_400_when_validation_fails() throws Exception {
     //given
     Mockito.doThrow(new ValidationMessageException(new Message(ERROR_STOCK_EVENT_REASON_NOT_MATCH)))
