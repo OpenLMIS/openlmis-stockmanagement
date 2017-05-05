@@ -86,6 +86,7 @@ public class QuantityValidator implements StockEventValidator {
     //those reasons does not exist in DB, they are from physicalCredit and physicalDebit methods
     //remove their reason assignment after recalculation to avoid jpa persistence
     foundCard.getLineItems().stream()
+        .filter(lineItem -> lineItem.getReason() != null)
         .filter(lineItem -> lineItem.getReason().getReasonCategory() == PHYSICAL_INVENTORY)
         .forEach(lineItem -> lineItem.setReason(null));
     //remove the line items from card to avoid jpa persistence
