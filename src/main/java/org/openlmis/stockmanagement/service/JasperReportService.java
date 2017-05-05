@@ -76,6 +76,7 @@ public class JasperReportService {
     }
     Map<String, Object> params = new HashMap<>();
     params.put("datasource", singletonList(stockCardDto));
+    params.put("hasLot", stockCardDto.hasLot());
 
     return generateReport(CARD_REPORT_URL, params);
   }
