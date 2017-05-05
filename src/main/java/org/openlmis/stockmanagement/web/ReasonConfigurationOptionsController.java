@@ -16,13 +16,13 @@
 package org.openlmis.stockmanagement.web;
 
 import static java.util.Arrays.asList;
-import static org.openlmis.stockmanagement.domain.adjustment.ReasonCategory.ADJUSTMENT;
-import static org.openlmis.stockmanagement.domain.adjustment.ReasonCategory.TRANSFER;
-import static org.openlmis.stockmanagement.domain.adjustment.ReasonType.CREDIT;
-import static org.openlmis.stockmanagement.domain.adjustment.ReasonType.DEBIT;
+import static org.openlmis.stockmanagement.domain.reason.ReasonCategory.ADJUSTMENT;
+import static org.openlmis.stockmanagement.domain.reason.ReasonCategory.TRANSFER;
+import static org.openlmis.stockmanagement.domain.reason.ReasonType.CREDIT;
+import static org.openlmis.stockmanagement.domain.reason.ReasonType.DEBIT;
 
-import org.openlmis.stockmanagement.domain.adjustment.ReasonCategory;
-import org.openlmis.stockmanagement.domain.adjustment.ReasonType;
+import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
+import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;

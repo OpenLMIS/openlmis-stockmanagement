@@ -24,11 +24,11 @@ import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createL
 import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
 
 import org.junit.Test;
-import org.openlmis.stockmanagement.domain.adjustment.ReasonCategory;
-import org.openlmis.stockmanagement.domain.adjustment.ReasonType;
-import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.movement.Node;
+import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
+import org.openlmis.stockmanagement.domain.reason.ReasonType;
+import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 
 import java.time.ZonedDateTime;

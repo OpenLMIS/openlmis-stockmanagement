@@ -15,10 +15,10 @@
 
 package org.openlmis.stockmanagement.testutils;
 
-import org.openlmis.stockmanagement.domain.adjustment.ReasonCategory;
-import org.openlmis.stockmanagement.domain.adjustment.ReasonType;
-import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
+import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
+import org.openlmis.stockmanagement.domain.reason.ReasonType;
+import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.FacilityDto;
 import org.openlmis.stockmanagement.dto.OrderableDto;
 import org.openlmis.stockmanagement.dto.ProgramDto;

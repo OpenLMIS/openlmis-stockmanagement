@@ -15,18 +15,18 @@
 
 package org.openlmis.stockmanagement.validators;
 
-import static org.openlmis.stockmanagement.domain.adjustment.ReasonCategory.TRANSFER;
-import static org.openlmis.stockmanagement.domain.adjustment.ReasonType.CREDIT;
-import static org.openlmis.stockmanagement.domain.adjustment.ReasonType.DEBIT;
+import static org.openlmis.stockmanagement.domain.reason.ReasonCategory.TRANSFER;
+import static org.openlmis.stockmanagement.domain.reason.ReasonType.CREDIT;
+import static org.openlmis.stockmanagement.domain.reason.ReasonType.DEBIT;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ISSUE_REASON_CATEGORY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ISSUE_REASON_TYPE_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_RECEIVE_REASON_CATEGORY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_RECEIVE_REASON_TYPE_INVALID;
 
-import org.openlmis.stockmanagement.domain.adjustment.ReasonCategory;
-import org.openlmis.stockmanagement.domain.adjustment.ReasonType;
-import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
+import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
+import org.openlmis.stockmanagement.domain.reason.ReasonType;
+import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;

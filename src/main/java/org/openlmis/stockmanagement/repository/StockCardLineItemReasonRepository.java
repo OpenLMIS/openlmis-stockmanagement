@@ -15,7 +15,7 @@
 
 package org.openlmis.stockmanagement.repository;
 
-import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
+import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 

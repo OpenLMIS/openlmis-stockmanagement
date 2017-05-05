@@ -13,7 +13,7 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.domain.adjustment;
+package org.openlmis.stockmanagement.domain.reason;
 
 public enum ReasonCategory {
   TRANSFER, ADJUSTMENT, PHYSICAL_INVENTORY

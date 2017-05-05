@@ -15,7 +15,7 @@
 
 package org.openlmis.stockmanagement.repository;
 
-import org.openlmis.stockmanagement.domain.adjustment.ValidReasonAssignment;
+import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 

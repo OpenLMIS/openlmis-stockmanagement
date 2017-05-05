@@ -17,19 +17,19 @@ package org.openlmis.stockmanagement.domain.card;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static java.time.ZonedDateTime.now;
-import static org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason.physicalBalance;
-import static org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason.physicalCredit;
-import static org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason.physicalDebit;
+import static org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason.physicalBalance;
+import static org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason.physicalCredit;
+import static org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason.physicalDebit;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.openlmis.stockmanagement.domain.BaseEntity;
-import org.openlmis.stockmanagement.domain.adjustment.ReasonType;
-import org.openlmis.stockmanagement.domain.adjustment.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.movement.Node;
+import org.openlmis.stockmanagement.domain.reason.ReasonType;
+import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
