@@ -13,18 +13,27 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.dto;
+package org.openlmis.stockmanagement.dto.referencedata;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.UUID;
 
-@Data
-public class FacilityTypeDto {
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class ProgramDto {
   private UUID id;
   private String code;
   private String name;
   private String description;
-  private Integer displayOrder;
   private Boolean active;
+  private Boolean periodsSkippable;
+  private Boolean showNonFullSupplyTab;
 }

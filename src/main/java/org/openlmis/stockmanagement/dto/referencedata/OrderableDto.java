@@ -13,35 +13,24 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.dto;
+package org.openlmis.stockmanagement.dto.referencedata;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProgramOrderableDto {
-  private UUID orderableId;
-  private String orderableFullProductName;
-  private String orderableCode;
-  private boolean active;
-
-  /**
-   * Convert program orderable dto to orderable dto.
-   *
-   * @return the converted dto.
-   */
-  public OrderableDto toOrderableDto() {
-    return OrderableDto.builder()
-        .id(orderableId)
-        .fullProductName(orderableFullProductName)
-        .productCode(orderableCode)
-        .build();
-  }
+public class OrderableDto {
+  private UUID id;
+  private String productCode;
+  private String fullProductName;
+  private DispensableDto dispensable;
 }

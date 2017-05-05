@@ -13,19 +13,33 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.dto;
+package org.openlmis.stockmanagement.dto.referencedata;
 
+import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Set;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Getter
 @Setter
-public class RightDto {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class LotDto {
   private UUID id;
-  private String name;
-  private String description;
-  private Set<RightDto> attachments;
+  private String lotCode;
+  private boolean active;
+  private UUID tradeItemId;
+  @JsonFormat(shape = STRING)
+  private LocalDate expirationDate;
+  @JsonFormat(shape = STRING)
+  private LocalDate manufactureDate;
 }

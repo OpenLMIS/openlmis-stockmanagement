@@ -15,7 +15,7 @@
 
 package org.openlmis.stockmanagement.utils;
 
-import org.openlmis.stockmanagement.dto.ResultDto;
+import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
 import org.springframework.core.ParameterizedTypeReference;
 
 import java.lang.reflect.ParameterizedType;
@@ -29,15 +29,15 @@ import java.lang.reflect.Type;
  * the provided generic type at runtime.
  */
 public class DynamicParametrizedTypeReference<T>
-        extends ParameterizedTypeReference<ResultDto<T>> {
+    extends ParameterizedTypeReference<ResultDto<T>> {
   private final Class<?> valueType;
 
   /**
    * Constructs an instance that will represents {@link ResultDto} wrappers for
    * the given type.
    *
-   * @param valueType the value type (generic type) of the {@link ResultDto}
-   *                  type that this will represent
+   * @param valueType the value type (generic type) of the {@link ResultDto} type that this will
+   *                  represent
    */
   public DynamicParametrizedTypeReference(Class<?> valueType) {
     this.valueType = valueType;

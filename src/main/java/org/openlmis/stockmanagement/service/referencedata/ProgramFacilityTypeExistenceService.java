@@ -18,8 +18,8 @@ package org.openlmis.stockmanagement.service.referencedata;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_TYPE_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_NOT_FOUND;
 
-import org.openlmis.stockmanagement.dto.FacilityTypeDto;
-import org.openlmis.stockmanagement.dto.ProgramDto;
+import org.openlmis.stockmanagement.dto.referencedata.FacilityTypeDto;
+import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +38,8 @@ public class ProgramFacilityTypeExistenceService {
 
   /**
    * Check program and facility type existence.
-   * @param programId program id.
+   *
+   * @param programId      program id.
    * @param facilityTypeId facility type id.
    */
   public void checkProgramAndFacilityTypeExist(UUID programId, UUID facilityTypeId) {

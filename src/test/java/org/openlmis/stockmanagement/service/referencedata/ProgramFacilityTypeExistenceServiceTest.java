@@ -25,8 +25,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.openlmis.stockmanagement.dto.FacilityTypeDto;
-import org.openlmis.stockmanagement.dto.ProgramDto;
+import org.openlmis.stockmanagement.dto.referencedata.FacilityTypeDto;
+import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 
 import java.util.UUID;

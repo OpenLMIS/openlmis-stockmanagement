@@ -24,6 +24,7 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 
 import java.time.ZonedDateTime;

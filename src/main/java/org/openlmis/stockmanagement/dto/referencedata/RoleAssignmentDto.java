@@ -13,24 +13,17 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.dto;
+package org.openlmis.stockmanagement.dto.referencedata;
 
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.util.UUID;
 
 @Getter
 @Setter
-public class SupportedProgramDto {
+public class RoleAssignmentDto {
   private UUID id;
-  private String code;
-  private String name;
-  private String description;
-  private boolean programActive;
-  private boolean periodsSkippable;
-  private boolean showNonFullSupplyTab;
-  private boolean supportActive;
-  private LocalDate supportStartDate;
+  protected RoleDto role;
+  protected UserDto user;
 }

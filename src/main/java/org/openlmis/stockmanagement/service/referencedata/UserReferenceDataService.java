@@ -15,8 +15,8 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
-import org.openlmis.stockmanagement.dto.ResultDto;
-import org.openlmis.stockmanagement.dto.UserDto;
+import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
+import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 

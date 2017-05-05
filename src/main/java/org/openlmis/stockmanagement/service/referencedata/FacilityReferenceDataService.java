@@ -15,7 +15,7 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
-import org.openlmis.stockmanagement.dto.FacilityDto;
+import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;

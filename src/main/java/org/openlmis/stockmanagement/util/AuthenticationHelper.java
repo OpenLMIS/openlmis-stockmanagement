@@ -15,8 +15,8 @@
 
 package org.openlmis.stockmanagement.util;
 
-import org.openlmis.stockmanagement.dto.RightDto;
-import org.openlmis.stockmanagement.dto.UserDto;
+import org.openlmis.stockmanagement.dto.referencedata.RightDto;
+import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.exception.AuthenticationException;
 import org.openlmis.stockmanagement.service.referencedata.RightReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;

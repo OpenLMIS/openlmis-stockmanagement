@@ -15,12 +15,12 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
-import org.openlmis.stockmanagement.dto.OrderableDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.springframework.stereotype.Service;
 
 @Service
 public class OrderableReferenceDataService
-        extends BaseReferenceDataService<OrderableDto> {
+    extends BaseReferenceDataService<OrderableDto> {
 
   @Override
   protected String getUrl() {

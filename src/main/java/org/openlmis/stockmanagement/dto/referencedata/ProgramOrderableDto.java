@@ -13,52 +13,35 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.dto;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-
-import org.openlmis.stockmanagement.domain.sourcedestination.Organization;
+package org.openlmis.stockmanagement.dto.referencedata;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonInclude(NON_NULL)
-public class FacilityDto {
-  private UUID id;
-  private String code;
-  private String name;
-  private String description;
-  private Boolean active;
-  private LocalDate goLiveDate;
-  private LocalDate goDownDate;
-  private String comment;
-  private Boolean enabled;
-  private Boolean openLmisAccessible;
-  private List<SupportedProgramDto> supportedPrograms;
-  private GeographicZoneDto geographicZone;
-  private FacilityTypeDto type;
+public class ProgramOrderableDto {
+  private UUID orderableId;
+  private String orderableFullProductName;
+  private String orderableCode;
+  private boolean active;
 
   /**
-   * Create facility dto from organization.
+   * Convert program orderable dto to orderable dto.
    *
-   * @param organization organization.
-   * @return facility dto.
+   * @return the converted dto.
    */
-  public static FacilityDto createFrom(Organization organization) {
-    return FacilityDto.builder()
-        .name(organization.getName())
+  public OrderableDto toOrderableDto() {
+    return OrderableDto.builder()
+        .id(orderableId)
+        .fullProductName(orderableFullProductName)
+        .productCode(orderableCode)
         .build();
   }
 }

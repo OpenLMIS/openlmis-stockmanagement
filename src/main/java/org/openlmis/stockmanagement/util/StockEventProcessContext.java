@@ -15,11 +15,11 @@
 
 package org.openlmis.stockmanagement.util;
 
-import org.openlmis.stockmanagement.dto.FacilityDto;
-import org.openlmis.stockmanagement.dto.LotDto;
-import org.openlmis.stockmanagement.dto.OrderableDto;
-import org.openlmis.stockmanagement.dto.ProgramDto;
-import org.openlmis.stockmanagement.dto.UserDto;
+import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
+import org.openlmis.stockmanagement.dto.referencedata.LotDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
+import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
+import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -15,7 +15,7 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
-import org.openlmis.stockmanagement.dto.ProgramDto;
+import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.springframework.stereotype.Service;
 
 @Service

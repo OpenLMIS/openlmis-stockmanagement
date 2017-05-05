@@ -13,33 +13,52 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.dto;
+package org.openlmis.stockmanagement.dto.referencedata;
 
-import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import org.openlmis.stockmanagement.domain.sourcedestination.Organization;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
-@Getter
-@Setter
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LotDto {
+@JsonInclude(NON_NULL)
+public class FacilityDto {
   private UUID id;
-  private String lotCode;
-  private boolean active;
-  private UUID tradeItemId;
-  @JsonFormat(shape = STRING)
-  private LocalDate expirationDate;
-  @JsonFormat(shape = STRING)
-  private LocalDate manufactureDate;
+  private String code;
+  private String name;
+  private String description;
+  private Boolean active;
+  private LocalDate goLiveDate;
+  private LocalDate goDownDate;
+  private String comment;
+  private Boolean enabled;
+  private Boolean openLmisAccessible;
+  private List<SupportedProgramDto> supportedPrograms;
+  private GeographicZoneDto geographicZone;
+  private FacilityTypeDto type;
+
+  /**
+   * Create facility dto from organization.
+   *
+   * @param organization organization.
+   * @return facility dto.
+   */
+  public static FacilityDto createFrom(Organization organization) {
+    return FacilityDto.builder()
+        .name(organization.getName())
+        .build();
+  }
 }

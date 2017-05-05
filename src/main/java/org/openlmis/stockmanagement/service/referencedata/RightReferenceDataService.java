@@ -15,7 +15,7 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
-import org.openlmis.stockmanagement.dto.RightDto;
+import org.openlmis.stockmanagement.dto.referencedata.RightDto;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

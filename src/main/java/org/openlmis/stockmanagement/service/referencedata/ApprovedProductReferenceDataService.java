@@ -18,8 +18,8 @@ package org.openlmis.stockmanagement.service.referencedata;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 
-import org.openlmis.stockmanagement.dto.ApprovedProductDto;
-import org.openlmis.stockmanagement.dto.OrderableDto;
+import org.openlmis.stockmanagement.dto.referencedata.ApprovedProductDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;

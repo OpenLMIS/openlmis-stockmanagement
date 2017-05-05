@@ -13,19 +13,13 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.dto;
+package org.openlmis.stockmanagement.dto.referencedata;
 
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Set;
-import java.util.UUID;
-
 @Getter
 @Setter
-public class RoleDto {
-  private UUID id;
-  private String name;
-  private String description;
-  private Set<RightDto> rights;
+public class DispensableDto {
+  private String dispensingUnit;
 }

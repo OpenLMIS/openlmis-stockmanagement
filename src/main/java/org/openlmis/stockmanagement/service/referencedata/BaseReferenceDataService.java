@@ -15,7 +15,7 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
-import org.openlmis.stockmanagement.dto.ResultDto;
+import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
 import org.openlmis.stockmanagement.service.BaseCommunicationService;
 import org.openlmis.stockmanagement.utils.DynamicParametrizedTypeReference;
 import org.slf4j.Logger;
@@ -57,7 +57,7 @@ public abstract class BaseReferenceDataService<T> extends BaseCommunicationServi
 
     try {
       ResponseEntity<T> responseEntity = restTemplate.exchange(
-              buildUri(url, params), HttpMethod.GET, null, getResultClass());
+          buildUri(url, params), HttpMethod.GET, null, getResultClass());
       return responseEntity.getBody();
     } catch (HttpStatusCodeException ex) {
       // rest template will handle 404 as an exception, instead of returning null
@@ -102,10 +102,10 @@ public abstract class BaseReferenceDataService<T> extends BaseCommunicationServi
 
     RestTemplate restTemplate = new RestTemplate();
     ResponseEntity<ResultDto<P>> response = restTemplate.exchange(
-            buildUri(url, params),
-            HttpMethod.GET,
-            null,
-            new DynamicParametrizedTypeReference<>(type)
+        buildUri(url, params),
+        HttpMethod.GET,
+        null,
+        new DynamicParametrizedTypeReference<>(type)
     );
 
     return response.getBody();
@@ -126,7 +126,7 @@ public abstract class BaseReferenceDataService<T> extends BaseCommunicationServi
         responseEntity = restTemplate.getForEntity(buildUri(url, params), getArrayResultClass());
       } else {
         responseEntity = restTemplate.postForEntity(buildUri(url, params), payload,
-                getArrayResultClass());
+            getArrayResultClass());
       }
       return new ArrayList<>(Arrays.asList(responseEntity.getBody()));
     } catch (HttpStatusCodeException ex) {

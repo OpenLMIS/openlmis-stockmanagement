@@ -16,9 +16,12 @@
 package org.openlmis.stockmanagement.dto;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+
+import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
+import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
+
 import lombok.Builder;
 import lombok.Data;
-import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 
 @Builder
 @Data

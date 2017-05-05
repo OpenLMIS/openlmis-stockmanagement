@@ -13,17 +13,18 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.dto;
+package org.openlmis.stockmanagement.dto.referencedata;
 
 import lombok.Data;
 
 import java.util.UUID;
 
 @Data
-public class GeographicZoneDto {
+public class FacilityTypeDto {
   private UUID id;
   private String code;
   private String name;
-  private GeographicLevelDto level;
-  private GeographicZoneDto parent;
+  private String description;
+  private Integer displayOrder;
+  private Boolean active;
 }
