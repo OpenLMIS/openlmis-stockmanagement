@@ -100,6 +100,7 @@ public class JasperReportService {
     //in the future we may want to support one reprot for multiple programs
     params.put("showProgram", getCount(cards, card -> card.getProgram().getId().toString()) > 1);
     params.put("showFacility", getCount(cards, card -> card.getFacility().getId().toString()) > 1);
+    params.put("showLot", cards.stream().anyMatch(card -> card.getLotId() != null));
 
     return generateReport(CARD_SUMMARY_REPORT_URL, params);
   }
