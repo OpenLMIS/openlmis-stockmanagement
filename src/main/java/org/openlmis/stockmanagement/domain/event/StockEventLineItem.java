@@ -16,7 +16,7 @@
 package org.openlmis.stockmanagement.domain.event;
 
 import org.openlmis.stockmanagement.domain.BaseEntity;
-import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
+import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 
 import lombok.Data;
 
@@ -31,7 +31,7 @@ import javax.persistence.Table;
 @Data
 @Entity
 @Table(name = "stock_event_line_items", schema = "stockmanagement")
-public class StockEventLineItem extends BaseEntity {
+public class StockEventLineItem extends BaseEntity implements IdentifiableByOrderableLot {
 
   private UUID lotId;
   private UUID orderableId;
@@ -63,10 +63,6 @@ public class StockEventLineItem extends BaseEntity {
 
   public boolean hasLot() {
     return this.lotId != null;
-  }
-
-  public OrderableLotIdentity orderableAndLotIdentity() {
-    return new OrderableLotIdentity(orderableId, lotId);
   }
 
   public boolean hasDestinationFreeText() {

@@ -25,7 +25,7 @@ import org.hibernate.annotations.LazyCollection;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
-import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
+import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +58,7 @@ import javax.persistence.Transient;
     indexes = @Index(columnList = "facilityId,programId,orderableId"))
 //the above line creates an index, it'll make select statements faster
 //especially for getStockCardIdBy method of StockCardRepository
-public class StockCard extends BaseEntity {
+public class StockCard extends BaseEntity implements IdentifiableByOrderableLot {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCard.class);
 
@@ -112,10 +112,6 @@ public class StockCard extends BaseEntity {
     stockCard.setId(foundCardId);
     stockCard.setLineItems(new ArrayList<>());
     return stockCard;
-  }
-
-  public OrderableLotIdentity orderableLotIdentity() {
-    return new OrderableLotIdentity(orderableId, lotId);
   }
 
   /**

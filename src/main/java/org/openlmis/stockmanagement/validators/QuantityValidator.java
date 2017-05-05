@@ -56,7 +56,7 @@ public class QuantityValidator implements StockEventValidator {
 
     Map<OrderableLotIdentity, List<StockEventLineItem>> sameOrderableGroups = stockEventDto
         .getLineItems().stream()
-        .collect(groupingBy(StockEventLineItem::orderableAndLotIdentity));
+        .collect(groupingBy(OrderableLotIdentity::identityOf));
 
     for (List<StockEventLineItem> group : sameOrderableGroups.values()) {
       boolean anyDebitInGroup = group.stream().anyMatch(this::hasDebitReason);

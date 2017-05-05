@@ -19,9 +19,11 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Stream.concat;
+import static org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity.identityOf;
 import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.ExistingStockCardsOnly;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
@@ -113,7 +115,7 @@ public class StockCardSummariesService extends StockCardBaseService {
       List<StockCardDto> dtos,
       Map<OrderableLotIdentity, OrderableLot> orderableLotsMap) {
     dtos.forEach(stockCardDto -> {
-      OrderableLot orderableLot = orderableLotsMap.get(stockCardDto.orderableLotIdentity());
+      OrderableLot orderableLot = orderableLotsMap.get(identityOf(stockCardDto));
       stockCardDto.setOrderable(orderableLot.getOrderable());
       stockCardDto.setLot(orderableLot.getLot());
       //line items are not needed in summary
@@ -147,7 +149,7 @@ public class StockCardSummariesService extends StockCardBaseService {
     return orderableLots.stream()
         .filter(orderableLot ->
             stockCards.stream().noneMatch(stockCard ->
-                stockCard.orderableLotIdentity().equals(orderableLot.orderableLotIdentity())))
+                identityOf(stockCard).equals(identityOf(orderableLot))))
         .collect(toList());
   }
 
@@ -161,7 +163,7 @@ public class StockCardSummariesService extends StockCardBaseService {
         .map(orderableDto -> new OrderableLot(orderableDto, null));
 
     return concat(orderableLots, orderablesOnly)
-        .collect(toMap(OrderableLot::orderableLotIdentity, orderableLot -> orderableLot));
+        .collect(toMap(OrderableLotIdentity::identityOf, orderableLot -> orderableLot));
   }
 
   public enum SearchOptions {
@@ -170,7 +172,7 @@ public class StockCardSummariesService extends StockCardBaseService {
   }
 
   @Getter
-  private static class OrderableLot {
+  private static class OrderableLot implements IdentifiableByOrderableLot {
     private OrderableDto orderable;
     private LotDto lot;
 
@@ -183,8 +185,8 @@ public class StockCardSummariesService extends StockCardBaseService {
       return lot == null ? null : lot.getId();
     }
 
-    public OrderableLotIdentity orderableLotIdentity() {
-      return new OrderableLotIdentity(orderable.getId(), lot == null ? null : lot.getId());
+    public UUID getOrderableId() {
+      return orderable.getId();
     }
   }
 

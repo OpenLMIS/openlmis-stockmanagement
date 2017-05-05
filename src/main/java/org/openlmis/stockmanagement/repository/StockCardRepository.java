@@ -31,8 +31,8 @@ public interface StockCardRepository extends
     PagingAndSortingRepository<StockCard, UUID> {
 
   String selectId = "select s.id ";
-  String selectIdentity = "select new "
-      + "org.openlmis.stockmanagement.util.OrderableLotIdentity(s.orderableId, s.lotId) ";
+  String selectIdentity = "select new org.openlmis.stockmanagement.domain"
+      + ".identity.OrderableLotIdentity(s.orderableId, s.lotId) ";
 
   String fromStockCards = "from org.openlmis.stockmanagement.domain.card.StockCard s ";
 

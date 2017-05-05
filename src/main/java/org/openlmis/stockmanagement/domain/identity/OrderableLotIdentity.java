@@ -54,4 +54,8 @@ public class OrderableLotIdentity {
     result = 31 * result + (lotId != null ? lotId.hashCode() : 0);
     return result;
   }
+
+  public static OrderableLotIdentity identityOf(IdentifiableByOrderableLot identifiable) {
+    return new OrderableLotIdentity(identifiable.getOrderableId(), identifiable.getLotId());
+  }
 }

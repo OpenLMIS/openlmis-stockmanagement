@@ -18,7 +18,6 @@ package org.openlmis.stockmanagement.validators;
 import static java.util.stream.Collectors.toList;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_NOT_INCLUDE_ACTIVE_STOCK_CARD;
 
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
@@ -49,7 +48,7 @@ public class ActiveStockCardsValidator implements StockEventValidator {
 
   private void checkAllStockCardsCovered(StockEventDto stockEventDto) {
     List<OrderableLotIdentity> coveredIdentities = stockEventDto.getLineItems().stream()
-        .map(StockEventLineItem::orderableAndLotIdentity)
+        .map(OrderableLotIdentity::identityOf)
         .collect(toList());
 
     boolean anyMissing = stockCardRepository

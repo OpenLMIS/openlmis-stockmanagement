@@ -20,10 +20,11 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static java.util.stream.Collectors.toList;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
-import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
+import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
@@ -42,7 +43,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class StockCardDto {
+public class StockCardDto implements IdentifiableByOrderableLot {
 
   @JsonInclude(NON_NULL)
   private UUID id;
@@ -59,6 +60,20 @@ public class StockCardDto {
   @JsonInclude(NON_NULL)
   private List<StockCardLineItemDto> lineItems;
 
+  @JsonIgnore
+  public UUID getOrderableId() {
+    return orderable.getId();
+  }
+
+  @JsonIgnore
+  public UUID getLotId() {
+    return lot == null ? null : lot.getId();
+  }
+
+  public boolean hasLot() {
+    return getLotId() != null;
+  }
+
   /**
    * Create stock card dto from stock card.
    *
@@ -74,13 +89,5 @@ public class StockCardDto {
         .lineItems(lineItemDtos)
         .stockOnHand(stockCard.getStockOnHand())
         .build();
-  }
-
-  public OrderableLotIdentity orderableLotIdentity() {
-    return new OrderableLotIdentity(orderable.getId(), lot == null ? null : lot.getId());
-  }
-
-  public boolean hasLot() {
-    return lot != null && lot.getId() != null;
   }
 }

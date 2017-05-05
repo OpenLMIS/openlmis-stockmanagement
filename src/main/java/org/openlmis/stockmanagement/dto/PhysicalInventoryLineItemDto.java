@@ -15,7 +15,9 @@
 
 package org.openlmis.stockmanagement.dto;
 
-import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
@@ -32,7 +34,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PhysicalInventoryLineItemDto {
+public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot {
   private OrderableDto orderable;
   private LotDto lot;
   private Integer stockOnHand;
@@ -46,10 +48,20 @@ public class PhysicalInventoryLineItemDto {
    */
   public PhysicalInventoryLineItem toPhysicalInventoryLineItem(PhysicalInventory inventory) {
     return PhysicalInventoryLineItem.builder()
-        .orderableId(orderable.getId())
-        .lotId(lotId())
+        .orderableId(getOrderableId())
+        .lotId(getLotId())
         .quantity(quantity)
         .physicalInventory(inventory).build();
+  }
+
+  @JsonIgnore
+  public UUID getOrderableId() {
+    return orderable.getId();
+  }
+
+  @JsonIgnore
+  public UUID getLotId() {
+    return lot == null ? null : lot.getId();
   }
 
   /**
@@ -65,13 +77,5 @@ public class PhysicalInventoryLineItemDto {
         .orderable(OrderableDto.builder().id(lineItem.getOrderableId()).build())
         .lot(lineItem.getLotId() == null ? null : LotDto.builder().id(lineItem.getLotId()).build())
         .build();
-  }
-
-  public OrderableLotIdentity orderableLotIdentity() {
-    return new OrderableLotIdentity(orderable.getId(), lotId());
-  }
-
-  private UUID lotId() {
-    return lot == null ? null : lot.getId();
   }
 }

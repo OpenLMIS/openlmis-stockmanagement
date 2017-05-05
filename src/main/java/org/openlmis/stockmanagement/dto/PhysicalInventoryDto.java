@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.dto;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static java.util.stream.Collectors.toList;
+import static org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity.identityOf;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -107,7 +108,7 @@ public class PhysicalInventoryDto {
       List<StockCardDto> stockCards) {
     Map<OrderableLotIdentity, Integer> savedQuantities = this.lineItems.stream()
         .collect(HashMap::new,
-            (map, lineItem) -> map.put(lineItem.orderableLotIdentity(), lineItem.getQuantity()),
+            (map, lineItem) -> map.put(identityOf(lineItem), lineItem.getQuantity()),
             HashMap::putAll);
 
     this.setLineItems(stockCards.stream()
@@ -115,7 +116,7 @@ public class PhysicalInventoryDto {
             .orderable(stockCardDto.getOrderable())
             .lot(stockCardDto.getLot())
             .stockOnHand(stockCardDto.getStockOnHand())
-            .quantity(savedQuantities.get(stockCardDto.orderableLotIdentity()))
+            .quantity(savedQuantities.get(identityOf(stockCardDto)))
             .build())
         .collect(toList()));
   }

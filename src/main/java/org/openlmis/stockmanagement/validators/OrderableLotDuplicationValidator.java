@@ -18,7 +18,6 @@ package org.openlmis.stockmanagement.validators;
 import static java.util.stream.Collectors.toSet;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ORDERABLE_LOT_DUPLICATION;
 
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
@@ -40,7 +39,7 @@ public class OrderableLotDuplicationValidator implements StockEventValidator {
 
     Set<OrderableLotIdentity> nonDuplicates = new HashSet<>();
     Set<OrderableLotIdentity> duplicates = stockEventDto.getLineItems()
-        .stream().map(StockEventLineItem::orderableAndLotIdentity)
+        .stream().map(OrderableLotIdentity::identityOf)
         .filter(lotIdentity -> !nonDuplicates.add(lotIdentity))
         .collect(toSet());
 
