@@ -17,7 +17,7 @@ package org.openlmis.stockmanagement.repository;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
-import org.openlmis.stockmanagement.util.OrderableLotIdentity;
+import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;

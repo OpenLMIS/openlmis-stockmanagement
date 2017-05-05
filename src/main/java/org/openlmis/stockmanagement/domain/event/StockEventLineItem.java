@@ -16,7 +16,7 @@
 package org.openlmis.stockmanagement.domain.event;
 
 import org.openlmis.stockmanagement.domain.BaseEntity;
-import org.openlmis.stockmanagement.util.OrderableLotIdentity;
+import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 
 import lombok.Data;
 

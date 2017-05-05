@@ -13,7 +13,7 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.util;
+package org.openlmis.stockmanagement.domain.identity;
 
 import lombok.Getter;
 import lombok.Setter;

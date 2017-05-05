@@ -15,11 +15,11 @@
 
 package org.openlmis.stockmanagement.dto;
 
+import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
-import org.openlmis.stockmanagement.util.OrderableLotIdentity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

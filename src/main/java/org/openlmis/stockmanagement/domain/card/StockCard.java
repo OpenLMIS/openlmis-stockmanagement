@@ -25,8 +25,8 @@ import org.hibernate.annotations.LazyCollection;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
+import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.dto.StockEventDto;
-import org.openlmis.stockmanagement.util.OrderableLotIdentity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,13 +83,14 @@ public class StockCard extends BaseEntity {
   private Integer stockOnHand = null;
 
   /**
-   * Create stock card from stock event dto.
+   * Create stock card from stock event dto and its line item.
    *
    * @param stockEventDto the origin event dto.
+   * @param eventLineItem event line item.
    * @param savedEventId  the saved event id.
-   * @return the created stock card.
-   * @throws InstantiationException InstantiationException.
-   * @throws IllegalAccessException IllegalAccessException.
+   * @return Created stock card.
+   * @throws InstantiationException InstantiationException
+   * @throws IllegalAccessException IllegalAccessException
    */
   public static StockCard createStockCardFrom(StockEventDto stockEventDto,
                                               StockEventLineItem eventLineItem, UUID savedEventId)
