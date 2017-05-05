@@ -18,8 +18,8 @@ package org.openlmis.stockmanagement.service;
 import static org.openlmis.stockmanagement.dto.ValidSourceDestinationDto.createFrom;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_ASSIGNMENT_ID_MISSING;
 
-import org.openlmis.stockmanagement.domain.movement.Node;
-import org.openlmis.stockmanagement.domain.movement.SourceDestinationAssignment;
+import org.openlmis.stockmanagement.domain.sourcedestination.Node;
+import org.openlmis.stockmanagement.domain.sourcedestination.SourceDestinationAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.NodeRepository;

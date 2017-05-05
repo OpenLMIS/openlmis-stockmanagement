@@ -18,7 +18,7 @@ package org.openlmis.stockmanagement.service;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_ASSIGNMENT_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_NOT_FOUND;
 
-import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
+import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
 import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;

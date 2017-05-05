@@ -15,8 +15,8 @@
 
 package org.openlmis.stockmanagement.testutils;
 
-import org.openlmis.stockmanagement.domain.movement.Node;
-import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
+import org.openlmis.stockmanagement.domain.sourcedestination.Node;
+import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAssignment;
 
 import java.util.UUID;
 

@@ -13,13 +13,28 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.domain.movement;
+package org.openlmis.stockmanagement.domain.sourcedestination;
 
+import org.hibernate.annotations.Type;
+import org.openlmis.stockmanagement.domain.BaseEntity;
+
+import lombok.Data;
+
+import java.util.UUID;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-@Entity
-@Table(name = "valid_destination_assignments", schema = "stockmanagement")
-public class ValidDestinationAssignment extends SourceDestinationAssignment {
 
+@Entity
+@Data
+@Table(name = "nodes", schema = "stockmanagement")
+public class Node extends BaseEntity {
+  @Column(nullable = false)
+  @Type(type = PG_UUID)
+  UUID referenceId;
+
+  @Column(nullable = false)
+  boolean isRefDataFacility;
 }

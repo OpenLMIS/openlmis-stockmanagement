@@ -15,7 +15,7 @@
 
 package org.openlmis.stockmanagement.repository;
 
-import org.openlmis.stockmanagement.domain.movement.Node;
+import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 

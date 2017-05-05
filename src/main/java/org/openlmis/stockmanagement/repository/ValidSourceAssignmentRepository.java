@@ -15,7 +15,7 @@
 
 package org.openlmis.stockmanagement.repository;
 
-import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
+import org.openlmis.stockmanagement.domain.sourcedestination.ValidSourceAssignment;
 
 public interface ValidSourceAssignmentRepository extends
     SourceDestinationAssignmentRepository<ValidSourceAssignment> {

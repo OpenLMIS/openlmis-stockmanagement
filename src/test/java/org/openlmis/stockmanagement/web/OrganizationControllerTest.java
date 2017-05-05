@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Test;
-import org.openlmis.stockmanagement.domain.movement.Organization;
+import org.openlmis.stockmanagement.domain.sourcedestination.Organization;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.service.PermissionService;

@@ -15,18 +15,20 @@
 
 package org.openlmis.stockmanagement.dto;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import org.openlmis.stockmanagement.domain.sourcedestination.Organization;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.openlmis.stockmanagement.domain.movement.Organization;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 @Data
 @Builder

@@ -23,8 +23,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
-import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
+import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAssignment;
+import org.openlmis.stockmanagement.domain.sourcedestination.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.ValidDestinationService;

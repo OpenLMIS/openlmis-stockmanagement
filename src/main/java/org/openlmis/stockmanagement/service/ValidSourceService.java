@@ -18,7 +18,7 @@ package org.openlmis.stockmanagement.service;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_ASSIGNMENT_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_FOUND;
 
-import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
+import org.openlmis.stockmanagement.domain.sourcedestination.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
 import org.openlmis.stockmanagement.repository.ValidSourceAssignmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;

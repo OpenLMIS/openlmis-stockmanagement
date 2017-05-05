@@ -15,8 +15,8 @@
 
 package org.openlmis.stockmanagement.dto;
 
-import org.openlmis.stockmanagement.domain.movement.Node;
-import org.openlmis.stockmanagement.domain.movement.SourceDestinationAssignment;
+import org.openlmis.stockmanagement.domain.sourcedestination.Node;
+import org.openlmis.stockmanagement.domain.sourcedestination.SourceDestinationAssignment;
 
 import lombok.Data;
 

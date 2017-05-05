@@ -31,8 +31,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Test;
-import org.openlmis.stockmanagement.domain.movement.ValidDestinationAssignment;
-import org.openlmis.stockmanagement.domain.movement.ValidSourceAssignment;
+import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAssignment;
+import org.openlmis.stockmanagement.domain.sourcedestination.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.PermissionService;

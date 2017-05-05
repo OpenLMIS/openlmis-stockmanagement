@@ -23,7 +23,7 @@ import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createL
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
-import org.openlmis.stockmanagement.domain.movement.Node;
+import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.dto.FacilityDto;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;

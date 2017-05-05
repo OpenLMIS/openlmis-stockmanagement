@@ -13,13 +13,13 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.domain.movement;
+package org.openlmis.stockmanagement.domain.sourcedestination;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "valid_source_assignments", schema = "stockmanagement")
-public class ValidSourceAssignment extends SourceDestinationAssignment {
+@Table(name = "valid_destination_assignments", schema = "stockmanagement")
+public class ValidDestinationAssignment extends SourceDestinationAssignment {
 
 }

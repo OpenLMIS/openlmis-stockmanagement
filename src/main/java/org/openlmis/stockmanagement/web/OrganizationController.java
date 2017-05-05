@@ -23,7 +23,7 @@ import static org.springframework.http.HttpStatus.OK;
 
 import com.google.common.base.Strings;
 
-import org.openlmis.stockmanagement.domain.movement.Organization;
+import org.openlmis.stockmanagement.domain.sourcedestination.Organization;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.service.PermissionService;

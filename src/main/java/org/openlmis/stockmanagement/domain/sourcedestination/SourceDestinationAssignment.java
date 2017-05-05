@@ -13,19 +13,32 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.domain.movement;
+package org.openlmis.stockmanagement.domain.sourcedestination;
 
-import lombok.Data;
+import org.hibernate.annotations.Type;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import lombok.Data;
 
-@Entity
+import java.util.UUID;
+
+import javax.persistence.Column;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
+
+@MappedSuperclass
 @Data
-@Table(name = "organizations", schema = "stockmanagement")
-public class Organization extends BaseEntity {
-  @Column(nullable = false, columnDefinition = TEXT_COLUMN_DEFINITION)
-  String name;
+public class SourceDestinationAssignment extends BaseEntity {
+  @Column(nullable = false)
+  @Type(type = PG_UUID)
+  UUID programId;
+
+  @Column(nullable = false)
+  @Type(type = PG_UUID)
+  UUID facilityTypeId;
+
+  @ManyToOne()
+  @JoinColumn(nullable = false)
+  Node node;
 }
