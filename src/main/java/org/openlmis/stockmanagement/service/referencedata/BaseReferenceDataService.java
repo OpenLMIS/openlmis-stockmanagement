@@ -16,7 +16,6 @@
 package org.openlmis.stockmanagement.service.referencedata;
 
 import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
-import org.openlmis.stockmanagement.service.BaseCommunicationService;
 import org.openlmis.stockmanagement.utils.DynamicParametrizedTypeReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -18,7 +18,6 @@ package org.openlmis.stockmanagement.service.referencedata;
 import static java.util.Collections.emptyList;
 
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
-import org.openlmis.stockmanagement.service.DataRetrievalException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;

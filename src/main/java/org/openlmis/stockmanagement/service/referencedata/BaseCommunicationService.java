@@ -13,7 +13,7 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.service;
+package org.openlmis.stockmanagement.service.referencedata;
 
 import org.apache.commons.codec.binary.Base64;
 import org.openlmis.stockmanagement.util.DynamicPageTypeReference;
@@ -74,7 +74,7 @@ public abstract class BaseCommunicationService<T> {
     params.put("grant_type", "client_credentials");
 
     ResponseEntity<?> response = restTemplate.exchange(
-            buildUri(authorizationUrl, params), HttpMethod.POST, request, Object.class);
+        buildUri(authorizationUrl, params), HttpMethod.POST, request, Object.class);
 
 
     return ((Map<String, String>) response.getBody()).get(ACCESS_TOKEN);
@@ -114,10 +114,10 @@ public abstract class BaseCommunicationService<T> {
 
     try {
       ResponseEntity<PageImplRepresentation<P>> response = restTemplate.exchange(
-              buildUri(url, params),
-              method,
-              (payload != null) ? new HttpEntity<>(payload) : null,
-              new DynamicPageTypeReference<>(type)
+          buildUri(url, params),
+          method,
+          (payload != null) ? new HttpEntity<>(payload) : null,
+          new DynamicPageTypeReference<>(type)
       );
       return response.getBody();
 
@@ -127,9 +127,9 @@ public abstract class BaseCommunicationService<T> {
   }
 
   protected DataRetrievalException buildDataRetrievalException(
-          HttpStatusCodeException ex) {
+      HttpStatusCodeException ex) {
     return new DataRetrievalException(
-            getResultClass().getSimpleName(), ex.getStatusCode(), ex.getResponseBodyAsString()
+        getResultClass().getSimpleName(), ex.getStatusCode(), ex.getResponseBodyAsString()
     );
   }
 }

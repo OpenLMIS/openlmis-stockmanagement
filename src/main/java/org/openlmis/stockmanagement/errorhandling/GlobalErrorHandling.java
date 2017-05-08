@@ -20,7 +20,7 @@ import org.openlmis.stockmanagement.exception.JasperReportViewException;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.service.DataRetrievalException;
+import org.openlmis.stockmanagement.service.referencedata.DataRetrievalException;
 import org.openlmis.stockmanagement.util.ErrorResponse;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.http.HttpStatus;
