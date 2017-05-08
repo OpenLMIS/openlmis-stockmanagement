@@ -34,6 +34,12 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+/**
+ * Before processing a stock event, one instance of this class will be created
+ * to hold all things needed from ref-data service.
+ * By doing this, all network traffic is concentrated in one place, not scattered around
+ * in different places.
+ */
 public class StockEventProcessContext {
   private UserDto currentUser;
   private ProgramDto program;
