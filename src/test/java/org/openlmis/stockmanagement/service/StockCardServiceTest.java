@@ -211,6 +211,24 @@ public class StockCardServiceTest extends BaseTest {
   }
 
   @Test
+  public void should_reassign_physical_inventory_reason_names() throws Exception {
+    //given
+    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    stockEventDto.getLineItems().get(0).setSourceId(null);
+    stockEventDto.getLineItems().get(0).setDestinationId(null);
+    stockEventDto.getLineItems().get(0).setReasonId(null);
+    StockEvent savedEvent = save(stockEventDto, randomUUID());
+
+    //when
+    UUID cardId = stockCardRepository.findByOriginEvent(savedEvent).getId();
+    StockCardDto card = stockCardService.findStockCardById(cardId);
+
+    //then
+    String reasonName = card.getLineItems().get(0).getLineItem().getReason().getName();
+    assertThat(reasonName, is("Overstock"));
+  }
+
+  @Test
   public void should_return_null_when_can_not_find_stock_card_by_id() throws Exception {
     //when
     UUID nonExistingCardId = randomUUID();

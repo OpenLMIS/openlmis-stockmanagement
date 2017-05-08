@@ -19,6 +19,7 @@ import static java.util.Collections.singletonList;
 import static org.openlmis.stockmanagement.domain.card.StockCard.createStockCardFrom;
 import static org.openlmis.stockmanagement.domain.card.StockCard.newInstanceById;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemFrom;
+import static org.openlmis.stockmanagement.domain.reason.ReasonCategory.PHYSICAL_INVENTORY;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
@@ -27,12 +28,14 @@ import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
+import org.openlmis.stockmanagement.i18n.MessageService;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.repository.StockCardLineItemRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
+import org.openlmis.stockmanagement.utils.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +47,11 @@ import java.util.UUID;
 public class StockCardService extends StockCardBaseService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCardService.class);
+  private static final String PHYSICAL_INVENTORY_REASON_PREFIX =
+      "stockmanagement.reason.physicalInventory.";
+
+  @Autowired
+  private MessageService messageService;
 
   @Autowired
   private PermissionService permissionService;
@@ -108,7 +116,7 @@ public class StockCardService extends StockCardBaseService {
     if (cardDto.hasLot()) {
       cardDto.setLot(lotReferenceDataService.findOne(cardDto.getLot().getId()));
     }
-    assignSourceDestinationForLineItems(cardDto);
+    assignSourceDestinationReasonNameForLineItems(cardDto);
     return cardDto;
   }
 
@@ -142,12 +150,24 @@ public class StockCardService extends StockCardBaseService {
     return foundCardId;
   }
 
-  private void assignSourceDestinationForLineItems(StockCardDto stockCardDto) {
+  private void assignSourceDestinationReasonNameForLineItems(StockCardDto stockCardDto) {
     stockCardDto.getLineItems().forEach(lineItemDto -> {
       StockCardLineItem lineItem = lineItemDto.getLineItem();
+      assignReasonName(lineItem);
       lineItemDto.setSource(getFromRefDataOrConvertOrg(lineItem.getSource()));
       lineItemDto.setDestination(getFromRefDataOrConvertOrg(lineItem.getDestination()));
     });
+  }
+
+  private void assignReasonName(StockCardLineItem lineItem) {
+    boolean isPhysicalReason = lineItem.getReason() != null
+        && lineItem.getReason().getReasonCategory() == PHYSICAL_INVENTORY;
+    if (isPhysicalReason) {
+      String messageKey = PHYSICAL_INVENTORY_REASON_PREFIX
+          + lineItem.getReason().getReasonType().toString().toLowerCase();
+      String reasonName = messageService.localize(new Message(messageKey)).getMessage();
+      lineItem.getReason().setName(reasonName);
+    }
   }
 
   private FacilityDto getFromRefDataOrConvertOrg(Node node) {

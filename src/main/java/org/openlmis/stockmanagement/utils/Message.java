@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.utils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.context.MessageSource;
@@ -97,6 +98,10 @@ public class Message {
       Validate.notBlank(message);
       this.messageKey = Message.this.key;
       this.message = message;
+    }
+
+    public String getMessage() {
+      return message;
     }
 
     @Override

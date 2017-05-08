@@ -70,7 +70,7 @@ public class StockCardLineItemReason extends BaseEntity {
     return builder()
         .reasonType(ReasonType.CREDIT)
         .reasonCategory(ReasonCategory.PHYSICAL_INVENTORY)
-        .name("Overstock")
+        .name("Overstock(will be replaced by messages_lang.properties)")
         .build();
   }
 
@@ -83,7 +83,7 @@ public class StockCardLineItemReason extends BaseEntity {
     return builder()
         .reasonType(ReasonType.DEBIT)
         .reasonCategory(ReasonCategory.PHYSICAL_INVENTORY)
-        .name("Understock")
+        .name("Understock(will be replaced by messages_lang.properties)")
         .build();
   }
 
@@ -96,7 +96,7 @@ public class StockCardLineItemReason extends BaseEntity {
     return builder()
         .reasonType(ReasonType.BALANCE_ADJUSTMENT)
         .reasonCategory(ReasonCategory.PHYSICAL_INVENTORY)
-        .name("Balance adjustment")
+        .name("Balance adjustment(will be replaced by messages_lang.properties)")
         .build();
   }
 
