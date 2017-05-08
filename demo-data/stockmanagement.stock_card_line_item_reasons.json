@@ -13,7 +13,7 @@
     "description": "Transfer Out",
     "reasonCategory": "TRANSFER",
     "reasonType": "DEBIT",
-    "isFreeTextAllowed": false
+    "isFreeTextAllowed": true
   },
   {
     "id": "279d55bd-42e3-438c-a63d-9c021b185dae",
