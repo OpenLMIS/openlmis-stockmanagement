@@ -95,10 +95,17 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
   public static StockCard createStockCardFrom(StockEventDto stockEventDto,
                                               StockEventLineItem eventLineItem, UUID savedEventId)
       throws InstantiationException, IllegalAccessException {
-    return new StockCard(fromId(savedEventId, StockEvent.class),
-        stockEventDto.getFacilityId(), stockEventDto.getProgramId(),
-        eventLineItem.getOrderableId(), eventLineItem.getLotId(),
-        new ArrayList<>(), 0);
+    return StockCard.builder()
+        .originEvent(fromId(savedEventId, StockEvent.class))
+
+        .programId(stockEventDto.getProgramId())
+        .facilityId(stockEventDto.getFacilityId())
+        .orderableId(eventLineItem.getOrderableId())
+        .lotId(eventLineItem.getLotId())
+
+        .lineItems(new ArrayList<>())
+        .stockOnHand(0)
+        .build();
   }
 
   /**
