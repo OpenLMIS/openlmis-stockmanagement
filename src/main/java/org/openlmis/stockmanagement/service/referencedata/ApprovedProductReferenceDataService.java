@@ -80,7 +80,7 @@ public class ApprovedProductReferenceDataService extends
         getApprovedProducts(facilityId, programId, false);
 
     return concat(fullSupply.stream(), nonFullSupply.stream())
-        .map(approvedProduct -> approvedProduct.getOrderable())
+        .map(ApprovedProductDto::getOrderable)
         .collect(toList());
   }
 
