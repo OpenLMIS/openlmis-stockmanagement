@@ -47,7 +47,8 @@ public class FacilityDto {
   private Boolean enabled;
   private Boolean openLmisAccessible;
   private List<SupportedProgramDto> supportedPrograms;
-  private GeographicZoneDto geographicZone;
+  //  private GeographicZoneDto geographicZone;
+  //geographicZone is not used anywhere by stock management, we can take it back when needed
   private FacilityTypeDto type;
 
   /**
