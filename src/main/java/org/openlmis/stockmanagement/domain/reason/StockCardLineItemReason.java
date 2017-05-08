@@ -71,10 +71,8 @@ public class StockCardLineItemReason extends BaseEntity {
         .reasonType(ReasonType.CREDIT)
         .reasonCategory(ReasonCategory.PHYSICAL_INVENTORY)
         .name("Overstock")
-        .description("Inventory correction in case of overstock")
         .build();
   }
-
 
   /**
    * Create physical debit reason.
@@ -86,7 +84,6 @@ public class StockCardLineItemReason extends BaseEntity {
         .reasonType(ReasonType.DEBIT)
         .reasonCategory(ReasonCategory.PHYSICAL_INVENTORY)
         .name("Understock")
-        .description("Inventory correction in case of understock")
         .build();
   }
 
@@ -100,7 +97,6 @@ public class StockCardLineItemReason extends BaseEntity {
         .reasonType(ReasonType.BALANCE_ADJUSTMENT)
         .reasonCategory(ReasonCategory.PHYSICAL_INVENTORY)
         .name("Balance adjustment")
-        .description("Balance adjustment")
         .build();
   }
 
