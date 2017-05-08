@@ -67,7 +67,7 @@ public interface StockCardRepository extends
 
   @Query(value = selectId + fromStockCards
       + matchByProgramAndFacility + matchByOrderable + noLot)
-  UUID getStockCardIdWithNoLot(UUID programId, UUID facilityId, UUID orderableId);
+  UUID getStockCardIdWithoutLot(UUID programId, UUID facilityId, UUID orderableId);
 
   @Query(value = selectIdentity + fromStockCards + matchByProgramAndFacility)
   List<OrderableLotIdentity> getIdentitiesBy(UUID programId, UUID facilityId);

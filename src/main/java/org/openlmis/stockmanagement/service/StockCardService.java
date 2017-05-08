@@ -139,13 +139,12 @@ public class StockCardService extends StockCardBaseService {
   private UUID findCard(StockEventDto eventDto, StockEventLineItem eventLineItem) {
     UUID foundCardId;
     if (eventLineItem.getLotId() == null) {
-      foundCardId = cardRepository.getStockCardIdWithNoLot(
-          eventDto.getProgramId(), eventDto.getFacilityId(),
-          eventLineItem.getOrderableId());
+      foundCardId = cardRepository.getStockCardIdWithoutLot(
+          eventDto.getProgramId(), eventDto.getFacilityId(), eventLineItem.getOrderableId());
     } else {
       foundCardId = cardRepository.getStockCardIdWithLot(
-          eventDto.getProgramId(), eventDto.getFacilityId(),
-          eventLineItem.getOrderableId(), eventLineItem.getLotId());
+          eventDto.getProgramId(), eventDto.getFacilityId(), eventLineItem.getOrderableId(),
+          eventLineItem.getLotId());
     }
     return foundCardId;
   }
