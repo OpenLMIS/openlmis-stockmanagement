@@ -19,6 +19,7 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.empty;
 import static org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity.identityOf;
 import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.ExistingStockCardsOnly;
 
@@ -74,8 +75,7 @@ public class StockCardSummariesService extends StockCardBaseService {
     List<StockCard> cards = cardRepository
         .findByProgramIdAndFacilityId(programId, facilityId);
 
-    LOGGER.info("Calling ref data to get approved orderables");
-
+    LOGGER.info("Calling ref data to get all approved orderables");
     Map<OrderableLotIdentity, OrderableLot> orderableLotsMap = createOrderableLots(
         approvedProductService.getAllApprovedProducts(programId, facilityId));
 
@@ -130,7 +130,7 @@ public class StockCardSummariesService extends StockCardBaseService {
                                              Collection<OrderableLot> orderableLots,
                                              SearchOptions searchOption) {
     if (searchOption == ExistingStockCardsOnly) {
-      return Stream.empty();//do not create dummy cards when option says so.
+      return empty();//do not create dummy cards when option says so.
     }
 
     return filterOrderableLotsWithoutCards(orderableLots, existingCards)
@@ -147,31 +147,23 @@ public class StockCardSummariesService extends StockCardBaseService {
   private List<OrderableLot> filterOrderableLotsWithoutCards(
       Collection<OrderableLot> orderableLots, List<StockCard> stockCards) {
     return orderableLots.stream()
-        .filter(orderableLot ->
-            stockCards.stream().noneMatch(stockCard ->
-                identityOf(stockCard).equals(identityOf(orderableLot))))
+        .filter(orderableLot -> stockCards.stream()
+            .noneMatch(stockCard -> identityOf(stockCard).equals(identityOf(orderableLot))))
         .collect(toList());
   }
 
   private Map<OrderableLotIdentity, OrderableLot> createOrderableLots(
       List<OrderableDto> orderableDtos) {
-    Stream<OrderableLot> orderableLots = orderableDtos.stream().flatMap(orderableDto ->
-        lotReferenceDataService.getAllLotsOf(orderableDto.getId())
-            .stream().map(lot -> new OrderableLot(orderableDto, lot)));
+    Stream<OrderableLot> orderableLots = orderableDtos.stream()
+        .flatMap(orderableDto ->
+            lotReferenceDataService.getAllLotsOf(orderableDto.getId()).stream()
+                .map(lot -> new OrderableLot(orderableDto, lot)));
 
     Stream<OrderableLot> orderablesOnly = orderableDtos.stream()
         .map(orderableDto -> new OrderableLot(orderableDto, null));
 
     return concat(orderableLots, orderablesOnly)
         .collect(toMap(OrderableLotIdentity::identityOf, orderableLot -> orderableLot));
-  }
-
-  public enum SearchOptions {
-    //only include stock cards that exist in DB
-    ExistingStockCardsOnly,
-    //combine existing stock cards, plus:
-    //cartesian product of approved orderables(that don't have cards yet) and their lots
-    IncludeApprovedOrderables
   }
 
   @Getter
@@ -191,6 +183,14 @@ public class StockCardSummariesService extends StockCardBaseService {
     public UUID getOrderableId() {
       return orderable.getId();
     }
+  }
+
+  public enum SearchOptions {
+    //only include stock cards that exist in DB
+    ExistingStockCardsOnly,
+    //combine existing stock cards, plus:
+    //cartesian product of approved orderables(that don't have cards yet) and their lots
+    IncludeApprovedOrderables
   }
 
 }
