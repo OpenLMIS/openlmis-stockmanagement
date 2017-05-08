@@ -20,6 +20,7 @@ import static org.openlmis.stockmanagement.domain.BaseEntity.fromId;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING;
 import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.IncludeApprovedOrderables;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
@@ -33,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.UUID;
@@ -60,7 +60,6 @@ public class PhysicalInventoryService {
   public void submitPhysicalInventory(PhysicalInventoryDto inventoryDto, UUID eventId)
       throws IllegalAccessException, InstantiationException {
     LOGGER.info("submit physical inventory");
-
     deleteExistingDraft(inventoryDto);
 
     PhysicalInventory inventory = inventoryDto.toPhysicalInventoryForSubmit();
@@ -77,10 +76,11 @@ public class PhysicalInventoryService {
    * @return found draft, or if not found, returns empty draft.
    */
   public PhysicalInventoryDto findDraft(UUID programId, UUID facilityId) {
+    LOGGER.info("find physical inventory draft");
     PhysicalInventory foundInventory = physicalInventoriesRepository
         .findByProgramIdAndFacilityIdAndIsDraft(programId, facilityId, true);
     if (foundInventory == null) {
-      return createEmptyInventory(programId, facilityId);
+      return createEmptyDraft(programId, facilityId);
     } else {
       return assignOrderablesAndSoh(PhysicalInventoryDto.from(foundInventory));
     }
@@ -93,6 +93,7 @@ public class PhysicalInventoryService {
    * @return the saved inventory.
    */
   public PhysicalInventoryDto saveDraft(PhysicalInventoryDto dto) {
+    LOGGER.info("save physical inventory draft");
     validateLineItems(dto);
     deleteExistingDraft(dto);
 
@@ -119,7 +120,7 @@ public class PhysicalInventoryService {
     return inventoryDto;
   }
 
-  private PhysicalInventoryDto createEmptyInventory(UUID programId, UUID facilityId) {
+  private PhysicalInventoryDto createEmptyDraft(UUID programId, UUID facilityId) {
     List<StockCardDto> stockCards = stockCardSummariesService
         .findStockCards(programId, facilityId, IncludeApprovedOrderables);
 
@@ -137,7 +138,7 @@ public class PhysicalInventoryService {
 
   private void validateLineItems(PhysicalInventoryDto dto) {
     List<PhysicalInventoryLineItemDto> lineItems = dto.getLineItems();
-    if (CollectionUtils.isEmpty(lineItems)) {
+    if (isEmpty(lineItems)) {
       throw new ValidationMessageException(
           new Message(ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING));
     }

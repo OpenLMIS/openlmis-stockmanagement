@@ -167,8 +167,11 @@ public class StockCardSummariesService extends StockCardBaseService {
   }
 
   public enum SearchOptions {
-    IncludeApprovedOrderables,
-    ExistingStockCardsOnly
+    //only include stock cards that exist in DB
+    ExistingStockCardsOnly,
+    //combine existing stock cards, plus:
+    //cartesian product of approved orderables(that don't have cards yet) and their lots
+    IncludeApprovedOrderables
   }
 
   @Getter
