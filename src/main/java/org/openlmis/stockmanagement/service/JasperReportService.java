@@ -43,6 +43,7 @@ import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +75,8 @@ public class JasperReportService {
     if (stockCardDto == null) {
       throw new ResourceNotFoundException(new Message(ERROR_REPORT_ID_NOT_FOUND));
     }
+
+    Collections.reverse(stockCardDto.getLineItems());
     Map<String, Object> params = new HashMap<>();
     params.put("datasource", singletonList(stockCardDto));
     params.put("hasLot", stockCardDto.hasLot());

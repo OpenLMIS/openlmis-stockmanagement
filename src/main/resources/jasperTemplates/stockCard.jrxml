@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.3.1.final using JasperReports Library version 6.3.1  -->
-<!-- 2017-05-05T17:55:53 -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="StockCard" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="d0829c7a-bf73-4e6e-9b5a-1735ab6c4d7d">
+<!-- 2017-05-08T11:45:33 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="StockCard" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" whenResourceMissingType="Empty" uuid="d0829c7a-bf73-4e6e-9b5a-1735ab6c4d7d">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
@@ -105,7 +105,7 @@
 				</textElement>
 				<text><![CDATA[Facility:]]></text>
 			</staticText>
-			<textField isStretchWithOverflow="true" pattern="">
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
 				<reportElement x="50" y="0" width="100" height="10" uuid="68d8d341-d519-4cd5-adaf-845085a2b343"/>
 				<textElement>
 					<font size="8" isBold="false"/>
@@ -121,7 +121,7 @@
 				</textElement>
 				<text><![CDATA[Facility code:]]></text>
 			</staticText>
-			<textField isStretchWithOverflow="true" pattern="">
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
 				<reportElement x="70" y="20" width="80" height="10" uuid="e28722c1-aff1-4167-af88-1d9b88dc2c81"/>
 				<textElement>
 					<font size="8" isBold="false"/>
@@ -139,7 +139,7 @@
 				</textElement>
 				<text><![CDATA[Program:]]></text>
 			</staticText>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement x="210" y="0" width="90" height="10" uuid="090f268a-9013-48d7-bf4c-2d082ce82426">
 					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
@@ -160,7 +160,7 @@
 				</textElement>
 				<text><![CDATA[SOH:]]></text>
 			</staticText>
-			<textField isStretchWithOverflow="true" pattern="">
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
 				<reportElement x="520" y="0" width="80" height="10" uuid="83ee175f-b7f6-47ab-97d1-e0e47cbd5ba8"/>
 				<textElement>
 					<font size="8" isBold="false"/>
@@ -178,7 +178,7 @@
 				</textElement>
 				<text><![CDATA[Program Code:]]></text>
 			</staticText>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement x="230" y="20" width="90" height="10" uuid="1155efb4-d80b-4867-bc2c-4708e21299cb">
 					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
@@ -199,7 +199,7 @@
 				</textElement>
 				<text><![CDATA[Product Code:]]></text>
 			</staticText>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement x="400" y="20" width="90" height="10" uuid="86e1db6a-c030-42b4-be86-55aa8a13bffd">
 					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
@@ -220,7 +220,7 @@
 				</textElement>
 				<text><![CDATA[Product:]]></text>
 			</staticText>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement x="370" y="0" width="90" height="10" uuid="91c74f77-e92c-4d01-a5c3-39c827cfc9ff">
 					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
@@ -230,7 +230,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{orderable}.getFullProductName()]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true" pattern="">
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
 				<reportElement x="70" y="40" width="80" height="10" uuid="40f09f1a-ba6b-4bcc-ad3a-0bffbbb8d984">
 					<printWhenExpression><![CDATA[$P{hasLot}]]></printWhenExpression>
 				</reportElement>
@@ -261,7 +261,7 @@
 				</textElement>
 				<text><![CDATA[Expiry date:]]></text>
 			</staticText>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement x="230" y="40" width="90" height="10" uuid="ac3309ea-58c8-4931-a9c2-8af93b151edb">
 					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
@@ -293,9 +293,10 @@
 		</band>
 	</pageFooter>
 	<summary>
-		<band height="92">
+		<band height="100">
+			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 			<staticText>
-				<reportElement x="10" y="5" width="575" height="20" uuid="7da9e4ae-b08d-4775-95d1-532061acfedb">
+				<reportElement x="10" y="12" width="575" height="20" uuid="7da9e4ae-b08d-4775-95d1-532061acfedb">
 					<printWhenExpression><![CDATA[$F{lineItems} != null]]></printWhenExpression>
 				</reportElement>
 				<textElement>
@@ -304,13 +305,13 @@
 				<text><![CDATA[Card Line Items]]></text>
 			</staticText>
 			<componentElement>
-				<reportElement x="10" y="30" width="575" height="60" uuid="49aff7ec-0984-4b44-aaf6-ba51725190dd">
+				<reportElement x="10" y="35" width="575" height="60" uuid="49aff7ec-0984-4b44-aaf6-ba51725190dd">
 					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
 					<property name="com.jaspersoft.studio.table.style.table_header" value="Table_TH"/>
 					<property name="com.jaspersoft.studio.table.style.column_header" value="Table_CH"/>
 					<property name="com.jaspersoft.studio.table.style.detail" value="Table_TD"/>
 				</reportElement>
-				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" whenNoDataType="Blank">
 					<datasetRun subDataset="LineItemDataset" uuid="f0f9122a-6671-4108-a3c4-f35d2629002b">
 						<dataSourceExpression><![CDATA[new JRBeanCollectionDataSource($F{lineItems})]]></dataSourceExpression>
 					</datasetRun>
@@ -324,48 +325,46 @@
 							</staticText>
 						</jr:tableHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField>
+							<textField isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="80" height="30" uuid="3442e65e-4567-4aa5-9baf-75de733717ed"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{lineItem}.getOccurredDate().toLocalDate().toString()]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="80" uuid="53d81bc2-77cb-4b04-abb3-a4860c7289f4">
+					<jr:column width="60" uuid="f05dabc3-f83e-4898-a189-f65039db51d2">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
 						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
 							<staticText>
-								<reportElement x="0" y="0" width="80" height="30" uuid="80fe6109-73bc-4a9a-930e-fbb0d4989a64"/>
+								<reportElement x="0" y="0" width="60" height="30" uuid="80704dca-2510-44bd-9b1b-d8638caa2c29"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<text><![CDATA[Processed Date]]></text>
+								<text><![CDATA[Destination]]></text>
 							</staticText>
 						</jr:tableHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField>
-								<reportElement x="0" y="0" width="80" height="30" uuid="3b274005-993a-4636-87d7-c9af176da564"/>
+							<textField isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="60" height="30" uuid="45281874-eba8-42a9-824b-62e4b04cdf75"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{lineItem}.getProcessedDate().toLocalDate().toString()]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{destination}.getName()]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="50" uuid="eb96136d-28bf-4269-b2cc-b8af716516a7">
+					<jr:column width="60" uuid="0eb58bfc-7d0a-468f-bf82-2781cce56282">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
 						<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<staticText>
-								<reportElement x="0" y="0" width="50" height="30" uuid="cfe0820a-6b1d-4ab5-901f-4bba85be9b3a">
-									<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
-								</reportElement>
+								<reportElement x="0" y="0" width="60" height="30" uuid="0a7784d6-3da3-46c8-9716-c3890bf4dec2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<text><![CDATA[Quantity]]></text>
+								<text><![CDATA[Destination Remark]]></text>
 							</staticText>
 						</jr:tableHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField>
-								<reportElement x="0" y="0" width="50" height="30" uuid="109c656e-5a92-4ab3-9578-cf1e39ee1e3d"/>
+							<textField isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="60" height="30" uuid="cca0bd7a-5c3d-4fab-865d-d9179b633fde"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{lineItem}.getQuantity()]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{lineItem}.getDestinationFreeText()]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -381,7 +380,7 @@
 							</staticText>
 						</jr:tableHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField>
+							<textField isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="40" height="30" uuid="f0f02791-44c8-44d8-96e0-15d78068606b"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{source}.getName()]]></textFieldExpression>
@@ -400,51 +399,15 @@
 							</staticText>
 						</jr:tableHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField>
+							<textField isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="50" height="30" uuid="108eab4f-01d2-4a52-a8a2-9ca968d92b14"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{lineItem}.getSourceFreeText()]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="60" uuid="f05dabc3-f83e-4898-a189-f65039db51d2">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
-							<staticText>
-								<reportElement x="0" y="0" width="60" height="30" uuid="80704dca-2510-44bd-9b1b-d8638caa2c29"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<text><![CDATA[Destination]]></text>
-							</staticText>
-						</jr:tableHeader>
-						<jr:detailCell style="Table_TD" height="30">
-							<textField>
-								<reportElement x="0" y="0" width="60" height="30" uuid="45281874-eba8-42a9-824b-62e4b04cdf75"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{destination}.getName()]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="60" uuid="0eb58bfc-7d0a-468f-bf82-2781cce56282">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column7"/>
-						<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
-							<property name="com.jaspersoft.studio.unit.width" value="px"/>
-							<staticText>
-								<reportElement x="0" y="0" width="60" height="30" uuid="0a7784d6-3da3-46c8-9716-c3890bf4dec2"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<text><![CDATA[Destination Remark]]></text>
-							</staticText>
-						</jr:tableHeader>
-						<jr:detailCell style="Table_TD" height="30">
-							<textField>
-								<reportElement x="0" y="0" width="60" height="30" uuid="cca0bd7a-5c3d-4fab-865d-d9179b633fde"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{lineItem}.getDestinationFreeText()]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
 					<jr:column width="40" uuid="ea9fc2dc-0484-41ff-80e9-c47b4779fd27">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column8"/>
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
 						<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
 							<staticText>
@@ -457,7 +420,7 @@
 						</jr:tableHeader>
 						<jr:detailCell style="Table_TD" height="30">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
-							<textField>
+							<textField isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="40" height="30" uuid="2237b77f-d8d1-40c8-9a3c-350b740eecd2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{lineItem}.getReason().getName()]]></textFieldExpression>
@@ -465,7 +428,7 @@
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="50" uuid="56c59096-9c87-4e4f-87e3-c9e3b92c34fc">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column9"/>
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column7"/>
 						<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -476,10 +439,50 @@
 							</staticText>
 						</jr:tableHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField>
+							<textField isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="50" height="30" uuid="16c2160d-c4d2-4338-9d43-5a0388af6565"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{lineItem}.getReasonFreeText()]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="50" uuid="eb96136d-28bf-4269-b2cc-b8af716516a7">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column8"/>
+						<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<staticText>
+								<reportElement x="0" y="0" width="50" height="30" uuid="cfe0820a-6b1d-4ab5-901f-4bba85be9b3a">
+									<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+								</reportElement>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<text><![CDATA[Quantity]]></text>
+							</staticText>
+						</jr:tableHeader>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="50" height="30" uuid="109c656e-5a92-4ab3-9578-cf1e39ee1e3d"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{lineItem}.getQuantity()]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="50" uuid="dc6dd8dc-5535-40c7-a4ff-3f32c16a5b98">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column9"/>
+						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="50" height="30" uuid="6c86ff17-9c22-4161-95a4-79bc947fb015">
+									<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+								</reportElement>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<text><![CDATA[SOH]]></text>
+							</staticText>
+						</jr:tableHeader>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="50" height="30" uuid="2b8cc7f3-6461-4122-b530-cdacfa242a8c"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{lineItem}.getStockOnHand()]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -494,7 +497,7 @@
 							</staticText>
 						</jr:tableHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField>
+							<textField isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="50" height="30" uuid="ef145284-93eb-4f5f-a9a6-b3c979a527e1"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{lineItem}.getSignature()]]></textFieldExpression>

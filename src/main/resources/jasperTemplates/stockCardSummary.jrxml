@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.3.1.final using JasperReports Library version 6.3.1  -->
-<!-- 2017-05-05T15:54:32 -->
+<!-- 2017-05-08T11:46:15 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="StockCardSummary" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" whenResourceMissingType="Empty" uuid="d0829c7a-bf73-4e6e-9b5a-1735ab6c4d7d">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -254,7 +254,7 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table 1_TD" height="30">
-							<textField>
+							<textField isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="93" height="30" uuid="b1604e69-79e0-4933-8ee5-51d6cce5061f"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{orderable}.getProductCode()]]></textFieldExpression>
@@ -275,7 +275,7 @@
 						<jr:detailCell style="Table 1_TD" height="30">
 							<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.HorizontalRowLayout"/>
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
-							<textField>
+							<textField isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="77" height="30" uuid="469bc4d2-785e-4ac7-81ab-df1bff6c2525"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{orderable}.getFullProductName()]]></textFieldExpression>
@@ -296,7 +296,7 @@
 						</jr:columnHeader>
 						<jr:detailCell style="Table 1_TD" height="30">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
-							<textField>
+							<textField isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="67" height="30" uuid="624e834f-d046-4881-a936-88b40ef263bd"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{program}.getName()]]></textFieldExpression>
@@ -317,7 +317,7 @@
 						</jr:columnHeader>
 						<jr:detailCell style="Table 1_TD" height="30">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
-							<textField>
+							<textField isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="50" height="30" uuid="9abf6368-8b9c-4cc1-9e71-69cb90044263"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{facility}.getName()]]></textFieldExpression>
@@ -339,7 +339,7 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table 1_TD" height="30">
-							<textField>
+							<textField isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="60" height="30" uuid="6680122f-b158-4277-afff-29f8eae11525"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{lot}.getLotCode()]]></textFieldExpression>
@@ -361,7 +361,7 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table 1_TD" height="30">
-							<textField>
+							<textField isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="73" height="30" uuid="32fea3a9-1db4-4e09-90d0-49c214525ec5"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{lot}.getExpirationDate()]]></textFieldExpression>
@@ -380,7 +380,7 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table 1_TD" height="30">
-							<textField>
+							<textField isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="102" height="30" uuid="e8a313ec-9db5-4892-9671-fc221c5e6abd"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{lastUpdate}.toLocalDate().toString()]]></textFieldExpression>
@@ -399,7 +399,7 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table 1_TD" height="30">
-							<textField>
+							<textField isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="65" height="30" uuid="6b7919e9-5946-4ae1-9417-412f5ddc1286"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{stockOnHand}]]></textFieldExpression>
