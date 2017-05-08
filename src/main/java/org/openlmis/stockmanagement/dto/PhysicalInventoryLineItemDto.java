@@ -54,16 +54,6 @@ public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot 
         .physicalInventory(inventory).build();
   }
 
-  @JsonIgnore
-  public UUID getOrderableId() {
-    return orderable.getId();
-  }
-
-  @JsonIgnore
-  public UUID getLotId() {
-    return lot == null ? null : lot.getId();
-  }
-
   /**
    * Create from jpa model.
    *
@@ -77,5 +67,15 @@ public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot 
         .orderable(OrderableDto.builder().id(lineItem.getOrderableId()).build())
         .lot(lineItem.getLotId() == null ? null : LotDto.builder().id(lineItem.getLotId()).build())
         .build();
+  }
+
+  @JsonIgnore
+  public UUID getOrderableId() {
+    return orderable.getId();
+  }
+
+  @JsonIgnore
+  public UUID getLotId() {
+    return lot == null ? null : lot.getId();
   }
 }

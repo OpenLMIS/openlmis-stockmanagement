@@ -85,8 +85,7 @@ public class PhysicalInventoryDto {
    * @return created dto.
    */
   public static PhysicalInventoryDto from(PhysicalInventory inventory) {
-    return PhysicalInventoryDto
-        .builder()
+    return PhysicalInventoryDto.builder()
         .programId(inventory.getProgramId())
         .facilityId(inventory.getFacilityId())
         .occurredDate(inventory.getOccurredDate())

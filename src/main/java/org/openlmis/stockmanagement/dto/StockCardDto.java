@@ -81,12 +81,11 @@ public class StockCardDto implements IdentifiableByOrderableLot {
    * @return the created stock card dto.
    */
   public static StockCardDto createFrom(StockCard stockCard) {
-    List<StockCardLineItemDto> lineItemDtos = stockCard.getLineItems().stream()
-        .map(StockCardLineItemDto::createFrom).collect(toList());
 
     return StockCardDto.builder()
         .id(stockCard.getId())
-        .lineItems(lineItemDtos)
+        .lineItems(stockCard.getLineItems().stream()
+            .map(StockCardLineItemDto::createFrom).collect(toList()))
         .stockOnHand(stockCard.getStockOnHand())
         .build();
   }
