@@ -36,6 +36,7 @@ import org.openlmis.stockmanagement.validators.LotValidator;
 import org.openlmis.stockmanagement.validators.MandatoryFieldsValidator;
 import org.openlmis.stockmanagement.validators.OrderableLotDuplicationValidator;
 import org.openlmis.stockmanagement.validators.QuantityValidator;
+import org.openlmis.stockmanagement.validators.ReasonExistenceValidator;
 import org.openlmis.stockmanagement.validators.ReceiveIssueReasonValidator;
 import org.openlmis.stockmanagement.validators.SourceDestinationAssignmentValidator;
 import org.openlmis.stockmanagement.validators.StockEventValidator;
@@ -82,6 +83,9 @@ public class StockEventValidationsServiceTest {
   private LotValidator lotValidator;
 
   @MockBean
+  private ReasonExistenceValidator reasonExistenceValidator;
+
+  @MockBean
   private OrderableLotDuplicationValidator orderableLotDuplicationValidator;
 
   @Before
@@ -97,6 +101,7 @@ public class StockEventValidationsServiceTest {
     doNothing().when(quantityValidator).validate(any(StockEventDto.class));
     doNothing().when(lotValidator).validate(any(StockEventDto.class));
     doNothing().when(orderableLotDuplicationValidator).validate(any(StockEventDto.class));
+    doNothing().when(reasonExistenceValidator).validate(any(StockEventDto.class));
   }
 
   @Test

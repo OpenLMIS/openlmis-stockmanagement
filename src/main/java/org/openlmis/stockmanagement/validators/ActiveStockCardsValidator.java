@@ -37,13 +37,15 @@ public class ActiveStockCardsValidator implements StockEventValidator {
   @Override
   public void validate(StockEventDto stockEventDto)
       throws IllegalAccessException, InstantiationException {
-    if (stockEventDto.getProgramId() == null || stockEventDto.getFacilityId() == null) {
+    boolean noProgram = stockEventDto.getProgramId() == null;
+    boolean noFacility = stockEventDto.getFacilityId() == null;
+    boolean notPhysicalInventory = !stockEventDto.isPhysicalInventory();
+
+    if (noProgram || noFacility || notPhysicalInventory) {
       return;
     }
 
-    if (stockEventDto.isPhysicalInventory()) {
-      checkAllStockCardsCovered(stockEventDto);
-    }
+    checkAllStockCardsCovered(stockEventDto);
   }
 
   private void checkAllStockCardsCovered(StockEventDto stockEventDto) {

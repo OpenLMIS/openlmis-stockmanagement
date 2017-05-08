@@ -116,8 +116,13 @@ public abstract class MessageKeys {
       + ".debit.quantity.exceed.stockOnHand";
 
   //stock events creation: reason assignment
+  //reason.not.in.validList error key is not used for now, because we remove valid reasons
+  //check when implementing adjustment's UI
   public static final String ERROR_EVENT_REASON_NOT_IN_VALID_LIST = EVENT_ERROR_PREFIX
       + ".reason.not.in.validList";
+
+  public static final String ERROR_EVENT_REASON_NOT_EXIST = EVENT_ERROR_PREFIX
+      + ".reason.not.exist";
 
   //stock events creation: orderable duplication
   public static final String ERROR_EVENT_ORDERABLE_LOT_DUPLICATION = EVENT_ERROR_PREFIX
