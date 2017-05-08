@@ -23,6 +23,7 @@ import lombok.Data;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -33,20 +34,24 @@ import javax.persistence.Table;
 @Table(name = "stock_event_line_items", schema = "stockmanagement")
 public class StockEventLineItem extends BaseEntity implements IdentifiableByOrderableLot {
 
-  private UUID lotId;
+  @Column(nullable = false)
   private UUID orderableId;
 
+  private UUID lotId;
+
+  @Column(nullable = false)
   private Integer quantity;
 
+  @Column(nullable = false)
   private ZonedDateTime occurredDate;
 
   private UUID reasonId;
   private String reasonFreeText;
 
   private UUID sourceId;
-  private UUID destinationId;
-
   private String sourceFreeText;
+
+  private UUID destinationId;
   private String destinationFreeText;
 
   @ManyToOne()
