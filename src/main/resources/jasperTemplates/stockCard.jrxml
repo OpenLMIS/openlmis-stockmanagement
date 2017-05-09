@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.3.1.final using JasperReports Library version 6.3.1  -->
-<!-- 2017-05-08T11:45:33 -->
+<!-- 2017-05-09T14:41:24 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="StockCard" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" whenResourceMissingType="Empty" uuid="d0829c7a-bf73-4e6e-9b5a-1735ab6c4d7d">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -332,86 +332,49 @@
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="60" uuid="f05dabc3-f83e-4898-a189-f65039db51d2">
+					<jr:column width="80" uuid="116a8009-1af1-4d47-af29-fa1f1844b120">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
 						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
-							<staticText>
-								<reportElement x="0" y="0" width="60" height="30" uuid="80704dca-2510-44bd-9b1b-d8638caa2c29"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<text><![CDATA[Destination]]></text>
-							</staticText>
-						</jr:tableHeader>
-						<jr:detailCell style="Table_TD" height="30">
-							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="60" height="30" uuid="45281874-eba8-42a9-824b-62e4b04cdf75"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{destination}.getName()]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="60" uuid="0eb58bfc-7d0a-468f-bf82-2781cce56282">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
-						<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<staticText>
-								<reportElement x="0" y="0" width="60" height="30" uuid="0a7784d6-3da3-46c8-9716-c3890bf4dec2"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<text><![CDATA[Destination Remark]]></text>
-							</staticText>
-						</jr:tableHeader>
-						<jr:detailCell style="Table_TD" height="30">
-							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="60" height="30" uuid="cca0bd7a-5c3d-4fab-865d-d9179b633fde"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{lineItem}.getDestinationFreeText()]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="40" uuid="116a8009-1af1-4d47-af29-fa1f1844b120">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column4"/>
-						<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
-							<property name="com.jaspersoft.studio.unit.width" value="px"/>
-							<staticText>
-								<reportElement x="0" y="0" width="40" height="30" uuid="0d289147-887f-40e3-b9dd-a0b83e1e3d5a"/>
+								<reportElement x="0" y="0" width="80" height="30" uuid="0d289147-887f-40e3-b9dd-a0b83e1e3d5a">
+									<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+								</reportElement>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<text><![CDATA[Source]]></text>
 							</staticText>
 						</jr:tableHeader>
 						<jr:detailCell style="Table_TD" height="30">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="40" height="30" uuid="f0f02791-44c8-44d8-96e0-15d78068606b"/>
+								<reportElement x="0" y="0" width="80" height="30" uuid="f0f02791-44c8-44d8-96e0-15d78068606b"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{source}.getName()]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{lineItem}.getSourceFreeText() != null ? MessageFormat.format("{0} : {1}", $F{source}.getName(), $F{lineItem}.getSourceFreeText()) :  $F{source}.getName()]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="50" uuid="11d42dc7-499c-43ba-992e-80c3d6860ac3">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
-						<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<jr:column width="80" uuid="f05dabc3-f83e-4898-a189-f65039db51d2">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
 						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
-							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<staticText>
-								<reportElement x="0" y="0" width="50" height="30" uuid="b183b096-f6bc-4475-9ca4-1293e906f791"/>
+								<reportElement x="0" y="0" width="80" height="30" uuid="80704dca-2510-44bd-9b1b-d8638caa2c29"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<text><![CDATA[Source Remark]]></text>
+								<text><![CDATA[Destination]]></text>
 							</staticText>
 						</jr:tableHeader>
 						<jr:detailCell style="Table_TD" height="30">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="50" height="30" uuid="108eab4f-01d2-4a52-a8a2-9ca968d92b14"/>
+								<reportElement x="0" y="0" width="80" height="30" uuid="45281874-eba8-42a9-824b-62e4b04cdf75"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{lineItem}.getSourceFreeText()]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{lineItem}.getDestinationFreeText() != null ? MessageFormat.format("{0} : {1}", $F{destination}.getName(), $F{lineItem}.getDestinationFreeText()) : $F{destination}.getName()]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="40" uuid="ea9fc2dc-0484-41ff-80e9-c47b4779fd27">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
-						<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<jr:column width="80" uuid="ea9fc2dc-0484-41ff-80e9-c47b4779fd27">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column4"/>
 						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<staticText>
-								<reportElement x="0" y="0" width="40" height="30" uuid="eec6930c-ab54-49e9-a0f0-dc72b9e5074a">
+								<reportElement x="0" y="0" width="80" height="30" uuid="eec6930c-ab54-49e9-a0f0-dc72b9e5074a">
 									<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 								</reportElement>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
@@ -421,38 +384,18 @@
 						<jr:detailCell style="Table_TD" height="30">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="40" height="30" uuid="2237b77f-d8d1-40c8-9a3c-350b740eecd2"/>
+								<reportElement x="0" y="0" width="80" height="30" uuid="2237b77f-d8d1-40c8-9a3c-350b740eecd2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{lineItem}.getReason().getName()]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{lineItem}.getReasonFreeText() != null ? MessageFormat.format("{0} : {1}", $F{lineItem}.getReason().getName(), $F{lineItem}.getReasonFreeText()) : $F{lineItem}.getReason().getName()]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="50" uuid="56c59096-9c87-4e4f-87e3-c9e3b92c34fc">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column7"/>
-						<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<jr:column width="80" uuid="eb96136d-28bf-4269-b2cc-b8af716516a7">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
 						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<staticText>
-								<reportElement x="0" y="0" width="50" height="30" uuid="8df21833-d99a-4ed4-afbe-6715b9551c6d"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<text><![CDATA[Reason Remark]]></text>
-							</staticText>
-						</jr:tableHeader>
-						<jr:detailCell style="Table_TD" height="30">
-							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="50" height="30" uuid="16c2160d-c4d2-4338-9d43-5a0388af6565"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{lineItem}.getReasonFreeText()]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="50" uuid="eb96136d-28bf-4269-b2cc-b8af716516a7">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column8"/>
-						<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
-						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
-							<property name="com.jaspersoft.studio.unit.width" value="px"/>
-							<staticText>
-								<reportElement x="0" y="0" width="50" height="30" uuid="cfe0820a-6b1d-4ab5-901f-4bba85be9b3a">
+								<reportElement x="0" y="0" width="80" height="30" uuid="cfe0820a-6b1d-4ab5-901f-4bba85be9b3a">
 									<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 								</reportElement>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
@@ -461,17 +404,18 @@
 						</jr:tableHeader>
 						<jr:detailCell style="Table_TD" height="30">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="50" height="30" uuid="109c656e-5a92-4ab3-9578-cf1e39ee1e3d"/>
+								<reportElement x="0" y="0" width="80" height="30" uuid="109c656e-5a92-4ab3-9578-cf1e39ee1e3d"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{lineItem}.getQuantity()]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="50" uuid="dc6dd8dc-5535-40c7-a4ff-3f32c16a5b98">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column9"/>
+					<jr:column width="80" uuid="dc6dd8dc-5535-40c7-a4ff-3f32c16a5b98">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
 						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<staticText>
-								<reportElement x="0" y="0" width="50" height="30" uuid="6c86ff17-9c22-4161-95a4-79bc947fb015">
+								<reportElement x="0" y="0" width="80" height="30" uuid="6c86ff17-9c22-4161-95a4-79bc947fb015">
 									<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 								</reportElement>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
@@ -480,25 +424,25 @@
 						</jr:tableHeader>
 						<jr:detailCell style="Table_TD" height="30">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="50" height="30" uuid="2b8cc7f3-6461-4122-b530-cdacfa242a8c"/>
+								<reportElement x="0" y="0" width="80" height="30" uuid="2b8cc7f3-6461-4122-b530-cdacfa242a8c"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{lineItem}.getStockOnHand()]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="50" uuid="801ec044-823a-4c00-b96e-7649f3a1858b">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column10"/>
+					<jr:column width="80" uuid="801ec044-823a-4c00-b96e-7649f3a1858b">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column7"/>
 						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<staticText>
-								<reportElement x="0" y="0" width="50" height="30" uuid="fbcacb14-dc82-482c-b5d3-1dd2884b80bc"/>
+								<reportElement x="0" y="0" width="80" height="30" uuid="fbcacb14-dc82-482c-b5d3-1dd2884b80bc"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<text><![CDATA[Signature]]></text>
 							</staticText>
 						</jr:tableHeader>
 						<jr:detailCell style="Table_TD" height="30">
 							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="50" height="30" uuid="ef145284-93eb-4f5f-a9a6-b3c979a527e1"/>
+								<reportElement x="0" y="0" width="80" height="30" uuid="ef145284-93eb-4f5f-a9a6-b3c979a527e1"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{lineItem}.getSignature()]]></textFieldExpression>
 							</textField>
