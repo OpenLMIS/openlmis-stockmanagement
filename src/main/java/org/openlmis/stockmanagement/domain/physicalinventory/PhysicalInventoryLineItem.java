@@ -41,7 +41,8 @@ public class PhysicalInventoryLineItem extends BaseEntity {
   private UUID orderableId;
   private UUID lotId;
 
-  @Column(nullable = false)
+  //when saving draft quantity is allowed to be null
+  //do NOT annotate this field as nullable = false
   private Integer quantity;
 
   @ManyToOne()
