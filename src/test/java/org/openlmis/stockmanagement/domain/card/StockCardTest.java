@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 
 
 public class StockCardTest {
@@ -91,4 +92,27 @@ public class StockCardTest {
     assertThat(card.getStockOnHand(), is(456));
   }
 
+  @Test
+  public void should_shallow_copy_line_items() throws Exception {
+    //given
+    StockCard stockCard = new StockCard();
+
+    StockCardLineItem lineItem = new StockCardLineItem();
+    lineItem.setQuantity(5);
+
+    stockCard.setLineItems(new ArrayList<>());
+    stockCard.getLineItems().add(lineItem);
+
+    //when
+    StockCard copy = stockCard.shallowCopy();
+
+    //then
+    assertThat(copy.getLineItems().get(0).getQuantity(), is(5));
+
+    //when
+    copy.getLineItems().get(0).setQuantity(6);
+
+    //then
+    assertThat(stockCard.getLineItems().get(0).getQuantity(), is(5));
+  }
 }

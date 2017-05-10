@@ -17,6 +17,11 @@ services:
     env_file: .manual-api-test-env
     depends_on: [consul]
 
+  reference-ui:
+    image: openlmis/reference-ui:5.0.1-SNAPSHOT
+    env_file: .manual-api-test-env
+    depends_on: [consul]
+
   stockmanagement:
     image: openlmis/dev:2
     ports:
@@ -26,7 +31,7 @@ services:
       - '..:/app'
       - 'gradlecache:/gradle'
     env_file: .manual-api-test-env
-    depends_on: [nginx,auth,referencedata]
+    depends_on: [nginx,auth,referencedata,reference-ui]
 
   auth:
     image: openlmis/auth

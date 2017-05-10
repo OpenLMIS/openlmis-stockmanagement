@@ -16,7 +16,6 @@
 package org.openlmis.stockmanagement.validators;
 
 import static java.util.stream.Collectors.groupingBy;
-import static org.openlmis.stockmanagement.domain.reason.ReasonCategory.PHYSICAL_INVENTORY;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
@@ -32,6 +31,7 @@ import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -72,25 +72,12 @@ public class QuantityValidator implements StockEventValidator {
         tryFindCard(stockEventDto.getProgramId(), stockEventDto.getFacilityId(), group.get(0));
 
     //create line item from event line item and add it to stock card for recalculation
-    List<StockCardLineItem> itemsToBe = calculateStockOnHand(stockEventDto, group, foundCard);
+    calculateStockOnHand(stockEventDto, group, foundCard);
     foundCard.getLineItems().forEach(item -> {
       if (item.getStockOnHand() < 0) {
         throwQuantityError(group);
       }
     });
-    avoidPersistence(foundCard, itemsToBe);
-  }
-
-  private void avoidPersistence(StockCard foundCard, List<StockCardLineItem> itemsToBe) {
-    //during recalculating soh, physical inventory line items will be assigned a reason
-    //those reasons does not exist in DB, they are from physicalCredit and physicalDebit methods
-    //remove their reason assignment after recalculation to avoid jpa persistence
-    foundCard.getLineItems().stream()
-        .filter(lineItem -> lineItem.getReason() != null)
-        .filter(lineItem -> lineItem.getReason().getReasonCategory() == PHYSICAL_INVENTORY)
-        .forEach(lineItem -> lineItem.setReason(null));
-    //remove the line items from card to avoid jpa persistence
-    foundCard.getLineItems().removeAll(itemsToBe);
   }
 
   private StockCard tryFindCard(UUID programId, UUID facilityId, StockEventLineItem lineItem) {
@@ -98,10 +85,21 @@ public class QuantityValidator implements StockEventValidator {
         .findByProgramIdAndFacilityIdAndOrderableIdAndLotId(programId, facilityId,
             lineItem.getOrderableId(), lineItem.getLotId());
     if (foundCard == null) {
-      foundCard = new StockCard();
-      foundCard.setLineItems(new ArrayList<>());
+      StockCard emptyCard = new StockCard();
+      emptyCard.setLineItems(new ArrayList<>());
+      return emptyCard;
+    } else {
+      //use a shallow copy of stock card to do recalculation, because some domain model will be
+      //modified during recalculation, this will avoid persistence of those modified models
+      try {
+        return foundCard.shallowCopy();
+      } catch (InvocationTargetException | NoSuchMethodException
+          | InstantiationException | IllegalAccessException ex) {
+        //if this exception is ever seen in front end, that means our code has a bug. we only put
+        //this here to satisfy checkstyle/pmd and to make sure potential bug is not hidden.
+        throw new ValidationMessageException(new Message("Error during shallow copy", ex));
+      }
     }
-    return foundCard;
   }
 
   private void throwQuantityError(List<StockEventLineItem> group) {
@@ -109,20 +107,16 @@ public class QuantityValidator implements StockEventValidator {
         new Message(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH, group));
   }
 
-  private List<StockCardLineItem> calculateStockOnHand(StockEventDto eventDto,
-                                                       List<StockEventLineItem> group,
-                                                       StockCard foundCard)
+  private void calculateStockOnHand(StockEventDto eventDto, List<StockEventLineItem> group,
+                                    StockCard foundCard)
       throws InstantiationException, IllegalAccessException {
-    List<StockCardLineItem> lineItemsToBe = new ArrayList<>();
     for (StockEventLineItem lineItem : group) {
       StockCardLineItem stockCardLineItem = StockCardLineItem
           .createLineItemFrom(eventDto, lineItem, foundCard, null, null);
       stockCardLineItem.setReason(findReason(lineItem.getReasonId()));
-      lineItemsToBe.add(stockCardLineItem);
     }
 
     foundCard.calculateStockOnHand();
-    return lineItemsToBe;
   }
 
   private StockCardLineItemReason findReason(UUID reasonId) {

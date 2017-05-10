@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.domain.card;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static javax.persistence.CascadeType.ALL;
+import static org.apache.commons.beanutils.BeanUtils.cloneBean;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.hibernate.annotations.LazyCollectionOption.FALSE;
 
@@ -35,6 +36,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -58,7 +60,8 @@ import javax.persistence.Transient;
     indexes = @Index(columnList = "facilityId,programId,orderableId"))
 //the above line creates an index, it'll make select statements faster
 //especially for getStockCardIdBy method of StockCardRepository
-public class StockCard extends BaseEntity implements IdentifiableByOrderableLot {
+public class StockCard
+    extends BaseEntity implements IdentifiableByOrderableLot {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCard.class);
 
@@ -137,6 +140,22 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
     }
     setStockOnHand(previousSoh);
     LOGGER.debug("Calculated stock on hand: " + previousSoh);
+  }
+
+  /**
+   * Creates a shallow copy of this stock card. Used during recalculation to avoid updates on
+   * existing stock cards and line items.
+   */
+  public StockCard shallowCopy() throws InvocationTargetException, NoSuchMethodException,
+      InstantiationException, IllegalAccessException {
+    StockCard clone = new StockCard();
+    clone.setLineItems(new ArrayList<>());
+
+    for (StockCardLineItem lineItem : this.getLineItems()) {
+      clone.getLineItems().add((StockCardLineItem) cloneBean(lineItem));
+    }
+
+    return clone;
   }
 
   private void reorderLineItemsByDates() {
