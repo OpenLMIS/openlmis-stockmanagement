@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.3.1.final using JasperReports Library version 6.3.1  -->
-<!-- 2017-05-08T11:46:15 -->
+<!-- 2017-05-10T16:49:49 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="StockCardSummary" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" whenResourceMissingType="Empty" uuid="d0829c7a-bf73-4e6e-9b5a-1735ab6c4d7d">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -324,12 +324,12 @@
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="60" uuid="a7bee396-1a71-4dc5-a7c7-5a795da02240">
+					<jr:column width="80" uuid="a7bee396-1a71-4dc5-a7c7-5a795da02240">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
 						<printWhenExpression><![CDATA[$P{showLot}]]></printWhenExpression>
 						<jr:columnHeader style="Table 1_CH" height="30" rowSpan="1">
 							<staticText>
-								<reportElement x="0" y="0" width="60" height="30" uuid="f3af19dd-e960-4808-8702-7afdbc4b9503">
+								<reportElement x="0" y="0" width="80" height="30" uuid="f3af19dd-e960-4808-8702-7afdbc4b9503">
 									<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
 								</reportElement>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -339,10 +339,10 @@
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table 1_TD" height="30">
-							<textField isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="60" height="30" uuid="6680122f-b158-4277-afff-29f8eae11525"/>
+							<textField isBlankWhenNull="false">
+								<reportElement x="0" y="0" width="80" height="30" uuid="6680122f-b158-4277-afff-29f8eae11525"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{lot}.getLotCode()]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{lot} != null ? $F{lot}.getLotCode()  : "No lot defined"]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
