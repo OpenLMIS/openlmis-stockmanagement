@@ -42,7 +42,7 @@ public class ActiveStockCardsValidator implements StockEventValidator {
     boolean notPhysicalInventory = !stockEventDto.isPhysicalInventory();
 
     if (noProgram || noFacility || notPhysicalInventory) {
-      return;
+      return;//only need to do this validation for physical inventory
     }
 
     checkAllStockCardsCovered(stockEventDto);

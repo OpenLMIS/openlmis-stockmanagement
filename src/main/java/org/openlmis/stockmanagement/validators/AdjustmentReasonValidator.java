@@ -42,9 +42,7 @@ public class AdjustmentReasonValidator implements StockEventValidator {
     }
 
     stockEventDto.getLineItems().forEach(lineItem -> {
-      //this validator does not care if reason id not found in db
-      //that is handled by other validators
-      if (lineItem.hasReason()) {
+      if (lineItem.hasReasonId()) {
         validateReason(lineItem);
       }
     });
@@ -52,6 +50,8 @@ public class AdjustmentReasonValidator implements StockEventValidator {
 
   private void validateReason(StockEventLineItem lineItem) {
     StockCardLineItemReason foundReason = reasonRepository.findOne(lineItem.getReasonId());
+    //this validator does not care if reason id not found in db
+    //that is handled by other validators
     if (foundReason != null) {
       validReasonType(foundReason);
       validReasonCategory(foundReason);

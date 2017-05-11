@@ -36,7 +36,7 @@ public class LotValidator implements StockEventValidator {
     }
 
     stockEventDto.getLineItems().forEach(lineItem -> {
-      if (lineItem.hasLot()) {
+      if (lineItem.hasLotId()) {
         LotDto lotDto = stockEventDto.getContext().getLots().get(lineItem.getLotId());
         if (lotDto == null) {
           throw new ValidationMessageException(

@@ -58,7 +58,7 @@ public class StockEventLineItem extends BaseEntity implements IdentifiableByOrde
   @JoinColumn(nullable = false)
   private StockEvent stockEvent;
 
-  public boolean hasReason() {
+  public boolean hasReasonId() {
     return this.reasonId != null;
   }
 
@@ -66,7 +66,7 @@ public class StockEventLineItem extends BaseEntity implements IdentifiableByOrde
     return this.reasonFreeText != null;
   }
 
-  public boolean hasLot() {
+  public boolean hasLotId() {
     return this.lotId != null;
   }
 
@@ -78,11 +78,11 @@ public class StockEventLineItem extends BaseEntity implements IdentifiableByOrde
     return this.sourceFreeText != null;
   }
 
-  public boolean hasSource() {
+  public boolean hasSourceId() {
     return this.sourceId != null;
   }
 
-  public boolean hasDestination() {
+  public boolean hasDestinationId() {
     return this.destinationId != null;
   }
 }

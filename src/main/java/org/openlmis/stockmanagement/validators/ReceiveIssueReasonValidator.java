@@ -51,10 +51,10 @@ public class ReceiveIssueReasonValidator implements StockEventValidator {
     }
 
     eventDto.getLineItems().forEach(eventLineItem -> {
-      if (eventLineItem.hasSource()) {
+      if (eventLineItem.hasSourceId()) {
         checkReceiveReason(eventLineItem);
       }
-      if (eventLineItem.hasDestination()) {
+      if (eventLineItem.hasDestinationId()) {
         checkIssueReason(eventLineItem);
       }
     });
@@ -74,7 +74,7 @@ public class ReceiveIssueReasonValidator implements StockEventValidator {
 
   private void checkReason(StockEventLineItem lineItem, ReasonType expectedReasonType,
                            String typeErrorKey, String categoryErrorKey) {
-    if (lineItem.hasReason()) {
+    if (lineItem.hasReasonId()) {
       StockCardLineItemReason foundReason = reasonRepository.findOne(lineItem.getReasonId());
       //this validator does not care if reason id points to something in DB
       //that is handled by other validators

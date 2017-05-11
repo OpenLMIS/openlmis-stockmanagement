@@ -63,17 +63,17 @@ public class SourceDestinationAssignmentValidator implements StockEventValidator
     //this validator does not care if program missing or facility not found in ref data
     //that is handled in other validators
     if (facilityTypeId != null && programId != null) {
-      if (eventLineItem.hasSource()) {
+      if (eventLineItem.hasSourceId()) {
         checkSourceAssignment(eventLineItem, facilityTypeId, programId);
       }
-      if (eventLineItem.hasDestination()) {
+      if (eventLineItem.hasDestinationId()) {
         checkDestinationAssignment(eventLineItem, facilityTypeId, programId);
       }
     }
   }
 
   private void checkSourceDestinationBothPresent(StockEventLineItem eventLineItem) {
-    if (eventLineItem.hasSource() && eventLineItem.hasDestination()) {
+    if (eventLineItem.hasSourceId() && eventLineItem.hasDestinationId()) {
       throwError(ERROR_SOURCE_DESTINATION_BOTH_PRESENT,
           eventLineItem.getSourceId(), eventLineItem.getDestinationId());
     }

@@ -81,18 +81,23 @@ public class FreeTextValidator implements StockEventValidator {
   }
 
   private void checkReasonFreeText(StockEventLineItem lineItem) {
-    String freeText = lineItem.getReasonFreeText();
-    if (lineItem.hasReason()) {
-      StockCardLineItemReason reason = stockCardLineItemReasonRepository
-          .findOne(lineItem.getReasonId());
-
-      if (null != reason && !reason.getIsFreeTextAllowed() && lineItem.hasReasonFreeText()) {
-        throwError(ERROR_REASON_FREE_TEXT_NOT_ALLOWED, lineItem.getReasonId(), freeText);
-      }
-    } else if (freeText != null) {
-      //reason free text exist but reason id is null
-      throwError(ERROR_REASON_FREE_TEXT_NOT_ALLOWED, lineItem.getReasonId(), freeText);
+    if (!lineItem.hasReasonFreeText()) {
+      return;//if there is no reason free text, then there is no need to validate
     }
+
+    boolean reasonNotAllowFreeText = lineItem.hasReasonId() && !isFreeTextAllowed(lineItem);
+    boolean hasNoReasonIdButHasFreeText = !lineItem.hasReasonId();
+    if (reasonNotAllowFreeText || hasNoReasonIdButHasFreeText) {
+      throwError(ERROR_REASON_FREE_TEXT_NOT_ALLOWED,
+          lineItem.getReasonId(), lineItem.getReasonFreeText());
+    }
+  }
+
+  private boolean isFreeTextAllowed(StockEventLineItem lineItem) {
+    StockCardLineItemReason reason = stockCardLineItemReasonRepository
+        .findOne(lineItem.getReasonId());
+
+    return reason != null && reason.getIsFreeTextAllowed();
   }
 
   private void throwError(String key, Object... params) {

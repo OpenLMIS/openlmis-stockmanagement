@@ -62,11 +62,11 @@ public class StockEventDto {
   }
 
   public boolean hasSource() {
-    return hasLineItems() && getLineItems().stream().anyMatch(StockEventLineItem::hasSource);
+    return hasLineItems() && getLineItems().stream().anyMatch(StockEventLineItem::hasSourceId);
   }
 
   public boolean hasDestination() {
-    return hasLineItems() && getLineItems().stream().anyMatch(StockEventLineItem::hasDestination);
+    return hasLineItems() && getLineItems().stream().anyMatch(StockEventLineItem::hasDestinationId);
   }
 
   /**
@@ -76,7 +76,7 @@ public class StockEventDto {
    */
   public boolean isPhysicalInventory() {
     boolean noReason = hasLineItems()
-        && getLineItems().stream().noneMatch(StockEventLineItem::hasReason);
+        && getLineItems().stream().noneMatch(StockEventLineItem::hasReasonId);
     return noReason && !hasDestination() && !hasSource();
   }
 
