@@ -101,7 +101,12 @@ public class PhysicalInventoryService {
     return dto;
   }
 
-  private void deleteExistingDraft(PhysicalInventoryDto dto) {
+  /**
+   * Delete draft.
+   *
+   * @param dto physical inventory dto.
+   */
+  public void deleteExistingDraft(PhysicalInventoryDto dto) {
     PhysicalInventory foundInventory = physicalInventoriesRepository
         .findByProgramIdAndFacilityIdAndIsDraft(dto.getProgramId(), dto.getFacilityId(), true);
     if (foundInventory != null) {

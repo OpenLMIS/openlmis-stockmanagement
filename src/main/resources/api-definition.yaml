@@ -771,3 +771,20 @@ traits:
               body:
                 application/json:
                     schema: localizedMessage
+
+        delete:
+          is: [ secured ]
+          description: Delete a draft physical inventory.
+          body:
+            application/json:
+              schema: physicalInventory
+
+          responses:
+            204:
+              description: Draft deleted.
+
+            403:
+              description: User does not have permission to save draft physical inventory.
+              body:
+                application/json:
+                    schema: localizedMessage

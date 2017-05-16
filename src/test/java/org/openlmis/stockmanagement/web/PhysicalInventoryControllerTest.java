@@ -19,7 +19,10 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -37,7 +40,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.util.UUID;
 
 public class PhysicalInventoryControllerTest extends BaseWebTest {
-  private static final String PHYSICAL_INVENTORY_API = "/api/physicalInventories";
   private static final String PHYSICAL_INVENTORY_DRAFT_API = "/api/physicalInventories/draft";
 
   @MockBean
@@ -98,10 +100,27 @@ public class PhysicalInventoryControllerTest extends BaseWebTest {
         .andExpect(jsonPath("$.lineItems", hasSize(1)));
   }
 
-  private ResultActions callApi(PhysicalInventoryDto piDto) throws Exception {
-    return mvc.perform(post(PHYSICAL_INVENTORY_API)
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectToJsonString(piDto)));
+  @Test
+  public void should_return_204_when_deleted_physical_inventory_draft() throws Exception {
+    //given
+    PhysicalInventoryDto physicalInventoryDto = PhysicalInventoryDto
+        .builder()
+        .programId(UUID.randomUUID())
+        .facilityId(UUID.randomUUID())
+        .build();
+
+    //when
+    ResultActions resultActions = mvc.perform(
+        delete(PHYSICAL_INVENTORY_DRAFT_API)
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectToJsonString(physicalInventoryDto)));
+
+    //then
+    resultActions.andExpect(status().isNoContent());
+    verify(permissionService, times(1)).canEditPhysicalInventory(
+        physicalInventoryDto.getProgramId(), physicalInventoryDto.getFacilityId());
+    verify(physicalInventoryService, times(1)).deleteExistingDraft(physicalInventoryDto);
   }
+
 }

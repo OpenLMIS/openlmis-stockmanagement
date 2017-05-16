@@ -16,7 +16,9 @@
 package org.openlmis.stockmanagement.web;
 
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -69,6 +71,19 @@ public class PhysicalInventoryController {
   public ResponseEntity<PhysicalInventoryDto> saveDraft(@RequestBody PhysicalInventoryDto dto) {
     permissionService.canEditPhysicalInventory(dto.getProgramId(), dto.getFacilityId());
     return new ResponseEntity<>(physicalInventoryService.saveDraft(dto), CREATED);
+  }
+
+  /**
+   * Delete a draft physical inventory.
+   *
+   * @param dto physical inventory dto.
+   * @return No content status.
+   */
+  @RequestMapping(value = "physicalInventories/draft", method = DELETE)
+  public ResponseEntity deleteDraft(@RequestBody PhysicalInventoryDto dto) {
+    permissionService.canEditPhysicalInventory(dto.getProgramId(), dto.getFacilityId());
+    physicalInventoryService.deleteExistingDraft(dto);
+    return new ResponseEntity<>(null, NO_CONTENT);
   }
 
 }
