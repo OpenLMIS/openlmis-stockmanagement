@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.web;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_NOT_SUPPORTED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_STOCK_EVENT_REASON_NOT_MATCH;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_ADJUST;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createNoSourceDestinationStockEventDto;
@@ -31,6 +32,7 @@ import org.mockito.Mockito;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.service.HomeFacilityPermissionService;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockEventProcessor;
 import org.openlmis.stockmanagement.utils.Message;
@@ -47,6 +49,9 @@ public class StockEventsControllerTest extends BaseWebTest {
 
   @MockBean
   private PermissionService permissionService;
+
+  @MockBean
+  private HomeFacilityPermissionService homeFacilityPermissionService;
 
   @MockBean
   private StockEventProcessor stockEventProcessor;
@@ -82,6 +87,19 @@ public class StockEventsControllerTest extends BaseWebTest {
         .when(permissionService).canAdjustStock(any(UUID.class), any(UUID.class));
 
     StockEventDto eventDto = createNoSourceDestinationStockEventDto();
+    shouldReject(eventDto);
+  }
+
+  @Test
+  public void should_return_403_when_user_home_facility_does_not_support_provided_program()
+      throws Exception {
+    //given
+    StockEventDto eventDto = createNoSourceDestinationStockEventDto();
+
+    Mockito.doThrow(new PermissionMessageException(
+        new Message(ERROR_PROGRAM_NOT_SUPPORTED)))
+        .when(homeFacilityPermissionService).checkProgramSupported(eventDto.getProgramId());
+
     shouldReject(eventDto);
   }
 

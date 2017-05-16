@@ -19,39 +19,51 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_TYPE_
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_NOT_SUPPORTED;
 
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
-import org.openlmis.stockmanagement.dto.referencedata.SupportedProgramDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
-public class ProgramFacilityTypePermissionService {
+public class HomeFacilityPermissionService {
   @Autowired
   private AuthenticationHelper authenticationHelper;
 
   /**
-   * Check if program and facility type matches user's home facility.
+   * 1 Check if program is supported by user's home facility.
+   * 2 Check if facility type matches user's home facility's type.
+   * Will throw exception if any of the above two fails.
    *
    * @param programId      program id.
    * @param facilityTypeId facility type id.
    */
-  public void checkHomeFacilitySupport(UUID programId, UUID facilityTypeId) {
+  public void checkProgramAndFacilityType(UUID programId, UUID facilityTypeId) {
+    checkProgramSupported(programId);
+    checkFacilityTypeMatches(facilityTypeId);
+  }
+
+  /**
+   * Check if program is supported by user's home facility.
+   *
+   * @param programId the program's id.
+   */
+  public void checkProgramSupported(UUID programId) {
     FacilityDto homeFacility = authenticationHelper.getCurrentUser().getHomeFacility();
-
-    if (homeFacility == null || !facilityTypeId.equals(homeFacility.getType().getId())) {
-      throwException(ERROR_FACILITY_TYPE_HOME_FACILITY_TYPE_NOT_MATCH, facilityTypeId.toString());
-    }
-
-    List<SupportedProgramDto> supportedPrograms = homeFacility.getSupportedPrograms();
-    boolean isSupported = supportedPrograms.stream()
+    boolean isSupported = homeFacility != null
+        && homeFacility.getSupportedPrograms().stream()
         .anyMatch(supportedProgram -> programId.equals(supportedProgram.getId()));
     if (!isSupported) {
       throwException(ERROR_PROGRAM_NOT_SUPPORTED, programId.toString());
+    }
+  }
+
+  private void checkFacilityTypeMatches(UUID facilityTypeId) {
+    FacilityDto homeFacility = authenticationHelper.getCurrentUser().getHomeFacility();
+    if (homeFacility == null || !facilityTypeId.equals(homeFacility.getType().getId())) {
+      throwException(ERROR_FACILITY_TYPE_HOME_FACILITY_TYPE_NOT_MATCH, facilityTypeId.toString());
     }
   }
 

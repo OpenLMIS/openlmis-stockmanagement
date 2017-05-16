@@ -34,10 +34,10 @@ import java.util.Arrays;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ProgramFacilityTypePermissionServiceTest {
+public class HomeFacilityPermissionServiceTest {
 
   @InjectMocks
-  private ProgramFacilityTypePermissionService programFacilityTypePermissionService;
+  private HomeFacilityPermissionService homeFacilityPermissionService;
 
   @Mock
   private AuthenticationHelper authenticationHelper;
@@ -51,7 +51,7 @@ public class ProgramFacilityTypePermissionServiceTest {
     UserDto userDto = createUserDto(programId, facilityTypeId);
     when(authenticationHelper.getCurrentUser()).thenReturn(userDto);
 
-    programFacilityTypePermissionService.checkHomeFacilitySupport(programId, randomUUID());
+    homeFacilityPermissionService.checkProgramAndFacilityType(programId, randomUUID());
   }
 
   @Test(expected = PermissionMessageException.class)
@@ -62,7 +62,7 @@ public class ProgramFacilityTypePermissionServiceTest {
     UserDto userDto = createUserDto(randomUUID(), facilityTypeId);
     when(authenticationHelper.getCurrentUser()).thenReturn(userDto);
 
-    programFacilityTypePermissionService.checkHomeFacilitySupport(programId, facilityTypeId);
+    homeFacilityPermissionService.checkProgramAndFacilityType(programId, facilityTypeId);
   }
 
   @Test
@@ -73,7 +73,7 @@ public class ProgramFacilityTypePermissionServiceTest {
     UserDto userDto = createUserDto(programId, facilityTypeId);
     when(authenticationHelper.getCurrentUser()).thenReturn(userDto);
 
-    programFacilityTypePermissionService.checkHomeFacilitySupport(programId, facilityTypeId);
+    homeFacilityPermissionService.checkProgramAndFacilityType(programId, facilityTypeId);
   }
 
   private UserDto createUserDto(UUID programId, UUID facilityTypeId) {

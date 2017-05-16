@@ -54,7 +54,7 @@ public class PermissionService {
   private UserReferenceDataService userReferenceDataService;
 
   @Autowired
-  private ProgramFacilityTypePermissionService programFacilityTypePermissionService;
+  private HomeFacilityPermissionService homeFacilityPermissionService;
 
   /**
    * Checks if current user has permission to submit a stock card template.
@@ -161,7 +161,7 @@ public class PermissionService {
   private void canViewStockAssignable(String rightName, UUID program, UUID facilityType) {
     ResultDto<Boolean> result = getRightResult(rightName, null, null, null);
     if (null == result || !result.getResult()) {
-      programFacilityTypePermissionService.checkHomeFacilitySupport(program, facilityType);
+      homeFacilityPermissionService.checkProgramAndFacilityType(program, facilityType);
     }
   }
 

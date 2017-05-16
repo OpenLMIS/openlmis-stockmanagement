@@ -19,6 +19,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.service.HomeFacilityPermissionService;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockEventProcessor;
 import org.slf4j.Logger;
@@ -45,6 +46,9 @@ public class StockEventsController {
   private PermissionService permissionService;
 
   @Autowired
+  private HomeFacilityPermissionService homeFacilityPermissionService;
+
+  @Autowired
   private StockEventProcessor stockEventProcessor;
 
   /**
@@ -69,10 +73,11 @@ public class StockEventsController {
     UUID programId = eventDto.getProgramId();
     UUID facilityId = eventDto.getFacilityId();
 
+    homeFacilityPermissionService.checkProgramSupported(programId);
     if (eventDto.isPhysicalInventory()) {
       permissionService.canEditPhysicalInventory(programId, facilityId);
     } else {
-      //we check adjust permission for both adjustment and issue/receive
+      //we check STOCK_ADJUST permission for both adjustment and issue/receive
       //this may change in the future
       permissionService.canAdjustStock(programId, facilityId);
     }
