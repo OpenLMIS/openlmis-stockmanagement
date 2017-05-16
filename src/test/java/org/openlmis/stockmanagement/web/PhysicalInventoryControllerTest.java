@@ -28,9 +28,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
+import org.openlmis.stockmanagement.service.HomeFacilityPermissionService;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.PhysicalInventoryService;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -47,6 +49,15 @@ public class PhysicalInventoryControllerTest extends BaseWebTest {
 
   @MockBean
   private PermissionService permissionService;
+
+  @MockBean
+  private HomeFacilityPermissionService homeFacilityPermissionService;
+
+  @Before
+  public void setUp() throws Exception {
+    doNothing().when(homeFacilityPermissionService).checkProgramSupported(any());
+
+  }
 
   @Test
   public void should_return_200_when_found_physical_inventory_draft() throws Exception {

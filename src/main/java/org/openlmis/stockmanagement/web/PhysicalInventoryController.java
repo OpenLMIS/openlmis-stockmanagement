@@ -23,6 +23,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
+import org.openlmis.stockmanagement.service.HomeFacilityPermissionService;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.PhysicalInventoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,9 @@ public class PhysicalInventoryController {
   private PermissionService permissionService;
 
   @Autowired
+  private HomeFacilityPermissionService homeFacilityPermissionService;
+
+  @Autowired
   private PhysicalInventoryService physicalInventoryService;
 
   /**
@@ -56,7 +60,7 @@ public class PhysicalInventoryController {
   public ResponseEntity<PhysicalInventoryDto> findDraft(
       @RequestParam UUID program,
       @RequestParam UUID facility) {
-    permissionService.canEditPhysicalInventory(program, facility);
+    checkPermission(program, facility);
     return new ResponseEntity<>(physicalInventoryService.findDraft(program, facility), OK);
   }
 
@@ -69,7 +73,7 @@ public class PhysicalInventoryController {
   @Transactional
   @RequestMapping(value = "physicalInventories/draft", method = POST)
   public ResponseEntity<PhysicalInventoryDto> saveDraft(@RequestBody PhysicalInventoryDto dto) {
-    permissionService.canEditPhysicalInventory(dto.getProgramId(), dto.getFacilityId());
+    checkPermission(dto.getProgramId(), dto.getFacilityId());
     return new ResponseEntity<>(physicalInventoryService.saveDraft(dto), CREATED);
   }
 
@@ -83,10 +87,15 @@ public class PhysicalInventoryController {
   @RequestMapping(value = "physicalInventories/draft", method = DELETE)
   public ResponseEntity deleteDraft(@RequestParam UUID program,
                                     @RequestParam UUID facility) {
-    permissionService.canEditPhysicalInventory(program, facility);
+    checkPermission(program, facility);
     physicalInventoryService.deleteExistingDraft(
         PhysicalInventoryDto.builder().programId(program).facilityId(facility).build());
     return new ResponseEntity<>(null, NO_CONTENT);
+  }
+
+  private void checkPermission(@RequestParam UUID program, @RequestParam UUID facility) {
+    homeFacilityPermissionService.checkProgramSupported(program);
+    permissionService.canEditPhysicalInventory(program, facility);
   }
 
 }
