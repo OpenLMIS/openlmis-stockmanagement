@@ -775,14 +775,16 @@ traits:
         delete:
           is: [ secured ]
           description: Delete a draft physical inventory.
-          body:
-            application/json:
-              schema: physicalInventory
+
+          queryParameters:
+            program:
+              required: true
+            facility:
+              required: true
 
           responses:
             204:
               description: Draft deleted.
-
             403:
               description: User does not have permission to save draft physical inventory.
               body:

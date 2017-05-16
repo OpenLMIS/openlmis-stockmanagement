@@ -103,24 +103,24 @@ public class PhysicalInventoryControllerTest extends BaseWebTest {
   @Test
   public void should_return_204_when_deleted_physical_inventory_draft() throws Exception {
     //given
-    PhysicalInventoryDto physicalInventoryDto = PhysicalInventoryDto
-        .builder()
-        .programId(UUID.randomUUID())
-        .facilityId(UUID.randomUUID())
-        .build();
+    UUID programId = UUID.randomUUID();
+    UUID facilityId = UUID.randomUUID();
 
     //when
     ResultActions resultActions = mvc.perform(
         delete(PHYSICAL_INVENTORY_DRAFT_API)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectToJsonString(physicalInventoryDto)));
+            .param("program", programId.toString())
+            .param("facility", facilityId.toString()));
 
     //then
     resultActions.andExpect(status().isNoContent());
-    verify(permissionService, times(1)).canEditPhysicalInventory(
-        physicalInventoryDto.getProgramId(), physicalInventoryDto.getFacilityId());
-    verify(physicalInventoryService, times(1)).deleteExistingDraft(physicalInventoryDto);
+    verify(permissionService, times(1)).canEditPhysicalInventory(programId, facilityId);
+    verify(physicalInventoryService, times(1)).deleteExistingDraft(PhysicalInventoryDto
+        .builder()
+        .programId(programId)
+        .facilityId(facilityId)
+        .build());
   }
 
 }

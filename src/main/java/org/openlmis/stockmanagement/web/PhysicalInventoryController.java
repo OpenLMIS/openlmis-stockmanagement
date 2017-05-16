@@ -76,13 +76,16 @@ public class PhysicalInventoryController {
   /**
    * Delete a draft physical inventory.
    *
-   * @param dto physical inventory dto.
+   * @param program  program ID.
+   * @param facility facility ID.
    * @return No content status.
    */
   @RequestMapping(value = "physicalInventories/draft", method = DELETE)
-  public ResponseEntity deleteDraft(@RequestBody PhysicalInventoryDto dto) {
-    permissionService.canEditPhysicalInventory(dto.getProgramId(), dto.getFacilityId());
-    physicalInventoryService.deleteExistingDraft(dto);
+  public ResponseEntity deleteDraft(@RequestParam UUID program,
+                                    @RequestParam UUID facility) {
+    permissionService.canEditPhysicalInventory(program, facility);
+    physicalInventoryService.deleteExistingDraft(
+        PhysicalInventoryDto.builder().programId(program).facilityId(facility).build());
     return new ResponseEntity<>(null, NO_CONTENT);
   }
 
