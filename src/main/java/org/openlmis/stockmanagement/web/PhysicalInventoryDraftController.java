@@ -38,7 +38,7 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping("/api")
-public class PhysicalInventoryController {
+public class PhysicalInventoryDraftController {
 
   @Autowired
   private PermissionService permissionService;
