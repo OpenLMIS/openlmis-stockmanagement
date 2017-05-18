@@ -19,7 +19,9 @@ import static java.time.ZoneOffset.UTC;
 import static java.time.ZonedDateTime.of;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
+import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasItem;
@@ -52,6 +54,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -88,6 +91,7 @@ public class StockCardSummariesServiceTest {
     UUID orderable4Id = randomUUID();
 
     OrderableDto orderable1 = createOrderableDto(orderable1Id);
+    orderable1.getIdentifiers().put("tradeItem", randomUUID().toString());
     OrderableDto orderable2 = createOrderableDto(orderable2Id);
     OrderableDto orderable3 = createOrderableDto(orderable3Id);
     OrderableDto orderable4 = createOrderableDto(orderable4Id);
@@ -106,7 +110,8 @@ public class StockCardSummariesServiceTest {
 
     LotDto lotDto = new LotDto();
     lotDto.setId(randomUUID());
-    when(lotReferenceDataService.getAllLotsOf(orderable1Id))
+    when(lotReferenceDataService
+        .getAllLotsOf(fromString(orderable1.getIdentifiers().get("tradeItem"))))
         .thenReturn(singletonList(lotDto));
     when(lotReferenceDataService.getAllLotsOf(orderable2Id))
         .thenReturn(emptyList());
@@ -236,7 +241,7 @@ public class StockCardSummariesServiceTest {
         .thenReturn(new PageImpl<>(singletonList(card), pageRequest, 10));
 
     when(approvedProductReferenceDataService.getAllApprovedProducts(programId, facilityId))
-        .thenReturn(singletonList(new OrderableDto()));
+        .thenReturn(singletonList(OrderableDto.builder().identifiers(emptyMap()).build()));
 
     when(lotReferenceDataService.getAllLotsOf(any(UUID.class)))
         .thenReturn(emptyList());
@@ -269,6 +274,9 @@ public class StockCardSummariesServiceTest {
   }
 
   private OrderableDto createOrderableDto(UUID orderableId) {
-    return OrderableDto.builder().id(orderableId).build();
+    return OrderableDto.builder()
+        .id(orderableId)
+        .identifiers(new HashMap<>())
+        .build();
   }
 }

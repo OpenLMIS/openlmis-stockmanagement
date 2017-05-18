@@ -154,16 +154,24 @@ public class StockCardSummariesService extends StockCardBaseService {
 
   private Map<OrderableLotIdentity, OrderableLot> createOrderableLots(
       List<OrderableDto> orderableDtos) {
-    Stream<OrderableLot> orderableLots = orderableDtos.stream()
-        .flatMap(orderableDto ->
-            lotReferenceDataService.getAllLotsOf(orderableDto.getId()).stream()
-                .map(lot -> new OrderableLot(orderableDto, lot)));
+    Stream<OrderableLot> orderableLots = orderableDtos.stream().flatMap(this::lotsOfOrderable);
 
     Stream<OrderableLot> orderablesOnly = orderableDtos.stream()
         .map(orderableDto -> new OrderableLot(orderableDto, null));
 
     return concat(orderableLots, orderablesOnly)
         .collect(toMap(OrderableLotIdentity::identityOf, orderableLot -> orderableLot));
+  }
+
+  private Stream<OrderableLot> lotsOfOrderable(OrderableDto orderableDto) {
+    String tradeItemId = orderableDto.getIdentifiers().get("tradeItem");
+    if (tradeItemId != null) {
+      return lotReferenceDataService
+          .getAllLotsOf(UUID.fromString(tradeItemId)).stream()
+          .map(lot -> new OrderableLot(orderableDto, lot));
+    } else {
+      return empty();
+    }
   }
 
   @Getter

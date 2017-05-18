@@ -15,6 +15,8 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LOT_NOT_EXIST;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LOT_ORDERABLE_NOT_MATCH;
@@ -28,6 +30,7 @@ import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
 import java.util.HashMap;
@@ -63,7 +66,7 @@ public class LotValidatorTest {
   }
 
   @Test
-  public void should_fail_if_lot_does_not_belong_to_orderable() throws Exception {
+  public void should_fail_if_lot_does_not_match_orderable() throws Exception {
     //expect
     expectedEx.expectMessage(ERROR_EVENT_LOT_ORDERABLE_NOT_MATCH);
 
@@ -81,6 +84,11 @@ public class LotValidatorTest {
 
     StockEventProcessContext context = new StockEventProcessContext();
     context.setLots(lots);
+    context.setAllApprovedProducts(
+        singletonList(OrderableDto.builder()
+            .id(stockEventDto.getLineItems().get(0).getOrderableId())
+            .identifiers(emptyMap())
+            .build()));
 
     stockEventDto.setContext(context);
 

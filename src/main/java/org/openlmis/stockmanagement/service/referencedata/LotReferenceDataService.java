@@ -15,11 +15,8 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
-import static java.util.Collections.emptyList;
-
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -71,13 +68,6 @@ public class LotReferenceDataService extends BaseReferenceDataService<LotDto> {
     HashMap<String, Object> params = new HashMap<>();
     params.put("tradeIdemId", tradeItemId);
     params.put("page", pageNumber);
-    try {
-      return getPage("search", params);
-    } catch (DataRetrievalException ex) {
-      //this is a workaround, this exception happens when the trade item id parameter is
-      //a commodity type, this will be removed after ref-data tells us either an orderable is
-      //trade item or commodity type.
-      return new PageImpl<>(emptyList());
-    }
+    return getPage("search", params);
   }
 }

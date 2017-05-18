@@ -21,6 +21,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Map;
 import java.util.UUID;
 
 @Getter
@@ -33,4 +34,5 @@ public class OrderableDto {
   private String productCode;
   private String fullProductName;
   private DispensableDto dispensable;
+  private Map<String, String> identifiers;
 }

@@ -15,14 +15,19 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static java.util.UUID.fromString;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LOT_NOT_EXIST;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LOT_ORDERABLE_NOT_MATCH;
 
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Component(value = "LotValidator")
 public class LotValidator implements StockEventValidator {
@@ -38,16 +43,33 @@ public class LotValidator implements StockEventValidator {
     stockEventDto.getLineItems().forEach(lineItem -> {
       if (lineItem.hasLotId()) {
         LotDto lotDto = stockEventDto.getContext().getLots().get(lineItem.getLotId());
-        if (lotDto == null) {
-          throw new ValidationMessageException(
-              new Message(ERROR_EVENT_LOT_NOT_EXIST, lineItem.getLotId()));
-        }
-        if (!lotDto.getTradeItemId().equals(lineItem.getOrderableId())) {
-          throw new ValidationMessageException(
-              new Message(ERROR_EVENT_LOT_ORDERABLE_NOT_MATCH,
-                  lineItem.getLotId(), lineItem.getOrderableId()));
-        }
+        checkLotExists(lineItem, lotDto);
+        checkLotOrderableMatches(stockEventDto, lineItem, lotDto);
       }
     });
+  }
+
+  private void checkLotOrderableMatches(StockEventDto stockEventDto,
+                                        StockEventLineItem lineItem, LotDto lotDto) {
+    Optional<OrderableDto> foundOrderableDto = stockEventDto.getContext()
+        .getAllApprovedProducts().stream()
+        .filter(orderableDto -> orderableDto.getId().equals(lineItem.getOrderableId()))
+        .findFirst();
+
+    if (foundOrderableDto.isPresent()) {
+      String tradeItemId = foundOrderableDto.get().getIdentifiers().get("tradeItem");
+      if (tradeItemId == null || !lotDto.getTradeItemId().equals(fromString(tradeItemId))) {
+        throw new ValidationMessageException(
+            new Message(ERROR_EVENT_LOT_ORDERABLE_NOT_MATCH,
+                lineItem.getLotId(), lineItem.getOrderableId()));
+      }
+    }
+  }
+
+  private void checkLotExists(StockEventLineItem lineItem, LotDto lotDto) {
+    if (lotDto == null) {
+      throw new ValidationMessageException(
+          new Message(ERROR_EVENT_LOT_NOT_EXIST, lineItem.getLotId()));
+    }
   }
 }
