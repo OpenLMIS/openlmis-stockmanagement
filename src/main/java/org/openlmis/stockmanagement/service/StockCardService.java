@@ -45,10 +45,8 @@ import java.util.UUID;
 
 /**
  * This class is in charge of persisting and retrieving stock cards.
- *
  * For persisting, it may create and save multiple stock cards in one go, since one stock event may
  * involve more than one orderable/lot combos.
- *
  * For retrieving, it only retrieves one stock card at a time. Its purpose is for users to view
  * one single stock card with full details.
  */

@@ -29,10 +29,8 @@ import java.util.Set;
 
 /**
  * This validator is for physical inventory only.
- *
  * In a physical inventory, a user is only allowed to claim stock on hand ONCE for each
  * orderable/lot combo.
- *
  * Such rule is NOT applied to adjustment, issue, receive.
  */
 @Component(value = "OrderableLotDuplicationValidator")

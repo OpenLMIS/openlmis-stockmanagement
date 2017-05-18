@@ -39,13 +39,10 @@ import java.util.UUID;
 
 /**
  * This validator makes sure stock on hand does NOT go below zero for any stock card.
- *
  * It does so by re-calculating soh of each orderable/lot combo that either has a destination or has
  * a debit reason.
- *
  * The re-calculation only happens for issue and negative adjustment. It does not apply to physical
  * inventory and receive.
- *
  * This has a negative impact on performance. The impact grows larger as stock card line items
  * accumulates over time. Because re-calculation requires reading stock card line items from DB.
  */

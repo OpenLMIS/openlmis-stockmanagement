@@ -51,7 +51,6 @@ import java.util.stream.Stream;
 /**
  * This class is in charge of retrieving stock card summaries(stock cards with soh but not line
  * items).
- *
  * Its result may include existing stock cards only, or it may include dummy stock cards for
  * approved products and their lots. See SearchOptions for details.
  */

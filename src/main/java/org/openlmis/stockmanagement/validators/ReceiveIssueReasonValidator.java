@@ -41,7 +41,6 @@ import java.util.UUID;
  * If source and reason are both present, then reason must be credit.
  * If destination and reason are both present, then reason must be debit.
  * And reason must be of TRANSFER category for both cases.
- *
  * It's ok for source and destination to appear without a reason accompanied though.
  */
 @Component(value = "ReceiveIssueReasonValidator")
