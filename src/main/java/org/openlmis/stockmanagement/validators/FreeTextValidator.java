@@ -33,6 +33,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
+/**
+ * This validator checks reason free text, source free text and destination free text.
+ * Reason free text is only allowed when reason id is present and the reason allows free text.
+ * Same case for source free text and destination free text.
+ */
 @Component(value = "FreeTextValidator")
 public class FreeTextValidator implements StockEventValidator {
 

@@ -35,6 +35,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+/**
+ * Before we process a stock event, this class will run first, to get all things we need from
+ * reference data. So that network traffic will be concentrated at one place rather than scattered
+ * all around the place.
+ */
 @Service
 public class StockEventProcessContextBuilder {
   private static final Logger LOGGER = getLogger(StockEventProcessContextBuilder.class);

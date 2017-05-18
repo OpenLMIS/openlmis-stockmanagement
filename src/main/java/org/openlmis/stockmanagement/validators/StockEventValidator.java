@@ -20,6 +20,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+/**
+ * All implementations of this interface is supposed to be independent. Meaning that it should not
+ * assume any specific execution order.
+ *
+ * An implementation of this interface should work correctly no matter which other validator is ran
+ * before or after it.
+ */
 @Component
 public interface StockEventValidator {
   Logger LOGGER = LoggerFactory.getLogger(StockEventValidator.class);

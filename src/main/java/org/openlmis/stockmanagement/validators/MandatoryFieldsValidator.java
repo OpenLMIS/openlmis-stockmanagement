@@ -34,6 +34,10 @@ import org.springframework.stereotype.Component;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+/**
+ * This validator makes sure all must have fields are present.
+ * Must have fields: facility id, program id, orderable id, occurred date, and quantity.
+ */
 @Component(value = "MandatoryFieldsValidator")
 public class MandatoryFieldsValidator implements StockEventValidator {
 

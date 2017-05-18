@@ -35,6 +35,12 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * This validator makes sure the sources/destinations in a stock event are in the valid lists.
+ *
+ * Meaning that users can not just issue to or receive from anywhere they want. Users have to
+ * pick that from a valid list that has been set up by admin or implementer.
+ */
 @Component(value = "SourceDestinationAssignmentValidator")
 public class SourceDestinationAssignmentValidator implements StockEventValidator {
 

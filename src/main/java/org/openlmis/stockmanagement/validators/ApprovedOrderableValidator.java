@@ -30,6 +30,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * This validator makes sure all orderable ids included in stock event are approved products.
+ */
 @Component(value = "ApprovedOrderableValidator")
 public class ApprovedOrderableValidator implements StockEventValidator {
 
@@ -38,12 +41,12 @@ public class ApprovedOrderableValidator implements StockEventValidator {
    *
    * @param stockEventDto the event to be validated.
    */
-  //this validator does not care if facility or program or orderable are missing
-  //that is other validator's job
   public void validate(StockEventDto stockEventDto) {
     LOGGER.debug("Validate approved product reference data service");
     UUID facility = stockEventDto.getFacilityId();
     UUID program = stockEventDto.getProgramId();
+    //this validator does not care if facility or program or orderable are missing
+    //that is other validator's job
     if (!stockEventDto.hasLineItems() || facility == null || program == null) {
       return;
     }

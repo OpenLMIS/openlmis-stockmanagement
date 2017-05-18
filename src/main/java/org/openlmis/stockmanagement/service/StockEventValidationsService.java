@@ -23,6 +23,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * An aggregator of all stock event validators.
+ * All validators will run before any actual DB writing happens.
+ * It any one validator detects something wrong, we'll stop processing the stock event.
+ */
 @Service
 public class StockEventValidationsService {
 

@@ -27,6 +27,10 @@ import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * An adjustment should have a reason that is either DEBIT or CREDIT.
+ * And it should have a reason category that is ADJUSTMENT
+ */
 @Component(value = "AdjustmentReasonValidator")
 public class AdjustmentReasonValidator implements StockEventValidator {
 

@@ -50,7 +50,9 @@ public class PhysicalInventoryService {
   private StockCardSummariesService stockCardSummariesService;
 
   /**
-   * Persist physical inventory, with an event id.
+   * Persist physical inventory, with an event id. (For now, we only save physical inventory, but we
+   * are not reading it anywhere in the code. We do this in case in the future some countries may
+   * wanna view all the physical inventories that has been done in the past.)
    *
    * @param inventoryDto inventoryDto.
    * @param eventId      eventId.

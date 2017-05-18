@@ -29,6 +29,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
+/**
+ * This validator makes sure all lot ids included in stock event do exist in reference data.
+ * And makes sure each lot id is associated with the orderable id that appears along its side.
+ */
 @Component(value = "LotValidator")
 public class LotValidator implements StockEventValidator {
 

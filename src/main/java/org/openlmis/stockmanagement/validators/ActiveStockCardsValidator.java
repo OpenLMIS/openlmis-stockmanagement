@@ -28,6 +28,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * When submitting a physical inventory, user MUST claim a stock on hand for each existing stock
+ * card.
+ * This validator makes sure no existing stock card is missing in the stock event.
+ */
 @Component(value = "ActiveStockCardsValidator")
 public class ActiveStockCardsValidator implements StockEventValidator {
 

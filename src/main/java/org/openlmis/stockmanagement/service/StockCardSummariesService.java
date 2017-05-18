@@ -48,9 +48,15 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+/**
+ * This class is in charge of retrieving stock card summaries(stock cards with soh but not line
+ * items).
+ *
+ * Its result may include existing stock cards only, or it may include dummy stock cards for
+ * approved products and their lots. See SearchOptions for details.
+ */
 @Service
 public class StockCardSummariesService extends StockCardBaseService {
-
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCardSummariesService.class);
 
   @Autowired
@@ -67,13 +73,13 @@ public class StockCardSummariesService extends StockCardBaseService {
    *
    * @param programId    program id.
    * @param facilityId   facility id.
-   * @param searchOption enum option that indicates either to include approved products
+   * @param searchOption enum option that indicates either to include dummy stock cards for approved
+   *                     products and their lots.
    * @return found stock cards.
    */
   public List<StockCardDto> findStockCards(UUID programId, UUID facilityId,
                                            SearchOptions searchOption) {
-    List<StockCard> cards = cardRepository
-        .findByProgramIdAndFacilityId(programId, facilityId);
+    List<StockCard> cards = cardRepository.findByProgramIdAndFacilityId(programId, facilityId);
 
     LOGGER.info("Calling ref data to get all approved orderables");
     Map<OrderableLotIdentity, OrderableLot> orderableLotsMap = createOrderableLots(
@@ -83,8 +89,7 @@ public class StockCardSummariesService extends StockCardBaseService {
     Stream<StockCard> dummyCards = createDummyCards(programId, facilityId, cards,
         orderableLotsMap.values(), searchOption);
 
-    List<StockCardDto> dtos =
-        createDtos(concat(cards.stream(), dummyCards).collect(toList()));
+    List<StockCardDto> dtos = createDtos(concat(cards.stream(), dummyCards).collect(toList()));
     return assignOrderableLotRemoveLineItems(dtos, orderableLotsMap);
   }
 
@@ -112,17 +117,15 @@ public class StockCardSummariesService extends StockCardBaseService {
   }
 
   private List<StockCardDto> assignOrderableLotRemoveLineItems(
-      List<StockCardDto> dtos,
+      List<StockCardDto> stockCardDtos,
       Map<OrderableLotIdentity, OrderableLot> orderableLotsMap) {
-    dtos.forEach(stockCardDto -> {
+    stockCardDtos.forEach(stockCardDto -> {
       OrderableLot orderableLot = orderableLotsMap.get(identityOf(stockCardDto));
       stockCardDto.setOrderable(orderableLot.getOrderable());
       stockCardDto.setLot(orderableLot.getLot());
-      //line items are not needed in summary
-      //remove them after re-calculation is done(in base class)
-      stockCardDto.setLineItems(null);
+      stockCardDto.setLineItems(null);//line items are not needed in summary
     });
-    return dtos;
+    return stockCardDtos;
   }
 
   private Stream<StockCard> createDummyCards(UUID programId, UUID facilityId,
@@ -166,8 +169,7 @@ public class StockCardSummariesService extends StockCardBaseService {
   private Stream<OrderableLot> lotsOfOrderable(OrderableDto orderableDto) {
     String tradeItemId = orderableDto.getIdentifiers().get("tradeItem");
     if (tradeItemId != null) {
-      return lotReferenceDataService
-          .getAllLotsOf(UUID.fromString(tradeItemId)).stream()
+      return lotReferenceDataService.getAllLotsOf(UUID.fromString(tradeItemId)).stream()
           .map(lot -> new OrderableLot(orderableDto, lot));
     } else {
       return empty();
@@ -196,9 +198,12 @@ public class StockCardSummariesService extends StockCardBaseService {
   public enum SearchOptions {
     //only include stock cards that exist in DB
     ExistingStockCardsOnly,
+
     //combine existing stock cards, plus:
     //cartesian product of approved orderables(that don't have cards yet) and their lots
+    //For example: there is one orderable called O1, there are 2 lots(L1 and L2) associated with
+    //its trade item. When you use this option you will get:
+    //(O1, L1) and (O1, L2) and (O1, null). So, 3 stock cards in total.
     IncludeApprovedOrderables
   }
-
 }
