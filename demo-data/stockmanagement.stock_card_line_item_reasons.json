@@ -17,8 +17,8 @@
   },
   {
     "id": "279d55bd-42e3-438c-a63d-9c021b185dae",
-    "name": "Clinic return",
-    "description": "Clinic return",
+    "name": "Facility return",
+    "description": "Facility return",
     "reasonCategory": "ADJUSTMENT",
     "reasonType": "CREDIT",
     "isFreeTextAllowed": false
@@ -27,6 +27,30 @@
     "id": "5b09202e-b8a7-4f77-9e0e-8156f8efc613",
     "name": "Damage",
     "description": "Damage",
+    "reasonCategory": "ADJUSTMENT",
+    "reasonType": "DEBIT",
+    "isFreeTextAllowed": false
+  },
+  {
+    "id": "3e7940db-49a5-492f-a4eb-75acb981dd2b",
+    "name": "Expired",
+    "description": "Expired",
+    "reasonCategory": "ADJUSTMENT",
+    "reasonType": "DEBIT",
+    "isFreeTextAllowed": false
+  },
+  {
+    "id": "09e1d05d-f736-4834-9346-c27196a99eae",
+    "name": "Stolen",
+    "description": "Stolen",
+    "reasonCategory": "ADJUSTMENT",
+    "reasonType": "DEBIT",
+    "isFreeTextAllowed": false
+  },
+  {
+    "id": "b7e99f5b-af04-433d-9c30-d4f90c60c47b",
+    "name": "Lost",
+    "description": "Lost",
     "reasonCategory": "ADJUSTMENT",
     "reasonType": "DEBIT",
     "isFreeTextAllowed": true
