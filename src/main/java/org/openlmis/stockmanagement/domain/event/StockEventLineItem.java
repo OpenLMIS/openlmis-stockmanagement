@@ -85,4 +85,9 @@ public class StockEventLineItem extends BaseEntity implements IdentifiableByOrde
   public boolean hasDestinationId() {
     return this.destinationId != null;
   }
+
+  public boolean isPhysicalInventory() {
+    return sourceId == null && destinationId == null && reasonId == null;
+  }
+
 }

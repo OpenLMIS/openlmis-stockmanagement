@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.domain.card;
 
+import static java.lang.Integer.MAX_VALUE;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.is;
@@ -23,7 +24,9 @@ import static org.junit.Assert.assertThat;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemFrom;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
@@ -36,6 +39,9 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 public class StockCardLineItemTest {
+
+  @Rule
+  public final ExpectedException exception = ExpectedException.none();
 
   @Test
   public void should_create_line_item_from_stock_event() throws Exception {
@@ -93,6 +99,23 @@ public class StockCardLineItemTest {
 
     //then
     assertThat(lineItem.getStockOnHand(), is(15));
+  }
+
+  @Test
+  public void should_not_increase_soh_over_int_limit() throws Exception {
+    //expect
+    exception.expectMessage("exceed.upperLimit");
+
+    //given
+    StockCardLineItemReason creditReason = StockCardLineItemReason.builder()
+        .reasonType(ReasonType.CREDIT).build();
+
+    int quantityToAdd = 10;
+    StockCardLineItem lineItem = StockCardLineItem.builder()
+        .reason(creditReason)
+        .quantity(quantityToAdd).build();
+    //when
+    lineItem.calculateStockOnHand(MAX_VALUE - quantityToAdd + 1);
   }
 
   @Test

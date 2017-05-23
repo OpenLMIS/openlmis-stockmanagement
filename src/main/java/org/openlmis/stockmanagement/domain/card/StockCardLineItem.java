@@ -20,6 +20,8 @@ import static java.time.ZonedDateTime.now;
 import static org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason.physicalBalance;
 import static org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason.physicalCredit;
 import static org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason.physicalDebit;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERRRO_EVENT_SOH_EXCEEDS_LIMIT;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -31,6 +33,8 @@ import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.utils.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -160,11 +164,29 @@ public class StockCardLineItem extends BaseEntity {
       setQuantity(Math.abs(getStockOnHand() - previousStockOnHand));
       LOGGER.debug("Physical inventory: " + getStockOnHand());
     } else if (shouldIncrease()) {
-      setStockOnHand(previousStockOnHand + quantity);
-      LOGGER.debug(previousStockOnHand + " + " + quantity + " = " + getStockOnHand());
+      tryIncrease(previousStockOnHand);
     } else {
-      setStockOnHand(previousStockOnHand - quantity);
-      LOGGER.debug(previousStockOnHand + " - " + quantity + " = " + getStockOnHand());
+      tryDecrease(previousStockOnHand);
+    }
+  }
+
+  private void tryDecrease(int previousStockOnHand) {
+    if (previousStockOnHand - quantity < 0) {
+      throw new ValidationMessageException(
+          new Message(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH, quantity));
+    }
+
+    setStockOnHand(previousStockOnHand - quantity);
+    LOGGER.debug(previousStockOnHand + " - " + quantity + " = " + getStockOnHand());
+  }
+
+  private void tryIncrease(int previousStockOnHand) {
+    try {
+      //this may exceed max of integer
+      setStockOnHand(Math.addExact(previousStockOnHand, quantity));
+      LOGGER.debug(previousStockOnHand + " + " + quantity + " = " + getStockOnHand());
+    } catch (ArithmeticException ex) {
+      throw new ValidationMessageException(new Message(ERRRO_EVENT_SOH_EXCEEDS_LIMIT));
     }
   }
 

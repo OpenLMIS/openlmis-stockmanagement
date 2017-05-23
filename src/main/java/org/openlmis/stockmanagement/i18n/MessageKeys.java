@@ -111,10 +111,11 @@ public abstract class MessageKeys {
   public static final String ERROR_EVENT_ISSUE_REASON_CATEGORY_INVALID = EVENT_ERROR_PREFIX
       + ".issue.reasonCategory.invalid";
 
-  //stock events creation: debit quantity
+  //stock events creation: soh
   public static final String ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH = EVENT_ERROR_PREFIX
       + ".debit.quantity.exceed.stockOnHand";
-
+  public static final String ERRRO_EVENT_SOH_EXCEEDS_LIMIT = EVENT_ERROR_PREFIX
+      + ".stockOnHand.exceed.upperLimit";
   //stock events creation: reason assignment
   //reason.not.in.validList error key is not used for now, because we remove valid reasons
   //check when implementing adjustment's UI
@@ -128,7 +129,7 @@ public abstract class MessageKeys {
   public static final String ERROR_EVENT_ORDERABLE_LOT_DUPLICATION = EVENT_ERROR_PREFIX
       + ".orderable.and.lot.duplication";
 
-  //stock events creation: orderable duplication
+  //stock events creation: lot
   public static final String ERROR_EVENT_LOT_NOT_EXIST = EVENT_ERROR_PREFIX + ".lot.not.exist";
   public static final String ERROR_EVENT_LOT_ORDERABLE_NOT_MATCH = EVENT_ERROR_PREFIX
       + ".lot.not.match.orderable";
@@ -218,4 +219,5 @@ public abstract class MessageKeys {
   private MessageKeys() {
     throw new UnsupportedOperationException();
   }
+
 }

@@ -16,7 +16,6 @@
 package org.openlmis.stockmanagement.validators;
 
 import static java.util.stream.Collectors.groupingBy;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
@@ -38,11 +37,10 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * This validator makes sure stock on hand does NOT go below zero for any stock card.
- * It does so by re-calculating soh of each orderable/lot combo that either has a destination or has
- * a debit reason.
- * The re-calculation only happens for issue and negative adjustment. It does not apply to physical
- * inventory and receive.
+ * 1 This validator makes sure stock on hand does NOT go below zero for any stock card.
+ * 2 This validator also makes sure soh does not be over upper limit of integer.
+ * It does so by re-calculating soh of each orderable/lot combo.
+ * The re-calculation does not apply to physical inventory.
  * This has a negative impact on performance. The impact grows larger as stock card line items
  * accumulates over time. Because re-calculation requires reading stock card line items from DB.
  */
@@ -68,8 +66,9 @@ public class QuantityValidator implements StockEventValidator {
         .collect(groupingBy(OrderableLotIdentity::identityOf));
 
     for (List<StockEventLineItem> group : sameOrderableGroups.values()) {
-      boolean anyDebitInGroup = group.stream().anyMatch(this::hasDebitReason);
-      if (stockEventDto.hasDestination() || anyDebitInGroup) {
+      boolean willIncreaseOrDecrease = !group.stream()
+          .allMatch(StockEventLineItem::isPhysicalInventory);
+      if (willIncreaseOrDecrease) {//increase may cause int overflow, decrease may cause below zero
         validateQuantity(stockEventDto, group);
       }
     }
@@ -82,11 +81,6 @@ public class QuantityValidator implements StockEventValidator {
 
     //create line item from event line item and add it to stock card for recalculation
     calculateStockOnHand(stockEventDto, group, foundCard);
-    foundCard.getLineItems().forEach(item -> {
-      if (item.getStockOnHand() < 0) {
-        throwQuantityError(group);
-      }
-    });
   }
 
   private StockCard tryFindCard(UUID programId, UUID facilityId, StockEventLineItem lineItem) {
@@ -109,11 +103,6 @@ public class QuantityValidator implements StockEventValidator {
         throw new ValidationMessageException(new Message("Error during shallow copy", ex));
       }
     }
-  }
-
-  private void throwQuantityError(List<StockEventLineItem> group) {
-    throw new ValidationMessageException(
-        new Message(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH, group));
   }
 
   private void calculateStockOnHand(StockEventDto eventDto, List<StockEventLineItem> group,
