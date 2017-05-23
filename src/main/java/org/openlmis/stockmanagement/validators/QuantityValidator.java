@@ -68,7 +68,8 @@ public class QuantityValidator implements StockEventValidator {
     for (List<StockEventLineItem> group : sameOrderableGroups.values()) {
       boolean willIncreaseOrDecrease = !group.stream()
           .allMatch(StockEventLineItem::isPhysicalInventory);
-      if (willIncreaseOrDecrease) {//increase may cause int overflow, decrease may cause below zero
+      if (willIncreaseOrDecrease) {
+        //increase may cause int overflow, decrease may cause below zero
         validateQuantity(stockEventDto, group);
       }
     }

@@ -186,7 +186,8 @@ public class StockCardLineItem extends BaseEntity {
       setStockOnHand(Math.addExact(previousStockOnHand, quantity));
       LOGGER.debug(previousStockOnHand + " + " + quantity + " = " + getStockOnHand());
     } catch (ArithmeticException ex) {
-      throw new ValidationMessageException(new Message(ERRRO_EVENT_SOH_EXCEEDS_LIMIT));
+      throw new ValidationMessageException(
+          new Message(ERRRO_EVENT_SOH_EXCEEDS_LIMIT, previousStockOnHand, quantity, ex));
     }
   }
 
