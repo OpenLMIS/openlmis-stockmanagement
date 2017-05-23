@@ -173,7 +173,7 @@ public class StockCardLineItem extends BaseEntity {
   private void tryDecrease(int previousStockOnHand) {
     if (previousStockOnHand - quantity < 0) {
       throw new ValidationMessageException(
-          new Message(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH, quantity));
+          new Message(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH, previousStockOnHand, quantity));
     }
 
     setStockOnHand(previousStockOnHand - quantity);
