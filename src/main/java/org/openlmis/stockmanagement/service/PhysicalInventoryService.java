@@ -89,6 +89,24 @@ public class PhysicalInventoryService {
   }
 
   /**
+   * Find draft by program and facility.
+   *
+   * @param programId  programId.
+   * @param facilityId facilityId.
+   * @return found draft, or if not found, returns empty draft.
+   */
+  public PhysicalInventoryDto findDraftTmp(UUID programId, UUID facilityId) {
+    LOGGER.info("find physical inventory draft");
+    PhysicalInventory foundInventory = physicalInventoriesRepository
+        .findByProgramIdAndFacilityIdAndIsDraft(programId, facilityId, true);
+    if (foundInventory == null) {
+      return null;
+    } else {
+      return PhysicalInventoryDto.from(foundInventory);
+    }
+  }
+
+  /**
    * Save or update draft.
    *
    * @param dto physical inventory dto.

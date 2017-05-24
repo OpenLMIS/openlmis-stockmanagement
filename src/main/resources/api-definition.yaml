@@ -781,6 +781,33 @@ traits:
                   schema: localizedMessage
 
   /physicalInventories:
+      /draftTmp:
+        get:
+          is: [ secured ]
+          description: Get a draft physical inventory. If draft does not exist, will return null.
+          queryParameters:
+            facility:
+              required: true
+            program:
+              required: true
+          responses:
+            200:
+              description: Retrieved a draft.
+              body:
+                application/json:
+                  schema: physicalInventory
+            204:
+              description: No draft has been saved yet.
+              body:
+                application/json:
+                  schema: physicalInventory
+
+            403:
+              description: User does not have permission to view draft physical inventory.
+              body:
+                application/json:
+                  schema: localizedMessage
+
       /draft:
         get:
           is: [ secured ]
