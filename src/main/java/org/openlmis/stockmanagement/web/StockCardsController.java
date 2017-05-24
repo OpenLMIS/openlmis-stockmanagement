@@ -23,10 +23,11 @@ import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardService;
 import org.openlmis.stockmanagement.service.StockCardSummariesService;
-import org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -71,6 +72,7 @@ public class StockCardsController {
     }
   }
 
+
   /**
    * Get stock card summaries by program and facility.
    *
@@ -79,7 +81,7 @@ public class StockCardsController {
   @RequestMapping(value = "/stockCardSummaries")
   public ResponseEntity<List<StockCardDto>> getStockCardSummaries(
       @RequestParam() UUID program, @RequestParam() UUID facility,
-      @RequestParam(required = false) SearchOptions searchOption
+      @RequestParam(required = false) StockCardSummariesService.SearchOptions searchOption
   ) {
     LOGGER.debug("Try to find stock card summaries");
     permissionService.canViewStockCard(program, facility);
@@ -90,6 +92,37 @@ public class StockCardsController {
 
     return new ResponseEntity<>(stockCardSummariesService.findStockCards(
         program, facility, searchOption), OK);
+  }
+
+  /**
+   * Get stock card summaries by program and facility.
+   *
+   * @return Stock card summaries.
+   */
+  @RequestMapping(value = "/stockCardSummariesTmp")//this will replace the api above
+  public Page<StockCardDto> getStockCardSummaries(
+      @RequestParam() UUID program,
+      @RequestParam() UUID facility,
+      Pageable pageable
+  ) {
+    LOGGER.debug("Try to find stock card summaries");
+    permissionService.canViewStockCard(program, facility);
+    return stockCardSummariesService.findStockCards(program, facility, pageable);
+  }
+
+  /**
+   * Get dummy stock card summaries for approved products and lots.
+   *
+   * @return Stock card summaries.
+   */
+  @RequestMapping(value = "/stockCardSummaries/noCards")
+  public List<StockCardDto> getStockCardSummariesFor(
+      @RequestParam() UUID program,
+      @RequestParam() UUID facility
+  ) {
+    LOGGER.debug("dummy stock card summaries for approved orderables and lots");
+    permissionService.canViewStockCard(program, facility);
+    return stockCardSummariesService.createDummyStockCards(program, facility);
   }
 
 }

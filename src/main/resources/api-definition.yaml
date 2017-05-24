@@ -272,6 +272,57 @@ traits:
                 application/json:
                   schema: localizedMessage
 
+  /stockCardSummariesTmp:
+      get:
+        is: [ secured ]
+        description: Get summaries of stock cards, which contains SOH, product name, and other essential information. This will NOT return any line items. (This could be used by front end for list view.)
+        queryParameters:
+          facility:
+            required: true
+            description: Facility id, indicates the facility that the queried stock card summaries should belong to.
+          program:
+            required: true
+            description: Program id, indicates the program that the queries stock card summaries is under.
+
+        responses:
+          200:
+            body:
+              application/json:
+                schema: stockCardSummaries
+          404:
+            description: No stock cards were found that matches given facility and program.
+            body:
+              application/json:
+                schema: localizedMessage
+          403:
+            description: User does not have permission to view stock cards of given facility and program.
+            body:
+              application/json:
+                schema: localizedMessage
+
+  /stockCardSummaries/noCards:
+      get:
+        is: [ secured ]
+        description: Get dummy stock card summaries for approved products and lots that don't have cards yet.
+        queryParameters:
+          facility:
+            required: true
+            description: Facility id, indicates the facility.
+          program:
+            required: true
+            description: Program id, indicates the program.
+
+        responses:
+          200:
+            body:
+              application/json:
+                schema: stockCardSummaries
+          403:
+            description: User does not have permission to view stock cards of given facility and program.
+            body:
+              application/json:
+                schema: localizedMessage
+
   /stockCards/{id}:
       get:
         is: [ secured ]

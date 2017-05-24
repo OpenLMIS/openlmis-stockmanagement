@@ -22,6 +22,7 @@ import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.empty;
 import static org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity.identityOf;
 import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.ExistingStockCardsOnly;
+import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.IncludeApprovedOrderables;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
@@ -85,8 +86,10 @@ public class StockCardSummariesService extends StockCardBaseService {
         approvedProductService.getAllApprovedProducts(programId, facilityId));
 
     //create dummy(fake/not persisted) cards for approved orderables that don't have cards yet
-    Stream<StockCard> dummyCards = createDummyCards(programId, facilityId, cards,
-        orderableLotsMap.values(), searchOption);
+    List<OrderableLotIdentity> cardIdentities = cards.stream()
+        .map(OrderableLotIdentity::identityOf).collect(toList());
+    Stream<StockCard> dummyCards = createDummyCards(programId, facilityId,
+        orderableLotsMap.values(), searchOption, cardIdentities);
 
     List<StockCardDto> dtos = createDtos(concat(cards.stream(), dummyCards).collect(toList()));
     return assignOrderableLotRemoveLineItems(dtos, orderableLotsMap);
@@ -101,8 +104,6 @@ public class StockCardSummariesService extends StockCardBaseService {
    * @return page of stock cards.
    */
   public Page<StockCardDto> findStockCards(UUID programId, UUID facilityId, Pageable pageable) {
-    //Currently this method has not been used,
-    // but might be used in the future when do back end pagination
     Page<StockCard> cards = cardRepository
         .findByProgramIdAndFacilityId(programId, facilityId, pageable);
 
@@ -113,6 +114,21 @@ public class StockCardSummariesService extends StockCardBaseService {
     List<StockCardDto> stockCardDtos =
         assignOrderableLotRemoveLineItems(createDtos(cards.getContent()), orderableLotsMap);
     return new PageImpl<>(stockCardDtos, pageable, cards.getTotalElements());
+  }
+
+  public List<StockCardDto> createDummyStockCards(UUID programId, UUID facilityId) {
+    //this will not read the whole table, only the orderable id and lot id
+    List<OrderableLotIdentity> existingCardIdentities =
+        cardRepository.getIdentitiesBy(programId, facilityId);
+
+    LOGGER.info("Calling ref data to get all approved orderables");
+    Map<OrderableLotIdentity, OrderableLot> orderableLotsMap = createOrderableLots(
+        approvedProductService.getAllApprovedProducts(programId, facilityId));
+
+    //create dummy(fake/not persisted) cards for approved orderables that don't have cards yet
+    List<StockCard> dummyCards = createDummyCards(programId, facilityId, orderableLotsMap.values(),
+        IncludeApprovedOrderables, existingCardIdentities).collect(toList());
+    return assignOrderableLotRemoveLineItems(createDtos(dummyCards), orderableLotsMap);
   }
 
   private List<StockCardDto> assignOrderableLotRemoveLineItems(
@@ -128,14 +144,14 @@ public class StockCardSummariesService extends StockCardBaseService {
   }
 
   private Stream<StockCard> createDummyCards(UUID programId, UUID facilityId,
-                                             List<StockCard> existingCards,
                                              Collection<OrderableLot> orderableLots,
-                                             SearchOptions searchOption) {
+                                             SearchOptions searchOption,
+                                             List<OrderableLotIdentity> cardIdentities) {
     if (searchOption == ExistingStockCardsOnly) {
       return empty();//do not create dummy cards when option says so.
     }
 
-    return filterOrderableLotsWithoutCards(orderableLots, existingCards)
+    return filterOrderableLotsWithoutCards(orderableLots, cardIdentities)
         .stream()
         .map(orderableLot -> StockCard.builder()
             .programId(programId)
@@ -147,10 +163,10 @@ public class StockCardSummariesService extends StockCardBaseService {
   }
 
   private List<OrderableLot> filterOrderableLotsWithoutCards(
-      Collection<OrderableLot> orderableLots, List<StockCard> stockCards) {
+      Collection<OrderableLot> orderableLots, List<OrderableLotIdentity> cardIdentities) {
     return orderableLots.stream()
-        .filter(orderableLot -> stockCards.stream()
-            .noneMatch(stockCard -> identityOf(stockCard).equals(identityOf(orderableLot))))
+        .filter(orderableLot -> cardIdentities.stream()
+            .noneMatch(cardIdentity -> cardIdentity.equals(identityOf(orderableLot))))
         .collect(toList());
   }
 
@@ -198,11 +214,10 @@ public class StockCardSummariesService extends StockCardBaseService {
     //only include stock cards that exist in DB
     ExistingStockCardsOnly,
 
-    //combine existing stock cards, plus:
     //cartesian product of approved orderables(that don't have cards yet) and their lots
     //For example: there is one orderable called O1, there are 2 lots(L1 and L2) associated with
     //its trade item. When you use this option you will get:
-    //(O1, L1) and (O1, L2) and (O1, null). So, 3 stock cards in total.
+    //(O1, L1) and (O1, L2) and (O1, null). So, 3 dummy stock cards in total.
     IncludeApprovedOrderables
   }
 }
