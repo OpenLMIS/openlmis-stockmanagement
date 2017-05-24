@@ -116,6 +116,13 @@ public class StockCardSummariesService extends StockCardBaseService {
     return new PageImpl<>(stockCardDtos, pageable, cards.getTotalElements());
   }
 
+  /**
+   * Create dummy cards for approved products and lots that don't have cards yet.
+   *
+   * @param programId  programId
+   * @param facilityId facilityId
+   * @return dummy cards.
+   */
   public List<StockCardDto> createDummyStockCards(UUID programId, UUID facilityId) {
     //this will not read the whole table, only the orderable id and lot id
     List<OrderableLotIdentity> existingCardIdentities =
