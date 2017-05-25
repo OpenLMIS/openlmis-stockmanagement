@@ -274,7 +274,7 @@ traits:
 
   /stockCardSummariesTmp:
       get:
-        is: [ secured ]
+        is: [ secured , paginated ]
         description: Get summaries of stock cards, which contains SOH, product name, and other essential information. This will NOT return any line items. (This could be used by front end for list view.)
         queryParameters:
           facility:
@@ -303,7 +303,7 @@ traits:
   /stockCardSummaries/noCards:
       get:
         is: [ secured ]
-        description: Get dummy stock card summaries for approved products and lots that don't have cards yet.
+        description: Get dummy stock card summaries for approved products and lots that don't have cards yet. This can be used by front end to determine what new stock cards can be created.
         queryParameters:
           facility:
             required: true
@@ -784,7 +784,7 @@ traits:
       /draftTmp:
         get:
           is: [ secured ]
-          description: Get a draft physical inventory. If draft does not exist, will return null.
+          description: Get a saved draft physical inventory. If draft does not exist, will return null. Only one draft is allowed at the same time for one facility&program. To save a new draft, the previous one will be replaced.
           queryParameters:
             facility:
               required: true
@@ -801,7 +801,6 @@ traits:
               body:
                 application/json:
                   schema: physicalInventory
-
             403:
               description: User does not have permission to view draft physical inventory.
               body:
