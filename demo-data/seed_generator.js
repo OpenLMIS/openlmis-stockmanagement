@@ -10,13 +10,18 @@ var query = "INSERT INTO %s (SELECT * FROM json_populate_recordset(NULL::%s, '%s
 // This presents the order that must be kept for proper data insertion.
 // Tables not included here are populated in random order
 var filesOrdered = [
-    "stockmanagement.stock_card_line_item_reasons",
-    "stockmanagement.valid_reason_assignments",
-    "stockmanagement.organizations",
-    "stockmanagement.nodes",
-    "stockmanagement.valid_source_assignments",
-    "stockmanagement.valid_destination_assignments"
-]
+  "stockmanagement.stock_card_line_item_reasons",
+  "stockmanagement.valid_reason_assignments",
+  "stockmanagement.organizations",
+  "stockmanagement.nodes",
+  "stockmanagement.valid_source_assignments",
+  "stockmanagement.valid_destination_assignments",
+  "stockmanagement.stock_events",
+  "stockmanagement.stock_event_line_items",
+  "stockmanagement.stock_cards",
+  "stockmanagement.stock_card_line_items",
+  "stockmanagement.physical_inventories"
+];
 
 // Detects if the given key/value pair represents a foreign key.
 var isForeign = function (obj, key) {
