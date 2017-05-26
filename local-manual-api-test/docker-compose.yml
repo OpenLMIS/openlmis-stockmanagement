@@ -18,7 +18,7 @@ services:
     depends_on: [consul]
 
   reference-ui:
-    image: openlmis/reference-ui:5.0.1-SNAPSHOT
+    image: openlmis/reference-ui
     env_file: .manual-api-test-env
     depends_on: [consul]
 
