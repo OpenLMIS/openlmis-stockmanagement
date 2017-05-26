@@ -39,6 +39,7 @@ import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
+import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
@@ -68,6 +69,9 @@ public class StockCardServiceTest extends BaseTest {
   @Autowired
   private StockCardRepository stockCardRepository;
 
+  @Autowired
+  private PhysicalInventoriesRepository physicalInventoriesRepository;
+
   @MockBean
   private FacilityReferenceDataService facilityReferenceDataService;
 
@@ -85,6 +89,7 @@ public class StockCardServiceTest extends BaseTest {
 
   @After
   public void tearDown() throws Exception {
+    physicalInventoriesRepository.deleteAll();
     stockCardRepository.deleteAll();
     stockEventsRepository.deleteAll();
   }

@@ -15,8 +15,6 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
@@ -30,11 +28,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.openlmis.stockmanagement.BaseTest;
-import org.openlmis.stockmanagement.domain.card.StockCard;
-import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
+import org.openlmis.stockmanagement.repository.StockCardLineItemRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
@@ -43,7 +40,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.List;
 import java.util.UUID;
 
 @RunWith(SpringRunner.class)
@@ -66,13 +62,22 @@ public class StockEventProcessorTest extends BaseTest {
   private StockCardRepository stockCardRepository;
 
   @Autowired
+  private StockCardLineItemRepository lineItemRepository;
+
+  @Autowired
   private PhysicalInventoriesRepository physicalInventoriesRepository;
 
-  private UUID userId;
+  private long cardSize;
+  private long eventSize;
+  private long lineItemSize;
 
   @Before
   public void setUp() throws Exception {
-    userId = UUID.randomUUID();
+    cardSize = stockCardRepository.count();
+    eventSize = stockEventsRepository.count();
+    lineItemSize = lineItemRepository.count();
+
+    UUID userId = UUID.randomUUID();
     UserDto userDto = new UserDto();
     userDto.setId(userId);
 
@@ -105,7 +110,7 @@ public class StockEventProcessorTest extends BaseTest {
       stockEventProcessor.process(stockEventDto);
     } catch (RuntimeException ex) {
       //then
-      assertEventAndCardAndLineItemTableSize(0);
+      assertSize(cardSize, eventSize, lineItemSize);
       return;
     }
 
@@ -114,14 +119,13 @@ public class StockEventProcessorTest extends BaseTest {
 
   @Test
   public void should_save_event_and_line_items_when_validation_service_passes() throws Exception {
-    assertEventAndCardAndLineItemTableSize(0);
     StockEventDto stockEventDto = createStockEventDto();
 
     //when
     stockEventProcessor.process(stockEventDto);
 
     //then
-    assertEventAndCardAndLineItemTableSize(1);
+    assertSize(cardSize + 1, eventSize + 1, lineItemSize + 1);
   }
 
   @Test
@@ -137,21 +141,13 @@ public class StockEventProcessorTest extends BaseTest {
     stockEventProcessor.process(stockEventDto);
 
     //then
-    assertEventAndCardAndLineItemTableSize(1);
+    assertSize(cardSize + 1, eventSize + 1, lineItemSize + 1);
     assertThat(physicalInventoriesRepository.count(), is(1L));
   }
 
-  private void assertEventAndCardAndLineItemTableSize(long size) {
-    Iterable<StockCard> allCards = stockCardRepository.findAll();
-    List<StockCardLineItem> allLineItems = stream(allCards.spliterator(), false)
-        .flatMap(stockCard -> stockCard.getLineItems().stream())
-        .collect(toList());
-
-    if (!allLineItems.isEmpty()) {
-      assertThat(allLineItems.get(0).getUserId(), is(userId));
-    }
-    assertThat(allCards.spliterator().getExactSizeIfKnown(), is(size));
-    assertThat((long) allLineItems.size(), is(size));
-    assertThat(stockEventsRepository.count(), is(size));
+  private void assertSize(long cardSize, long eventSize, long lineItemSize) {
+    assertThat(stockCardRepository.count(), is(cardSize));
+    assertThat(stockEventsRepository.count(), is(eventSize));
+    assertThat(lineItemRepository.count(), is(lineItemSize));
   }
 }
