@@ -214,7 +214,7 @@ traits:
 
   /stockCardSummaries:
       get:
-        is: [ secured ]
+        is: [ secured , paginated ]
         description: Get summaries of stock cards, which contains SOH, product name, and other essential information. This will NOT return any line items. (This could be used by front end for list view.)
         queryParameters:
           facility:
@@ -223,12 +223,6 @@ traits:
           program:
             required: true
             description: Program id, indicates the program that the queries stock card summaries is under.
-          searchOption:
-            required: false
-            description: |
-              Indicates the result should include all approved products or not.
-              Deafult value is "ExistingStockCardsOnly", so that you can only get existing stock cards.
-              And you can Indicate "IncludeApprovedOrderables" to get all approved orderables of the program and facility combination.
 
         responses:
           200:
@@ -245,6 +239,7 @@ traits:
             body:
               application/json:
                 schema: localizedMessage
+
       /print:
         get:
           is: [ secured ]
@@ -271,34 +266,6 @@ traits:
               body:
                 application/json:
                   schema: localizedMessage
-
-  /stockCardSummariesTmp:
-      get:
-        is: [ secured , paginated ]
-        description: Get summaries of stock cards, which contains SOH, product name, and other essential information. This will NOT return any line items. (This could be used by front end for list view.)
-        queryParameters:
-          facility:
-            required: true
-            description: Facility id, indicates the facility that the queried stock card summaries should belong to.
-          program:
-            required: true
-            description: Program id, indicates the program that the queries stock card summaries is under.
-
-        responses:
-          200:
-            body:
-              application/json:
-                schema: stockCardSummaries
-          404:
-            description: No stock cards were found that matches given facility and program.
-            body:
-              application/json:
-                schema: localizedMessage
-          403:
-            description: User does not have permission to view stock cards of given facility and program.
-            body:
-              application/json:
-                schema: localizedMessage
 
   /stockCardSummaries/noCards:
       get:
@@ -781,7 +748,7 @@ traits:
                   schema: localizedMessage
 
   /physicalInventories:
-      /draftTmp:
+      /draft:
         get:
           is: [ secured ]
           description: Get a saved draft physical inventory. If draft does not exist, will return null. Only one draft is allowed at the same time for one facility&program. To save a new draft, the previous one will be replaced.
@@ -801,28 +768,6 @@ traits:
               body:
                 application/json:
                   schema: physicalInventory
-            403:
-              description: User does not have permission to view draft physical inventory.
-              body:
-                application/json:
-                  schema: localizedMessage
-
-      /draft:
-        get:
-          is: [ secured ]
-          description: Get a draft physical inventory. If draft does not exist, will return a list of all approved products with empty quantity as a starter template.
-          queryParameters:
-            facility:
-              required: true
-            program:
-              required: true
-          responses:
-            200:
-              description: Retrieved a draft.
-              body:
-                application/json:
-                  schema: physicalInventory
-
             403:
               description: User does not have permission to view draft physical inventory.
               body:

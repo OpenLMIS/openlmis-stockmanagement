@@ -15,7 +15,6 @@
 
 package org.openlmis.stockmanagement.web;
 
-import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.ExistingStockCardsOnly;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 
@@ -72,34 +71,12 @@ public class StockCardsController {
     }
   }
 
-
   /**
    * Get stock card summaries by program and facility.
    *
    * @return Stock card summaries.
    */
   @RequestMapping(value = "/stockCardSummaries")
-  public ResponseEntity<List<StockCardDto>> getStockCardSummaries(
-      @RequestParam() UUID program, @RequestParam() UUID facility,
-      @RequestParam(required = false) StockCardSummariesService.SearchOptions searchOption
-  ) {
-    LOGGER.debug("Try to find stock card summaries");
-    permissionService.canViewStockCard(program, facility);
-
-    if (searchOption == null) {
-      searchOption = ExistingStockCardsOnly;
-    }
-
-    return new ResponseEntity<>(stockCardSummariesService.findStockCards(
-        program, facility, searchOption), OK);
-  }
-
-  /**
-   * Get stock card summaries by program and facility.
-   *
-   * @return Stock card summaries.
-   */
-  @RequestMapping(value = "/stockCardSummariesTmp")//this will replace the api above
   public Page<StockCardDto> getStockCardSummaries(
       @RequestParam() UUID program,
       @RequestParam() UUID facility,

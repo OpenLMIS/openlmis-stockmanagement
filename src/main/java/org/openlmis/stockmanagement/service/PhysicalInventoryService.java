@@ -15,18 +15,15 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static java.util.stream.Collectors.toList;
 import static org.openlmis.stockmanagement.domain.BaseEntity.fromId;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING;
-import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.IncludeApprovedOrderables;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
-import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
 import org.openlmis.stockmanagement.utils.Message;
@@ -45,9 +42,6 @@ public class PhysicalInventoryService {
 
   @Autowired
   private PhysicalInventoriesRepository physicalInventoriesRepository;
-
-  @Autowired
-  private StockCardSummariesService stockCardSummariesService;
 
   /**
    * Persist physical inventory, with an event id. (For now, we only save physical inventory, but we
@@ -78,24 +72,6 @@ public class PhysicalInventoryService {
    * @return found draft, or if not found, returns empty draft.
    */
   public PhysicalInventoryDto findDraft(UUID programId, UUID facilityId) {
-    LOGGER.info("find physical inventory draft");
-    PhysicalInventory foundInventory = physicalInventoriesRepository
-        .findByProgramIdAndFacilityIdAndIsDraft(programId, facilityId, true);
-    if (foundInventory == null) {
-      return createEmptyDraft(programId, facilityId);
-    } else {
-      return assignOrderablesAndSoh(PhysicalInventoryDto.from(foundInventory));
-    }
-  }
-
-  /**
-   * Find draft by program and facility.
-   *
-   * @param programId  programId.
-   * @param facilityId facilityId.
-   * @return found draft, or if not found, returns empty draft.
-   */
-  public PhysicalInventoryDto findDraftTmp(UUID programId, UUID facilityId) {
     LOGGER.info("find physical inventory draft");
     PhysicalInventory foundInventory = physicalInventoriesRepository
         .findByProgramIdAndFacilityIdAndIsDraft(programId, facilityId, true);
@@ -132,33 +108,6 @@ public class PhysicalInventoryService {
     if (foundInventory != null) {
       physicalInventoriesRepository.delete(foundInventory);
     }
-  }
-
-  private PhysicalInventoryDto assignOrderablesAndSoh(PhysicalInventoryDto inventoryDto) {
-    UUID programId = inventoryDto.getProgramId();
-    UUID facilityId = inventoryDto.getFacilityId();
-
-    List<StockCardDto> cards = stockCardSummariesService
-        .findStockCards(programId, facilityId, IncludeApprovedOrderables);
-    inventoryDto.mergeWith(cards);
-
-    return inventoryDto;
-  }
-
-  private PhysicalInventoryDto createEmptyDraft(UUID programId, UUID facilityId) {
-    List<StockCardDto> stockCards = stockCardSummariesService
-        .findStockCards(programId, facilityId, IncludeApprovedOrderables);
-
-    return PhysicalInventoryDto.builder()
-        .programId(programId)
-        .facilityId(facilityId)
-        .isStarter(true)
-        .lineItems(stockCards.stream().map(stockCardDto -> PhysicalInventoryLineItemDto.builder()
-            .orderable(stockCardDto.getOrderable())
-            .lot(stockCardDto.getLot())
-            .stockOnHand(stockCardDto.getStockOnHand())
-            .build()).collect(toList()))
-        .build();
   }
 
   private void validateLineItems(PhysicalInventoryDto dto) {

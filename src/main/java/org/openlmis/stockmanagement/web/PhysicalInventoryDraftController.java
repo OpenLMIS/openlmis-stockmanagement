@@ -57,30 +57,15 @@ public class PhysicalInventoryDraftController {
    * @return returns found draft, if not found, returns empty draft.
    */
   @RequestMapping(value = "physicalInventories/draft", method = GET)
-  public ResponseEntity<PhysicalInventoryDto> findDraft(
-      @RequestParam UUID program,
-      @RequestParam UUID facility) {
-    checkPermission(program, facility);
-    return new ResponseEntity<>(physicalInventoryService.findDraft(program, facility), OK);
-  }
-
-  /**
-   * Get a draft physical inventory.
-   *
-   * @param program  program ID.
-   * @param facility facility ID.
-   * @return returns found draft, if not found, returns empty draft.
-   */
-  @RequestMapping(value = "physicalInventories/draftTmp", method = GET)
   public ResponseEntity<PhysicalInventoryDto> findDraftTmp(
       @RequestParam UUID program,
       @RequestParam UUID facility) {
     checkPermission(program, facility);
-    PhysicalInventoryDto draftTmp = physicalInventoryService.findDraftTmp(program, facility);
-    if (draftTmp == null) {
-      return new ResponseEntity<>(draftTmp, NO_CONTENT);
+    PhysicalInventoryDto draft = physicalInventoryService.findDraft(program, facility);
+    if (draft != null) {
+      return new ResponseEntity<>(draft, OK);
     } else {
-      return new ResponseEntity<>(draftTmp, OK);
+      return new ResponseEntity<>(NO_CONTENT);
     }
   }
 

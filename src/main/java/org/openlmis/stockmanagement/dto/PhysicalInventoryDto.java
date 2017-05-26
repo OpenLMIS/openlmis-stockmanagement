@@ -17,11 +17,9 @@ package org.openlmis.stockmanagement.dto;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static java.util.stream.Collectors.toList;
-import static org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity.identityOf;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 
 import lombok.AllArgsConstructor;
@@ -30,9 +28,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.ZonedDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Data
@@ -95,29 +91,6 @@ public class PhysicalInventoryDto {
         .lineItems(inventory.getLineItems().stream().map(
             PhysicalInventoryLineItemDto::from).collect(toList()))
         .build();
-  }
-
-  /**
-   * Merge quantities saved in physical inventory line item dtos with soh in stock card dtos.
-   * And Assign orderable to physical inventory line item dtos.
-   *
-   * @param stockCards list stock card DTOs.
-   */
-  public void mergeWith(
-      List<StockCardDto> stockCards) {
-    Map<OrderableLotIdentity, Integer> savedQuantities = this.lineItems.stream()
-        .collect(HashMap::new,
-            (map, lineItem) -> map.put(identityOf(lineItem), lineItem.getQuantity()),
-            HashMap::putAll);
-
-    this.setLineItems(stockCards.stream()
-        .map(stockCardDto -> PhysicalInventoryLineItemDto.builder()
-            .orderable(stockCardDto.getOrderable())
-            .lot(stockCardDto.getLot())
-            .stockOnHand(stockCardDto.getStockOnHand())
-            .quantity(savedQuantities.get(identityOf(stockCardDto)))
-            .build())
-        .collect(toList()));
   }
 
   /**

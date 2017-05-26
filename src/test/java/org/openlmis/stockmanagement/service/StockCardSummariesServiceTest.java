@@ -32,8 +32,6 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.ExistingStockCardsOnly;
-import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.IncludeApprovedOrderables;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,6 +40,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
+import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
@@ -82,7 +81,7 @@ public class StockCardSummariesServiceTest {
   private StockCardSummariesService stockCardSummariesService;
 
   @Test
-  public void should_contain_existing_stock_cards_and_approved_orderables_and_lots()
+  public void should_create_dummy_cards()
       throws Exception {
     //given
     UUID orderable1Id = randomUUID();
@@ -90,42 +89,39 @@ public class StockCardSummariesServiceTest {
     UUID orderable3Id = randomUUID();
     UUID orderable4Id = randomUUID();
 
-    OrderableDto orderable1 = createOrderableDto(orderable1Id);
-    orderable1.getIdentifiers().put("tradeItem", randomUUID().toString());
-    OrderableDto orderable2 = createOrderableDto(orderable2Id);
-    OrderableDto orderable3 = createOrderableDto(orderable3Id);
-    OrderableDto orderable4 = createOrderableDto(orderable4Id);
+    OrderableDto orderable1 = createOrderableDto(orderable1Id, "1");
+    OrderableDto orderable2 = createOrderableDto(orderable2Id, "2");
+    orderable2.getIdentifiers().put("tradeItem", randomUUID().toString());
+    OrderableDto orderable3 = createOrderableDto(orderable3Id, "3");
+    OrderableDto orderable4 = createOrderableDto(orderable4Id, "4");
 
     UUID programId = randomUUID();
     UUID facilityId = randomUUID();
 
+    //1,2,3,4 all approved
     when(approvedProductReferenceDataService
         .getAllApprovedProducts(programId, facilityId))
         .thenReturn(asList(orderable1, orderable2, orderable3, orderable4));
 
-    when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId))
+    //but only 1, 3 have cards. 2, 4 don't have cards.
+    when(cardRepository.getIdentitiesBy(programId, facilityId))
         .thenReturn(asList(
-            createStockCard(orderable1Id, randomUUID()),
-            createStockCard(orderable3Id, randomUUID())));
+            new OrderableLotIdentity(orderable1Id, null),
+            new OrderableLotIdentity(orderable3Id, null)));
 
     LotDto lotDto = new LotDto();
     lotDto.setId(randomUUID());
+    //2 has a lot
     when(lotReferenceDataService
-        .getAllLotsOf(fromString(orderable1.getIdentifiers().get("tradeItem"))))
+        .getAllLotsOf(fromString(orderable2.getIdentifiers().get("tradeItem"))))
         .thenReturn(singletonList(lotDto));
-    when(lotReferenceDataService.getAllLotsOf(orderable2Id))
-        .thenReturn(emptyList());
-    when(lotReferenceDataService.getAllLotsOf(orderable3Id))
-        .thenReturn(emptyList());
-    when(lotReferenceDataService.getAllLotsOf(orderable4Id))
-        .thenReturn(emptyList());
 
     //when
     List<StockCardDto> cardDtos = stockCardSummariesService
-        .findStockCards(programId, facilityId, IncludeApprovedOrderables);
+        .createDummyStockCards(programId, facilityId);
 
     //then
-    assertThat(cardDtos.size(), is(5));
+    assertThat(cardDtos.size(), is(3));
 
     String orderablePropertyName = "orderable";
     String lotPropertyName = "lot";
@@ -134,21 +130,15 @@ public class StockCardSummariesServiceTest {
     String stockOnHandPropertyName = "stockOnHand";
     String lastUpdatePropertyName = "lastUpdate";
 
+    //2 and lot
     assertThat(cardDtos, hasItem(allOf(
-        hasProperty(orderablePropertyName, is(orderable1)),
-        hasProperty(lotPropertyName, is(nullValue())),
-        hasProperty(idPropertyName, notNullValue()),
-        hasProperty(stockOnHandPropertyName, notNullValue()),
-        hasProperty(lastUpdatePropertyName, is(of(2017, 3, 18, 15, 10, 31, 100, UTC))),
-        hasProperty(lineItemsPropertyName, nullValue()))));
-    assertThat(cardDtos, hasItem(allOf(
-        hasProperty(orderablePropertyName, is(orderable3)),
-        hasProperty(lotPropertyName, is(nullValue())),
-        hasProperty(idPropertyName, notNullValue()),
-        hasProperty(stockOnHandPropertyName, notNullValue()),
-        hasProperty(lastUpdatePropertyName, is(of(2017, 3, 18, 15, 10, 31, 100, UTC))),
+        hasProperty(orderablePropertyName, is(orderable2)),
+        hasProperty(lotPropertyName, is(lotDto)),
+        hasProperty(idPropertyName, nullValue()),
+        hasProperty(stockOnHandPropertyName, nullValue()),
         hasProperty(lineItemsPropertyName, nullValue()))));
 
+    //2 and no lot
     assertThat(cardDtos, hasItem(allOf(
         hasProperty(orderablePropertyName, is(orderable2)),
         hasProperty(lotPropertyName, is(nullValue())),
@@ -156,6 +146,8 @@ public class StockCardSummariesServiceTest {
         hasProperty(stockOnHandPropertyName, nullValue()),
         hasProperty(lastUpdatePropertyName, nullValue()),
         hasProperty(lineItemsPropertyName, nullValue()))));
+
+    //4 and no lot
     assertThat(cardDtos, hasItem(allOf(
         hasProperty(orderablePropertyName, is(orderable4)),
         hasProperty(lotPropertyName, is(nullValue())),
@@ -163,18 +155,10 @@ public class StockCardSummariesServiceTest {
         hasProperty(stockOnHandPropertyName, nullValue()),
         hasProperty(lastUpdatePropertyName, nullValue()),
         hasProperty(lineItemsPropertyName, nullValue()))));
-
-    assertThat(cardDtos, hasItem(allOf(
-        hasProperty(orderablePropertyName, is(orderable1)),
-        hasProperty(lotPropertyName, is(lotDto)),
-        hasProperty(idPropertyName, nullValue()),
-        hasProperty(stockOnHandPropertyName, nullValue()),
-        hasProperty(lastUpdatePropertyName, nullValue()),
-        hasProperty(lineItemsPropertyName, nullValue()))));
   }
 
   @Test
-  public void should_contain_existing_stock_cards_only_when_indicated_by_parameter()
+  public void should_find_existing_stock_cards()
       throws Exception {
     //given
     UUID orderable1Id = randomUUID();
@@ -182,10 +166,10 @@ public class StockCardSummariesServiceTest {
     UUID orderable3Id = randomUUID();
     UUID orderable4Id = randomUUID();
 
-    OrderableDto orderable1 = createOrderableDto(orderable1Id);
-    OrderableDto orderable2 = createOrderableDto(orderable2Id);
-    OrderableDto orderable3 = createOrderableDto(orderable3Id);
-    OrderableDto orderable4 = createOrderableDto(orderable4Id);
+    OrderableDto orderable1 = createOrderableDto(orderable1Id, "");
+    OrderableDto orderable2 = createOrderableDto(orderable2Id, "");
+    OrderableDto orderable3 = createOrderableDto(orderable3Id, "");
+    OrderableDto orderable4 = createOrderableDto(orderable4Id, "");
 
     UUID programId = randomUUID();
     UUID facilityId = randomUUID();
@@ -203,7 +187,7 @@ public class StockCardSummariesServiceTest {
 
     //when
     List<StockCardDto> cardDtos = stockCardSummariesService
-        .findStockCards(programId, facilityId, ExistingStockCardsOnly);
+        .findStockCards(programId, facilityId);
 
     //then
     assertThat(cardDtos.size(), is(2));
@@ -273,9 +257,10 @@ public class StockCardSummariesServiceTest {
     return stockCard;
   }
 
-  private OrderableDto createOrderableDto(UUID orderableId) {
+  private OrderableDto createOrderableDto(UUID orderableId, String productName) {
     return OrderableDto.builder()
         .id(orderableId)
+        .fullProductName(productName)
         .identifiers(new HashMap<>())
         .build();
   }

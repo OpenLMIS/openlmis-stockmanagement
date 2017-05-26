@@ -15,7 +15,6 @@
 
 package org.openlmis.stockmanagement.dto;
 
-import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -29,7 +28,6 @@ import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.UUID;
 
 public class PhysicalInventoryDtoTest {
   @Test
@@ -107,32 +105,6 @@ public class PhysicalInventoryDtoTest {
     assertThat(dto.getIsStarter(), is(false));
 
     assertThat(dto.getLineItems().size(), is(1));
-  }
-
-  @Test
-  public void should_merge_with_stock_card_dtos() throws Exception {
-    //given
-    UUID orderableId = randomUUID();
-    StockCardDto cardDto = StockCardDto.builder()
-        .orderable(OrderableDto.builder().id(orderableId).build())
-        .stockOnHand(111).build();
-
-    PhysicalInventoryLineItemDto inventoryLineItemDto =
-        PhysicalInventoryLineItemDto.builder()
-            .orderable(OrderableDto.builder().id(orderableId).build())
-            .quantity(222)
-            .build();
-    PhysicalInventoryDto inventoryDto = PhysicalInventoryDto.builder()
-        .lineItems(singletonList(inventoryLineItemDto))
-        .build();
-
-    //when
-    inventoryDto.mergeWith(singletonList(cardDto));
-
-    //then
-    assertThat(inventoryDto.getLineItems().size(), is(1));
-    assertThat(inventoryDto.getLineItems().get(0).getStockOnHand(), is(111));
-    assertThat(inventoryDto.getLineItems().get(0).getQuantity(), is(222));
   }
 
   private PhysicalInventoryDto createInventoryDto() {

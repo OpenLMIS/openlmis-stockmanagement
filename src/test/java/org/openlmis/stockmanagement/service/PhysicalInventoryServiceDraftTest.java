@@ -18,13 +18,11 @@ package org.openlmis.stockmanagement.service;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.service.StockCardSummariesService.SearchOptions.IncludeApprovedOrderables;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,8 +34,6 @@ import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
-import org.openlmis.stockmanagement.dto.StockCardDto;
-import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
 
@@ -50,44 +46,6 @@ public class PhysicalInventoryServiceDraftTest {
 
   @Mock
   private PhysicalInventoriesRepository physicalInventoriesRepository;
-
-  @Mock
-  private StockCardSummariesService stockCardSummariesService;
-
-  @Test
-  public void should_generate_empty_draft_if_no_saved_draft_is_found() throws Exception {
-    //given
-    UUID programId = UUID.randomUUID();
-    UUID facilityId = UUID.randomUUID();
-
-    when(physicalInventoriesRepository
-        .findByProgramIdAndFacilityIdAndIsDraft(programId, facilityId, true))
-        .thenReturn(null);
-
-    OrderableDto orderableDto = new OrderableDto();
-    LotDto lotDto = new LotDto();
-    when(stockCardSummariesService
-        .findStockCards(programId, facilityId, IncludeApprovedOrderables)).thenReturn(
-        singletonList(StockCardDto.builder()
-            .orderable(orderableDto)
-            .lot(lotDto)
-            .stockOnHand(233).build()));
-
-    //when
-    PhysicalInventoryDto inventory = physicalInventoryService.findDraft(programId, facilityId);
-
-    //then
-    assertThat(inventory.getProgramId(), is(programId));
-    assertThat(inventory.getFacilityId(), is(facilityId));
-    assertThat(inventory.getIsStarter(), is(true));
-    assertThat(inventory.getLineItems().size(), is(1));
-
-    PhysicalInventoryLineItemDto inventoryLineItemDto = inventory.getLineItems().get(0);
-    assertThat(inventoryLineItemDto.getOrderable(), is(orderableDto));
-    assertThat(inventoryLineItemDto.getLot(), is(lotDto));
-    assertThat(inventoryLineItemDto.getQuantity(), nullValue());
-    assertThat(inventoryLineItemDto.getStockOnHand(), is(233));
-  }
 
   @Test
   public void should_save_draft_if_no_saved_draft_is_found() throws Exception {
@@ -155,18 +113,12 @@ public class PhysicalInventoryServiceDraftTest {
         .findByProgramIdAndFacilityIdAndIsDraft(programId, facilityId, true))
         .thenReturn(inventory);
 
-    OrderableDto orderableDto = OrderableDto.builder().id(orderableId).build();
-    when(stockCardSummariesService
-        .findStockCards(programId, facilityId, IncludeApprovedOrderables)).thenReturn(
-        singletonList(StockCardDto.builder().orderable(orderableDto).stockOnHand(233).build()));
-
     //when
     PhysicalInventoryDto foundDraft = physicalInventoryService.findDraft(programId, facilityId);
 
     //then
     PhysicalInventoryLineItemDto lineItemDto = foundDraft.getLineItems().get(0);
-    assertThat(lineItemDto.getOrderable(), is(orderableDto));
-    assertThat(lineItemDto.getStockOnHand(), is(233));
+    assertThat(lineItemDto.getOrderable().getId(), is(orderableId));
   }
 
   private PhysicalInventory createInventory(UUID orderableId, UUID programId, UUID facilityId) {
