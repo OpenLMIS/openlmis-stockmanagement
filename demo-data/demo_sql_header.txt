@@ -1,0 +1,7 @@
+DO $do$
+
+BEGIN
+IF (SELECT to_regclass('data_loaded') IS NOT NULL) THEN
+  RETURN;
+END IF;
+

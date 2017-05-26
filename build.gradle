@@ -39,6 +39,7 @@ dependencies {
     compile "org.springframework.security.oauth:spring-security-oauth2"
     compile 'org.springframework:spring-context-support'
     compile 'org.hibernate:hibernate-java8'
+    compile 'org.flywaydb:flyway-core:4.1.2'
 
     compile "org.projectlombok:lombok:1.16.8"
     compile "org.postgresql:postgresql:42.0.0"
@@ -51,6 +52,7 @@ dependencies {
     testCompile "junit:junit"
     testCompile "org.mockito:mockito-core:1.+"
     testCompile "org.springframework.boot:spring-boot-starter-test"
+    testCompile('org.flywaydb.flyway-test-extensions:flyway-spring-test:4.1.0')
     testCompile 'org.springframework.security:spring-security-test'
     testCompile "org.springframework:spring-test"
 }
@@ -84,7 +86,7 @@ flyway {
     url = "$System.env.DATABASE_URL"
     user = "$System.env.POSTGRES_USER"
     password = "$System.env.POSTGRES_PASSWORD"
-    schemas = ['template']
+    schemas = ['stockmanagement']
     sqlMigrationPrefix = ''
     placeholderPrefix = '#['
     placeholderSuffix = ']'
@@ -140,9 +142,9 @@ task checkApiIsRaml(type: Exec) {
     args "src/main/resources/api-definition.yaml"
 }
 
-task demoDataSeed(type: Exec) {
+task demoDataSeed(type:Exec) {
     executable "./demo-data/demo_seed.sh"
-    args "./demo-data", "node ./demo-data/seed_generator.js"
+    args "demo-data", "build/demo-data", "demo-data/generator.js"
 }
 
 configure(checkApiIsRaml) {

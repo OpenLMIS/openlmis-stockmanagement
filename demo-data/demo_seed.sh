@@ -1,27 +1,46 @@
-#!/bin/sh
+#!/bin/bash
 
-# This script populates the database with demo data for presentational and testing purposes.
-# It searches for json files in given directory and inserts the contained records into the database.
-# Note: file name should refer to their target table name.
+# This script creates a sql input file that can be used to populate the database with demo data.
+# It searches for json files in given directory and then merges them into input file.
+# Note: each file's name should refer to its target table name.
 
-DIRECTORY=${1}
-GENERATOR=${2}
-OUTPUT_DIR=${DIRECTORY}/../build/demo-data
-TEST_OUTPUT_DIR=${DIRECTORY}/../build/resources/test/demo-data
+INPUT_DIR=${1}
+OUTPUT_DIR=${2}
+GENERATOR=${3}
 
-
-# Get list of JSON files in current directory
-FILES=`find ${DIRECTORY} -name "*.json"`
+# Get list of JSON files in input directory
+FILES=`find ${INPUT_DIR} -name "*.json"`
 
 # Run database input generation
-${GENERATOR} ${FILES}
+node ${GENERATOR} ${FILES}
 
-mkdir ${OUTPUT_DIR}
-mkdir ${TEST_OUTPUT_DIR}
+# Generate a single SQL file out of all sources, because Flyway expects only one afterMigrate.sql file.
+CAT_ARGS=()
 
-mv input.sql ${OUTPUT_DIR}/data.sql
-cp ${OUTPUT_DIR}/data.sql ${TEST_OUTPUT_DIR}/data.sql
+# Function adds a file to CAT_ARGS only if it exists.
+function addCatArg {
+  if [ -f $1 ]; then
+    CAT_ARGS+=($1)
+  fi
+}
 
-echo "Generated ${OUTPUT_DIR}/data.sql"
-echo "To insert the data into database, first run the service, and then from outside of container type:"
-echo "docker exec -i openlmisstockmanagement_db_1 psql -Upostgres open_lmis < ${OUTPUT_DIR}/data.sql"
+addCatArg ${INPUT_DIR}/demo_sql_header.txt
+addCatArg /app/src/main/resources/db/starter/afterMigrate.sql
+addCatArg input.sql
+addCatArg ${INPUT_DIR}/demo_sql_footer.txt
+
+cat ${CAT_ARGS[@]} > result.sql
+
+# Move the generated file into output directory
+OUTPUT_FILE=${OUTPUT_DIR}/afterMigrate.sql
+
+mkdir -p ${OUTPUT_DIR}
+mv result.sql ${OUTPUT_FILE}
+rm input.sql
+
+# Print instructions to insert the data into the database
+echo "=============================="
+echo "Generated ${OUTPUT_FILE}"
+echo "To insert the data into database, you should copy this file to Flyway's migration directory, by default:"
+echo "cp ${OUTPUT_FILE} /app/build/resources/main/db/starter"
+echo "The demo data will be inserted automatically while the application starts."
