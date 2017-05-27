@@ -191,3 +191,64 @@ debugger has connected.
 ## Environment variables
 
 Environment variables common to all services are listed here: https://github.com/OpenLMIS/openlmis-template-service/blob/master/README.md#environment-variables
+
+## Steps to create test data for performance testing
+
+1. Log on to the server(ssh)
+
+2. Find container id of posgres: `docker ps`
+
+3. Go to DB
+   * `docker exec -it [postgres container id] bash`
+   * `psql -U postgres`
+   * `\connect open_lmis`
+4. Run the following sql
+( You can change the number (1..100) to choose how many orderables to create )
+```sql
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+DO
+$do$
+BEGIN
+FOR i IN 1..100 LOOP 
+ INSERT INTO referencedata.orderables(id, dispensingunit, fullproductname, packroundingthreshold, netcontent, code, roundtozero) VALUES
+ (gen_random_uuid(), '10 tab strip', 'test' || i, 0, 1, 'c120' || i, 'false');
+ INSERT INTO referencedata.program_orderables(id, active, displayorder, dosesperpatient, fullsupply, priceperpack, orderabledisplaycategoryid, orderableid, programid) VALUES
+ (gen_random_uuid(), 'true', 0, 1, 'true', 5.20, '15b8ef1f-a5d6-42dd-95bf-bb68a4504e82', (select id from referencedata.orderables where fullproductname = 'test' || i ), 'dce17f2e-af3e-40ad-8e00-3496adef44c3');
+ INSERT INTO referencedata.facility_type_approved_products(id, emergencyorderpoint, maxperiodsofstock, minperiodsofstock, facilitytypeid, orderableid, programid) VALUES
+ (gen_random_uuid(), 1, 3, 1.5, 'ac1d268b-ce10-455f-bf87-9c667da8f060', (select id from referencedata.orderables where fullproductname = 'test' || i), 'dce17f2e-af3e-40ad-8e00-3496adef44c3');
+END LOOP;
+END
+$do$;
+```
+
+After execution of this sql, there should be 100 new orderables approved for program: "Famility planning" and facility type: "Health Center".
+
+5. Find 'create_stock_cards_and_stock_card_line_items.js' in 'perf_test' directory of this repository.
+
+Run `npm install request --save` in the directory that contains the js file.
+
+Then use nodejs to run the js file.
+`node create_stock_cards_and_stock_card_line_items.js [url, for example: https://test.openlmis.org]`
+
+After execution of this js file, user: "srmanager1" will have access to 126 stock cards.
+
+6. Copy the following sql to the DB and run
+ * Make sure the number of `j` equals to the number of the orderables.
+ * You can change the number of `i` to choose how many stock card line items created for each stock card.
+```sql
+DO
+$do$
+BEGIN
+FOR j IN 1..100 LOOP
+FOR i IN 1..99 LOOP
+INSERT INTO stockmanagement.stock_card_line_items(id, documentnumber, occurreddate, processeddate, quantity, userid, origineventid, stockcardid)
+VALUES(gen_random_uuid(), 'Testit' || i, '2017-05-17 06:39:50.717','2017-05-17 06:40:14.155', 10, 'c994d1ea-47f7-435d-9d4d-42fb54197698', (select distinct origineventid from stockmanagement.stock_cards where facilityid='176c4276-1fb1-4507-8ad2-cdfba0f47445'), (select id from stockmanagement.stock_cards where orderableid in (select id from referencedata.orderables where fullproductname = 'test' || j)));
+END LOOP;
+END LOOP;
+END
+$do$;
+```
+
+After execution of this sql, there will be 100 stock card line items for each stock card.
+
+7. Now you can go to the web pages, log in as "srmanager1" and conduct performance tests.
