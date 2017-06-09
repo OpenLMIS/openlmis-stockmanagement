@@ -19,6 +19,7 @@ import org.flywaydb.core.Flyway;
 import org.openlmis.stockmanagement.i18n.ExposedMessageSourceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy;
@@ -30,6 +31,7 @@ import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 
 import java.util.Locale;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang3.LocaleUtils.toLocale;
 
 @SpringBootApplication
@@ -41,6 +43,9 @@ public class Application {
     SpringApplication.run(Application.class, args);
   }
 
+  @Value("${defaultLocale}")
+  private Locale defaultLocale;
+
   /**
    * Creates new LocaleResolver.
    *
@@ -51,12 +56,9 @@ public class Application {
     CookieLocaleResolver lr = new CookieLocaleResolver();
     lr.setCookieName("lang");
 
-    Locale systemLocale;
-    try {
-      systemLocale = toLocale(System.getenv("LOCALE"));
-    } catch (IllegalArgumentException ex) {
-      systemLocale = Locale.ENGLISH;
-    }
+    String envLocale = System.getenv("LOCALE");
+    Locale systemLocale = isBlank(envLocale)
+        ? defaultLocale : toLocale(envLocale);
     lr.setDefaultLocale(systemLocale);
 
     return lr;
