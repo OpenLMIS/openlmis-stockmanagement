@@ -252,3 +252,20 @@ $do$;
 After execution of this sql, there will be 100 stock card line items for each stock card.
 
 7. Now you can go to the web pages, log in as "srmanager1" and conduct performance tests.
+
+## Production by Spring Profile
+
+By default when this service is started, it will clean its schema in the database before migrating
+it. This is meant for use during the normal development cycle. For production data, this obviously
+is not desired as it would remove all of the production data. To change the default clean & migrate
+behavior to just be a migrate behavior (which is still desired for production use), we use a Spring
+Profile named `production`. To use this profile, it must be marked as Active. The easiest way to
+do so is to add to the .env file:
+
+```java
+spring_profiles_active=production
+```
+
+This will set the similarly named environment variable and limit the profile in use.  The
+expected use-case for this is when this service is deployed through the
+[Reference Distribution](https://github.com/openlmis/openlmis-ref-distro).
