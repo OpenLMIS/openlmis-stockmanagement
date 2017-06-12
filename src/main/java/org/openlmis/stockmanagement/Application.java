@@ -44,7 +44,7 @@ public class Application {
   }
 
   @Value("${defaultLocale}")
-  private Locale defaultLocale;
+  private Locale locale;
 
   /**
    * Creates new LocaleResolver.
@@ -55,12 +55,7 @@ public class Application {
   public LocaleResolver localeResolver() {
     CookieLocaleResolver lr = new CookieLocaleResolver();
     lr.setCookieName("lang");
-
-    String envLocale = System.getenv("LOCALE");
-    Locale systemLocale = isBlank(envLocale)
-        ? defaultLocale : toLocale(envLocale);
-    lr.setDefaultLocale(systemLocale);
-
+    lr.setDefaultLocale(locale);
     return lr;
   }
 
