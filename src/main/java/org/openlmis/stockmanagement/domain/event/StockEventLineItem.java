@@ -16,14 +16,17 @@
 package org.openlmis.stockmanagement.domain.event;
 
 import org.openlmis.stockmanagement.domain.BaseEntity;
+import org.openlmis.stockmanagement.domain.ExtraDataConverter;
 import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 
 import lombok.Data;
 
 import java.time.ZonedDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -41,6 +44,10 @@ public class StockEventLineItem extends BaseEntity implements IdentifiableByOrde
 
   @Column(nullable = false)
   private Integer quantity;
+
+  @Column(name = "extradata", columnDefinition = "jsonb")
+  @Convert(converter = ExtraDataConverter.class)
+  private Map<String, String> extraData;
 
   @Column(nullable = false)
   private ZonedDateTime occurredDate;

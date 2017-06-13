@@ -28,6 +28,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
 import java.util.UUID;
 
 @Data
@@ -39,6 +40,7 @@ public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot 
   private LotDto lot;
   private Integer stockOnHand;
   private Integer quantity;
+  private Map<String, String> extraData;
 
   /**
    * Convert to jpa model.
@@ -51,6 +53,7 @@ public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot 
         .orderableId(getOrderableId())
         .lotId(getLotId())
         .quantity(quantity)
+        .extraData(extraData)
         .physicalInventory(inventory).build();
   }
 
@@ -64,6 +67,7 @@ public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot 
     return PhysicalInventoryLineItemDto
         .builder()
         .quantity(lineItem.getQuantity())
+        .extraData(lineItem.getExtraData())
         .orderable(OrderableDto.builder().id(lineItem.getOrderableId()).build())
         .lot(lineItem.getLotId() == null ? null : LotDto.builder().id(lineItem.getLotId()).build())
         .build();

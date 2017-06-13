@@ -21,10 +21,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.openlmis.stockmanagement.domain.ExtraDataConverter;
 
+import java.util.Map;
 import java.util.UUID;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -44,6 +47,10 @@ public class PhysicalInventoryLineItem extends BaseEntity {
   //when saving draft quantity is allowed to be null
   //do NOT annotate this field as nullable = false
   private Integer quantity;
+
+  @Column(name = "extradata", columnDefinition = "jsonb")
+  @Convert(converter = ExtraDataConverter.class)
+  private Map<String, String> extraData;
 
   @ManyToOne()
   @JoinColumn(nullable = false)
