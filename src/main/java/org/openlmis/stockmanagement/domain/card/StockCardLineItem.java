@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.openlmis.stockmanagement.domain.BaseEntity;
+import org.openlmis.stockmanagement.domain.ExtraDataConverter;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
@@ -44,9 +45,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.ZonedDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -78,6 +81,10 @@ public class StockCardLineItem extends BaseEntity {
 
   @Column(nullable = false)
   private Integer quantity;
+
+  @Column(name = "extradata", columnDefinition = "jsonb")
+  @Convert(converter = ExtraDataConverter.class)
+  private Map<String, String> extraData;
 
   @ManyToOne()
   @JoinColumn()
@@ -146,6 +153,8 @@ public class StockCardLineItem extends BaseEntity {
         .userId(userId)
 
         .stockOnHand(0)
+
+        .extraData(eventLineItem.getExtraData())
         .build();
 
     stockCard.getLineItems().add(cardLineItem);

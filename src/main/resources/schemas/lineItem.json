@@ -45,6 +45,11 @@
     "occurredDate": {
       "type": "string",
       "format": "date-time"
+    },
+    "extraData": {
+      "type": "object",
+      "description": "Can be used to save additional data for line item.",
+      "title": "extraData"
     }
   }
 }
