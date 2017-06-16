@@ -48,6 +48,11 @@
       "type": "string",
       "format": "date-time",
       "description": "The date and time(including time zone) when this event occurred"
+    },
+    "extraData": {
+      "type": "object",
+      "description": "Can be used to save additional data for line item.",
+      "title": "extraData"
     }
   }
 }

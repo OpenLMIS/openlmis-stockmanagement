@@ -25,6 +25,11 @@
       "type": "integer",
       "description": "Indicates current stock on hand for an orderable.",
       "required": true
+    },
+    "extraData": {
+      "type": "object",
+      "description": "Can be used to save additional data for line item.",
+      "title": "extraData"
     }
   }
 }
