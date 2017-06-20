@@ -74,9 +74,11 @@ public class ValidReasonAssignmentController {
   @RequestMapping(value = "/validReasons", method = GET)
   public ResponseEntity<List<ValidReasonAssignment>> getValidReasons(
       @RequestParam("program") UUID program, @RequestParam("facilityType") UUID facilityType) {
-    LOGGER.debug(format(
-        "Try to find stock card line item reason with program %s and facility type %s",
-        program.toString(), facilityType.toString()));
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug(format(
+          "Try to find stock card line item reason with program %s and facility type %s",
+          program.toString(), facilityType.toString()));
+    }
     permissionService.canViewValidReasons(program, facilityType);
     return new ResponseEntity<>(getReasonsBy(program, facilityType), OK);
   }
