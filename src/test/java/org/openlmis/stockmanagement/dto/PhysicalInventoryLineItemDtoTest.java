@@ -15,12 +15,16 @@
 
 package org.openlmis.stockmanagement.dto;
 
+import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
-
+import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
+import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
+import org.openlmis.stockmanagement.domain.reason.ReasonType;
+import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import java.util.UUID;
 
 public class PhysicalInventoryLineItemDtoTest {
@@ -31,6 +35,7 @@ public class PhysicalInventoryLineItemDtoTest {
         .quantity(123)
         .orderableId(UUID.randomUUID())
         .lotId(UUID.randomUUID())
+        .stockAdjustments(singletonList(createStockAdjustment()))
         .build();
 
     //when
@@ -40,5 +45,20 @@ public class PhysicalInventoryLineItemDtoTest {
     assertThat(lineItemDto.getQuantity(), is(lineItem.getQuantity()));
     assertThat(lineItemDto.getOrderable().getId(), is(lineItem.getOrderableId()));
     assertThat(lineItemDto.getLot().getId(), is(lineItem.getLotId()));
+    assertThat(lineItemDto.getStockAdjustments(), is(lineItem.getStockAdjustments()));
+  }
+
+  private StockAdjustment createStockAdjustment() {
+    StockCardLineItemReason reason = StockCardLineItemReason.builder()
+        .name("test reason")
+        .reasonType(ReasonType.CREDIT)
+        .reasonCategory(ReasonCategory.TRANSFER)
+        .isFreeTextAllowed(false)
+        .build();
+
+    return StockAdjustment.builder()
+        .quantity(10)
+        .reason(reason)
+        .build();
   }
 }

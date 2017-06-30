@@ -15,22 +15,24 @@
 
 package org.openlmis.stockmanagement.domain.physicalinventory;
 
-import org.openlmis.stockmanagement.domain.BaseEntity;
+import static javax.persistence.CascadeType.ALL;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.ExtraDataConverter;
-
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -55,4 +57,12 @@ public class PhysicalInventoryLineItem extends BaseEntity {
   @ManyToOne()
   @JoinColumn(nullable = false)
   private PhysicalInventory physicalInventory;
+
+  @OneToMany(
+          cascade = ALL,
+          fetch = FetchType.EAGER,
+          orphanRemoval = true)
+  @JoinColumn(name = "physicalInventoryLineItemId")
+  private List<StockAdjustment> stockAdjustments;
+
 }

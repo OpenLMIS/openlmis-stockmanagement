@@ -49,6 +49,7 @@ schemas:
         }
   - physicalInventoryLineItem: !include schemas/physicalInventoryLineItem.json
   - physicalInventory: !include schemas/physicalInventory.json
+  - stockAdjustment: !include schemas/stockAdjustment.json
   - localizedMessage: !include schemas/localizedMessage.json
   - uuid: |
       {

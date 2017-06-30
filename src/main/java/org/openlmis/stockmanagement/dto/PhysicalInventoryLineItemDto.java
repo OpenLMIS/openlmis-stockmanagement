@@ -16,18 +16,17 @@
 package org.openlmis.stockmanagement.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
-import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
-import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
-import org.openlmis.stockmanagement.dto.referencedata.LotDto;
-import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
+import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
+import org.openlmis.stockmanagement.dto.referencedata.LotDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -40,6 +39,7 @@ public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot 
   private LotDto lot;
   private Integer stockOnHand;
   private Integer quantity;
+  private List<StockAdjustment> stockAdjustments;
   private Map<String, String> extraData;
 
   /**
@@ -53,6 +53,7 @@ public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot 
         .orderableId(getOrderableId())
         .lotId(getLotId())
         .quantity(quantity)
+        .stockAdjustments(stockAdjustments)
         .extraData(extraData)
         .physicalInventory(inventory).build();
   }
@@ -67,6 +68,7 @@ public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot 
     return PhysicalInventoryLineItemDto
         .builder()
         .quantity(lineItem.getQuantity())
+        .stockAdjustments(lineItem.getStockAdjustments())
         .extraData(lineItem.getExtraData())
         .orderable(OrderableDto.builder().id(lineItem.getOrderableId()).build())
         .lot(lineItem.getLotId() == null ? null : LotDto.builder().id(lineItem.getLotId()).build())

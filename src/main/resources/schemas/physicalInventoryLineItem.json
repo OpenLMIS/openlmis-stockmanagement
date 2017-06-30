@@ -26,6 +26,25 @@
       "description": "Indicates current stock on hand for an orderable.",
       "required": true
     },
+    "stockAdjustments": {
+      "type": "array",
+      "title": "StockAdjustments",
+      "items": {
+        "type": "object",
+        "title": "StockAdjustment",
+        "$ref": "stockAdjustment"
+      }
+    },
+    "lineItems": {
+      "type": "array",
+      "title": "LineItems",
+      "items": {
+        "type": "object",
+        "title": "LineItem",
+        "$ref": "lineItem"
+      }
+    },
+
     "extraData": {
       "type": "object",
       "description": "Can be used to save additional data for line item.",
