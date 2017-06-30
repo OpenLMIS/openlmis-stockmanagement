@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.validators;
 
 import static java.util.stream.Collectors.groupingBy;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_SOH_CURRENT_STOCK_DIFFER;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
@@ -82,6 +83,15 @@ public class QuantityValidator implements StockEventValidator {
 
     //create line item from event line item and add it to stock card for recalculation
     calculateStockOnHand(stockEventDto, group, foundCard);
+
+    //TODO: include adjustments in validation
+    for (StockCardLineItem lineItem : foundCard.getLineItems()) {
+      if (!lineItem.getStockOnHand().equals(lineItem.getQuantity())) {
+        throw new ValidationMessageException(new Message(ERROR_PHYSICAL_INVENTORY_SOH_CURRENT_STOCK_DIFFER));
+      }
+    }
+
+
   }
 
   private StockCard tryFindCard(UUID programId, UUID facilityId, StockEventLineItem lineItem) {
