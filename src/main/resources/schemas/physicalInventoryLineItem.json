@@ -35,16 +35,6 @@
         "$ref": "stockAdjustment"
       }
     },
-    "lineItems": {
-      "type": "array",
-      "title": "LineItems",
-      "items": {
-        "type": "object",
-        "title": "LineItem",
-        "$ref": "lineItem"
-      }
-    },
-
     "extraData": {
       "type": "object",
       "description": "Can be used to save additional data for line item.",

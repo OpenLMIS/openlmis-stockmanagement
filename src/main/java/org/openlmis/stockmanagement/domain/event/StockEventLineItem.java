@@ -15,21 +15,27 @@
 
 package org.openlmis.stockmanagement.domain.event;
 
+import static javax.persistence.CascadeType.ALL;
+
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.ExtraDataConverter;
 import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 
 import lombok.Data;
+import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Data
@@ -64,6 +70,13 @@ public class StockEventLineItem extends BaseEntity implements IdentifiableByOrde
   @ManyToOne()
   @JoinColumn(nullable = false)
   private StockEvent stockEvent;
+
+  @OneToMany(
+      cascade = ALL,
+      fetch = FetchType.EAGER,
+      orphanRemoval = true)
+  @JoinColumn(name = "stockEventLineItemId")
+  private List<StockAdjustment> stockAdjustments;
 
   public boolean hasReasonId() {
     return this.reasonId != null;

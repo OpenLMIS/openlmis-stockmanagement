@@ -11,6 +11,15 @@
     "quantity": {
       "type": "integer"
     },
+    "stockAdjustments": {
+      "type": "array",
+      "title": "StockAdjustments",
+      "items": {
+        "type": "object",
+        "title": "StockAdjustment",
+        "$ref": "stockAdjustment"
+      }
+    },
     "signature": {
       "type": "string"
     },

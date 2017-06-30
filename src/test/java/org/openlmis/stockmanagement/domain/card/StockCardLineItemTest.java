@@ -17,9 +17,11 @@ package org.openlmis.stockmanagement.domain.card;
 
 import static java.lang.Integer.MAX_VALUE;
 import static java.time.temporal.ChronoUnit.SECONDS;
+import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemFrom;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
@@ -28,12 +30,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
+import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
 import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.dto.StockEventDto;
-
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -52,6 +54,7 @@ public class StockCardLineItemTest {
     //when
     StockEventDto eventDto = createStockEventDto();
     StockEventLineItem eventLineItem = eventDto.getLineItems().get(0);
+    eventLineItem.setStockAdjustments(singletonList(createStockAdjustment()));
 
     UUID userId = randomUUID();
     UUID eventId = randomUUID();
@@ -78,6 +81,8 @@ public class StockCardLineItemTest {
     assertThat(cardLineItem.getOriginEvent().getId(), is(eventId));
 
     assertThat(cardLineItem.getUserId(), is(userId));
+
+    assertEquals(cardLineItem.getStockAdjustments(), eventLineItem.getStockAdjustments());
 
     ZonedDateTime processedDate = cardLineItem.getProcessedDate();
     long between = SECONDS.between(processedDate, ZonedDateTime.now());
@@ -206,5 +211,19 @@ public class StockCardLineItemTest {
     assertThat(lineItem.getStockOnHand(), is(15));
     assertThat(lineItem.getReason().getReasonType(), is(ReasonType.BALANCE_ADJUSTMENT));
     assertThat(lineItem.getReason().getReasonCategory(), is(ReasonCategory.PHYSICAL_INVENTORY));
+  }
+
+  private static StockAdjustment createStockAdjustment() {
+    StockCardLineItemReason reason = StockCardLineItemReason.builder()
+        .name("test reason")
+        .reasonType(ReasonType.CREDIT)
+        .reasonCategory(ReasonCategory.PHYSICAL_INVENTORY)
+        .isFreeTextAllowed(false)
+        .build();
+
+    return StockAdjustment.builder()
+        .quantity(10)
+        .reason(reason)
+        .build();
   }
 }
