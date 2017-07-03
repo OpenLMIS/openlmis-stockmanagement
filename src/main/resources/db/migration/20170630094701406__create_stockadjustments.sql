@@ -1,4 +1,4 @@
-CREATE TABLE stock_adjustments (
+CREATE TABLE physical_inventory_line_item_reasons (
     id uuid NOT NULL,
     quantity integer NOT NULL,
     reasonId uuid NOT NULL,

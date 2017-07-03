@@ -30,7 +30,7 @@ import javax.persistence.Table;
 @Data
 @Builder
 @Entity
-@Table(name = "stock_adjustments")
+@Table(name = "physical_inventory_line_item_reasons")
 @NoArgsConstructor
 @AllArgsConstructor
 public class StockAdjustment extends BaseEntity {
