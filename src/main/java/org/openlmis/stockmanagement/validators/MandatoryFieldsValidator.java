@@ -68,8 +68,7 @@ public class MandatoryFieldsValidator implements StockEventValidator {
     boolean nullOrderableId = dto.getLineItems().stream()
         .anyMatch(lineItem -> lineItem.getOrderableId() == null);
     if (nullOrderableId) {
-      throw new ValidationMessageException(
-          new Message(ERROR_EVENT_ORDERABLE_INVALID, null));
+      throw new ValidationMessageException(ERROR_EVENT_ORDERABLE_INVALID);
     }
   }
 

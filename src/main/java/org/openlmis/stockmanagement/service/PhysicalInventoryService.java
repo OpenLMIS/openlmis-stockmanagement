@@ -16,23 +16,17 @@
 package org.openlmis.stockmanagement.service;
 
 import static org.openlmis.stockmanagement.domain.BaseEntity.fromId;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING;
-import static org.springframework.util.CollectionUtils.isEmpty;
 
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
-import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
-import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
-import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.validators.PhysicalInventoryValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -42,6 +36,9 @@ public class PhysicalInventoryService {
 
   @Autowired
   private PhysicalInventoriesRepository physicalInventoriesRepository;
+
+  @Autowired
+  private PhysicalInventoryValidator physicalInventoryValidator;
 
   /**
    * Persist physical inventory, with an event id. (For now, we only save physical inventory, but we
@@ -90,7 +87,7 @@ public class PhysicalInventoryService {
    */
   public PhysicalInventoryDto saveDraft(PhysicalInventoryDto dto) {
     LOGGER.info("save physical inventory draft");
-    validateLineItems(dto);
+    physicalInventoryValidator.validate(dto);
     deleteExistingDraft(dto);
 
     physicalInventoriesRepository.save(dto.toPhysicalInventoryForDraft());
@@ -107,20 +104,6 @@ public class PhysicalInventoryService {
         .findByProgramIdAndFacilityIdAndIsDraft(dto.getProgramId(), dto.getFacilityId(), true);
     if (foundInventory != null) {
       physicalInventoriesRepository.delete(foundInventory);
-    }
-  }
-
-  private void validateLineItems(PhysicalInventoryDto dto) {
-    List<PhysicalInventoryLineItemDto> lineItems = dto.getLineItems();
-    if (isEmpty(lineItems)) {
-      throw new ValidationMessageException(
-          new Message(ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING));
-    }
-    boolean orderableMissing = lineItems.stream()
-        .anyMatch(lineItem -> lineItem.getOrderable() == null);
-    if (orderableMissing) {
-      throw new ValidationMessageException(
-          new Message(ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING));
     }
   }
 }

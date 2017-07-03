@@ -35,4 +35,5 @@ public class OrderableDto {
   private String fullProductName;
   private DispensableDto dispensable;
   private Map<String, String> identifiers;
+  private Map<String, String> extraData;
 }

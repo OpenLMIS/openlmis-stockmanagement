@@ -20,6 +20,7 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentCaptor.forClass;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,16 +37,21 @@ import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
+import org.openlmis.stockmanagement.validators.PhysicalInventoryValidator;
 
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PhysicalInventoryServiceDraftTest {
-  @InjectMocks
-  private PhysicalInventoryService physicalInventoryService;
+
+  @Mock
+  private PhysicalInventoryValidator validator;
 
   @Mock
   private PhysicalInventoriesRepository physicalInventoriesRepository;
+
+  @InjectMocks
+  private PhysicalInventoryService physicalInventoryService;
 
   @Test
   public void should_save_draft_if_no_saved_draft_is_found() throws Exception {
@@ -84,6 +90,7 @@ public class PhysicalInventoryServiceDraftTest {
         .thenReturn(savedDraft);
 
     PhysicalInventoryDto newDraft = createInventoryDto(programId, facilityId);
+    doNothing().when(validator).validate(newDraft);
 
     //when
     physicalInventoryService.saveDraft(newDraft);

@@ -211,6 +211,9 @@ public abstract class MessageKeys {
   public static final String ERROR_PHYSICAL_INVENTORY_NOT_INCLUDE_ACTIVE_STOCK_CARD =
       PHYSICAL_INVENTORY_ERROR_PREFIX + ".lineItems.not.include.active.stockCard";
 
+  public static final String ERROR_PHYSICAL_INVENTORY_ORDERABLE_DISABLED_VVM =
+      PHYSICAL_INVENTORY_ERROR_PREFIX + ".orderable.disabled.vvm";
+
   //report
   public static final String ERROR_GENERATE_REPORT_FAILED = ERROR_PREFIX + ".generateReport.failed";
 

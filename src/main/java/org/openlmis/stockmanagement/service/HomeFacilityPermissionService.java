@@ -68,6 +68,6 @@ public class HomeFacilityPermissionService {
   }
 
   private void throwException(String errorKey, String... params) {
-    throw new PermissionMessageException(new Message(errorKey, params));
+    throw new PermissionMessageException(new Message(errorKey, (Object)params));
   }
 }

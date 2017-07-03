@@ -127,10 +127,9 @@ public class StockCardService extends StockCardBaseService {
     return cardDto;
   }
 
-  private StockCard findOrCreateCard(StockEventDto eventDto,
-                                     StockEventLineItem eventLineItem, UUID savedEventId)
+  private StockCard findOrCreateCard(
+      StockEventDto eventDto, StockEventLineItem eventLineItem, UUID savedEventId)
       throws InstantiationException, IllegalAccessException {
-
     UUID foundCardId = findCard(eventDto, eventLineItem);
 
     if (foundCardId != null) {
