@@ -36,7 +36,6 @@ import java.util.stream.Collectors;
 
 @Component("PhysicalInventoryValidator")
 public class PhysicalInventoryValidator {
-  @SuppressWarnings("AbbreviationAsWordInName")
   private static final String USE_VVM = "useVVM";
   private static final String VVM_STATUS = "vvmStatus";
 
