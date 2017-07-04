@@ -51,10 +51,14 @@ dependencies {
 
     testCompile "junit:junit"
     testCompile "org.mockito:mockito-core:1.+"
+    testCompile "org.powermock:powermock-api-mockito:1.6.5"
     testCompile "org.springframework.boot:spring-boot-starter-test"
     testCompile('org.flywaydb.flyway-test-extensions:flyway-spring-test:4.1.0')
     testCompile 'org.springframework.security:spring-security-test'
     testCompile "org.springframework:spring-test"
+
+    testCompile "com.jayway.restassured:rest-assured:2.7.0"
+    testCompile "guru.nidi.raml:raml-tester:0.8.9"
 }
 
 idea {
@@ -70,15 +74,6 @@ idea {
                 }
             }
         }
-        /*    iml.withXml { xmlFile ->
-                xmlFile.asNode().component.find { it.@name == 'NewModuleRootManager'}['Content'][0]
-                    .addNode {
-                    sourceFolder {
-                        profile(url: "file://$MODULE_DIR\$/src/integration-test/java", isTestSource:
-                                true)
-                    }
-                }
-            }*/
     }
 }
 

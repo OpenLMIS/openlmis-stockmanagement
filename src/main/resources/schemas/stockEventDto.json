@@ -21,18 +21,16 @@
     "lineItems": {
       "type": "array",
       "title": "Line items of stock event, each of a different orderable.",
-      "required": true,
       "items": {
         "type": "object",
         "title": "Stock event line item",
-        "$ref": "stockEventLineItemDto"
+        "$ref": "stockEventLineItemDto.json"
       }
     }
   },
   "required": [
     "facilityId",
     "programId",
-    "lineItems",
-    "occurredDate"
+    "lineItems"
   ]
 }

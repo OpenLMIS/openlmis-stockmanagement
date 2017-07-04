@@ -35,6 +35,7 @@ import java.util.UUID;
 public class StockEventDto {
 
   private UUID facilityId;
+
   private UUID programId;
 
   private String signature;

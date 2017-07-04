@@ -3,8 +3,14 @@
   "$schema": "http://json-schema.org/draft-04/schema",
   "description": "A single orderable.",
   "properties": {
-    "netContent": {
-      "type": "integer"
+    "id": {
+      "type": "string"
+    },
+    "productCode": {
+      "type": "string"
+    },
+    "fullProductName": {
+      "type": "string"
     },
     "dispensable": {
       "type": "object",
@@ -15,53 +21,11 @@
         }
       }
     },
-    "productCode": {
-      "type": "string"
+    "identifiers": {
+      "type": "object"
     },
-    "roundToZero": {
-      "type": "boolean"
-    },
-    "packRoundingThreshold": {
-      "type": "integer"
-    },
-    "fullProductName": {
-      "type": "string"
-    },
-    "id": {
-      "type": "string"
-    },
-    "programs": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "title": "ProgramOrderable",
-        "properties": {
-          "orderableId": {
-            "type": "string"
-          },
-          "orderableDisplayCategoryId": {
-            "type": "string"
-          },
-          "displayOrder": {
-            "type": "integer"
-          },
-          "active": {
-            "type": "boolean"
-          },
-          "orderableCategoryDisplayOrder": {
-            "type": "integer"
-          },
-          "programId": {
-            "type": "string"
-          },
-          "orderableCategoryDisplayName": {
-            "type": "string"
-          },
-          "fullSupply": {
-            "type": "boolean"
-          }
-        }
-      }
+    "extraData": {
+      "type": "object"
     }
   }
 }

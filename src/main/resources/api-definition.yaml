@@ -766,9 +766,6 @@ traits:
                   schema: physicalInventory
             204:
               description: No draft has been saved yet.
-              body:
-                application/json:
-                  schema: physicalInventory
             403:
               description: User does not have permission to view draft physical inventory.
               body:
@@ -788,6 +785,12 @@ traits:
               body:
                 application/json:
                   schema: physicalInventory
+
+            400:
+              body:
+                application/json:
+                    schema: localizedMessage
+              description: An error occured during request processing.
 
             403:
               description: User does not have permission to save draft physical inventory.

@@ -11,7 +11,7 @@
       "title": "Reason",
       "description": "Indicates reason for an adjustment.",
       "required": true,
-      "$ref": "reason"
+      "$ref": "reason.json"
     },
     "quantity": {
       "type": "integer",

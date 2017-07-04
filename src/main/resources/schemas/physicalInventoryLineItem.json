@@ -7,15 +7,13 @@
       "type": "object",
       "title": "Orderable",
       "description": "Indicates which orderable this physical inventory line item is for.",
-      "required": true,
-      "$ref": "orderable"
+      "$ref": "orderable.json"
     },
     "lot": {
       "type": "object",
       "title": "Lot",
       "description": "Indicates which lot this physical inventory line item is for.",
-      "required": false,
-      "$ref": "lot"
+      "$ref": "lot.json"
     },
     "stockOnHand": {
       "type": "integer",
@@ -23,8 +21,7 @@
     },
     "quantity": {
       "type": "integer",
-      "description": "Indicates current stock on hand for an orderable.",
-      "required": true
+      "description": "Indicates current stock on hand for an orderable."
     },
     "stockAdjustments": {
       "type": "array",
@@ -32,7 +29,7 @@
       "items": {
         "type": "object",
         "title": "StockAdjustment",
-        "$ref": "stockAdjustment"
+        "$ref": "stockAdjustment.json"
       }
     },
     "extraData": {
@@ -40,5 +37,9 @@
       "description": "Can be used to save additional data for line item.",
       "title": "extraData"
     }
-  }
+  },
+  "required": [
+    "orderable",
+    "quantity"
+  ]
 }

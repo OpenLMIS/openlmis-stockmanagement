@@ -41,4 +41,12 @@ public class StockAdjustment extends BaseEntity {
 
   @Column(nullable = false)
   private Integer quantity;
+
+  /**
+   * Returns quantity as signed integer, based on reason type (negative for debit).
+   * @return signed quantity
+   */
+  public int getSignedQuantity() {
+    return reason.isDebitReasonType() ? -quantity : quantity;
+  }
 }

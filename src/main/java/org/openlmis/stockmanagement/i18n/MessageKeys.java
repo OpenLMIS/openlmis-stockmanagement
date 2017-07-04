@@ -91,6 +91,9 @@ public abstract class MessageKeys {
   public static final String ERROR_EVENT_NO_LINE_ITEMS = EVENT_ERROR_PREFIX
       + ".no.lineItems";
 
+  public static final String ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID = EVENT_ERROR_PREFIX
+      + ".adjustment.quantity.invalid";
+
   //stock events creation: adjustment reason
   public static final String ERROR_EVENT_ADJUSTMENT_REASON_TYPE_INVALID = EVENT_ERROR_PREFIX
       + ".adjustment.reason.type.invalid";
@@ -214,6 +217,9 @@ public abstract class MessageKeys {
   public static final String ERROR_PHYSICAL_INVENTORY_ORDERABLE_DISABLED_VVM =
       PHYSICAL_INVENTORY_ERROR_PREFIX + ".orderable.disabled.vvm";
 
+  public static final String ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER =
+      PHYSICAL_INVENTORY_ERROR_PREFIX + ".lineItems.stockOnHand.currentStock.differ";
+
   //report
   public static final String ERROR_GENERATE_REPORT_FAILED = ERROR_PREFIX + ".generateReport.failed";
 
@@ -222,5 +228,4 @@ public abstract class MessageKeys {
   private MessageKeys() {
     throw new UnsupportedOperationException();
   }
-
 }

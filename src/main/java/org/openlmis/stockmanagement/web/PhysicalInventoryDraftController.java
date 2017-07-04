@@ -95,7 +95,7 @@ public class PhysicalInventoryDraftController {
     checkPermission(program, facility);
     physicalInventoryService.deleteExistingDraft(
         PhysicalInventoryDto.builder().programId(program).facilityId(facility).build());
-    return new ResponseEntity<>(null, NO_CONTENT);
+    return new ResponseEntity<>(NO_CONTENT);
   }
 
   private void checkPermission(@RequestParam UUID program, @RequestParam UUID facility) {

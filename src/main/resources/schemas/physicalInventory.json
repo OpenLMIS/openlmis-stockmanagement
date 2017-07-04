@@ -3,49 +3,45 @@
   "$schema": "http://json-schema.org/draft-04/schema",
   "description": "Physical inventory",
   "properties": {
-    "id": {
-      "type": "string"
-    },
     "programId": {
       "type": "string",
-      "description": "Indicates which program the physical inventory is done for. Will be used for all events created from this physical inventory.",
-      "required": true
+      "description": "Indicates which program the physical inventory is done for. Will be used for all events created from this physical inventory."
     },
     "facilityId": {
       "type": "string",
-      "description": "Indicates which facility the physical inventory is done for. Will be used for all events created from this physical inventory.",
-      "required": true
+      "description": "Indicates which facility the physical inventory is done for. Will be used for all events created from this physical inventory."
     },
     "occurredDate": {
       "type": "string",
       "format": "date-time",
-      "description": "Will be used as occurred date for all events created from this physical inventory.",
-      "required": true
+      "description": "Will be used as occurred date for all events created from this physical inventory."
     },
     "signature": {
       "type": "string",
-      "description": "The signature of the operator.",
-      "required": false
+      "description": "The signature of the operator."
     },
     "documentNumber": {
       "type": "string",
-      "description": "",
-      "required": false
+      "description": ""
     },
     "isStarter": {
       "type": "boolean",
-      "description": "The boolean value of the draft is a starter template.",
-      "required": false
+      "description": "The boolean value of the draft is a starter template."
     },
     "lineItems": {
       "type": "array",
       "title": "Physical inventory line items, each will become an event when submitted.",
-      "required": true,
       "items": {
         "type": "object",
         "title": "Physical inventory line item",
-        "$ref": "physicalInventoryLineItem"
+        "$ref": "physicalInventoryLineItem.json"
       }
     }
-  }
+  },
+  "required": [
+    "programId",
+    "facilityId",
+    "occurredDate",
+    "lineItems"
+  ]
 }
