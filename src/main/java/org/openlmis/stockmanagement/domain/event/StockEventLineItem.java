@@ -19,6 +19,7 @@ import static javax.persistence.CascadeType.ALL;
 
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.ExtraDataConverter;
+import org.openlmis.stockmanagement.domain.common.VvmApplicable;
 import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 
 import lombok.Data;
@@ -41,7 +42,8 @@ import javax.persistence.Table;
 @Data
 @Entity
 @Table(name = "stock_event_line_items", schema = "stockmanagement")
-public class StockEventLineItem extends BaseEntity implements IdentifiableByOrderableLot {
+public class StockEventLineItem extends BaseEntity
+    implements IdentifiableByOrderableLot, VvmApplicable {
 
   @Column(nullable = false)
   private UUID orderableId;

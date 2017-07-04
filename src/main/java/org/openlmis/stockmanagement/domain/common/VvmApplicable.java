@@ -13,23 +13,15 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.validators;
+package org.openlmis.stockmanagement.domain.common;
 
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_STOCK_EVENT_ORDERABLE_DISABLED_VVM;
 
-import org.openlmis.stockmanagement.dto.StockEventDto;
-import org.springframework.stereotype.Component;
+import java.util.Map;
+import java.util.UUID;
 
-/**
- * This validator ensures that stock event line items for orderables
- * with disabled VVM usage do not specify VVM Status.
- */
-@Component("StockEventVvmValidator")
-public class StockEventVvmValidator extends VvmValidator implements StockEventValidator {
+public interface VvmApplicable {
 
-  @Override
-  public void validate(StockEventDto stockEventDto)
-      throws InstantiationException, IllegalAccessException {
-    validateVvm(stockEventDto.getLineItems(), ERROR_STOCK_EVENT_ORDERABLE_DISABLED_VVM);
-  }
+  UUID getOrderableId();
+
+  Map<String, String> getExtraData();
 }

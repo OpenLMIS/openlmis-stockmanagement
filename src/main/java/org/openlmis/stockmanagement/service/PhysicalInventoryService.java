@@ -85,7 +85,8 @@ public class PhysicalInventoryService {
    * @param dto physical inventory dto.
    * @return the saved inventory.
    */
-  public PhysicalInventoryDto saveDraft(PhysicalInventoryDto dto) {
+  public PhysicalInventoryDto saveDraft(PhysicalInventoryDto dto)
+      throws IllegalAccessException, InstantiationException {
     LOGGER.info("save physical inventory draft");
     physicalInventoryValidator.validate(dto);
     deleteExistingDraft(dto);

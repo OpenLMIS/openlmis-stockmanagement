@@ -124,7 +124,7 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
   // POST /api/physicalInventories/draft
 
   @Test
-  public void shouldSaveDraftWhenValid() {
+  public void shouldSaveDraftWhenValid() throws InstantiationException, IllegalAccessException {
     // given
     mockHasPermissions();
 
@@ -152,7 +152,8 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
   // POST /api/physicalInventories/draft
 
   @Test
-  public void shouldReturnBadRequestOnSaveDraftWhenEntityInvalid() {
+  public void shouldReturnBadRequestOnSaveDraftWhenEntityInvalid()
+      throws InstantiationException, IllegalAccessException {
     // given
     mockHasPermissions();
 

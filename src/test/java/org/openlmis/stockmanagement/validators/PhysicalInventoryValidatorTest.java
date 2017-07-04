@@ -33,7 +33,7 @@ import java.util.Collections;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PhysicalInventoryValidatorTest {
+public class PhysicalInventoryValidatorTest extends VvmValidator {
 
   @Mock
   private OrderableReferenceDataService orderableReferenceDataService;
@@ -57,7 +57,8 @@ public class PhysicalInventoryValidatorTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void shouldRejectIfOrderableNotConfiguredVvmAndLineItemHasVvmStatus() {
+  public void shouldRejectIfOrderableNotConfiguredVvmAndLineItemHasVvmStatus()
+      throws IllegalAccessException, InstantiationException {
     OrderableDto orderable = generateOrderable();
 
     PhysicalInventoryLineItemDto lineItem = generatePhysicalInventoryLineItem(orderable);
@@ -70,7 +71,8 @@ public class PhysicalInventoryValidatorTest {
   }
 
   @Test
-  public void shouldNotRejectIfOrderableEnabledVvmAndLineItemHasVvmStatus() {
+  public void shouldNotRejectIfOrderableEnabledVvmAndLineItemHasVvmStatus()
+      throws IllegalAccessException, InstantiationException {
     OrderableDto orderable = generateOrderable();
     orderable.setExtraData(Collections.singletonMap("useVVM", "true"));
 
@@ -84,7 +86,8 @@ public class PhysicalInventoryValidatorTest {
   }
 
   @Test
-  public void shouldNotRejectIfOrderableDisabledVvmAndLineItemHasNoVvmStatus() {
+  public void shouldNotRejectIfOrderableDisabledVvmAndLineItemHasNoVvmStatus()
+      throws IllegalAccessException, InstantiationException {
     OrderableDto orderable = generateOrderable();
     orderable.setExtraData(Collections.singletonMap("useVVM", "false"));
 

@@ -22,32 +22,25 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
-import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
+/**
+ * This validator ensures that physical inventory line items for orderables
+ * with disabled VVM usage do not specify VVM Status.
+ */
 @Component("PhysicalInventoryValidator")
-public class PhysicalInventoryValidator {
-  private static final String USE_VVM = "useVVM";
-  private static final String VVM_STATUS = "vvmStatus";
-
-  @Autowired
-  private OrderableReferenceDataService orderableReferenceDataService;
+public class PhysicalInventoryValidator extends VvmValidator {
 
   /**
-   * Check for physical inventory dto's validity.
-   * Throws {@link ValidationMessageException} if an error found.
-   * @param inventory physical inventory to validate.
-   */
-  public void validate(PhysicalInventoryDto inventory) {
+    * Check for physical inventory dto's validity.
+    * Throws {@link ValidationMessageException} if an error found.
+    * @param inventory physical inventory to validate.
+    */
+  public void validate(PhysicalInventoryDto inventory)
+      throws InstantiationException, IllegalAccessException {
     List<PhysicalInventoryLineItemDto> lineItems = inventory.getLineItems();
 
     if (isEmpty(lineItems)) {
@@ -60,36 +53,6 @@ public class PhysicalInventoryValidator {
       throw new ValidationMessageException(ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING);
     }
 
-    validateVvmStatuses(lineItems);
-  }
-
-  private void validateVvmStatuses(List<PhysicalInventoryLineItemDto> lineItems) {
-    Map<UUID, OrderableDto> orderables = lineItems
-        .stream()
-        .map(PhysicalInventoryLineItemDto::getOrderableId)
-        .distinct()
-        .collect(Collectors.toMap(
-            Function.identity(),
-            id -> orderableReferenceDataService.findOne(id)
-        ));
-
-    for (PhysicalInventoryLineItemDto item : lineItems) {
-      OrderableDto orderable = orderables.get(item.getOrderableId());
-
-      boolean useVvm = false;
-      boolean hasVvmStatus = false;
-
-      if (orderable.getExtraData() != null) {
-        useVvm = Boolean.parseBoolean(orderable.getExtraData().get(USE_VVM));
-      }
-
-      if (item.getExtraData() != null) {
-        hasVvmStatus = item.getExtraData().get(VVM_STATUS) != null;
-      }
-
-      if (!useVvm && hasVvmStatus) {
-        throw new ValidationMessageException(ERROR_PHYSICAL_INVENTORY_ORDERABLE_DISABLED_VVM);
-      }
-    }
+    validateVvm(lineItems, ERROR_PHYSICAL_INVENTORY_ORDERABLE_DISABLED_VVM);
   }
 }

@@ -69,6 +69,9 @@ public abstract class MessageKeys {
   public static final String ERROR_REASON_FREE_TEXT_NOT_ALLOWED =
       EVENT_ERROR_PREFIX + ".reasonFreeText.notAllowed";
 
+  public static final String ERROR_STOCK_EVENT_ORDERABLE_DISABLED_VVM =
+      EVENT_ERROR_PREFIX + ".orderable.disabled.vvm";
+
   //stock events creation: mandatory fields
   public static final String ERROR_EVENT_OCCURRED_DATE_INVALID = EVENT_ERROR_PREFIX
       + ".occurredDate.invalid";

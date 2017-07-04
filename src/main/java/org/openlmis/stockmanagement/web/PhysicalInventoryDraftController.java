@@ -77,7 +77,8 @@ public class PhysicalInventoryDraftController {
    */
   @Transactional
   @RequestMapping(value = "physicalInventories/draft", method = POST)
-  public ResponseEntity<PhysicalInventoryDto> saveDraft(@RequestBody PhysicalInventoryDto dto) {
+  public ResponseEntity<PhysicalInventoryDto> saveDraft(@RequestBody PhysicalInventoryDto dto)
+      throws InstantiationException, IllegalAccessException {
     checkPermission(dto.getProgramId(), dto.getFacilityId());
     return new ResponseEntity<>(physicalInventoryService.saveDraft(dto), CREATED);
   }

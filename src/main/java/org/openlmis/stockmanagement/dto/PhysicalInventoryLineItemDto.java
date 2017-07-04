@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import org.openlmis.stockmanagement.domain.common.VvmApplicable;
 import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
@@ -37,7 +38,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot {
+public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot, VvmApplicable {
   private OrderableDto orderable;
   private LotDto lot;
   private Integer stockOnHand;
