@@ -53,6 +53,6 @@ public class PhysicalInventoryValidator extends VvmValidator {
       throw new ValidationMessageException(ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING);
     }
 
-    validateVvm(lineItems, ERROR_PHYSICAL_INVENTORY_ORDERABLE_DISABLED_VVM);
+    validate(lineItems, ERROR_PHYSICAL_INVENTORY_ORDERABLE_DISABLED_VVM);
   }
 }

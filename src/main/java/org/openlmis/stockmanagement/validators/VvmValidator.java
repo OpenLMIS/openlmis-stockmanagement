@@ -31,14 +31,21 @@ import java.util.stream.Collectors;
  * This validator ensures that line items for orderables
  * with disabled VVM usage do not specify VVM Status.
  */
-class VvmValidator {
+public class VvmValidator {
   private static final String USE_VVM = "useVVM";
   private static final String VVM_STATUS = "vvmStatus";
 
   @Autowired
   private OrderableReferenceDataService orderableReferenceDataService;
 
-  protected void validateVvm(List<? extends VvmApplicable> vvmApplicables, String messageKey)
+  /**
+   * Validates whether the vvm applicables have proper vvm status (if applicable).
+   * Throws ValidationMessageException if any of items is in invalid state.
+   *
+   * @param vvmApplicables list of items to test
+   * @param messageKey error message key for exception
+   */
+  public void validate(List<? extends VvmApplicable> vvmApplicables, String messageKey)
       throws IllegalAccessException, InstantiationException {
     Map<UUID, OrderableDto> orderables = vvmApplicables
         .stream()

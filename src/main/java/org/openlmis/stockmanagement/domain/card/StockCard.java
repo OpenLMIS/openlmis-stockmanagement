@@ -151,8 +151,10 @@ public class StockCard
     StockCard clone = new StockCard();
     clone.setLineItems(new ArrayList<>());
 
-    for (StockCardLineItem lineItem : this.getLineItems()) {
-      clone.getLineItems().add((StockCardLineItem) cloneBean(lineItem));
+    if (lineItems != null) {
+      for (StockCardLineItem lineItem : this.getLineItems()) {
+        clone.getLineItems().add((StockCardLineItem) cloneBean(lineItem));
+      }
     }
 
     return clone;

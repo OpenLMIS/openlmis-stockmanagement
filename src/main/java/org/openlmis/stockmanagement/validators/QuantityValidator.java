@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.validators;
 
 import static java.util.stream.Collectors.groupingBy;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
@@ -69,41 +70,49 @@ public class QuantityValidator implements StockEventValidator {
         .collect(groupingBy(OrderableLotIdentity::identityOf));
 
     for (List<StockEventLineItem> group : sameOrderableGroups.values()) {
-      boolean willIncreaseOrDecrease = !group.stream()
-          .allMatch(StockEventLineItem::isPhysicalInventory);
-      if (willIncreaseOrDecrease) {
-        //increase may cause int overflow, decrease may cause below zero
-        validateQuantity(stockEventDto, group);
+      boolean willChange = !group.stream().allMatch(StockEventLineItem::isPhysicalInventory);
+      if (willChange) {
+        validateEventItems(stockEventDto, group);
       }
     }
   }
 
-  private void validateQuantity(StockEventDto stockEventDto, List<StockEventLineItem> group)
-      throws InstantiationException, IllegalAccessException {
+  private void validateEventItems(StockEventDto event, List<StockEventLineItem> items)
+      throws IllegalAccessException, InstantiationException {
+    //increase may cause int overflow, decrease may cause below zero
     StockCard foundCard = tryFindCard(
-        stockEventDto.getProgramId(),
-        stockEventDto.getFacilityId(),
-        group.get(0)
+        event.getProgramId(),
+        event.getFacilityId(),
+        items.get(0)
     );
 
     //create line item from event line item and add it to stock card for recalculation
-    calculateStockOnHand(stockEventDto, group, foundCard);
+    calculateStockOnHand(event, items, foundCard);
 
-    for (StockCardLineItem lineItem : foundCard.getLineItems()) {
+    validateQuantities(foundCard.getLineItems());
+  }
+
+  private void validateQuantities(List<StockCardLineItem> items)
+      throws InstantiationException, IllegalAccessException {
+    for (StockCardLineItem lineItem : items) {
       int stockOnHand = lineItem.getStockOnHand();
       int quantity = lineItem.getQuantity();
 
-      int adjustments = 0;
+      int adjustmentsQuantity = 0;
 
-      if (lineItem.getStockAdjustments() != null) {
+      List<StockAdjustment> adjustments = lineItem.getStockAdjustments();
+      if (adjustments != null && !adjustments.isEmpty()) {
         validateStockAdjustments(lineItem.getStockAdjustments());
-        adjustments = lineItem.getStockAdjustments()
+        adjustmentsQuantity = lineItem.getStockAdjustments()
             .stream()
             .mapToInt(StockAdjustment::getSignedQuantity)
             .sum();
+      } else if (stockOnHand != quantity) {
+        throw new ValidationMessageException(
+            ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED);
       }
 
-      if (stockOnHand + adjustments != quantity) {
+      if (stockOnHand + adjustmentsQuantity != quantity) {
         throw new ValidationMessageException(
             ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER);
       }
@@ -148,8 +157,15 @@ public class QuantityValidator implements StockEventValidator {
     }
   }
 
-  private void calculateStockOnHand(StockEventDto eventDto, List<StockEventLineItem> group,
-                                    StockCard foundCard)
+  private StockCardLineItemReason findReason(UUID reasonId) {
+    if (reasonId != null) {
+      return reasonRepository.findOne(reasonId);
+    }
+    return null;
+  }
+
+  private void calculateStockOnHand(
+      StockEventDto eventDto, List<StockEventLineItem> group, StockCard foundCard)
       throws InstantiationException, IllegalAccessException {
     for (StockEventLineItem lineItem : group) {
       StockCardLineItem stockCardLineItem = StockCardLineItem
@@ -158,12 +174,5 @@ public class QuantityValidator implements StockEventValidator {
     }
 
     foundCard.calculateStockOnHand();
-  }
-
-  private StockCardLineItemReason findReason(UUID reasonId) {
-    if (reasonId != null) {
-      return reasonRepository.findOne(reasonId);
-    }
-    return null;
   }
 }

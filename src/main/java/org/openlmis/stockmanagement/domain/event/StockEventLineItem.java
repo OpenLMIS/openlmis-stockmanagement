@@ -21,9 +21,9 @@ import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.ExtraDataConverter;
 import org.openlmis.stockmanagement.domain.common.VvmApplicable;
 import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
+import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
 
 import lombok.Data;
-import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
 
 import java.time.ZonedDateTime;
 import java.util.List;

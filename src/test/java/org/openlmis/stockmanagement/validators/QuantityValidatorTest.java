@@ -20,6 +20,7 @@ import static org.junit.rules.ExpectedException.none;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
 
@@ -32,6 +33,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
@@ -43,15 +45,15 @@ import org.openlmis.stockmanagement.repository.StockCardRepository;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 @RunWith(MockitoJUnitRunner.class)
 @SuppressWarnings("PMD.TooManyMethods")
 public class QuantityValidatorTest {
 
   @Rule
-  public ExpectedException expectedEx = none();
+  public ExpectedException expectedException = none();
 
   @InjectMocks
   private QuantityValidator quantityValidator;
@@ -63,8 +65,53 @@ public class QuantityValidatorTest {
   private StockCardLineItemReasonRepository reasonRepository;
 
   @Test
-  public void shouldNotThrowValidationExceptionIfEventHasNoDestinationOrDebitReason()
+  public void shouldRejectWhenQuantityMakesStockOnHandBelowZero() throws Exception {
+    //expect
+    expectedException.expect(ValidationMessageException.class);
+    expectedException.expectMessage(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH);
+
+    //given
+    ZonedDateTime firstDate = dateTimeFromYear(2015);
+
+    StockCard card = new StockCard();
+    card.setLineItems(Arrays.asList(
+        createCreditLineItem(firstDate.plusDays(1), 5),
+        createDebitLineItem(firstDate.plusDays(3), 1),
+        createCreditLineItem(firstDate.plusDays(4), 2)
+    ));
+
+    StockEventDto event = createDebitEventDto(firstDate.plusDays(2), 5);
+    mockCardFound(event, card);
+
+    //when
+    quantityValidator.validate(event);
+  }
+
+  @Test
+  public void shouldRejectWhenStockOnHandDoesNotMatchQuantityAndNoAdjustmentsProvided()
       throws Exception {
+    //expect
+    expectedException.expect(ValidationMessageException.class);
+    expectedException.expectMessage(ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED);
+
+    //given
+    ZonedDateTime firstDate = dateTimeFromYear(2015);
+
+    StockCard card = new StockCard();
+    card.setLineItems(Arrays.asList(
+        generateLineItemWithAdjustments(firstDate.plusDays(1), 10),
+        generateLineItemWithAdjustments(firstDate.plusDays(3), 10)
+    ));
+
+    StockEventDto event = createDebitEventDto(firstDate.plusDays(2), 5);
+    mockCardFound(event, card);
+
+    //when
+    quantityValidator.validate(event);
+  }
+
+  @Test
+  public void shouldNotRejectWhenEventHasNoDestinationOrDebitReason() throws Exception {
     //given
     StockEventDto stockEventDto = new StockEventDto();
 
@@ -73,158 +120,107 @@ public class QuantityValidatorTest {
   }
 
   @Test
-  public void shouldNotThrowValidationExceptionIfEventReasonIdIsNotFound()
-      throws Exception {
+  public void shouldNotRejectWhenEventReasonIdIsNotFound() throws Exception {
     //given
-    StockEventDto stockEventDto = createStockEventDto();
-    stockEventDto.getLineItems().get(0).setDestinationId(null);
-    when(reasonRepository.findOne(stockEventDto.getLineItems().get(0).getReasonId()))
-        .thenReturn(null);
+    StockEventDto event = createStockEventDto();
+
+    StockEventLineItem invalidItem = event.getLineItems().get(0);
+    invalidItem.setDestinationId(null);
+
+    when(reasonRepository.findOne(invalidItem.getReasonId())).thenReturn(null);
 
     //when
-    quantityValidator.validate(stockEventDto);
+    quantityValidator.validate(event);
   }
 
   @Test
-  public void shouldNotThrowExceptionIfEventLineItemHasNoReason()
-      throws Exception {
+  public void shouldNotRejectWhenEventLineItemHasNoReason() throws Exception {
     //given
-    StockEventDto stockEventDto = createStockEventDto();
-    stockEventDto.getLineItems().get(0).setDestinationId(randomUUID());
-    stockEventDto.getLineItems().get(0).setReasonId(null);
+    StockEventDto event = createStockEventDto();
+
+    StockEventLineItem invalidItem = event.getLineItems().get(0);
+    invalidItem.setDestinationId(randomUUID());
+    invalidItem.setReasonId(null);
 
     //when
-    quantityValidator.validate(stockEventDto);
+    quantityValidator.validate(event);
   }
 
   @Test
-  public void shouldThrowValidationExceptionIfQuantityMakeSohBelowZero()
-      throws Exception {
-    //expect
-    expectedEx.expect(ValidationMessageException.class);
-    expectedEx.expectMessage(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH);
-
+  public void shouldNotRejectWhenStockOnHandMatchesQuantityAndNoAdjustments() throws Exception {
     //given
-    ZonedDateTime day1 = ZonedDateTime.of(2017, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
-    ZonedDateTime day2 = day1.plusDays(1);
-    ZonedDateTime day3 = day2.plusDays(1);
-    ZonedDateTime day4 = day3.plusDays(1);
-
-    ArrayList<StockCardLineItem> lineItems = new ArrayList<>();
-    lineItems.add(createCreditLineItem(day1, 5));
-    lineItems.add(createDebitLineItem(day3, 1));
-    lineItems.add(createCreditLineItem(day4, 2));
+    ZonedDateTime firstDate = dateTimeFromYear(2015);
 
     StockCard card = new StockCard();
-    card.setLineItems(lineItems);
+    StockEventDto event = createDebitEventDto(firstDate.plusDays(1), 0);
 
-    StockEventDto stockEventDto = createDebitEventDto(day2, 5);
-
-    when(stockCardRepository
-        .findByProgramIdAndFacilityIdAndOrderableIdAndLotId(
-            stockEventDto.getProgramId(),
-            stockEventDto.getFacilityId(),
-            stockEventDto.getLineItems().get(0).getOrderableId(),
-            stockEventDto.getLineItems().get(0).getLotId()))
-        .thenReturn(card);
+    mockCardFound(event, card);
 
     //when
-    quantityValidator.validate(stockEventDto);
+    quantityValidator.validate(event);
   }
 
   @Test
-  public void shouldNotRejectWhenStockOnHandWithAdjustmentsMatchQuantity()
-      throws Exception {
+  public void shouldNotRejectWhenStockOnHandWithAdjustmentsMatchQuantity() throws Exception {
     //given
-    ZonedDateTime day1 = ZonedDateTime.of(2017, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
-    ZonedDateTime day2 = day1.plusDays(1);
-    ZonedDateTime day3 = day2.plusDays(1);
-
-    List<StockCardLineItem> cardItems = new ArrayList<>();
-    cardItems.add(generateLineItemWithAdjustments(day1, 10));
-    cardItems.add(generateLineItemWithAdjustments(day3, 10, -2, -3));
+    ZonedDateTime firstDate = dateTimeFromYear(2015);
 
     StockCard card = new StockCard();
-    card.setLineItems(cardItems);
+    card.setLineItems(Arrays.asList(
+        generateLineItemWithAdjustments(firstDate.plusDays(1), 10),
+        generateLineItemWithAdjustments(firstDate.plusDays(3), 10, -2, -3)
+    ));
 
-    StockEventDto stockEventDto = createDebitEventDto(day2, 5);
-
-    when(stockCardRepository
-        .findByProgramIdAndFacilityIdAndOrderableIdAndLotId(
-            stockEventDto.getProgramId(),
-            stockEventDto.getFacilityId(),
-            stockEventDto.getLineItems().get(0).getOrderableId(),
-            stockEventDto.getLineItems().get(0).getLotId()))
-        .thenReturn(card);
+    StockEventDto event = createDebitEventDto(firstDate.plusDays(2), 5);
+    mockCardFound(event, card);
 
     //when
-    quantityValidator.validate(stockEventDto);
+    quantityValidator.validate(event);
   }
 
   @Test
-  public void shouldRejectWhenStockOnHandWithAdjustmentsDoesNotMatchQuantity()
-      throws Exception {
+  public void shouldRejectWhenStockOnHandWithAdjustmentsDoNotMatchQuantity() throws Exception {
     //expect
-    expectedEx.expect(ValidationMessageException.class);
-    expectedEx.expectMessage(ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER);
+    expectedException.expect(ValidationMessageException.class);
+    expectedException.expectMessage(ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER);
 
     //given
-    ZonedDateTime day1 = ZonedDateTime.of(2017, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
-    ZonedDateTime day2 = day1.plusDays(1);
-    ZonedDateTime day3 = day2.plusDays(1);
-
-    List<StockCardLineItem> cardItems = new ArrayList<>();
-    cardItems.add(generateLineItemWithAdjustments(day1, 10));
-    cardItems.add(generateLineItemWithAdjustments(day3, 5, 1, 3));
+    ZonedDateTime firstDate = dateTimeFromYear(2015);
 
     StockCard card = new StockCard();
-    card.setLineItems(cardItems);
+    card.setLineItems(Arrays.asList(
+        generateLineItemWithAdjustments(firstDate.plusDays(1), 10),
+        generateLineItemWithAdjustments(firstDate.plusDays(3), 5, 1, 3)
+    ));
 
-    StockEventDto stockEventDto = createDebitEventDto(day2, 5);
-
-    when(stockCardRepository
-        .findByProgramIdAndFacilityIdAndOrderableIdAndLotId(
-            stockEventDto.getProgramId(),
-            stockEventDto.getFacilityId(),
-            stockEventDto.getLineItems().get(0).getOrderableId(),
-            stockEventDto.getLineItems().get(0).getLotId()))
-        .thenReturn(card);
+    StockEventDto event = createDebitEventDto(firstDate.plusDays(2), 5);
+    mockCardFound(event, card);
 
     //when
-    quantityValidator.validate(stockEventDto);
+    quantityValidator.validate(event);
   }
 
   @Test
-  public void shouldRejectWhenAnyAdjustmentHasNegativeQuantity()
-      throws Exception {
+  public void shouldRejectWhenAnyAdjustmentHasNegativeQuantity() throws Exception {
     //expect
-    expectedEx.expect(ValidationMessageException.class);
-    expectedEx.expectMessage(ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID);
+    expectedException.expect(ValidationMessageException.class);
+    expectedException.expectMessage(ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID);
 
     //given
-    ZonedDateTime day1 = ZonedDateTime.of(2017, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
-    ZonedDateTime day2 = day1.plusDays(1);
+    ZonedDateTime firstDate = dateTimeFromYear(2015);
 
-    StockAdjustment invalidAdjustment = new StockAdjustment(
-        StockCardLineItemReason.physicalDebit(), -5);
-    StockCardLineItem invalidLineItem = createCreditLineItem(day1, 10);
-    invalidLineItem.getStockAdjustments().add(invalidAdjustment);
+    StockAdjustment invalidAdj = new StockAdjustment(StockCardLineItemReason.physicalDebit(), -5);
+    StockCardLineItem invalidLineItem = createCreditLineItem(firstDate.plusDays(1), 10);
+    invalidLineItem.setStockAdjustments(Collections.singletonList(invalidAdj));
 
     StockCard card = new StockCard();
     card.setLineItems(Collections.singletonList(invalidLineItem));
 
-    StockEventDto stockEventDto = createDebitEventDto(day2, 5);
-
-    when(stockCardRepository
-        .findByProgramIdAndFacilityIdAndOrderableIdAndLotId(
-            stockEventDto.getProgramId(),
-            stockEventDto.getFacilityId(),
-            stockEventDto.getLineItems().get(0).getOrderableId(),
-            stockEventDto.getLineItems().get(0).getLotId()))
-        .thenReturn(card);
+    StockEventDto event = createDebitEventDto(firstDate.plusDays(2), 5);
+    mockCardFound(event, card);
 
     //when
-    quantityValidator.validate(stockEventDto);
+    quantityValidator.validate(event);
   }
 
   private StockCardLineItem generateLineItemWithAdjustments(
@@ -242,13 +238,17 @@ public class QuantityValidatorTest {
     return item;
   }
 
+  private ZonedDateTime dateTimeFromYear(int year) {
+    return ZonedDateTime.of(year, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+  }
+  
   private StockEventDto createDebitEventDto(ZonedDateTime dateTime, int quantity) {
     StockEventDto stockEventDto = createStockEventDto();
 
-    stockEventDto.getLineItems().get(0).setSourceId(null);
     stockEventDto.getLineItems().get(0).setDestinationId(randomUUID());
     stockEventDto.getLineItems().get(0).setQuantity(quantity);
     stockEventDto.getLineItems().get(0).setOccurredDate(dateTime);
+    stockEventDto.getLineItems().get(0).setSourceId(null);
 
     return stockEventDto;
   }
@@ -277,4 +277,13 @@ public class QuantityValidatorTest {
         .build();
   }
 
+  private void mockCardFound(StockEventDto event, StockCard card) {
+    when(stockCardRepository
+        .findByProgramIdAndFacilityIdAndOrderableIdAndLotId(
+            event.getProgramId(),
+            event.getFacilityId(),
+            event.getLineItems().get(0).getOrderableId(),
+            event.getLineItems().get(0).getLotId()))
+        .thenReturn(card);
+  }
 }

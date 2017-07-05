@@ -30,6 +30,6 @@ public class StockEventVvmValidator extends VvmValidator implements StockEventVa
   @Override
   public void validate(StockEventDto stockEventDto)
       throws InstantiationException, IllegalAccessException {
-    validateVvm(stockEventDto.getLineItems(), ERROR_STOCK_EVENT_ORDERABLE_DISABLED_VVM);
+    validate(stockEventDto.getLineItems(), ERROR_STOCK_EVENT_ORDERABLE_DISABLED_VVM);
   }
 }
