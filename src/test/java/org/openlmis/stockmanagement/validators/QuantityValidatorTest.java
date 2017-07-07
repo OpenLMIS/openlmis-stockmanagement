@@ -161,7 +161,7 @@ public class QuantityValidatorTest {
   }
 
   @Test
-  public void shouldNotRejectWhenStockOnHandWithAdjustmentsMatchQuantity() throws Exception {
+  public void shouldNotRejectWhenStockOnHandWithAdjustmentsMatchesQuantity() throws Exception {
     //given
     ZonedDateTime firstDate = dateTimeFromYear(2015);
 
@@ -179,7 +179,7 @@ public class QuantityValidatorTest {
   }
 
   @Test
-  public void shouldRejectWhenStockOnHandWithAdjustmentsDoNotMatchQuantity() throws Exception {
+  public void shouldRejectWhenStockOnHandWithAdjustmentsDoesNotMatchQuantity() throws Exception {
     //expect
     expectedException.expect(ValidationMessageException.class);
     expectedException.expectMessage(ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER);
