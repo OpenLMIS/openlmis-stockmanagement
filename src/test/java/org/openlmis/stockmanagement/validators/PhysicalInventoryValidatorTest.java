@@ -15,104 +15,166 @@
 
 package org.openlmis.stockmanagement.validators;
 
-import static org.mockito.BDDMockito.given;
+import static org.junit.rules.ExpectedException.none;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
+import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PhysicalInventoryValidatorTest extends VvmValidator {
+public class PhysicalInventoryValidatorTest {
+
+  @Rule
+  public ExpectedException expectedException = none();
 
   @Mock
-  private OrderableReferenceDataService orderableReferenceDataService;
+  private VvmValidator vvmValidator;
 
   @InjectMocks
   private PhysicalInventoryValidator validator;
 
   @Test(expected = ValidationMessageException.class)
-  public void shouldRejectIfOrderableDisabledVvmAndLineItemHasVvmStatus()
+  public void shouldRejectWhenNoLineItemsPresent()
       throws InstantiationException, IllegalAccessException {
-    OrderableDto orderable = generateOrderable();
-    orderable.setExtraData(Collections.singletonMap("useVVM", "false"));
-
-    PhysicalInventoryLineItemDto lineItem = generatePhysicalInventoryLineItem(orderable);
-    lineItem.setExtraData(Collections.singletonMap("vvmStatus", "status"));
-
+    // given
     PhysicalInventoryDto inventory = new PhysicalInventoryDto();
-    inventory.setLineItems(Collections.singletonList(lineItem));
+    inventory.setLineItems(Collections.emptyList());
 
+    doNothing()
+        .when(vvmValidator).validate(eq(inventory.getLineItems()), anyString());
+
+    // when
     validator.validate(inventory);
+
+    // then
+    verify(vvmValidator, atLeastOnce()).validate(eq(inventory.getLineItems()), anyString());
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void shouldRejectIfOrderableNotConfiguredVvmAndLineItemHasVvmStatus()
-      throws IllegalAccessException, InstantiationException {
-    OrderableDto orderable = generateOrderable();
+  public void shouldRejectWhenLineItemHasNoOrderable()
+      throws InstantiationException, IllegalAccessException {
+    // given
+    PhysicalInventoryDto inventory = new PhysicalInventoryDto();
+    inventory.setLineItems(Collections.singletonList(new PhysicalInventoryLineItemDto()));
 
-    PhysicalInventoryLineItemDto lineItem = generatePhysicalInventoryLineItem(orderable);
-    lineItem.setExtraData(Collections.singletonMap("vvmStatus", "status"));
+    doNothing()
+        .when(vvmValidator).validate(eq(inventory.getLineItems()), anyString());
+
+    // when
+    validator.validate(inventory);
+
+    // then
+    verify(vvmValidator, atLeastOnce()).validate(eq(inventory.getLineItems()), anyString());
+  }
+
+  @Test
+  public void shouldCallVvmValidator() throws InstantiationException, IllegalAccessException {
+    // given
+    PhysicalInventoryDto inventory = new PhysicalInventoryDto();
+    inventory.setLineItems(Collections.singletonList(generateLineItem(5, 5)));
+
+    doNothing()
+        .when(vvmValidator).validate(any(), anyString());
+
+    // when
+    validator.validate(inventory);
+
+    // then
+    verify(vvmValidator, atLeastOnce()).validate(eq(inventory.getLineItems()), anyString());
+  }
+
+  @Test
+  public void shouldRejectWhenAnyAdjustmentHasNegativeQuantity() throws Exception {
+    //expect
+    expectedException.expect(ValidationMessageException.class);
+    expectedException.expectMessage(ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID);
+
+    //given
+    StockAdjustment adjustment = StockAdjustment
+        .builder()
+        .reason(StockCardLineItemReason.physicalCredit())
+        .quantity(-10)
+        .build();
+
+    PhysicalInventoryLineItemDto invalidItem = generateLineItem(10, 5);
+    invalidItem.setStockAdjustments(Collections.singletonList(adjustment));
 
     PhysicalInventoryDto inventory = new PhysicalInventoryDto();
-    inventory.setLineItems(Collections.singletonList(lineItem));
+    inventory.setLineItems(Collections.singletonList(invalidItem));
 
+    //when
     validator.validate(inventory);
   }
 
   @Test
-  public void shouldNotRejectIfOrderableEnabledVvmAndLineItemHasVvmStatus()
-      throws IllegalAccessException, InstantiationException {
-    OrderableDto orderable = generateOrderable();
-    orderable.setExtraData(Collections.singletonMap("useVVM", "true"));
+  public void shouldRejectWhenStockOnHandDoesNotMatchQuantityAndNoAdjustmentsProvided()
+      throws Exception {
+    //expect
+    expectedException.expect(ValidationMessageException.class);
+    expectedException.expectMessage(ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED);
 
-    PhysicalInventoryLineItemDto lineItem = generatePhysicalInventoryLineItem(orderable);
-    lineItem.setExtraData(Collections.singletonMap("vvmStatus", "status"));
+    //given
+    PhysicalInventoryLineItemDto invalidItem = generateLineItem(10, 5);
 
     PhysicalInventoryDto inventory = new PhysicalInventoryDto();
-    inventory.setLineItems(Collections.singletonList(lineItem));
+    inventory.setLineItems(Collections.singletonList(invalidItem));
 
+    //when
     validator.validate(inventory);
   }
 
   @Test
-  public void shouldNotRejectIfOrderableDisabledVvmAndLineItemHasNoVvmStatus()
-      throws IllegalAccessException, InstantiationException {
-    OrderableDto orderable = generateOrderable();
-    orderable.setExtraData(Collections.singletonMap("useVVM", "false"));
+  public void shouldRejectWhenStockOnHandWithAdjustmentsDoesNotMatchQuantity() throws Exception {
+    //expect
+    expectedException.expect(ValidationMessageException.class);
+    expectedException.expectMessage(ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER);
 
-    PhysicalInventoryLineItemDto lineItem = generatePhysicalInventoryLineItem(orderable);
+    //given
+    StockAdjustment adjustment = StockAdjustment
+        .builder()
+        .reason(StockCardLineItemReason.physicalCredit())
+        .quantity(30)
+        .build();
+
+    PhysicalInventoryLineItemDto invalidItem = generateLineItem(10, 5);
+    invalidItem.setStockAdjustments(Collections.singletonList(adjustment));
 
     PhysicalInventoryDto inventory = new PhysicalInventoryDto();
-    inventory.setLineItems(Collections.singletonList(lineItem));
+    inventory.setLineItems(Collections.singletonList(invalidItem));
 
+    //when
     validator.validate(inventory);
   }
 
-  private OrderableDto generateOrderable() {
-    OrderableDto orderable = new OrderableDto();
-    orderable.setId(UUID.randomUUID());
-
-    given(orderableReferenceDataService.findOne(eq(orderable.getId())))
-        .willReturn(orderable);
-
-    return orderable;
-  }
-
-  private PhysicalInventoryLineItemDto generatePhysicalInventoryLineItem(OrderableDto orderable) {
-    PhysicalInventoryLineItemDto lineItem = new PhysicalInventoryLineItemDto();
-    lineItem.setOrderable(orderable);
-
-    return lineItem;
+  private PhysicalInventoryLineItemDto generateLineItem(int soh, int quantity) {
+    return PhysicalInventoryLineItemDto
+        .builder()
+        .orderable(new OrderableDto())
+        .stockOnHand(soh)
+        .quantity(quantity)
+        .stockAdjustments(new ArrayList<>())
+        .build();
   }
 }

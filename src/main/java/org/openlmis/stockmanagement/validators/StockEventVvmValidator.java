@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.validators;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_STOCK_EVENT_ORDERABLE_DISABLED_VVM;
 
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -25,11 +26,14 @@ import org.springframework.stereotype.Component;
  * with disabled VVM usage do not specify VVM Status.
  */
 @Component("StockEventVvmValidator")
-public class StockEventVvmValidator extends VvmValidator implements StockEventValidator {
+public class StockEventVvmValidator implements StockEventValidator {
+
+  @Autowired
+  private VvmValidator vvmValidator;
 
   @Override
   public void validate(StockEventDto stockEventDto)
       throws InstantiationException, IllegalAccessException {
-    validate(stockEventDto.getLineItems(), ERROR_STOCK_EVENT_ORDERABLE_DISABLED_VVM);
+    vvmValidator.validate(stockEventDto.getLineItems(), ERROR_STOCK_EVENT_ORDERABLE_DISABLED_VVM);
   }
 }

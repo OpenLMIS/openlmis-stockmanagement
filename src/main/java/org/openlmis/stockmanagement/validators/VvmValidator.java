@@ -20,6 +20,7 @@ import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
  * This validator ensures that line items for orderables
  * with disabled VVM usage do not specify VVM Status.
  */
+@Component("VvmValidator")
 public class VvmValidator {
   private static final String USE_VVM = "useVVM";
   private static final String VVM_STATUS = "vvmStatus";

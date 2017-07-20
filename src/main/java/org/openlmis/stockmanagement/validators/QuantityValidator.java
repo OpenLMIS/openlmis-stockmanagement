@@ -16,15 +16,11 @@
 package org.openlmis.stockmanagement.validators;
 
 import static java.util.stream.Collectors.groupingBy;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
-import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
@@ -88,51 +84,6 @@ public class QuantityValidator implements StockEventValidator {
 
     //create line item from event line item and add it to stock card for recalculation
     calculateStockOnHand(event, items, foundCard);
-
-    validateQuantities(foundCard.getLineItems());
-  }
-
-  private void validateQuantities(List<StockCardLineItem> items)
-      throws InstantiationException, IllegalAccessException {
-    for (StockCardLineItem lineItem : items) {
-      int stockOnHand = lineItem.getStockOnHand();
-      int quantity = lineItem.getQuantity();
-
-      int adjustmentsQuantity = 0;
-
-      List<StockAdjustment> adjustments = lineItem.getStockAdjustments();
-      if (adjustments != null && !adjustments.isEmpty()) {
-        validateStockAdjustments(lineItem.getStockAdjustments());
-        adjustmentsQuantity = lineItem.getStockAdjustments()
-            .stream()
-            .mapToInt(StockAdjustment::getSignedQuantity)
-            .sum();
-      } else if (stockOnHand != quantity) {
-        throw new ValidationMessageException(
-            ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED);
-      }
-
-      if (stockOnHand + adjustmentsQuantity != quantity) {
-        throw new ValidationMessageException(
-            ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER);
-      }
-    }
-  }
-
-  /**
-   * Make sure each stock adjustment a non-negative quantity assigned.
-   * @param adjustments adjustments to validate
-   */
-  private void validateStockAdjustments(List<StockAdjustment> adjustments) {
-    // Check for valid quantities
-    boolean hasNegative = adjustments
-        .stream()
-        .mapToInt(StockAdjustment::getQuantity)
-        .anyMatch(quantity -> quantity < 0);
-
-    if (hasNegative) {
-      throw new ValidationMessageException(ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID);
-    }
   }
 
   private StockCard tryFindCard(UUID programId, UUID facilityId, StockEventLineItem lineItem) {

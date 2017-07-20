@@ -16,104 +16,43 @@
 package org.openlmis.stockmanagement.validators;
 
 
-import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
-import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
-import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 
 import java.util.Collections;
-import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StockEventVvmValidatorTest {
 
   @Mock
-  private OrderableReferenceDataService orderableReferenceDataService;
+  private VvmValidator vvmValidator;
 
   @InjectMocks
   private StockEventVvmValidator validator;
 
-  @Test(expected = ValidationMessageException.class)
-  public void shouldRejectIfOrderableDisabledVvmAndLineItemHasVvmStatus()
-      throws InstantiationException, IllegalAccessException {
-    OrderableDto orderable = generateOrderable();
-    orderable.setExtraData(Collections.singletonMap("useVVM", "false"));
-
-    StockEventLineItem lineItem = generateStockEventLineItem(orderable.getId());
-    lineItem.setExtraData(Collections.singletonMap("vvmStatus", "status"));
-
-    StockEventDto stockEvent = new StockEventDto();
-    stockEvent.setLineItems(Collections.singletonList(lineItem));
-
-    validator.validate(stockEvent);
-  }
-
-  @Test(expected = ValidationMessageException.class)
-  public void shouldRejectIfOrderableNotConfiguredVvmAndLineItemHasVvmStatus()
-      throws InstantiationException, IllegalAccessException {
-    OrderableDto orderable = generateOrderable();
-
-    StockEventLineItem lineItem = generateStockEventLineItem(orderable.getId());
-    lineItem.setExtraData(Collections.singletonMap("vvmStatus", "status"));
-
-    StockEventDto stockEvent = new StockEventDto();
-    stockEvent.setLineItems(Collections.singletonList(lineItem));
-
-    validator.validate(stockEvent);
-  }
-
   @Test
-  public void shouldNotRejectIfOrderableEnabledVvmAndLineItemHasVvmStatus()
-      throws InstantiationException, IllegalAccessException {
-    OrderableDto orderable = generateOrderable();
-    orderable.setExtraData(Collections.singletonMap("useVVM", "true"));
-
-    StockEventLineItem lineItem = generateStockEventLineItem(orderable.getId());
-    lineItem.setExtraData(Collections.singletonMap("vvmStatus", "status"));
-
+  public void shouldCallVvmValidator() throws InstantiationException, IllegalAccessException {
+    // given
     StockEventDto stockEvent = new StockEventDto();
-    stockEvent.setLineItems(Collections.singletonList(lineItem));
+    stockEvent.setLineItems(Collections.emptyList());
 
+    doNothing()
+        .when(vvmValidator).validate(eq(stockEvent.getLineItems()), anyString());
+
+    // when
     validator.validate(stockEvent);
-  }
 
-  @Test
-  public void shouldNotRejectIfOrderableDisabledVvmAndLineItemHasNoVvmStatus()
-      throws InstantiationException, IllegalAccessException {
-    OrderableDto orderable = generateOrderable();
-    orderable.setExtraData(Collections.singletonMap("useVVM", "false"));
-
-    StockEventLineItem lineItem = generateStockEventLineItem(orderable.getId());
-
-    StockEventDto stockEvent = new StockEventDto();
-    stockEvent.setLineItems(Collections.singletonList(lineItem));
-
-    validator.validate(stockEvent);
-  }
-
-  private OrderableDto generateOrderable() {
-    OrderableDto orderable = new OrderableDto();
-    orderable.setId(UUID.randomUUID());
-
-    given(orderableReferenceDataService.findOne(eq(orderable.getId())))
-        .willReturn(orderable);
-
-    return orderable;
-  }
-
-  private StockEventLineItem generateStockEventLineItem(UUID orderableId) {
-    StockEventLineItem lineItem = new StockEventLineItem();
-    lineItem.setOrderableId(orderableId);
-
-    return lineItem;
+    // then
+    verify(vvmValidator, atLeastOnce()).validate(eq(stockEvent.getLineItems()), anyString());
   }
 }

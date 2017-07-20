@@ -24,4 +24,6 @@ public interface VvmApplicable {
   UUID getOrderableId();
 
   Map<String, String> getExtraData();
+
+  void setExtraData(Map<String, String> data);
 }
