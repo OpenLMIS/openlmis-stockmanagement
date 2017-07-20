@@ -59,26 +59,28 @@ public class PhysicalInventoryValidator {
   private void validateQuantities(List<PhysicalInventoryLineItemDto> items)
       throws InstantiationException, IllegalAccessException {
     for (PhysicalInventoryLineItemDto lineItem : items) {
-      int stockOnHand = lineItem.getStockOnHand();
-      int quantity = lineItem.getQuantity();
+      if (lineItem.getStockOnHand() != null) {
+        int stockOnHand = lineItem.getStockOnHand();
+        int quantity = lineItem.getQuantity();
 
-      int adjustmentsQuantity = 0;
+        int adjustmentsQuantity = 0;
 
-      List<StockAdjustment> adjustments = lineItem.getStockAdjustments();
-      if (adjustments != null && !adjustments.isEmpty()) {
-        validateStockAdjustments(lineItem.getStockAdjustments());
-        adjustmentsQuantity = lineItem.getStockAdjustments()
-            .stream()
-            .mapToInt(StockAdjustment::getSignedQuantity)
-            .sum();
-      } else if (stockOnHand != quantity) {
-        throw new ValidationMessageException(
-            ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED);
-      }
+        List<StockAdjustment> adjustments = lineItem.getStockAdjustments();
+        if (adjustments != null && !adjustments.isEmpty()) {
+          validateStockAdjustments(lineItem.getStockAdjustments());
+          adjustmentsQuantity = lineItem.getStockAdjustments()
+              .stream()
+              .mapToInt(StockAdjustment::getSignedQuantity)
+              .sum();
+        } else if (stockOnHand != quantity) {
+          throw new ValidationMessageException(
+              ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED);
+        }
 
-      if (stockOnHand + adjustmentsQuantity != quantity) {
-        throw new ValidationMessageException(
-            ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER);
+        if (stockOnHand + adjustmentsQuantity != quantity) {
+          throw new ValidationMessageException(
+              ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER);
+        }
       }
     }
   }
