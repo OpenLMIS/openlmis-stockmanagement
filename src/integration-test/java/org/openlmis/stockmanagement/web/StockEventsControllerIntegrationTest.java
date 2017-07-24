@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import guru.nidi.ramltester.junit.RamlMatchers;
+import org.springframework.http.HttpHeaders;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -79,7 +80,7 @@ public class StockEventsControllerIntegrationTest extends BaseWebIntegrationTest
 
     // when
     UUID result = restAssured.given()
-        .queryParam(ACCESS_TOKEN, getToken())
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
         .contentType(APPLICATION_JSON)
         .body(stockEvent)
         .when()
@@ -106,7 +107,7 @@ public class StockEventsControllerIntegrationTest extends BaseWebIntegrationTest
 
     // when
     restAssured.given()
-        .queryParam(ACCESS_TOKEN, getToken())
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
         .contentType(APPLICATION_JSON)
         .body(stockEvent)
         .when()

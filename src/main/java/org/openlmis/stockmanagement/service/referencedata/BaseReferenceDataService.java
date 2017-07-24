@@ -51,12 +51,10 @@ public abstract class BaseReferenceDataService<T> extends BaseCommunicationServi
     String url = getServiceUrl() + getUrl() + id;
 
     RestTemplate restTemplate = new RestTemplate();
-    Map<String, String> params = new HashMap<>();
-    params.put(ACCESS_TOKEN, obtainAccessToken());
 
     try {
       ResponseEntity<T> responseEntity = restTemplate.exchange(
-          buildUri(url, params), HttpMethod.GET, null, getResultClass());
+          buildUri(url), HttpMethod.GET, createAuthEntityNoBody(), getResultClass());
       return responseEntity.getBody();
     } catch (HttpStatusCodeException ex) {
       // rest template will handle 404 as an exception, instead of returning null
@@ -97,13 +95,12 @@ public abstract class BaseReferenceDataService<T> extends BaseCommunicationServi
     String url = getServiceUrl() + getUrl() + resourceUrl;
     Map<String, Object> params = new HashMap<>();
     params.putAll(parameters);
-    params.put(ACCESS_TOKEN, obtainAccessToken());
 
     RestTemplate restTemplate = new RestTemplate();
     ResponseEntity<ResultDto<P>> response = restTemplate.exchange(
         buildUri(url, params),
         HttpMethod.GET,
-        null,
+        createAuthEntityNoBody(),
         new DynamicParametrizedTypeReference<>(type)
     );
 
@@ -116,17 +113,12 @@ public abstract class BaseReferenceDataService<T> extends BaseCommunicationServi
     RestTemplate restTemplate = new RestTemplate();
 
     Map<String, Object> params = new HashMap<>();
-    params.put(ACCESS_TOKEN, obtainAccessToken());
     params.putAll(uriParameters);
 
     try {
-      ResponseEntity<T[]> responseEntity;
-      if (HttpMethod.GET == method) {
-        responseEntity = restTemplate.getForEntity(buildUri(url, params), getArrayResultClass());
-      } else {
-        responseEntity = restTemplate.postForEntity(buildUri(url, params), payload,
-            getArrayResultClass());
-      }
+      ResponseEntity<T[]> responseEntity = restTemplate.exchange(buildUri(url, params),
+              method, createEntityWithAuthHeader(payload), getArrayResultClass());
+
       return new ArrayList<>(Arrays.asList(responseEntity.getBody()));
     } catch (HttpStatusCodeException ex) {
       throw buildDataRetrievalException(ex);

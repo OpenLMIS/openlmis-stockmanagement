@@ -80,10 +80,16 @@ public abstract class BaseCommunicationService<T> {
     return ((Map<String, String>) response.getBody()).get(ACCESS_TOKEN);
   }
 
+  protected URI buildUri(String url) {
+    return buildUri(url, null);
+  }
+
   protected URI buildUri(String url, Map<String, ?> params) {
     UriComponentsBuilder builder = UriComponentsBuilder.newInstance().uri(URI.create(url));
 
-    params.entrySet().forEach(e -> builder.queryParam(e.getKey(), e.getValue()));
+    if (params != null) {
+      params.forEach(builder::queryParam);
+    }
 
     return builder.build(true).toUri();
   }
@@ -109,14 +115,13 @@ public abstract class BaseCommunicationService<T> {
     String url = getServiceUrl() + getUrl() + resourceUrl;
 
     Map<String, Object> params = new HashMap<>();
-    params.put(ACCESS_TOKEN, obtainAccessToken());
     params.putAll(parameters);
 
     try {
       ResponseEntity<PageImplRepresentation<P>> response = restTemplate.exchange(
           buildUri(url, params),
           method,
-          (payload != null) ? new HttpEntity<>(payload) : null,
+          createEntityWithAuthHeader(payload),
           new DynamicPageTypeReference<>(type)
       );
       return response.getBody();
@@ -131,5 +136,23 @@ public abstract class BaseCommunicationService<T> {
     return new DataRetrievalException(
         getResultClass().getSimpleName(), ex.getStatusCode(), ex.getResponseBodyAsString()
     );
+  }
+
+  protected <E> HttpEntity<E> createEntityWithAuthHeader(E payload) {
+    if (payload == null) {
+      return createAuthEntityNoBody();
+    } else {
+      return new HttpEntity<>(payload, createHeadersWithAuth());
+    }
+  }
+
+  protected HttpEntity createAuthEntityNoBody() {
+    return new HttpEntity(createHeadersWithAuth());
+  }
+
+  protected HttpHeaders createHeadersWithAuth() {
+    HttpHeaders headers = new HttpHeaders();
+    headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + obtainAccessToken());
+    return headers;
   }
 }

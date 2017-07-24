@@ -114,8 +114,17 @@ traits:
                   displayName: access_token
                   description: OAuth2 access token
                   type: string
-                  required: true
+                  required: false
                   repeat: false
+          headers:
+              Authorization:
+                  displayName: access_token
+                  description: OAuth2 access token
+                  type: string
+                  required: false
+                  repeat: false
+
+
 
     - paginated:
           queryParameters:

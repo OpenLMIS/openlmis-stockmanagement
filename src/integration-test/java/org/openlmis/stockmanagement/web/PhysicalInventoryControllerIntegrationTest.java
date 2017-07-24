@@ -36,6 +36,7 @@ import org.openlmis.stockmanagement.service.PhysicalInventoryService;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import guru.nidi.ramltester.junit.RamlMatchers;
+import org.springframework.http.HttpHeaders;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -79,7 +80,7 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
 
     // when
     PhysicalInventoryDto result = restAssured.given()
-        .queryParam(ACCESS_TOKEN, getToken())
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
         .queryParam(PROGRAM_PARAM, programId)
         .queryParam(FACILITY_PARAM, facilityId)
         .when()
@@ -109,7 +110,7 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
 
     // when
     restAssured.given()
-        .queryParam(ACCESS_TOKEN, getToken())
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
         .queryParam(PROGRAM_PARAM, programId)
         .queryParam(FACILITY_PARAM, facilityId)
         .when()
@@ -134,7 +135,7 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
 
     // when
     PhysicalInventoryDto result = restAssured.given()
-        .queryParam(ACCESS_TOKEN, getToken())
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
         .contentType(APPLICATION_JSON)
         .body(expectedDraft)
         .when()
@@ -163,7 +164,7 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
 
     // when
     restAssured.given()
-        .queryParam(ACCESS_TOKEN, getToken())
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
         .contentType(APPLICATION_JSON)
         .body(expectedDraft)
         .when()
@@ -190,7 +191,7 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
 
     // when
     restAssured.given()
-        .queryParam(ACCESS_TOKEN, getToken())
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
         .contentType(APPLICATION_JSON)
         .queryParam(PROGRAM_PARAM, programId)
         .queryParam(FACILITY_PARAM, facilityId)
