@@ -118,8 +118,8 @@ traits:
                   repeat: false
           headers:
               Authorization:
-                  displayName: access_token
-                  description: OAuth2 access token
+                  displayName: Authorization
+                  description: OAuth2 authorization token header. Takes the form of 'Bearer <token>'.
                   type: string
                   required: false
                   repeat: false
