@@ -13,33 +13,40 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.dto.referencedata;
+package org.openlmis.stockmanagement.util;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.google.common.collect.Maps;
+import java.util.Map;
+import java.util.function.Consumer;
 
-import java.util.Set;
-import java.util.UUID;
+public final class RequestParameters {
+  private Map<String, Object> params = Maps.newHashMap();
 
-@Getter
-@Setter
-public class UserDto {
-  private UUID id;
-  private String username;
-  private String firstName;
-  private String lastName;
-  private String email;
-  private boolean verified;
-  private FacilityDto homeFacility;
-  private Set<RoleAssignmentDto> roleAssignments;
-  private Boolean allowNotify;
-  private boolean active;
-
-  public boolean allowNotify() {
-    return this.getAllowNotify() != null && this.getAllowNotify();
+  private RequestParameters() {
   }
 
-  public boolean activeAndVerified() {
-    return this.isActive() && this.isVerified();
+  public static RequestParameters init() {
+    return new RequestParameters();
   }
+
+  /**
+   * Set parameter (key argument) with the value only if the value is not null.
+   */
+  public RequestParameters set(String key, Object value) {
+    if (null != value) {
+      params.put(key, value);
+    }
+
+    return this;
+  }
+
+  public RequestParameters setAll(RequestParameters parameters) {
+    parameters.forEach(entry -> set(entry.getKey(), entry.getValue()));
+    return this;
+  }
+
+  public void forEach(Consumer<Map.Entry<String, Object>> action) {
+    params.entrySet().forEach(action);
+  }
+
 }

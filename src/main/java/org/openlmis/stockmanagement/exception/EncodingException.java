@@ -13,33 +13,11 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.dto.referencedata;
+package org.openlmis.stockmanagement.exception;
 
-import lombok.Getter;
-import lombok.Setter;
+public class EncodingException extends RuntimeException {
 
-import java.util.Set;
-import java.util.UUID;
-
-@Getter
-@Setter
-public class UserDto {
-  private UUID id;
-  private String username;
-  private String firstName;
-  private String lastName;
-  private String email;
-  private boolean verified;
-  private FacilityDto homeFacility;
-  private Set<RoleAssignmentDto> roleAssignments;
-  private Boolean allowNotify;
-  private boolean active;
-
-  public boolean allowNotify() {
-    return this.getAllowNotify() != null && this.getAllowNotify();
-  }
-
-  public boolean activeAndVerified() {
-    return this.isActive() && this.isVerified();
+  public EncodingException(Throwable cause) {
+    super(cause);
   }
 }

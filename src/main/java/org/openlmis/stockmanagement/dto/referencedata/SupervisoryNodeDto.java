@@ -17,29 +17,14 @@ package org.openlmis.stockmanagement.dto.referencedata;
 
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.Set;
 import java.util.UUID;
 
 @Getter
 @Setter
-public class UserDto {
+public class SupervisoryNodeDto {
   private UUID id;
-  private String username;
-  private String firstName;
-  private String lastName;
-  private String email;
-  private boolean verified;
-  private FacilityDto homeFacility;
-  private Set<RoleAssignmentDto> roleAssignments;
-  private Boolean allowNotify;
-  private boolean active;
-
-  public boolean allowNotify() {
-    return this.getAllowNotify() != null && this.getAllowNotify();
-  }
-
-  public boolean activeAndVerified() {
-    return this.isActive() && this.isVerified();
-  }
+  private String code;
+  private String name;
+  private String description;
+  private FacilityDto facility;
 }

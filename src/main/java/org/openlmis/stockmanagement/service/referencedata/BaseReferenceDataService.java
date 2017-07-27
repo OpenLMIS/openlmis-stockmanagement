@@ -15,6 +15,9 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
+import static org.openlmis.stockmanagement.util.RequestHelper.createAuthEntityNoBody;
+import static org.openlmis.stockmanagement.util.RequestHelper.createEntityWithAuthHeader;
+
 import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
 import org.openlmis.stockmanagement.utils.DynamicParametrizedTypeReference;
 import org.slf4j.Logger;
@@ -40,7 +43,6 @@ public abstract class BaseReferenceDataService<T> extends BaseCommunicationServi
   @Value("${referencedata.url}")
   private String referenceDataUrl;
 
-
   /**
    * Return one object from Reference data service.
    *
@@ -54,7 +56,8 @@ public abstract class BaseReferenceDataService<T> extends BaseCommunicationServi
 
     try {
       ResponseEntity<T> responseEntity = restTemplate.exchange(
-          buildUri(url), HttpMethod.GET, createAuthEntityNoBody(), getResultClass());
+          buildUri(url), HttpMethod.GET, createAuthEntityNoBody(obtainAccessToken()),
+          getResultClass());
       return responseEntity.getBody();
     } catch (HttpStatusCodeException ex) {
       // rest template will handle 404 as an exception, instead of returning null
@@ -100,7 +103,7 @@ public abstract class BaseReferenceDataService<T> extends BaseCommunicationServi
     ResponseEntity<ResultDto<P>> response = restTemplate.exchange(
         buildUri(url, params),
         HttpMethod.GET,
-        createAuthEntityNoBody(),
+        createAuthEntityNoBody(obtainAccessToken()),
         new DynamicParametrizedTypeReference<>(type)
     );
 
@@ -117,7 +120,8 @@ public abstract class BaseReferenceDataService<T> extends BaseCommunicationServi
 
     try {
       ResponseEntity<T[]> responseEntity = restTemplate.exchange(buildUri(url, params),
-              method, createEntityWithAuthHeader(payload), getArrayResultClass());
+          method, createEntityWithAuthHeader(payload, obtainAccessToken()),
+          getArrayResultClass());
 
       return new ArrayList<>(Arrays.asList(responseEntity.getBody()));
     } catch (HttpStatusCodeException ex) {

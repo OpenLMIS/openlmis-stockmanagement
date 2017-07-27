@@ -40,6 +40,7 @@ dependencies {
     compile 'org.springframework:spring-context-support'
     compile 'org.hibernate:hibernate-java8'
     compile 'org.flywaydb:flyway-core:4.1.2'
+    compile 'org.openlmis:openlmis-service-util:3.0.0'
 
     compile "org.projectlombok:lombok:1.16.8"
     compile "org.postgresql:postgresql:42.0.0"

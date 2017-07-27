@@ -15,20 +15,19 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
-import org.apache.commons.codec.binary.Base64;
+import static org.openlmis.stockmanagement.util.RequestHelper.createEntityWithAuthHeader;
+
+import org.openlmis.stockmanagement.service.AuthService;
 import org.openlmis.stockmanagement.util.DynamicPageTypeReference;
 import org.openlmis.stockmanagement.util.PageImplRepresentation;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,38 +45,15 @@ public abstract class BaseCommunicationService<T> {
 
   protected abstract Class<T[]> getArrayResultClass();
 
-  @Value("${auth.server.clientId}")
-  private String clientId;
-
-  @Value("${auth.server.clientSecret}")
-  private String clientSecret;
-
-  @Value("${auth.server.authorizationUrl}")
-  private String authorizationUrl;
+  @Autowired
+  private AuthService authService;
 
   public BaseCommunicationService() {
     this.restTemplate = new RestTemplate();
   }
 
   protected String obtainAccessToken() {
-    String plainCreds = clientId + ":" + clientSecret;
-    byte[] plainCredsBytes = plainCreds.getBytes();
-    byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
-    String base64Creds = new String(base64CredsBytes);
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.add("Authorization", "Basic " + base64Creds);
-
-    HttpEntity<String> request = new HttpEntity<>(headers);
-
-    Map<String, Object> params = new HashMap<>();
-    params.put("grant_type", "client_credentials");
-
-    ResponseEntity<?> response = restTemplate.exchange(
-        buildUri(authorizationUrl, params), HttpMethod.POST, request, Object.class);
-
-
-    return ((Map<String, String>) response.getBody()).get(ACCESS_TOKEN);
+    return authService.obtainAccessToken();
   }
 
   protected URI buildUri(String url) {
@@ -121,7 +97,7 @@ public abstract class BaseCommunicationService<T> {
       ResponseEntity<PageImplRepresentation<P>> response = restTemplate.exchange(
           buildUri(url, params),
           method,
-          createEntityWithAuthHeader(payload),
+          createEntityWithAuthHeader(payload, obtainAccessToken()),
           new DynamicPageTypeReference<>(type)
       );
       return response.getBody();
@@ -136,23 +112,5 @@ public abstract class BaseCommunicationService<T> {
     return new DataRetrievalException(
         getResultClass().getSimpleName(), ex.getStatusCode(), ex.getResponseBodyAsString()
     );
-  }
-
-  protected <E> HttpEntity<E> createEntityWithAuthHeader(E payload) {
-    if (payload == null) {
-      return createAuthEntityNoBody();
-    } else {
-      return new HttpEntity<>(payload, createHeadersWithAuth());
-    }
-  }
-
-  protected HttpEntity createAuthEntityNoBody() {
-    return new HttpEntity(createHeadersWithAuth());
-  }
-
-  protected HttpHeaders createHeadersWithAuth() {
-    HttpHeaders headers = new HttpHeaders();
-    headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + obtainAccessToken());
-    return headers;
   }
 }

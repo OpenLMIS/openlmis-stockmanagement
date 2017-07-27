@@ -231,6 +231,13 @@ public abstract class MessageKeys {
 
   public static final String ERROR_REPORT_ID_NOT_FOUND = ERROR_PREFIX + ".report.id.notFound";
 
+
+  //notifications
+  public static final String EMAIL_ACTION_REQUIRED_SUBJECT
+      = SERVICE_PREFIX + ".email.actionRequired.subject";
+  public static final String EMAIL_ACTION_REQUIRED_CONTENT
+      = SERVICE_PREFIX + ".email.actionRequired.content";
+
   private MessageKeys() {
     throw new UnsupportedOperationException();
   }
