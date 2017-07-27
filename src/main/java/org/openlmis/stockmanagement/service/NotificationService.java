@@ -60,8 +60,8 @@ public class NotificationService {
     try {
       restTemplate.postForObject(
           RequestHelper.createUri(url),
-          RequestHelper.createEntityWithAuthHeader(request,
-              authService.obtainAccessToken()),
+          RequestHelper.createEntity(authService.obtainAccessToken(),
+              request),
           Object.class);
     } catch (RestClientException ex) {
       logger.error("Can not send notification ", ex);

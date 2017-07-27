@@ -15,7 +15,7 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
-import static org.openlmis.stockmanagement.util.RequestHelper.createEntityWithAuthHeader;
+import static org.openlmis.stockmanagement.util.RequestHelper.createEntity;
 
 import org.openlmis.stockmanagement.service.AuthService;
 import org.openlmis.stockmanagement.util.DynamicPageTypeReference;
@@ -97,7 +97,7 @@ public abstract class BaseCommunicationService<T> {
       ResponseEntity<PageImplRepresentation<P>> response = restTemplate.exchange(
           buildUri(url, params),
           method,
-          createEntityWithAuthHeader(payload, obtainAccessToken()),
+          createEntity(obtainAccessToken(), payload),
           new DynamicPageTypeReference<>(type)
       );
       return response.getBody();

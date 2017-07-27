@@ -15,8 +15,7 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
-import static org.openlmis.stockmanagement.util.RequestHelper.createAuthEntityNoBody;
-import static org.openlmis.stockmanagement.util.RequestHelper.createEntityWithAuthHeader;
+import static org.openlmis.stockmanagement.util.RequestHelper.createEntity;
 
 import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
 import org.openlmis.stockmanagement.utils.DynamicParametrizedTypeReference;
@@ -56,7 +55,7 @@ public abstract class BaseReferenceDataService<T> extends BaseCommunicationServi
 
     try {
       ResponseEntity<T> responseEntity = restTemplate.exchange(
-          buildUri(url), HttpMethod.GET, createAuthEntityNoBody(obtainAccessToken()),
+          buildUri(url), HttpMethod.GET, createEntity(obtainAccessToken()),
           getResultClass());
       return responseEntity.getBody();
     } catch (HttpStatusCodeException ex) {
@@ -103,7 +102,7 @@ public abstract class BaseReferenceDataService<T> extends BaseCommunicationServi
     ResponseEntity<ResultDto<P>> response = restTemplate.exchange(
         buildUri(url, params),
         HttpMethod.GET,
-        createAuthEntityNoBody(obtainAccessToken()),
+        createEntity(obtainAccessToken()),
         new DynamicParametrizedTypeReference<>(type)
     );
 
@@ -120,7 +119,7 @@ public abstract class BaseReferenceDataService<T> extends BaseCommunicationServi
 
     try {
       ResponseEntity<T[]> responseEntity = restTemplate.exchange(buildUri(url, params),
-          method, createEntityWithAuthHeader(payload, obtainAccessToken()),
+          method, createEntity(obtainAccessToken(), payload),
           getArrayResultClass());
 
       return new ArrayList<>(Arrays.asList(responseEntity.getBody()));
