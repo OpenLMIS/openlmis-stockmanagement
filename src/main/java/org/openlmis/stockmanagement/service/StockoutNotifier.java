@@ -125,7 +125,6 @@ public class StockoutNotifier extends BaseNotifier {
 
     valuesMap.put("urlToViewBinCard", getUrlToViewBinCard(stockCard));
     valuesMap.put("urlToInitiateRequisition", getUrlToInitiateRequisition(stockCard));
-    valuesMap.put("minStock", "10");
     return valuesMap;
   }
 

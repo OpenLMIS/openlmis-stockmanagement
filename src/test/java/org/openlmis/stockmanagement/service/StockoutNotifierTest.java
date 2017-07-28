@@ -68,8 +68,7 @@ public class StockoutNotifierTest {
   private static final String CONTENT = "Dear ${username}:\n"
       + "This email is informing you that there is 0 stock on hand for "
       + "${orderableNameLotInformation} in ${programName} at ${facilityName} as of ${stockoutDate}."
-      + " As of today, this product has been stocked out for ${numberOfDaysOfStockout}."
-      + "The minimum level for ${orderableName} is ${minStock}.\n"
+      + " As of today, this product has been stocked out for ${numberOfDaysOfStockout}.\n"
       + "Please login to view the bin card and take immediate action.\n"
       + "View bin card for ${orderableName}: ${urlToViewBinCard}\n"
       + "Initiate emergency requisition for this product: ${urlToInitiateRequisition}\n"
@@ -170,8 +169,7 @@ public class StockoutNotifierTest {
         + "This email is informing you that there is 0 stock on hand for "
         + "Mock Orderable LOT 111 in Mock Program at Mock Facility as "
         + "of " + getDateTimeFormatter().format(stockoutDate)
-        + ". As of today, this product has been stocked out for 5 days."
-        + "The minimum level for Mock Orderable is 10.\n"
+        + ". As of today, this product has been stocked out for 5 days.\n"
         + "Please login to view the bin card and take immediate action.\n"
         + "View bin card for Mock Orderable: " + urlToViewBinCard
         + "\nInitiate emergency requisition for this product: " + urlToInitiateRequisition
