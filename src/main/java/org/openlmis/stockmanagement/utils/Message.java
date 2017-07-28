@@ -94,7 +94,11 @@ public class Message {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String message;
 
-    LocalizedMessage(String message) {
+    /**
+     * Creates new LocalizedMessage based on given String.
+     * @param message message.
+     */
+    public LocalizedMessage(String message) {
       Validate.notBlank(message);
       this.messageKey = Message.this.key;
       this.message = message;

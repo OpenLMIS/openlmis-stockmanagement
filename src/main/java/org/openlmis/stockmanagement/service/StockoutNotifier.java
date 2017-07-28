@@ -21,17 +21,29 @@ import static org.openlmis.stockmanagement.service.PermissionService.STOCK_INVEN
 
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
+import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.RightDto;
 import org.openlmis.stockmanagement.dto.referencedata.SupervisoryNodeDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
+import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.RightReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.SupervisingUsersReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.SupervisoryNodeReferenceDataService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import java.text.MessageFormat;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Component
 public class StockoutNotifier extends BaseNotifier {
@@ -48,25 +60,43 @@ public class StockoutNotifier extends BaseNotifier {
   @Autowired
   private NotificationService notificationService;
 
+  @Autowired
+  private FacilityReferenceDataService facilityReferenceDataService;
+
+  @Autowired
+  private OrderableReferenceDataService orderableReferenceDataService;
+
+  @Autowired
+  private LotReferenceDataService lotReferenceDataService;
+
+  @Autowired
+  private ProgramReferenceDataService programReferenceDataService;
+
+  @Value("${email.urlToViewBinCard}")
+  private String urlToViewBinCard;
+
+  @Value("${email.urlToInitiateRequisition}")
+  private String urlToInitiateRequisition;
+
   /**
    * Notify user with "Edit stock inventories" right for the facility/program that
    * facility has stocked out of a product.
    *
-   * @param stockCard stockCard for a product
+   * @param stockCard StockCard for a product
    */
   public void notifyStockEditors(StockCard stockCard) {
-    Collection<UserDto> recipents = getEditors(stockCard);
+    Collection<UserDto> recipients = getEditors(stockCard);
 
     String subject = getMessage(EMAIL_ACTION_REQUIRED_SUBJECT);
     String content = getMessage(EMAIL_ACTION_REQUIRED_CONTENT);
 
-    Map<String, String> valuesMap = getValuesMap();
+    Map<String, String> valuesMap = getValuesMap(stockCard);
     StrSubstitutor sub = new StrSubstitutor(valuesMap);
-    for (UserDto recipent : recipents) {
-      if (recipent.getHomeFacility().getId() == stockCard.getFacilityId()
-          && canBeNotified(recipent)) {
-        valuesMap.put("recipent", recipent.getUsername());
-        notificationService.notify(recipent, subject, sub.replace(content));
+    for (UserDto recipient : recipients) {
+      if (recipient.getHomeFacility().getId().equals(stockCard.getFacilityId())
+          && canBeNotified(recipient)) {
+        valuesMap.put("username", recipient.getUsername());
+        notificationService.notify(recipient, sub.replace(subject), sub.replace(content));
       }
     }
   }
@@ -80,9 +110,56 @@ public class StockoutNotifier extends BaseNotifier {
         .findAll(supervisoryNode.getId(), right.getId(), stockCard.getProgramId());
   }
 
-  private Map<String, String> getValuesMap() {
+  private Map<String, String> getValuesMap(StockCard stockCard) {
     Map<String, String> valuesMap = new HashMap<>();
+    valuesMap.put("facilityName", getFacilityName(stockCard.getFacilityId()));
+    valuesMap.put("orderableName", getOrderableName(stockCard.getOrderableId()));
+    valuesMap.put("orderableNameLotInformation",
+        getOrderableNameLotInformation(valuesMap.get("orderableName"), stockCard.getLotId()));
+    valuesMap.put("programName", getProgramName(stockCard.getProgramId()));
+
+    List<StockCardLineItem> lineItems = stockCard.getLineItems();
+    ZonedDateTime stockoutDate = lineItems.get(lineItems.size() - 1).getOccurredDate();
+    valuesMap.put("stockoutDate", getDateTimeFormatter().format(stockoutDate));
+    valuesMap.put("numberOfDaysOfStockout", getNumberOfDaysOfStockout(stockoutDate) + " days");
+
+    valuesMap.put("urlToViewBinCard", getUrlToViewBinCard(stockCard));
+    valuesMap.put("urlToInitiateRequisition", getUrlToInitiateRequisition(stockCard));
+    valuesMap.put("minStock", "10");
     return valuesMap;
   }
 
+  private String getFacilityName(UUID facilityId) {
+    return facilityReferenceDataService.findOne(facilityId).getName();
+  }
+
+  private String getOrderableName(UUID orderableId) {
+    return orderableReferenceDataService.findOne(orderableId).getFullProductName();
+  }
+
+  private String getOrderableNameLotInformation(String orderableName, UUID lotId) {
+    if (lotId != null) {
+      LotDto lot = lotReferenceDataService.findOne(lotId);
+      return orderableName + " " + lot.getLotCode();
+    }
+    return orderableName;
+  }
+
+  private String getProgramName(UUID programId) {
+    return programReferenceDataService.findOne(programId).getName();
+  }
+
+  private String getNumberOfDaysOfStockout(ZonedDateTime stockoutDate) {
+    return String.valueOf(ChronoUnit.DAYS.between(stockoutDate, ZonedDateTime.now()));
+  }
+
+  private String getUrlToViewBinCard(StockCard stockCard) {
+    return MessageFormat.format(urlToViewBinCard, stockCard.getId(), stockCard.getFacilityId(),
+        stockCard.getProgramId(), "false");
+  }
+
+  private String getUrlToInitiateRequisition(StockCard stockCard) {
+    return MessageFormat.format(urlToInitiateRequisition,
+        stockCard.getFacilityId(), stockCard.getProgramId(), "true", "false");
+  }
 }
