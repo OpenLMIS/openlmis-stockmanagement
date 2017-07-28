@@ -64,7 +64,7 @@ public class PhysicalInventoryLineItem extends BaseEntity implements VvmApplicab
 
   @OneToMany(
           cascade = ALL,
-          fetch = FetchType.EAGER,
+          fetch = FetchType.LAZY,
           orphanRemoval = true)
   @JoinColumn(name = "physicalInventoryLineItemId")
   private List<StockAdjustment> stockAdjustments;

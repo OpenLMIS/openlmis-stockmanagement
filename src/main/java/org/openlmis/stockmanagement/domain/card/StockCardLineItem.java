@@ -26,7 +26,10 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERRRO_EVENT_SOH_EXCE
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.ExtraDataConverter;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
@@ -40,17 +43,11 @@ import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.utils.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -124,7 +121,7 @@ public class StockCardLineItem extends BaseEntity {
 
   @OneToMany(
       cascade = ALL,
-      fetch = FetchType.EAGER,
+      fetch = FetchType.LAZY,
       orphanRemoval = true)
   @JoinColumn(name = "stockCardLineItemId")
   private List<StockAdjustment> stockAdjustments;
@@ -148,7 +145,9 @@ public class StockCardLineItem extends BaseEntity {
         .originEvent(fromId(savedEventId, StockEvent.class))
 
         .quantity(eventLineItem.getQuantity())
-        .stockAdjustments(eventLineItem.getStockAdjustments())
+        .stockAdjustments(eventLineItem.getStockAdjustments() != null
+            ? new ArrayList<>(eventLineItem.getStockAdjustments())
+            : null)
 
         .occurredDate(eventLineItem.getOccurredDate())
         .processedDate(now())
