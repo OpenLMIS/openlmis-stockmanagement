@@ -17,8 +17,13 @@ package org.openlmis.stockmanagement.validators;
 
 import static java.util.UUID.randomUUID;
 import static org.junit.rules.ExpectedException.none;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
 
 import org.junit.Rule;
@@ -43,6 +48,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 @RunWith(MockitoJUnitRunner.class)
 @SuppressWarnings("PMD.TooManyMethods")
@@ -151,6 +158,77 @@ public class QuantityValidatorTest {
     quantityValidator.validate(event);
   }
 
+  @Test
+  public void shouldRejectWhenAnyAdjustmentHasNegativeQuantity() throws Exception {
+    //expect
+    expectedException.expect(ValidationMessageException.class);
+    expectedException.expectMessage(ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID);
+
+    //given
+    ZonedDateTime firstDate = dateTimeFromYear(2015);
+
+    StockCardLineItem lineItem = createCreditLineItem(
+        firstDate.plusDays(1), 15, Collections.singletonList(createCreditAdjustment(-2)));
+
+    StockCard card = new StockCard();
+    card.setLineItems(Collections.singletonList(lineItem));
+
+    StockEventDto event = spy(createDebitEventDto(firstDate.plusDays(2), 5));
+    given(event.isPhysicalInventory()).willReturn(true);
+    mockCardFound(event, card);
+
+    //when
+    quantityValidator.validate(event);
+  }
+
+  @Test
+  public void shouldRejectWhenStockOnHandDoesNotMatchQuantityAndNoAdjustmentsProvided()
+      throws Exception {
+    //expect
+    expectedException.expect(ValidationMessageException.class);
+    expectedException.expectMessage(ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED);
+
+    //given
+    ZonedDateTime firstDate = dateTimeFromYear(2015);
+
+    StockCardLineItem lineItem = createCreditLineItem(firstDate.plusDays(1), 15);
+    lineItem.setStockOnHand(50);
+
+    StockCard card = new StockCard();
+    card.setLineItems(Collections.singletonList(lineItem));
+
+    StockEventDto event = spy(createDebitEventDto(firstDate.plusDays(2), 5));
+    given(event.isPhysicalInventory()).willReturn(true);
+    mockCardFound(event, card);
+
+    //when
+    quantityValidator.validate(event);
+  }
+
+  @Test
+  public void shouldRejectWhenStockOnHandWithAdjustmentsDoesNotMatchQuantity() throws Exception {
+    //expect
+    expectedException.expect(ValidationMessageException.class);
+    expectedException.expectMessage(ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER);
+
+    //given
+    ZonedDateTime firstDate = dateTimeFromYear(2015);
+
+    StockCardLineItem lineItem = createCreditLineItem(
+        firstDate.plusDays(1), 15, Collections.singletonList(createCreditAdjustment(5)));
+    lineItem.setStockOnHand(5);
+
+    StockCard card = new StockCard();
+    card.setLineItems(Collections.singletonList(lineItem));
+
+    StockEventDto event = spy(createDebitEventDto(firstDate.plusDays(2), 5));
+    given(event.isPhysicalInventory()).willReturn(true);
+    mockCardFound(event, card);
+
+    //when
+    quantityValidator.validate(event);
+  }
+
   private StockCardLineItem generateLineItemWithAdjustments(
       ZonedDateTime date, int quantity, int... adjustments) {
     int absQuantity = Math.abs(quantity);
@@ -193,7 +271,8 @@ public class QuantityValidatorTest {
         .build();
   }
 
-  private StockCardLineItem createCreditLineItem(ZonedDateTime dateTime, int quantity) {
+  private StockCardLineItem createCreditLineItem(
+      ZonedDateTime dateTime, int quantity, List<StockAdjustment> adjustments) {
     return StockCardLineItem
         .builder()
         .quantity(quantity)
@@ -201,7 +280,19 @@ public class QuantityValidatorTest {
         .processedDate(dateTime)
         .destination(new Node())
         .reason(StockCardLineItemReason.physicalCredit())
-        .stockAdjustments(new ArrayList<>())
+        .stockAdjustments(adjustments)
+        .build();
+  }
+
+  private StockCardLineItem createCreditLineItem(ZonedDateTime dateTime, int quantity) {
+    return createCreditLineItem(dateTime, quantity, new ArrayList<>());
+  }
+
+  private StockAdjustment createCreditAdjustment(int quantity) {
+    return StockAdjustment
+        .builder()
+        .reason(StockCardLineItemReason.physicalCredit())
+        .quantity(quantity)
         .build();
   }
 

@@ -22,9 +22,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -33,8 +30,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
-import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
@@ -103,69 +98,6 @@ public class PhysicalInventoryValidatorTest {
 
     // then
     verify(vvmValidator, atLeastOnce()).validate(eq(inventory.getLineItems()), anyString());
-  }
-
-  @Test
-  public void shouldRejectWhenAnyAdjustmentHasNegativeQuantity() throws Exception {
-    //expect
-    expectedException.expect(ValidationMessageException.class);
-    expectedException.expectMessage(ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID);
-
-    //given
-    StockAdjustment adjustment = StockAdjustment
-        .builder()
-        .reason(StockCardLineItemReason.physicalCredit())
-        .quantity(-10)
-        .build();
-
-    PhysicalInventoryLineItemDto invalidItem = generateLineItem(10, 5);
-    invalidItem.setStockAdjustments(Collections.singletonList(adjustment));
-
-    PhysicalInventoryDto inventory = new PhysicalInventoryDto();
-    inventory.setLineItems(Collections.singletonList(invalidItem));
-
-    //when
-    validator.validate(inventory);
-  }
-
-  @Test
-  public void shouldRejectWhenStockOnHandDoesNotMatchQuantityAndNoAdjustmentsProvided()
-      throws Exception {
-    //expect
-    expectedException.expect(ValidationMessageException.class);
-    expectedException.expectMessage(ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED);
-
-    //given
-    PhysicalInventoryLineItemDto invalidItem = generateLineItem(10, 5);
-
-    PhysicalInventoryDto inventory = new PhysicalInventoryDto();
-    inventory.setLineItems(Collections.singletonList(invalidItem));
-
-    //when
-    validator.validate(inventory);
-  }
-
-  @Test
-  public void shouldRejectWhenStockOnHandWithAdjustmentsDoesNotMatchQuantity() throws Exception {
-    //expect
-    expectedException.expect(ValidationMessageException.class);
-    expectedException.expectMessage(ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER);
-
-    //given
-    StockAdjustment adjustment = StockAdjustment
-        .builder()
-        .reason(StockCardLineItemReason.physicalCredit())
-        .quantity(30)
-        .build();
-
-    PhysicalInventoryLineItemDto invalidItem = generateLineItem(10, 5);
-    invalidItem.setStockAdjustments(Collections.singletonList(adjustment));
-
-    PhysicalInventoryDto inventory = new PhysicalInventoryDto();
-    inventory.setLineItems(Collections.singletonList(invalidItem));
-
-    //when
-    validator.validate(inventory);
   }
 
   private PhysicalInventoryLineItemDto generateLineItem(int soh, int quantity) {
