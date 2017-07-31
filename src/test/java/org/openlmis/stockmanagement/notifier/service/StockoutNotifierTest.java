@@ -13,7 +13,7 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.service;
+package org.openlmis.stockmanagement.notifier.service;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -40,6 +40,7 @@ import org.openlmis.stockmanagement.dto.referencedata.RightDto;
 import org.openlmis.stockmanagement.dto.referencedata.SupervisoryNodeDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.i18n.MessageService;
+import org.openlmis.stockmanagement.service.NotificationService;
 import org.openlmis.stockmanagement.service.notifier.StockoutNotifier;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
