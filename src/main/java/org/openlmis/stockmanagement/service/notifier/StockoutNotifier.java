@@ -122,7 +122,9 @@ public class StockoutNotifier extends BaseNotifier {
     List<StockCardLineItem> lineItems = stockCard.getLineItems();
     ZonedDateTime stockoutDate = lineItems.get(lineItems.size() - 1).getOccurredDate();
     valuesMap.put("stockoutDate", getDateTimeFormatter().format(stockoutDate));
-    valuesMap.put("numberOfDaysOfStockout", getNumberOfDaysOfStockout(stockoutDate) + " days");
+    long numberOfDaysOfStockout = getNumberOfDaysOfStockout(stockoutDate);
+    valuesMap.put("numberOfDaysOfStockout", numberOfDaysOfStockout
+        + (numberOfDaysOfStockout == 1 ? " day" : " days"));
 
     valuesMap.put("urlToViewBinCard", getUrlToViewBinCard(stockCard));
     valuesMap.put("urlToInitiateRequisition", getUrlToInitiateRequisition(stockCard));
@@ -149,8 +151,8 @@ public class StockoutNotifier extends BaseNotifier {
     return programReferenceDataService.findOne(programId).getName();
   }
 
-  private String getNumberOfDaysOfStockout(ZonedDateTime stockoutDate) {
-    return String.valueOf(ChronoUnit.DAYS.between(stockoutDate, ZonedDateTime.now()));
+  private long getNumberOfDaysOfStockout(ZonedDateTime stockoutDate) {
+    return ChronoUnit.DAYS.between(stockoutDate, ZonedDateTime.now());
   }
 
   private String getUrlToViewBinCard(StockCard stockCard) {

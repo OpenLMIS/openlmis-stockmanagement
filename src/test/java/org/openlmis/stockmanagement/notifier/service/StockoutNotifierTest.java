@@ -163,23 +163,15 @@ public class StockoutNotifierTest {
 
   @Test
   public void notifyStockEditorsShouldNotifyWithCorrectMessageBody() {
-    String urlToViewBinCard = MessageFormat.format(URL_TO_VIEW_BIN_CARD, stockCard.getId(),
-        stockCard.getFacilityId(), stockCard.getProgramId(), "false");
-    String urlToInitiateRequisition = MessageFormat.format(URL_TO_INITIATE_REQUISITION,
-        stockCard.getFacilityId(), stockCard.getProgramId(), "true", "false");
-    String expected = "Dear editor:\n"
-        + "This email is informing you that there is 0 stock on hand for "
-        + "Mock Orderable LOT 111 in Mock Program at Mock Facility as "
-        + "of " + getDateTimeFormatter().format(stockoutDate)
-        + ". As of today, this product has been stocked out for 5 days.\n"
-        + "Please login to view the bin card and take immediate action.\n"
-        + "View bin card for Mock Orderable: " + urlToViewBinCard
-        + "\nInitiate emergency requisition for this product: " + urlToInitiateRequisition
-        + "\nThank you.";
+    testNotificationBody(stockoutDate, "5 days");
+  }
 
-    stockoutNotifier.notifyStockEditors(stockCard);
+  @Test
+  public void notifyStockEditorsShouldNotifyWithCorrectMessageBodyForOneDayOfStockout() {
+    ZonedDateTime stockoutDate = ZonedDateTime.now().minusDays(1);
+    when(stockCardLineItem.getOccurredDate()).thenReturn(stockoutDate);
 
-    verify(notificationService).notify(eq(editor), any(), eq(expected));
+    testNotificationBody(stockoutDate, "1 day");
   }
 
   private void mockServices() {
@@ -195,6 +187,26 @@ public class StockoutNotifierTest {
     when(lotReferenceDataService.findOne(lotId)).thenReturn(lot);
 
     mockMessages();
+  }
+
+  private void testNotificationBody(ZonedDateTime stockoutDate, String stockoutDays) {
+    String urlToViewBinCard = MessageFormat.format(URL_TO_VIEW_BIN_CARD, stockCard.getId(),
+        stockCard.getFacilityId(), stockCard.getProgramId(), "false");
+    String urlToInitiateRequisition = MessageFormat.format(URL_TO_INITIATE_REQUISITION,
+        stockCard.getFacilityId(), stockCard.getProgramId(), "true", "false");
+    String expected = "Dear editor:\n"
+        + "This email is informing you that there is 0 stock on hand for "
+        + "Mock Orderable LOT 111 in Mock Program at Mock Facility as "
+        + "of " + getDateTimeFormatter().format(stockoutDate)
+        + ". As of today, this product has been stocked out for " + stockoutDays + ".\n"
+        + "Please login to view the bin card and take immediate action.\n"
+        + "View bin card for Mock Orderable: " + urlToViewBinCard
+        + "\nInitiate emergency requisition for this product: " + urlToInitiateRequisition
+        + "\nThank you.";
+
+    stockoutNotifier.notifyStockEditors(stockCard);
+
+    verify(notificationService).notify(eq(editor), any(), eq(expected));
   }
 
   private void mockUser(UserDto editor) {
