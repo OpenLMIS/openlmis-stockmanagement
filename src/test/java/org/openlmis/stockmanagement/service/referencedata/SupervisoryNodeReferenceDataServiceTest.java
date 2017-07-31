@@ -34,6 +34,9 @@ import java.util.UUID;
 
 public class SupervisoryNodeReferenceDataServiceTest {
 
+  private static final String PROGRAM_ID = "programId";
+  private static final String FACILITY_ID = "facilityId";
+  private static final String SEARCH_URI = "search";
   private UUID facility = UUID.randomUUID();
   private UUID program = UUID.randomUUID();
   private SupervisoryNodeDto supervisoryNode = mock(SupervisoryNodeDto.class);
@@ -48,9 +51,9 @@ public class SupervisoryNodeReferenceDataServiceTest {
   public void shouldReturnNullIfEmptyPage() {
     doReturn(new DummyPage<SupervisoryNodeDto>(Collections.emptyList()))
         .when(spy)
-        .getPage("search",
+        .getPage(SEARCH_URI,
             Collections.emptyMap(),
-            ImmutableMap.of("programId", program, "facilityId", facility));
+            ImmutableMap.of(PROGRAM_ID, program, FACILITY_ID, facility));
 
     assertNull(spy.findSupervisoryNode(program, facility));
   }
@@ -62,9 +65,9 @@ public class SupervisoryNodeReferenceDataServiceTest {
     List<SupervisoryNodeDto> found = Arrays.asList(supervisoryNode, secondNode);
     doReturn(new DummyPage<>(found))
         .when(spy)
-        .getPage("search",
+        .getPage(SEARCH_URI,
             Collections.emptyMap(),
-            ImmutableMap.of("programId", program, "facilityId", facility));
+            ImmutableMap.of(PROGRAM_ID, program, FACILITY_ID, facility));
 
     SupervisoryNodeDto foundNode = spy.findSupervisoryNode(program, facility);
 
@@ -77,9 +80,9 @@ public class SupervisoryNodeReferenceDataServiceTest {
     SupervisoryNodeReferenceDataService spy = spy(new SupervisoryNodeReferenceDataService());
     doReturn(new DummyPage<>(Collections.singletonList(supervisoryNode)))
         .when(spy)
-        .getPage("search",
+        .getPage(SEARCH_URI,
             Collections.emptyMap(),
-            ImmutableMap.of("programId", program, "facilityId", facility));
+            ImmutableMap.of(PROGRAM_ID, program, FACILITY_ID, facility));
 
     SupervisoryNodeDto foundNode = spy.findSupervisoryNode(program, facility);
 
