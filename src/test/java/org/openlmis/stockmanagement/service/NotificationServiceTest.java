@@ -46,7 +46,7 @@ public class NotificationServiceTest {
   private static final String FROM = "noreply@test.te";
   private static final String MAIL_SUBJECT = "subject";
   private static final String MAIL_CONTENT = "content";
-  private static final String BASE_URL = "http://localhost";
+  private static final String NOTIFICATION_URL = "http://localhost/notifiation";
 
   @Mock
   private AuthService authService;
@@ -58,11 +58,11 @@ public class NotificationServiceTest {
   private NotificationService notificationService;
 
   @Before
-  public void before() {
+  public void setUp() {
     when(authService.obtainAccessToken()).thenReturn(ACCESS_TOKEN);
 
     ReflectionTestUtils.setField(notificationService, "restTemplate", restTemplate);
-    ReflectionTestUtils.setField(notificationService, "notificationUrl", BASE_URL);
+    ReflectionTestUtils.setField(notificationService, "notificationUrl", NOTIFICATION_URL);
     ReflectionTestUtils.setField(notificationService, "from", FROM);
   }
 
@@ -76,7 +76,7 @@ public class NotificationServiceTest {
     ArgumentCaptor<HttpEntity> captor = ArgumentCaptor.forClass(HttpEntity.class);
 
     verify(restTemplate).postForObject(eq(
-        new URI(BASE_URL + "/api/notification")),
+        new URI(NOTIFICATION_URL)),
         captor.capture(), eq(Object.class));
 
     assertEquals(

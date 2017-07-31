@@ -15,31 +15,74 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 import com.google.common.collect.ImmutableMap;
-import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.stockmanagement.dto.referencedata.SupervisoryNodeDto;
 import org.openlmis.stockmanagement.testutils.DummyPage;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 public class SupervisoryNodeReferenceDataServiceTest {
 
   private UUID facility = UUID.randomUUID();
   private UUID program = UUID.randomUUID();
+  private SupervisoryNodeDto supervisoryNode = mock(SupervisoryNodeDto.class);
+  private SupervisoryNodeReferenceDataService spy;
+
+  @Before
+  public void setUp() {
+    spy = spy(new SupervisoryNodeReferenceDataService());
+  }
 
   @Test
   public void shouldReturnNullIfEmptyPage() {
-    SupervisoryNodeReferenceDataService spy = spy(new SupervisoryNodeReferenceDataService());
     doReturn(new DummyPage<SupervisoryNodeDto>(Collections.emptyList()))
         .when(spy)
         .getPage("search",
             Collections.emptyMap(),
             ImmutableMap.of("programId", program, "facilityId", facility));
 
-    Assert.assertNull(spy.findSupervisoryNode(program, facility));
+    assertNull(spy.findSupervisoryNode(program, facility));
+  }
+
+  @Test
+  public void shouldReturnFirstElementIfMoreThanOneFound() {
+    SupervisoryNodeReferenceDataService spy = spy(new SupervisoryNodeReferenceDataService());
+    SupervisoryNodeDto secondNode = new SupervisoryNodeDto();
+    List<SupervisoryNodeDto> found = Arrays.asList(supervisoryNode, secondNode);
+    doReturn(new DummyPage<>(found))
+        .when(spy)
+        .getPage("search",
+            Collections.emptyMap(),
+            ImmutableMap.of("programId", program, "facilityId", facility));
+
+    SupervisoryNodeDto foundNode = spy.findSupervisoryNode(program, facility);
+
+    assertEquals(supervisoryNode, foundNode);
+    assertNotEquals(secondNode, foundNode);
+  }
+
+  @Test
+  public void shouldReturnFirstElementFounElementIfOneFound() {
+    SupervisoryNodeReferenceDataService spy = spy(new SupervisoryNodeReferenceDataService());
+    doReturn(new DummyPage<>(Collections.singletonList(supervisoryNode)))
+        .when(spy)
+        .getPage("search",
+            Collections.emptyMap(),
+            ImmutableMap.of("programId", program, "facilityId", facility));
+
+    SupervisoryNodeDto foundNode = spy.findSupervisoryNode(program, facility);
+
+    assertEquals(supervisoryNode, foundNode);
   }
 }

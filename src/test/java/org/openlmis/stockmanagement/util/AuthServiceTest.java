@@ -73,7 +73,7 @@ public class AuthServiceTest {
   @Test
   public void shouldObtainAccessToken() throws Exception {
     ResponseEntity<Object> response = mock(ResponseEntity.class);
-    Map<String, String> body = ImmutableMap.of("access_token", TOKEN);
+    Map<String, String> body = ImmutableMap.of(AuthService.ACCESS_TOKEN, TOKEN);
 
     when(restTemplate.exchange(
         eq(AUTHORIZATION_URI), eq(HttpMethod.POST), any(HttpEntity.class), eq(Object.class)

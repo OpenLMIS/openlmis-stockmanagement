@@ -50,16 +50,14 @@ public class NotificationService {
    * @param content content of the email
    * @return true if success, false if failed.
    */
-  boolean notify(UserDto user, String subject, String content) {
-    String url = notificationUrl + "/api/notification";
-
+  public boolean notify(UserDto user, String subject, String content) {
     NotificationRequest request = new NotificationRequest(
         from, user.getEmail(), subject, content
     );
     
     try {
       restTemplate.postForObject(
-          RequestHelper.createUri(url),
+          RequestHelper.createUri(notificationUrl),
           RequestHelper.createEntity(authService.obtainAccessToken(),
               request),
           Object.class);
