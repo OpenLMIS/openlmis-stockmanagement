@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.notifier.service;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.EMAIL_ACTION_REQUIRED_CONTENT;
@@ -63,6 +64,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings("PMD.TooManyMethods")
 public class StockoutNotifierTest {
 
   private static final String SUBJECT =
@@ -149,6 +151,44 @@ public class StockoutNotifierTest {
 
     mockServices();
     mockStockCard();
+  }
+
+  @Test
+  public void notifyStockEditorsShouldNotNotifyWhenFoundFacilityIsNotHomeFacility() {
+    FacilityDto mock = mock(FacilityDto.class);
+    when(mock.getId()).thenReturn(UUID.randomUUID());
+    when(editor.getHomeFacility()).thenReturn(mock);
+
+    stockoutNotifier.notifyStockEditors(stockCard);
+
+    verify(notificationService, times(0)).notify(any(), any(), any());
+  }
+
+  @Test
+  public void notifyStockEditorsShouldNotNotifyWhenEditorHaveNoEmail() {
+    when(editor.getEmail()).thenReturn(null);
+
+    stockoutNotifier.notifyStockEditors(stockCard);
+
+    verify(notificationService, times(0)).notify(any(), any(), any());
+  }
+
+  @Test
+  public void notifyStockEditorsShouldNotNotifyWhenEditorIsNoActiveOrVerifier() {
+    when(editor.activeAndVerified()).thenReturn(false);
+
+    stockoutNotifier.notifyStockEditors(stockCard);
+
+    verify(notificationService, times(0)).notify(any(), any(), any());
+  }
+
+  @Test
+  public void notifyStockEditorsShouldNotNotifyWhenEditoDoesNotAllowNotify() {
+    when(editor.allowNotify()).thenReturn(false);
+
+    stockoutNotifier.notifyStockEditors(stockCard);
+
+    verify(notificationService, times(0)).notify(any(), any(), any());
   }
 
   @Test

@@ -60,8 +60,7 @@ import javax.persistence.Transient;
     indexes = @Index(columnList = "facilityId,programId,orderableId"))
 //the above line creates an index, it'll make select statements faster
 //especially for getStockCardIdBy method of StockCardRepository
-public class StockCard
-    extends BaseEntity implements IdentifiableByOrderableLot {
+public class StockCard extends BaseEntity implements IdentifiableByOrderableLot {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCard.class);
 

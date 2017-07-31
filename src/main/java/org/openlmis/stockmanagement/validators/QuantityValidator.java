@@ -30,6 +30,7 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
+import org.openlmis.stockmanagement.service.notifier.StockoutNotifier;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -56,6 +57,9 @@ public class QuantityValidator implements StockEventValidator {
 
   @Autowired
   private StockCardRepository stockCardRepository;
+
+  @Autowired
+  private StockoutNotifier stockoutNotifier;
 
   @Override
   public void validate(StockEventDto stockEventDto)
@@ -85,6 +89,10 @@ public class QuantityValidator implements StockEventValidator {
 
     // create line item from event line item and add it to stock card for recalculation
     calculateStockOnHand(event, items, foundCard);
+
+    if (foundCard.getStockOnHand() == 0) {
+      stockoutNotifier.notifyStockEditors(foundCard);
+    }
 
     if (event.isPhysicalInventory()) {
       validateQuantities(foundCard.getLineItems());
