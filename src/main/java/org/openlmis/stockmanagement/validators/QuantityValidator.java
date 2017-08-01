@@ -105,6 +105,8 @@ public class QuantityValidator implements StockEventValidator {
             lineItem.getOrderableId(), lineItem.getLotId());
     if (foundCard == null) {
       StockCard emptyCard = new StockCard();
+      emptyCard.setFacilityId(facilityId);
+      emptyCard.setProgramId(programId);
       emptyCard.setLineItems(new ArrayList<>());
       return emptyCard;
     } else {
