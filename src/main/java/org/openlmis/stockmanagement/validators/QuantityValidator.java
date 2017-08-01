@@ -87,12 +87,15 @@ public class QuantityValidator implements StockEventValidator {
         items.get(0)
     );
 
+    //get line item with newest date
     Integer previousQuantity = foundCard.getLineItems().stream()
         .sorted((l1, l2) ->
             (int) ChronoUnit.MILLIS.between(l2.getOccurredDate(), l1.getOccurredDate()))
         .map(StockCardLineItem::getQuantity)
         .findFirst()
         .orElse(null);
+
+    List<StockEventLineItem> untouchedItems = new ArrayList<>(items);
 
     // create line item from event line item and add it to stock card for recalculation
     calculateStockOnHand(event, items, foundCard);
@@ -101,8 +104,8 @@ public class QuantityValidator implements StockEventValidator {
       stockoutNotifier.notifyStockEditors(foundCard);
     }
 
-    if (event.isPhysicalInventory() && previousQuantity != null) {
-      validateQuantities(foundCard.getLineItems(), previousQuantity);
+    if (event.isPhysicalInventory()) {
+      validateQuantities(untouchedItems, previousQuantity);
     }
   }
 
@@ -137,30 +140,34 @@ public class QuantityValidator implements StockEventValidator {
     return null;
   }
 
-  private void validateQuantities(List<StockCardLineItem> items, Integer stockOnHand)
-          throws InstantiationException, IllegalAccessException {
-    for (StockCardLineItem lineItem : items) {
-      if (stockOnHand != null) {
-        int quantity = lineItem.getQuantity();
+  private void validateQuantities(List<StockEventLineItem> items, Integer stockOnHand)
+      throws InstantiationException, IllegalAccessException {
+    //for one orderable-lot pair there can be only one line item
+    Integer quantity = items.get(0).getQuantity();
 
-        int adjustmentsQuantity = 0;
+    if (stockOnHand != null && quantity != null) {
+      List<StockAdjustment> stockAdjustments = items.get(0).getStockAdjustments();
+      List<StockAdjustment> adjustments = null;
+      if (stockAdjustments != null) {
+        adjustments = new ArrayList<>(stockAdjustments);
+      }
 
-        List<StockAdjustment> adjustments = lineItem.getStockAdjustments();
-        if (adjustments != null && !adjustments.isEmpty()) {
-          validateStockAdjustments(lineItem.getStockAdjustments());
-          adjustmentsQuantity = lineItem.getStockAdjustments()
-              .stream()
-              .mapToInt(StockAdjustment::getSignedQuantity)
-              .sum();
-        } else if (stockOnHand != quantity) {
-          throw new ValidationMessageException(
-              ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED);
-        }
+      int adjustmentsQuantity = 0;
 
-        if (stockOnHand + adjustmentsQuantity != quantity) {
-          throw new ValidationMessageException(
-              ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER);
-        }
+      if (adjustments != null && !adjustments.isEmpty()) {
+        validateStockAdjustments(adjustments);
+        adjustmentsQuantity = adjustments
+            .stream()
+            .mapToInt(StockAdjustment::getSignedQuantity)
+            .sum();
+      } else if (stockOnHand != quantity) {
+        throw new ValidationMessageException(
+            ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED);
+      }
+
+      if (stockOnHand + adjustmentsQuantity != quantity) {
+        throw new ValidationMessageException(
+            ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER);
       }
     }
   }

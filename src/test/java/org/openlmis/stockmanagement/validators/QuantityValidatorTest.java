@@ -174,12 +174,13 @@ public class QuantityValidatorTest {
     ZonedDateTime firstDate = dateTimeFromYear(2015);
 
     StockCardLineItem lineItem = createCreditLineItem(
-        firstDate.plusDays(1), 15, Collections.singletonList(createCreditAdjustment(-2)));
+        firstDate.plusDays(1), 15);
 
     StockCard card = new StockCard();
     card.setLineItems(Collections.singletonList(lineItem));
 
-    StockEventDto event = spy(createDebitEventDto(firstDate.plusDays(2), 5));
+    StockEventDto event = spy(createDebitEventDto(firstDate.plusDays(2), 5,
+        Collections.singletonList(createCreditAdjustment(-2))));
     given(event.isPhysicalInventory()).willReturn(true);
     mockCardFound(event, card);
 
@@ -221,13 +222,13 @@ public class QuantityValidatorTest {
     ZonedDateTime firstDate = dateTimeFromYear(2015);
 
     StockCardLineItem lineItem = createCreditLineItem(
-        firstDate.plusDays(1), 15, Collections.singletonList(createCreditAdjustment(5)));
-    lineItem.setStockOnHand(5);
+        firstDate.plusDays(1), 15);
 
     StockCard card = new StockCard();
     card.setLineItems(Collections.singletonList(lineItem));
 
-    StockEventDto event = spy(createDebitEventDto(firstDate.plusDays(2), 5));
+    StockEventDto event = spy(createDebitEventDto(firstDate.plusDays(2), 5,
+        Collections.singletonList(createCreditAdjustment(5))));
     given(event.isPhysicalInventory()).willReturn(true);
     mockCardFound(event, card);
 
@@ -240,8 +241,6 @@ public class QuantityValidatorTest {
     //given
     StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.getLineItems().get(0).setQuantity(0);
-    StockCard card = new StockCard();
-    mockCardFound(stockEventDto, card);
 
     //when
     quantityValidator.validate(stockEventDto);
@@ -269,15 +268,21 @@ public class QuantityValidatorTest {
     return ZonedDateTime.of(year, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
   }
   
-  private StockEventDto createDebitEventDto(ZonedDateTime dateTime, int quantity) {
+  private StockEventDto createDebitEventDto(ZonedDateTime dateTime, int quantity,
+                                            List<StockAdjustment> adjustments) {
     StockEventDto stockEventDto = createStockEventDto();
 
     stockEventDto.getLineItems().get(0).setDestinationId(randomUUID());
     stockEventDto.getLineItems().get(0).setQuantity(quantity);
     stockEventDto.getLineItems().get(0).setOccurredDate(dateTime);
     stockEventDto.getLineItems().get(0).setSourceId(null);
+    stockEventDto.getLineItems().get(0).setStockAdjustments(adjustments);
 
     return stockEventDto;
+  }
+
+  private StockEventDto createDebitEventDto(ZonedDateTime dateTime, int quantity) {
+    return createDebitEventDto(dateTime, quantity, null);
   }
 
   private StockCardLineItem createDebitLineItem(ZonedDateTime dateTime, int quantity) {
