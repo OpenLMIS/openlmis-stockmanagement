@@ -137,10 +137,8 @@ public class QuantityValidatorTest {
     //given
     ZonedDateTime firstDate = dateTimeFromYear(2015);
 
-    StockCard card = new StockCard();
     StockEventDto event = createDebitEventDto(firstDate.plusDays(1), 0);
-
-    mockCardFound(event, card);
+    given(event.isPhysicalInventory()).willReturn(true);
 
     //when
     quantityValidator.validate(event);
@@ -151,13 +149,15 @@ public class QuantityValidatorTest {
     //given
     ZonedDateTime firstDate = dateTimeFromYear(2015);
 
-    StockCard card = new StockCard();
-    card.setLineItems(Arrays.asList(
-        generateLineItemWithAdjustments(firstDate.plusDays(1), 10),
-        generateLineItemWithAdjustments(firstDate.plusDays(3), 10, -2, -3)
-    ));
+    StockCardLineItem lineItem = createCreditLineItem(
+        firstDate.plusDays(1), 10);
 
-    StockEventDto event = createDebitEventDto(firstDate.plusDays(2), 5);
+    StockCard card = new StockCard();
+    card.setLineItems(Collections.singletonList(lineItem));
+
+    StockEventDto event = spy(createDebitEventDto(firstDate.plusDays(2), 5,
+        Collections.singletonList(createDebitAdjustment(5))));
+    given(event.isPhysicalInventory()).willReturn(true);
     mockCardFound(event, card);
 
     //when
@@ -318,6 +318,14 @@ public class QuantityValidatorTest {
     return StockAdjustment
         .builder()
         .reason(StockCardLineItemReason.physicalCredit())
+        .quantity(quantity)
+        .build();
+  }
+
+  private StockAdjustment createDebitAdjustment(int quantity) {
+    return StockAdjustment
+        .builder()
+        .reason(StockCardLineItemReason.physicalDebit())
         .quantity(quantity)
         .build();
   }
