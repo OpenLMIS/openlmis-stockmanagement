@@ -16,9 +16,9 @@
 package org.openlmis.stockmanagement.validators;
 
 import static java.util.UUID.randomUUID;
+import static org.junit.Assert.assertEquals;
 import static org.junit.rules.ExpectedException.none;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,6 +32,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -46,7 +47,6 @@ import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.notifier.StockoutNotifier;
-
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -240,13 +240,20 @@ public class QuantityValidatorTest {
   public void shouldCallStockoutNotifierWhenStockOnHandIsZero() throws Exception {
     //given
     StockEventDto stockEventDto = createStockEventDto();
-    stockEventDto.getLineItems().get(0).setQuantity(0);
+    StockEventLineItem firstLineItem = stockEventDto.getLineItems().get(0);
+    firstLineItem.setQuantity(0);
 
     //when
     quantityValidator.validate(stockEventDto);
 
     //then
-    verify(stockoutNotifier).notifyStockEditors(any(StockCard.class));
+    ArgumentCaptor<StockCard> captor = ArgumentCaptor.forClass(StockCard.class);
+    verify(stockoutNotifier).notifyStockEditors(captor.capture());
+
+    assertEquals(stockEventDto.getProgramId(), captor.getValue().getProgramId());
+    assertEquals(stockEventDto.getFacilityId(), captor.getValue().getFacilityId());
+    assertEquals(firstLineItem.getOrderableId(), captor.getValue().getOrderableId());
+    assertEquals(firstLineItem.getLotId(), captor.getValue().getLotId());
   }
 
   private StockCardLineItem generateLineItemWithAdjustments(

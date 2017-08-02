@@ -115,15 +115,16 @@ public class QuantityValidator implements StockEventValidator {
             lineItem.getOrderableId(), lineItem.getLotId());
     if (foundCard == null) {
       StockCard emptyCard = new StockCard();
-      emptyCard.setFacilityId(facilityId);
-      emptyCard.setProgramId(programId);
+      setGroupingFields(programId, facilityId, lineItem, emptyCard);
       emptyCard.setLineItems(new ArrayList<>());
       return emptyCard;
     } else {
       //use a shallow copy of stock card to do recalculation, because some domain model will be
       //modified during recalculation, this will avoid persistence of those modified models
       try {
-        return foundCard.shallowCopy();
+        StockCard stockCard = foundCard.shallowCopy();
+        setGroupingFields(programId, facilityId, lineItem, stockCard);
+        return stockCard;
       } catch (InvocationTargetException | NoSuchMethodException
           | InstantiationException | IllegalAccessException ex) {
         //if this exception is ever seen in front end, that means our code has a bug. we only put
@@ -131,6 +132,14 @@ public class QuantityValidator implements StockEventValidator {
         throw new ValidationMessageException(new Message("Error during shallow copy", ex));
       }
     }
+  }
+
+  private void setGroupingFields(UUID programId, UUID facilityId, StockEventLineItem lineItem,
+                                 StockCard emptyCard) {
+    emptyCard.setFacilityId(facilityId);
+    emptyCard.setProgramId(programId);
+    emptyCard.setOrderableId(lineItem.getOrderableId());
+    emptyCard.setLotId(lineItem.getLotId());
   }
 
   private StockCardLineItemReason findReason(UUID reasonId) {
