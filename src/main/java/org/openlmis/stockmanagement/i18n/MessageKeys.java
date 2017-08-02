@@ -234,9 +234,9 @@ public abstract class MessageKeys {
 
   //notifications
   public static final String EMAIL_ACTION_REQUIRED_SUBJECT
-      = SERVICE_PREFIX + ".email.actionRequired.subject";
+      = SERVICE_PREFIX + ".email.stockout.subject";
   public static final String EMAIL_ACTION_REQUIRED_CONTENT
-      = SERVICE_PREFIX + ".email.actionRequired.content";
+      = SERVICE_PREFIX + ".email.stockout.content";
 
   private MessageKeys() {
     throw new UnsupportedOperationException();
