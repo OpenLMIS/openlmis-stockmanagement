@@ -123,32 +123,28 @@ public class QuantityValidator implements StockEventValidator {
 
   private void validateQuantities(List<StockEventLineItem> items, Integer stockOnHand)
       throws InstantiationException, IllegalAccessException {
-    //for one orderable-lot pair there can be only one line item
-    Integer quantity = items.get(0).getQuantity();
+    for (StockEventLineItem item : items) {
+      Integer quantity = item.getQuantity();
+      if (stockOnHand != null && quantity != null) {
+        List<StockAdjustment> adjustments = item.getStockAdjustments();
 
-    if (stockOnHand != null && quantity != null) {
-      List<StockAdjustment> stockAdjustments = items.get(0).getStockAdjustments();
-      List<StockAdjustment> adjustments = null;
-      if (stockAdjustments != null) {
-        adjustments = new ArrayList<>(stockAdjustments);
-      }
+        int adjustmentsQuantity = 0;
 
-      int adjustmentsQuantity = 0;
+        if (adjustments != null && !adjustments.isEmpty()) {
+          validateStockAdjustments(adjustments);
+          adjustmentsQuantity = adjustments
+              .stream()
+              .mapToInt(StockAdjustment::getSignedQuantity)
+              .sum();
+        } else if (stockOnHand != quantity) {
+          throw new ValidationMessageException(
+              ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED);
+        }
 
-      if (adjustments != null && !adjustments.isEmpty()) {
-        validateStockAdjustments(adjustments);
-        adjustmentsQuantity = adjustments
-            .stream()
-            .mapToInt(StockAdjustment::getSignedQuantity)
-            .sum();
-      } else if (stockOnHand != quantity) {
-        throw new ValidationMessageException(
-            ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED);
-      }
-
-      if (stockOnHand + adjustmentsQuantity != quantity) {
-        throw new ValidationMessageException(
-            ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER);
+        if (stockOnHand + adjustmentsQuantity != quantity) {
+          throw new ValidationMessageException(
+              ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER);
+        }
       }
     }
   }
