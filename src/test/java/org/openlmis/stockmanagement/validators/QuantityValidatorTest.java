@@ -16,11 +16,9 @@
 package org.openlmis.stockmanagement.validators;
 
 import static java.util.UUID.randomUUID;
-import static org.junit.Assert.assertEquals;
 import static org.junit.rules.ExpectedException.none;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH;
@@ -32,7 +30,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -234,26 +231,6 @@ public class QuantityValidatorTest {
 
     //when
     quantityValidator.validate(event);
-  }
-
-  @Test
-  public void shouldCallStockoutNotifierWhenStockOnHandIsZero() throws Exception {
-    //given
-    StockEventDto stockEventDto = createStockEventDto();
-    StockEventLineItem firstLineItem = stockEventDto.getLineItems().get(0);
-    firstLineItem.setQuantity(0);
-
-    //when
-    quantityValidator.validate(stockEventDto);
-
-    //then
-    ArgumentCaptor<StockCard> captor = ArgumentCaptor.forClass(StockCard.class);
-    verify(stockoutNotifier).notifyStockEditors(captor.capture());
-
-    assertEquals(stockEventDto.getProgramId(), captor.getValue().getProgramId());
-    assertEquals(stockEventDto.getFacilityId(), captor.getValue().getFacilityId());
-    assertEquals(firstLineItem.getOrderableId(), captor.getValue().getOrderableId());
-    assertEquals(firstLineItem.getLotId(), captor.getValue().getLotId());
   }
 
   private StockCardLineItem generateLineItemWithAdjustments(

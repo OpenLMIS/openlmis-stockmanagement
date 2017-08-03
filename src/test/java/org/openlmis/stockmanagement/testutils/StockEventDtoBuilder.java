@@ -19,7 +19,6 @@ import static java.util.Collections.singletonList;
 
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
-
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -39,6 +38,18 @@ public class StockEventDtoBuilder {
     stockEventDto.setProgramId(UUID.randomUUID());
     stockEventDto.setFacilityId(UUID.randomUUID());
 
+    StockEventLineItem eventLineItemDto = createStockEventLineItem();
+
+    stockEventDto.setLineItems(singletonList(eventLineItemDto));
+    return stockEventDto;
+  }
+
+  /**
+   * Create stock event line item dto object for testing.
+   *
+   * @return created dto object.
+   */
+  public static StockEventLineItem createStockEventLineItem() {
     StockEventLineItem eventLineItemDto = new StockEventLineItem();
     eventLineItemDto.setReasonFreeText("d");
     eventLineItemDto.setReasonId(UUID.fromString("e3fc3cf3-da18-44b0-a220-77c985202e06"));
@@ -49,9 +60,7 @@ public class StockEventDtoBuilder {
     eventLineItemDto.setDestinationId(UUID.fromString("087e81f6-a74d-4bba-9d01-16e0d64e9609"));
     eventLineItemDto.setSourceFreeText("a");
     eventLineItemDto.setDestinationFreeText("b");
-
-    stockEventDto.setLineItems(singletonList(eventLineItemDto));
-    return stockEventDto;
+    return eventLineItemDto;
   }
 
   /**

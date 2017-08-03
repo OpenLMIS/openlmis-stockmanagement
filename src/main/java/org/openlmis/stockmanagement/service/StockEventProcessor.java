@@ -15,16 +15,26 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static java.util.stream.Collectors.groupingBy;
 import static org.openlmis.stockmanagement.dto.PhysicalInventoryDto.fromEventDto;
 
+import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
+import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
+import org.openlmis.stockmanagement.service.notifier.StockoutNotifier;
+import org.openlmis.stockmanagement.utils.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -46,6 +56,10 @@ public class StockEventProcessor {
   private StockCardService stockCardService;
   @Autowired
   private StockEventsRepository stockEventsRepository;
+  @Autowired
+  private StockoutNotifier stockoutNotifier;
+  @Autowired
+  private StockCardRepository stockCardRepository;
 
   /**
    * Validate and persist event and create stock card and line items from it.
@@ -73,7 +87,57 @@ public class StockEventProcessor {
       physicalInventoryService.submitPhysicalInventory(fromEventDto(eventDto), savedEventId);
     }
     stockCardService.saveFromEvent(eventDto, savedEventId, currentUserId);
+
+    Map<OrderableLotIdentity, List<StockEventLineItem>> sameOrderableGroups = eventDto
+        .getLineItems().stream()
+        .collect(groupingBy(OrderableLotIdentity::identityOf));
+
+    for (List<StockEventLineItem> group : sameOrderableGroups.values()) {
+      callNotifications(eventDto, group);
+    }
+
     return savedEventId;
+  }
+
+  private void callNotifications(StockEventDto event, List<StockEventLineItem> groupItems) {
+    StockCard foundCard = tryFindCard(
+        event.getProgramId(),
+        event.getFacilityId(),
+        groupItems.get(0)
+    );
+
+    foundCard.calculateStockOnHand();
+
+    if (foundCard.getStockOnHand() == 0) {
+      stockoutNotifier.notifyStockEditors(foundCard);
+    }
+  }
+
+  private StockCard tryFindCard(UUID programId, UUID facilityId, StockEventLineItem lineItem) {
+    StockCard foundCard = stockCardRepository
+        .findByProgramIdAndFacilityIdAndOrderableIdAndLotId(programId, facilityId,
+            lineItem.getOrderableId(), lineItem.getLotId());
+    //use a shallow copy of stock card to do recalculation, because some domain model will be
+    //modified during recalculation, this will avoid persistence of those modified models
+    try {
+      StockCard stockCard = foundCard.shallowCopy();
+      stockCard.setId(foundCard.getId());
+      setGroupingFields(programId, facilityId, lineItem, stockCard);
+      return stockCard;
+    } catch (InvocationTargetException | NoSuchMethodException
+        | InstantiationException | IllegalAccessException ex) {
+      //if this exception is ever seen in front end, that means our code has a bug. we only put
+      //this here to satisfy checkstyle/pmd and to make sure potential bug is not hidden.
+      throw new ValidationMessageException(new Message("Error during shallow copy", ex));
+    }
+  }
+
+  private void setGroupingFields(UUID programId, UUID facilityId, StockEventLineItem lineItem,
+                                 StockCard card) {
+    card.setFacilityId(facilityId);
+    card.setProgramId(programId);
+    card.setOrderableId(lineItem.getOrderableId());
+    card.setLotId(lineItem.getLotId());
   }
 
 }
