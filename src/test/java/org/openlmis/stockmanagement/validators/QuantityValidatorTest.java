@@ -192,7 +192,6 @@ public class QuantityValidatorTest {
     ZonedDateTime firstDate = dateTimeFromYear(2015);
 
     StockCardLineItem lineItem = createCreditLineItem(firstDate.plusDays(1), 15);
-    lineItem.setStockOnHand(50);
 
     StockCard card = new StockCard();
     card.setLineItems(Collections.singletonList(lineItem));

@@ -15,14 +15,11 @@
 
 package org.openlmis.stockmanagement.validators;
 
-import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER;
 
-import com.google.common.collect.Iterables;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
@@ -38,11 +35,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 /**
  * 1 This validator makes sure stock on hand does NOT go below zero for any stock card.
@@ -87,23 +82,8 @@ public class QuantityValidator implements StockEventValidator {
         items.get(0)
     );
 
-    Comparator<StockCardLineItem> byOccurred =
-        comparing(StockCardLineItem::getOccurredDate);
-    Comparator<StockCardLineItem> byProcessed =
-        comparing(StockCardLineItem::getProcessedDate);
-
-    Integer previousQuantity = null;
-    //get line item with newest date
-    if (!foundCard.getLineItems().isEmpty()) {
-      Stream<Integer> sorted = foundCard.getLineItems().stream()
-          .sorted(byOccurred.thenComparing(byProcessed))
-          .map(StockCardLineItem::getQuantity);
-      List<Integer> collect = sorted.collect(toList());
-      previousQuantity = Iterables.getLast(collect);
-    }
-
     if (event.isPhysicalInventory()) {
-      validateQuantities(items, previousQuantity);
+      validateQuantities(items, foundCard.getStockOnHand());
     }
 
     // create line item from event line item and add it to stock card for recalculation
@@ -116,16 +96,16 @@ public class QuantityValidator implements StockEventValidator {
             lineItem.getOrderableId(), lineItem.getLotId());
     if (foundCard == null) {
       StockCard emptyCard = new StockCard();
-      setGroupingFields(programId, facilityId, lineItem, emptyCard);
       emptyCard.setLineItems(new ArrayList<>());
       return emptyCard;
     } else {
+      foundCard.calculateStockOnHand();
+
       //use a shallow copy of stock card to do recalculation, because some domain model will be
       //modified during recalculation, this will avoid persistence of those modified models
       try {
         StockCard stockCard = foundCard.shallowCopy();
-        stockCard.setId(stockCard.getId());
-        setGroupingFields(programId, facilityId, lineItem, stockCard);
+        stockCard.setStockOnHand(foundCard.getStockOnHand());
         return stockCard;
       } catch (InvocationTargetException | NoSuchMethodException
           | InstantiationException | IllegalAccessException ex) {
@@ -134,14 +114,6 @@ public class QuantityValidator implements StockEventValidator {
         throw new ValidationMessageException(new Message("Error during shallow copy", ex));
       }
     }
-  }
-
-  private void setGroupingFields(UUID programId, UUID facilityId, StockEventLineItem lineItem,
-                                 StockCard emptyCard) {
-    emptyCard.setFacilityId(facilityId);
-    emptyCard.setProgramId(programId);
-    emptyCard.setOrderableId(lineItem.getOrderableId());
-    emptyCard.setLotId(lineItem.getLotId());
   }
 
   private StockCardLineItemReason findReason(UUID reasonId) {
