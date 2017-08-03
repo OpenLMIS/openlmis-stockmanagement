@@ -99,13 +99,11 @@ public class QuantityValidator implements StockEventValidator {
       emptyCard.setLineItems(new ArrayList<>());
       return emptyCard;
     } else {
-      foundCard.calculateStockOnHand();
-
       //use a shallow copy of stock card to do recalculation, because some domain model will be
       //modified during recalculation, this will avoid persistence of those modified models
       try {
         StockCard stockCard = foundCard.shallowCopy();
-        stockCard.setStockOnHand(foundCard.getStockOnHand());
+        stockCard.calculateStockOnHand();
         return stockCard;
       } catch (InvocationTargetException | NoSuchMethodException
           | InstantiationException | IllegalAccessException ex) {
