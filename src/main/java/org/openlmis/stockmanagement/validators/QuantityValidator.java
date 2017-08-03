@@ -123,6 +123,7 @@ public class QuantityValidator implements StockEventValidator {
       //modified during recalculation, this will avoid persistence of those modified models
       try {
         StockCard stockCard = foundCard.shallowCopy();
+        stockCard.setId(stockCard.getId());
         setGroupingFields(programId, facilityId, lineItem, stockCard);
         return stockCard;
       } catch (InvocationTargetException | NoSuchMethodException
