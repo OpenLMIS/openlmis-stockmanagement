@@ -19,11 +19,14 @@ import static java.util.stream.Collectors.groupingBy;
 import static org.openlmis.stockmanagement.dto.PhysicalInventoryDto.fromEventDto;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
+import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.service.notifier.StockoutNotifier;
@@ -60,6 +63,8 @@ public class StockEventProcessor {
   private StockoutNotifier stockoutNotifier;
   @Autowired
   private StockCardRepository stockCardRepository;
+  @Autowired
+  private StockCardLineItemReasonRepository reasonRepository;
 
   /**
    * Validate and persist event and create stock card and line items from it.
@@ -105,7 +110,12 @@ public class StockEventProcessor {
         event.getFacilityId(),
         groupItems.get(0)
     );
-
+    for (StockCardLineItem line : foundCard.getLineItems()) {
+      StockCardLineItemReason reason = line.getReason();
+      if (reason != null) {
+        line.setReason(reasonRepository.findOne(reason.getId()));
+      }
+    }
     foundCard.calculateStockOnHand();
 
     if (foundCard.getStockOnHand() == 0) {
