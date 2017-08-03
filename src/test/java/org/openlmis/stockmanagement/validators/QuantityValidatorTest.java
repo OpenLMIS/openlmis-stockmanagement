@@ -43,7 +43,6 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
-import org.openlmis.stockmanagement.service.notifier.StockoutNotifier;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -66,9 +65,6 @@ public class QuantityValidatorTest {
 
   @Mock
   private StockCardLineItemReasonRepository reasonRepository;
-
-  @Mock
-  private StockoutNotifier stockoutNotifier;
 
   @Test
   public void shouldRejectWhenQuantityMakesStockOnHandBelowZero() throws Exception {

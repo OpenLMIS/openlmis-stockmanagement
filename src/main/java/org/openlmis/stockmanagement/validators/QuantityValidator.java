@@ -15,11 +15,14 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER;
 
+import com.google.common.collect.Iterables;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
@@ -34,11 +37,12 @@ import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.lang.reflect.InvocationTargetException;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 /**
  * 1 This validator makes sure stock on hand does NOT go below zero for any stock card.
@@ -83,13 +87,20 @@ public class QuantityValidator implements StockEventValidator {
         items.get(0)
     );
 
+    Comparator<StockCardLineItem> byOccurred =
+        comparing(StockCardLineItem::getOccurredDate);
+    Comparator<StockCardLineItem> byProcessed =
+        comparing(StockCardLineItem::getProcessedDate);
+
+    Integer previousQuantity = null;
     //get line item with newest date
-    Integer previousQuantity = foundCard.getLineItems().stream()
-        .sorted((l1, l2) ->
-            (int) ChronoUnit.MILLIS.between(l2.getOccurredDate(), l1.getOccurredDate()))
-        .map(StockCardLineItem::getQuantity)
-        .findFirst()
-        .orElse(null);
+    if (!foundCard.getLineItems().isEmpty()) {
+      Stream<Integer> sorted = foundCard.getLineItems().stream()
+          .sorted(byOccurred.thenComparing(byProcessed))
+          .map(StockCardLineItem::getQuantity);
+      List<Integer> collect = sorted.collect(toList());
+      previousQuantity = Iterables.getLast(collect);
+    }
 
     if (event.isPhysicalInventory()) {
       validateQuantities(items, previousQuantity);
