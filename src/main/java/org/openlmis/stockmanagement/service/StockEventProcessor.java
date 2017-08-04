@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.service;
 
 import static java.util.stream.Collectors.groupingBy;
 import static org.openlmis.stockmanagement.dto.PhysicalInventoryDto.fromEventDto;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.SERVER_ERROR_SHALLOW_COPY;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
@@ -97,9 +98,7 @@ public class StockEventProcessor {
         .getLineItems().stream()
         .collect(groupingBy(OrderableLotIdentity::identityOf));
 
-    for (List<StockEventLineItem> group : sameOrderableGroups.values()) {
-      callNotifications(eventDto, group);
-    }
+    sameOrderableGroups.values().forEach(group -> callNotifications(eventDto, group));
 
     return savedEventId;
   }
@@ -138,7 +137,7 @@ public class StockEventProcessor {
         | InstantiationException | IllegalAccessException ex) {
       //if this exception is ever seen in front end, that means our code has a bug. we only put
       //this here to satisfy checkstyle/pmd and to make sure potential bug is not hidden.
-      throw new ValidationMessageException(new Message("Error during shallow copy", ex));
+      throw new ValidationMessageException(new Message(SERVER_ERROR_SHALLOW_COPY, ex));
     }
   }
 

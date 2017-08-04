@@ -238,6 +238,10 @@ public abstract class MessageKeys {
   public static final String EMAIL_ACTION_REQUIRED_CONTENT
       = SERVICE_PREFIX + ".email.stockout.content";
 
+  //server errors
+  public static final String SERVER_ERROR_SHALLOW_COPY
+      = SERVICE_PREFIX + ".error.shallowCopy";
+
   private MessageKeys() {
     throw new UnsupportedOperationException();
   }
