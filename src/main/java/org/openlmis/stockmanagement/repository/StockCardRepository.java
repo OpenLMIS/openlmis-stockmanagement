@@ -20,17 +20,16 @@ import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-
 import java.util.List;
 import java.util.UUID;
 
 public interface StockCardRepository extends
-    PagingAndSortingRepository<StockCard, UUID> {
+    JpaRepository<StockCard, UUID> {
 
-  String selectId = "select s.id ";
+  String select = "select s ";
   String selectIdentity = "select new org.openlmis.stockmanagement.domain"
       + ".identity.OrderableLotIdentity(s.orderableId, s.lotId) ";
 
@@ -58,16 +57,13 @@ public interface StockCardRepository extends
 
   StockCard findByOriginEvent(@Param("originEventId") StockEvent stockEvent);
 
-  //the following is for performance optimization
-  //when saving a new stock card line item, only need to find existing card id
-  //fetching the whole card including line items takes too long
-  @Query(value = selectId + fromStockCards
+  @Query(value = select + fromStockCards
       + matchByProgramAndFacility + matchByOrderable + matchByLot)
-  UUID getStockCardIdWithLot(UUID programId, UUID facilityId, UUID orderableId, UUID lotId);
+  StockCard getStockCardIdWithLot(UUID programId, UUID facilityId, UUID orderableId, UUID lotId);
 
-  @Query(value = selectId + fromStockCards
+  @Query(value = select + fromStockCards
       + matchByProgramAndFacility + matchByOrderable + noLot)
-  UUID getStockCardIdWithoutLot(UUID programId, UUID facilityId, UUID orderableId);
+  StockCard getStockCardIdWithoutLot(UUID programId, UUID facilityId, UUID orderableId);
 
   @Query(value = selectIdentity + fromStockCards + matchByProgramAndFacility)
   List<OrderableLotIdentity> getIdentitiesBy(UUID programId, UUID facilityId);
