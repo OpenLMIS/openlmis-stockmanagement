@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.service;
 
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.stockmanagement.service.PermissionService.REASONS_MANAGE;
@@ -38,6 +39,9 @@ import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 import java.util.UUID;
 
@@ -63,10 +67,12 @@ public class PermissionServiceTest {
   @Mock
   private RightDto manageStockCardTemplatesRight;
 
+  @Mock
+  private OAuth2Authentication userAuthentication;
 
   private UUID userId = UUID.randomUUID();
   private UUID manageStockCardTemplatesRightId = UUID.randomUUID();
-
+  private SecurityContext securityContext;
 
   @Before
   public void setUp() {
@@ -82,6 +88,12 @@ public class PermissionServiceTest {
     when(authenticationHelper.getRight(STOCK_SOURCES_MANAGE)).thenReturn(new RightDto());
     when(authenticationHelper.getRight(STOCK_DESTINATIONS_MANAGE)).thenReturn(new RightDto());
     when(authenticationHelper.getRight(REASONS_MANAGE)).thenReturn(new RightDto());
+
+    securityContext = mock(SecurityContext.class);
+    SecurityContextHolder.setContext(securityContext);
+
+    when(securityContext.getAuthentication()).thenReturn(userAuthentication);
+    when(userAuthentication.isClientOnly()).thenReturn(false);
   }
 
   @Test

@@ -27,6 +27,8 @@ import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataServi
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
@@ -167,6 +169,12 @@ public class PermissionService {
 
   private ResultDto<Boolean> getRightResult(
       String rightName, UUID program, UUID facility, UUID warehouse) {
+    OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder.getContext()
+        .getAuthentication();
+    if (authentication.isClientOnly()) {
+      return new ResultDto<>(true);
+    }
+
     UserDto user = authenticationHelper.getCurrentUser();
     RightDto right = authenticationHelper.getRight(rightName);
 
