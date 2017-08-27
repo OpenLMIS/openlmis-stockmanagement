@@ -136,7 +136,7 @@ public class QuantityValidator implements StockEventValidator {
               .stream()
               .mapToInt(StockAdjustment::getSignedQuantity)
               .sum();
-        } else if (stockOnHand != quantity) {
+        } else if (!stockOnHand.equals(quantity)) {
           throw new ValidationMessageException(
               ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED);
         }
