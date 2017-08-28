@@ -34,7 +34,7 @@ import java.util.UUID;
 
 /**
  * This validator ensures that physical inventory line items
- * have stock adjustments with valid reasons.
+ * have stock adjustments with quantity and valid reasons.
  */
 
 @Component(value = "DiscrepancyReasonsValidator")
