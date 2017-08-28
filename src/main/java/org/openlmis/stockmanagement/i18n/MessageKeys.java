@@ -226,6 +226,15 @@ public abstract class MessageKeys {
   public static final String ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED =
       PHYSICAL_INVENTORY_ERROR_PREFIX + ".lineItems.stockAdjustments.notProvided";
 
+  public static final String ERROR_PHYSICAL_INVENTORY_DISCREPANCY_REASON_NOT_VALID =
+      PHYSICAL_INVENTORY_ERROR_PREFIX + ".lineItems.stockAdjustments.reason.notValid";
+
+  public static final String ERROR_PHYSICAL_INVENTORY_DISCREPANCY_REASON_NOT_PROVIDED =
+      PHYSICAL_INVENTORY_ERROR_PREFIX + ".lineItems.stockAdjustments.reason.notProvided";
+
+  public static final String ERROR_PHYSICAL_INVENTORY_DISCREPANCY_QUANTITY_NOT_PROVIDED =
+      PHYSICAL_INVENTORY_ERROR_PREFIX + ".lineItems.stockAdjustments.quantity.notProvided";
+
   //report
   public static final String ERROR_GENERATE_REPORT_FAILED = ERROR_PREFIX + ".generateReport.failed";
 

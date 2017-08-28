@@ -17,6 +17,9 @@ package org.openlmis.stockmanagement.domain.event;
 
 import static javax.persistence.CascadeType.ALL;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.ExtraDataConverter;
 import org.openlmis.stockmanagement.domain.common.VvmApplicable;
@@ -40,6 +43,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "stock_event_line_items", schema = "stockmanagement")
 public class StockEventLineItem extends BaseEntity
