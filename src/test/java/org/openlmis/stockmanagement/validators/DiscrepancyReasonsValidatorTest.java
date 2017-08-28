@@ -88,6 +88,18 @@ public class DiscrepancyReasonsValidatorTest {
     verify(validReasonRepository)
         .findByProgramIdAndFacilityTypeIdAndReasonId(
             stockEventDto.getProgramId(), facilityTypeId, reasonId);
+    verify(facilityReferenceDataService)
+        .findOne(stockEventDto.getFacilityId());
+  }
+
+  @Test
+  public void shouldPassWhenNoStockAdjustments()
+      throws InstantiationException, IllegalAccessException {
+    StockEventDto stockEventDto = new StockEventDto();
+    stockEventDto.setLineItems(
+        Collections.singletonList(new StockEventLineItem()));
+
+    validator.validate(stockEventDto);
   }
 
   @Test(expected = ValidationMessageException.class)
