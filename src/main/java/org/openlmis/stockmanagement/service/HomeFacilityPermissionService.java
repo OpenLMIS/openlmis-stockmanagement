@@ -23,6 +23,8 @@ import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -41,8 +43,12 @@ public class HomeFacilityPermissionService {
    * @param facilityTypeId facility type id.
    */
   public void checkProgramAndFacilityType(UUID programId, UUID facilityTypeId) {
-    checkProgramSupported(programId);
-    checkFacilityTypeMatches(facilityTypeId);
+    OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder.getContext()
+        .getAuthentication();
+    if (!authentication.isClientOnly()) {
+      checkProgramSupported(programId);
+      checkFacilityTypeMatches(facilityTypeId);
+    }
   }
 
   /**

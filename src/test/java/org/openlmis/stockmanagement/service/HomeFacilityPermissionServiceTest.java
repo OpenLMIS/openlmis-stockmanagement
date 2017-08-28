@@ -18,22 +18,29 @@ package org.openlmis.stockmanagement.service;
 import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.when;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityTypeDto;
 import org.openlmis.stockmanagement.dto.referencedata.SupportedProgramDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 import java.util.Arrays;
 import java.util.UUID;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(SecurityContextHolder.class)
 public class HomeFacilityPermissionServiceTest {
 
   @InjectMocks
@@ -41,6 +48,20 @@ public class HomeFacilityPermissionServiceTest {
 
   @Mock
   private AuthenticationHelper authenticationHelper;
+
+  @Mock
+  private SecurityContext securityContext;
+
+  @Mock
+  private OAuth2Authentication authentication;
+
+  @Before
+  public void setUp() {
+    PowerMockito.mockStatic(SecurityContextHolder.class);
+    PowerMockito.when(SecurityContextHolder.getContext()).thenReturn(securityContext);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.isClientOnly()).thenReturn(false);
+  }
 
   @Test(expected = PermissionMessageException.class)
   public void throw_exception_when_facility_type_and_home_facility_type_not_match()
