@@ -45,8 +45,9 @@ public class HomeFacilityPermissionService {
   public void checkProgramAndFacilityType(UUID programId, UUID facilityTypeId) {
     OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder.getContext()
         .getAuthentication();
+
     if (!authentication.isClientOnly()) {
-      checkProgramSupported(programId);
+      isProgramSupported(programId);
       checkFacilityTypeMatches(facilityTypeId);
     }
   }
@@ -57,6 +58,15 @@ public class HomeFacilityPermissionService {
    * @param programId the program's id.
    */
   public void checkProgramSupported(UUID programId) {
+    OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder.getContext()
+        .getAuthentication();
+
+    if (!authentication.isClientOnly()) {
+      isProgramSupported(programId);
+    }
+  }
+
+  private void isProgramSupported(UUID programId) {
     FacilityDto homeFacility = authenticationHelper.getCurrentUser().getHomeFacility();
     boolean isSupported = homeFacility != null
         && homeFacility.getSupportedPrograms().stream()
