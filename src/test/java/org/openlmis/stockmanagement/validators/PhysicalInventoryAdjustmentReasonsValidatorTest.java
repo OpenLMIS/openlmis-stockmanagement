@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.validators;
 import static org.junit.rules.ExpectedException.none;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -59,6 +60,7 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest {
   private UUID reasonId = UUID.randomUUID();
   private FacilityDto facility = mock(FacilityDto.class);
   private UUID facilityTypeId = UUID.randomUUID();
+  private StockEventDto stockEventDto = spy(new StockEventDto());
 
   @Before
   public void setUp() {
@@ -66,17 +68,22 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest {
         .findByProgramIdAndFacilityTypeIdAndReasonId(
             any(UUID.class), any(UUID.class), any(UUID.class)))
         .thenReturn(new ValidReasonAssignment());
-    when(facilityReferenceDataService.findOne(any(UUID.class)))
-        .thenReturn(facility);
-    FacilityTypeDto facilityType = new FacilityTypeDto();
-    facilityType.setId(facilityTypeId);
-    when(facility.getType()).thenReturn(facilityType);
+    stubFacilityType();
+
+    when(stockEventDto.isPhysicalInventory()).thenReturn(true);
+  }
+
+  @Test
+  public void shouldByPassWhenStockEventIsNotPhysicalInventory()
+      throws InstantiationException, IllegalAccessException {
+    when(stockEventDto.isPhysicalInventory()).thenReturn(false);
+
+    validator.validate(stockEventDto);
   }
 
   @Test
   public void shouldPassWhenReasonIsValid()
       throws InstantiationException, IllegalAccessException {
-    StockEventDto stockEventDto = new StockEventDto();
     stockEventDto.setProgramId(UUID.randomUUID());
     stockEventDto.setFacilityId(UUID.randomUUID());
     stockEventDto.setLineItems(
@@ -95,7 +102,6 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest {
   @Test
   public void shouldPassWhenNoStockAdjustments()
       throws InstantiationException, IllegalAccessException {
-    StockEventDto stockEventDto = new StockEventDto();
     stockEventDto.setLineItems(
         Collections.singletonList(new StockEventLineItem()));
 
@@ -105,7 +111,6 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest {
   @Test(expected = ValidationMessageException.class)
   public void shouldNotPassWhenReasonIsNotValid()
       throws InstantiationException, IllegalAccessException {
-    StockEventDto stockEventDto = new StockEventDto();
     stockEventDto.setLineItems(
         Collections.singletonList(
             generateLineItem(5, generateReason())));
@@ -121,7 +126,6 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest {
   @Test(expected = ValidationMessageException.class)
   public void shouldNotPassWhenNoReason()
       throws InstantiationException, IllegalAccessException {
-    StockEventDto stockEventDto = new StockEventDto();
     stockEventDto.setLineItems(
         Collections.singletonList(
             generateLineItem(5, null)));
@@ -132,12 +136,32 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest {
   @Test(expected = ValidationMessageException.class)
   public void shouldNotPassWhenNoQuantity()
       throws InstantiationException, IllegalAccessException {
-    StockEventDto stockEventDto = new StockEventDto();
     stockEventDto.setLineItems(
         Collections.singletonList(
             generateLineItem(null, generateReason())));
 
     validator.validate(stockEventDto);
+  }
+
+  @Test(expected = ValidationMessageException.class)
+  public void shouldNotPassWhenFacilityIdIsInvalid()
+      throws InstantiationException, IllegalAccessException {
+    stockEventDto.setLineItems(
+        Collections.singletonList(
+            generateLineItem(5, generateReason())));
+
+    when(facilityReferenceDataService.findOne(any(UUID.class)))
+        .thenReturn(null);
+
+    validator.validate(stockEventDto);
+  }
+
+  private void stubFacilityType() {
+    when(facilityReferenceDataService.findOne(any(UUID.class)))
+        .thenReturn(facility);
+    FacilityTypeDto facilityType = new FacilityTypeDto();
+    facilityType.setId(facilityTypeId);
+    when(facility.getType()).thenReturn(facilityType);
   }
 
   private StockCardLineItemReason generateReason() {

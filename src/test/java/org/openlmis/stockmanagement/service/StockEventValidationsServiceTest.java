@@ -94,7 +94,7 @@ public class StockEventValidationsServiceTest {
   private OrderableLotDuplicationValidator orderableLotDuplicationValidator;
 
   @MockBean
-  private PhysicalInventoryAdjustmentReasonsValidator physicalInventoryAdjustmentReasonsValidator;
+  private PhysicalInventoryAdjustmentReasonsValidator physicalInventoryReasonsValidator;
 
   @Before
   public void setUp() throws Exception {
@@ -111,7 +111,7 @@ public class StockEventValidationsServiceTest {
     doNothing().when(lotValidator).validate(any(StockEventDto.class));
     doNothing().when(orderableLotDuplicationValidator).validate(any(StockEventDto.class));
     doNothing().when(reasonExistenceValidator).validate(any(StockEventDto.class));
-    doNothing().when(physicalInventoryAdjustmentReasonsValidator).validate(any(StockEventDto.class));
+    doNothing().when(physicalInventoryReasonsValidator).validate(any(StockEventDto.class));
   }
 
   @Test

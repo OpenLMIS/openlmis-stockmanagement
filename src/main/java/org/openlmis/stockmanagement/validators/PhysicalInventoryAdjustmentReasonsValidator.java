@@ -82,9 +82,9 @@ public class PhysicalInventoryAdjustmentReasonsValidator implements StockEventVa
           new Message(ERROR_PHYSICAL_INVENTORY_DISCREPANCY_REASON_NOT_PROVIDED));
     }
     UUID facilityType = getFacilityType(facilityId);
-    UUID id = reason.getId();
-    if (!isReasonValid(programId, facilityType, id)) {
-      throwException(programId, facilityType, id);
+    UUID reasonId = reason.getId();
+    if (!isReasonValid(programId, facilityType, reasonId)) {
+      throwException(programId, facilityType, reasonId);
     }
   }
 
@@ -98,16 +98,16 @@ public class PhysicalInventoryAdjustmentReasonsValidator implements StockEventVa
     return facility.getType().getId();
   }
 
-  private boolean isReasonValid(UUID programId, UUID facilityTypeId, UUID id) {
+  private boolean isReasonValid(UUID programId, UUID facilityTypeId, UUID reasonId) {
     ValidReasonAssignment validReason =
         validReasonRepository.findByProgramIdAndFacilityTypeIdAndReasonId(
-            programId, facilityTypeId, id);
+            programId, facilityTypeId, reasonId);
     return validReason != null;
   }
 
-  private void throwException(UUID programId, UUID facilityTypeId, UUID id) {
+  private void throwException(UUID programId, UUID facilityTypeId, UUID reasonId) {
     throw new ValidationMessageException(
         new Message(ERROR_PHYSICAL_INVENTORY_DISCREPANCY_REASON_NOT_VALID,
-            id, programId, facilityTypeId));
+            reasonId, programId, facilityTypeId));
   }
 }
