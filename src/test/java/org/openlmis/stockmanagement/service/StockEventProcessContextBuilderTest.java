@@ -19,11 +19,11 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
@@ -37,11 +37,18 @@ import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataSe
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 import java.util.ArrayList;
 import java.util.UUID;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(SecurityContextHolder.class)
 public class StockEventProcessContextBuilderTest {
 
   @Mock
@@ -59,8 +66,22 @@ public class StockEventProcessContextBuilderTest {
   @Mock
   private ApprovedProductReferenceDataService approvedProductService;
 
+  @Mock
+  private SecurityContext securityContext;
+
+  @Mock
+  private OAuth2Authentication authentication;
+
   @InjectMocks
   private StockEventProcessContextBuilder contextBuilder;
+
+  @Before
+  public void setUp() {
+    PowerMockito.mockStatic(SecurityContextHolder.class);
+    PowerMockito.when(SecurityContextHolder.getContext()).thenReturn(securityContext);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.isClientOnly()).thenReturn(false);
+  }
 
   @Test
   public void should_build_context_with_ref_data_needed_by_processor() throws Exception {

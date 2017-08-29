@@ -28,6 +28,8 @@ import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -70,10 +72,17 @@ public class StockEventProcessContextBuilder {
     LOGGER.info("build stock event process context");
     UUID programId = eventDto.getProgramId();
     UUID facilityId = eventDto.getFacilityId();
+    OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder.getContext()
+        .getAuthentication();
 
-    return StockEventProcessContext.builder()
-        .currentUser(authenticationHelper.getCurrentUser())
-        .program(programService.findOne(programId))
+    StockEventProcessContext.StockEventProcessContextBuilder context = StockEventProcessContext
+        .builder();
+
+    if (!authentication.isClientOnly()) {
+      context.currentUser(authenticationHelper.getCurrentUser());
+    }
+
+    return context.program(programService.findOne(programId))
         .facility(facilityService.findOne(facilityId))
         .allApprovedProducts(approvedProductService.getAllApprovedProducts(programId, facilityId))
         .lots(getLots(eventDto))
