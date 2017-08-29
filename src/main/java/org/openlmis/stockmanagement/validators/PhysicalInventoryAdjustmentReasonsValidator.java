@@ -40,7 +40,7 @@ import java.util.UUID;
  * have stock adjustments with quantity and valid reasons.
  */
 
-@Component(value = "DiscrepancyReasonsValidator")
+@Component(value = "PhysicalInventoryAdjustmentReasonsValidator")
 public class PhysicalInventoryAdjustmentReasonsValidator implements StockEventValidator {
 
   @Autowired
