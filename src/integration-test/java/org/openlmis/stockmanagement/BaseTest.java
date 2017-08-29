@@ -15,8 +15,10 @@
 
 package org.openlmis.stockmanagement;
 
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(locations = {"classpath:application.properties", "classpath:test.properties"})
+@DirtiesContext
 public abstract class BaseTest {
 }

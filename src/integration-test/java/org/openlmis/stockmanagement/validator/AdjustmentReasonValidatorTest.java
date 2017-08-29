@@ -13,7 +13,7 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.validators;
+package org.openlmis.stockmanagement.validator;
 
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_REASON_CATEGORY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_REASON_TYPE_INVALID;
@@ -30,12 +30,11 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
+import org.openlmis.stockmanagement.validators.AdjustmentReasonValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-
 import java.util.UUID;
-
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
