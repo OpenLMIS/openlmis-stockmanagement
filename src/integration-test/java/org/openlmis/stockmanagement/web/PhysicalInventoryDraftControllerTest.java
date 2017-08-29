@@ -38,7 +38,6 @@ import org.openlmis.stockmanagement.service.PhysicalInventoryService;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
-
 import java.util.UUID;
 
 public class PhysicalInventoryDraftControllerTest extends BaseWebTest {

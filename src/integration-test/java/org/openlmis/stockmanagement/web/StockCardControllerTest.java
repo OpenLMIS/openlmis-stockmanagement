@@ -39,7 +39,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.web.servlet.ResultActions;
-
 import java.util.UUID;
 
 //the name of this controller test is intentional wrong: cardz insteads of cards

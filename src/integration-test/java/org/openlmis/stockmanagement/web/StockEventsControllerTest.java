@@ -40,7 +40,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-
 import java.util.UUID;
 
 public class StockEventsControllerTest extends BaseWebTest {

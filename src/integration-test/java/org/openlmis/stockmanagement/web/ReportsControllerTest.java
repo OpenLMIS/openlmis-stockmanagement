@@ -31,7 +31,6 @@ import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.servlet.ModelAndView;
-
 import java.util.UUID;
 
 public class ReportsControllerTest extends BaseWebTest {
