@@ -98,11 +98,21 @@ sourceSets {
         }
         resources.srcDir file('src/integration-test/resources')
     }
+    webTest {
+        java {
+            compileClasspath += main.output + test.output
+            runtimeClasspath += main.output + test.output
+            srcDir file('src/test/java')
+        }
+        resources.srcDir file('src/test/resources')
+    }
 }
 
 configurations {
     integrationTestCompile.extendsFrom testCompile
     integrationTestRuntime.extendsFrom testRuntime
+    webTestCompile.extendsFrom testCompile
+    webTestRuntime.extendsFrom testRuntime
 }
 
 task integrationTest(type: Test) {
@@ -113,6 +123,20 @@ task integrationTest(type: Test) {
         exceptionFormat = 'full'
     }
     mustRunAfter test
+}
+
+task webTest(type: Test) {
+    testClassesDir = sourceSets.webTest.output.classesDir
+    classpath = sourceSets.webTest.runtimeClasspath
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat = 'full'
+    }
+    mustRunAfter test
+
+    environment 'BASE_URL', "http://localhost"
+
+    include '**/web/**'
 }
 
 tasks.withType(Test) {
@@ -205,6 +229,8 @@ test {
         events 'started', 'passed'
         exceptionFormat = 'full'
     }
+
+    exclude '**/web/**'
 }
 
 //enable the lines below if you need to debug spring running in docker
@@ -234,6 +260,7 @@ check {
 apply from: "registration.gradle"
 
 build {
+    dependsOn webTest
     dependsOn jacocoTestReport
     dependsOn check
     dependsOn ramlToHtml
