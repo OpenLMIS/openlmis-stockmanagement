@@ -41,7 +41,7 @@ import java.util.UUID;
  */
 
 @Component(value = "DiscrepancyReasonsValidator")
-public class DiscrepancyReasonsValidator implements StockEventValidator {
+public class PhysicalInventoryAdjustmentReasonsValidator implements StockEventValidator {
 
   @Autowired
   private ValidReasonAssignmentRepository validReasonRepository;
@@ -81,14 +81,14 @@ public class DiscrepancyReasonsValidator implements StockEventValidator {
       throw new ValidationMessageException(
           new Message(ERROR_PHYSICAL_INVENTORY_DISCREPANCY_REASON_NOT_PROVIDED));
     }
-    UUID reasonTypeId = getReasonTypeId(facilityId);
+    UUID facilityType = getFacilityType(facilityId);
     UUID id = reason.getId();
-    if (!isReasonValid(programId, reasonTypeId, id)) {
-      throwException(programId, reasonTypeId, id);
+    if (!isReasonValid(programId, facilityType, id)) {
+      throwException(programId, facilityType, id);
     }
   }
 
-  private UUID getReasonTypeId(UUID facilityId) {
+  private UUID getFacilityType(UUID facilityId) {
     FacilityDto facility =
         facilityReferenceDataService.findOne(facilityId);
     if (facility == null) {

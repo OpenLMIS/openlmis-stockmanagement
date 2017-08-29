@@ -31,7 +31,7 @@ import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 import org.openlmis.stockmanagement.utils.Message;
 import org.openlmis.stockmanagement.validators.AdjustmentReasonValidator;
 import org.openlmis.stockmanagement.validators.ApprovedOrderableValidator;
-import org.openlmis.stockmanagement.validators.DiscrepancyReasonsValidator;
+import org.openlmis.stockmanagement.validators.PhysicalInventoryAdjustmentReasonsValidator;
 import org.openlmis.stockmanagement.validators.FreeTextValidator;
 import org.openlmis.stockmanagement.validators.LotValidator;
 import org.openlmis.stockmanagement.validators.MandatoryFieldsValidator;
@@ -94,7 +94,7 @@ public class StockEventValidationsServiceTest {
   private OrderableLotDuplicationValidator orderableLotDuplicationValidator;
 
   @MockBean
-  private DiscrepancyReasonsValidator discrepancyReasonsValidator;
+  private PhysicalInventoryAdjustmentReasonsValidator physicalInventoryAdjustmentReasonsValidator;
 
   @Before
   public void setUp() throws Exception {
@@ -111,7 +111,7 @@ public class StockEventValidationsServiceTest {
     doNothing().when(lotValidator).validate(any(StockEventDto.class));
     doNothing().when(orderableLotDuplicationValidator).validate(any(StockEventDto.class));
     doNothing().when(reasonExistenceValidator).validate(any(StockEventDto.class));
-    doNothing().when(discrepancyReasonsValidator).validate(any(StockEventDto.class));
+    doNothing().when(physicalInventoryAdjustmentReasonsValidator).validate(any(StockEventDto.class));
   }
 
   @Test

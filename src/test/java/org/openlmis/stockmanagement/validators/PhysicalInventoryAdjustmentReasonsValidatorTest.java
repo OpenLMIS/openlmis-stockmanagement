@@ -43,7 +43,7 @@ import java.util.Collections;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DiscrepancyReasonsValidatorTest {
+public class PhysicalInventoryAdjustmentReasonsValidatorTest {
 
   @Rule
   public ExpectedException expectedException = none();
@@ -55,7 +55,7 @@ public class DiscrepancyReasonsValidatorTest {
   private FacilityReferenceDataService facilityReferenceDataService;
 
   @InjectMocks
-  private DiscrepancyReasonsValidator validator;
+  private PhysicalInventoryAdjustmentReasonsValidator validator;
   private UUID reasonId = UUID.randomUUID();
   private FacilityDto facility = mock(FacilityDto.class);
   private UUID facilityTypeId = UUID.randomUUID();
