@@ -26,6 +26,7 @@ import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.RightDto;
 import org.openlmis.stockmanagement.dto.referencedata.SupervisoryNodeDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.NotificationService;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
@@ -106,6 +107,12 @@ public class StockoutNotifier extends BaseNotifier {
     RightDto right = rightReferenceDataService.findRight(STOCK_INVENTORIES_EDIT);
     SupervisoryNodeDto supervisoryNode = supervisoryNodeReferenceDataService
         .findSupervisoryNode(stockCard.getProgramId(), stockCard.getFacilityId());
+
+    if (supervisoryNode == null) {
+      throw new IllegalArgumentException(
+              String.format("There is no supervisory node for program %s and facility %s",
+              stockCard.getProgramId(), stockCard.getFacilityId()));
+    }
 
     return supervisingUsersReferenceDataService
         .findAll(supervisoryNode.getId(), right.getId(), stockCard.getProgramId());
