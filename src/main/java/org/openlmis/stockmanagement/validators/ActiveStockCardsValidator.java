@@ -24,7 +24,6 @@ import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -33,7 +32,7 @@ import java.util.List;
  * card.
  * This validator makes sure no existing stock card is missing in the stock event.
  */
-@Component(value = "ActiveStockCardsValidator")
+//@Component(value = "ActiveStockCardsValidator")
 public class ActiveStockCardsValidator implements StockEventValidator {
 
   @Autowired
