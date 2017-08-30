@@ -42,6 +42,8 @@ public class StockEventDto {
 
   private String documentNumber;
 
+  private UUID userId;
+
   private List<StockEventLineItem> lineItems;
 
   private StockEventProcessContext context;

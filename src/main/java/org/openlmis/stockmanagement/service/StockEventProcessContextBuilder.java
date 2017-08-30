@@ -20,10 +20,13 @@ import static org.slf4j.LoggerFactory.getLogger;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
+import org.openlmis.stockmanagement.dto.referencedata.UserDto;
+import org.openlmis.stockmanagement.exception.AuthenticationException;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import org.slf4j.Logger;
@@ -61,6 +64,9 @@ public class StockEventProcessContextBuilder {
   @Autowired
   private LotReferenceDataService lotReferenceDataService;
 
+  @Autowired
+  private UserReferenceDataService userReferenceDataService;
+
   /**
    * Before processing events, put all needed ref data into context so we don't have to do frequent
    * network requests.
@@ -78,10 +84,19 @@ public class StockEventProcessContextBuilder {
     StockEventProcessContext.StockEventProcessContextBuilder context = StockEventProcessContext
         .builder();
 
-    if (!authentication.isClientOnly()) {
+    if (authentication.isClientOnly()) {
+      UserDto userDto = userReferenceDataService.findOne(eventDto.getUserId());
+      context.currentUser(userDto);
+
+      if (userDto == null) {
+        // TODO: change to localized message
+        throw new AuthenticationException(
+            "User with id \"" + eventDto.getUserId() + "\" not found.");
+      }
+
+    } else {
       context.currentUser(authenticationHelper.getCurrentUser());
     }
-
     return context.program(programService.findOne(programId))
         .facility(facilityService.findOne(facilityId))
         .allApprovedProducts(approvedProductService.getAllApprovedProducts(programId, facilityId))

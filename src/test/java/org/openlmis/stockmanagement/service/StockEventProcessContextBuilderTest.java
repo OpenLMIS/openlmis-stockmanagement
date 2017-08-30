@@ -30,10 +30,12 @@ import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
+import org.openlmis.stockmanagement.exception.AuthenticationException;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
@@ -43,7 +45,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -72,8 +73,13 @@ public class StockEventProcessContextBuilderTest {
   @Mock
   private OAuth2Authentication authentication;
 
+  @Mock
+  private UserReferenceDataService userReferenceDataService;
+
   @InjectMocks
   private StockEventProcessContextBuilder contextBuilder;
+
+  private UserDto userDto = new UserDto();
 
   @Before
   public void setUp() {
@@ -84,19 +90,45 @@ public class StockEventProcessContextBuilderTest {
   }
 
   @Test
-  public void should_build_context_with_ref_data_needed_by_processor() throws Exception {
+  public void shouldBuildContextWithRefDataNeededByProcessor() throws Exception {
+    when(authenticationHelper.getCurrentUser()).thenReturn(userDto);
+
+    testBuildContext(StockEventDtoBuilder.createStockEventDto());
+  }
+
+  @Test
+  public void shouldBuildContextWithUserIdFromDtoWhenClientAuthentication() throws Exception {
+    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    stockEventDto.setUserId(UUID.randomUUID());
+
+    when(authentication.isClientOnly()).thenReturn(true);
+    when(userReferenceDataService.findOne(stockEventDto.getUserId())).thenReturn(userDto);
+
+    testBuildContext(stockEventDto);
+  }
+
+  @Test(expected = AuthenticationException.class)
+  public void shouldThrowExceptionWhenUserIsNotFound() throws Exception {
+    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    stockEventDto.setUserId(UUID.randomUUID());
+
+    when(authentication.isClientOnly()).thenReturn(true);
+    when(userReferenceDataService.findOne(stockEventDto.getUserId())).thenReturn(null);
+
+    testBuildContext(stockEventDto);
+  }
+
+  private void testBuildContext(StockEventDto stockEventDto) {
     //given
     UUID lotId = UUID.randomUUID();
 
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    StockEventDtoBuilder.createStockEventDto();
     stockEventDto.getLineItems().get(0).setLotId(lotId);
 
-    UserDto userDto = new UserDto();
     ProgramDto programDto = new ProgramDto();
     FacilityDto facilityDto = new FacilityDto();
     ArrayList<OrderableDto> approvedProductDtos = new ArrayList<>();
 
-    when(authenticationHelper.getCurrentUser()).thenReturn(userDto);
     when(programService.findOne(stockEventDto.getProgramId())).thenReturn(programDto);
     when(facilityService.findOne(stockEventDto.getFacilityId())).thenReturn(facilityDto);
     when(approvedProductService

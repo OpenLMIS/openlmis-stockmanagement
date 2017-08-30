@@ -46,6 +46,7 @@ public class AuthenticationHelper {
     UserDto user = userReferenceDataService.findUser(username);
 
     if (user == null) {
+      // TODO: change to localized message
       throw new AuthenticationException("User with name \"" + username + "\" not found.");
     }
 
