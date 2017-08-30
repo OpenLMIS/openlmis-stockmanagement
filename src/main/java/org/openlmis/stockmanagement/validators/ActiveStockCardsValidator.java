@@ -32,6 +32,9 @@ import java.util.List;
  * card.
  * This validator makes sure no existing stock card is missing in the stock event.
  */
+
+// TODO: Disabled because of OLMIS-2834 - we want to allow inventories from requisitions
+// that do not fully cover the stock card for now.
 //@Component(value = "ActiveStockCardsValidator")
 public class ActiveStockCardsValidator implements StockEventValidator {
 
