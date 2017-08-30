@@ -39,8 +39,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 /**
  * This class is in charge of persisting and retrieving stock cards.
@@ -77,9 +75,6 @@ public class StockCardService extends StockCardBaseService {
   @Autowired
   private OrganizationRepository organizationRepository;
 
-  @PersistenceContext
-  private EntityManager entityManager;
-
   /**
    * Generate stock card line items and stock cards based on event, and persist them.
    *
@@ -108,11 +103,11 @@ public class StockCardService extends StockCardBaseService {
    * @return the found stock card.
    */
   public StockCardDto findStockCardById(UUID stockCardId) {
-    StockCard foundCard = cardRepository.findOne(stockCardId);
-    if (foundCard == null) {
+    StockCard card = cardRepository.findOne(stockCardId);
+    if (card == null) {
       return null;
     }
-    entityManager.detach(foundCard);
+    StockCard foundCard = card.shallowCopy();
 
     LOGGER.debug("Stock card found");
     permissionService.canViewStockCard(foundCard.getProgramId(), foundCard.getFacilityId());

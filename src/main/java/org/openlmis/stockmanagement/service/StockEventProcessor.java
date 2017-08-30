@@ -17,7 +17,6 @@ package org.openlmis.stockmanagement.service;
 
 import static java.util.stream.Collectors.groupingBy;
 import static org.openlmis.stockmanagement.dto.PhysicalInventoryDto.fromEventDto;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.SERVER_ERROR_SHALLOW_COPY;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
@@ -26,17 +25,14 @@ import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventDto;
-import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.service.notifier.StockoutNotifier;
-import org.openlmis.stockmanagement.utils.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -128,25 +124,7 @@ public class StockEventProcessor {
             lineItem.getOrderableId(), lineItem.getLotId());
     //use a shallow copy of stock card to do recalculation, because some domain model will be
     //modified during recalculation, this will avoid persistence of those modified models
-    try {
-      StockCard stockCard = foundCard.shallowCopy();
-      stockCard.setId(foundCard.getId());
-      setGroupingFields(programId, facilityId, lineItem, stockCard);
-      return stockCard;
-    } catch (InvocationTargetException | NoSuchMethodException
-        | InstantiationException | IllegalAccessException ex) {
-      //if this exception is ever seen in front end, that means our code has a bug. we only put
-      //this here to satisfy checkstyle/pmd and to make sure potential bug is not hidden.
-      throw new ValidationMessageException(new Message(SERVER_ERROR_SHALLOW_COPY, ex));
-    }
-  }
-
-  private void setGroupingFields(UUID programId, UUID facilityId, StockEventLineItem lineItem,
-                                 StockCard card) {
-    card.setFacilityId(facilityId);
-    card.setProgramId(programId);
-    card.setOrderableId(lineItem.getOrderableId());
-    card.setLotId(lineItem.getLotId());
+    return foundCard.shallowCopy();
   }
 
 }

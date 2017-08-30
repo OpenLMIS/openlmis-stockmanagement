@@ -30,10 +30,8 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
-import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -101,16 +99,9 @@ public class QuantityValidator implements StockEventValidator {
     } else {
       //use a shallow copy of stock card to do recalculation, because some domain model will be
       //modified during recalculation, this will avoid persistence of those modified models
-      try {
-        StockCard stockCard = foundCard.shallowCopy();
-        stockCard.calculateStockOnHand();
-        return stockCard;
-      } catch (InvocationTargetException | NoSuchMethodException
-          | InstantiationException | IllegalAccessException ex) {
-        //if this exception is ever seen in front end, that means our code has a bug. we only put
-        //this here to satisfy checkstyle/pmd and to make sure potential bug is not hidden.
-        throw new ValidationMessageException(new Message("Error during shallow copy", ex));
-      }
+      StockCard stockCard = foundCard.shallowCopy();
+      stockCard.calculateStockOnHand();
+      return stockCard;
     }
   }
 

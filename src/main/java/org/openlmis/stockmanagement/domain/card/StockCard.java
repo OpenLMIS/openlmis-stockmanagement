@@ -21,6 +21,7 @@ import static javax.persistence.CascadeType.ALL;
 import static org.apache.commons.beanutils.BeanUtils.cloneBean;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.hibernate.annotations.LazyCollectionOption.FALSE;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.SERVER_ERROR_SHALLOW_COPY;
 
 import org.hibernate.annotations.LazyCollection;
 import org.openlmis.stockmanagement.domain.BaseEntity;
@@ -28,6 +29,8 @@ import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.utils.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -145,15 +148,27 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
    * Creates a shallow copy of this stock card. Used during recalculation to avoid updates on
    * existing stock cards and line items.
    */
-  public StockCard shallowCopy() throws InvocationTargetException, NoSuchMethodException,
-      InstantiationException, IllegalAccessException {
+  public StockCard shallowCopy() {
     StockCard clone = new StockCard();
+    clone.setId(id);
+    clone.setLotId(lotId);
+    clone.setStockOnHand(stockOnHand);
+    clone.setOrderableId(orderableId);
+    clone.setProgramId(programId);
+    clone.setFacilityId(facilityId);
     clone.setLineItems(new ArrayList<>());
 
-    if (lineItems != null) {
-      for (StockCardLineItem lineItem : this.getLineItems()) {
-        clone.getLineItems().add((StockCardLineItem) cloneBean(lineItem));
+    try {
+      if (lineItems != null) {
+        for (StockCardLineItem lineItem : this.getLineItems()) {
+          clone.getLineItems().add((StockCardLineItem) cloneBean(lineItem));
+        }
       }
+    } catch (InvocationTargetException | NoSuchMethodException
+      | InstantiationException | IllegalAccessException ex) {
+      //if this exception is ever seen in front end, that means our code has a bug. we only put
+      //this here to satisfy checkstyle/pmd and to make sure potential bug is not hidden.
+      throw new ValidationMessageException(new Message(SERVER_ERROR_SHALLOW_COPY, ex));
     }
 
     return clone;
