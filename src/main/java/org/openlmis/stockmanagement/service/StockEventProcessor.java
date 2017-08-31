@@ -32,9 +32,8 @@ import org.openlmis.stockmanagement.service.notifier.StockoutNotifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -81,16 +80,7 @@ public class StockEventProcessor {
 
   private UUID saveEventAndGenerateLineItems(StockEventDto eventDto)
       throws InstantiationException, IllegalAccessException {
-
-    UUID currentUserId;
-    OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder.getContext()
-        .getAuthentication();
-
-    if (!authentication.isClientOnly()) {
-      currentUserId = eventDto.getContext().getCurrentUser().getId();
-    } else {
-      currentUserId = eventDto.getUserId();
-    }
+    UUID currentUserId = eventDto.getContext().getCurrentUser().getId();
 
     StockEvent stockEvent = eventDto.toEvent(currentUserId);
     UUID savedEventId = stockEventsRepository.save(stockEvent).getId();
