@@ -142,12 +142,7 @@ public class QuantityValidator implements StockEventValidator {
               "Stock on hand [{}] and adjustments [{}] = [{}] differ from current stock [{}]",
                   stockOnHand, adjustmentsQuantity, stockOnHand + adjustmentsQuantity, quantity);
 
-          if (LOGGER.isDebugEnabled() && CollectionUtils.isNotEmpty(adjustments)) {
-            LOGGER.debug("Logging adjustments");
-            for (StockAdjustment adj : adjustments) {
-              LOGGER.debug("Adjustment {}: {}", adj.getReason().getName(), adj.getQuantity());
-            }
-          }
+          debugAdjustments(adjustments);
 
           throw new ValidationMessageException(
               ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER);
@@ -182,5 +177,14 @@ public class QuantityValidator implements StockEventValidator {
     }
 
     foundCard.calculateStockOnHand();
+  }
+
+  private void debugAdjustments(List<StockAdjustment> adjustments) {
+    if (LOGGER.isDebugEnabled() && CollectionUtils.isNotEmpty(adjustments)) {
+      LOGGER.debug("Logging adjustments");
+      for (StockAdjustment adj : adjustments) {
+        LOGGER.debug("Adjustment {}: {}", adj.getReason().getName(), adj.getQuantity());
+      }
+    }
   }
 }
