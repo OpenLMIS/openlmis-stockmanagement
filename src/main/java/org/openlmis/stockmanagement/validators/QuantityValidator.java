@@ -139,8 +139,10 @@ public class QuantityValidator implements StockEventValidator {
 
         if (stockOnHand + adjustmentsQuantity != quantity) {
           LOGGER.warn(
-              "Stock on hand [{}] and adjustments [{}] = [{}] differ from current stock [{}]",
-                  stockOnHand, adjustmentsQuantity, stockOnHand + adjustmentsQuantity, quantity);
+              "Stock on hand [{}] and adjustments [{}] = [{}] differ from current stock [{}]. "
+                      + "Orderable: {}",
+                  stockOnHand, adjustmentsQuantity, stockOnHand + adjustmentsQuantity, quantity,
+                  item.getOrderableId());
 
           debugAdjustments(adjustments);
 
