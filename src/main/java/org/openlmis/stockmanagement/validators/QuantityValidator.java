@@ -137,8 +137,9 @@ public class QuantityValidator implements StockEventValidator {
         }
 
         if (stockOnHand + adjustmentsQuantity != quantity) {
-          LOGGER.warn("Stock on hand [{}] and current stock [{}] differ",
-                  stockOnHand + adjustmentsQuantity, quantity);
+          LOGGER.warn(
+            "Stock on hand [{}] and adjustments [{}] = [{}] differ from current stock [{}]",
+                  stockOnHand, adjustmentsQuantity, stockOnHand + adjustmentsQuantity, quantity);
           throw new ValidationMessageException(
               ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER);
         }
