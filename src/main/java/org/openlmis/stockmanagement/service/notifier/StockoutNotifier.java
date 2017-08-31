@@ -127,7 +127,7 @@ public class StockoutNotifier extends BaseNotifier {
 
     List<StockCardLineItem> lineItems = stockCard.getLineItems();
     LocalDate stockoutDate = lineItems.get(lineItems.size() - 1).getOccurredDate();
-    valuesMap.put("stockoutDate", getDateTimeFormatter().format(stockoutDate));
+    valuesMap.put("stockoutDate", getDateFormatter().format(stockoutDate));
     long numberOfDaysOfStockout = getNumberOfDaysOfStockout(stockoutDate);
     valuesMap.put("numberOfDaysOfStockout", numberOfDaysOfStockout
         + (numberOfDaysOfStockout == 1 ? " day" : " days"));

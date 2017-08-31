@@ -45,7 +45,7 @@ public class BaseNotifier {
         .getMessage();
   }
 
-  protected DateTimeFormatter getDateTimeFormatter() {
+  protected DateTimeFormatter getDateFormatter() {
     Locale locale = LocaleContextHolder.getLocale();
 
     String datePattern = DateTimeFormatterBuilder.getLocalizedDateTimePattern(
