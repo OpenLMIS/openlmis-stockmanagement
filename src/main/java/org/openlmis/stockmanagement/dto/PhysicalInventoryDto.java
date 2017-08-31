@@ -27,7 +27,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,7 +41,7 @@ public class PhysicalInventoryDto {
   private UUID facilityId;
 
   @JsonFormat(shape = STRING)
-  private ZonedDateTime occurredDate;
+  private LocalDate occurredDate;
 
   private String signature;
   private String documentNumber;

@@ -15,8 +15,10 @@
 
 package org.openlmis.stockmanagement.domain.event;
 
+import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static javax.persistence.CascadeType.ALL;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -28,7 +30,7 @@ import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
 
 import lombok.Data;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -64,7 +66,8 @@ public class StockEventLineItem extends BaseEntity
   private Map<String, String> extraData;
 
   @Column(nullable = false)
-  private ZonedDateTime occurredDate;
+  @JsonFormat(shape = STRING, pattern = "yyyy-MM-dd")
+  private LocalDate occurredDate;
 
   private UUID reasonId;
   private String reasonFreeText;

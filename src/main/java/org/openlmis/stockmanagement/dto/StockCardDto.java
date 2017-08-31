@@ -35,7 +35,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,7 +55,7 @@ public class StockCardDto implements IdentifiableByOrderableLot {
   private LotDto lot;
 
   @JsonFormat(shape = STRING)
-  private ZonedDateTime lastUpdate;
+  private LocalDate lastUpdate;
 
   @JsonInclude(NON_NULL)
   private List<StockCardLineItemDto> lineItems;

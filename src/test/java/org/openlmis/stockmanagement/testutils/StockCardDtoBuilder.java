@@ -25,8 +25,7 @@ import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.util.Arrays;
 
 public class StockCardDtoBuilder {
@@ -47,7 +46,7 @@ public class StockCardDtoBuilder {
         .builder()
         .stockOnHand(1)
         .quantity(1)
-        .occurredDate(ZonedDateTime.of(2017, 2, 13, 4, 2, 18, 781000000, ZoneId.of("UTC")))
+        .occurredDate(LocalDate.of(2017, 2, 13))
         .reason(reason).build();
 
     StockCardLineItemDto lineItemDto = StockCardLineItemDto

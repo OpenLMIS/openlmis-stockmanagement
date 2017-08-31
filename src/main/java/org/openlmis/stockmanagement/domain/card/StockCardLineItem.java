@@ -43,6 +43,8 @@ import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.utils.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -106,9 +108,9 @@ public class StockCardLineItem extends BaseEntity {
   @JoinColumn()
   private Node destination;
 
-  @Column(nullable = false, columnDefinition = "timestamp")
-  @JsonFormat(shape = STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-  private ZonedDateTime occurredDate;
+  @Column(nullable = false)
+  @JsonFormat(shape = STRING, pattern = "yyyy-MM-dd")
+  private LocalDate occurredDate;
 
   @Column(nullable = false, columnDefinition = "timestamp")
   private ZonedDateTime processedDate;

@@ -51,8 +51,9 @@
       "description": "Remark of reason. Only allowed when reason id is present and the reason is configured by implementer or admin to allow free text."
     },
     "occurredDate": {
-      "type": "number",
-      "description": "The date and time(including time zone) when this event occurred"
+      "type": "string",
+      "format": "date",
+      "description": "The date when this event occurred"
     },
     "extraData": {
       "type": "object",

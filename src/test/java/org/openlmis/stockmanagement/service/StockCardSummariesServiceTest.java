@@ -53,6 +53,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -202,13 +203,13 @@ public class StockCardSummariesServiceTest {
         hasProperty(orderablePropertyName, is(orderable1)),
         hasProperty(idPropertyName, notNullValue()),
         hasProperty(stockOnHandPropertyName, notNullValue()),
-        hasProperty(lastUpdatePropertyName, is(of(2017, 3, 18, 15, 10, 31, 100, UTC))),
+        hasProperty(lastUpdatePropertyName, is(LocalDate.of(2017, 3, 18))),
         hasProperty(lineItemsPropertyName, nullValue()))));
     assertThat(cardDtos, hasItem(allOf(
         hasProperty(orderablePropertyName, is(orderable3)),
         hasProperty(idPropertyName, notNullValue()),
         hasProperty(stockOnHandPropertyName, notNullValue()),
-        hasProperty(lastUpdatePropertyName, is(of(2017, 3, 18, 15, 10, 31, 100, UTC))),
+        hasProperty(lastUpdatePropertyName, is(LocalDate.of(2017, 3, 18))),
         hasProperty(lineItemsPropertyName, nullValue()))));
   }
 
@@ -244,12 +245,12 @@ public class StockCardSummariesServiceTest {
     stockCard.setOrderableId(orderableId);
     stockCard.setId(cardId);
     StockCardLineItem lineItem1 = StockCardLineItem.builder()
-        .occurredDate(of(2017, 3, 17, 15, 10, 31, 100, UTC))
+        .occurredDate(LocalDate.of(2017, 3, 17))
         .processedDate(of(2017, 3, 17, 15, 10, 31, 100, UTC))
         .quantity(1)
         .build();
     StockCardLineItem lineItem2 = StockCardLineItem.builder()
-        .occurredDate(of(2017, 3, 18, 15, 10, 31, 100, UTC))
+        .occurredDate(LocalDate.of(2017, 3, 18))
         .processedDate(of(2017, 3, 18, 15, 10, 31, 100, UTC))
         .quantity(1)
         .build();

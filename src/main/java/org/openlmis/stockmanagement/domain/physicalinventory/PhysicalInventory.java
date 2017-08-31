@@ -22,7 +22,8 @@ import lombok.Data;
 import org.hibernate.annotations.LazyCollection;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
-import java.time.ZonedDateTime;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import javax.persistence.Column;
@@ -44,8 +45,7 @@ public class PhysicalInventory extends BaseEntity {
   @Column(nullable = false)
   private Boolean isDraft;
 
-  @Column(columnDefinition = "timestamp")
-  private ZonedDateTime occurredDate;
+  private LocalDate occurredDate;
 
   private String signature;
   private String documentNumber;

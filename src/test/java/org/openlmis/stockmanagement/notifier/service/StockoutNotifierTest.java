@@ -54,7 +54,7 @@ import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 import java.text.MessageFormat;
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.time.chrono.Chronology;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -132,7 +132,7 @@ public class StockoutNotifierTest {
   private StockCard stockCard = mock(StockCard.class);
   private StockCardLineItem stockCardLineItem = mock(StockCardLineItem.class);
 
-  private ZonedDateTime stockoutDate = ZonedDateTime.now().minusDays(5);
+  private LocalDate stockoutDate = LocalDate.now().minusDays(5);
 
   @Before
   public void setUp() {
@@ -208,7 +208,7 @@ public class StockoutNotifierTest {
 
   @Test
   public void notifyStockEditorsShouldNotifyWithCorrectMessageBodyForOneDayOfStockout() {
-    ZonedDateTime stockoutDate = ZonedDateTime.now().minusDays(1);
+    LocalDate stockoutDate = LocalDate.now().minusDays(1);
     when(stockCardLineItem.getOccurredDate()).thenReturn(stockoutDate);
 
     testNotificationBody(stockoutDate, "1 day");
@@ -229,7 +229,7 @@ public class StockoutNotifierTest {
     mockMessages();
   }
 
-  private void testNotificationBody(ZonedDateTime stockoutDate, String stockoutDays) {
+  private void testNotificationBody(LocalDate stockoutDate, String stockoutDays) {
     String urlToViewBinCard = MessageFormat.format(URL_TO_VIEW_BIN_CARD, stockCard.getId(),
         stockCard.getFacilityId(), stockCard.getProgramId(), "false");
     String urlToInitiateRequisition = MessageFormat.format(URL_TO_INITIATE_REQUISITION,
@@ -280,7 +280,7 @@ public class StockoutNotifierTest {
     Locale locale = LocaleContextHolder.getLocale();
 
     String datePattern = DateTimeFormatterBuilder.getLocalizedDateTimePattern(
-        FormatStyle.MEDIUM, FormatStyle.MEDIUM, Chronology.ofLocale(locale), locale);
+        FormatStyle.MEDIUM, null, Chronology.ofLocale(locale), locale);
     return DateTimeFormatter.ofPattern(datePattern);
   }
 }

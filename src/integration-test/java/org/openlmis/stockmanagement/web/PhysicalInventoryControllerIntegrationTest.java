@@ -39,7 +39,6 @@ import guru.nidi.ramltester.junit.RamlMatchers;
 import org.springframework.http.HttpHeaders;
 
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -209,7 +208,7 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
 
     inventory.setFacilityId(UUID.randomUUID());
     inventory.setProgramId(UUID.randomUUID());
-    inventory.setOccurredDate(ZonedDateTime.now());
+    inventory.setOccurredDate(LocalDate.now());
     inventory.setDocumentNumber("number");
     inventory.setIsStarter(false);
     inventory.setSignature("signature");

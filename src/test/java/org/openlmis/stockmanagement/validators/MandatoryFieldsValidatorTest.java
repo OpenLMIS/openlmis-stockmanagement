@@ -38,7 +38,7 @@ import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -102,7 +102,7 @@ public class MandatoryFieldsValidatorTest {
   @Test()
   public void stock_event_with_future_occurred_date_should_not_pass_validation() throws Exception {
     //given
-    expectOccurredDateException(ZonedDateTime.now().plusDays(1),
+    expectOccurredDateException(LocalDate.now().plusDays(1),
         ERROR_EVENT_OCCURRED_DATE_IN_FUTURE);
   }
 
@@ -172,7 +172,7 @@ public class MandatoryFieldsValidatorTest {
     mandatoryFieldsValidator.validate(stockEventDto);
   }
 
-  private void expectOccurredDateException(ZonedDateTime occurredDate, String errorKey) {
+  private void expectOccurredDateException(LocalDate occurredDate, String errorKey) {
     //given
     stockEventDto.getLineItems().get(0).setOccurredDate(occurredDate);
 

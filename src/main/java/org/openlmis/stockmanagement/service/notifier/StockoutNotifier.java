@@ -38,7 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import java.text.MessageFormat;
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.HashMap;
@@ -126,7 +126,7 @@ public class StockoutNotifier extends BaseNotifier {
     valuesMap.put("programName", getProgramName(stockCard.getProgramId()));
 
     List<StockCardLineItem> lineItems = stockCard.getLineItems();
-    ZonedDateTime stockoutDate = lineItems.get(lineItems.size() - 1).getOccurredDate();
+    LocalDate stockoutDate = lineItems.get(lineItems.size() - 1).getOccurredDate();
     valuesMap.put("stockoutDate", getDateTimeFormatter().format(stockoutDate));
     long numberOfDaysOfStockout = getNumberOfDaysOfStockout(stockoutDate);
     valuesMap.put("numberOfDaysOfStockout", numberOfDaysOfStockout
@@ -157,8 +157,8 @@ public class StockoutNotifier extends BaseNotifier {
     return programReferenceDataService.findOne(programId).getName();
   }
 
-  private long getNumberOfDaysOfStockout(ZonedDateTime stockoutDate) {
-    return ChronoUnit.DAYS.between(stockoutDate, ZonedDateTime.now());
+  private long getNumberOfDaysOfStockout(LocalDate stockoutDate) {
+    return ChronoUnit.DAYS.between(stockoutDate, LocalDate.now());
   }
 
   private String getUrlToViewBinCard(StockCard stockCard) {

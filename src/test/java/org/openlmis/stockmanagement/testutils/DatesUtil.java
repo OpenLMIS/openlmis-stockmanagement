@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.testutils;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
 import static java.time.ZoneId.of;
@@ -28,6 +29,15 @@ public class DatesUtil {
    */
   public static ZonedDateTime getBaseDateTime() {
     return ZonedDateTime.of(2017, 2, 14, 15, 20, 0, 0, of("UTC"));
+  }
+
+  /**
+   * Create a zoned date time.
+   *
+   * @return zoned date time.
+   */
+  public static LocalDate getBaseDate() {
+    return LocalDate.of(2017, 2, 14);
   }
 
   /**

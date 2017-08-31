@@ -97,7 +97,7 @@ public class StockCardControllerTest extends BaseWebTest {
                 + "'program':{'name':'HIV'},"
                 + "'orderable':{'productCode':'ABC01'},"
                 + "'lineItems':["
-                + "{'occurredDate':'2017-02-13T04:02:18.781+0000',"
+                + "{'occurredDate':'2017-02-13',"
                 + "'source':{'name':'HF1'},"
                 + "'destination':null,"
                 + "'reason':{'name':'Transfer In','reasonCategory':'ADJUSTMENT',"

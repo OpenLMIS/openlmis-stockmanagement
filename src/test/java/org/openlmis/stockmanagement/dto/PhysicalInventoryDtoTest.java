@@ -26,7 +26,7 @@ import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLi
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.util.Arrays;
 
 public class PhysicalInventoryDtoTest {
@@ -109,7 +109,7 @@ public class PhysicalInventoryDtoTest {
 
   private PhysicalInventoryDto createInventoryDto() {
     PhysicalInventoryDto piDto = new PhysicalInventoryDto();
-    piDto.setOccurredDate(ZonedDateTime.now());
+    piDto.setOccurredDate(LocalDate.now());
     piDto.setFacilityId(randomUUID());
     piDto.setProgramId(randomUUID());
     piDto.setSignature("test");

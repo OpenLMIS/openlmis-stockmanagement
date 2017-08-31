@@ -43,7 +43,10 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
-import java.time.ZoneId;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,7 +76,7 @@ public class QuantityValidatorTest {
     expectedException.expectMessage(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH);
 
     //given
-    ZonedDateTime firstDate = dateTimeFromYear(2015);
+    LocalDate firstDate = dateFromYear(2015);
 
     StockCard card = new StockCard();
     card.setLineItems(Arrays.asList(
@@ -128,7 +131,7 @@ public class QuantityValidatorTest {
   @Test
   public void shouldNotRejectWhenStockOnHandMatchesQuantityAndNoAdjustments() throws Exception {
     //given
-    ZonedDateTime firstDate = dateTimeFromYear(2015);
+    LocalDate firstDate = dateFromYear(2015);
 
     StockEventDto event = createDebitEventDto(firstDate.plusDays(1), 0);
     given(event.isPhysicalInventory()).willReturn(true);
@@ -140,7 +143,7 @@ public class QuantityValidatorTest {
   @Test
   public void shouldNotRejectWhenStockOnHandWithAdjustmentsMatchesQuantity() throws Exception {
     //given
-    ZonedDateTime firstDate = dateTimeFromYear(2015);
+    LocalDate firstDate = dateFromYear(2015);
 
     StockCardLineItem lineItem = createCreditLineItem(
         firstDate.plusDays(1), 10);
@@ -164,7 +167,7 @@ public class QuantityValidatorTest {
     expectedException.expectMessage(ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID);
 
     //given
-    ZonedDateTime firstDate = dateTimeFromYear(2015);
+    LocalDate firstDate = dateFromYear(2015);
 
     StockCardLineItem lineItem = createCreditLineItem(
         firstDate.plusDays(1), 15);
@@ -189,7 +192,7 @@ public class QuantityValidatorTest {
     expectedException.expectMessage(ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED);
 
     //given
-    ZonedDateTime firstDate = dateTimeFromYear(2015);
+    LocalDate firstDate = dateFromYear(2015);
 
     StockCardLineItem lineItem = createCreditLineItem(firstDate.plusDays(1), 15);
 
@@ -211,7 +214,7 @@ public class QuantityValidatorTest {
     expectedException.expectMessage(ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER);
 
     //given
-    ZonedDateTime firstDate = dateTimeFromYear(2015);
+    LocalDate firstDate = dateFromYear(2015);
 
     StockCardLineItem lineItem = createCreditLineItem(
         firstDate.plusDays(1), 15);
@@ -229,7 +232,7 @@ public class QuantityValidatorTest {
   }
 
   private StockCardLineItem generateLineItemWithAdjustments(
-      ZonedDateTime date, int quantity, int... adjustments) {
+      LocalDate date, int quantity, int... adjustments) {
     int absQuantity = Math.abs(quantity);
     StockCardLineItem item = quantity < 0
         ? createDebitLineItem(date, absQuantity) : createCreditLineItem(date, absQuantity);
@@ -243,33 +246,33 @@ public class QuantityValidatorTest {
     return item;
   }
 
-  private ZonedDateTime dateTimeFromYear(int year) {
-    return ZonedDateTime.of(year, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+  private LocalDate dateFromYear(int year) {
+    return LocalDate.of(year, 1, 1);
   }
   
-  private StockEventDto createDebitEventDto(ZonedDateTime dateTime, int quantity,
+  private StockEventDto createDebitEventDto(LocalDate date, int quantity,
                                             List<StockAdjustment> adjustments) {
     StockEventDto stockEventDto = createStockEventDto();
 
     stockEventDto.getLineItems().get(0).setDestinationId(randomUUID());
     stockEventDto.getLineItems().get(0).setQuantity(quantity);
-    stockEventDto.getLineItems().get(0).setOccurredDate(dateTime);
+    stockEventDto.getLineItems().get(0).setOccurredDate(date);
     stockEventDto.getLineItems().get(0).setSourceId(null);
     stockEventDto.getLineItems().get(0).setStockAdjustments(adjustments);
 
     return stockEventDto;
   }
 
-  private StockEventDto createDebitEventDto(ZonedDateTime dateTime, int quantity) {
-    return createDebitEventDto(dateTime, quantity, null);
+  private StockEventDto createDebitEventDto(LocalDate date, int quantity) {
+    return createDebitEventDto(date, quantity, null);
   }
 
-  private StockCardLineItem createDebitLineItem(ZonedDateTime dateTime, int quantity) {
+  private StockCardLineItem createDebitLineItem(LocalDate date, int quantity) {
     return StockCardLineItem
         .builder()
         .quantity(quantity)
-        .occurredDate(dateTime)
-        .processedDate(dateTime)
+        .occurredDate(date)
+        .processedDate(ZonedDateTime.of(date, LocalTime.NOON, ZoneOffset.UTC))
         .destination(new Node())
         .reason(StockCardLineItemReason.physicalDebit())
         .stockAdjustments(new ArrayList<>())
@@ -277,20 +280,20 @@ public class QuantityValidatorTest {
   }
 
   private StockCardLineItem createCreditLineItem(
-      ZonedDateTime dateTime, int quantity, List<StockAdjustment> adjustments) {
+      LocalDate date, int quantity, List<StockAdjustment> adjustments) {
     return StockCardLineItem
         .builder()
         .quantity(quantity)
-        .occurredDate(dateTime)
-        .processedDate(dateTime)
+        .occurredDate(date)
+        .processedDate(ZonedDateTime.of(date, LocalTime.NOON, ZoneOffset.UTC))
         .destination(new Node())
         .reason(StockCardLineItemReason.physicalCredit())
         .stockAdjustments(adjustments)
         .build();
   }
 
-  private StockCardLineItem createCreditLineItem(ZonedDateTime dateTime, int quantity) {
-    return createCreditLineItem(dateTime, quantity, new ArrayList<>());
+  private StockCardLineItem createCreditLineItem(LocalDate date, int quantity) {
+    return createCreditLineItem(date, quantity, new ArrayList<>());
   }
 
   private StockAdjustment createCreditAdjustment(int quantity) {

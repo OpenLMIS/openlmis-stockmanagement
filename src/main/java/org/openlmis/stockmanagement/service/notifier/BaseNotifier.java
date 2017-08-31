@@ -49,7 +49,7 @@ public class BaseNotifier {
     Locale locale = LocaleContextHolder.getLocale();
 
     String datePattern = DateTimeFormatterBuilder.getLocalizedDateTimePattern(
-        FormatStyle.MEDIUM, FormatStyle.MEDIUM, Chronology.ofLocale(locale), locale);
+        FormatStyle.MEDIUM, null, Chronology.ofLocale(locale), locale);
     return DateTimeFormatter.ofPattern(datePattern);
   }
 }

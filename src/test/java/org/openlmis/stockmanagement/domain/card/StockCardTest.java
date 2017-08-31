@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.testutils.DatesUtil.getBaseDate;
 import static org.openlmis.stockmanagement.testutils.DatesUtil.getBaseDateTime;
 import static org.openlmis.stockmanagement.testutils.DatesUtil.oneDayLater;
 import static org.openlmis.stockmanagement.testutils.DatesUtil.oneHourEarlier;
@@ -29,6 +30,7 @@ import static org.openlmis.stockmanagement.testutils.DatesUtil.oneHourLater;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
@@ -39,21 +41,22 @@ public class StockCardTest {
   public void should_reorder_line_items_by_occurred_then_by_processed_when_calculate_soh()
       throws Exception {
     //given
-    ZonedDateTime baseDate = getBaseDateTime();
+    LocalDate baseDate = getBaseDate();
+    ZonedDateTime baseDateTime = getBaseDateTime();
 
     StockCardLineItem lineItem1 = new StockCardLineItem();
     lineItem1.setOccurredDate(baseDate);
-    lineItem1.setProcessedDate(oneDayLater(baseDate));
+    lineItem1.setProcessedDate(oneDayLater(baseDateTime));
     lineItem1.setQuantity(1);
 
     StockCardLineItem lineItem2 = new StockCardLineItem();
     lineItem2.setOccurredDate(baseDate);
-    lineItem2.setProcessedDate(oneHourLater(baseDate));
+    lineItem2.setProcessedDate(oneHourLater(baseDateTime));
     lineItem2.setQuantity(1);
 
     StockCardLineItem lineItem3 = new StockCardLineItem();
-    lineItem3.setOccurredDate(oneHourEarlier(baseDate));
-    lineItem3.setProcessedDate(oneHourEarlier(baseDate));
+    lineItem3.setOccurredDate(baseDate.minusDays(1));
+    lineItem3.setProcessedDate(oneHourEarlier(baseDateTime));
     lineItem3.setQuantity(1);
 
     StockCard stockCard = new StockCard();
@@ -74,8 +77,8 @@ public class StockCardTest {
     StockCardLineItem lineItem1 = mock(StockCardLineItem.class);
     StockCardLineItem lineItem2 = mock(StockCardLineItem.class);
 
-    when(lineItem1.getOccurredDate()).thenReturn(getBaseDateTime());
-    when(lineItem2.getOccurredDate()).thenReturn(oneDayLater(getBaseDateTime()));
+    when(lineItem1.getOccurredDate()).thenReturn(getBaseDate());
+    when(lineItem2.getOccurredDate()).thenReturn(getBaseDate().plusDays(1));
     when(lineItem1.getStockOnHand()).thenReturn(123);
     when(lineItem2.getStockOnHand()).thenReturn(456);
 

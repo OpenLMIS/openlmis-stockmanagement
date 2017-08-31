@@ -53,7 +53,7 @@
     },
     "occurredDate": {
       "type": "string",
-      "format": "date-time"
+      "format": "date"
     },
     "extraData": {
       "type": "object",

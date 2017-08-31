@@ -37,7 +37,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import guru.nidi.ramltester.junit.RamlMatchers;
 import org.springframework.http.HttpHeaders;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -143,7 +143,7 @@ public class StockEventsControllerIntegrationTest extends BaseWebIntegrationTest
     item.setQuantity(10);
     item.setReasonId(UUID.randomUUID());
     item.setReasonFreeText("reason");
-    item.setOccurredDate(ZonedDateTime.now());
+    item.setOccurredDate(LocalDate.now());
     item.setExtraData(new HashMap<>());
     item.setStockAdjustments(new ArrayList<>());
 

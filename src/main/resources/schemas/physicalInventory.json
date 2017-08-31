@@ -13,7 +13,7 @@
     },
     "occurredDate": {
       "type": "string",
-      "format": "date-time",
+      "format": "date",
       "description": "Will be used as occurred date for all events created from this physical inventory."
     },
     "signature": {

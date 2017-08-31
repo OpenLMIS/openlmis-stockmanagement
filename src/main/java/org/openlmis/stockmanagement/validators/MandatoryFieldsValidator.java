@@ -31,7 +31,7 @@ import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.stereotype.Component;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -86,11 +86,11 @@ public class MandatoryFieldsValidator implements StockEventValidator {
   private void validateOccurredDate(StockEventDto stockEventDto) {
     if (stockEventDto.hasLineItems()) {
       stockEventDto.getLineItems().forEach(lineItem -> {
-        ZonedDateTime occurredDate = lineItem.getOccurredDate();
+        LocalDate occurredDate = lineItem.getOccurredDate();
         if (occurredDate == null) {
           throw new ValidationMessageException(
               new Message(ERROR_EVENT_OCCURRED_DATE_INVALID, occurredDate));
-        } else if (occurredDate.isAfter(ZonedDateTime.now())) {
+        } else if (occurredDate.isAfter(LocalDate.now())) {
           //If the following error happens and the users have not chosen a future date in their
           //browser, ask them to visit "https://time.is", and see if there is a time drift on
           //the client machine. If so, ask them to re-sync their computer's time setting.
