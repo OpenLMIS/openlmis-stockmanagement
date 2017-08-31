@@ -20,6 +20,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTME
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
@@ -138,8 +139,16 @@ public class QuantityValidator implements StockEventValidator {
 
         if (stockOnHand + adjustmentsQuantity != quantity) {
           LOGGER.warn(
-            "Stock on hand [{}] and adjustments [{}] = [{}] differ from current stock [{}]",
+              "Stock on hand [{}] and adjustments [{}] = [{}] differ from current stock [{}]",
                   stockOnHand, adjustmentsQuantity, stockOnHand + adjustmentsQuantity, quantity);
+
+          if (LOGGER.isDebugEnabled() && CollectionUtils.isNotEmpty(adjustments)) {
+            LOGGER.debug("Logging adjustments");
+            for (StockAdjustment adj : adjustments) {
+              LOGGER.debug("Adjustment {}: {}", adj.getReason().getName(), adj.getQuantity());
+            }
+          }
+
           throw new ValidationMessageException(
               ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER);
         }
