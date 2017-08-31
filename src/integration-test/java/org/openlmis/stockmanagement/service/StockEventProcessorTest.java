@@ -31,6 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.openlmis.stockmanagement.BaseTest;
 import org.openlmis.stockmanagement.domain.card.StockCard;
@@ -46,6 +47,9 @@ import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.test.context.junit4.SpringRunner;
 import java.util.Arrays;
 import java.util.UUID;
@@ -78,6 +82,12 @@ public class StockEventProcessorTest extends BaseTest {
   @Autowired
   private PhysicalInventoriesRepository physicalInventoriesRepository;
 
+  @Mock
+  private SecurityContext securityContext;
+
+  @Mock
+  private OAuth2Authentication authentication;
+
   private long cardSize;
   private long eventSize;
   private long lineItemSize;
@@ -97,6 +107,10 @@ public class StockEventProcessorTest extends BaseTest {
 
     when(contextBuilder.buildContext(any(StockEventDto.class)))
         .thenReturn(eventProcessContext);
+
+    SecurityContextHolder.setContext(securityContext);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.isClientOnly()).thenReturn(false);
   }
 
   @After
