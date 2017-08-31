@@ -30,6 +30,8 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.util.ArrayList;
@@ -47,6 +49,8 @@ import java.util.UUID;
  */
 @Component(value = "QuantityValidator")
 public class QuantityValidator implements StockEventValidator {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(QuantityValidator.class);
 
   @Autowired
   private StockCardLineItemReasonRepository reasonRepository;
@@ -133,6 +137,8 @@ public class QuantityValidator implements StockEventValidator {
         }
 
         if (stockOnHand + adjustmentsQuantity != quantity) {
+          LOGGER.warn("Stock on hand [{}] and current stock [{}] differ",
+                  stockOnHand + adjustmentsQuantity, quantity);
           throw new ValidationMessageException(
               ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER);
         }
