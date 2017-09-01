@@ -26,6 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -70,16 +72,20 @@ public class StockEventsController {
   }
 
   private void checkPermission(@RequestBody StockEventDto eventDto) {
-    UUID programId = eventDto.getProgramId();
-    UUID facilityId = eventDto.getFacilityId();
+    OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder.getContext()
+        .getAuthentication();
+    if (!authentication.isClientOnly()) {
+      UUID programId = eventDto.getProgramId();
+      UUID facilityId = eventDto.getFacilityId();
 
-    homeFacilityPermissionService.checkProgramSupported(programId);
-    if (eventDto.isPhysicalInventory()) {
-      permissionService.canEditPhysicalInventory(programId, facilityId);
-    } else {
-      //we check STOCK_ADJUST permission for both adjustment and issue/receive
-      //this may change in the future
-      permissionService.canAdjustStock(programId, facilityId);
+      homeFacilityPermissionService.checkProgramSupported(programId);
+      if (eventDto.isPhysicalInventory()) {
+        permissionService.canEditPhysicalInventory(programId, facilityId);
+      } else {
+        //we check STOCK_ADJUST permission for both adjustment and issue/receive
+        //this may change in the future
+        permissionService.canAdjustStock(programId, facilityId);
+      }
     }
   }
 

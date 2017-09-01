@@ -23,8 +23,6 @@ import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -43,13 +41,8 @@ public class HomeFacilityPermissionService {
    * @param facilityTypeId facility type id.
    */
   public void checkProgramAndFacilityType(UUID programId, UUID facilityTypeId) {
-    OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder.getContext()
-        .getAuthentication();
-
-    if (!authentication.isClientOnly()) {
-      isProgramSupported(programId);
-      checkFacilityTypeMatches(facilityTypeId);
-    }
+    checkProgramSupported(programId);
+    checkFacilityTypeMatches(facilityTypeId);
   }
 
   /**
@@ -58,15 +51,6 @@ public class HomeFacilityPermissionService {
    * @param programId the program's id.
    */
   public void checkProgramSupported(UUID programId) {
-    OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder.getContext()
-        .getAuthentication();
-
-    if (!authentication.isClientOnly()) {
-      isProgramSupported(programId);
-    }
-  }
-
-  private void isProgramSupported(UUID programId) {
     FacilityDto homeFacility = authenticationHelper.getCurrentUser().getHomeFacility();
     boolean isSupported = homeFacility != null
         && homeFacility.getSupportedPrograms().stream()
