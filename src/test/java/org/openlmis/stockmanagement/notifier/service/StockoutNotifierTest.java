@@ -174,7 +174,7 @@ public class StockoutNotifierTest {
   }
 
   @Test
-  public void notifyStockEditorsShouldNotNotifyWhenEditorIsNoActiveOrVerifier() {
+  public void notifyStockEditorsShouldNotNotifyWhenEditorIsNoActiveOrVerified() {
     when(editor.activeAndVerified()).thenReturn(false);
 
     stockoutNotifier.notifyStockEditors(stockCard);
@@ -183,7 +183,7 @@ public class StockoutNotifierTest {
   }
 
   @Test
-  public void notifyStockEditorsShouldNotNotifyWhenEditoDoesNotAllowNotify() {
+  public void notifyStockEditorsShouldNotNotifyWhenEditorDoesNotAllowNotify() {
     when(editor.allowNotify()).thenReturn(false);
 
     stockoutNotifier.notifyStockEditors(stockCard);

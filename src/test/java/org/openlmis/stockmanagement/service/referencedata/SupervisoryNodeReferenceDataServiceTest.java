@@ -76,7 +76,7 @@ public class SupervisoryNodeReferenceDataServiceTest {
   }
 
   @Test
-  public void shouldReturnFirstElementFounElementIfOneFound() {
+  public void shouldReturnFirstElementFoundElementIfOneFound() {
     SupervisoryNodeReferenceDataService spy = spy(new SupervisoryNodeReferenceDataService());
     doReturn(new DummyPage<>(Collections.singletonList(supervisoryNode)))
         .when(spy)
