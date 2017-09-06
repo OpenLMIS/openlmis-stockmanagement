@@ -1,5 +1,6 @@
 {
   "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema",
   "properties": {
     "openLmisAccessible": {
       "type": "boolean"
@@ -24,7 +25,7 @@
     "type": {
       "type": "object",
       "title": "FacilityType",
-      "$ref": "facilityType"
+      "$ref": "facilityType.json"
     },
     "supportedPrograms": {
       "type": "array",
@@ -69,7 +70,7 @@
     "geographicZone": {
       "type": "object",
       "title": "GeographicZone",
-      "$ref": "geographicZone"
+      "$ref": "geographicZone.json"
     },
     "name": {
       "type": "string"

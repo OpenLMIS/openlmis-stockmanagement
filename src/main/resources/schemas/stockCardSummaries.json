@@ -5,6 +5,6 @@
   "items": {
     "type": "object",
     "title": "Stock card",
-    "$ref": "stockCard"
+    "$ref": "stockCard.json"
   }
 }

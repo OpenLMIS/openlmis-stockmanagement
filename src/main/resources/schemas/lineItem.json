@@ -6,7 +6,7 @@
     "reason": {
       "type": "object",
       "title": "Reason",
-      "$ref": "reason"
+      "$ref": "reason.json"
     },
     "quantity": {
       "type": "integer"
@@ -17,7 +17,7 @@
       "items": {
         "type": "object",
         "title": "StockAdjustment",
-        "$ref": "stockAdjustment"
+        "$ref": "stockAdjustment.json"
       }
     },
     "signature": {
@@ -32,7 +32,7 @@
     "destination": {
       "type": "object",
       "title": "Destination",
-      "$ref": "facility"
+      "$ref": "facility.json"
     },
     "stockOnHand": {
       "type": "integer"
@@ -43,7 +43,7 @@
     "source": {
       "type": "object",
       "title": "Source",
-      "$ref": "facility"
+      "$ref": "facility.json"
     },
     "sourceFreeText": {
       "type": "string"

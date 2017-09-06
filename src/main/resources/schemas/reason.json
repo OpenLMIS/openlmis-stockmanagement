@@ -4,24 +4,19 @@
   "description": "The reason in line item.",
   "properties": {
     "isFreeTextAllowed": {
-      "type": "boolean",
-      "required": true
+      "type": "boolean"
     },
     "name": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "description": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "id": {
-      "type": "string",
-      "required": false
+      "type": "string"
     },
     "reasonType": {
       "type": "string",
-      "required": true,
       "enum": [
         "CREDIT",
         "DEBIT",
@@ -30,12 +25,18 @@
     },
     "reasonCategory": {
       "type": "string",
-      "required": true,
       "enum": [
         "TRANSFER",
         "ADJUSTMENT",
         "PHYSICAL_INVENTORY"
       ]
     }
-  }
+  },
+  "required": [
+    "isFreeTextAllowed",
+    "name",
+    "description",
+    "reasonType",
+    "reasonCategory"
+  ]
 }

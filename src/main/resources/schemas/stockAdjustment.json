@@ -10,13 +10,15 @@
       "type": "object",
       "title": "Reason",
       "description": "Indicates reason for an adjustment.",
-      "required": true,
       "$ref": "reason.json"
     },
     "quantity": {
       "type": "integer",
-      "description": "Indicates quantity for an adjustment",
-      "required": true
+      "description": "Indicates quantity for an adjustment"
     }
-  }
+  },
+  "required": [
+    "reason",
+    "quantity"
+  ]
 }

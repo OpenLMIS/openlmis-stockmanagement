@@ -9,34 +9,35 @@
       "items": {
         "type": "object",
         "title": "LineItem",
-        "$ref": "lineItem"
+        "$ref": "lineItem.json"
       }
     },
     "orderable": {
       "type": "object",
       "title": "Orderable",
-      "$ref": "orderable"
+      "$ref": "orderable.json"
     },
     "lot": {
       "type": "object",
       "title": "Lot",
-      "$ref": "lot"
+      "$ref": "lot.json"
     },
     "stockOnHand": {
       "type": "integer"
     },
     "lastUpdate": {
-      "type": "date"
+      "type": "string",
+      "format": "date"
     },
     "program": {
       "type": "object",
       "title": "Program",
-      "$ref": "program"
+      "$ref": "program.json"
     },
     "facility": {
       "type": "object",
       "title": "Facility",
-      "$ref": "facility"
+      "$ref": "facility.json"
     }
   }
 }

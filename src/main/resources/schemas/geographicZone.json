@@ -4,7 +4,7 @@
     "parent": {
       "type": "object",
       "title": "GeographicZone",
-      "$ref": "geographicZone"
+      "$ref": "geographicZone.json"
     },
     "code": {
       "type": "string"

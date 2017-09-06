@@ -4,12 +4,13 @@
   "description": "Organization",
   "properties": {
     "id": {
-      "type": "string",
-      "required": false
+      "type": "string"
     },
     "name": {
-      "type": "string",
-      "required": true
+      "type": "string"
     }
-  }
+  },
+  "required": [
+    "name"
+  ]
 }

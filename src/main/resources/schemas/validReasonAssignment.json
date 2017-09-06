@@ -12,7 +12,7 @@
     "reason": {
       "type": "object",
       "title": "Reason",
-      "$ref": "reason"
+      "$ref": "reason.json"
     }
   }
 }

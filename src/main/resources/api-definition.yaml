@@ -20,7 +20,7 @@ schemas:
   - reasons: |
        {
            "type": "array",
-           "items": { "type": "object", "$ref": "reason" }
+           "items": { "type": "object", "$ref": "schemas/reason.json" }
        }
   - geographicZone: !include schemas/geographicZone.json
   - stockCardTemplate: !include schemas/stockCardTemplate.json
@@ -33,19 +33,19 @@ schemas:
   - validSourceDestinations: |
         {
             "type": "array",
-            "items": {"type": "object", "$ref": "validSourceDestination"}
+            "items": {"type": "object", "$ref": "schemas/validSourceDestination.json"}
         }
   - validReasonAssignment: !include schemas/validReasonAssignment.json
   - validReasonAssignments: |
         {
             "type": "array",
-            "items": {"type": "object", "$ref": "validReasonAssignment"}
+            "items": {"type": "object", "$ref": "schemas/validReasonAssignment.json"}
         }
   - organization: !include schemas/organization.json
   - organizations: |
         {
             "type": "array",
-            "items": {"type": "object", "$ref": "organization"}
+            "items": {"type": "object", "$ref": "schemas/organization.json"}
         }
   - physicalInventoryLineItem: !include schemas/physicalInventoryLineItem.json
   - physicalInventory: !include schemas/physicalInventory.json
