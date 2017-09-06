@@ -16,8 +16,11 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.util.UUID.randomUUID;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +31,7 @@ import org.openlmis.stockmanagement.dto.referencedata.FacilityTypeDto;
 import org.openlmis.stockmanagement.dto.referencedata.SupportedProgramDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
+import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -35,9 +39,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-
-import java.util.Arrays;
-import java.util.UUID;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(SecurityContextHolder.class)
@@ -54,6 +55,15 @@ public class HomeFacilityPermissionServiceTest {
 
   @Mock
   private OAuth2Authentication authentication;
+  
+  @Mock
+  private FacilityReferenceDataService facilityService;
+  
+  private UUID homeFacilityId;
+  private UUID programId;
+  private UUID facilityTypeId;
+  private UserDto userDto;
+  private FacilityDto homeFacilityDto;
 
   @Before
   public void setUp() {
@@ -61,56 +71,50 @@ public class HomeFacilityPermissionServiceTest {
     PowerMockito.when(SecurityContextHolder.getContext()).thenReturn(securityContext);
     when(securityContext.getAuthentication()).thenReturn(authentication);
     when(authentication.isClientOnly()).thenReturn(false);
+    homeFacilityId = randomUUID();
+    programId = randomUUID();
+    facilityTypeId = randomUUID();
+    mockUserDto();
+    mockFacilityDto();
   }
 
   @Test(expected = PermissionMessageException.class)
   public void throw_exception_when_facility_type_and_home_facility_type_not_match()
       throws Exception {
-    UUID programId = randomUUID();
-    UUID facilityTypeId = randomUUID();
-
-    UserDto userDto = createUserDto(programId, facilityTypeId);
-    when(authenticationHelper.getCurrentUser()).thenReturn(userDto);
 
     homeFacilityPermissionService.checkProgramAndFacilityType(programId, randomUUID());
   }
 
   @Test(expected = PermissionMessageException.class)
   public void throw_exception_when_program_is_not_supported_by_the_facility() throws Exception {
-    UUID programId = randomUUID();
-    UUID facilityTypeId = randomUUID();
 
-    UserDto userDto = createUserDto(randomUUID(), facilityTypeId);
-    when(authenticationHelper.getCurrentUser()).thenReturn(userDto);
-
-    homeFacilityPermissionService.checkProgramAndFacilityType(programId, facilityTypeId);
+    homeFacilityPermissionService.checkProgramAndFacilityType(randomUUID(), facilityTypeId);
   }
 
   @Test
   public void check_program_facility_happy_path() throws Exception {
-    UUID programId = randomUUID();
-    UUID facilityTypeId = randomUUID();
-
-    UserDto userDto = createUserDto(programId, facilityTypeId);
-    when(authenticationHelper.getCurrentUser()).thenReturn(userDto);
 
     homeFacilityPermissionService.checkProgramAndFacilityType(programId, facilityTypeId);
   }
-
-  private UserDto createUserDto(UUID programId, UUID facilityTypeId) {
-    UserDto userDto = new UserDto();
-
-    FacilityDto homeFacility = new FacilityDto();
-    userDto.setHomeFacility(homeFacility);
-
-    FacilityTypeDto facilityTypeDto = new FacilityTypeDto();
-    facilityTypeDto.setId(facilityTypeId);
-    homeFacility.setType(facilityTypeDto);
+  
+  private void mockUserDto() {
+    userDto = mock(UserDto.class);
+    when(userDto.getHomeFacilityId()).thenReturn(homeFacilityId);
+    when(authenticationHelper.getCurrentUser()).thenReturn(userDto);
+  }
+  
+  private void mockFacilityDto() {
+    homeFacilityDto = mock(FacilityDto.class);
 
     SupportedProgramDto supportedProgramDto = new SupportedProgramDto();
     supportedProgramDto.setId(programId);
-    homeFacility.setSupportedPrograms(Arrays.asList(supportedProgramDto));
+    when(homeFacilityDto.getSupportedPrograms())
+        .thenReturn(Collections.singletonList(supportedProgramDto));
 
-    return userDto;
+    FacilityTypeDto facilityTypeDto = new FacilityTypeDto();
+    facilityTypeDto.setId(facilityTypeId);
+    when(homeFacilityDto.getType()).thenReturn(facilityTypeDto);
+
+    when(facilityService.findOne(homeFacilityId)).thenReturn(homeFacilityDto);
   }
 }

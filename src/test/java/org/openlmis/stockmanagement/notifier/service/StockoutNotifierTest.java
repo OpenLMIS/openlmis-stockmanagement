@@ -155,9 +155,7 @@ public class StockoutNotifierTest {
 
   @Test
   public void notifyStockEditorsShouldNotNotifyWhenFoundFacilityIsNotHomeFacility() {
-    FacilityDto mock = mock(FacilityDto.class);
-    when(mock.getId()).thenReturn(UUID.randomUUID());
-    when(editor.getHomeFacility()).thenReturn(mock);
+    when(editor.getHomeFacilityId()).thenReturn(UUID.randomUUID());
 
     stockoutNotifier.notifyStockEditors(stockCard);
 
@@ -254,7 +252,7 @@ public class StockoutNotifierTest {
     when(editor.activeAndVerified()).thenReturn(true);
     when(editor.getEmail()).thenReturn("editor@mail.com");
     when(editor.getUsername()).thenReturn("editor");
-    when(editor.getHomeFacility()).thenReturn(facility);
+    when(editor.getHomeFacilityId()).thenReturn(facilityId);
   }
 
   private void mockMessages() {
