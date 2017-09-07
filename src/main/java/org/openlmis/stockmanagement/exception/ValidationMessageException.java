@@ -23,6 +23,14 @@ public class ValidationMessageException extends BaseMessageException {
     super(message);
   }
 
+  public ValidationMessageException(Throwable cause, Message message) {
+    super(cause, message);
+  }
+
+  public ValidationMessageException(Throwable cause, String messageKey) {
+    super(cause, new Message(messageKey));
+  }
+
   public ValidationMessageException(String messageKey) {
     super(messageKey);
   }

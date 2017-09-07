@@ -17,13 +17,17 @@ package org.openlmis.stockmanagement.service;
 
 import static java.io.File.createTempFile;
 import static java.util.Collections.singletonList;
+import static org.apache.commons.io.FileUtils.writeByteArrayToFile;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_CLASS_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_GENERATE_REPORT_FAILED;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_IO;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_JASPER_FILE_CREATION;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REPORT_ID_NOT_FOUND;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperReport;
-
+import org.openlmis.stockmanagement.domain.JasperTemplate;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.exception.JasperReportViewException;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
@@ -32,25 +36,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.jasperreports.JasperReportsMultiFormatView;
 import org.springframework.web.servlet.view.jasperreports.JasperReportsPdfView;
-
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
+import javax.sql.DataSource;
 
 @Service
 public class JasperReportService {
+
+  private static final String CARD_REPORT_URL = "/jasperTemplates/stockCard.jrxml";
+  private static final String CARD_SUMMARY_REPORT_URL = "/jasperTemplates/stockCardSummary.jrxml";
+
   @Autowired
   private ApplicationContext appContext;
 
@@ -60,8 +68,8 @@ public class JasperReportService {
   @Autowired
   private StockCardSummariesService stockCardSummariesService;
 
-  private static final String CARD_REPORT_URL = "/jasperTemplates/stockCard.jrxml";
-  private static final String CARD_SUMMARY_REPORT_URL = "/jasperTemplates/stockCardSummary.jrxml";
+  @Autowired
+  private DataSource replicationDataSource;
 
   /**
    * Generate stock card report in PDF format.
@@ -108,35 +116,81 @@ public class JasperReportService {
     return generateReport(CARD_SUMMARY_REPORT_URL, params);
   }
 
+  /**
+   * Create Jasper Report View.
+   * Create Jasper Report (".jasper" file) from bytes from Template entity.
+   * Set 'Jasper' exporter parameters, JDBC data source, web application context, url to file.
+   *
+   * @param jasperTemplate template that will be used to create a view
+   * @return created jasper view.
+   * @throws JasperReportViewException if there will be any problem with creating the view.
+   */
+  public JasperReportsMultiFormatView getJasperReportsView(JasperTemplate jasperTemplate)
+      throws JasperReportViewException {
+    JasperReportsMultiFormatView jasperView = new JasperReportsMultiFormatView();
+    jasperView.setJdbcDataSource(replicationDataSource);
+    jasperView.setUrl(getReportUrlForReportData(jasperTemplate));
+    jasperView.setApplicationContext(appContext);
+    return jasperView;
+  }
+
   private long getCount(List<StockCardDto> stockCards, Function<StockCardDto, String> mapper) {
     return stockCards.stream().map(mapper).distinct().count();
   }
 
   private ModelAndView generateReport(String templateUrl, Map<String, Object> params) {
     JasperReportsPdfView view = new JasperReportsPdfView();
-    compileReport(view, templateUrl);
-
+    view.setUrl(compileReportAndGetUrl(templateUrl));
     view.setApplicationContext(appContext);
     return new ModelAndView(view, params);
   }
 
-  private void compileReport(JasperReportsPdfView view, String templateUrl) {
+  private String compileReportAndGetUrl(String templateUrl) {
     try (InputStream inputStream = getClass().getResourceAsStream(templateUrl)) {
-      File reportTempFile = createTempFile("report_temp", ".jasper");
       JasperReport report = JasperCompileManager.compileReport(inputStream);
 
-      try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-           ObjectOutputStream out = new ObjectOutputStream(bos)) {
-
-        out.writeObject(report);
-
-        Path path = Paths.get(reportTempFile.getAbsolutePath());
-        Files.write(path, bos.toByteArray());
-
-        view.setUrl(reportTempFile.toURI().toURL().toString());
-      }
+      return saveAndGetUrl(report, "report_temp");
     } catch (IOException | JRException ex) {
       throw new JasperReportViewException(new Message(ERROR_GENERATE_REPORT_FAILED), ex);
+    }
+  }
+
+  /**
+   * Create ".jasper" file with byte array from Template.
+   *
+   * @return Url to ".jasper" file.
+   */
+  private String getReportUrlForReportData(JasperTemplate jasperTemplate)
+      throws JasperReportViewException {
+
+    try (ObjectInputStream inputStream =
+             new ObjectInputStream(new ByteArrayInputStream(jasperTemplate.getData()))) {
+      JasperReport jasperReport = (JasperReport) inputStream.readObject();
+
+      return saveAndGetUrl(jasperReport, jasperTemplate.getName() + "_temp");
+    } catch (IOException ex) {
+      throw new JasperReportViewException(new Message((ERROR_IO), ex.getMessage()), ex);
+    } catch (ClassNotFoundException ex) {
+      throw new JasperReportViewException(
+          new Message(ERROR_CLASS_NOT_FOUND, JasperReport.class.getName()), ex);
+    }
+  }
+
+  private String saveAndGetUrl(JasperReport report, String templateName) throws IOException {
+    File reportTempFile;
+    try {
+      reportTempFile = createTempFile(templateName, ".jasper");
+    } catch (IOException ex) {
+      throw new JasperReportViewException(ERROR_JASPER_FILE_CREATION, ex);
+    }
+
+    try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+         ObjectOutputStream out = new ObjectOutputStream(bos)) {
+
+      out.writeObject(report);
+      writeByteArrayToFile(reportTempFile, bos.toByteArray());
+
+      return reportTempFile.toURI().toURL().toString();
     }
   }
 }

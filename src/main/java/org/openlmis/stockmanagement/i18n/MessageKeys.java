@@ -140,6 +140,11 @@ public abstract class MessageKeys {
   public static final String ERROR_EVENT_LOT_ORDERABLE_NOT_MATCH = EVENT_ERROR_PREFIX
       + ".lot.not.match.orderable";
 
+  //stock events
+  public static final String ERROR_STOCK_EVENT_NOT_FOUND =
+      ERROR_PREFIX + ".stockEvent.notFound";
+
+
   //reason configuration
   public static final String ERROR_REASON_ID_EMPTY = ERROR_PREFIX
       + ".reason.id.isEmpty";
@@ -240,16 +245,29 @@ public abstract class MessageKeys {
 
   public static final String ERROR_REPORT_ID_NOT_FOUND = ERROR_PREFIX + ".report.id.notFound";
 
+  public static final String ERROR_JASPER_FILE_CREATION = ERROR_PREFIX + ".jasper.file-creation";
+  public static final String ERROR_CLASS_NOT_FOUND = ERROR_PREFIX + ".class-not-found";
+  public static final String ERROR_REPORTING_TEMPLATE_NOT_FOUND_WITH_NAME = ERROR_PREFIX
+      + ".reporting.template.notFound.with.name";
+  public static final String ERROR_REPORTING_CREATION = ERROR_PREFIX + ".reporting.creation";
+  public static final String ERROR_REPORTING_FILE_MISSING = ERROR_PREFIX
+      + ".reporting.file.missing";
+  public static final String ERROR_REPORTING_FILE_INVALID = ERROR_PREFIX
+      + ".reporting.file.invalid";
+  public static final String ERROR_REPORTING_FILE_INCORRECT_TYPE = ERROR_PREFIX
+      + ".reporting.file.incorrectType";
+  public static final String ERROR_REPORTING_FILE_EMPTY = ERROR_PREFIX + ".reporting.file.empty";
 
   //notifications
-  public static final String EMAIL_ACTION_REQUIRED_SUBJECT
-      = SERVICE_PREFIX + ".email.stockout.subject";
-  public static final String EMAIL_ACTION_REQUIRED_CONTENT
-      = SERVICE_PREFIX + ".email.stockout.content";
+  public static final String EMAIL_ACTION_REQUIRED_SUBJECT =
+      SERVICE_PREFIX + ".email.stockout.subject";
+  public static final String EMAIL_ACTION_REQUIRED_CONTENT =
+      SERVICE_PREFIX + ".email.stockout.content";
 
   //server errors
   public static final String SERVER_ERROR_SHALLOW_COPY
       = SERVICE_PREFIX + ".error.shallowCopy";
+  public static final String ERROR_IO = ERROR_PREFIX + ".io";
 
   private MessageKeys() {
     throw new UnsupportedOperationException();

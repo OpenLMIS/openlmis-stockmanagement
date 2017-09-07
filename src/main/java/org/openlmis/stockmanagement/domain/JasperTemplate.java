@@ -13,29 +13,40 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.exception;
+package org.openlmis.stockmanagement.domain;
 
-import static java.lang.String.format;
 
-import org.openlmis.stockmanagement.utils.Message;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
-public class JasperReportViewException extends BaseMessageException {
+@Entity
+@Table(name = "jasper_templates")
+@NoArgsConstructor
+@AllArgsConstructor
+public class JasperTemplate extends BaseEntity {
 
-  private Throwable throwable;
+  @Column(columnDefinition = TEXT_COLUMN_DEFINITION, unique = true, nullable = false)
+  @Getter
+  @Setter
+  private String name;
 
-  public JasperReportViewException(Message message, Throwable throwable) {
-    super(throwable, message);
-    this.throwable = throwable;
-  }
+  @Column
+  @Getter
+  @Setter
+  private byte[] data;
 
-  public JasperReportViewException(String messageKey, Throwable throwable) {
-    super(throwable, new Message(messageKey));
-    this.throwable = throwable;
-  }
+  @Column(columnDefinition = TEXT_COLUMN_DEFINITION)
+  @Getter
+  @Setter
+  private String type;
 
-  @Override
-  public String getMessage() {
-    return format("message: %s, original error: %s.",
-        super.getMessage(), this.throwable.getMessage());
-  }
+  @Column(columnDefinition = TEXT_COLUMN_DEFINITION)
+  @Getter
+  @Setter
+  private String description;
 }

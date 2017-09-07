@@ -47,6 +47,7 @@ dependencies {
     compile "com.github.tomakehurst:wiremock:1.58"
     compile 'org.webjars:swagger-ui:2.2.6'
     compile 'org.apache.commons:commons-lang3:3.4'
+    compile 'commons-io:commons-io:2.5'
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
     compile "net.sf.jasperreports:jasperreports:6.3.0"
 
