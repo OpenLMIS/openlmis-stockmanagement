@@ -27,6 +27,11 @@ public class BaseMessageException extends RuntimeException {
     this.message = message;
   }
 
+  public BaseMessageException(Throwable cause, Message message) {
+    super(cause);
+    this.message = message;
+  }
+
   public BaseMessageException(String messageKey) {
     this.message = new Message(messageKey);
   }

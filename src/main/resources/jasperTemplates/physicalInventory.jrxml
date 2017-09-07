@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.4.0.final using JasperReports Library version 6.4.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="physicaInventory" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="BlankPage" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="20" bottomMargin="0" isFloatColumnFooter="true" whenResourceMissingType="Empty" uuid="a0a4e861-0726-422f-b3d5-54b1aefe96ce">
+	<import value="java.util.*"/>
+	<import value="java.text.*"/>
+	<parameter name="subreport" class="net.sf.jasperreports.engine.design.JasperDesign" isForPrompting="false"/>
+	<parameter name="event_id" class="java.lang.String" isForPrompting="false"/>
+	<queryString>
+		<![CDATA[select f.name as facility, u.username as username, occurreddate, processeddate from stockmanagement.stock_events se                                                                                                                                   
+INNER JOIN referencedata.facilities f on f.id = se.facilityid
+INNER JOIN referencedata.users u on u.id = se.userId
+INNER JOIN stockmanagement.stock_event_line_items sel on se.id = sel.stockeventid
+WHERE se.id = $P!{event_id}]]>
+	</queryString>
+	<field name="facility" class="java.lang.String"/>
+	<field name="occurreddate" class="java.sql.Date"/>
+	<field name="processeddate" class="java.sql.Timestamp"/>
+	<field name="username" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="100">
+			<staticText>
+				<reportElement x="20" y="10" width="800" height="20" uuid="8b895ad8-e565-41e4-87f4-fe70fea7b9f1"/>
+				<textElement verticalAlignment="Middle">
+					<font size="14" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Submitted Physical Inventory for Approval]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="20" y="40" width="800" height="10" uuid="a035b2b6-8c32-4db2-89fd-6444a109b1d7"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[MessageFormat.format("District: {0} ; Facility: {0}", $F{facility})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="20" y="60" width="800" height="10" uuid="ec47a93b-983c-447f-85cf-4775e800330a"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[MessageFormat.format("Physical inventory for date: {0}", new SimpleDateFormat("dd/MM/yyyy").format($F{occurreddate}))]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="20" y="80" width="800" height="10" uuid="08e7b43c-4f44-4e33-88f6-92324585772e"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[MessageFormat.format("Submitted into system on {0} at {1} by {2}",
+				 new SimpleDateFormat("dd/MM/yyyy").format(new Date($F{processeddate}.getTime())),
+				 new SimpleDateFormat("kk:mm").format(new Date($F{processeddate}.getTime())),
+				 $F{username})]]>
+				</textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<detail>
+		<band height="45">
+			<subreport>
+				<reportElement x="0" y="0" width="842" height="45" uuid="4475ef7c-a24a-4301-812c-f41869743f79"/>
+				<subreportParameter name="event_id">
+					<subreportParameterExpression><![CDATA[$P{event_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="REPORT_LOCALE">
+					<subreportParameterExpression><![CDATA[$P{REPORT_LOCALE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="REPORT_RESOURCE_BUNDLE">
+					<subreportParameterExpression><![CDATA[$P{REPORT_RESOURCE_BUNDLE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[JasperCompileManager.compileReport($P{subreport})]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="30">
+			<textField>
+				<reportElement x="750" y="10" width="45" height="10" uuid="7510e277-8abf-4ec0-b306-b88cfd265a15"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="800" y="10" width="30" height="10" uuid="5ded44a2-6687-46fd-b29e-205ba278ca50"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["of " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement positionType="Float" x="10" y="10" width="80" height="10" uuid="2dd094dc-e4b5-43c0-89ab-02f2dda79bb5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

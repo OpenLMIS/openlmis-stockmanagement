@@ -49,6 +49,8 @@ public class PermissionService {
 
   public static final String STOCK_CARDS_VIEW = "STOCK_CARDS_VIEW";
 
+  static final String SYSTEM_SETTINGS_MANAGE = "SYSTEM_SETTINGS_MANAGE";
+
   @Autowired
   private AuthenticationHelper authenticationHelper;
 
@@ -150,6 +152,10 @@ public class PermissionService {
    */
   public void canViewValidDestinations(UUID program, UUID facilityType) {
     canViewStockAssignable(STOCK_DESTINATIONS_MANAGE, program, facilityType);
+  }
+
+  public void canManageSystemSettings() {
+    getRightResult(SYSTEM_SETTINGS_MANAGE, null, null, null);
   }
 
   private void hasPermission(String rightName, UUID program, UUID facility, UUID warehouse) {

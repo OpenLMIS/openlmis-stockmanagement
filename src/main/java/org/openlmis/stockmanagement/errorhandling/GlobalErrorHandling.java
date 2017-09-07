@@ -56,13 +56,27 @@ public class GlobalErrorHandling extends AbstractErrorHandling {
     return logErrorAndRespond("Error fetching from reference data", ex);
   }
 
+  /**
+   * Handles Message exceptions and returns status 500.
+   *
+   * @param ex the JasperReportViewException to handle
+   * @return the error response for the user
+   */
   @ExceptionHandler(JasperReportViewException.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   @ResponseBody
-  public ErrorResponse handleJasperReportException(JasperReportViewException ex) {
-    return logErrorAndRespond("Error generating jasper report failed", ex);
+  public Message.LocalizedMessage handleJasperReportException(JasperReportViewException ex) {
+    logger.error("Error generating jasper report failed", ex);
+
+    return getLocalizedMessage(ex);
   }
 
+  /**
+   * Handles Message exceptions and returns status 404 NOT_FOUND.
+   *
+   * @param ex the ResourceNotFoundException to handle
+   * @return the error response for the user
+   */
   @ExceptionHandler(ResourceNotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
   @ResponseBody

@@ -13,29 +13,17 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.exception;
+package org.openlmis.stockmanagement.repository;
 
-import static java.lang.String.format;
+import org.openlmis.stockmanagement.domain.JasperTemplate;
+import org.openlmis.stockmanagement.repository.custom.TemplateRepositoryCustom;
+import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
+import java.util.UUID;
 
-import org.openlmis.stockmanagement.utils.Message;
+public interface TemplateRepository
+    extends PagingAndSortingRepository<JasperTemplate, UUID>, TemplateRepositoryCustom {
 
-public class JasperReportViewException extends BaseMessageException {
+  JasperTemplate findByName(@Param("name") String name);
 
-  private Throwable throwable;
-
-  public JasperReportViewException(Message message, Throwable throwable) {
-    super(throwable, message);
-    this.throwable = throwable;
-  }
-
-  public JasperReportViewException(String messageKey, Throwable throwable) {
-    super(throwable, new Message(messageKey));
-    this.throwable = throwable;
-  }
-
-  @Override
-  public String getMessage() {
-    return format("message: %s, original error: %s.",
-        super.getMessage(), this.throwable.getMessage());
-  }
 }

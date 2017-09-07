@@ -13,29 +13,21 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.exception;
+package org.openlmis.stockmanagement.repository.custom.impl;
 
-import static java.lang.String.format;
+import org.openlmis.stockmanagement.domain.JasperTemplate;
+import org.openlmis.stockmanagement.repository.custom.TemplateRepositoryCustom;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
-import org.openlmis.stockmanagement.utils.Message;
+public class TemplateRepositoryImpl implements TemplateRepositoryCustom {
 
-public class JasperReportViewException extends BaseMessageException {
-
-  private Throwable throwable;
-
-  public JasperReportViewException(Message message, Throwable throwable) {
-    super(throwable, message);
-    this.throwable = throwable;
-  }
-
-  public JasperReportViewException(String messageKey, Throwable throwable) {
-    super(throwable, new Message(messageKey));
-    this.throwable = throwable;
-  }
+  @PersistenceContext
+  private EntityManager entityManager;
 
   @Override
-  public String getMessage() {
-    return format("message: %s, original error: %s.",
-        super.getMessage(), this.throwable.getMessage());
+  public void removeAndFlush(JasperTemplate template) {
+    entityManager.remove(template);
+    entityManager.flush();
   }
 }
