@@ -6,11 +6,13 @@
 	<parameter name="subreport" class="net.sf.jasperreports.engine.design.JasperDesign" isForPrompting="false"/>
 	<parameter name="event_id" class="java.lang.String" isForPrompting="false"/>
 	<queryString>
-		<![CDATA[select f.name as facility, u.username as username, occurreddate, processeddate from stockmanagement.stock_events se                                                                                                                                   
+		<![CDATA[select f.name as facility, u.username as username, sel.occurreddate, se.processeddate from stockmanagement.stock_events se                                                                                                                                   
 INNER JOIN referencedata.facilities f on f.id = se.facilityid
 INNER JOIN referencedata.users u on u.id = se.userId
 INNER JOIN stockmanagement.stock_event_line_items sel on se.id = sel.stockeventid
-WHERE se.id = $P!{event_id}]]>
+WHERE se.id = $P!{event_id}
+ORDER BY sel.occurreddate DESC
+FETCH FIRST 1 ROWS ONLY]]>
 	</queryString>
 	<field name="facility" class="java.lang.String"/>
 	<field name="occurreddate" class="java.sql.Date"/>
