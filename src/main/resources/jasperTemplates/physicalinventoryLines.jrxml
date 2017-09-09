@@ -227,7 +227,7 @@
 				<textElement>
 					<font size="6"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{extradata}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[(new org.json.JSONObject($F{extradata}).getString("vvmStatus")) == "null" ? "" : new org.json.JSONObject($F{extradata}).getString("vvmStatus")]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Group" evaluationGroup="productGroup" isBlankWhenNull="true">
 				<reportElement x="520" y="0" width="102" height="20" uuid="547fa08c-24e6-4617-aa94-09384a952a19" printWhenGroupChanges="productGroup">
