@@ -6,18 +6,25 @@
 	<parameter name="subreport" class="net.sf.jasperreports.engine.design.JasperDesign" isForPrompting="false"/>
 	<parameter name="event_id" class="java.lang.String" isForPrompting="false"/>
 	<queryString>
-		<![CDATA[select f.name as facility, u.username as username, sel.occurreddate, se.processeddate from stockmanagement.stock_events se                                                                                                                                   
-INNER JOIN referencedata.facilities f on f.id = se.facilityid
+		<![CDATA[select f.name as facility, p.name as program, u.username as username, sel.occurreddate, se.processeddate, gzp.name as geozonename, gl.code as geolevel from stockmanagement.stock_events se
 INNER JOIN referencedata.users u on u.id = se.userId
+INNER JOIN referencedata.facilities f on f.id = se.facilityid
+INNER JOIN referencedata.programs p on p.id = se.programid
+INNER JOIN referencedata.geographic_zones gz on gz.id = f.geographiczoneid
+INNER JOIN referencedata.geographic_zones gzp on gzp.id = gz.parentid
+INNER JOIN referencedata.geographic_levels gl on gl.id = gzp.levelid
 INNER JOIN stockmanagement.stock_event_line_items sel on se.id = sel.stockeventid
 WHERE se.id = $P!{event_id}
 ORDER BY sel.occurreddate DESC
 FETCH FIRST 1 ROWS ONLY]]>
 	</queryString>
 	<field name="facility" class="java.lang.String"/>
+	<field name="program" class="java.lang.String"/>
 	<field name="occurreddate" class="java.sql.Date"/>
 	<field name="processeddate" class="java.sql.Timestamp"/>
 	<field name="username" class="java.lang.String"/>
+	<field name="geozonename" class="java.lang.String"/>
+	<field name="geolevel" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -35,7 +42,7 @@ FETCH FIRST 1 ROWS ONLY]]>
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[MessageFormat.format("District: {0} ; Facility: {0}", $F{facility})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[MessageFormat.format("{0}: {1} ; Facility: {2} ; Program: {3}", $F{geolevel}, $F{geozonename}, $F{facility}, $F{program})]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="20" y="60" width="800" height="10" uuid="ec47a93b-983c-447f-85cf-4775e800330a"/>
