@@ -4,20 +4,24 @@
 	<import value="java.util.*"/>
 	<import value="java.text.*"/>
 	<parameter name="subreport" class="net.sf.jasperreports.engine.design.JasperDesign" isForPrompting="false"/>
-	<parameter name="event_id" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="pi_id" class="java.lang.String" isForPrompting="false"/>
 	<queryString>
-		<![CDATA[select f.name as facility, p.name as program, u.username as username, sel.occurreddate, se.processeddate, gzp.name as geozonename, gl.code as geolevel from stockmanagement.stock_events se
-INNER JOIN referencedata.users u on u.id = se.userId
-INNER JOIN referencedata.facilities f on f.id = se.facilityid
-INNER JOIN referencedata.programs p on p.id = se.programid
-INNER JOIN referencedata.geographic_zones gz on gz.id = f.geographiczoneid
-INNER JOIN referencedata.geographic_zones gzp on gzp.id = gz.parentid
-INNER JOIN referencedata.geographic_levels gl on gl.id = gzp.levelid
-INNER JOIN stockmanagement.stock_event_line_items sel on se.id = sel.stockeventid
-WHERE se.id = $P!{event_id}
-ORDER BY sel.occurreddate DESC
-FETCH FIRST 1 ROWS ONLY]]>
+		<![CDATA[select f.name as facility, p.name as program, u.username as username, sel.occurreddate, se.processeddate, gzp.name as geozonename, gl.code as geolevel, se.id as event_id
+			from stockmanagement.physical_inventories pi
+			INNER JOIN stockmanagement.stock_events se on se.id = pi.stockeventid
+			INNER JOIN referencedata.users u on u.id = se.userId
+			INNER JOIN referencedata.facilities f on f.id = se.facilityid
+			INNER JOIN referencedata.programs p on p.id = se.programid
+			INNER JOIN referencedata.geographic_zones gz on gz.id = f.geographiczoneid
+			INNER JOIN referencedata.geographic_zones gzp on gzp.id = gz.parentid
+			INNER JOIN referencedata.geographic_levels gl on gl.id = gzp.levelid
+			INNER JOIN stockmanagement.stock_event_line_items sel on se.id = sel.stockeventid
+			WHERE pi.id = $P!{pi_id}
+			ORDER BY sel.occurreddate DESC
+			FETCH FIRST 1 ROWS ONLY
+		]]>
 	</queryString>
+	<field name="event_id" class="java.lang.String"/>
 	<field name="facility" class="java.lang.String"/>
 	<field name="program" class="java.lang.String"/>
 	<field name="occurreddate" class="java.sql.Date"/>
@@ -69,7 +73,7 @@ FETCH FIRST 1 ROWS ONLY]]>
 			<subreport>
 				<reportElement x="0" y="0" width="842" height="45" uuid="4475ef7c-a24a-4301-812c-f41869743f79"/>
 				<subreportParameter name="event_id">
-					<subreportParameterExpression><![CDATA[$P{event_id}]]></subreportParameterExpression>
+					<subreportParameterExpression><![CDATA["'"+$F{event_id}+"'"]]></subreportParameterExpression>
 				</subreportParameter>
 				<subreportParameter name="REPORT_LOCALE">
 					<subreportParameterExpression><![CDATA[$P{REPORT_LOCALE}]]></subreportParameterExpression>

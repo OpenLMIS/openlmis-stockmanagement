@@ -15,25 +15,14 @@
 
 package org.openlmis.stockmanagement.web;
 
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REPORTING_TEMPLATE_NOT_FOUND_WITH_NAME;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-import org.openlmis.stockmanagement.domain.JasperTemplate;
-import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventResponseDto;
-import org.openlmis.stockmanagement.exception.JasperReportViewException;
-import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.i18n.MessageKeys;
-import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.service.HomeFacilityPermissionService;
-import org.openlmis.stockmanagement.service.JasperReportService;
-import org.openlmis.stockmanagement.service.JasperTemplateService;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockEventProcessor;
-import org.openlmis.stockmanagement.util.ReportUtils;
-import org.openlmis.stockmanagement.utils.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,15 +30,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.jasperreports.JasperReportsMultiFormatView;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -60,7 +44,6 @@ import java.util.UUID;
 public class StockEventsController {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StockEventsController.class);
-  private static final String PRINT_PI = "Print PI";
 
   @Autowired
   private PermissionService permissionService;
@@ -70,15 +53,6 @@ public class StockEventsController {
 
   @Autowired
   private StockEventProcessor stockEventProcessor;
-
-  @Autowired
-  private StockEventsRepository stockEventsRepository;
-
-  @Autowired
-  private JasperReportService jasperReportService;
-
-  @Autowired
-  private JasperTemplateService templateService;
 
   /**
    * Create stock event.
@@ -99,31 +73,6 @@ public class StockEventsController {
     return stockEventProcessor.process(eventDto);
   }
 
-  /**
-   * Print out physical inventory as a PDF file.
-   *
-   * @param id The UUID of the stock event to print
-   * @return ResponseEntity with the "#200 OK" HTTP response status and PDF file on success, or
-   *     ResponseEntity containing the error description status.
-   */
-  @RequestMapping(value = "/stockEvents/{id}/print", method = RequestMethod.GET)
-  @ResponseBody
-  public ModelAndView print(@PathVariable("id") UUID id)
-      throws JasperReportViewException {
-    checkPermission(id);
-
-    JasperTemplate printTemplate = templateService.getByName(PRINT_PI);
-    if (printTemplate == null) {
-      throw new ValidationMessageException(
-        new Message(ERROR_REPORTING_TEMPLATE_NOT_FOUND_WITH_NAME, PRINT_PI));
-    }
-
-    JasperReportsMultiFormatView jasperView =
-        jasperReportService.getJasperReportsView(printTemplate);
-
-    return new ModelAndView(jasperView, getParams(id));
-  }
-
   private void checkPermission(StockEventDto eventDto) {
     OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder.getContext()
         .getAuthentication();
@@ -140,26 +89,6 @@ public class StockEventsController {
         permissionService.canAdjustStock(programId, facilityId);
       }
     }
-  }
-
-  private void checkPermission(UUID id) {
-    StockEvent stockEvent = stockEventsRepository.findOne(id);
-    if (stockEvent == null) {
-      throw new ValidationMessageException(
-          new Message(MessageKeys.ERROR_STOCK_EVENT_NOT_FOUND, id));
-    }
-    permissionService
-        .canEditPhysicalInventory(stockEvent.getProgramId(), stockEvent.getFacilityId());
-  }
-
-  private Map<String, Object> getParams(UUID eventId) {
-    Map<String, Object> params = ReportUtils.createParametersMap();
-    String formatId = "'" + eventId + "'";
-    params.put("event_id", formatId);
-    params.put("subreport",
-        jasperReportService.createCustomizedPhysicalInventoryLineSubreport());
-
-    return params;
   }
 
 }

@@ -140,11 +140,6 @@ public abstract class MessageKeys {
   public static final String ERROR_EVENT_LOT_ORDERABLE_NOT_MATCH = EVENT_ERROR_PREFIX
       + ".lot.not.match.orderable";
 
-  //stock events
-  public static final String ERROR_STOCK_EVENT_NOT_FOUND =
-      ERROR_PREFIX + ".stockEvent.notFound";
-
-
   //reason configuration
   public static final String ERROR_REASON_ID_EMPTY = ERROR_PREFIX
       + ".reason.id.isEmpty";
@@ -239,6 +234,9 @@ public abstract class MessageKeys {
 
   public static final String ERROR_PHYSICAL_INVENTORY_DISCREPANCY_QUANTITY_NOT_PROVIDED =
       PHYSICAL_INVENTORY_ERROR_PREFIX + ".lineItems.stockAdjustments.quantity.notProvided";
+
+  public static final String ERROR_PHYSICAL_INVENTORY_NOT_FOUND =
+      PHYSICAL_INVENTORY_ERROR_PREFIX + ".notFound";
 
   //report
   public static final String ERROR_GENERATE_REPORT_FAILED = ERROR_PREFIX + ".generateReport.failed";

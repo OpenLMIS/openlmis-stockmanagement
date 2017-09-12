@@ -222,28 +222,6 @@ traits:
             body:
               application/json:
                   schema: localizedMessage
-      /{id}/print:
-        uriParameters:
-            id:
-                displayName: eventId
-                type: string
-                required: true
-                repeat: false
-        get:
-            is: [ secured ]
-            description: Print Physical Inventory to a pdf file.
-            responses:
-                200:
-                    body:
-                      application/pdf:
-                404:
-                    body:
-                      application/json:
-                        schema: localizedMessage
-                403:
-                    body:
-                      application/json:
-                        schema: localizedMessage
 
   /stockCardSummaries:
       get:
@@ -848,6 +826,34 @@ traits:
               body:
                 application/json:
                     schema: localizedMessage
+      /{id}:
+        uriParameters:
+            id:
+                displayName: physicalInventoryId
+                type: string
+                required: true
+                repeat: false
+        get:
+            is: [ secured ]
+            description: Print Physical Inventory to a pdf file.
+
+            queryParameters:
+              format:
+                required: true
+
+            responses:
+                200:
+                    body:
+                      application/pdf:
+                404:
+                    body:
+                      application/json:
+                        schema: localizedMessage
+                403:
+                    body:
+                      application/json:
+                        schema: localizedMessage
+
   /physicalInventoryTemplates:
       displayName: Physical Inventory report template.
       post:
