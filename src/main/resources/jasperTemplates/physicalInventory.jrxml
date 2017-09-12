@@ -67,7 +67,7 @@
 		<band height="45">
 			<subreport>
 				<reportElement x="0" y="0" width="842" height="45" uuid="4475ef7c-a24a-4301-812c-f41869743f79"/>
-				<subreportParameter name="event_id">
+				<subreportParameter name="pi_id">
 					<subreportParameterExpression><![CDATA[$P{pi_id}]]></subreportParameterExpression>
 				</subreportParameter>
 				<subreportParameter name="REPORT_LOCALE">
