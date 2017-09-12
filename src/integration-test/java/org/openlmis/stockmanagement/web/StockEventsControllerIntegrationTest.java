@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventResponseDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.HomeFacilityPermissionService;
 import org.openlmis.stockmanagement.service.StockEventProcessor;
@@ -73,13 +74,14 @@ public class StockEventsControllerIntegrationTest extends BaseWebIntegrationTest
     mockPassValidation();
 
     StockEventDto stockEvent = generateStockEvent();
-    UUID expectedId = UUID.randomUUID();
 
+    StockEventResponseDto response =
+        new StockEventResponseDto(UUID.randomUUID(), UUID.randomUUID());
     when(stockEventProcessor.process(any(StockEventDto.class)))
-        .thenReturn(expectedId);
+        .thenReturn(response);
 
     // when
-    UUID result = restAssured.given()
+    StockEventResponseDto result = restAssured.given()
         .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
         .contentType(APPLICATION_JSON)
         .body(stockEvent)
@@ -87,10 +89,10 @@ public class StockEventsControllerIntegrationTest extends BaseWebIntegrationTest
         .post(RESOURCE_URL)
         .then()
         .statusCode(201)
-        .extract().as(UUID.class);
+        .extract().as(StockEventResponseDto.class);
 
     // then
-    assertEquals(expectedId, result);
+    assertEquals(response, result);
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 

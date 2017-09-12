@@ -50,7 +50,7 @@ public class PhysicalInventoryService {
    * @throws IllegalAccessException IllegalAccessException.
    * @throws InstantiationException InstantiationException.
    */
-  public void submitPhysicalInventory(PhysicalInventoryDto inventoryDto, UUID eventId)
+  public PhysicalInventory submitPhysicalInventory(PhysicalInventoryDto inventoryDto, UUID eventId)
       throws IllegalAccessException, InstantiationException {
     LOGGER.info("submit physical inventory");
     deleteExistingDraft(inventoryDto);
@@ -58,7 +58,7 @@ public class PhysicalInventoryService {
     PhysicalInventory inventory = inventoryDto.toPhysicalInventoryForSubmit();
     inventory.setStockEvent(fromId(eventId, StockEvent.class));
 
-    physicalInventoriesRepository.save(inventory);
+    return physicalInventoriesRepository.save(inventory);
   }
 
   /**

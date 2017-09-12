@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "properties": {
+    "stockEventId": {
+      "type": "string",
+      "title": "stockEventId"
+    },
+    "physicalInventoryId": {
+      "type": "string",
+      "title": "physicalInventoryId"
+    }
+  }
+}
