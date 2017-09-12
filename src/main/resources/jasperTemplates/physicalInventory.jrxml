@@ -6,15 +6,12 @@
 	<parameter name="subreport" class="net.sf.jasperreports.engine.design.JasperDesign" isForPrompting="false"/>
 	<parameter name="pi_id" class="java.lang.String" isForPrompting="false"/>
 	<queryString>
-		<![CDATA[select f.name as facility, p.name as program, u.username as username, sel.occurreddate, se.processeddate, gzp.name as geozonename, gl.code as geolevel, se.id as event_id
+		<![CDATA[select f.name as facility, p.name as program, u.username as username, sel.occurreddate, se.processeddate, se.id as event_id
 			from stockmanagement.physical_inventories pi
 			INNER JOIN stockmanagement.stock_events se on se.id = pi.stockeventid
 			INNER JOIN referencedata.users u on u.id = se.userId
 			INNER JOIN referencedata.facilities f on f.id = se.facilityid
 			INNER JOIN referencedata.programs p on p.id = se.programid
-			INNER JOIN referencedata.geographic_zones gz on gz.id = f.geographiczoneid
-			INNER JOIN referencedata.geographic_zones gzp on gzp.id = gz.parentid
-			INNER JOIN referencedata.geographic_levels gl on gl.id = gzp.levelid
 			INNER JOIN stockmanagement.stock_event_line_items sel on se.id = sel.stockeventid
 			WHERE pi.id = $P!{pi_id}
 			ORDER BY sel.occurreddate DESC
@@ -27,38 +24,36 @@
 	<field name="occurreddate" class="java.sql.Date"/>
 	<field name="processeddate" class="java.sql.Timestamp"/>
 	<field name="username" class="java.lang.String"/>
-	<field name="geozonename" class="java.lang.String"/>
-	<field name="geolevel" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="100">
+		<band height="115">
 			<staticText>
 				<reportElement x="20" y="10" width="800" height="20" uuid="8b895ad8-e565-41e4-87f4-fe70fea7b9f1"/>
 				<textElement verticalAlignment="Middle">
-					<font size="14" isBold="false"/>
+					<font size="16" pdfFontName="Helvetica-Bold" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Submitted Physical Inventory for Approval]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="20" y="40" width="800" height="10" uuid="a035b2b6-8c32-4db2-89fd-6444a109b1d7"/>
+				<reportElement x="20" y="40" width="800" height="20" uuid="ec47a93b-983c-447f-85cf-4775e800330a"/>
 				<textElement>
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[MessageFormat.format("{0}: {1} ; Facility: {2} ; Program: {3}", $F{geolevel}, $F{geozonename}, $F{facility}, $F{program})]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="20" y="60" width="800" height="10" uuid="ec47a93b-983c-447f-85cf-4775e800330a"/>
-				<textElement>
-					<font size="8"/>
+					<font size="13" pdfFontName="Helvetica-Bold" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[MessageFormat.format("Physical inventory for date: {0}", new SimpleDateFormat("dd/MM/yyyy").format($F{occurreddate}))]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="20" y="80" width="800" height="10" uuid="08e7b43c-4f44-4e33-88f6-92324585772e"/>
+				<reportElement x="20" y="65" width="800" height="15" uuid="a035b2b6-8c32-4db2-89fd-6444a109b1d7"/>
 				<textElement>
-					<font size="8"/>
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[MessageFormat.format("Facility: {0} ; Program: {1}", $F{facility}, $F{program})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="20" y="80" width="800" height="15" uuid="08e7b43c-4f44-4e33-88f6-92324585772e"/>
+				<textElement>
+					<font size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[MessageFormat.format("Submitted into system on {0} at {1} by {2}",
 				 new SimpleDateFormat("dd/MM/yyyy").format(new Date($F{processeddate}.getTime())),
@@ -73,7 +68,7 @@
 			<subreport>
 				<reportElement x="0" y="0" width="842" height="45" uuid="4475ef7c-a24a-4301-812c-f41869743f79"/>
 				<subreportParameter name="event_id">
-					<subreportParameterExpression><![CDATA["'"+$F{event_id}+"'"]]></subreportParameterExpression>
+					<subreportParameterExpression><![CDATA[$P{pi_id}]]></subreportParameterExpression>
 				</subreportParameter>
 				<subreportParameter name="REPORT_LOCALE">
 					<subreportParameterExpression><![CDATA[$P{REPORT_LOCALE}]]></subreportParameterExpression>
