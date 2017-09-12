@@ -44,7 +44,10 @@
 	<field name="extradata" class="java.lang.String"/>
 	<field name="max_row_num" class="java.lang.Integer"/>
 	<group name="productGroup">
-		<groupExpression><![CDATA[$F{productcode} + $F{productname} + $F{lotcode} + $F{expirationdate} + $F{extradata} + $F{quantity}]]></groupExpression>
+		<groupExpression><![CDATA[$F{productcode} + $F{productname}]]></groupExpression>
+	</group>
+	<group name="lineItemGroup">
+		<groupExpression><![CDATA[$F{lotcode} + $F{expirationdate} + $F{extradata} + $F{quantity}]]></groupExpression>
 	</group>
 	<background>
 		<band splitType="Stretch"/>
@@ -189,9 +192,9 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{productname}]]></textFieldExpression>
 			</textField>
-			<textField evaluationTime="Group" evaluationGroup="productGroup" isBlankWhenNull="true">
-				<reportElement x="244" y="0" width="72" height="25" uuid="c649aa2d-900a-4d7f-94f7-0d072c516c0a" printWhenGroupChanges="productGroup">
-					<printWhenExpression><![CDATA[$V{productGroup_COUNT} == 1]]></printWhenExpression>
+			<textField evaluationTime="Group" evaluationGroup="lineItemGroup" isBlankWhenNull="true">
+				<reportElement x="244" y="0" width="72" height="25" uuid="c649aa2d-900a-4d7f-94f7-0d072c516c0a" printWhenGroupChanges="lineItemGroup">
+					<printWhenExpression><![CDATA[$V{lineItemGroup_COUNT} == 1]]></printWhenExpression>
 				</reportElement>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -204,9 +207,9 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{lotcode}]]></textFieldExpression>
 			</textField>
-			<textField evaluationTime="Group" evaluationGroup="productGroup" isBlankWhenNull="true">
-				<reportElement  x="316" y="0" width="102" height="25" uuid="0e217f2e-f7ca-4c05-b9d2-f13ec6cf38db" printWhenGroupChanges="productGroup">
-					<printWhenExpression><![CDATA[$V{productGroup_COUNT} == 1]]></printWhenExpression>
+			<textField evaluationTime="Group" evaluationGroup="lineItemGroup" isBlankWhenNull="true">
+				<reportElement  x="316" y="0" width="102" height="25" uuid="0e217f2e-f7ca-4c05-b9d2-f13ec6cf38db" printWhenGroupChanges="lineItemGroup">
+					<printWhenExpression><![CDATA[$V{lineItemGroup_COUNT} == 1]]></printWhenExpression>
 				</reportElement>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -219,9 +222,9 @@
 				</textElement>
 				<textFieldExpression><![CDATA[new SimpleDateFormat("dd/MM/yyyy").format($F{expirationdate})]]></textFieldExpression>
 			</textField>
-			<textField evaluationTime="Group" evaluationGroup="productGroup" isBlankWhenNull="true">
-				<reportElement x="418" y="0" width="102" height="25" uuid="a7672f9a-30bd-4bf9-96af-324baa7e2280" printWhenGroupChanges="productGroup">
-					<printWhenExpression><![CDATA[$V{productGroup_COUNT} == 1]]></printWhenExpression>
+			<textField evaluationTime="Group" evaluationGroup="lineItemGroup" isBlankWhenNull="true">
+				<reportElement x="418" y="0" width="102" height="25" uuid="a7672f9a-30bd-4bf9-96af-324baa7e2280" printWhenGroupChanges="lineItemGroup">
+					<printWhenExpression><![CDATA[$V{lineItemGroup_COUNT} == 1]]></printWhenExpression>
 				</reportElement>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -234,9 +237,9 @@
 				</textElement>
 				<textFieldExpression><![CDATA[(new org.json.JSONObject($F{extradata}).getString("vvmStatus")) == "null" ? "" : new org.json.JSONObject($F{extradata}).getString("vvmStatus")]]></textFieldExpression>
 			</textField>
-			<textField evaluationTime="Group" evaluationGroup="productGroup" isBlankWhenNull="true">
-				<reportElement x="520" y="0" width="72" height="25" forecolor="#848484" uuid="547fa08c-24e6-4617-aa94-09384a952a19" printWhenGroupChanges="productGroup">
-					<printWhenExpression><![CDATA[$V{productGroup_COUNT} == 1]]></printWhenExpression>
+			<textField evaluationTime="Group" evaluationGroup="lineItemGroup" isBlankWhenNull="true">
+				<reportElement x="520" y="0" width="72" height="25" forecolor="#848484" uuid="547fa08c-24e6-4617-aa94-09384a952a19" printWhenGroupChanges="lineItemGroup">
+					<printWhenExpression><![CDATA[$V{lineItemGroup_COUNT} == 1]]></printWhenExpression>
 				</reportElement>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -249,9 +252,9 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{quantity}]]></textFieldExpression>
 			</textField>
-			<textField evaluationTime="Group" evaluationGroup="productGroup" isBlankWhenNull="true">
-				<reportElement x="592" y="0" width="72" height="25" uuid="a2c8fc54-7cdc-442a-9ced-608a01ef270b" printWhenGroupChanges="productGroup">
-					<printWhenExpression><![CDATA[$V{productGroup_COUNT} == 1]]></printWhenExpression>
+			<textField evaluationTime="Group" evaluationGroup="lineItemGroup" isBlankWhenNull="true">
+				<reportElement x="592" y="0" width="72" height="25" uuid="a2c8fc54-7cdc-442a-9ced-608a01ef270b" printWhenGroupChanges="lineItemGroup">
+					<printWhenExpression><![CDATA[$V{lineItemGroup_COUNT} == 1]]></printWhenExpression>
 				</reportElement>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
