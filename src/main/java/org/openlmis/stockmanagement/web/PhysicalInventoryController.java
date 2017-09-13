@@ -101,12 +101,12 @@ public class PhysicalInventoryController {
   }
 
   private void checkFormat(String format) {
-    List<String> supportedPrograms = Arrays.asList("csv", "html", "pdf", "xls", "xlsx");
-    if (!supportedPrograms.contains(format)) {
+    List<String> supportedFormats = Arrays.asList("csv", "html", "pdf", "xls", "xlsx");
+    if (!supportedFormats.contains(format)) {
       throw new ResourceNotFoundException(
           new Message(ERROR_PHYSICAL_INVENTORY_FORMAT_NOT_ALLOWED,
               format,
-              join(", ", supportedPrograms)));
+              join(", ", supportedFormats)));
     }
   }
 
