@@ -238,6 +238,9 @@ public abstract class MessageKeys {
   public static final String ERROR_PHYSICAL_INVENTORY_NOT_FOUND =
       PHYSICAL_INVENTORY_ERROR_PREFIX + ".notFound";
 
+  public static final String ERROR_PHYSICAL_INVENTORY_FORMAT_NOT_ALLOWED =
+      PHYSICAL_INVENTORY_ERROR_PREFIX + ".format.notAllowed";
+
   //report
   public static final String ERROR_GENERATE_REPORT_FAILED = ERROR_PREFIX + ".generateReport.failed";
 

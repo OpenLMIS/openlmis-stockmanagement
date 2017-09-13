@@ -15,6 +15,8 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static java.lang.String.join;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_FORMAT_NOT_ALLOWED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REPORTING_TEMPLATE_NOT_FOUND_WITH_NAME;
 
 import org.openlmis.stockmanagement.domain.JasperTemplate;
@@ -38,6 +40,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.jasperreports.JasperReportsMultiFormatView;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -72,6 +76,7 @@ public class PhysicalInventoryController {
   public ModelAndView print(@PathVariable("id") UUID id, @RequestParam String format)
       throws JasperReportViewException {
     checkPermission(id);
+    checkFormat(format.toLowerCase());
 
     JasperTemplate printTemplate = templateService.getByName(PRINT_PI);
     if (printTemplate == null) {
@@ -93,6 +98,16 @@ public class PhysicalInventoryController {
     }
     permissionService
         .canEditPhysicalInventory(pi.getProgramId(), pi.getFacilityId());
+  }
+
+  private void checkFormat(String format) {
+    List<String> supportedPrograms = Arrays.asList("csv", "html", "pdf", "xls", "xlsx");
+    if (!supportedPrograms.contains(format)) {
+      throw new ResourceNotFoundException(
+          new Message(ERROR_PHYSICAL_INVENTORY_FORMAT_NOT_ALLOWED,
+              format,
+              join(", ", supportedPrograms)));
+    }
   }
 
   private Map<String, Object> getParams(UUID eventId, String format) {

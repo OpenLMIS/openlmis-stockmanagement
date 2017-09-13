@@ -16,13 +16,17 @@
 package org.openlmis.stockmanagement.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode
 public class StockEventResponseDto {
   private UUID stockEventId;
   private UUID physicalInventoryId;
