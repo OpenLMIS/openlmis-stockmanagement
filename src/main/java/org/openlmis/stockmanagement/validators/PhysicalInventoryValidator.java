@@ -15,18 +15,24 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_ID_MISSING;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ID_MISMATCH;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_IS_SUBMITTED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ORDERABLE_DISABLED_VVM;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_ID_MISSING;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import java.util.List;
+import java.util.UUID;
 
 /**
  * This validator ensures that physical inventory line items for orderables
@@ -38,17 +44,38 @@ public class PhysicalInventoryValidator {
   @Autowired
   private VvmValidator vvmValidator;
 
+  @Autowired
+  private PhysicalInventoriesRepository physicalInventoriesRepository;
+
   /**
     * Check for physical inventory dto's validity.
     * Throws {@link ValidationMessageException} if an error found.
     * @param inventory physical inventory to validate.
     */
-  public void validate(PhysicalInventoryDto inventory)
-      throws InstantiationException, IllegalAccessException {
-    List<PhysicalInventoryLineItemDto> lineItems = inventory.getLineItems();
+  public void validateDraft(PhysicalInventoryDto inventory, UUID id) {
+    if (inventory.getId() != id) {
+      throw new ValidationMessageException(ERROR_PHYSICAL_INVENTORY_ID_MISMATCH);
+    }
+    if (id != null) {
+      PhysicalInventory foundInventory = physicalInventoriesRepository.findOne(id);
+      if (foundInventory != null && !foundInventory.getIsDraft()) {
+        throw new ValidationMessageException(ERROR_PHYSICAL_INVENTORY_IS_SUBMITTED);
+      }
+    }
 
+    List<PhysicalInventoryLineItemDto> lineItems = inventory.getLineItems();
     validateLineItems(lineItems);
     vvmValidator.validate(lineItems, ERROR_PHYSICAL_INVENTORY_ORDERABLE_DISABLED_VVM);
+  }
+
+  /**
+    * Check for physical inventory dto's validity.
+    * Throws {@link ValidationMessageException} if an error found.
+    * @param inventory physical inventory to validate.
+    */
+  public void validateEmptyDraft(PhysicalInventoryDto inventory) {
+    validateNotNull(inventory.getProgramId(), ERROR_PROGRAM_ID_MISSING);
+    validateNotNull(inventory.getFacilityId(), ERROR_FACILITY_ID_MISSING);
   }
 
   private void validateLineItems(List<PhysicalInventoryLineItemDto> lineItems) {
@@ -60,6 +87,12 @@ public class PhysicalInventoryValidator {
         .anyMatch(lineItem -> lineItem.getOrderable() == null);
     if (orderableMissing) {
       throw new ValidationMessageException(ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING);
+    }
+  }
+
+  private void validateNotNull(Object field, String errorMessage) {
+    if (field == null) {
+      throw new ValidationMessageException(errorMessage);
     }
   }
 }

@@ -15,11 +15,13 @@
 
 package org.openlmis.stockmanagement.dto.referencedata;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@EqualsAndHashCode
 public class DispensableDto {
   private String dispensingUnit;
 }

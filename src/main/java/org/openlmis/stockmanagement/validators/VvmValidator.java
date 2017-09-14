@@ -47,8 +47,7 @@ public class VvmValidator {
    * @param vvmApplicables list of items to test
    * @param messageKey error message key for exception
    */
-  public void validate(List<? extends VvmApplicable> vvmApplicables, String messageKey)
-      throws IllegalAccessException, InstantiationException {
+  public void validate(List<? extends VvmApplicable> vvmApplicables, String messageKey) {
     Map<UUID, OrderableDto> orderables = vvmApplicables
         .stream()
         .map(VvmApplicable::getOrderableId)

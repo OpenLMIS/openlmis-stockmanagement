@@ -36,6 +36,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class PhysicalInventoryDto {
+  private UUID id;
+
   private UUID programId;
 
   private UUID facilityId;
@@ -49,6 +51,19 @@ public class PhysicalInventoryDto {
   private Boolean isStarter;
 
   private List<PhysicalInventoryLineItemDto> lineItems;
+
+  /**
+   * Convert into physical inventory jpa model for create new draft.
+   *
+   * @return converted jpa model.
+   */
+  public PhysicalInventory toEmptyPhysicalInventory() {
+    PhysicalInventory inventory = new PhysicalInventory();
+    inventory.setProgramId(programId);
+    inventory.setFacilityId(facilityId);
+    inventory.setIsDraft(true);
+    return inventory;
+  }
 
   /**
    * Convert into physical inventory jpa model for submit.
@@ -65,14 +80,8 @@ public class PhysicalInventoryDto {
    * @return converted jpa model.
    */
   public PhysicalInventory toPhysicalInventoryForDraft() {
-    PhysicalInventory inventory = toPhysicalInventory(true);
-
-    inventory.setLineItems(lineItems.stream()
-        .map(lineItemDto -> lineItemDto.toPhysicalInventoryLineItem(inventory))
-        .collect(toList()));
-    return inventory;
+    return toPhysicalInventory(true);
   }
-
 
   /**
    * Create from jpa model.
@@ -82,6 +91,7 @@ public class PhysicalInventoryDto {
    */
   public static PhysicalInventoryDto from(PhysicalInventory inventory) {
     return PhysicalInventoryDto.builder()
+        .id(inventory.getId())
         .programId(inventory.getProgramId())
         .facilityId(inventory.getFacilityId())
         .occurredDate(inventory.getOccurredDate())
@@ -101,6 +111,7 @@ public class PhysicalInventoryDto {
    */
   public static PhysicalInventoryDto fromEventDto(StockEventDto eventDto) {
     return PhysicalInventoryDto.builder()
+        .id(eventDto.getResourceId())
         .programId(eventDto.getProgramId())
         .facilityId(eventDto.getFacilityId())
         .signature(eventDto.getSignature())
@@ -111,12 +122,19 @@ public class PhysicalInventoryDto {
 
   private PhysicalInventory toPhysicalInventory(boolean isDraft) {
     PhysicalInventory inventory = new PhysicalInventory();
+    inventory.setId(id);
     inventory.setProgramId(programId);
     inventory.setFacilityId(facilityId);
     inventory.setOccurredDate(occurredDate);
     inventory.setDocumentNumber(documentNumber);
     inventory.setSignature(signature);
     inventory.setIsDraft(isDraft);
+
+    if (lineItems != null) {
+      inventory.setLineItems(lineItems.stream()
+          .map(lineItemDto -> lineItemDto.toPhysicalInventoryLineItem(inventory))
+          .collect(toList()));
+    }
     return inventory;
   }
 }

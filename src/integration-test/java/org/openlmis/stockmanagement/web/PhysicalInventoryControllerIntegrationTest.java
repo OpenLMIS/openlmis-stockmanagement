@@ -17,12 +17,13 @@ package org.openlmis.stockmanagement.web;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_ID_MISSING;
 
+import guru.nidi.ramltester.junit.RamlMatchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
@@ -31,29 +32,23 @@ import org.openlmis.stockmanagement.dto.referencedata.DispensableDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.service.HomeFacilityPermissionService;
 import org.openlmis.stockmanagement.service.PhysicalInventoryService;
 import org.springframework.boot.test.mock.mockito.MockBean;
-
-import guru.nidi.ramltester.junit.RamlMatchers;
 import org.springframework.http.HttpHeaders;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.UUID;
 
+@SuppressWarnings("PMD.TooManyMethods")
 public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrationTest {
 
   private static final String RESOURCE_URL = "/api/physicalInventories";
-  private static final String DRAFT_URL = RESOURCE_URL + "/draft";
+  private static final String ID_URL = RESOURCE_URL + "/{id}";
 
   private static final String PROGRAM_PARAM = "program";
   private static final String FACILITY_PARAM = "facility";
-
-  @MockBean
-  private HomeFacilityPermissionService homeFacilityPermissionService;
 
   @MockBean
   private PhysicalInventoryService physicalInventoryService;
@@ -63,13 +58,11 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
     mockUserAuthenticated();
   }
 
-  // GET /api/physicalInventories/draft
+  // GET /api/physicalInventories
 
   @Test
   public void shouldGetChosenDraftWhenExists() {
     // given
-    mockHasPermissions();
-
     UUID programId = UUID.randomUUID();
     UUID facilityId = UUID.randomUUID();
     PhysicalInventoryDto expectedDraft = generatePhysicalInventory();
@@ -83,7 +76,7 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
         .queryParam(PROGRAM_PARAM, programId)
         .queryParam(FACILITY_PARAM, facilityId)
         .when()
-        .get(DRAFT_URL)
+        .get(RESOURCE_URL)
         .then()
         .statusCode(200)
         .extract().as(PhysicalInventoryDto.class);
@@ -94,13 +87,11 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
-  // GET /api/physicalInventories/draft
+  // GET /api/physicalInventories
 
   @Test
   public void shouldReturnNoContentWhenDraftDoesNotExist() {
     // given
-    mockHasPermissions();
-
     UUID programId = UUID.randomUUID();
     UUID facilityId = UUID.randomUUID();
 
@@ -113,7 +104,7 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
         .queryParam(PROGRAM_PARAM, programId)
         .queryParam(FACILITY_PARAM, facilityId)
         .when()
-        .get(DRAFT_URL)
+        .get(RESOURCE_URL)
         .then()
         .statusCode(204);
 
@@ -121,45 +112,45 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
-  // POST /api/physicalInventories/draft
+  // POST /api/physicalInventories
 
   @Test
-  public void shouldSaveDraftWhenValid() throws InstantiationException, IllegalAccessException {
+  public void shouldCreateEmptyDraftWhenValid() {
     // given
-    mockHasPermissions();
+    PhysicalInventoryDto request = generateDraft();
+    PhysicalInventoryDto expectedDraft = new PhysicalInventoryDto();
+    expectedDraft.setProgramId(request.getProgramId());
+    expectedDraft.setFacilityId(request.getFacilityId());
+    expectedDraft.setId(UUID.randomUUID());
 
-    PhysicalInventoryDto expectedDraft = generatePhysicalInventory();
-    when(physicalInventoryService.saveDraft(any(PhysicalInventoryDto.class)))
+    when(physicalInventoryService
+        .createNewDraft(request))
         .thenReturn(expectedDraft);
 
     // when
     PhysicalInventoryDto result = restAssured.given()
         .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
         .contentType(APPLICATION_JSON)
-        .body(expectedDraft)
+        .body(request)
         .when()
-        .post(DRAFT_URL)
+        .post(RESOURCE_URL)
         .then()
         .statusCode(201)
         .extract().as(PhysicalInventoryDto.class);
 
     // then
-    assertEquals(expectedDraft.getProgramId(), result.getProgramId());
-    assertEquals(expectedDraft.getFacilityId(), result.getFacilityId());
+    assertEquals(expectedDraft, result);
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
-  // POST /api/physicalInventories/draft
-
   @Test
-  public void shouldReturnBadRequestOnSaveDraftWhenEntityInvalid()
+  public void shouldReturnBadRequestOnCreateEmptyDraftWhenEntityInvalid()
       throws InstantiationException, IllegalAccessException {
     // given
-    mockHasPermissions();
-
-    PhysicalInventoryDto expectedDraft = generatePhysicalInventory();
-    when(physicalInventoryService.saveDraft(any(PhysicalInventoryDto.class)))
-        .thenThrow(new ValidationMessageException(ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING));
+    PhysicalInventoryDto expectedDraft = generateDraft();
+    when(physicalInventoryService
+        .createNewDraft(expectedDraft))
+        .thenThrow(new ValidationMessageException(ERROR_PROGRAM_ID_MISSING));
 
     // when
     restAssured.given()
@@ -167,7 +158,60 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
         .contentType(APPLICATION_JSON)
         .body(expectedDraft)
         .when()
-        .post(DRAFT_URL)
+        .post(RESOURCE_URL)
+        .then()
+        .statusCode(400);
+
+    // then
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
+
+  // PUT /api/physicalInventories/{id}
+
+  @Test
+  public void shouldSaveDraftWhenValid() throws InstantiationException, IllegalAccessException {
+    // given
+    UUID physicalInventoryId = UUID.randomUUID();
+    PhysicalInventoryDto expectedDraft = generatePhysicalInventory();
+    when(physicalInventoryService
+        .saveDraft(expectedDraft, physicalInventoryId))
+        .thenReturn(expectedDraft);
+
+    // when
+    PhysicalInventoryDto result = restAssured.given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .pathParam("id", physicalInventoryId)
+        .contentType(APPLICATION_JSON)
+        .body(expectedDraft)
+        .when()
+        .put(ID_URL)
+        .then()
+        .statusCode(200)
+        .extract().as(PhysicalInventoryDto.class);
+
+    // then
+    assertEquals(expectedDraft, result);
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
+
+  @Test
+  public void shouldReturnBadRequestOnSaveDraftWhenEntityInvalid()
+      throws InstantiationException, IllegalAccessException {
+    // given
+    UUID physicalInventoryId = UUID.randomUUID();
+    PhysicalInventoryDto expectedDraft = generatePhysicalInventory();
+    when(physicalInventoryService
+        .saveDraft(expectedDraft, physicalInventoryId))
+        .thenThrow(new ValidationMessageException(ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING));
+
+    // when
+    restAssured.given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .contentType(APPLICATION_JSON)
+        .pathParam("id", physicalInventoryId)
+        .body(expectedDraft)
+        .when()
+        .put(ID_URL)
         .then()
         .statusCode(400);
 
@@ -178,24 +222,20 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
   // DELETE /api/physicalInventories/draft
 
   @Test
-  public void shouldDeleteDraftWhenExists() {
+  public void shouldReturnNoContentAfterDeleteDraft() {
     // given
-    mockHasPermissions();
-
-    UUID programId = UUID.randomUUID();
-    UUID facilityId = UUID.randomUUID();
+    UUID physicalInventoryId = UUID.randomUUID();
 
     doNothing().when(physicalInventoryService)
-        .deleteExistingDraft(any(PhysicalInventoryDto.class));
+        .deletePhysicalInventory(physicalInventoryId);
 
     // when
     restAssured.given()
         .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
         .contentType(APPLICATION_JSON)
-        .queryParam(PROGRAM_PARAM, programId)
-        .queryParam(FACILITY_PARAM, facilityId)
+        .pathParam("id", physicalInventoryId)
         .when()
-        .delete(DRAFT_URL)
+        .delete(ID_URL)
         .then()
         .statusCode(204);
 
@@ -206,6 +246,7 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
   private PhysicalInventoryDto generatePhysicalInventory() {
     PhysicalInventoryDto inventory = new PhysicalInventoryDto();
 
+    inventory.setId(UUID.randomUUID());
     inventory.setFacilityId(UUID.randomUUID());
     inventory.setProgramId(UUID.randomUUID());
     inventory.setOccurredDate(LocalDate.now());
@@ -214,6 +255,13 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
     inventory.setSignature("signature");
     inventory.setLineItems(Collections.singletonList(generatePhysicalInventoryLineItem()));
 
+    return inventory;
+  }
+
+  private PhysicalInventoryDto generateDraft() {
+    PhysicalInventoryDto inventory = new PhysicalInventoryDto();
+    inventory.setFacilityId(UUID.randomUUID());
+    inventory.setProgramId(UUID.randomUUID());
     return inventory;
   }
 
@@ -258,11 +306,5 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
     lot.setManufactureDate(LocalDate.now());
 
     return lot;
-  }
-
-  private void mockHasPermissions() {
-    doNothing().when(homeFacilityPermissionService).checkProgramSupported(anyUuid());
-    doNothing().when(permissionService).canAdjustStock(anyUuid(), anyUuid());
-    doNothing().when(permissionService).canEditPhysicalInventory(anyUuid(), anyUuid());
   }
 }

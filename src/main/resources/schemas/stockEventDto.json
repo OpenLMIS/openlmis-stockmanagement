@@ -2,6 +2,10 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
+    "resourceId": {
+      "type": ["string", "null"],
+      "description": "Indicates resource id."
+    },
     "facilityId": {
       "type": "string",
       "description": "Part of identifier of stock card. Indicates in which facility this event occurred."

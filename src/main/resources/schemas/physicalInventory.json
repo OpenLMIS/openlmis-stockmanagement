@@ -3,6 +3,11 @@
   "$schema": "http://json-schema.org/draft-04/schema",
   "description": "Physical inventory",
   "properties": {
+    "id": {
+      "type": ["string", "null"],
+      "title": "id",
+      "description": "Indicates physical inventory id."
+    },
     "programId": {
       "type": "string",
       "description": "Indicates which program the physical inventory is done for. Will be used for all events created from this physical inventory."
@@ -12,24 +17,24 @@
       "description": "Indicates which facility the physical inventory is done for. Will be used for all events created from this physical inventory."
     },
     "occurredDate": {
-      "type": "string",
+      "type": ["string", "null"],
       "format": "date",
       "description": "Will be used as occurred date for all events created from this physical inventory."
     },
     "signature": {
-      "type": "string",
+      "type": ["string", "null"],
       "description": "The signature of the operator."
     },
     "documentNumber": {
-      "type": "string",
+      "type": ["string", "null"],
       "description": ""
     },
     "isStarter": {
-      "type": "boolean",
+      "type": ["boolean", "null"],
       "description": "The boolean value of the draft is a starter template."
     },
     "lineItems": {
-      "type": "array",
+      "type": ["array", "null"],
       "title": "Physical inventory line items, each will become an event when submitted.",
       "items": {
         "type": "object",
@@ -40,8 +45,6 @@
   },
   "required": [
     "programId",
-    "facilityId",
-    "occurredDate",
-    "lineItems"
+    "facilityId"
   ]
 }

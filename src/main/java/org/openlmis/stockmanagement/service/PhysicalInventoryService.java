@@ -16,17 +16,21 @@
 package org.openlmis.stockmanagement.service;
 
 import static org.openlmis.stockmanagement.domain.BaseEntity.fromId;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_IS_SUBMITTED;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_NOT_FOUND;
 
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
+import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
+import org.openlmis.stockmanagement.utils.Message;
 import org.openlmis.stockmanagement.validators.PhysicalInventoryValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.UUID;
 
 @Service
@@ -40,10 +44,14 @@ public class PhysicalInventoryService {
   @Autowired
   private PhysicalInventoryValidator physicalInventoryValidator;
 
+  @Autowired
+  private PermissionService permissionService;
+
+  @Autowired
+  private HomeFacilityPermissionService homeFacilityPermissionService;
+
   /**
-   * Persist physical inventory, with an event id. (For now, we only save physical inventory, but we
-   * are not reading it anywhere in the code. We do this in case in the future some countries may
-   * wanna view all the physical inventories that has been done in the past.)
+   * Persist physical inventory, with an event id.
    *
    * @param inventoryDto inventoryDto.
    * @param eventId      eventId.
@@ -53,7 +61,6 @@ public class PhysicalInventoryService {
   public PhysicalInventory submitPhysicalInventory(PhysicalInventoryDto inventoryDto, UUID eventId)
       throws IllegalAccessException, InstantiationException {
     LOGGER.info("submit physical inventory");
-    deleteExistingDraft(inventoryDto);
 
     PhysicalInventory inventory = inventoryDto.toPhysicalInventoryForSubmit();
     inventory.setStockEvent(fromId(eventId, StockEvent.class));
@@ -80,16 +87,31 @@ public class PhysicalInventoryService {
   }
 
   /**
+   * Create new draft.
+   *
+   * @param dto physical inventory dto.
+   * @return the saved inventory.
+   */
+  public PhysicalInventoryDto createNewDraft(PhysicalInventoryDto dto) {
+    LOGGER.info("create physical inventory draft");
+    physicalInventoryValidator.validateEmptyDraft(dto);
+    checkPermission(dto.getProgramId(), dto.getFacilityId());
+
+    dto.setId(null);
+    physicalInventoriesRepository.save(dto.toEmptyPhysicalInventory());
+    return dto;
+  }
+
+  /**
    * Save or update draft.
    *
    * @param dto physical inventory dto.
    * @return the saved inventory.
    */
-  public PhysicalInventoryDto saveDraft(PhysicalInventoryDto dto)
-      throws IllegalAccessException, InstantiationException {
+  public PhysicalInventoryDto saveDraft(PhysicalInventoryDto dto, UUID id) {
     LOGGER.info("save physical inventory draft");
-    physicalInventoryValidator.validate(dto);
-    deleteExistingDraft(dto);
+    physicalInventoryValidator.validateDraft(dto, id);
+    checkPermission(dto.getProgramId(), dto.getFacilityId());
 
     physicalInventoriesRepository.save(dto.toPhysicalInventoryForDraft());
     return dto;
@@ -98,13 +120,26 @@ public class PhysicalInventoryService {
   /**
    * Delete draft.
    *
-   * @param dto physical inventory dto.
+   * @param id physical inventory id.
    */
-  public void deleteExistingDraft(PhysicalInventoryDto dto) {
-    PhysicalInventory foundInventory = physicalInventoriesRepository
-        .findByProgramIdAndFacilityIdAndIsDraft(dto.getProgramId(), dto.getFacilityId(), true);
+  public void deletePhysicalInventory(UUID id) {
+    PhysicalInventory foundInventory = physicalInventoriesRepository.findOne(id);
     if (foundInventory != null) {
+      checkPermission(foundInventory.getProgramId(), foundInventory.getFacilityId());
+      if (!foundInventory.getIsDraft()) {
+        throw new ValidationMessageException(ERROR_PHYSICAL_INVENTORY_IS_SUBMITTED);
+      }
       physicalInventoriesRepository.delete(foundInventory);
+    } else {
+      throw new ResourceNotFoundException(new Message(ERROR_PHYSICAL_INVENTORY_NOT_FOUND, id));
     }
+  }
+
+  /**
+   * Checks permission.
+   */
+  public void checkPermission(UUID program, UUID facility) {
+    homeFacilityPermissionService.checkProgramSupported(program);
+    permissionService.canEditPhysicalInventory(program, facility);
   }
 }

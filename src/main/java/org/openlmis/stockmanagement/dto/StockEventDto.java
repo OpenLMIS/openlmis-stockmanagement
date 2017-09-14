@@ -34,6 +34,8 @@ import java.util.UUID;
 @NoArgsConstructor
 public class StockEventDto {
 
+  private UUID resourceId;
+
   private UUID facilityId;
 
   private UUID programId;

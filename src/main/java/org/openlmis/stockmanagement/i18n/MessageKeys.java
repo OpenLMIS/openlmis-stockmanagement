@@ -31,6 +31,8 @@ public abstract class MessageKeys {
 
   public static final String ERROR_PROGRAM_ID_MISSING =
       ERROR_PREFIX + ".program.id.missing";
+  public static final String ERROR_FACILITY_ID_MISSING =
+      ERROR_PREFIX + ".facility.id.missing";
   public static final String ERROR_FACILITY_TYPE_ID_MISSING =
       ERROR_PREFIX + ".facilityType.id.missing";
 
@@ -240,6 +242,12 @@ public abstract class MessageKeys {
 
   public static final String ERROR_PHYSICAL_INVENTORY_FORMAT_NOT_ALLOWED =
       PHYSICAL_INVENTORY_ERROR_PREFIX + ".format.notAllowed";
+
+  public static final String ERROR_PHYSICAL_INVENTORY_ID_MISMATCH =
+      PHYSICAL_INVENTORY_ERROR_PREFIX + ".id.mismatch";
+
+  public static final String ERROR_PHYSICAL_INVENTORY_IS_SUBMITTED =
+      PHYSICAL_INVENTORY_ERROR_PREFIX + ".isSubmitted";
 
   //report
   public static final String ERROR_GENERATE_REPORT_FAILED = ERROR_PREFIX + ".generateReport.failed";

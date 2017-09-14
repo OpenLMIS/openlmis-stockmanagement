@@ -17,7 +17,6 @@ package org.openlmis.stockmanagement.dto;
 
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
@@ -25,9 +24,8 @@ import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
-
 import java.time.LocalDate;
-import java.util.Arrays;
+import java.util.Collections;
 
 public class PhysicalInventoryDtoTest {
   @Test
@@ -60,8 +58,8 @@ public class PhysicalInventoryDtoTest {
     assertThat(inventory.getOccurredDate(), is(piDto.getOccurredDate()));
     assertThat(inventory.getSignature(), is(piDto.getSignature()));
     assertThat(inventory.getDocumentNumber(), is(piDto.getDocumentNumber()));
+    assertThat(inventory.getLineItems().size(), is(1));
     assertThat(inventory.getIsDraft(), is(false));
-    assertThat(inventory.getLineItems(), nullValue());
   }
 
   @Test
@@ -119,7 +117,7 @@ public class PhysicalInventoryDtoTest {
     piLineItemDto1.setOrderable(OrderableDto.builder().id(randomUUID()).build());
     piLineItemDto1.setQuantity(123);
 
-    piDto.setLineItems(Arrays.asList(piLineItemDto1));
+    piDto.setLineItems(Collections.singletonList(piLineItemDto1));
     return piDto;
   }
 }

@@ -759,30 +759,84 @@ traits:
                   schema: localizedMessage
 
   /physicalInventories:
-      /draft:
-        get:
-          is: [ secured ]
-          description: Get a saved draft physical inventory. If draft does not exist, will return null. Only one draft is allowed at the same time for one facility&program. To save a new draft, the previous one will be replaced.
-          queryParameters:
-            facility:
-              required: true
-            program:
-              required: true
-          responses:
-            200:
-              description: Retrieved a draft.
-              body:
-                application/json:
-                  schema: physicalInventory
-            204:
-              description: No draft has been saved yet.
-            403:
-              description: User does not have permission to view draft physical inventory.
-              body:
-                application/json:
+      get:
+        is: [ secured ]
+        description: Get a saved draft physical inventory. If draft does not exist, will return null. Only one draft is allowed at the same time for one facility&program. To save a new draft, the previous one will be replaced.
+        queryParameters:
+          facility:
+            required: true
+          program:
+            required: true
+        responses:
+          200:
+            description: Retrieved a draft.
+            body:
+              application/json:
+                schema: physicalInventory
+          204:
+            description: No draft has been saved yet.
+          403:
+            description: User does not have permission to view draft physical inventory.
+            body:
+              application/json:
+                schema: localizedMessage
+
+      post:
+        is: [ secured ]
+        description: Create empty draft physical inventory.
+        body:
+          application/json:
+            schema: physicalInventory
+
+        responses:
+          201:
+            description: Draft saved.
+            body:
+              application/json:
+                schema: physicalInventory
+          400:
+            body:
+              application/json:
+                  schema: localizedMessage
+            description: An error occured during request processing.
+          403:
+            description: User does not have permission to save draft physical inventory.
+            body:
+              application/json:
                   schema: localizedMessage
 
-        post:
+      /{id}:
+        uriParameters:
+            id:
+                displayName: physicalInventoryId
+                type: string
+                required: true
+                repeat: false
+        get:
+            is: [ secured ]
+            description: Print Physical Inventory to a pdf file.
+
+            queryParameters:
+              format:
+                description: "This parameter specifies return format of this endpoint. If it is not specified json format is returned. Supported types: csv, html, pdf, xls, xlsx."
+                type: string
+                required: false
+                repeat: false
+
+            responses:
+                200:
+                    body:
+                      application/pdf:
+                404:
+                    body:
+                      application/json:
+                        schema: localizedMessage
+                403:
+                    body:
+                      application/json:
+                        schema: localizedMessage
+
+        put:
           is: [ secured ]
           description: Save a draft physical inventory.
           body:
@@ -790,12 +844,11 @@ traits:
               schema: physicalInventory
 
           responses:
-            201:
+            200:
               description: Draft saved.
               body:
                 application/json:
                   schema: physicalInventory
-
             400:
               body:
                 application/json:
@@ -812,47 +865,14 @@ traits:
           is: [ secured ]
           description: Delete a draft physical inventory.
 
-          queryParameters:
-            program:
-              required: true
-            facility:
-              required: true
-
           responses:
             204:
               description: Draft deleted.
             403:
-              description: User does not have permission to save draft physical inventory.
+              description: User does not have permission to delete draft physical inventory.
               body:
                 application/json:
                     schema: localizedMessage
-      /{id}:
-        uriParameters:
-            id:
-                displayName: physicalInventoryId
-                type: string
-                required: true
-                repeat: false
-        get:
-            is: [ secured ]
-            description: Print Physical Inventory to a pdf file.
-
-            queryParameters:
-              format:
-                required: true
-
-            responses:
-                200:
-                    body:
-                      application/pdf:
-                404:
-                    body:
-                      application/json:
-                        schema: localizedMessage
-                403:
-                    body:
-                      application/json:
-                        schema: localizedMessage
 
   /physicalInventoryTemplates:
       displayName: Physical Inventory report template.
