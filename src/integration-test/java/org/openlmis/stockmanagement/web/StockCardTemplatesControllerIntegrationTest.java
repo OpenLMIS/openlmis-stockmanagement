@@ -44,7 +44,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import java.util.UUID;
 
-public class StockCardTemplatesControllerTest extends BaseWebTest {
+public class StockCardTemplatesControllerIntegrationTest extends BaseWebTest {
 
   private static final String STOCK_CARD_TEMPLATE_API = "/api/stockCardTemplates";
 

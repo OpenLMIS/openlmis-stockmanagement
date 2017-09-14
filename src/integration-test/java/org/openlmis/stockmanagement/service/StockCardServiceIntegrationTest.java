@@ -27,7 +27,7 @@ import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.create
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openlmis.stockmanagement.BaseTest;
+import org.openlmis.stockmanagement.BaseIntegrationTest;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
@@ -57,7 +57,7 @@ import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class StockCardServiceTest extends BaseTest {
+public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
   @Autowired
   private StockCardService stockCardService;

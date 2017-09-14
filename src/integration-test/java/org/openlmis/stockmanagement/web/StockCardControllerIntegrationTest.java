@@ -45,7 +45,7 @@ import java.util.UUID;
 //because there is a problem with "spring security test" that seems to be relates
 //with test execution order, naming it cardz will put it behind and solve the problem
 //not sure what the root cause is yet
-public class StockCardControllerTest extends BaseWebTest {
+public class StockCardControllerIntegrationTest extends BaseWebTest {
 
   private static final String API_STOCK_CARDS = "/api/stockCards/";
   private static final String API_STOCK_CARD_SUMMARIES = "/api/stockCardSummaries";

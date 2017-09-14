@@ -33,7 +33,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.servlet.ModelAndView;
 import java.util.UUID;
 
-public class ReportsControllerTest extends BaseWebTest {
+public class ReportsControllerIntegrationTest extends BaseWebTest {
 
   private static final String CARD_REPORT = "/api/stockCards/%s/print";
   private static final String CARD_SUMMARY_REPORT = "/api/stockCardSummaries/print";

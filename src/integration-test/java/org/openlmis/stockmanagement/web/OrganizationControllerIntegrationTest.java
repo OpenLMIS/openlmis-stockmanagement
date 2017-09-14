@@ -37,7 +37,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import java.util.UUID;
 
-public class OrganizationControllerTest extends BaseWebTest {
+public class OrganizationControllerIntegrationTest extends BaseWebTest {
   private static final String ORGANIZATION_API = "/api/organizations/";
 
   @MockBean

@@ -20,5 +20,5 @@ import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(locations = {"classpath:application.properties", "classpath:test.properties"})
 @DirtiesContext
-public abstract class BaseTest {
+public abstract class BaseIntegrationTest {
 }

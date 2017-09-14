@@ -44,7 +44,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import java.util.UUID;
 
-public class ValidSourceDestinationControllerTest extends BaseWebTest {
+public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest {
 
   private static final String PROGRAM = "program";
   private static final String FACILITY_TYPE = "facilityType";

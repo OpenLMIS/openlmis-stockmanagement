@@ -30,7 +30,7 @@ import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.ResultActions;
 
-public class ReasonConfigurationOptionsControllerTest extends BaseWebTest {
+public class ReasonConfigurationOptionsControllerIntegrationTest extends BaseWebTest {
 
   private String reasonTypesApi = "/api/reasonTypes";
   private String reasonCategoriesApi = "/api/reasonCategories";

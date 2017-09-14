@@ -40,7 +40,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import java.util.UUID;
 
-public class PhysicalInventoryDraftControllerTest extends BaseWebTest {
+public class PhysicalInventoryDraftControllerIntegrationTest extends BaseWebTest {
   private static final String PHYSICAL_INVENTORY_DRAFT_API = "/api/physicalInventories/draft";
 
   @MockBean

@@ -43,7 +43,10 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import java.util.UUID;
 
-public class StockEventsControllerTest extends BaseWebTest {
+/**
+ * TODO: needs to merge with StockEventsControllerIntegrationTest.
+ */
+public class StockEventsControllerrIntegrationTest extends BaseWebTest {
 
   private static final String CREATE_STOCK_EVENT_API = "/api/stockEvents";
 

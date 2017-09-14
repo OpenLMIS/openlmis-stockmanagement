@@ -39,7 +39,7 @@ import java.util.Arrays;
 import java.util.UUID;
 
 
-public class StockCardLineItemReasonControllerTest extends BaseWebTest {
+public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebTest {
 
   private static final String STOCK_CARD_LINE_ITEM_REASON_API = "/api/stockCardLineItemReasons";
 
