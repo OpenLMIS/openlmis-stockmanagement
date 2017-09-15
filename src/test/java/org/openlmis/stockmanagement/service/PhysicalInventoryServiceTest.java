@@ -41,9 +41,11 @@ import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
 import org.openlmis.stockmanagement.validators.PhysicalInventoryValidator;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+@SuppressWarnings("PMD.TooManyMethods")
 @RunWith(MockitoJUnitRunner.class)
 public class PhysicalInventoryServiceTest {
   @Captor
@@ -64,25 +66,22 @@ public class PhysicalInventoryServiceTest {
   @InjectMocks
   private PhysicalInventoryService physicalInventoryService;
 
+  private UUID programId = randomUUID();
+  private UUID facilityId = randomUUID();
+  private UUID orderableId = randomUUID();
+
   @Test
   public void shouldReturnDraftIfSavedDraftIsFound() throws Exception {
-    //given
-    UUID programId = randomUUID();
-    UUID facilityId = randomUUID();
-    UUID orderableId = randomUUID();
-
     PhysicalInventory inventory = createInventoryDraft(orderableId, programId, facilityId);
 
-    when(physicalInventoryRepository
-        .findByProgramIdAndFacilityIdAndIsDraft(programId, facilityId, true))
-        .thenReturn(inventory);
+    shouldSearchBasedOnIsDraft(inventory,true);
+  }
 
-    //when
-    PhysicalInventoryDto foundDraft = physicalInventoryService.findDraft(programId, facilityId);
+  @Test
+  public void shouldReturnSubmittedInventryIfSavedDraftIsFound() throws Exception {
+    PhysicalInventory submittedInventory = createInventoryDraft(orderableId, programId, facilityId);
 
-    //then
-    PhysicalInventoryLineItemDto lineItemDto = foundDraft.getLineItems().get(0);
-    assertThat(lineItemDto.getOrderable().getId(), is(orderableId));
+    shouldSearchBasedOnIsDraft(submittedInventory, false);
   }
 
   @Test
@@ -172,6 +171,37 @@ public class PhysicalInventoryServiceTest {
     physicalInventoryService.deletePhysicalInventory(physicalInventoryId);
   }
 
+  private PhysicalInventory createInventoryDraft(
+      UUID orderableId, UUID programId, UUID facilityId) {
+    PhysicalInventory inventory = createInventoryDto(programId, facilityId)
+        .toPhysicalInventoryForDraft();
+    inventory.getLineItems().get(0).setOrderableId(orderableId);
+    return inventory;
+  }
+
+  private void shouldSearchBasedOnIsDraft(PhysicalInventory inventory, boolean isDraft) {
+    //given
+    inventory.setIsDraft(isDraft);
+    when(physicalInventoryRepository
+        .findByProgramIdAndFacilityIdAndIsDraft(programId, facilityId, isDraft))
+        .thenReturn(Collections.singletonList(inventory));
+
+    //when
+    List<PhysicalInventoryDto> foundDraft =
+        physicalInventoryService.findPhysicalInventory(programId, facilityId, isDraft);
+
+    //then
+    assertEquals(1, foundDraft.size());
+    assertEquals(programId, foundDraft.get(0).getProgramId());
+    assertEquals(facilityId, foundDraft.get(0).getFacilityId());
+    assertEquals(isDraft, foundDraft.get(0).getIsDraft());
+
+    PhysicalInventoryLineItemDto lineItemDto = foundDraft.get(0).getLineItems().get(0);
+    assertEquals(orderableId, lineItemDto.getOrderable().getId());
+    assertEquals(null, lineItemDto.getQuantity());
+
+  }
+
   private PhysicalInventoryDto createInventoryDto(UUID programId, UUID facilityId) {
     PhysicalInventoryLineItemDto piLineItemDto = PhysicalInventoryLineItemDto
         .builder()
@@ -192,13 +222,5 @@ public class PhysicalInventoryServiceTest {
     PhysicalInventoryLineItem lineItem = actual.get(0);
     assertThat(lineItem.getQuantity(), is(lineItemDto.getQuantity()));
     assertThat(lineItem.getOrderableId(), is(lineItemDto.getOrderable().getId()));
-  }
-
-  private PhysicalInventory createInventoryDraft(
-      UUID orderableId, UUID programId, UUID facilityId) {
-    PhysicalInventory inventory = createInventoryDto(programId, facilityId)
-        .toPhysicalInventoryForDraft();
-    inventory.getLineItems().get(0).setOrderableId(orderableId);
-    return inventory;
   }
 }

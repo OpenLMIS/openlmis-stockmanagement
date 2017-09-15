@@ -53,12 +53,8 @@ public class PhysicalInventoryDtoTest {
     PhysicalInventory inventory = piDto.toPhysicalInventoryForSubmit();
 
     //then
-    assertThat(inventory.getProgramId(), is(piDto.getProgramId()));
-    assertThat(inventory.getFacilityId(), is(piDto.getFacilityId()));
-    assertThat(inventory.getOccurredDate(), is(piDto.getOccurredDate()));
-    assertThat(inventory.getSignature(), is(piDto.getSignature()));
-    assertThat(inventory.getDocumentNumber(), is(piDto.getDocumentNumber()));
-    assertThat(inventory.getLineItems().size(), is(1));
+    fieldsEqual(piDto, inventory);
+
     assertThat(inventory.getIsDraft(), is(false));
   }
 
@@ -71,19 +67,9 @@ public class PhysicalInventoryDtoTest {
     PhysicalInventory inventory = piDto.toPhysicalInventoryForDraft();
 
     //then
-    assertThat(inventory.getProgramId(), is(piDto.getProgramId()));
-    assertThat(inventory.getFacilityId(), is(piDto.getFacilityId()));
-    assertThat(inventory.getOccurredDate(), is(piDto.getOccurredDate()));
-    assertThat(inventory.getSignature(), is(piDto.getSignature()));
-    assertThat(inventory.getDocumentNumber(), is(piDto.getDocumentNumber()));
+    fieldsEqual(piDto, inventory);
 
     assertThat(inventory.getIsDraft(), is(true));
-
-    assertThat(inventory.getLineItems().size(), is(1));
-    PhysicalInventoryLineItemDto piLineItemDto = piDto.getLineItems().get(0);
-    PhysicalInventoryLineItem piLineItem = inventory.getLineItems().get(0);
-    assertThat(piLineItem.getQuantity(), is(piLineItemDto.getQuantity()));
-    assertThat(piLineItem.getOrderableId(), is(piLineItemDto.getOrderable().getId()));
   }
 
   @Test
@@ -119,5 +105,19 @@ public class PhysicalInventoryDtoTest {
 
     piDto.setLineItems(Collections.singletonList(piLineItemDto1));
     return piDto;
+  }
+
+  private void fieldsEqual(PhysicalInventoryDto piDto, PhysicalInventory inventory) {
+    assertThat(inventory.getOccurredDate(), is(piDto.getOccurredDate()));
+    assertThat(inventory.getProgramId(), is(piDto.getProgramId()));
+    assertThat(inventory.getFacilityId(), is(piDto.getFacilityId()));
+    assertThat(inventory.getSignature(), is(piDto.getSignature()));
+    assertThat(inventory.getDocumentNumber(), is(piDto.getDocumentNumber()));
+
+    assertThat(inventory.getLineItems().size(), is(1));
+    PhysicalInventoryLineItemDto piLineItemDto = piDto.getLineItems().get(0);
+    PhysicalInventoryLineItem piLineItem = inventory.getLineItems().get(0);
+    assertThat(piLineItem.getQuantity(), is(piLineItemDto.getQuantity()));
+    assertThat(piLineItem.getOrderableId(), is(piLineItemDto.getOrderable().getId()));
   }
 }

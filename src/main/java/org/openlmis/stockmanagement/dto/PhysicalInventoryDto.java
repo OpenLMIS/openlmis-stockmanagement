@@ -19,15 +19,14 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static java.util.stream.Collectors.toList;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-
-import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,6 +48,8 @@ public class PhysicalInventoryDto {
   private String documentNumber;
 
   private Boolean isStarter;
+
+  private Boolean isDraft;
 
   private List<PhysicalInventoryLineItemDto> lineItems;
 
@@ -86,6 +87,18 @@ public class PhysicalInventoryDto {
   /**
    * Create from jpa model.
    *
+   * @param inventories inventory jpa model.
+   * @return created dto.
+   */
+  public static List<PhysicalInventoryDto> from(Collection<PhysicalInventory> inventories) {
+    List<PhysicalInventoryDto> inventoryDtos = new ArrayList<>(inventories.size());
+    inventories.forEach(i -> inventoryDtos.add(from(i)));
+    return inventoryDtos;
+  }
+
+  /**
+   * Create from jpa model.
+   *
    * @param inventory inventory jpa model.
    * @return created dto.
    */
@@ -98,6 +111,7 @@ public class PhysicalInventoryDto {
         .documentNumber(inventory.getDocumentNumber())
         .signature(inventory.getSignature())
         .isStarter(false)
+        .isDraft(inventory.getIsDraft())
         .lineItems(inventory.getLineItems().stream().map(
             PhysicalInventoryLineItemDto::from).collect(toList()))
         .build();
@@ -117,6 +131,7 @@ public class PhysicalInventoryDto {
         .signature(eventDto.getSignature())
         .documentNumber(eventDto.getDocumentNumber())
         .occurredDate(eventDto.getLineItems().get(0).getOccurredDate())
+        .isDraft(false)
         .build();
   }
 

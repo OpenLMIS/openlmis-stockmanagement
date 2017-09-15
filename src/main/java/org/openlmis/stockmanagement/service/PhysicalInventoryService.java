@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -51,39 +52,28 @@ public class PhysicalInventoryService {
   private HomeFacilityPermissionService homeFacilityPermissionService;
 
   /**
-   * Persist physical inventory, with an event id.
-   *
-   * @param inventoryDto inventoryDto.
-   * @param eventId      eventId.
-   * @throws IllegalAccessException IllegalAccessException.
-   * @throws InstantiationException InstantiationException.
-   */
-  public PhysicalInventory submitPhysicalInventory(PhysicalInventoryDto inventoryDto, UUID eventId)
-      throws IllegalAccessException, InstantiationException {
-    LOGGER.info("submit physical inventory");
-
-    PhysicalInventory inventory = inventoryDto.toPhysicalInventoryForSubmit();
-    inventory.setStockEvent(fromId(eventId, StockEvent.class));
-
-    return physicalInventoriesRepository.save(inventory);
-  }
-
-  /**
    * Find draft by program and facility.
    *
    * @param programId  programId.
    * @param facilityId facilityId.
    * @return found draft, or if not found, returns empty draft.
    */
-  public PhysicalInventoryDto findDraft(UUID programId, UUID facilityId) {
+  public List<PhysicalInventoryDto> findPhysicalInventory(UUID programId,
+                                                          UUID facilityId,
+                                                          Boolean isDraft) {
     LOGGER.info("find physical inventory draft");
-    PhysicalInventory foundInventory = physicalInventoriesRepository
-        .findByProgramIdAndFacilityIdAndIsDraft(programId, facilityId, true);
-    if (foundInventory == null) {
-      return null;
+    List<PhysicalInventory> found;
+    if (isDraft == null) {
+      found = physicalInventoriesRepository
+          .findByProgramIdAndFacilityId(programId, facilityId);
     } else {
-      return PhysicalInventoryDto.from(foundInventory);
+      found = physicalInventoriesRepository
+          .findByProgramIdAndFacilityIdAndIsDraft(programId, facilityId, isDraft);
     }
+    if (found == null) {
+      return null;
+    }
+    return PhysicalInventoryDto.from(found);
   }
 
   /**
@@ -141,5 +131,23 @@ public class PhysicalInventoryService {
   public void checkPermission(UUID program, UUID facility) {
     homeFacilityPermissionService.checkProgramSupported(program);
     permissionService.canEditPhysicalInventory(program, facility);
+  }
+
+  /**
+   * Persist physical inventory, with an event id.
+   *
+   * @param inventoryDto inventoryDto.
+   * @param eventId      eventId.
+   * @throws IllegalAccessException IllegalAccessException.
+   * @throws InstantiationException InstantiationException.
+   */
+  PhysicalInventory submitPhysicalInventory(PhysicalInventoryDto inventoryDto, UUID eventId)
+      throws IllegalAccessException, InstantiationException {
+    LOGGER.info("submit physical inventory");
+
+    PhysicalInventory inventory = inventoryDto.toPhysicalInventoryForSubmit();
+    inventory.setStockEvent(fromId(eventId, StockEvent.class));
+
+    return physicalInventoriesRepository.save(inventory);
   }
 }

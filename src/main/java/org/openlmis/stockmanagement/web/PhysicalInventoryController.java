@@ -91,13 +91,15 @@ public class PhysicalInventoryController {
    * @return returns found draft, if not found, returns empty draft.
    */
   @RequestMapping(method = GET)
-  public ResponseEntity<PhysicalInventoryDto> searchPhysicalInventory(
+  public ResponseEntity<List<PhysicalInventoryDto>> searchPhysicalInventory(
       @RequestParam UUID program,
-      @RequestParam UUID facility) {
+      @RequestParam UUID facility,
+      @RequestParam(required = false) Boolean isDraft) {
     physicalInventoryService.checkPermission(program, facility);
-    PhysicalInventoryDto draft = physicalInventoryService.findDraft(program, facility);
-    if (draft != null) {
-      return new ResponseEntity<>(draft, OK);
+    List<PhysicalInventoryDto> inventories =
+        physicalInventoryService.findPhysicalInventory(program, facility, isDraft);
+    if (inventories != null) {
+      return new ResponseEntity<>(inventories, OK);
     } else {
       return new ResponseEntity<>(NO_CONTENT);
     }

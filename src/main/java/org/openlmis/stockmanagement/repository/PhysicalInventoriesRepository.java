@@ -18,14 +18,18 @@ package org.openlmis.stockmanagement.repository;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-
+import java.util.List;
 import java.util.UUID;
 
 public interface PhysicalInventoriesRepository
     extends PagingAndSortingRepository<PhysicalInventory, UUID> {
 
-  PhysicalInventory findByProgramIdAndFacilityIdAndIsDraft(
+  List<PhysicalInventory> findByProgramIdAndFacilityIdAndIsDraft(
       @Param("programId") UUID programId,
       @Param("facilityId") UUID facilityId,
       @Param("isDraft") boolean isDraft);
+
+  List<PhysicalInventory> findByProgramIdAndFacilityId(
+      @Param("programId") UUID programId,
+      @Param("facilityId") UUID facilityId);
 }

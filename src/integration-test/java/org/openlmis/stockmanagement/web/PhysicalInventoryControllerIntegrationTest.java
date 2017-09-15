@@ -17,7 +17,6 @@ package org.openlmis.stockmanagement.web;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING;
@@ -39,6 +38,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 @SuppressWarnings("PMD.TooManyMethods")
@@ -63,39 +63,39 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
   @Test
   public void shouldGetChosenDraftWhenExists() {
     // given
-    UUID programId = UUID.randomUUID();
-    UUID facilityId = UUID.randomUUID();
     PhysicalInventoryDto expectedDraft = generatePhysicalInventory();
+    UUID programId = expectedDraft.getProgramId();
+    UUID facilityId = expectedDraft.getFacilityId();
 
-    when(physicalInventoryService.findDraft(eq(programId), eq(facilityId)))
-        .thenReturn(expectedDraft);
+    when(physicalInventoryService.findPhysicalInventory(programId, facilityId, true))
+        .thenReturn(Collections.singletonList(expectedDraft));
 
     // when
-    PhysicalInventoryDto result = restAssured.given()
+    List resultCollection = restAssured.given()
         .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
         .queryParam(PROGRAM_PARAM, programId)
         .queryParam(FACILITY_PARAM, facilityId)
+        .queryParam("isDraft", true)
         .when()
         .get(RESOURCE_URL)
         .then()
         .statusCode(200)
-        .extract().as(PhysicalInventoryDto.class);
+        .extract().as(List.class);
 
     // then
-    assertEquals(expectedDraft.getProgramId(), result.getProgramId());
-    assertEquals(expectedDraft.getFacilityId(), result.getFacilityId());
+    assertEquals(1, resultCollection.size());
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
   // GET /api/physicalInventories
 
   @Test
-  public void shouldReturnNoContentWhenDraftDoesNotExist() {
+  public void shouldReturnNoContentWhenInventoriesDoNotExistForProgramAndFacility() {
     // given
     UUID programId = UUID.randomUUID();
     UUID facilityId = UUID.randomUUID();
 
-    when(physicalInventoryService.findDraft(eq(programId), eq(facilityId)))
+    when(physicalInventoryService.findPhysicalInventory(programId, facilityId, null))
         .thenReturn(null);
 
     // when

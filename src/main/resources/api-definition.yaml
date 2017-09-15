@@ -49,6 +49,11 @@ schemas:
         }
   - physicalInventoryLineItem: !include schemas/physicalInventoryLineItem.json
   - physicalInventory: !include schemas/physicalInventory.json
+  - physicalInventories: |
+        {
+            "type": "array",
+            "items": {"type": "object", "$ref": "schemas/physicalInventory.json"}
+        }
   - stockAdjustment: !include schemas/stockAdjustment.json
   - localizedMessage: !include schemas/localizedMessage.json
   - stockEventResponse: !include schemas/stockEventResponse.json
@@ -761,20 +766,22 @@ traits:
   /physicalInventories:
       get:
         is: [ secured ]
-        description: Get a saved draft physical inventory. If draft does not exist, will return null. Only one draft is allowed at the same time for one facility&program. To save a new draft, the previous one will be replaced.
+        description: Get a list of saved physical inventory. If inventories do not exist, will return null.
         queryParameters:
           facility:
             required: true
           program:
             required: true
+          isDraft:
+            required: false
         responses:
           200:
             description: Retrieved a draft.
             body:
               application/json:
-                schema: physicalInventory
+                schema: physicalInventories
           204:
-            description: No draft has been saved yet.
+            description: No inventory has been saved yet.
           403:
             description: User does not have permission to view draft physical inventory.
             body:
@@ -783,7 +790,7 @@ traits:
 
       post:
         is: [ secured ]
-        description: Create empty draft physical inventory.
+        description: Create empty draft physical inventory. Only one draft is allowed at the same time for one facility&program.
         body:
           application/json:
             schema: physicalInventory
@@ -838,7 +845,7 @@ traits:
 
         put:
           is: [ secured ]
-          description: Save a draft physical inventory.
+          description: Save a draft physical inventory. Only one draft is allowed at the same time for one facility&program.
           body:
             application/json:
               schema: physicalInventory
