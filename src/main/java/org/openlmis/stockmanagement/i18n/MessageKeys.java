@@ -249,6 +249,9 @@ public abstract class MessageKeys {
   public static final String ERROR_PHYSICAL_INVENTORY_IS_SUBMITTED =
       PHYSICAL_INVENTORY_ERROR_PREFIX + ".isSubmitted";
 
+  public static final String ERROR_PHYSICAL_INVENTORY_DRAFT_EXISTS =
+      PHYSICAL_INVENTORY_ERROR_PREFIX + ".draft.exists";
+
   //report
   public static final String ERROR_GENERATE_REPORT_FAILED = ERROR_PREFIX + ".generateReport.failed";
 

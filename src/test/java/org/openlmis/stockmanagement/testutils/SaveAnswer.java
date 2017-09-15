@@ -13,17 +13,28 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.exception;
+package org.openlmis.stockmanagement.testutils;
 
-import org.openlmis.stockmanagement.utils.Message;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.openlmis.stockmanagement.domain.BaseEntity;
+import java.util.UUID;
 
-public class ResourceNotFoundException extends BaseMessageException {
-  public ResourceNotFoundException(Message message) {
-    super(message);
-  }
+public class SaveAnswer<T extends BaseEntity> implements Answer<T> {
 
-  public ResourceNotFoundException(String messageKey) {
-    super(messageKey);
+  @Override
+  public T answer(InvocationOnMock invocation) throws Throwable {
+    T obj = (T) invocation.getArguments()[0];
+
+    if (null == obj) {
+      return null;
+    }
+
+    if (null == obj.getId()) {
+      obj.setId(UUID.randomUUID());
+    }
+
+    return obj;
   }
 
 }

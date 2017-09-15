@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.service;
 
 import static org.openlmis.stockmanagement.domain.BaseEntity.fromId;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_DRAFT_EXISTS;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_IS_SUBMITTED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_NOT_FOUND;
 
@@ -87,8 +88,12 @@ public class PhysicalInventoryService {
     physicalInventoryValidator.validateEmptyDraft(dto);
     checkPermission(dto.getProgramId(), dto.getFacilityId());
 
+    checkIfDraftExists(dto);
+
     dto.setId(null);
-    physicalInventoriesRepository.save(dto.toEmptyPhysicalInventory());
+    PhysicalInventory save = physicalInventoriesRepository.save(dto.toEmptyPhysicalInventory());
+    dto.setId(save.getId());
+
     return dto;
   }
 
@@ -102,6 +107,8 @@ public class PhysicalInventoryService {
     LOGGER.info("save physical inventory draft");
     physicalInventoryValidator.validateDraft(dto, id);
     checkPermission(dto.getProgramId(), dto.getFacilityId());
+
+    checkIfDraftExists(dto);
 
     physicalInventoriesRepository.save(dto.toPhysicalInventoryForDraft());
     return dto;
@@ -149,5 +156,16 @@ public class PhysicalInventoryService {
     inventory.setStockEvent(fromId(eventId, StockEvent.class));
 
     return physicalInventoriesRepository.save(inventory);
+  }
+
+  private void checkIfDraftExists(PhysicalInventoryDto dto) {
+    List<PhysicalInventory> found = physicalInventoriesRepository
+        .findByProgramIdAndFacilityIdAndIsDraft(dto.getProgramId(), dto.getFacilityId(), true);
+    if (found != null && !found.isEmpty()) {
+      throw new ValidationMessageException(
+          new Message(ERROR_PHYSICAL_INVENTORY_DRAFT_EXISTS,
+              dto.getProgramId(),
+              dto.getFacilityId()));
+    }
   }
 }

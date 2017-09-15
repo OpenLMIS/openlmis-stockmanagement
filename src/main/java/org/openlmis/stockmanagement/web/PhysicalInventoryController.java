@@ -98,11 +98,11 @@ public class PhysicalInventoryController {
     physicalInventoryService.checkPermission(program, facility);
     List<PhysicalInventoryDto> inventories =
         physicalInventoryService.findPhysicalInventory(program, facility, isDraft);
-    if (inventories != null) {
-      return new ResponseEntity<>(inventories, OK);
-    } else {
+    if (inventories == null || inventories.isEmpty()) {
       return new ResponseEntity<>(NO_CONTENT);
     }
+    return new ResponseEntity<>(inventories, OK);
+
   }
 
   /**

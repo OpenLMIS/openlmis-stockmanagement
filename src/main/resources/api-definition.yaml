@@ -875,11 +875,22 @@ traits:
           responses:
             204:
               description: Draft deleted.
+            400:
+              description: Physical inventory is submittted.
+              body:
+                application/json:
+                    schema: localizedMessage
             403:
               description: User does not have permission to delete draft physical inventory.
               body:
                 application/json:
                     schema: localizedMessage
+            404:
+              description: Physical inventory not found.
+              body:
+                application/json:
+                  schema: localizedMessage
+
 
   /physicalInventoryTemplates:
       displayName: Physical Inventory report template.

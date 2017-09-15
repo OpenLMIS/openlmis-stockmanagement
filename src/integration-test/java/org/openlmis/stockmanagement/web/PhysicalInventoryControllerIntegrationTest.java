@@ -18,8 +18,11 @@ package org.openlmis.stockmanagement.web;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_IS_SUBMITTED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_ID_MISSING;
 
 import guru.nidi.ramltester.junit.RamlMatchers;
@@ -30,6 +33,7 @@ import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
 import org.openlmis.stockmanagement.dto.referencedata.DispensableDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
+import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.PhysicalInventoryService;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -96,7 +100,7 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
     UUID facilityId = UUID.randomUUID();
 
     when(physicalInventoryService.findPhysicalInventory(programId, facilityId, null))
-        .thenReturn(null);
+        .thenReturn(Collections.emptyList());
 
     // when
     restAssured.given()
@@ -219,7 +223,7 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
-  // DELETE /api/physicalInventories/draft
+  // DELETE /api/physicalInventories
 
   @Test
   public void shouldReturnNoContentAfterDeleteDraft() {
@@ -238,6 +242,52 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
         .delete(ID_URL)
         .then()
         .statusCode(204);
+
+    // then
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
+
+  @Test
+  public void shouldReturnBadRequestWhenInventoryIsSubmitted() {
+    // given
+    UUID physicalInventoryId = UUID.randomUUID();
+
+    doThrow(new ValidationMessageException(ERROR_PHYSICAL_INVENTORY_IS_SUBMITTED))
+        .when(physicalInventoryService)
+        .deletePhysicalInventory(physicalInventoryId);
+
+    // when
+    restAssured.given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .contentType(APPLICATION_JSON)
+        .pathParam("id", physicalInventoryId)
+        .when()
+        .delete(ID_URL)
+        .then()
+        .statusCode(400);
+
+    // then
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
+
+  @Test
+  public void shouldReturnNotFoundWhenInventoryIsNotFound() {
+    // given
+    UUID physicalInventoryId = UUID.randomUUID();
+
+    doThrow(new ResourceNotFoundException(ERROR_PHYSICAL_INVENTORY_NOT_FOUND))
+        .when(physicalInventoryService)
+        .deletePhysicalInventory(physicalInventoryId);
+
+    // when
+    restAssured.given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .contentType(APPLICATION_JSON)
+        .pathParam("id", physicalInventoryId)
+        .when()
+        .delete(ID_URL)
+        .then()
+        .statusCode(404);
 
     // then
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());

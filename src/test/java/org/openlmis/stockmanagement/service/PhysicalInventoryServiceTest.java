@@ -20,6 +20,8 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -40,6 +42,7 @@ import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
+import org.openlmis.stockmanagement.testutils.SaveAnswer;
 import org.openlmis.stockmanagement.validators.PhysicalInventoryValidator;
 import java.util.Collections;
 import java.util.List;
@@ -78,10 +81,49 @@ public class PhysicalInventoryServiceTest {
   }
 
   @Test
-  public void shouldReturnSubmittedInventryIfSavedDraftIsFound() throws Exception {
+  public void shouldReturnSubmittedInventoryIfSavedDraftIsFound() throws Exception {
     PhysicalInventory submittedInventory = createInventoryDraft(orderableId, programId, facilityId);
 
     shouldSearchBasedOnIsDraft(submittedInventory, false);
+  }
+
+  @Test
+  public void shouldCreateNewDraft() throws Exception {
+    //given
+    UUID programId = UUID.randomUUID();
+    UUID facilityId = UUID.randomUUID();
+    PhysicalInventoryDto piDto = createInventoryDto(programId, facilityId);
+    when(physicalInventoryRepository.save(any(PhysicalInventory.class)))
+        .thenAnswer(new SaveAnswer<PhysicalInventory>());
+
+    //when
+    PhysicalInventoryDto newDraft = physicalInventoryService.createNewDraft(piDto);
+
+    //then
+    assertNotNull(newDraft.getId());
+    verify(physicalInventoryRepository, times(1)).save(inventoryArgumentCaptor.capture());
+    PhysicalInventory captured = inventoryArgumentCaptor.getValue();
+    assertEquals(programId, captured.getProgramId());
+    assertEquals(facilityId, captured.getFacilityId());
+    assertEquals(true, captured.getIsDraft());
+    assertEquals(null, captured.getLineItems());
+
+    verify(homeFacilityPermissionService, times(1)).checkProgramSupported(programId);
+    verify(permissionService, times(1)).canEditPhysicalInventory(programId, facilityId);
+    verify(validator, times(1)).validateEmptyDraft(piDto);
+  }
+
+  @Test(expected = ValidationMessageException.class)
+  public void shouldThrowExceptionWhenCreateNewDraftIfExistsAlready() throws Exception {
+    UUID programId = UUID.randomUUID();
+    UUID facilityId = UUID.randomUUID();
+    PhysicalInventoryDto piDto = createInventoryDto(programId, facilityId);
+
+    when(physicalInventoryRepository
+        .findByProgramIdAndFacilityIdAndIsDraft(programId, facilityId, true))
+        .thenReturn(Collections.singletonList(mock(PhysicalInventory.class)));
+
+    physicalInventoryService.createNewDraft(piDto);
   }
 
   @Test
@@ -108,27 +150,17 @@ public class PhysicalInventoryServiceTest {
     verify(validator, times(1)).validateDraft(piDto, physicalInventoryId);
   }
 
-  @Test
-  public void shouldCreateNewDraft() throws Exception {
-    //given
+  @Test(expected = ValidationMessageException.class)
+  public void shouldThrowExceptionWhenSaveDraftIfExistsAlready() throws Exception {
     UUID programId = UUID.randomUUID();
     UUID facilityId = UUID.randomUUID();
     PhysicalInventoryDto piDto = createInventoryDto(programId, facilityId);
 
-    //when
+    when(physicalInventoryRepository
+        .findByProgramIdAndFacilityIdAndIsDraft(programId, facilityId, true))
+        .thenReturn(Collections.singletonList(mock(PhysicalInventory.class)));
+
     physicalInventoryService.createNewDraft(piDto);
-
-    //then
-    verify(physicalInventoryRepository, times(1)).save(inventoryArgumentCaptor.capture());
-    PhysicalInventory captured = inventoryArgumentCaptor.getValue();
-    assertEquals(programId, captured.getProgramId());
-    assertEquals(facilityId, captured.getFacilityId());
-    assertEquals(true, captured.getIsDraft());
-    assertEquals(null, captured.getLineItems());
-
-    verify(homeFacilityPermissionService, times(1)).checkProgramSupported(programId);
-    verify(permissionService, times(1)).canEditPhysicalInventory(programId, facilityId);
-    verify(validator, times(1)).validateEmptyDraft(piDto);
   }
 
   @Test
