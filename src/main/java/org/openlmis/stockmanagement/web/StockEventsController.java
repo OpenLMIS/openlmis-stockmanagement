@@ -19,21 +19,19 @@ import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import org.openlmis.stockmanagement.dto.StockEventDto;
-import org.openlmis.stockmanagement.dto.StockEventResponseDto;
 import org.openlmis.stockmanagement.service.HomeFacilityPermissionService;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockEventProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import java.util.UUID;
 
 /**
@@ -63,14 +61,13 @@ public class StockEventsController {
    * @throws IllegalAccessException IllegalAccessException.
    */
   @RequestMapping(value = "stockEvents", method = POST)
-  @ResponseStatus(CREATED)
-  @ResponseBody
   @Transactional(rollbackFor = {InstantiationException.class, IllegalAccessException.class})
-  public StockEventResponseDto createStockEvent(@RequestBody StockEventDto eventDto)
+  public ResponseEntity<UUID> createStockEvent(@RequestBody StockEventDto eventDto)
       throws InstantiationException, IllegalAccessException {
     LOGGER.debug("Try to create a stock event");
     checkPermission(eventDto);
-    return stockEventProcessor.process(eventDto);
+    UUID createdEventId = stockEventProcessor.process(eventDto);
+    return new ResponseEntity<>(createdEventId, CREATED);
   }
 
   private void checkPermission(StockEventDto eventDto) {

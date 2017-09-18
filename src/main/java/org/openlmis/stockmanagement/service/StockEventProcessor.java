@@ -25,7 +25,6 @@ import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventDto;
-import org.openlmis.stockmanagement.dto.StockEventResponseDto;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
@@ -72,14 +71,14 @@ public class StockEventProcessor {
    * @return the persisted event ids.
    */
 
-  public StockEventResponseDto process(StockEventDto eventDto)
+  public UUID process(StockEventDto eventDto)
       throws IllegalAccessException, InstantiationException {
     eventDto.setContext(contextBuilder.buildContext(eventDto));
     stockEventValidationsService.validate(eventDto);
     return saveEventAndGenerateLineItems(eventDto);
   }
 
-  private StockEventResponseDto saveEventAndGenerateLineItems(StockEventDto eventDto)
+  private UUID saveEventAndGenerateLineItems(StockEventDto eventDto)
       throws InstantiationException, IllegalAccessException {
     UUID currentUserId = eventDto.getContext().getCurrentUser().getId();
 
@@ -87,12 +86,8 @@ public class StockEventProcessor {
     UUID savedEventId = stockEventsRepository.save(stockEvent).getId();
     LOGGER.debug("Saved stock event with id " + savedEventId);
 
-    UUID physicalInventoryId = null;
     if (eventDto.isPhysicalInventory()) {
-      physicalInventoryId =
-          physicalInventoryService
-              .submitPhysicalInventory(fromEventDto(eventDto), savedEventId)
-              .getId();
+      physicalInventoryService.submitPhysicalInventory(fromEventDto(eventDto), savedEventId);
     }
     stockCardService.saveFromEvent(eventDto, savedEventId, currentUserId);
 
@@ -102,7 +97,7 @@ public class StockEventProcessor {
 
     sameOrderableGroups.values().forEach(group -> callNotifications(eventDto, group));
 
-    return new StockEventResponseDto(savedEventId, physicalInventoryId);
+    return savedEventId;
   }
 
   private void callNotifications(StockEventDto event, List<StockEventLineItem> groupItems) {

@@ -56,7 +56,6 @@ schemas:
         }
   - stockAdjustment: !include schemas/stockAdjustment.json
   - localizedMessage: !include schemas/localizedMessage.json
-  - stockEventResponse: !include schemas/stockEventResponse.json
   - uuid: |
       {
         "type": "string",
@@ -214,7 +213,7 @@ traits:
             description: Stock event has been processed with no validatoin error or persistence error.
             body:
               application/json:
-                schema: stockEventResponse
+                schema: uuid
 
           400:
             description: Failed to process stock event due to validation error.

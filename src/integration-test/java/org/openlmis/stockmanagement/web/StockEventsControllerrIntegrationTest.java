@@ -30,7 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.openlmis.stockmanagement.dto.StockEventDto;
-import org.openlmis.stockmanagement.dto.StockEventResponseDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.HomeFacilityPermissionService;
@@ -62,10 +61,9 @@ public class StockEventsControllerrIntegrationTest extends BaseWebTest {
   @Test
   public void should_return_201_when_event_successfully_created() throws Exception {
     //given
-    StockEventResponseDto response =
-        new StockEventResponseDto(UUID.randomUUID(), UUID.randomUUID());
+    UUID uuid = UUID.randomUUID();
     when(stockEventProcessor.process(any(StockEventDto.class)))
-        .thenReturn(response);
+        .thenReturn(uuid);
 
     //when
     StockEventDto stockEventDto = createStockEventDto();
@@ -80,7 +78,7 @@ public class StockEventsControllerrIntegrationTest extends BaseWebTest {
     //then
     resultActions.andDo(MockMvcResultHandlers.print())
         .andExpect(status().isCreated())
-        .andExpect(content().json(objectToJsonString(response)));
+        .andExpect(content().string("\"" + uuid.toString() + "\""));
   }
 
   @Test
