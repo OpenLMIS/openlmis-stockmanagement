@@ -766,7 +766,7 @@ traits:
   /physicalInventories:
       get:
         is: [ secured ]
-        description: Get a list of saved physical inventory. If inventories do not exist, will return null.
+        description: Get a list of saved physical inventory. If inventories do not exist, will return empty list.
         queryParameters:
           facility:
             required: true
@@ -776,12 +776,10 @@ traits:
             required: false
         responses:
           200:
-            description: Retrieved a draft.
+            description: list of physical inventories.
             body:
               application/json:
                 schema: physicalInventories
-          204:
-            description: No inventory has been saved yet.
           403:
             description: User does not have permission to view draft physical inventory.
             body:
@@ -834,6 +832,8 @@ traits:
                 200:
                     body:
                       application/pdf:
+                      application/json:
+                        schema: physicalInventory
                 404:
                     body:
                       application/json:

@@ -43,8 +43,8 @@ public class PhysicalInventoryLineItemDtoTest {
 
     //then
     assertThat(lineItemDto.getQuantity(), is(lineItem.getQuantity()));
-    assertThat(lineItemDto.getOrderable().getId(), is(lineItem.getOrderableId()));
-    assertThat(lineItemDto.getLot().getId(), is(lineItem.getLotId()));
+    assertThat(lineItemDto.getOrderableId(), is(lineItem.getOrderableId()));
+    assertThat(lineItemDto.getLotId(), is(lineItem.getLotId()));
     assertThat(lineItemDto.getStockAdjustments(), is(lineItem.getStockAdjustments()));
   }
 

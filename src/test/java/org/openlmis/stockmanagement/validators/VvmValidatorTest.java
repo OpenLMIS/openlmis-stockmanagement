@@ -101,7 +101,7 @@ public class VvmValidatorTest {
 
   private VvmApplicable generateVvmApplicable(OrderableDto orderable) {
     PhysicalInventoryLineItemDto lineItem = new PhysicalInventoryLineItemDto();
-    lineItem.setOrderable(orderable);
+    lineItem.setOrderableId(orderable.getId());
 
     return lineItem;
   }

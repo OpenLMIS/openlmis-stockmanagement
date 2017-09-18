@@ -84,7 +84,7 @@ public class PhysicalInventoryValidator {
     }
 
     boolean orderableMissing = lineItems.stream()
-        .anyMatch(lineItem -> lineItem.getOrderable() == null);
+        .anyMatch(lineItem -> lineItem.getOrderableId() == null);
     if (orderableMissing) {
       throw new ValidationMessageException(ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING);
     }

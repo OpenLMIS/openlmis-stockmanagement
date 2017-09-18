@@ -38,7 +38,6 @@ import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
-import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
@@ -81,10 +80,34 @@ public class PhysicalInventoryServiceTest {
   }
 
   @Test
-  public void shouldReturnSubmittedInventoryIfSavedDraftIsFound() throws Exception {
+  public void shouldReturnSubmittedInventoryIfIsFound() throws Exception {
     PhysicalInventory submittedInventory = createInventoryDraft(orderableId, programId, facilityId);
 
     shouldSearchBasedOnIsDraft(submittedInventory, false);
+  }
+
+  @Test
+  public void shouldReturnAllSavedInventories() throws Exception {
+    PhysicalInventory inventory = createInventoryDraft(orderableId, programId, facilityId);
+
+    //given
+    when(physicalInventoryRepository
+        .findByProgramIdAndFacilityId(programId, facilityId))
+        .thenReturn(Collections.singletonList(inventory));
+
+    //when
+    List<PhysicalInventoryDto> foundDraft =
+        physicalInventoryService.findPhysicalInventory(programId, facilityId, null);
+
+    //then
+    assertEquals(1, foundDraft.size());
+    assertEquals(programId, foundDraft.get(0).getProgramId());
+    assertEquals(facilityId, foundDraft.get(0).getFacilityId());
+
+    PhysicalInventoryLineItemDto lineItemDto = foundDraft.get(0).getLineItems().get(0);
+    assertEquals(orderableId, lineItemDto.getOrderableId());
+    assertEquals(null, lineItemDto.getQuantity());
+
   }
 
   @Test
@@ -156,11 +179,28 @@ public class PhysicalInventoryServiceTest {
     UUID facilityId = UUID.randomUUID();
     PhysicalInventoryDto piDto = createInventoryDto(programId, facilityId);
 
+    PhysicalInventory mock = mock(PhysicalInventory.class);
+    when(mock.getId()).thenReturn(UUID.randomUUID());
     when(physicalInventoryRepository
         .findByProgramIdAndFacilityIdAndIsDraft(programId, facilityId, true))
-        .thenReturn(Collections.singletonList(mock(PhysicalInventory.class)));
+        .thenReturn(Collections.singletonList(mock));
 
-    physicalInventoryService.createNewDraft(piDto);
+    physicalInventoryService.saveDraft(piDto, piDto.getId());
+  }
+
+  @Test
+  public void shouldNotThrowExceptionWhenSaveDraftIfExistingDraftHasSameId() throws Exception {
+    UUID programId = UUID.randomUUID();
+    UUID facilityId = UUID.randomUUID();
+    PhysicalInventoryDto piDto = createInventoryDto(programId, facilityId);
+
+    PhysicalInventory mock = mock(PhysicalInventory.class);
+    when(mock.getId()).thenReturn(piDto.getId());
+    when(physicalInventoryRepository
+        .findByProgramIdAndFacilityIdAndIsDraft(programId, facilityId, true))
+        .thenReturn(Collections.singletonList(mock));
+
+    physicalInventoryService.saveDraft(piDto, piDto.getId());
   }
 
   @Test
@@ -229,19 +269,19 @@ public class PhysicalInventoryServiceTest {
     assertEquals(isDraft, foundDraft.get(0).getIsDraft());
 
     PhysicalInventoryLineItemDto lineItemDto = foundDraft.get(0).getLineItems().get(0);
-    assertEquals(orderableId, lineItemDto.getOrderable().getId());
+    assertEquals(orderableId, lineItemDto.getOrderableId());
     assertEquals(null, lineItemDto.getQuantity());
-
   }
 
   private PhysicalInventoryDto createInventoryDto(UUID programId, UUID facilityId) {
     PhysicalInventoryLineItemDto piLineItemDto = PhysicalInventoryLineItemDto
         .builder()
-        .orderable(OrderableDto.builder().id(randomUUID()).build())
+        .orderableId(randomUUID())
         .quantity(null)//quantity is allowed to be null
         .build();
     return PhysicalInventoryDto
         .builder()
+        .id(UUID.randomUUID())
         .programId(programId)
         .facilityId(facilityId)
         .lineItems(singletonList(piLineItemDto))
@@ -253,6 +293,6 @@ public class PhysicalInventoryServiceTest {
     PhysicalInventoryLineItemDto lineItemDto = expected.get(0);
     PhysicalInventoryLineItem lineItem = actual.get(0);
     assertThat(lineItem.getQuantity(), is(lineItemDto.getQuantity()));
-    assertThat(lineItem.getOrderableId(), is(lineItemDto.getOrderable().getId()));
+    assertThat(lineItem.getOrderableId(), is(lineItemDto.getOrderableId()));
   }
 }

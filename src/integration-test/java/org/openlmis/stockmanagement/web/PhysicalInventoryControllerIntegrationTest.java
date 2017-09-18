@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.web;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -30,11 +31,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
-import org.openlmis.stockmanagement.dto.referencedata.DispensableDto;
-import org.openlmis.stockmanagement.dto.referencedata.LotDto;
-import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
 import org.openlmis.stockmanagement.service.PhysicalInventoryService;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
@@ -56,6 +55,9 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
 
   @MockBean
   private PhysicalInventoryService physicalInventoryService;
+
+  @MockBean
+  private PhysicalInventoriesRepository physicalInventoriesRepository;
 
   @Before
   public void setUp() {
@@ -91,10 +93,8 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
-  // GET /api/physicalInventories
-
   @Test
-  public void shouldReturnNoContentWhenInventoriesDoNotExistForProgramAndFacility() {
+  public void shouldReturnEmptyListWhenInventoriesDoNotExistForProgramAndFacility() {
     // given
     UUID programId = UUID.randomUUID();
     UUID facilityId = UUID.randomUUID();
@@ -103,16 +103,44 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
         .thenReturn(Collections.emptyList());
 
     // when
-    restAssured.given()
+    List response = restAssured.given()
         .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
         .queryParam(PROGRAM_PARAM, programId)
         .queryParam(FACILITY_PARAM, facilityId)
         .when()
         .get(RESOURCE_URL)
         .then()
-        .statusCode(204);
+        .statusCode(200)
+        .extract().as(List.class);
 
     // then
+    assertTrue(response.isEmpty());
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
+
+  // GET /api/physicalInventories/{id}
+
+  @Test
+  public void shouldReturnOnePhysicalInventory() {
+    // given
+    PhysicalInventoryDto expectedInventory = generatePhysicalInventory();
+
+    UUID piId = UUID.randomUUID();
+    when(physicalInventoriesRepository.findOne(piId))
+        .thenReturn(expectedInventory.toPhysicalInventoryForDraft());
+
+    // when
+    PhysicalInventoryDto response = restAssured.given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .pathParam("id", piId)
+        .when()
+        .get(ID_URL)
+        .then()
+        .statusCode(200)
+        .extract().as(expectedInventory.getClass());
+
+    // then
+    assertEquals(expectedInventory.getId(), response.getId());
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
@@ -320,41 +348,11 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
 
     item.setQuantity(10);
     item.setStockOnHand(5);
-    item.setOrderable(generateOrderable());
+    item.setOrderableId(UUID.randomUUID());
     item.setStockAdjustments(new ArrayList<>());
-    item.setLot(generateLot());
+    item.setLotId(UUID.randomUUID());
     item.setExtraData(new HashMap<>());
 
     return item;
-  }
-
-  private OrderableDto generateOrderable() {
-    OrderableDto orderable = new OrderableDto();
-
-    orderable.setId(UUID.randomUUID());
-    orderable.setProductCode("code");
-    orderable.setFullProductName("name");
-    orderable.setIdentifiers(new HashMap<>());
-    orderable.setExtraData(new HashMap<>());
-
-    DispensableDto dispensable = new DispensableDto();
-    dispensable.setDispensingUnit("unit");
-
-    orderable.setDispensable(dispensable);
-
-    return orderable;
-  }
-
-  private LotDto generateLot() {
-    LotDto lot = new LotDto();
-
-    lot.setId(UUID.randomUUID());
-    lot.setLotCode("code");
-    lot.setActive(true);
-    lot.setTradeItemId(UUID.randomUUID());
-    lot.setExpirationDate(LocalDate.now());
-    lot.setManufactureDate(LocalDate.now());
-
-    return lot;
   }
 }

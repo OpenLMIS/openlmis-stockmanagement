@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -72,7 +73,7 @@ public class PhysicalInventoryService {
           .findByProgramIdAndFacilityIdAndIsDraft(programId, facilityId, isDraft);
     }
     if (found == null) {
-      return null;
+      return Collections.emptyList();
     }
     return PhysicalInventoryDto.from(found);
   }
@@ -108,7 +109,7 @@ public class PhysicalInventoryService {
     physicalInventoryValidator.validateDraft(dto, id);
     checkPermission(dto.getProgramId(), dto.getFacilityId());
 
-    checkIfDraftExists(dto);
+    checkIfDraftExists(dto, id);
 
     physicalInventoriesRepository.save(dto.toPhysicalInventoryForDraft());
     return dto;
@@ -162,6 +163,19 @@ public class PhysicalInventoryService {
     List<PhysicalInventory> found = physicalInventoriesRepository
         .findByProgramIdAndFacilityIdAndIsDraft(dto.getProgramId(), dto.getFacilityId(), true);
     if (found != null && !found.isEmpty()) {
+      throw new ValidationMessageException(
+          new Message(ERROR_PHYSICAL_INVENTORY_DRAFT_EXISTS,
+              dto.getProgramId(),
+              dto.getFacilityId()));
+    }
+  }
+
+  private void checkIfDraftExists(PhysicalInventoryDto dto, UUID physicalInventoryToUpdate) {
+    List<PhysicalInventory> found = physicalInventoriesRepository
+        .findByProgramIdAndFacilityIdAndIsDraft(dto.getProgramId(), dto.getFacilityId(), true);
+    if (found != null
+        && !found.isEmpty()
+        && physicalInventoryToUpdate != found.get(0).getId()) {
       throw new ValidationMessageException(
           new Message(ERROR_PHYSICAL_INVENTORY_DRAFT_EXISTS,
               dto.getProgramId(),

@@ -36,10 +36,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
-import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
@@ -150,7 +148,7 @@ public class PhysicalInventoryValidatorTest {
   private PhysicalInventoryLineItemDto generateLineItem() {
     return PhysicalInventoryLineItemDto
         .builder()
-        .orderable(new OrderableDto())
+        .orderableId(UUID.randomUUID())
         .stockOnHand(5)
         .quantity(5)
         .stockAdjustments(new ArrayList<>())

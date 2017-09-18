@@ -3,20 +3,18 @@
   "$schema": "http://json-schema.org/draft-04/schema",
   "description": "Physical inventory line item",
   "properties": {
-    "orderable": {
-      "type": "object",
-      "title": "Orderable",
-      "description": "Indicates which orderable this physical inventory line item is for.",
-      "$ref": "orderable.json"
+    "orderableId": {
+      "type": "string",
+      "title": "OrderableId",
+      "description": "Indicates which orderable this physical inventory line item is for."
     },
     "lot": {
-      "type": "object",
-      "title": "Lot",
-      "description": "Indicates which lot this physical inventory line item is for.",
-      "$ref": "lot.json"
+      "type": "string",
+      "title": "LotId",
+      "description": "Indicates which lot this physical inventory line item is for."
     },
     "stockOnHand": {
-      "type": "integer",
+      "type": ["integer", "null"],
       "description": "Indicates previous stock on hand for an orderable."
     },
     "quantity": {
@@ -39,7 +37,7 @@
     }
   },
   "required": [
-    "orderable",
+    "orderableId",
     "quantity"
   ]
 }

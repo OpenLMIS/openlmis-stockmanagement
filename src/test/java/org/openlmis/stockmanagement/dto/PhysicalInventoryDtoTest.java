@@ -22,7 +22,6 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
-import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 import java.time.LocalDate;
 import java.util.Collections;
@@ -100,7 +99,7 @@ public class PhysicalInventoryDtoTest {
     piDto.setDocumentNumber(null);
 
     PhysicalInventoryLineItemDto piLineItemDto1 = new PhysicalInventoryLineItemDto();
-    piLineItemDto1.setOrderable(OrderableDto.builder().id(randomUUID()).build());
+    piLineItemDto1.setOrderableId(randomUUID());
     piLineItemDto1.setQuantity(123);
 
     piDto.setLineItems(Collections.singletonList(piLineItemDto1));
@@ -118,6 +117,6 @@ public class PhysicalInventoryDtoTest {
     PhysicalInventoryLineItemDto piLineItemDto = piDto.getLineItems().get(0);
     PhysicalInventoryLineItem piLineItem = inventory.getLineItems().get(0);
     assertThat(piLineItem.getQuantity(), is(piLineItemDto.getQuantity()));
-    assertThat(piLineItem.getOrderableId(), is(piLineItemDto.getOrderable().getId()));
+    assertThat(piLineItem.getOrderableId(), is(piLineItemDto.getOrderableId()));
   }
 }

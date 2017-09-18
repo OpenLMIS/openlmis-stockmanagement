@@ -15,21 +15,15 @@
 
 package org.openlmis.stockmanagement.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.openlmis.stockmanagement.domain.common.VvmApplicable;
 import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
 import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
-import org.openlmis.stockmanagement.dto.referencedata.LotDto;
-import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -39,8 +33,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot, VvmApplicable {
-  private OrderableDto orderable;
-  private LotDto lot;
+  private UUID orderableId;
+  private UUID lotId;
   private Integer stockOnHand;
   private Integer quantity;
   private List<StockAdjustment> stockAdjustments;
@@ -74,18 +68,8 @@ public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot,
         .quantity(lineItem.getQuantity())
         .stockAdjustments(lineItem.getStockAdjustments())
         .extraData(lineItem.getExtraData())
-        .orderable(OrderableDto.builder().id(lineItem.getOrderableId()).build())
-        .lot(lineItem.getLotId() == null ? null : LotDto.builder().id(lineItem.getLotId()).build())
+        .orderableId(lineItem.getOrderableId())
+        .lotId(lineItem.getLotId())
         .build();
-  }
-
-  @JsonIgnore
-  public UUID getOrderableId() {
-    return orderable.getId();
-  }
-
-  @JsonIgnore
-  public UUID getLotId() {
-    return lot == null ? null : lot.getId();
   }
 }
