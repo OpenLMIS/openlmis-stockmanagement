@@ -58,6 +58,21 @@ public class PhysicalInventoryValidatorTest {
   @InjectMocks
   private PhysicalInventoryValidator validator;
 
+  @Test
+  public void shouldPassAndCallVvmValidator() {
+    // given
+    PhysicalInventoryDto inventory = newInventory();
+
+    doNothing()
+        .when(vvmValidator).validate(any(), anyString());
+
+    // when
+    validator.validateDraft(inventory, UUID.fromString(inventory.getId().toString()));
+
+    // then
+    verify(vvmValidator, atLeastOnce()).validate(eq(inventory.getLineItems()), anyString());
+  }
+
   @Test(expected = ValidationMessageException.class)
   public void shouldRejectWhenNoLineItemsPresent() {
     // given
@@ -82,21 +97,6 @@ public class PhysicalInventoryValidatorTest {
 
     doNothing()
         .when(vvmValidator).validate(eq(inventory.getLineItems()), anyString());
-
-    // when
-    validator.validateDraft(inventory, inventory.getId());
-
-    // then
-    verify(vvmValidator, atLeastOnce()).validate(eq(inventory.getLineItems()), anyString());
-  }
-
-  @Test
-  public void shouldCallVvmValidator() {
-    // given
-    PhysicalInventoryDto inventory = newInventory();
-
-    doNothing()
-        .when(vvmValidator).validate(any(), anyString());
 
     // when
     validator.validateDraft(inventory, inventory.getId());
@@ -138,6 +138,15 @@ public class PhysicalInventoryValidatorTest {
     validator.validateEmptyDraft(physicalInventoryDto);
   }
 
+  private void testValidateBasedOnIfExistingIsDraft(boolean isDraft) {
+    PhysicalInventoryDto inventory = newInventory();
+    PhysicalInventory existingInventory = mock(PhysicalInventory.class);
+    when(existingInventory.getIsDraft()).thenReturn(isDraft);
+    when(repository.findOne(inventory.getId())).thenReturn(existingInventory);
+
+    validator.validateDraft(inventory, inventory.getId());
+  }
+
   private PhysicalInventoryDto newInventory() {
     PhysicalInventoryDto inventory = new PhysicalInventoryDto();
     inventory.setId(randomUUID());
@@ -153,14 +162,5 @@ public class PhysicalInventoryValidatorTest {
         .quantity(5)
         .stockAdjustments(new ArrayList<>())
         .build();
-  }
-
-  private void testValidateBasedOnIfExistingIsDraft(boolean isDraft) {
-    PhysicalInventoryDto inventory = newInventory();
-    PhysicalInventory existingInventory = mock(PhysicalInventory.class);
-    when(existingInventory.getIsDraft()).thenReturn(isDraft);
-    when(repository.findOne(inventory.getId())).thenReturn(existingInventory);
-
-    validator.validateDraft(inventory, inventory.getId());
   }
 }

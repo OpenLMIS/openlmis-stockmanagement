@@ -53,7 +53,7 @@ public class PhysicalInventoryValidator {
     * @param inventory physical inventory to validate.
     */
   public void validateDraft(PhysicalInventoryDto inventory, UUID id) {
-    if (inventory.getId() != id) {
+    if (!inventory.getId().equals(id)) {
       throw new ValidationMessageException(ERROR_PHYSICAL_INVENTORY_ID_MISMATCH);
     }
     if (id != null) {
