@@ -56,11 +56,9 @@ public class PhysicalInventoryValidator {
     if (!inventory.getId().equals(id)) {
       throw new ValidationMessageException(ERROR_PHYSICAL_INVENTORY_ID_MISMATCH);
     }
-    if (id != null) {
-      PhysicalInventory foundInventory = physicalInventoriesRepository.findOne(id);
-      if (foundInventory != null && !foundInventory.getIsDraft()) {
-        throw new ValidationMessageException(ERROR_PHYSICAL_INVENTORY_IS_SUBMITTED);
-      }
+    PhysicalInventory foundInventory = physicalInventoriesRepository.findOne(id);
+    if (foundInventory != null && !foundInventory.getIsDraft()) {
+      throw new ValidationMessageException(ERROR_PHYSICAL_INVENTORY_IS_SUBMITTED);
     }
 
     List<PhysicalInventoryLineItemDto> lineItems = inventory.getLineItems();
