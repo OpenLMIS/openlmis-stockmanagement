@@ -81,7 +81,7 @@ public class PhysicalInventoryController {
   private PhysicalInventoryService physicalInventoryService;
 
   @Autowired
-  private PhysicalInventoriesRepository physicalInventoriesRepository;
+  private PhysicalInventoriesRepository physicalInventoryRepository;
 
   /**
    * Get a draft physical inventory.
@@ -112,7 +112,7 @@ public class PhysicalInventoryController {
   @ResponseStatus(OK)
   @ResponseBody
   public PhysicalInventoryDto getPhysicalInventory(@PathVariable UUID id) {
-    PhysicalInventory foundInventory = physicalInventoriesRepository.findOne(id);
+    PhysicalInventory foundInventory = physicalInventoryRepository.findOne(id);
     if (foundInventory != null) {
       physicalInventoryService.checkPermission(
           foundInventory.getProgramId(), foundInventory.getFacilityId());

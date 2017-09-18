@@ -819,7 +819,7 @@ traits:
                 repeat: false
         get:
             is: [ secured ]
-            description: Print Physical Inventory to a pdf file.
+            description: Get a physical inventory with format specified in query param. Json format is default.
 
             queryParameters:
               format:
