@@ -18,6 +18,7 @@
 					l.lotcode as lotcode,
 					l.expirationdate as expirationdate,
 					pil.quantity,
+					pil.previousstockonhand as soh,
 					pil.extradata,
 					adj.quantity as reasonquantity,
 					r.name as reasonname
@@ -28,7 +29,7 @@
 				LEFT JOIN stockmanagement.physical_inventory_line_item_reasons adj on adj.physicalinventorylineitemid = pil.id
 				LEFT JOIN stockmanagement.stock_card_line_item_reasons r on r.id = adj.reasonid
 				WHERE pi.id = $P!{pi_id} AND pil.quantity IS NOT NULL
-				GROUP BY o.code, o.fullproductname, l.lotcode, l.expirationdate, pil.quantity, pil.extradata, adj.quantity, adj.id, r.name
+				GROUP BY o.code, o.fullproductname, l.lotcode, l.expirationdate, pil.quantity, pil.previousstockonhand, pil.extradata, adj.quantity, adj.id, r.name
 				ORDER BY o.code, l.lotcode NULLS FIRST
 		]]>
 	</queryString>
@@ -37,12 +38,16 @@
 	<field name="lotcode" class="java.lang.String"/>
 	<field name="expirationdate" class="java.sql.Date"/>
 	<field name="quantity" class="java.lang.Integer"/>
+	<field name="soh" class="java.lang.Integer"/>
 	<field name="reasonquantity" class="java.lang.Integer"/>
 	<field name="reasonname" class="java.lang.String"/>
 	<field name="extradata" class="java.lang.String"/>
 	<field name="max_row_num" class="java.lang.Integer"/>
-	<variable name="quantitySumValue" class="java.lang.Double" calculation="Sum" resetType="Group" resetGroup="productGroup">
+	<variable name="quantitySumValue" class="java.lang.Integer" calculation="Sum" resetType="Group" resetGroup="productGroup">
 		<variableExpression><![CDATA[$F{quantity}]]></variableExpression>
+	</variable>
+	<variable name="sohSumValue" class="java.lang.Integer" calculation="Sum" resetType="Group" resetGroup="productGroup">
+		<variableExpression><![CDATA[$F{soh}]]></variableExpression>
 	</variable>
 	<group name="productGroup">
 		<groupExpression><![CDATA[$F{productcode} + $F{productname}]]></groupExpression>
@@ -58,7 +63,7 @@
 						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					</box>
 				</staticText>
-				<textField evaluationTime="Group" evaluationGroup="productGroup" pattern="###0;-###0">
+				<textField evaluationTime="Group" evaluationGroup="productGroup">
 					<reportElement mode="Opaque" x="592" y="0" width="72" height="25" uuid="1dd698e8-9aae-4cd6-94b9-708523090dec"/>
 					<box padding="3">
 						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -71,7 +76,7 @@
 					</textElement>
 					<textFieldExpression><![CDATA[$V{quantitySumValue}]]></textFieldExpression>
 				</textField>
-				<textField evaluationTime="Group" evaluationGroup="productGroup" pattern="###0;-###0">
+				<textField evaluationTime="Group" evaluationGroup="productGroup">
 					<reportElement mode="Opaque" x="520" y="0" width="72" height="25" forecolor="#848484" uuid="d2a96208-ada5-4412-bdc6-3ab766acbf7e"/>
 					<box padding="3">
 						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -82,7 +87,7 @@
 					<textElement textAlignment="Right">
 						<font size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$V{quantitySumValue}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$V{sohSumValue}]]></textFieldExpression>
 				</textField>
 				<staticText>
 					<reportElement mode="Opaque" x="418" y="0" width="102" height="25" uuid="d07d08b5-df52-43b1-b3d0-d571623c8b02"/>
@@ -314,7 +319,7 @@
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{quantity}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{soh}]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Group" evaluationGroup="lineItemGroup" isBlankWhenNull="true">
 				<reportElement x="592" y="0" width="72" height="25" uuid="a2c8fc54-7cdc-442a-9ced-608a01ef270b" printWhenGroupChanges="lineItemGroup">

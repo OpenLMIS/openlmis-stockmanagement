@@ -36,6 +36,7 @@ import org.mockito.Mockito;
 import org.openlmis.stockmanagement.BaseIntegrationTest;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
+import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
@@ -66,6 +67,9 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
 
   @MockBean
   private StockoutNotifier stockoutNotifier;
+
+  @MockBean
+  private PhysicalInventoryService physicalInventoryService;
 
   @Autowired
   private StockEventProcessor stockEventProcessor;
@@ -154,7 +158,7 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  public void should_persist_physical_inventory_when_event_is_about_physical_inventory()
+  public void shouldSubmitPhysicalInventoryWhenEventIsAboutPhysicalInventory()
       throws Exception {
     //given
     StockEventDto stockEventDto = createStockEventDto();
@@ -166,8 +170,8 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
     stockEventProcessor.process(stockEventDto);
 
     //then
-    assertSize(cardSize + 1, eventSize + 1, lineItemSize + 1);
-    assertThat(physicalInventoriesRepository.count(), is(1L));
+    verify(physicalInventoryService)
+        .submitPhysicalInventory(any(PhysicalInventoryDto.class), any(UUID.class));
   }
 
   @Test

@@ -20,6 +20,7 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -34,6 +35,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
@@ -41,10 +43,13 @@ import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
+import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.testutils.SaveAnswer;
 import org.openlmis.stockmanagement.validators.PhysicalInventoryValidator;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 @SuppressWarnings("PMD.TooManyMethods")
@@ -65,12 +70,40 @@ public class PhysicalInventoryServiceTest {
   @Mock
   private PermissionService permissionService;
 
+  @Mock
+  private StockCardRepository stockCardRepository;
+
   @InjectMocks
   private PhysicalInventoryService physicalInventoryService;
 
+  private StockCard stockCard = mock(StockCard.class);
   private UUID programId = randomUUID();
   private UUID facilityId = randomUUID();
   private UUID orderableId = randomUUID();
+  private PhysicalInventoryLineItemDto lineItemDto;
+
+  @Test
+  public void shouldSubmitPhysicalInventory() throws Exception {
+    PhysicalInventoryDto physicalInventoryDto = newInventoryForSubmit();
+    int previousSoH = new Random().nextInt();
+    when(stockCardRepository
+        .findByProgramIdAndFacilityIdAndOrderableIdAndLotId(
+            physicalInventoryDto.getProgramId(),
+            physicalInventoryDto.getFacilityId(),
+            lineItemDto.getOrderableId(),
+            lineItemDto.getLotId()))
+        .thenReturn(stockCard);
+    StockCard cloneOfCard = mockCloneOfCard(previousSoH);
+    when(stockCard.shallowCopy()).thenReturn(cloneOfCard);
+
+    physicalInventoryService.submitPhysicalInventory(physicalInventoryDto, UUID.randomUUID());
+
+    verify(physicalInventoryRepository, times(1)).save(inventoryArgumentCaptor.capture());
+    verify(stockCard).shallowCopy();
+    verify(cloneOfCard).calculateStockOnHand();
+
+    verifyPhysicalInventorySavedWithSohAndAsDraft(previousSoH);
+  }
 
   @Test
   public void shouldReturnDraftIfSavedDraftIsFound() throws Exception {
@@ -241,6 +274,41 @@ public class PhysicalInventoryServiceTest {
         .thenReturn(physicalInventory);
 
     physicalInventoryService.deletePhysicalInventory(physicalInventoryId);
+  }
+
+  private PhysicalInventoryDto newInventoryForSubmit() {
+    PhysicalInventoryDto inventory = new PhysicalInventoryDto();
+    inventory.setId(randomUUID());
+    inventory.setProgramId(randomUUID());
+    inventory.setFacilityId(randomUUID());
+    inventory.setIsDraft(true);
+    lineItemDto = generateLineItem();
+    inventory.setLineItems(Collections.singletonList(lineItemDto));
+    return inventory;
+  }
+
+  private PhysicalInventoryLineItemDto generateLineItem() {
+    return PhysicalInventoryLineItemDto
+        .builder()
+        .orderableId(UUID.randomUUID())
+        .lotId(UUID.randomUUID())
+        .quantity(5)
+        .stockAdjustments(new ArrayList<>())
+        .build();
+  }
+
+  private StockCard mockCloneOfCard(int previousSoH) {
+    StockCard cloneOfCard = mock(StockCard.class);
+    when(cloneOfCard.getStockOnHand()).thenReturn(previousSoH);
+    return cloneOfCard;
+  }
+
+  private void verifyPhysicalInventorySavedWithSohAndAsDraft(int previousSoH) {
+    PhysicalInventory captured = inventoryArgumentCaptor.getValue();
+    Integer previousStockOnHand = captured.getLineItems().get(0).getPreviousStockOnHand();
+    assertNotNull(previousStockOnHand);
+    assertEquals(previousSoH, previousStockOnHand.intValue());
+    assertFalse(captured.getIsDraft());
   }
 
   private PhysicalInventory createInventoryDraft(

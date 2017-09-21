@@ -68,4 +68,6 @@ public class PhysicalInventoryLineItem extends BaseEntity implements VvmApplicab
           orphanRemoval = true)
   @JoinColumn(name = "physicalInventoryLineItemId")
   private List<StockAdjustment> stockAdjustments;
+
+  private Integer previousStockOnHand;
 }

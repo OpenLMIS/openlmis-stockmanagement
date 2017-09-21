@@ -20,12 +20,15 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVEN
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_IS_SUBMITTED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_NOT_FOUND;
 
+import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
+import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.utils.Message;
 import org.openlmis.stockmanagement.validators.PhysicalInventoryValidator;
 import org.slf4j.Logger;
@@ -52,6 +55,9 @@ public class PhysicalInventoryService {
 
   @Autowired
   private HomeFacilityPermissionService homeFacilityPermissionService;
+
+  @Autowired
+  private StockCardRepository stockCardRepository;
 
   /**
    * Find draft by program and facility.
@@ -155,6 +161,18 @@ public class PhysicalInventoryService {
 
     PhysicalInventory inventory = inventoryDto.toPhysicalInventoryForSubmit();
     inventory.setStockEvent(fromId(eventId, StockEvent.class));
+
+    for (PhysicalInventoryLineItem line : inventory.getLineItems()) {
+      StockCard foundCard = stockCardRepository
+          .findByProgramIdAndFacilityIdAndOrderableIdAndLotId(
+              inventory.getProgramId(), inventory.getFacilityId(),
+              line.getOrderableId(), line.getLotId());
+      //use a shallow copy of stock card to do recalculation, because some domain model will be
+      //modified during recalculation, this will avoid persistence of those modified models
+      StockCard stockCard = foundCard.shallowCopy();
+      stockCard.calculateStockOnHand();
+      line.setPreviousStockOnHand(stockCard.getStockOnHand());
+    }
 
     return physicalInventoriesRepository.save(inventory);
   }
