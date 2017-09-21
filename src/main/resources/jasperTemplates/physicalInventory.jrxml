@@ -34,7 +34,7 @@
 				<textElement verticalAlignment="Middle">
 					<font size="16" pdfFontName="Helvetica-Bold" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Submitted Physical Inventory for Approval]]></text>
+				<text><![CDATA[Submitted Physical Inventory]]></text>
 			</staticText>
 			<textField>
 				<reportElement x="20" y="40" width="800" height="20" uuid="ec47a93b-983c-447f-85cf-4775e800330a"/>
