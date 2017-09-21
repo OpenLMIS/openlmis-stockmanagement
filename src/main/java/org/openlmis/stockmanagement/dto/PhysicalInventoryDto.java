@@ -131,6 +131,7 @@ public class PhysicalInventoryDto {
         .signature(eventDto.getSignature())
         .documentNumber(eventDto.getDocumentNumber())
         .occurredDate(eventDto.getLineItems().get(0).getOccurredDate())
+        .lineItems(PhysicalInventoryLineItemDto.from(eventDto.getLineItems()))
         .isDraft(false)
         .build();
   }

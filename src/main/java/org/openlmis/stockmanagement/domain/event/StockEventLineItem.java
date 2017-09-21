@@ -31,6 +31,7 @@ import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -119,6 +120,21 @@ public class StockEventLineItem extends BaseEntity
 
   public boolean isPhysicalInventory() {
     return sourceId == null && destinationId == null && reasonId == null;
+  }
+
+  /**
+   * Returns clean copy of stock adjustments.
+   */
+  public List<StockAdjustment> stockAdjustments() {
+    if (getStockAdjustments() != null) {
+      List<StockAdjustment> newAdjustments = new ArrayList<>(stockAdjustments.size());
+      getStockAdjustments().forEach(stockAdjustment -> newAdjustments.add(StockAdjustment.builder()
+          .reason(stockAdjustment.getReason())
+          .quantity(stockAdjustment.getQuantity())
+          .build()));
+      return newAdjustments;
+    }
+    return null;
   }
 
 }

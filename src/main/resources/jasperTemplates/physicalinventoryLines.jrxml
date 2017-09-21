@@ -7,30 +7,28 @@
 		<![CDATA[
 			with temp as (
 				select row_number() over () as rownum
-				from stockmanagement.stock_event_line_items sel
-				INNER JOIN stockmanagement.stock_events se on se.id = sel.stockeventid
-				INNER JOIN stockmanagement.physical_inventories pi on pi.stockeventid = se.id
-				LEFT JOIN stockmanagement.physical_inventory_line_item_reasons r on r.stockeventlineitemid = sel.id
-				WHERE pi.id = $P!{pi_id}
+				from stockmanagement.physical_inventory_line_items pil
+				INNER JOIN stockmanagement.physical_inventories pi on pi.id = pil.physicalinventoryid
+				LEFT JOIN stockmanagement.physical_inventory_line_item_reasons adj on adj.physicalinventorylineitemid = pil.id
+				WHERE pi.id = $P!{pi_id} AND pil.quantity IS NOT NULL
 			)
 			select max(rownum) as max_row_num,
 					o.code as productcode,
 					o.fullproductname as productname,
 					l.lotcode as lotcode,
 					l.expirationdate as expirationdate,
-					sel.quantity,
-					sel.extradata,
+					pil.quantity,
+					pil.extradata,
 					adj.quantity as reasonquantity,
 					r.name as reasonname
-				from temp, stockmanagement.stock_event_line_items sel
-				INNER JOIN stockmanagement.stock_events se on se.id = sel.stockeventid
-				INNER JOIN stockmanagement.physical_inventories pi on pi.stockeventid = se.id
-				INNER JOIN referencedata.orderables o on o.id = sel.orderableid
-				LEFT JOIN referencedata.lots l on l.id = sel.lotId
-				LEFT JOIN stockmanagement.physical_inventory_line_item_reasons adj on adj.stockeventlineitemid = sel.id
+				from temp, stockmanagement.physical_inventory_line_items pil
+				INNER JOIN stockmanagement.physical_inventories pi on pi.id = pil.physicalinventoryid
+				INNER JOIN referencedata.orderables o on o.id = pil.orderableid
+				LEFT JOIN referencedata.lots l on l.id = pil.lotId
+				LEFT JOIN stockmanagement.physical_inventory_line_item_reasons adj on adj.physicalinventorylineitemid = pil.id
 				LEFT JOIN stockmanagement.stock_card_line_item_reasons r on r.id = adj.reasonid
-				WHERE pi.id = $P!{pi_id}
-				GROUP BY o.code, o.fullproductname, l.lotcode, l.expirationdate, sel.quantity, sel.extradata, adj.quantity, adj.id, r.name
+				WHERE pi.id = $P!{pi_id} AND pil.quantity IS NOT NULL
+				GROUP BY o.code, o.fullproductname, l.lotcode, l.expirationdate, pil.quantity, pil.extradata, adj.quantity, adj.id, r.name
 				ORDER BY o.code, l.lotcode NULLS FIRST
 		]]>
 	</queryString>

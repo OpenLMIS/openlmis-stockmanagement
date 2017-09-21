@@ -43,10 +43,8 @@ import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.utils.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -147,9 +145,7 @@ public class StockCardLineItem extends BaseEntity {
         .originEvent(fromId(savedEventId, StockEvent.class))
 
         .quantity(eventLineItem.getQuantity())
-        .stockAdjustments(eventLineItem.getStockAdjustments() != null
-            ? new ArrayList<>(eventLineItem.getStockAdjustments())
-            : null)
+        .stockAdjustments(eventLineItem.stockAdjustments())
 
         .occurredDate(eventLineItem.getOccurredDate())
         .processedDate(now())

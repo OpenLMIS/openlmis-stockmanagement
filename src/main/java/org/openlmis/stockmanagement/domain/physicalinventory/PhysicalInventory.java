@@ -51,7 +51,7 @@ public class PhysicalInventory extends BaseEntity {
   private String documentNumber;
 
   @LazyCollection(FALSE)
-  @OneToMany(cascade = ALL, mappedBy = "physicalInventory")
+  @OneToMany(cascade = ALL, mappedBy = "physicalInventory", orphanRemoval = true)
   private List<PhysicalInventoryLineItem> lineItems;
 
   @OneToOne
