@@ -69,5 +69,5 @@ public class PhysicalInventoryLineItem extends BaseEntity implements VvmApplicab
   @JoinColumn(name = "physicalInventoryLineItemId")
   private List<StockAdjustment> stockAdjustments;
 
-  private Integer previousStockOnHand;
+  private Integer previousStockOnHandWhenSubmitted;
 }

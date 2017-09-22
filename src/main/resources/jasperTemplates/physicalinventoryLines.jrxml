@@ -18,7 +18,7 @@
 					l.lotcode as lotcode,
 					l.expirationdate as expirationdate,
 					pil.quantity,
-					pil.previousstockonhand as soh,
+					pil.previousstockonhandwhensubmitted as soh,
 					pil.extradata,
 					adj.quantity as reasonquantity,
 					r.name as reasonname
@@ -29,7 +29,7 @@
 				LEFT JOIN stockmanagement.physical_inventory_line_item_reasons adj on adj.physicalinventorylineitemid = pil.id
 				LEFT JOIN stockmanagement.stock_card_line_item_reasons r on r.id = adj.reasonid
 				WHERE pi.id = $P!{pi_id} AND pil.quantity IS NOT NULL
-				GROUP BY o.code, o.fullproductname, l.lotcode, l.expirationdate, pil.quantity, pil.previousstockonhand, pil.extradata, adj.quantity, adj.id, r.name
+				GROUP BY o.code, o.fullproductname, l.lotcode, l.expirationdate, pil.quantity, pil.previousstockonhandwhensubmitted, pil.extradata, adj.quantity, adj.id, r.name
 				ORDER BY o.code, l.lotcode NULLS FIRST
 		]]>
 	</queryString>
@@ -319,7 +319,7 @@
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{soh}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{soh} != null ? $F{soh} : ""]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Group" evaluationGroup="lineItemGroup" isBlankWhenNull="true">
 				<reportElement x="592" y="0" width="72" height="25" uuid="a2c8fc54-7cdc-442a-9ced-608a01ef270b" printWhenGroupChanges="lineItemGroup">

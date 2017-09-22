@@ -172,7 +172,7 @@ public class PhysicalInventoryService {
       if (foundCard != null) {
         StockCard stockCard = foundCard.shallowCopy();
         stockCard.calculateStockOnHand();
-        line.setPreviousStockOnHand(stockCard.getStockOnHand());
+        line.setPreviousStockOnHandWhenSubmitted(stockCard.getStockOnHand());
       }
     }
 

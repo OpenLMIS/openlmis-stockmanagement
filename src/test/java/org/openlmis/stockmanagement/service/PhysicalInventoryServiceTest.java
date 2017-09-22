@@ -305,7 +305,8 @@ public class PhysicalInventoryServiceTest {
 
   private void verifyPhysicalInventorySavedWithSohAndAsDraft(int previousSoH) {
     PhysicalInventory captured = inventoryArgumentCaptor.getValue();
-    Integer previousStockOnHand = captured.getLineItems().get(0).getPreviousStockOnHand();
+    Integer previousStockOnHand =
+        captured.getLineItems().get(0).getPreviousStockOnHandWhenSubmitted();
     assertNotNull(previousStockOnHand);
     assertEquals(previousSoH, previousStockOnHand.intValue());
     assertFalse(captured.getIsDraft());
