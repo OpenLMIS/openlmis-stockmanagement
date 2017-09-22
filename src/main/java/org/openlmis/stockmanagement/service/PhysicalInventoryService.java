@@ -169,9 +169,11 @@ public class PhysicalInventoryService {
               line.getOrderableId(), line.getLotId());
       //use a shallow copy of stock card to do recalculation, because some domain model will be
       //modified during recalculation, this will avoid persistence of those modified models
-      StockCard stockCard = foundCard.shallowCopy();
-      stockCard.calculateStockOnHand();
-      line.setPreviousStockOnHand(stockCard.getStockOnHand());
+      if (foundCard != null) {
+        StockCard stockCard = foundCard.shallowCopy();
+        stockCard.calculateStockOnHand();
+        line.setPreviousStockOnHand(stockCard.getStockOnHand());
+      }
     }
 
     return physicalInventoriesRepository.save(inventory);
