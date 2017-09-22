@@ -22,8 +22,10 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -103,6 +105,26 @@ public class PhysicalInventoryServiceTest {
     verify(cloneOfCard).calculateStockOnHand();
 
     verifyPhysicalInventorySavedWithSohAndAsDraft(previousSoH);
+  }
+
+  @Test
+  public void shouldLeavePreviousSohAsNullWhenSubmitPhysicalInventoryIfNoStockCardFound()
+      throws Exception {
+    PhysicalInventoryDto physicalInventoryDto = newInventoryForSubmit();
+    when(stockCardRepository
+        .findByProgramIdAndFacilityIdAndOrderableIdAndLotId(
+            physicalInventoryDto.getProgramId(),
+            physicalInventoryDto.getFacilityId(),
+            lineItemDto.getOrderableId(),
+            lineItemDto.getLotId()))
+        .thenReturn(null);
+
+    physicalInventoryService.submitPhysicalInventory(physicalInventoryDto, UUID.randomUUID());
+
+    verify(physicalInventoryRepository, times(1)).save(inventoryArgumentCaptor.capture());
+    verify(stockCard, never()).shallowCopy();
+
+    verifyPhysicalInventorySavedWithoutSohAndAsDraft();
   }
 
   @Test
@@ -309,6 +331,14 @@ public class PhysicalInventoryServiceTest {
         captured.getLineItems().get(0).getPreviousStockOnHandWhenSubmitted();
     assertNotNull(previousStockOnHand);
     assertEquals(previousSoH, previousStockOnHand.intValue());
+    assertFalse(captured.getIsDraft());
+  }
+
+  private void verifyPhysicalInventorySavedWithoutSohAndAsDraft() {
+    PhysicalInventory captured = inventoryArgumentCaptor.getValue();
+    Integer previousStockOnHand =
+        captured.getLineItems().get(0).getPreviousStockOnHandWhenSubmitted();
+    assertNull(previousStockOnHand);
     assertFalse(captured.getIsDraft());
   }
 
