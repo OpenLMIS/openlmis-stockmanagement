@@ -44,10 +44,10 @@
 	<field name="extradata" class="java.lang.String"/>
 	<field name="max_row_num" class="java.lang.Integer"/>
 	<variable name="quantitySumValue" class="java.lang.Integer" calculation="Sum" resetType="Group" resetGroup="productGroup">
-		<variableExpression><![CDATA[$F{quantity}]]></variableExpression>
+		<variableExpression><![CDATA[($V{lineItemGroup_COUNT} == 1) ? $F{quantity} : 0]]></variableExpression>
 	</variable>
 	<variable name="sohSumValue" class="java.lang.Integer" calculation="Sum" resetType="Group" resetGroup="productGroup">
-		<variableExpression><![CDATA[$F{soh}]]></variableExpression>
+		<variableExpression><![CDATA[($V{lineItemGroup_COUNT} == 1) ? $F{soh} : 0]]></variableExpression>
 	</variable>
 	<group name="productGroup">
 		<groupExpression><![CDATA[$F{productcode} + $F{productname}]]></groupExpression>
