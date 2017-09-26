@@ -48,7 +48,7 @@
 				<textElement>
 					<font size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[MessageFormat.format("Facility: {0} ; Program: {1}", $F{facility}, $F{program})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[MessageFormat.format("Facility: {0}; Program: {1}", $F{facility}, $F{program})]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="20" y="80" width="800" height="15" uuid="08e7b43c-4f44-4e33-88f6-92324585772e"/>
