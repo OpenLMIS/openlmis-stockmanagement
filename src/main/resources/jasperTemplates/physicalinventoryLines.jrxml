@@ -4,8 +4,7 @@
 	<import value="java.text.*"/>
 	<parameter name="pi_id" class="java.lang.String" isForPrompting="false"/>
 	<queryString>
-		<![CDATA[
-			with temp as (
+		<![CDATA[with temp as (
 				select row_number() over () as rownum
 				from stockmanagement.physical_inventory_line_items pil
 				INNER JOIN stockmanagement.physical_inventories pi on pi.id = pil.physicalinventoryid
@@ -30,8 +29,7 @@
 				LEFT JOIN stockmanagement.stock_card_line_item_reasons r on r.id = adj.reasonid
 				WHERE pi.id = $P!{pi_id} AND pil.quantity IS NOT NULL
 				GROUP BY o.code, o.fullproductname, l.lotcode, l.expirationdate, pil.quantity, pil.previousstockonhandwhensubmitted, pil.extradata, adj.quantity, adj.id, r.name
-				ORDER BY o.code, l.lotcode NULLS FIRST
-		]]>
+				ORDER BY o.code, l.lotcode NULLS FIRST]]>
 	</queryString>
 	<field name="productcode" class="java.lang.String"/>
 	<field name="productname" class="java.lang.String"/>
@@ -43,15 +41,14 @@
 	<field name="reasonname" class="java.lang.String"/>
 	<field name="extradata" class="java.lang.String"/>
 	<field name="max_row_num" class="java.lang.Integer"/>
-	<variable name="quantitySumValue" class="java.lang.Integer" calculation="Sum" resetType="Group" resetGroup="productGroup">
+	<variable name="quantitySumValue" class="java.lang.Integer" resetType="Group" resetGroup="productGroup" calculation="Sum">
 		<variableExpression><![CDATA[($V{lineItemGroup_COUNT} == 1) ? $F{quantity} : 0]]></variableExpression>
 	</variable>
-	<variable name="sohSumValue" class="java.lang.Integer" calculation="Sum" resetType="Group" resetGroup="productGroup">
+	<variable name="sohSumValue" class="java.lang.Integer" resetType="Group" resetGroup="productGroup" calculation="Sum">
 		<variableExpression><![CDATA[($V{lineItemGroup_COUNT} == 1) ? $F{soh} : 0]]></variableExpression>
 	</variable>
 	<group name="productGroup">
 		<groupExpression><![CDATA[$F{productcode} + $F{productname}]]></groupExpression>
-
 		<groupHeader>
 			<band height="25" splitType="Stretch">
 				<staticText>
@@ -72,7 +69,7 @@
 						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					</box>
 					<textElement textAlignment="Right">
-						<font size="8" pdfFontName="Helvetica-Bold" isBold="true"/>
+						<font size="8" isBold="true" pdfFontName="Helvetica-Bold"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$V{quantitySumValue}]]></textFieldExpression>
 				</textField>
@@ -262,7 +259,7 @@
 	<detail>
 		<band height="25" splitType="Stretch">
 			<textField evaluationTime="Group" evaluationGroup="lineItemGroup" isBlankWhenNull="true">
-				<reportElement x="244" y="0" width="72" height="25" uuid="c649aa2d-900a-4d7f-94f7-0d072c516c0a" printWhenGroupChanges="lineItemGroup">
+				<reportElement x="244" y="0" width="72" height="25" printWhenGroupChanges="lineItemGroup" uuid="c649aa2d-900a-4d7f-94f7-0d072c516c0a">
 					<printWhenExpression><![CDATA[$V{lineItemGroup_COUNT} == 1]]></printWhenExpression>
 				</reportElement>
 				<box padding="3">
@@ -277,7 +274,7 @@
 				<textFieldExpression><![CDATA[($F{lotcode} == null) ? "No lot defined" : $F{lotcode}]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Group" evaluationGroup="lineItemGroup" isBlankWhenNull="true">
-				<reportElement  x="316" y="0" width="102" height="25" uuid="0e217f2e-f7ca-4c05-b9d2-f13ec6cf38db" printWhenGroupChanges="lineItemGroup">
+				<reportElement x="316" y="0" width="102" height="25" printWhenGroupChanges="lineItemGroup" uuid="0e217f2e-f7ca-4c05-b9d2-f13ec6cf38db">
 					<printWhenExpression><![CDATA[$V{lineItemGroup_COUNT} == 1]]></printWhenExpression>
 				</reportElement>
 				<box padding="3">
@@ -292,7 +289,7 @@
 				<textFieldExpression><![CDATA[new SimpleDateFormat("dd/MM/yyyy").format($F{expirationdate})]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Group" evaluationGroup="lineItemGroup" isBlankWhenNull="true">
-				<reportElement x="418" y="0" width="102" height="25" uuid="a7672f9a-30bd-4bf9-96af-324baa7e2280" printWhenGroupChanges="lineItemGroup">
+				<reportElement x="418" y="0" width="102" height="25" printWhenGroupChanges="lineItemGroup" uuid="a7672f9a-30bd-4bf9-96af-324baa7e2280">
 					<printWhenExpression><![CDATA[$V{lineItemGroup_COUNT} == 1]]></printWhenExpression>
 				</reportElement>
 				<box padding="3">
@@ -307,7 +304,7 @@
 				<textFieldExpression><![CDATA[(new org.json.JSONObject($F{extradata}).getString("vvmStatus")) == "null" ? "" : new org.json.JSONObject($F{extradata}).getString("vvmStatus")]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Group" evaluationGroup="lineItemGroup" isBlankWhenNull="true">
-				<reportElement x="520" y="0" width="72" height="25" forecolor="#848484" uuid="547fa08c-24e6-4617-aa94-09384a952a19" printWhenGroupChanges="lineItemGroup">
+				<reportElement x="520" y="0" width="72" height="25" printWhenGroupChanges="lineItemGroup" forecolor="#848484" uuid="547fa08c-24e6-4617-aa94-09384a952a19">
 					<printWhenExpression><![CDATA[$V{lineItemGroup_COUNT} == 1]]></printWhenExpression>
 				</reportElement>
 				<box padding="3">
@@ -322,7 +319,7 @@
 				<textFieldExpression><![CDATA[$F{soh} != null ? $F{soh} : ""]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Group" evaluationGroup="lineItemGroup" isBlankWhenNull="true">
-				<reportElement x="592" y="0" width="72" height="25" uuid="a2c8fc54-7cdc-442a-9ced-608a01ef270b" printWhenGroupChanges="lineItemGroup">
+				<reportElement x="592" y="0" width="72" height="25" printWhenGroupChanges="lineItemGroup" uuid="a2c8fc54-7cdc-442a-9ced-608a01ef270b">
 					<printWhenExpression><![CDATA[$V{lineItemGroup_COUNT} == 1]]></printWhenExpression>
 				</reportElement>
 				<box padding="3">
@@ -332,11 +329,11 @@
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Right">
-					<font size="8" pdfFontName="Helvetica-Bold" isBold="true"/>
+					<font size="8" isBold="true" pdfFontName="Helvetica-Bold"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{quantity}]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true" isStretchWithOverflow="true">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement x="664" y="0" width="168" height="25" uuid="86886d4d-e188-4bbf-bfc7-113325f40773"/>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -350,7 +347,7 @@
 				<textFieldExpression><![CDATA[$F{reasonquantity} != null ? ($F{reasonquantity} + " " + $F{reasonname}) : ""]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="10" y="0" width="822" height="25"/>
+				<reportElement x="10" y="0" width="822" height="25" uuid="2d28b427-6b18-4024-b05d-2e5c03c6b5fb"/>
 				<box padding="3">
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -359,7 +356,7 @@
 				</box>
 			</staticText>
 			<staticText>
-				<reportElement x="82" y="0" width="162" height="25"/>
+				<reportElement x="82" y="0" width="162" height="25" uuid="fa240131-8b7e-4a65-98df-10999828a02c"/>
 				<box padding="3">
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -368,7 +365,7 @@
 				</box>
 			</staticText>
 			<staticText>
-				<reportElement x="316" y="0" width="102" height="25"/>
+				<reportElement x="316" y="0" width="102" height="25" uuid="ebc8760d-d268-41e6-aae9-fb96082fe7bd"/>
 				<box padding="3">
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -377,7 +374,7 @@
 				</box>
 			</staticText>
 			<staticText>
-				<reportElement x="520" y="0" width="72" height="25"/>
+				<reportElement x="520" y="0" width="72" height="25" uuid="60e82caa-8c9f-4334-a7ab-e07f3101c1a7"/>
 				<box padding="3">
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -386,7 +383,7 @@
 				</box>
 			</staticText>
 			<staticText>
-				<reportElement x="10" y="0" width="822" height="25">
+				<reportElement x="10" y="0" width="822" height="25" uuid="6071707f-3f5f-4ed6-ac1a-a65c8e4d2cb7">
 					<printWhenExpression><![CDATA[$V{REPORT_COUNT} == $F{max_row_num}]]></printWhenExpression>
 				</reportElement>
 				<box padding="3">
@@ -396,7 +393,6 @@
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 			</staticText>
-
 		</band>
 	</detail>
 </jasperReport>
