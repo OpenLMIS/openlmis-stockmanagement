@@ -20,17 +20,23 @@ import static java.util.Collections.singletonList;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
 import java.util.UUID;
 
+@SuppressWarnings("PMD.UnusedPrivateField")
 @RunWith(MockitoJUnitRunner.class)
 public class ApprovedOrderableValidatorTest {
+
+  @Mock
+  private OrderableReferenceDataService orderableReferenceDataService;
 
   @InjectMocks
   private ApprovedOrderableValidator approvedOrderableValidator;

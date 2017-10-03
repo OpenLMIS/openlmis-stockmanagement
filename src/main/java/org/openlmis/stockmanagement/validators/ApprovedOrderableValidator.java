@@ -23,18 +23,24 @@ import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.utils.Message;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * This validator makes sure all orderable ids included in stock event are approved products.
  */
 @Component(value = "ApprovedOrderableValidator")
 public class ApprovedOrderableValidator implements StockEventValidator {
+
+  @Autowired
+  private OrderableReferenceDataService orderableReferenceDataService;
 
   /**
    * Validate if the orderable in stock event is in the approved list.
@@ -55,8 +61,14 @@ public class ApprovedOrderableValidator implements StockEventValidator {
         findNonApprovedIds(stockEventDto, stockEventDto.getContext().getAllApprovedProducts());
 
     if (!isEmpty(nonApprovedIds)) {
+      List<OrderableDto> orderables = orderableReferenceDataService.findByIds(nonApprovedIds);
+      String codes = orderables
+          .stream()
+          .map(OrderableDto::getProductCode)
+          .collect(Collectors.joining(", "));
+
       throw new ValidationMessageException(
-          new Message(ERROR_ORDERABLE_NOT_IN_APPROVED_LIST, nonApprovedIds));
+          new Message(ERROR_ORDERABLE_NOT_IN_APPROVED_LIST, codes));
     }
   }
 
