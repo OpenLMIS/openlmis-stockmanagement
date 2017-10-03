@@ -15,8 +15,7 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
+import static com.google.common.collect.ImmutableMap.of;
 
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.springframework.stereotype.Service;
@@ -55,6 +54,6 @@ public class OrderableReferenceDataService
   public List<OrderableDto> findByIds(Collection<UUID> ids) {
     return CollectionUtils.isEmpty(ids)
         ? Collections.emptyList()
-        : getPage("search", Maps.newHashMap(), ImmutableMap.of("ids", ids)).getContent();
+        : getPage("search", of("size", ids.size()), of("ids", ids)).getContent();
   }
 }
