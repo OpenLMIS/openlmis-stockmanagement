@@ -41,9 +41,6 @@ public abstract class MessageKeys {
   public static final String ERROR_FACILITY_TYPE_NOT_FOUND =
       ERROR_PREFIX + ".facilityType.notFound";
 
-  public static final String ERROR_STOCK_EVENT_REASON_NOT_MATCH =
-      ERROR_PREFIX + ".reason.notMatch";
-
   //stock events creation: approved products
   public static final String ERROR_ORDERABLE_NOT_IN_APPROVED_LIST =
       EVENT_ERROR_PREFIX + ".orderable.not.in.approvedList";
@@ -257,8 +254,8 @@ public abstract class MessageKeys {
 
   public static final String ERROR_REPORT_ID_NOT_FOUND = ERROR_PREFIX + ".report.id.notFound";
 
-  public static final String ERROR_JASPER_FILE_CREATION = ERROR_PREFIX + ".jasper.file-creation";
-  public static final String ERROR_CLASS_NOT_FOUND = ERROR_PREFIX + ".class-not-found";
+  public static final String ERROR_JASPER_FILE_CREATION = ERROR_PREFIX + ".jasper.fileCreation";
+  public static final String ERROR_CLASS_NOT_FOUND = ERROR_PREFIX + ".classNotFound";
   public static final String ERROR_REPORTING_TEMPLATE_NOT_FOUND_WITH_NAME = ERROR_PREFIX
       + ".reporting.template.notFound.with.name";
   public static final String ERROR_REPORTING_CREATION = ERROR_PREFIX + ".reporting.creation";

@@ -17,9 +17,9 @@ package org.openlmis.stockmanagement.web;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_QUANTITY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_NOT_SUPPORTED;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_STOCK_EVENT_REASON_NOT_MATCH;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_ADJUST;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createNoSourceDestinationStockEventDto;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
@@ -40,6 +40,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+
 import java.util.UUID;
 
 /**
@@ -121,7 +122,7 @@ public class StockEventsControllerrIntegrationTest extends BaseWebTest {
   @Test
   public void should_return_400_when_validation_fails() throws Exception {
     //given
-    Mockito.doThrow(new ValidationMessageException(new Message(ERROR_STOCK_EVENT_REASON_NOT_MATCH)))
+    Mockito.doThrow(new ValidationMessageException(new Message(ERROR_EVENT_QUANTITY_INVALID)))
         .when(stockEventProcessor).process(any());
 
     //when
