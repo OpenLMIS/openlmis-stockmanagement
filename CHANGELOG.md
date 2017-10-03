@@ -8,7 +8,7 @@ Contract breaking changes:
 
 Bug fixes, security and performance improvements, also backwards-compatible:
 
-* [OLMIS-3148](https://openlmis.atlassian.net/browse/OLMIS-3148): Added missing message for error key
+* [OLMIS-3148](https://openlmis.atlassian.net/browse/OLMIS-3148): Added missing messages for error keys
 
 1.0.0 / 2017-09-01
 ==================
