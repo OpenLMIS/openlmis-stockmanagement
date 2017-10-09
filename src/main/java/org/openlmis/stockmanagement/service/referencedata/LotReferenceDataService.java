@@ -66,7 +66,7 @@ public class LotReferenceDataService extends BaseReferenceDataService<LotDto> {
 
   private Page<LotDto> getOnePage(UUID tradeItemId, int pageNumber) {
     HashMap<String, Object> params = new HashMap<>();
-    params.put("tradeIdemId", tradeItemId);
+    params.put("tradeItemId", tradeItemId);
     params.put("page", pageNumber);
     return getPage("search", params);
   }
