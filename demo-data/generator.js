@@ -20,7 +20,8 @@ var filesOrdered = [
   "stockmanagement.stock_event_line_items",
   "stockmanagement.stock_cards",
   "stockmanagement.stock_card_line_items",
-  "stockmanagement.physical_inventories"
+  "stockmanagement.physical_inventories",
+  "stockmanagement.physical_inventory_line_items"
 ]
 
 // Detects if the given key/value pair represents a foreign key.
