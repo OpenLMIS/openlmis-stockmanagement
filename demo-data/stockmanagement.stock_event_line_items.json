@@ -362,5 +362,108 @@
     "orderableId": "0a83fb92-289b-45c9-adba-f2ac7647312e",
     "quantity": 50,
     "stockEventId": "bb7fa1ca-f123-49c7-a315-8251b530c2f4"
+  },
+  {
+    "id": "48ccb360-f4d1-4dcc-b5ec-b0ea2be885e9",
+    "occurredDate": "2017-10-13",
+    "orderableId": "7c58f053-0ca5-46ad-8209-98cff0c79b42",
+    "quantity": "400",
+    "sourceId": "e94d5aad-1c40-4370-bac2-d326d65d277c",
+    "stockEventId": "cd4ad6ef-fb15-443d-8241-f81b7ed2f7cb"
+  },
+  {
+    "id": "6674e1e4-3fbf-45a5-81d3-c225bc375f0c",
+    "occurredDate": "2017-10-13",
+    "orderableId": "71204042-558e-4c47-a602-7886451e5689",
+    "quantity": "400",
+    "sourceId": "e94d5aad-1c40-4370-bac2-d326d65d277c",
+    "stockEventId": "cd4ad6ef-fb15-443d-8241-f81b7ed2f7cb",
+    "extraData": "{\"vvmStatus\": \"STAGE_1\"}"
+  },
+  {
+    "id": "d10f0b88-9579-4418-a545-563feb8d3951",
+    "lotId": "f08d3db1-9132-487c-ba58-15ea12302aee",
+    "occurredDate": "2017-10-13",
+    "orderableId": "9c3bea84-487b-4e22-8759-3fe93f8201d9",
+    "quantity": "220",
+    "sourceId": "e94d5aad-1c40-4370-bac2-d326d65d277c",
+    "stockEventId": "cd4ad6ef-fb15-443d-8241-f81b7ed2f7cb",
+    "extraData": "{\"vvmStatus\": \"STAGE_2\"}"
+  },
+  {
+    "id": "2dc502a7-e13a-40ae-8630-b2ed2213471f",
+    "lotId": "9d0cd7cb-5739-491b-8d6b-890fd17ec810",
+    "occurredDate": "2017-10-13",
+    "orderableId": "9c3bea84-487b-4e22-8759-3fe93f8201d9",
+    "quantity": "200",
+    "sourceId": "e94d5aad-1c40-4370-bac2-d326d65d277c",
+    "stockEventId": "cd4ad6ef-fb15-443d-8241-f81b7ed2f7cb",
+    "extraData": "{\"vvmStatus\": \"STAGE_1\"}"
+  },
+  {
+    "id": "204ff236-6c27-4907-ab62-3af30b6e6ea9",
+    "lotId": "f9f9bb7c-7636-40c1-a548-b45e918a512a",
+    "occurredDate": "2017-10-13",
+    "orderableId": "047638fa-92ce-4adf-9bbd-3bcb3216897a",
+    "quantity": "310",
+    "sourceId": "e94d5aad-1c40-4370-bac2-d326d65d277c",
+    "stockEventId": "cd4ad6ef-fb15-443d-8241-f81b7ed2f7cb",
+    "extraData": "{\"vvmStatus\": \"STAGE_1\"}"
+  },
+  {
+    "id": "d71e172f-c0c2-494b-a0b1-1d26a18f5080",
+    "lotId": "06f86552-1aa9-47d6-8857-6b7ad824f805",
+    "occurredDate": "2017-10-13",
+    "orderableId": "047638fa-92ce-4adf-9bbd-3bcb3216897a",
+    "quantity": "240",
+    "sourceId": "e94d5aad-1c40-4370-bac2-d326d65d277c",
+    "stockEventId": "cd4ad6ef-fb15-443d-8241-f81b7ed2f7cb",
+    "extraData": "{\"vvmStatus\": \"STAGE_1\"}"
+  },
+  {
+    "id": "1e75f516-6828-4fca-a5d3-d10e4fcb2654",
+    "occurredDate": "2017-10-13",
+    "orderableId": "047638fa-92ce-4adf-9bbd-3bcb3216897a",
+    "quantity": "10",
+    "sourceId": "e94d5aad-1c40-4370-bac2-d326d65d277c",
+    "stockEventId": "cd4ad6ef-fb15-443d-8241-f81b7ed2f7cb",
+    "extraData": "{\"vvmStatus\": \"STAGE_2\"}"
+  },
+  {
+    "id": "00ed20e5-db83-4796-9de8-a624285add68",
+    "occurredDate": "2017-10-13",
+    "orderableId": "a852f785-d82e-4afe-bc6a-04f3236caf90",
+    "quantity": "190",
+    "sourceId": "e94d5aad-1c40-4370-bac2-d326d65d277c",
+    "stockEventId": "cd4ad6ef-fb15-443d-8241-f81b7ed2f7cb",
+    "extraData": "{\"vvmStatus\": \"STAGE_1\"}"
+  },
+  {
+    "id": "da5092fa-674e-4f85-a230-fd30bc8b7c6a",
+    "lotId": "9d0cd7cb-5739-491b-8d6b-890fd17ec810",
+    "occurredDate": "2017-10-13",
+    "orderableId": "9c3bea84-487b-4e22-8759-3fe93f8201d9",
+    "quantity": "10",
+    "reasonFreeText": "Unable to locate.",
+    "reasonId": "b7e99f5b-af04-433d-9c30-d4f90c60c47b",
+    "stockEventId": "86386f07-c147-4088-a07b-fe1db811f4a7"
+  },
+  {
+    "id": "6a9a5b11-8958-4964-9fb3-baca2aca0296",
+    "occurredDate": "2017-10-04",
+    "orderableId": "18223845-4d19-4408-b7c2-971c26014058",
+    "quantity": "200",
+    "sourceId": "e94d5aad-1c40-4370-bac2-d326d65d277c",
+    "stockEventId": "f07bd4b7-5484-4293-a2f2-18a18f0146df",
+    "extraData": "{\"vvmStatus\": \"STAGE_1\"}"
+  },
+  {
+    "id": "56593f7a-6f8f-487a-8875-75c28b139b67",
+    "occurredDate": "2017-10-04",
+    "orderableId": "b75a88c7-70fa-4bab-9785-3dd980a5ffc3",
+    "quantity": "150",
+    "sourceId": "e94d5aad-1c40-4370-bac2-d326d65d277c",
+    "stockEventId": "f07bd4b7-5484-4293-a2f2-18a18f0146df",
+    "extraData": "{\"vvmStatus\": \"STAGE_1\"}"
   }
 ]
