@@ -24,6 +24,9 @@ import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockEventProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.ext.XLogger;
+import org.slf4j.ext.XLoggerFactory;
+import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,6 +35,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+
 import java.util.UUID;
 
 /**
@@ -40,8 +44,8 @@ import java.util.UUID;
 @Controller
 @RequestMapping("/api")
 public class StockEventsController {
-
   private static final Logger LOGGER = LoggerFactory.getLogger(StockEventsController.class);
+  private static final XLogger XLOGGER = XLoggerFactory.getXLogger(StockEventsController.class);
 
   @Autowired
   private PermissionService permissionService;
@@ -65,24 +69,43 @@ public class StockEventsController {
   public ResponseEntity<UUID> createStockEvent(@RequestBody StockEventDto eventDto)
       throws InstantiationException, IllegalAccessException {
     LOGGER.debug("Try to create a stock event");
-    checkPermission(eventDto);
+
+    XLOGGER.entry(eventDto);
+    Profiler profiler = new Profiler("CREATE_STOCK_EVENT");
+    profiler.setLogger(XLOGGER);
+
+    checkPermission(eventDto, profiler.startNested("CHECK_PERMISSION"));
+
+    profiler.start("PROCESS");
     UUID createdEventId = stockEventProcessor.process(eventDto);
-    return new ResponseEntity<>(createdEventId, CREATED);
+
+    profiler.start("CREATE_RESPONSE");
+    ResponseEntity<UUID> response = new ResponseEntity<>(createdEventId, CREATED);
+
+    profiler.stop().log();
+    XLOGGER.exit(response);
+
+    return response;
   }
 
-  private void checkPermission(StockEventDto eventDto) {
-    OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder.getContext()
-        .getAuthentication();
+  private void checkPermission(StockEventDto eventDto, Profiler profiler) {
+    OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder
+        .getContext().getAuthentication();
+
     if (!authentication.isClientOnly()) {
       UUID programId = eventDto.getProgramId();
       UUID facilityId = eventDto.getFacilityId();
 
+      profiler.start("CHECK_PROGRAM_SUPPORTED_BY_HOME_FACILITY");
       homeFacilityPermissionService.checkProgramSupported(programId);
+
       if (eventDto.isPhysicalInventory()) {
+        profiler.start("CAN_EDIT_PHYSICAL_INVENTORY");
         permissionService.canEditPhysicalInventory(programId, facilityId);
       } else {
         //we check STOCK_ADJUST permission for both adjustment and issue/receive
         //this may change in the future
+        profiler.start("CAN_ADJUST_STOCK");
         permissionService.canAdjustStock(programId, facilityId);
       }
     }

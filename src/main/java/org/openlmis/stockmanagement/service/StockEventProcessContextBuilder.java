@@ -16,10 +16,14 @@
 package org.openlmis.stockmanagement.service;
 
 import static org.slf4j.LoggerFactory.getLogger;
+import static org.slf4j.ext.XLoggerFactory.getXLogger;
 
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
+import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.exception.AuthenticationException;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
@@ -30,15 +34,17 @@ import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataServi
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import org.slf4j.Logger;
+import org.slf4j.ext.XLogger;
+import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 /**
  * Before we process a stock event, this class will run first, to get all things we need from
@@ -48,6 +54,7 @@ import java.util.stream.Stream;
 @Service
 public class StockEventProcessContextBuilder {
   private static final Logger LOGGER = getLogger(StockEventProcessContextBuilder.class);
+  private static final XLogger XLOGGER = getXLogger(StockEventProcessContextBuilder.class);
 
   @Autowired
   private AuthenticationHelper authenticationHelper;
@@ -75,18 +82,23 @@ public class StockEventProcessContextBuilder {
    * @return a context object that includes all needed ref data.
    */
   public StockEventProcessContext buildContext(StockEventDto eventDto) {
-    LOGGER.info("build stock event process context");
-    UUID programId = eventDto.getProgramId();
-    UUID facilityId = eventDto.getFacilityId();
-    OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder.getContext()
-        .getAuthentication();
+    XLOGGER.entry(eventDto);
+    Profiler profiler = new Profiler("BUILD_CONTEXT");
+    profiler.setLogger(XLOGGER);
 
-    StockEventProcessContext.StockEventProcessContextBuilder context = StockEventProcessContext
+    LOGGER.info("build stock event process context");
+    profiler.start("CREATE_BUILDER");
+    StockEventProcessContext.StockEventProcessContextBuilder builder = StockEventProcessContext
         .builder();
 
+    OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder
+        .getContext()
+        .getAuthentication();
+
     if (authentication.isClientOnly()) {
+      profiler.start("GET_USER");
       UserDto userDto = userReferenceDataService.findOne(eventDto.getUserId());
-      context.currentUser(userDto);
+      builder.currentUser(userDto);
 
       if (userDto == null) {
         // TODO: change to localized message
@@ -95,22 +107,46 @@ public class StockEventProcessContextBuilder {
       }
 
     } else {
-      context.currentUser(authenticationHelper.getCurrentUser());
+      profiler.start("GET_CURRENT_USER");
+      builder.currentUser(authenticationHelper.getCurrentUser());
     }
-    return context.program(programService.findOne(programId))
-        .facility(facilityService.findOne(facilityId))
-        .allApprovedProducts(approvedProductService.getAllApprovedProducts(programId, facilityId))
-        .lots(getLots(eventDto))
+
+    profiler.start("GET_PROGRAM");
+    UUID programId = eventDto.getProgramId();
+    ProgramDto program = programService.findOne(programId);
+
+    profiler.start("GET_FACILITY");
+    UUID facilityId = eventDto.getFacilityId();
+    FacilityDto facility = facilityService.findOne(facilityId);
+
+    profiler.start("GET_APPROVED_PRODUCTS");
+    List<OrderableDto> approvedProducts = approvedProductService
+        .getAllApprovedProducts(programId, facilityId);
+
+    profiler.start("GET_LOTS");
+    Map<UUID, LotDto> lots = getLots(eventDto);
+
+    profiler.start("BUILD");
+    StockEventProcessContext context = builder
+        .program(program)
+        .facility(facility)
+        .allApprovedProducts(approvedProducts)
+        .lots(lots)
         .build();
+
+    profiler.stop().log();
+    XLOGGER.exit(context);
+
+    return context;
   }
 
   private Map<UUID, LotDto> getLots(StockEventDto eventDto) {
-    Stream<UUID> lotIds = eventDto.getLineItems().stream()
+    return eventDto
+        .getLineItems()
+        .stream()
         .filter(item -> item.getLotId() != null)
-        .map(StockEventLineItem::getLotId).distinct();
-
-    return lotIds.collect(HashMap::new,
-        (map, lotId) -> map.put(lotId, lotReferenceDataService.findOne(lotId)),
-        HashMap::putAll);
+        .map(StockEventLineItem::getLotId)
+        .distinct()
+        .collect(Collectors.toMap(id -> id, id -> lotReferenceDataService.findOne(id)));
   }
 }
