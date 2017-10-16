@@ -81,6 +81,7 @@ public class ApprovedProductReferenceDataService extends
 
     return concat(fullSupply.stream(), nonFullSupply.stream())
         .map(ApprovedProductDto::getOrderable)
+        .distinct()
         .collect(toList());
   }
 
