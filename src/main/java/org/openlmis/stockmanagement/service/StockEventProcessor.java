@@ -102,7 +102,7 @@ public class StockEventProcessor {
   private UUID saveEventAndGenerateLineItems(StockEventDto eventDto, Profiler profiler)
       throws InstantiationException, IllegalAccessException {
     profiler.start("GET_USER_ID_FROM_CONTEXT");
-    UUID currentUserId = eventDto.getContext().getCurrentUser().getId();
+    UUID currentUserId = eventDto.getContext().getCurrentUserId();
 
     profiler.start("CONVERT_TO_EVENT");
     StockEvent stockEvent = eventDto.toEvent(currentUserId);

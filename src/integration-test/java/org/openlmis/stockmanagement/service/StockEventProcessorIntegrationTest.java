@@ -38,7 +38,6 @@ import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
-import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
 import org.openlmis.stockmanagement.repository.StockCardLineItemRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
@@ -52,6 +51,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -103,11 +103,9 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
     lineItemSize = lineItemRepository.count();
 
     UUID userId = UUID.randomUUID();
-    UserDto userDto = new UserDto();
-    userDto.setId(userId);
 
     StockEventProcessContext eventProcessContext = new StockEventProcessContext();
-    eventProcessContext.setCurrentUser(userDto);
+    eventProcessContext.setCurrentUserId(userId);
 
     when(contextBuilder.buildContext(any(StockEventDto.class)))
         .thenReturn(eventProcessContext);

@@ -30,12 +30,10 @@ import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
-import org.openlmis.stockmanagement.exception.AuthenticationException;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
-import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
@@ -45,6 +43,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -73,9 +72,6 @@ public class StockEventProcessContextBuilderTest {
   @Mock
   private OAuth2Authentication authentication;
 
-  @Mock
-  private UserReferenceDataService userReferenceDataService;
-
   @InjectMocks
   private StockEventProcessContextBuilder contextBuilder;
 
@@ -83,6 +79,8 @@ public class StockEventProcessContextBuilderTest {
 
   @Before
   public void setUp() {
+    userDto.setId(UUID.randomUUID());
+
     PowerMockito.mockStatic(SecurityContextHolder.class);
     PowerMockito.when(SecurityContextHolder.getContext()).thenReturn(securityContext);
     when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -99,21 +97,9 @@ public class StockEventProcessContextBuilderTest {
   @Test
   public void shouldBuildContextWithUserIdFromDtoWhenClientAuthentication() throws Exception {
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
-    stockEventDto.setUserId(UUID.randomUUID());
+    stockEventDto.setUserId(userDto.getId());
 
     when(authentication.isClientOnly()).thenReturn(true);
-    when(userReferenceDataService.findOne(stockEventDto.getUserId())).thenReturn(userDto);
-
-    testBuildContext(stockEventDto);
-  }
-
-  @Test(expected = AuthenticationException.class)
-  public void shouldThrowExceptionWhenUserIsNotFound() throws Exception {
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
-    stockEventDto.setUserId(UUID.randomUUID());
-
-    when(authentication.isClientOnly()).thenReturn(true);
-    when(userReferenceDataService.findOne(stockEventDto.getUserId())).thenReturn(null);
 
     testBuildContext(stockEventDto);
   }
@@ -141,7 +127,7 @@ public class StockEventProcessContextBuilderTest {
     StockEventProcessContext context = contextBuilder.buildContext(stockEventDto);
 
     //then
-    assertThat(context.getCurrentUser(), is(userDto));
+    assertThat(context.getCurrentUserId(), is(userDto.getId()));
     assertThat(context.getProgram(), is(programDto));
     assertThat(context.getFacility(), is(facilityDto));
     assertThat(context.getAllApprovedProducts(), is(approvedProductDtos));

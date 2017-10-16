@@ -19,7 +19,6 @@ import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
-import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -41,7 +40,7 @@ import java.util.UUID;
  * in different places.
  */
 public class StockEventProcessContext {
-  private UserDto currentUser;
+  private UUID currentUserId;
   private ProgramDto program;
   private FacilityDto facility;
   private List<OrderableDto> allApprovedProducts;

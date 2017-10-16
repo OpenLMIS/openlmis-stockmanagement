@@ -24,13 +24,10 @@ import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
-import org.openlmis.stockmanagement.dto.referencedata.UserDto;
-import org.openlmis.stockmanagement.exception.AuthenticationException;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
-import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import org.slf4j.Logger;
@@ -71,9 +68,6 @@ public class StockEventProcessContextBuilder {
   @Autowired
   private LotReferenceDataService lotReferenceDataService;
 
-  @Autowired
-  private UserReferenceDataService userReferenceDataService;
-
   /**
    * Before processing events, put all needed ref data into context so we don't have to do frequent
    * network requests.
@@ -97,18 +91,10 @@ public class StockEventProcessContextBuilder {
 
     if (authentication.isClientOnly()) {
       profiler.start("GET_USER");
-      UserDto userDto = userReferenceDataService.findOne(eventDto.getUserId());
-      builder.currentUser(userDto);
-
-      if (userDto == null) {
-        // TODO: change to localized message
-        throw new AuthenticationException(
-            "User with id \"" + eventDto.getUserId() + "\" not found.");
-      }
-
+      builder.currentUserId(eventDto.getUserId());
     } else {
       profiler.start("GET_CURRENT_USER");
-      builder.currentUser(authenticationHelper.getCurrentUser());
+      builder.currentUserId(authenticationHelper.getCurrentUser().getId());
     }
 
     profiler.start("GET_PROGRAM");
