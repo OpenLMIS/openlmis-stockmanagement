@@ -20,6 +20,7 @@ import static javax.persistence.CascadeType.ALL;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.ExtraDataConverter;
 import org.openlmis.stockmanagement.domain.common.VvmApplicable;
+import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,7 +46,9 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @Builder
 @Table(name = "physical_inventory_line_items", schema = "stockmanagement")
-public class PhysicalInventoryLineItem extends BaseEntity implements VvmApplicable {
+public class PhysicalInventoryLineItem
+    extends BaseEntity
+    implements VvmApplicable, IdentifiableByOrderableLot {
   @Column(nullable = false)
   private UUID orderableId;
   private UUID lotId;

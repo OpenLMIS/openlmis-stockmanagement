@@ -15,13 +15,14 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static org.openlmis.stockmanagement.domain.BaseEntity.fromId;
+import static java.util.stream.Collectors.toMap;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_DRAFT_EXISTS;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_IS_SUBMITTED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_NOT_FOUND;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
@@ -35,8 +36,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -152,21 +155,26 @@ public class PhysicalInventoryService {
    *
    * @param inventoryDto inventoryDto.
    * @param eventId      eventId.
-   * @throws IllegalAccessException IllegalAccessException.
-   * @throws InstantiationException InstantiationException.
    */
-  PhysicalInventory submitPhysicalInventory(PhysicalInventoryDto inventoryDto, UUID eventId)
-      throws IllegalAccessException, InstantiationException {
+  void submitPhysicalInventory(PhysicalInventoryDto inventoryDto, UUID eventId) {
     LOGGER.info("submit physical inventory");
 
     PhysicalInventory inventory = inventoryDto.toPhysicalInventoryForSubmit();
-    inventory.setStockEvent(fromId(eventId, StockEvent.class));
+
+    if (null != eventId) {
+      StockEvent event = new StockEvent();
+      event.setId(eventId);
+
+      inventory.setStockEvent(event);
+    }
+
+    Map<OrderableLotIdentity, StockCard> cards = stockCardRepository
+        .findByProgramIdAndFacilityId(inventory.getProgramId(), inventory.getFacilityId())
+        .stream()
+        .collect(toMap(OrderableLotIdentity::identityOf, card -> card));
 
     for (PhysicalInventoryLineItem line : inventory.getLineItems()) {
-      StockCard foundCard = stockCardRepository
-          .findByProgramIdAndFacilityIdAndOrderableIdAndLotId(
-              inventory.getProgramId(), inventory.getFacilityId(),
-              line.getOrderableId(), line.getLotId());
+      StockCard foundCard = cards.get(OrderableLotIdentity.identityOf(line));
       //use a shallow copy of stock card to do recalculation, because some domain model will be
       //modified during recalculation, this will avoid persistence of those modified models
       if (foundCard != null) {
@@ -176,7 +184,7 @@ public class PhysicalInventoryService {
       }
     }
 
-    return physicalInventoriesRepository.save(inventory);
+    physicalInventoriesRepository.save(inventory);
   }
 
   private void checkIfDraftExists(PhysicalInventoryDto dto) {

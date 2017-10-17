@@ -89,13 +89,13 @@ public class PhysicalInventoryServiceTest {
     PhysicalInventoryDto physicalInventoryDto = newInventoryForSubmit();
     int previousSoH = new Random().nextInt();
     when(stockCardRepository
-        .findByProgramIdAndFacilityIdAndOrderableIdAndLotId(
+        .findByProgramIdAndFacilityId(
             physicalInventoryDto.getProgramId(),
-            physicalInventoryDto.getFacilityId(),
-            lineItemDto.getOrderableId(),
-            lineItemDto.getLotId()))
-        .thenReturn(stockCard);
+            physicalInventoryDto.getFacilityId()))
+        .thenReturn(singletonList(stockCard));
     StockCard cloneOfCard = mockCloneOfCard(previousSoH);
+    when(stockCard.getOrderableId()).thenReturn(lineItemDto.getOrderableId());
+    when(stockCard.getLotId()).thenReturn(lineItemDto.getLotId());
     when(stockCard.shallowCopy()).thenReturn(cloneOfCard);
 
     physicalInventoryService.submitPhysicalInventory(physicalInventoryDto, UUID.randomUUID());

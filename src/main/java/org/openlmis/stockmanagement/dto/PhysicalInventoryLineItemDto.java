@@ -15,20 +15,22 @@
 
 package org.openlmis.stockmanagement.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.openlmis.stockmanagement.domain.common.VvmApplicable;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
 import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
-import java.util.ArrayList;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
@@ -82,17 +84,16 @@ public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot,
    * @return created dtos.
    */
   public static List<PhysicalInventoryLineItemDto> from(List<StockEventLineItem> lineItems) {
-    List<PhysicalInventoryLineItemDto> list = new ArrayList<>(lineItems.size());
-    lineItems.forEach(lineItem ->
-        list.add(PhysicalInventoryLineItemDto
+    return lineItems
+        .stream()
+        .map(lineItem -> PhysicalInventoryLineItemDto
             .builder()
             .quantity(lineItem.getQuantity())
             .stockAdjustments(lineItem.stockAdjustments())
             .extraData(lineItem.getExtraData())
             .orderableId(lineItem.getOrderableId())
             .lotId(lineItem.getLotId())
-            .build()));
-
-    return list;
+            .build())
+        .collect(Collectors.toList());
   }
 }
