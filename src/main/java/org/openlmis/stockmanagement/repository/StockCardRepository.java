@@ -29,16 +29,12 @@ import java.util.UUID;
 public interface StockCardRepository extends
     JpaRepository<StockCard, UUID> {
 
-  String select = "select s ";
   String selectIdentity = "select new org.openlmis.stockmanagement.domain"
       + ".identity.OrderableLotIdentity(s.orderableId, s.lotId) ";
 
   String fromStockCards = "from org.openlmis.stockmanagement.domain.card.StockCard s ";
 
   String matchByProgramAndFacility = "where s.programId = ?1 and s.facilityId = ?2 ";
-  String matchByOrderable = "and s.orderableId = ?3 ";
-  String matchByLot = "and s.lotId = ?4";
-  String noLot = "and s.lotId IS NULL";
 
   StockCard findByProgramIdAndFacilityIdAndOrderableIdAndLotId(
       @Param("programId") UUID programId,
@@ -56,14 +52,6 @@ public interface StockCardRepository extends
       @Param("facilityId") UUID facilityId);
 
   StockCard findByOriginEvent(@Param("originEventId") StockEvent stockEvent);
-
-  @Query(value = select + fromStockCards
-      + matchByProgramAndFacility + matchByOrderable + matchByLot)
-  StockCard getStockCardIdWithLot(UUID programId, UUID facilityId, UUID orderableId, UUID lotId);
-
-  @Query(value = select + fromStockCards
-      + matchByProgramAndFacility + matchByOrderable + noLot)
-  StockCard getStockCardIdWithoutLot(UUID programId, UUID facilityId, UUID orderableId);
 
   @Query(value = selectIdentity + fromStockCards + matchByProgramAndFacility)
   List<OrderableLotIdentity> getIdentitiesBy(UUID programId, UUID facilityId);

@@ -26,10 +26,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERRRO_EVENT_SOH_EXCE
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.ExtraDataConverter;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
@@ -43,11 +40,18 @@ import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.utils.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -133,26 +137,44 @@ public class StockCardLineItem extends BaseEntity {
    * @param stockCard    the card that this line item belongs to.
    * @param savedEventId saved event id.
    * @param userId       user who performed the operation.  @return created line item.
-   * @throws InstantiationException InstantiationException.
-   * @throws IllegalAccessException IllegalAccessException.
    */
   public static StockCardLineItem createLineItemFrom(
       StockEventDto eventDto, StockEventLineItem eventLineItem,
-      StockCard stockCard, UUID savedEventId, UUID userId)
-      throws InstantiationException, IllegalAccessException {
-    StockCardLineItem cardLineItem = StockCardLineItem.builder()
+      StockCard stockCard, UUID savedEventId, UUID userId) {
+    StockCardLineItemBuilder builder = StockCardLineItem.builder();
+
+    if (null != savedEventId) {
+      StockEvent event = new StockEvent();
+      event.setId(savedEventId);
+      builder = builder.originEvent(event);
+    }
+
+    if (null != eventLineItem.getReasonId()) {
+      StockCardLineItemReason reason = new StockCardLineItemReason();
+      reason.setId(eventLineItem.getReasonId());
+      builder = builder.reason(reason);
+    }
+
+    if (null != eventLineItem.getSourceId()) {
+      Node source = new Node();
+      source.setId(eventLineItem.getSourceId());
+      builder = builder.source(source);
+    }
+
+    if (null != eventLineItem.getDestinationId()) {
+      Node destination = new Node();
+      destination.setId(eventLineItem.getDestinationId());
+      builder = builder.destination(destination);
+    }
+
+    StockCardLineItem cardLineItem = builder
         .stockCard(stockCard)
-        .originEvent(fromId(savedEventId, StockEvent.class))
 
         .quantity(eventLineItem.getQuantity())
         .stockAdjustments(eventLineItem.stockAdjustments())
 
         .occurredDate(eventLineItem.getOccurredDate())
         .processedDate(now())
-
-        .reason(fromId(eventLineItem.getReasonId(), StockCardLineItemReason.class))
-        .source(fromId(eventLineItem.getSourceId(), Node.class))
-        .destination(fromId(eventLineItem.getDestinationId(), Node.class))
 
         .reasonFreeText(eventLineItem.getReasonFreeText())
         .sourceFreeText(eventLineItem.getSourceFreeText())
@@ -168,6 +190,7 @@ public class StockCardLineItem extends BaseEntity {
         .build();
 
     stockCard.getLineItems().add(cardLineItem);
+
     return cardLineItem;
   }
 

@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toMap;
 import static org.openlmis.stockmanagement.domain.card.StockCard.createStockCardFrom;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemFrom;
 import static org.openlmis.stockmanagement.domain.reason.ReasonCategory.PHYSICAL_INVENTORY;
@@ -23,6 +24,7 @@ import static org.openlmis.stockmanagement.domain.reason.ReasonCategory.PHYSICAL
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
+import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
@@ -38,14 +40,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 import java.util.UUID;
 
 /**
- * This class is in charge of persisting and retrieving stock cards.
- * For persisting, it may create and save multiple stock cards in one go, since one stock event may
- * involve more than one orderable/lot combos.
- * For retrieving, it only retrieves one stock card at a time. Its purpose is for users to view
- * one single stock card with full details.
+ * This class is in charge of persisting and retrieving stock cards. For persisting, it may create
+ * and save multiple stock cards in one go, since one stock event may involve more than one
+ * orderable/lot combos. For retrieving, it only retrieves one stock card at a time. Its purpose is
+ * for users to view one single stock card with full details.
  */
 @Service
 public class StockCardService extends StockCardBaseService {
@@ -81,13 +84,15 @@ public class StockCardService extends StockCardBaseService {
    * @param stockEventDto the origin event.
    * @param savedEventId  saved event id.
    * @param currentUserId current user id.
-   * @throws IllegalAccessException IllegalAccessException.
-   * @throws InstantiationException InstantiationException.
    */
-  public void saveFromEvent(StockEventDto stockEventDto, UUID savedEventId, UUID currentUserId)
-      throws IllegalAccessException, InstantiationException {
+  void saveFromEvent(StockEventDto stockEventDto, UUID savedEventId, UUID currentUserId) {
+    Map<OrderableLotIdentity, StockCard> cards = cardRepository
+        .findByProgramIdAndFacilityId(stockEventDto.getProgramId(), stockEventDto.getFacilityId())
+        .stream()
+        .collect(toMap(OrderableLotIdentity::identityOf, card -> card));
+
     for (StockEventLineItem eventLineItem : stockEventDto.getLineItems()) {
-      StockCard stockCard = findOrCreateCard(stockEventDto, eventLineItem, savedEventId);
+      StockCard stockCard = findOrCreateCard(cards, stockEventDto, eventLineItem, savedEventId);
 
       createLineItemFrom(stockEventDto, eventLineItem, stockCard, savedEventId, currentUserId);
       cardRepository.save(stockCard);
@@ -121,30 +126,15 @@ public class StockCardService extends StockCardBaseService {
     return cardDto;
   }
 
-  private StockCard findOrCreateCard(
-      StockEventDto eventDto, StockEventLineItem eventLineItem, UUID savedEventId)
-      throws InstantiationException, IllegalAccessException {
-    StockCard foundCard = findCard(eventDto, eventLineItem);
-
-    if (foundCard != null) {
-      LOGGER.debug("Found existing stock card");
-      return foundCard;
-    } else {
-      LOGGER.debug("Creating new stock card");
-      StockCard newCard = createStockCardFrom(eventDto, eventLineItem, savedEventId);
-      return cardRepository.save(newCard);
-    }
-  }
-
-  private StockCard findCard(StockEventDto eventDto, StockEventLineItem eventLineItem) {
-    if (eventLineItem.getLotId() == null) {
-      return cardRepository.getStockCardIdWithoutLot(
-          eventDto.getProgramId(), eventDto.getFacilityId(), eventLineItem.getOrderableId());
-    } else {
-      return cardRepository.getStockCardIdWithLot(
-          eventDto.getProgramId(), eventDto.getFacilityId(), eventLineItem.getOrderableId(),
-          eventLineItem.getLotId());
-    }
+  private StockCard findOrCreateCard(Map<OrderableLotIdentity, StockCard> cards,
+                                     StockEventDto eventDto, StockEventLineItem eventLineItem,
+                                     UUID savedEventId) {
+    return cards.computeIfAbsent(
+        OrderableLotIdentity.identityOf(eventLineItem),
+        key -> {
+          StockCard newCard = createStockCardFrom(eventDto, eventLineItem, savedEventId);
+          return cardRepository.save(newCard);
+        });
   }
 
   private void assignSourceDestinationReasonNameForLineItems(StockCardDto stockCardDto) {
