@@ -136,11 +136,10 @@ public class StockCardLineItem extends BaseEntity {
    * @param eventDto     stock eventDto.
    * @param stockCard    the card that this line item belongs to.
    * @param savedEventId saved event id.
-   * @param userId       user who performed the operation.  @return created line item.
    */
   public static StockCardLineItem createLineItemFrom(
       StockEventDto eventDto, StockEventLineItem eventLineItem,
-      StockCard stockCard, UUID savedEventId, UUID userId) {
+      StockCard stockCard, UUID savedEventId) {
     StockCardLineItemBuilder builder = StockCardLineItem.builder();
 
     if (null != savedEventId) {
@@ -182,7 +181,7 @@ public class StockCardLineItem extends BaseEntity {
 
         .documentNumber(eventDto.getDocumentNumber())
         .signature(eventDto.getSignature())
-        .userId(userId)
+        .userId(eventDto.getContext().getCurrentUserId())
 
         .stockOnHand(0)
 

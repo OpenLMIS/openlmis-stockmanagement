@@ -43,6 +43,7 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
+import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -105,6 +106,7 @@ public class QuantityValidatorTest {
   public void shouldNotRejectWhenEventReasonIdIsNotFound() throws Exception {
     //given
     StockEventDto event = createStockEventDto();
+    event.setContext(new StockEventProcessContext());
 
     StockEventLineItem invalidItem = event.getLineItems().get(0);
     invalidItem.setDestinationId(null);
@@ -119,6 +121,7 @@ public class QuantityValidatorTest {
   public void shouldNotRejectWhenEventLineItemHasNoReason() throws Exception {
     //given
     StockEventDto event = createStockEventDto();
+    event.setContext(new StockEventProcessContext());
 
     StockEventLineItem invalidItem = event.getLineItems().get(0);
     invalidItem.setDestinationId(randomUUID());
@@ -252,7 +255,9 @@ public class QuantityValidatorTest {
   
   private StockEventDto createDebitEventDto(LocalDate date, int quantity,
                                             List<StockAdjustment> adjustments) {
+
     StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.setContext(new StockEventProcessContext());
 
     stockEventDto.getLineItems().get(0).setDestinationId(randomUUID());
     stockEventDto.getLineItems().get(0).setQuantity(quantity);

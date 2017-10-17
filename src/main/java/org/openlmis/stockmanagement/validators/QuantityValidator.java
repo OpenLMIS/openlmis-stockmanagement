@@ -174,7 +174,7 @@ public class QuantityValidator implements StockEventValidator {
       throws InstantiationException, IllegalAccessException {
     for (StockEventLineItem lineItem : group) {
       StockCardLineItem stockCardLineItem = StockCardLineItem
-          .createLineItemFrom(eventDto, lineItem, foundCard, null, null);
+          .createLineItemFrom(eventDto, lineItem, foundCard, null);
       stockCardLineItem.setReason(findReason(lineItem.getReasonId()));
     }
 

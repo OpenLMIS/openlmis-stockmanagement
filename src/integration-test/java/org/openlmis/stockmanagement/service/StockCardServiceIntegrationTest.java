@@ -47,11 +47,13 @@ import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataServic
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
+import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -102,7 +104,7 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     StockEvent savedEvent = save(stockEventDto, userId);
 
     //when
-    stockCardService.saveFromEvent(stockEventDto, savedEvent.getId(), userId);
+    stockCardService.saveFromEvent(stockEventDto, savedEvent.getId());
 
     //then
     StockCard savedCard = stockCardRepository.findByOriginEvent(savedEvent);
@@ -256,15 +258,15 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     stockCardService.findStockCardById(savedCardId);
   }
 
-  private StockEvent save(StockEventDto eventDto, UUID userId)
-      throws InstantiationException, IllegalAccessException {
-    StockEvent savedEvent = stockEventsRepository
-        .save(eventDto.toEvent(randomUUID()));
-    stockCardService.saveFromEvent(eventDto, savedEvent.getId(), userId);
-    return savedEvent;
-  }
+  private StockEvent save(StockEventDto eventDto, UUID userId) {
+    StockEventProcessContext context = new StockEventProcessContext();
+    context.setCurrentUserId(userId);
 
-  private UUID getEventIdOfNthLineItem(StockCardDto card, int nth) {
-    return card.getLineItems().get(nth - 1).getLineItem().getOriginEvent().getId();
+    eventDto.setContext(context);
+
+    StockEvent event = eventDto.toEvent();
+    StockEvent savedEvent = stockEventsRepository.save(event);
+    stockCardService.saveFromEvent(eventDto, savedEvent.getId());
+    return savedEvent;
   }
 }

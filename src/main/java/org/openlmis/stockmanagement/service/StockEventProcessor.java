@@ -16,7 +16,6 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
 import static org.openlmis.stockmanagement.dto.PhysicalInventoryDto.fromEventDto;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
@@ -39,6 +38,7 @@ import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -104,11 +104,8 @@ public class StockEventProcessor {
 
   private UUID saveEventAndGenerateLineItems(StockEventDto eventDto, Profiler profiler)
       throws InstantiationException, IllegalAccessException {
-    profiler.start("GET_USER_ID_FROM_CONTEXT");
-    UUID currentUserId = eventDto.getContext().getCurrentUserId();
-
     profiler.start("CONVERT_TO_EVENT");
-    StockEvent stockEvent = eventDto.toEvent(currentUserId);
+    StockEvent stockEvent = eventDto.toEvent();
 
     profiler.start("DB_SAVE");
     UUID savedEventId = stockEventsRepository.save(stockEvent).getId();
@@ -123,71 +120,70 @@ public class StockEventProcessor {
     }
 
     profiler.start("SAVE_FROM_EVENT");
-    stockCardService.saveFromEvent(eventDto, savedEventId, currentUserId);
-
-    profiler.start("MAP_LINE_ITEMS_TO_IDENTITY");
-    Set<OrderableLotIdentity> sameOrderableGroups = eventDto
-        .getLineItems()
-        .stream()
-        .map(OrderableLotIdentity::identityOf)
-        .collect(toSet());
+    stockCardService.saveFromEvent(eventDto, savedEventId);
 
     profiler.start("GET_CARDS_FOR_PROGRAM_AND_FACILITY");
     List<StockCard> cards = stockCardRepository
         .findByProgramIdAndFacilityId(eventDto.getProgramId(), eventDto.getFacilityId());
 
+    Map<UUID, StockCardLineItemReason> reasons = getReasons(
+        cards, profiler.startNested("GET_REASONS")
+    );
+
     profiler.start("GROUP_CARDS_BY_IDENTITY");
-    Map<OrderableLotIdentity, StockCard> groupByIdentity = cards
+    Map<OrderableLotIdentity, StockCard> groupCardsByIdentity = cards
         .stream()
         //use a shallow copy of stock card to do recalculation, because some domain model will be
         //modified during recalculation, this will avoid persistence of those modified models
         .map(StockCard::shallowCopy)
         .collect(toMap(OrderableLotIdentity::identityOf, card -> card));
 
-    for (OrderableLotIdentity group : sameOrderableGroups) {
-      StockCard foundCard = groupByIdentity.get(group);
-      callNotifications(foundCard, profiler.startNested("CALL_NOTIFICATION"));
-    }
+    profiler.start("CALL_NOTIFICATIONS");
+    eventDto
+        .getLineItems()
+        .stream()
+        .map(OrderableLotIdentity::identityOf)
+        .map(groupCardsByIdentity::get)
+        .forEach(card -> callNotifications(card, reasons));
 
     return savedEventId;
   }
 
-  private void callNotifications(StockCard foundCard, Profiler profiler) {
-    profiler.start("GET_REASON_IDS");
-    Set<UUID> reasonIds = foundCard
-        .getLineItems()
-        .stream()
-        .map(StockCardLineItem::getReason)
-        .filter(Objects::nonNull)
-        .map(StockCardLineItemReason::getId)
-        .collect(Collectors.toSet());
-
-    profiler.start("RETRIEVE_ALL_REASONS");
-    List<StockCardLineItemReason> reasons = reasonRepository
-        .findByIdIn(reasonIds);
-
-    profiler.start("GROUP_REASONS_BY_ID");
-    Map<UUID, StockCardLineItemReason> groupById = reasons
-        .stream()
-        .collect(Collectors.toMap(StockCardLineItemReason::getId, reason -> reason));
-
-    profiler.start("SET_REASON_FOR_CARD_LINE_ITEMS");
+  private void callNotifications(StockCard foundCard, Map<UUID, StockCardLineItemReason> reasons) {
     for (StockCardLineItem line : foundCard.getLineItems()) {
       StockCardLineItemReason reason = line.getReason();
 
       if (null != reason) {
         UUID key = reason.getId();
-        line.setReason(groupById.get(key));
+        line.setReason(reasons.get(key));
       }
     }
 
-    profiler.start("CALCULATE_STOCK_ON_HAND");
     foundCard.calculateStockOnHand();
 
     if (foundCard.getStockOnHand() == 0) {
-      profiler.start("NOTIFY_STOCK_EDITORS");
       stockoutNotifier.notifyStockEditors(foundCard);
     }
+  }
+
+  private Map<UUID, StockCardLineItemReason> getReasons(List<StockCard> cards, Profiler profiler) {
+    profiler.start("GET_IDS_FROM_CARDS");
+    Set<UUID> reasonIds = cards
+        .stream()
+        .map(StockCard::getLineItems)
+        .flatMap(Collection::stream)
+        .map(StockCardLineItem::getReason)
+        .filter(Objects::nonNull)
+        .map(StockCardLineItemReason::getId)
+        .collect(Collectors.toSet());
+
+    profiler.start("DB_CALL");
+    List<StockCardLineItemReason> reasons = reasonRepository.findByIdIn(reasonIds);
+
+    profiler.start("GROUP_BY_ID");
+    return reasons
+        .stream()
+        .collect(Collectors.toMap(StockCardLineItemReason::getId, reason -> reason));
   }
 
 }

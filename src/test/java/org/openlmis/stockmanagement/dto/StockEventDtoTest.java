@@ -23,6 +23,7 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
+import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -31,11 +32,16 @@ public class StockEventDtoTest {
   @Test
   public void should_convert_from_dto_to_jpa_model() throws Exception {
     //given
+    UUID userId = UUID.randomUUID();
+
+    StockEventProcessContext context = new StockEventProcessContext();
+    context.setCurrentUserId(userId);
+
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    stockEventDto.setContext(context);
 
     //when
-    UUID userId = UUID.randomUUID();
-    StockEvent event = stockEventDto.toEvent(userId);
+    StockEvent event = stockEventDto.toEvent();
 
     //then
     assertThat(event.getDocumentNumber(), is(stockEventDto.getDocumentNumber()));

@@ -36,6 +36,8 @@ import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.util.StockEventProcessContext;
+
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -52,15 +54,21 @@ public class StockCardLineItemTest {
     stockCard.setLineItems(new ArrayList<>());
 
     //when
+    UUID userId = randomUUID();
+
+    StockEventProcessContext context = new StockEventProcessContext();
+    context.setCurrentUserId(userId);
+
     StockEventDto eventDto = createStockEventDto();
+    eventDto.setContext(context);
+
     StockEventLineItem eventLineItem = eventDto.getLineItems().get(0);
     eventLineItem.setStockAdjustments(singletonList(createStockAdjustment()));
 
-    UUID userId = randomUUID();
     UUID eventId = randomUUID();
 
     StockCardLineItem cardLineItem =
-        createLineItemFrom(eventDto, eventLineItem, stockCard, eventId, userId);
+        createLineItemFrom(eventDto, eventLineItem, stockCard, eventId);
 
     //then
     assertThat(cardLineItem.getSourceFreeText(), is(eventLineItem.getSourceFreeText()));
