@@ -48,7 +48,7 @@ public class ValidReasonAssignment extends BaseEntity {
   private UUID facilityTypeId;
 
   @Column(nullable = false)
-  private Boolean hidden = false;
+  private boolean hidden;
 
   @ManyToOne()
   @JoinColumn(nullable = false)

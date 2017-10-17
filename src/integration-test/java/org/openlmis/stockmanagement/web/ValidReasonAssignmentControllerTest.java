@@ -111,7 +111,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
         .andExpect(status().isCreated());
     verify(reasonAssignmentRepository, times(1)).save(assignmentCaptor.capture());
     assertThat(assignmentCaptor.getValue().getReason().getId(), is(reasonId));
-    assertThat(assignmentCaptor.getValue().getHidden(), is(false));
+    assertThat(assignmentCaptor.getValue().isHidden(), is(false));
     verify(programFacilityTypeExistenceService, times(1)).checkProgramAndFacilityTypeExist(
         assignment.getProgramId(), assignment.getFacilityTypeId());
     verify(permissionService, times(1)).canManageReasons();
@@ -137,7 +137,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
         .andDo(print())
         .andExpect(status().isCreated());
     verify(reasonAssignmentRepository, times(1)).save(assignmentCaptor.capture());
-    assertThat(assignmentCaptor.getValue().getHidden(), is(false));
+    assertThat(assignmentCaptor.getValue().isHidden(), is(false));
   }
 
   @Test
@@ -160,7 +160,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
         .andDo(print())
         .andExpect(status().isCreated());
     verify(reasonAssignmentRepository, times(1)).save(assignmentCaptor.capture());
-    assertThat(assignmentCaptor.getValue().getHidden(), is(true));
+    assertThat(assignmentCaptor.getValue().isHidden(), is(true));
   }
 
   @Test
