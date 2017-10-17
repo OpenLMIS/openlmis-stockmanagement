@@ -23,9 +23,15 @@ import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
 import java.util.UUID;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
 
 public class ValidReasonAssignmentRepositoryIntegrationTest
     extends BaseCrudRepositoryIntegrationTest<ValidReasonAssignment> {
+
+  @PersistenceContext
+  private EntityManager entityManager;
 
   @Autowired
   private ValidReasonAssignmentRepository repository;
@@ -36,14 +42,16 @@ public class ValidReasonAssignmentRepositoryIntegrationTest
   private static final UUID PROGRAM_ID = UUID.randomUUID();
   private static final UUID FACILITY_TYPE_ID = UUID.randomUUID();
 
-  @Test
+  @Test(expected = PersistenceException.class)
   public void shouldThrowExceptionWhenSaveDuplicatedValidReason() throws Exception {
     ValidReasonAssignment validReasonAssignment = generateInstance();
     repository.save(validReasonAssignment);
 
-    ValidReasonAssignment duplicatedalidReason =
+    ValidReasonAssignment duplicateValidReason =
         new ValidReasonAssignment(PROGRAM_ID, FACILITY_TYPE_ID, validReasonAssignment.getReason());
-    repository.save(duplicatedalidReason);
+    repository.save(duplicateValidReason);
+
+    entityManager.flush();
   }
 
   @Override
