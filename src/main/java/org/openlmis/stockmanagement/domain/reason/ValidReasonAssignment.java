@@ -47,6 +47,9 @@ public class ValidReasonAssignment extends BaseEntity {
   @Type(type = PG_UUID)
   private UUID facilityTypeId;
 
+  @Column(nullable = false)
+  private Boolean hidden = false;
+
   @ManyToOne()
   @JoinColumn(nullable = false)
   private StockCardLineItemReason reason;

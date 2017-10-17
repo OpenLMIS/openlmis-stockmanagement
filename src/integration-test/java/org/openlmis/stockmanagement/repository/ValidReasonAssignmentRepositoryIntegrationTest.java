@@ -47,8 +47,8 @@ public class ValidReasonAssignmentRepositoryIntegrationTest
     ValidReasonAssignment validReasonAssignment = generateInstance();
     repository.save(validReasonAssignment);
 
-    ValidReasonAssignment duplicateValidReason =
-        new ValidReasonAssignment(PROGRAM_ID, FACILITY_TYPE_ID, validReasonAssignment.getReason());
+    ValidReasonAssignment duplicateValidReason = new ValidReasonAssignment(
+        PROGRAM_ID, FACILITY_TYPE_ID, false, validReasonAssignment.getReason());
     repository.save(duplicateValidReason);
 
     entityManager.flush();
@@ -70,6 +70,6 @@ public class ValidReasonAssignmentRepositoryIntegrationTest
         .reasonType(ReasonType.CREDIT)
         .build();
     reasonRepository.save(reason);
-    return new ValidReasonAssignment(PROGRAM_ID, FACILITY_TYPE_ID, reason);
+    return new ValidReasonAssignment(PROGRAM_ID, FACILITY_TYPE_ID, false, reason);
   }
 }

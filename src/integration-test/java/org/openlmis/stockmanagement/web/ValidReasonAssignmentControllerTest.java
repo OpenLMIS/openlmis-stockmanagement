@@ -50,6 +50,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.util.Collections;
 import java.util.UUID;
 
+@SuppressWarnings("PMD.TooManyMethods")
 public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   private static final String VALID_REASON_API = "/api/validReasons";
   private static final String PROGRAM = "program";
@@ -90,7 +91,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   }
 
   @Test
-  public void should_assign_reason_to_program_facility_type() throws Exception {
+  public void shouldAssignReasonToProgramFacilityTypeAndSetAsShownByDefault() throws Exception {
     //given
     UUID reasonId = UUID.randomUUID();
     ValidReasonAssignment assignment = mockedValidReasonAssignment(reasonId);
@@ -110,9 +111,56 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
         .andExpect(status().isCreated());
     verify(reasonAssignmentRepository, times(1)).save(assignmentCaptor.capture());
     assertThat(assignmentCaptor.getValue().getReason().getId(), is(reasonId));
+    assertThat(assignmentCaptor.getValue().getHidden(), is(false));
     verify(programFacilityTypeExistenceService, times(1)).checkProgramAndFacilityTypeExist(
         assignment.getProgramId(), assignment.getFacilityTypeId());
     verify(permissionService, times(1)).canManageReasons();
+  }
+
+  @Test
+  public void shouldSetValidReasonAsShownWhenHiddenIsFalse() throws Exception {
+    //given1
+    ValidReasonAssignment assignment = mockedValidReasonAssignment(UUID.randomUUID());
+    assignment.setHidden(false);
+
+    //when
+    ResultActions resultActions = mvc.perform(
+        post(VALID_REASON_API)
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectToJsonString(assignment)));
+
+    //then
+    ArgumentCaptor<ValidReasonAssignment> assignmentCaptor = forClass(ValidReasonAssignment.class);
+
+    resultActions
+        .andDo(print())
+        .andExpect(status().isCreated());
+    verify(reasonAssignmentRepository, times(1)).save(assignmentCaptor.capture());
+    assertThat(assignmentCaptor.getValue().getHidden(), is(false));
+  }
+
+  @Test
+  public void shouldSetValidReasonAsHiddenWhenHiddenIsTrue() throws Exception {
+    //given1
+    ValidReasonAssignment assignment = mockedValidReasonAssignment(UUID.randomUUID());
+    assignment.setHidden(true);
+
+    //when
+    ResultActions resultActions = mvc.perform(
+        post(VALID_REASON_API)
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectToJsonString(assignment)));
+
+    //then
+    ArgumentCaptor<ValidReasonAssignment> assignmentCaptor = forClass(ValidReasonAssignment.class);
+
+    resultActions
+        .andDo(print())
+        .andExpect(status().isCreated());
+    verify(reasonAssignmentRepository, times(1)).save(assignmentCaptor.capture());
+    assertThat(assignmentCaptor.getValue().getHidden(), is(true));
   }
 
   @Test
@@ -251,8 +299,6 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
     assignment.setFacilityTypeId(reasonId);
 
     when(reasonRepository.exists(assignment.getReason().getId())).thenReturn(true);
-    when(reasonRepository.findOne(assignment.getReason().getId()))
-        .thenReturn(reason);
     return assignment;
   }
 }
