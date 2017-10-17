@@ -19,6 +19,7 @@ import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,5 +28,7 @@ public interface StockCardLineItemReasonRepository extends
   List<StockCardLineItemReason> findAll();
 
   StockCardLineItemReason findByName(@Param("name") String name);
+
+  List<StockCardLineItemReason> findByIdIn(Collection<UUID> ids);
 
 }
