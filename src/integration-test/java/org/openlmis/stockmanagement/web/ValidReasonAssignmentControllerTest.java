@@ -19,7 +19,7 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -35,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
@@ -67,6 +68,12 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
 
   @MockBean
   private StockCardLineItemReasonRepository reasonRepository;
+
+  @Before
+  public void setUp() {
+    when(reasonAssignmentRepository.save(any(ValidReasonAssignment.class)))
+        .thenAnswer(new SaveAnswer<ValidReasonAssignment>());
+  }
 
   @Test
   public void get_valid_reason_assignment_by_program_and_facility_type() throws Exception {
@@ -111,7 +118,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
         .andExpect(status().isCreated());
     verify(reasonAssignmentRepository, times(1)).save(assignmentCaptor.capture());
     assertThat(assignmentCaptor.getValue().getReason().getId(), is(reasonId));
-    assertThat(assignmentCaptor.getValue().isHidden(), is(false));
+    assertThat(assignmentCaptor.getValue().getHidden(), is(false));
     verify(programFacilityTypeExistenceService, times(1)).checkProgramAndFacilityTypeExist(
         assignment.getProgramId(), assignment.getFacilityTypeId());
     verify(permissionService, times(1)).canManageReasons();
@@ -137,7 +144,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
         .andDo(print())
         .andExpect(status().isCreated());
     verify(reasonAssignmentRepository, times(1)).save(assignmentCaptor.capture());
-    assertThat(assignmentCaptor.getValue().isHidden(), is(false));
+    assertThat(assignmentCaptor.getValue().getHidden(), is(false));
   }
 
   @Test
@@ -160,7 +167,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
         .andDo(print())
         .andExpect(status().isCreated());
     verify(reasonAssignmentRepository, times(1)).save(assignmentCaptor.capture());
-    assertThat(assignmentCaptor.getValue().isHidden(), is(true));
+    assertThat(assignmentCaptor.getValue().getHidden(), is(true));
   }
 
   @Test
@@ -179,7 +186,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
     ArgumentCaptor<ValidReasonAssignment> assignmentCaptor = forClass(ValidReasonAssignment.class);
     verify(reasonAssignmentRepository, times(1)).save(assignmentCaptor.capture());
 
-    assertNull(assignmentCaptor.getValue().getId());
+    assertNotEquals(assignment.getId(), assignmentCaptor.getValue().getId());
   }
 
   @Test

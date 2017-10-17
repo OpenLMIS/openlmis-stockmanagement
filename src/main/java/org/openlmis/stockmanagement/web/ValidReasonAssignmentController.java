@@ -27,6 +27,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
+import org.openlmis.stockmanagement.dto.ValidReasonAssignmentDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
@@ -107,14 +108,15 @@ public class ValidReasonAssignmentController {
    * Assign a reason to program and facility type.
    * If valid reason assignment ID is specified, ID will be ignored.
    *
-   * @param assignment valid reason assignment.
+   * @param assignmentDto valid reason assignment.
    * @return the assigned reason and program and facility type.
    */
   @RequestMapping(value = "/validReasons", method = POST)
-  public ResponseEntity<ValidReasonAssignment> assignReason(
-      @RequestBody ValidReasonAssignment assignment) {
+  public ResponseEntity<ValidReasonAssignmentDto> assignReason(
+      @RequestBody ValidReasonAssignmentDto assignmentDto) {
     permissionService.canManageReasons();
-    assignment.setId(null);
+    assignmentDto.setId(null);
+    ValidReasonAssignment assignment = ValidReasonAssignment.newInstance(assignmentDto);
     checkIsValidRequest(assignment);
     return findExistingOrSaveNew(assignment);
   }
@@ -131,7 +133,7 @@ public class ValidReasonAssignmentController {
     }
   }
 
-  private ResponseEntity<ValidReasonAssignment> findExistingOrSaveNew(
+  private ResponseEntity<ValidReasonAssignmentDto> findExistingOrSaveNew(
       ValidReasonAssignment assignment) {
     UUID programId = assignment.getProgramId();
     UUID facilityTypeId = assignment.getFacilityTypeId();
@@ -141,10 +143,12 @@ public class ValidReasonAssignmentController {
         .findByProgramIdAndFacilityTypeIdAndReasonId(programId, facilityTypeId, reasonId);
 
     if (foundAssignment != null) {
-      return new ResponseEntity<>(foundAssignment, OK);
+      return new ResponseEntity<>(ValidReasonAssignmentDto.newInstance(foundAssignment), OK);
     }
 
-    return new ResponseEntity<>(reasonAssignmentRepository.save(assignment), CREATED);
+    ValidReasonAssignmentDto assignmentDto =
+        ValidReasonAssignmentDto.newInstance(reasonAssignmentRepository.save(assignment));
+    return new ResponseEntity<>(assignmentDto, CREATED);
   }
 
   private List<ValidReasonAssignment> getReasonsBy(UUID program, UUID facilityType) {

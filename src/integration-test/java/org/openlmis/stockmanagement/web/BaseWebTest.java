@@ -27,13 +27,17 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.openlmis.stockmanagement.BaseIntegrationTest;
+import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -91,5 +95,24 @@ public abstract class BaseWebTest extends BaseIntegrationTest {
     ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule());
     return mapper.writeValueAsString(obj);
+  }
+
+  static class SaveAnswer<T extends BaseEntity> implements Answer<T> {
+
+    @Override
+    public T answer(InvocationOnMock invocation) throws Throwable {
+      T obj = (T) invocation.getArguments()[0];
+
+      if (null == obj) {
+        return null;
+      }
+
+      if (null == obj.getId()) {
+        obj.setId(UUID.randomUUID());
+      }
+
+      return obj;
+    }
+
   }
 }
