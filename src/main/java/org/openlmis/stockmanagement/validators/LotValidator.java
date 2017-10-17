@@ -37,8 +37,7 @@ import java.util.Optional;
 public class LotValidator implements StockEventValidator {
 
   @Override
-  public void validate(StockEventDto stockEventDto)
-      throws IllegalAccessException, InstantiationException {
+  public void validate(StockEventDto stockEventDto) {
     LOGGER.info("validating lot");
     if (!stockEventDto.hasLineItems()) {
       return;

@@ -42,6 +42,7 @@ import java.util.UUID;
  * Controller used to create stock event.
  */
 @Controller
+@Transactional
 @RequestMapping("/api")
 public class StockEventsController {
   private static final Logger LOGGER = LoggerFactory.getLogger(StockEventsController.class);
@@ -61,13 +62,9 @@ public class StockEventsController {
    *
    * @param eventDto a stock event bound to request body.
    * @return created stock event's ID.
-   * @throws InstantiationException InstantiationException.
-   * @throws IllegalAccessException IllegalAccessException.
    */
   @RequestMapping(value = "stockEvents", method = POST)
-  @Transactional(rollbackFor = {InstantiationException.class, IllegalAccessException.class})
-  public ResponseEntity<UUID> createStockEvent(@RequestBody StockEventDto eventDto)
-      throws InstantiationException, IllegalAccessException {
+  public ResponseEntity<UUID> createStockEvent(@RequestBody StockEventDto eventDto) {
     LOGGER.debug("Try to create a stock event");
 
     XLOGGER.entry(eventDto);

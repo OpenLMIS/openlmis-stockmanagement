@@ -30,12 +30,10 @@ import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.HomeFacilityPermissionService;
 import org.openlmis.stockmanagement.service.StockEventProcessor;
 import org.openlmis.stockmanagement.service.StockEventValidationsService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 
 import guru.nidi.ramltester.junit.RamlMatchers;
-import org.springframework.http.HttpHeaders;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -44,10 +42,6 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class StockEventsControllerIntegrationTest extends BaseWebIntegrationTest {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(
-      StockEventsControllerIntegrationTest.class);
-
   private static final String RESOURCE_URL = "/api/stockEvents";
 
   @MockBean
@@ -67,7 +61,7 @@ public class StockEventsControllerIntegrationTest extends BaseWebIntegrationTest
   // POST /api/stockEvents
 
   @Test
-  public void shouldCreateStockEvent() throws InstantiationException, IllegalAccessException {
+  public void shouldCreateStockEvent() {
     // given
     mockHasPermissions();
     mockPassValidation();
@@ -95,8 +89,7 @@ public class StockEventsControllerIntegrationTest extends BaseWebIntegrationTest
   }
 
   @Test
-  public void shouldReturnBadRequestOnCreateStockEventWhenEntityInvalid()
-      throws InstantiationException, IllegalAccessException {
+  public void shouldReturnBadRequestOnCreateStockEventWhenEntityInvalid() {
     // given
     mockHasPermissions();
     mockPassValidation();
@@ -157,10 +150,6 @@ public class StockEventsControllerIntegrationTest extends BaseWebIntegrationTest
   }
 
   private void mockPassValidation() {
-    try {
-      doNothing().when(stockEventValidator).validate(any(StockEventDto.class));
-    } catch (IllegalAccessException | InstantiationException err) {
-      LOGGER.error(err.getLocalizedMessage());
-    }
+    doNothing().when(stockEventValidator).validate(any(StockEventDto.class));
   }
 }

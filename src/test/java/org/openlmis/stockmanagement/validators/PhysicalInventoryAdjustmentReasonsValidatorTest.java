@@ -74,16 +74,14 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest {
   }
 
   @Test
-  public void shouldByPassWhenStockEventIsNotPhysicalInventory()
-      throws InstantiationException, IllegalAccessException {
+  public void shouldByPassWhenStockEventIsNotPhysicalInventory() {
     when(stockEventDto.isPhysicalInventory()).thenReturn(false);
 
     validator.validate(stockEventDto);
   }
 
   @Test
-  public void shouldPassWhenReasonIsValid()
-      throws InstantiationException, IllegalAccessException {
+  public void shouldPassWhenReasonIsValid() {
     stockEventDto.setProgramId(UUID.randomUUID());
     stockEventDto.setFacilityId(UUID.randomUUID());
     stockEventDto.setLineItems(
@@ -100,8 +98,7 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest {
   }
 
   @Test
-  public void shouldPassWhenNoStockAdjustments()
-      throws InstantiationException, IllegalAccessException {
+  public void shouldPassWhenNoStockAdjustments() {
     stockEventDto.setLineItems(
         Collections.singletonList(new StockEventLineItem()));
 
@@ -109,8 +106,7 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void shouldNotPassWhenReasonIsNotValid()
-      throws InstantiationException, IllegalAccessException {
+  public void shouldNotPassWhenReasonIsNotValid() {
     stockEventDto.setLineItems(
         Collections.singletonList(
             generateLineItem(5, generateReason())));
@@ -124,8 +120,7 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void shouldNotPassWhenNoReason()
-      throws InstantiationException, IllegalAccessException {
+  public void shouldNotPassWhenNoReason() {
     stockEventDto.setLineItems(
         Collections.singletonList(
             generateLineItem(5, null)));
@@ -134,8 +129,7 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void shouldNotPassWhenNoQuantity()
-      throws InstantiationException, IllegalAccessException {
+  public void shouldNotPassWhenNoQuantity() {
     stockEventDto.setLineItems(
         Collections.singletonList(
             generateLineItem(null, generateReason())));
@@ -144,8 +138,7 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void shouldNotPassWhenFacilityIdIsInvalid()
-      throws InstantiationException, IllegalAccessException {
+  public void shouldNotPassWhenFacilityIdIsInvalid() {
     stockEventDto.setLineItems(
         Collections.singletonList(
             generateLineItem(5, generateReason())));

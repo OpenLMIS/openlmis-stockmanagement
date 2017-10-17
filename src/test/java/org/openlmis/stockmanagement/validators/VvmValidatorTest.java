@@ -44,8 +44,7 @@ public class VvmValidatorTest {
   private VvmValidator validator;
 
   @Test(expected = ValidationMessageException.class)
-  public void shouldRejectIfOrderableDisabledVvmAndLineItemHasVvmStatus()
-      throws InstantiationException, IllegalAccessException {
+  public void shouldRejectIfOrderableDisabledVvmAndLineItemHasVvmStatus() {
     OrderableDto orderable = generateOrderable();
     orderable.setExtraData(Collections.singletonMap("useVVM", "false"));
 
@@ -56,8 +55,7 @@ public class VvmValidatorTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void shouldRejectIfOrderableNotConfiguredVvmAndLineItemHasVvmStatus()
-      throws IllegalAccessException, InstantiationException {
+  public void shouldRejectIfOrderableNotConfiguredVvmAndLineItemHasVvmStatus() {
     OrderableDto orderable = generateOrderable();
 
     VvmApplicable lineItem = generateVvmApplicable(orderable);
@@ -67,8 +65,7 @@ public class VvmValidatorTest {
   }
 
   @Test
-  public void shouldNotRejectIfOrderableEnabledVvmAndLineItemHasVvmStatus()
-      throws IllegalAccessException, InstantiationException {
+  public void shouldNotRejectIfOrderableEnabledVvmAndLineItemHasVvmStatus() {
     OrderableDto orderable = generateOrderable();
     orderable.setExtraData(Collections.singletonMap("useVVM", "true"));
 
@@ -79,8 +76,7 @@ public class VvmValidatorTest {
   }
 
   @Test
-  public void shouldNotRejectIfOrderableDisabledVvmAndLineItemHasNoVvmStatus()
-      throws IllegalAccessException, InstantiationException {
+  public void shouldNotRejectIfOrderableDisabledVvmAndLineItemHasNoVvmStatus() {
     OrderableDto orderable = generateOrderable();
     orderable.setExtraData(Collections.singletonMap("useVVM", "false"));
 

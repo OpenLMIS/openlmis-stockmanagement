@@ -60,8 +60,7 @@ public class QuantityValidator implements StockEventValidator {
   private StockCardRepository stockCardRepository;
 
   @Override
-  public void validate(StockEventDto stockEventDto)
-      throws IllegalAccessException, InstantiationException {
+  public void validate(StockEventDto stockEventDto) {
     LOGGER.debug("Validate quantity");
     if (!stockEventDto.hasLineItems()) {
       return;
@@ -77,8 +76,7 @@ public class QuantityValidator implements StockEventValidator {
     }
   }
 
-  private void validateEventItems(StockEventDto event, List<StockEventLineItem> items)
-      throws IllegalAccessException, InstantiationException {
+  private void validateEventItems(StockEventDto event, List<StockEventLineItem> items) {
     StockCard foundCard = tryFindCard(
         event.getProgramId(),
         event.getFacilityId(),
@@ -117,8 +115,7 @@ public class QuantityValidator implements StockEventValidator {
     return null;
   }
 
-  private void validateQuantities(List<StockEventLineItem> items, Integer stockOnHand)
-      throws InstantiationException, IllegalAccessException {
+  private void validateQuantities(List<StockEventLineItem> items, Integer stockOnHand) {
     for (StockEventLineItem item : items) {
       Integer quantity = item.getQuantity();
       if (stockOnHand != null && quantity != null) {
@@ -170,8 +167,7 @@ public class QuantityValidator implements StockEventValidator {
   }
 
   private void calculateStockOnHand(
-      StockEventDto eventDto, List<StockEventLineItem> group, StockCard foundCard)
-      throws InstantiationException, IllegalAccessException {
+      StockEventDto eventDto, List<StockEventLineItem> group, StockCard foundCard) {
     for (StockEventLineItem lineItem : group) {
       StockCardLineItem stockCardLineItem = StockCardLineItem
           .createLineItemFrom(eventDto, lineItem, foundCard, null);

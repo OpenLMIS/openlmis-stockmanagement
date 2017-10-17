@@ -42,8 +42,7 @@ public class ActiveStockCardsValidator implements StockEventValidator {
   private StockCardRepository stockCardRepository;
 
   @Override
-  public void validate(StockEventDto stockEventDto)
-      throws IllegalAccessException, InstantiationException {
+  public void validate(StockEventDto stockEventDto) {
     boolean noProgram = stockEventDto.getProgramId() == null;
     boolean noFacility = stockEventDto.getFacilityId() == null;
     boolean notPhysicalInventory = !stockEventDto.isPhysicalInventory();

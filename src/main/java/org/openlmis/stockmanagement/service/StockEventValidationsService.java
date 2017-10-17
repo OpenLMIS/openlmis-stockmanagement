@@ -39,8 +39,7 @@ public class StockEventValidationsService {
    *
    * @param stockEventDto the event to be validated.
    */
-  public void validate(StockEventDto stockEventDto)
-      throws InstantiationException, IllegalAccessException {
+  public void validate(StockEventDto stockEventDto) {
     for (StockEventValidator validator : stockEventValidators) {
       validator.validate(stockEventDto);
     }

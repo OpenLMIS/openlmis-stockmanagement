@@ -79,8 +79,7 @@ public class StockEventProcessor {
    * @return the persisted event ids.
    */
 
-  public UUID process(StockEventDto eventDto)
-      throws IllegalAccessException, InstantiationException {
+  public UUID process(StockEventDto eventDto) {
     XLOGGER.entry(eventDto);
     Profiler profiler = new Profiler("PROCESS");
     profiler.setLogger(XLOGGER);
@@ -102,8 +101,7 @@ public class StockEventProcessor {
     return eventId;
   }
 
-  private UUID saveEventAndGenerateLineItems(StockEventDto eventDto, Profiler profiler)
-      throws InstantiationException, IllegalAccessException {
+  private UUID saveEventAndGenerateLineItems(StockEventDto eventDto, Profiler profiler) {
     profiler.start("CONVERT_TO_EVENT");
     StockEvent stockEvent = eventDto.toEvent();
 

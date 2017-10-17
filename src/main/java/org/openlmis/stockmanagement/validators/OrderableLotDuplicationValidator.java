@@ -36,8 +36,7 @@ import java.util.Set;
 @Component(value = "OrderableLotDuplicationValidator")
 public class OrderableLotDuplicationValidator implements StockEventValidator {
   @Override
-  public void validate(StockEventDto stockEventDto)
-      throws IllegalAccessException, InstantiationException {
+  public void validate(StockEventDto stockEventDto) {
     //duplication is not allow in physical inventory, but is allowed in adjustment
     if (!stockEventDto.hasLineItems() || !stockEventDto.isPhysicalInventory()) {
       return;

@@ -50,8 +50,7 @@ public class PhysicalInventoryAdjustmentReasonsValidator implements StockEventVa
   private FacilityReferenceDataService facilityReferenceDataService;
 
   @Override
-  public void validate(StockEventDto stockEventDto)
-      throws IllegalAccessException, InstantiationException {
+  public void validate(StockEventDto stockEventDto) {
 
     if (stockEventDto.isPhysicalInventory()) {
       stockEventDto.getLineItems().forEach(line -> validateAdjustments(stockEventDto, line)

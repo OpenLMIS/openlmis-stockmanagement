@@ -41,7 +41,7 @@ public class StockEventVvmValidatorTest {
   private StockEventVvmValidator validator;
 
   @Test
-  public void shouldCallVvmValidator() throws InstantiationException, IllegalAccessException {
+  public void shouldCallVvmValidator() {
     // given
     StockEventDto stockEvent = new StockEventDto();
     stockEvent.setLineItems(Collections.emptyList());

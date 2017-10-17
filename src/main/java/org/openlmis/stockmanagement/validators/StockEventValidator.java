@@ -30,5 +30,5 @@ import org.springframework.stereotype.Component;
 public interface StockEventValidator {
   Logger LOGGER = LoggerFactory.getLogger(StockEventValidator.class);
 
-  void validate(StockEventDto stockEventDto) throws IllegalAccessException, InstantiationException;
+  void validate(StockEventDto stockEventDto);
 }

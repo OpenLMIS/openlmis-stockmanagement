@@ -154,7 +154,7 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
    */
   public StockCard shallowCopy() {
     StockCard clone = new StockCard();
-    clone.setId(id);
+    clone.setId(getId());
     clone.setLotId(lotId);
     clone.setStockOnHand(stockOnHand);
     clone.setOrderableId(orderableId);

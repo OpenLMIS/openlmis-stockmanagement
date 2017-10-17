@@ -27,7 +27,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.domain.BaseEntity.fromId;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -193,8 +192,11 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   public void should_not_assign_same_reason_twice() throws Exception {
     //given
     UUID reasonId = UUID.randomUUID();
+    StockCardLineItemReason reason = new StockCardLineItemReason();
+    reason.setId(reasonId);
+
     ValidReasonAssignment assignment = new ValidReasonAssignment();
-    assignment.setReason(fromId(reasonId, StockCardLineItemReason.class));
+    assignment.setReason(reason);
     assignment.setProgramId(UUID.randomUUID());
     assignment.setFacilityTypeId(UUID.randomUUID());
 
@@ -233,9 +235,12 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   public void should_return_400_if_reason_not_exist() throws Exception {
     //given
     UUID reasonId = UUID.randomUUID();
+    StockCardLineItemReason reason = new StockCardLineItemReason();
+    reason.setId(reasonId);
+
     when(reasonRepository.findOne(reasonId)).thenReturn(null);
     ValidReasonAssignment assignment = new ValidReasonAssignment();
-    assignment.setReason(fromId(reasonId, StockCardLineItemReason.class));
+    assignment.setReason(reason);
 
     //when
     ResultActions resultActions = mvc.perform(
@@ -296,9 +301,9 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
     resultActions.andExpect(status().isBadRequest());
   }
 
-  private ValidReasonAssignment mockedValidReasonAssignment(UUID reasonId)
-      throws IllegalAccessException, InstantiationException {
-    StockCardLineItemReason reason = fromId(reasonId, StockCardLineItemReason.class);
+  private ValidReasonAssignment mockedValidReasonAssignment(UUID reasonId) {
+    StockCardLineItemReason reason = new StockCardLineItemReason();
+    reason.setId(reasonId);
 
     ValidReasonAssignment assignment = new ValidReasonAssignment();
     assignment.setReason(reason);

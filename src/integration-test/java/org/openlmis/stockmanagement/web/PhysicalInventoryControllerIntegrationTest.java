@@ -26,7 +26,6 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVEN
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_ID_MISSING;
 
-import guru.nidi.ramltester.junit.RamlMatchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
@@ -37,6 +36,9 @@ import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
 import org.openlmis.stockmanagement.service.PhysicalInventoryService;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
+
+import guru.nidi.ramltester.junit.RamlMatchers;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -176,8 +178,7 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
   }
 
   @Test
-  public void shouldReturnBadRequestOnCreateEmptyDraftWhenEntityInvalid()
-      throws InstantiationException, IllegalAccessException {
+  public void shouldReturnBadRequestOnCreateEmptyDraftWhenEntityInvalid() {
     // given
     PhysicalInventoryDto expectedDraft = generateDraft();
     when(physicalInventoryService
@@ -201,7 +202,7 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
   // PUT /api/physicalInventories/{id}
 
   @Test
-  public void shouldSaveDraftWhenValid() throws InstantiationException, IllegalAccessException {
+  public void shouldSaveDraftWhenValid() {
     // given
     UUID physicalInventoryId = UUID.randomUUID();
     PhysicalInventoryDto expectedDraft = generatePhysicalInventory();
@@ -227,8 +228,7 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
   }
 
   @Test
-  public void shouldReturnBadRequestOnSaveDraftWhenEntityInvalid()
-      throws InstantiationException, IllegalAccessException {
+  public void shouldReturnBadRequestOnSaveDraftWhenEntityInvalid() {
     // given
     UUID physicalInventoryId = UUID.randomUUID();
     PhysicalInventoryDto expectedDraft = generatePhysicalInventory();
