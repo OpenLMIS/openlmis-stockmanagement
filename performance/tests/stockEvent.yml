@@ -1,0 +1,106 @@
+execution:
+  - concurrency: 1
+    hold-for: 2m
+    scenario: send-stock-event
+
+scenarios:
+  get-user-token:
+    requests:
+      - url: ${__P(base-uri)}/api/oauth/token
+        method: POST
+        label: GetUserToken
+        headers:
+          Authorization: Basic ${__base64Encode(${__P(user-auth)})}
+        body:
+          grant_type: password
+          username: ${__P(username)}
+          password: ${__P(password)}
+        extract-jsonpath:
+          access_token:
+            jsonpath: $.access_token
+  get-approved-products:
+    requests:
+      - url: ${__P(base-uri)}/api/facilities/${facility_id}/approvedProducts?programId=${program_id}&fullSupply=true
+        method: GET
+        label: GetApprovedProducts
+        headers:
+          Authorization: Bearer ${access_token}
+          Content-Type: application/json
+        extract-jsonpath:
+          products:
+            jsonpath: $..orderable
+  get-valid-reasons:
+    requests:
+      - url: ${__P(base-uri)}/api/validReasons?program=${program_id}&facilityType=${facility_type_id}
+        method: GET
+        label: GetValidReasons
+        headers:
+          Authorization: Bearer ${access_token}
+          Content-Type: application/json
+        extract-jsonpath:
+          valid_reasons:
+            jsonpath: $..reason
+  send-stock-event:
+    variables:
+      # Health Center
+      facility_type_id: ac1d268b-ce10-455f-bf87-9c667da8f060
+      # Nandumbo Health Center
+      facility_id: 176c4276-1fb1-4507-8ad2-cdfba0f47445
+      # Family Planning
+      program_id: dce17f2e-af3e-40ad-8e00-3496adef44c3
+      # Administrator
+      user_id: a337ec45-31a0-4f2b-9b2e-a105c4b669bb
+    requests:
+      - include-scenario: get-user-token
+      - include-scenario: get-approved-products
+      - include-scenario: get-valid-reasons
+      - url: ${__P(base-uri)}/api/stockEvents
+        method: POST
+        label: SendStockEvent
+        headers:
+          Authorization: Bearer ${access_token}
+          Content-Type: application/json
+        jsr223:
+          execute: before
+          script-text: |
+            import groovy.json.JsonOutput
+            import groovy.json.JsonSlurper
+
+            def parser = new JsonSlurper()
+
+            def validReasons = parser.parseText(vars.get("valid_reasons"))
+
+            def reasons = [
+              consumed: validReasons.find { it.id == "b5c27da7-bdda-4790-925a-9484c5dfb594" },
+              receipts: validReasons.find { it.id == "313f2f5f-0c22-4626-8c49-3554ef763de3" },
+            ]
+
+            def eventLineItems = new ArrayList()
+
+            def products = parser.parseText(vars.get("products")).sort { it.id }
+            products.eachWithIndex { it, index ->
+              eventLineItems.add([
+                orderableId: it.id,
+                quantity: (index + 1) * 10,
+                occurredDate: new Date().format('yyyy-MM-dd'),
+                stockAdjustments: [
+                  [quantity: (index + 1) * 5, reason: reasons.receipts],
+                  [quantity: (index + 1) * 5, reason: reasons.consumed]
+                ]
+              ])
+            }
+
+            def stockEvent = [
+              facilityId: vars.get("facility_id"),
+              programId: vars.get("program_id"),
+              userId: vars.get("user_id"),
+              lineItems: eventLineItems
+            ]
+
+            vars.put("stock_event", JsonOutput.toJson(stockEvent))
+        body: ${stock_event}
+
+reporting:
+    - module: passfail
+      criteria:
+        Send stock event too slow: p90 of SendStockEvent>500ms

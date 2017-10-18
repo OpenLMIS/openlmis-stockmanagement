@@ -1,0 +1,14 @@
+modules:
+  jmeter:
+    properties:
+      base-uri: http://localhost
+      user-auth: user-client:changeme
+      username: administrator
+      password: password
+    xml-jtl-flags:
+      responseData: true
+reporting:
+  - module: final-stats
+  - module: passfail
+    criteria:
+    - failures>0%, stop as failed
