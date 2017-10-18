@@ -136,6 +136,7 @@ public class StockCardLineItem extends BaseEntity {
    * @param eventDto     stock eventDto.
    * @param stockCard    the card that this line item belongs to.
    * @param savedEventId saved event id.
+   * @return created line item.
    */
   public static StockCardLineItem createLineItemFrom(
       StockEventDto eventDto, StockEventLineItem eventLineItem,
