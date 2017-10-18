@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static java.util.Collections.singletonList;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
@@ -25,11 +26,15 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_IN_
 import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.openlmis.stockmanagement.domain.sourcedestination.Node;
+import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAssignment;
+import org.openlmis.stockmanagement.domain.sourcedestination.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityTypeDto;
@@ -53,10 +58,36 @@ public class SourceDestinationAssignmentValidatorTest {
   @InjectMocks
   private SourceDestinationAssignmentValidator sourceDestinationAssignmentValidator;
 
+  @Mock
+  private ValidSourceAssignment validSourceAssignment;
+
+  @Mock
+  private ValidDestinationAssignment validDestinationAssignment;
+
+  @Mock
+  private Node node;
+
+  @Before
+  public void setUp() throws Exception {
+    when(validSourceAssignment.getNode()).thenReturn(node);
+    when(validDestinationAssignment.getNode()).thenReturn(node);
+    when(node.getId()).thenReturn(UUID.randomUUID());
+
+    when(validSourceAssignmentRepository
+        .findByProgramIdAndFacilityTypeId(any(UUID.class), any(UUID.class)))
+        .thenReturn(singletonList(validSourceAssignment));
+
+    when(validDestinationAssignmentRepository
+        .findByProgramIdAndFacilityTypeId(any(UUID.class), any(UUID.class)))
+        .thenReturn(singletonList(validDestinationAssignment));
+  }
+
   @Test
   public void should_not_pass_when_event_has_both_source_and_destination() throws Exception {
     //given
     StockEventDto eventDto = createStockEventDto();
+    createContextWithFacility(eventDto);
+
     eventDto.getLineItems().get(0).setSourceId(UUID.randomUUID());
     eventDto.getLineItems().get(0).setDestinationId(UUID.randomUUID());
 
@@ -77,10 +108,11 @@ public class SourceDestinationAssignmentValidatorTest {
   public void should_not_pass_when_event_has_source_not_in_valid_list() throws Exception {
     //given
     StockEventDto eventDto = createStockEventDto();
+    createContextWithFacility(eventDto);
+
     eventDto.getLineItems().get(0).setSourceId(UUID.randomUUID());
     eventDto.getLineItems().get(0).setDestinationId(null);
 
-    createContextWithFacility(eventDto);
     when(validSourceAssignmentRepository
         .findByProgramIdAndFacilityTypeId(any(UUID.class), any(UUID.class)))
         .thenReturn(new ArrayList<>());
@@ -101,10 +133,11 @@ public class SourceDestinationAssignmentValidatorTest {
   public void should_not_pass_when_event_has_destination_not_in_valid_list() throws Exception {
     //given
     StockEventDto eventDto = createStockEventDto();
+    createContextWithFacility(eventDto);
+
     eventDto.getLineItems().get(0).setDestinationId(UUID.randomUUID());
     eventDto.getLineItems().get(0).setSourceId(null);
 
-    createContextWithFacility(eventDto);
     when(validDestinationAssignmentRepository
         .findByProgramIdAndFacilityTypeId(any(UUID.class), any(UUID.class)))
         .thenReturn(new ArrayList<>());
@@ -127,11 +160,11 @@ public class SourceDestinationAssignmentValidatorTest {
   public void should_pass_if_program_missing() throws Exception {
     //given
     StockEventDto eventDto = createStockEventDto();
-    eventDto.setProgramId(null);
-    eventDto.getLineItems().get(0).setDestinationId(UUID.randomUUID());
-    eventDto.getLineItems().get(0).setSourceId(null);
-
     createContextWithFacility(eventDto);
+
+    eventDto.setProgramId(null);
+    eventDto.getLineItems().get(0).setDestinationId(node.getId());
+    eventDto.getLineItems().get(0).setSourceId(null);
 
     //when
     sourceDestinationAssignmentValidator.validate(eventDto);
@@ -145,10 +178,11 @@ public class SourceDestinationAssignmentValidatorTest {
   public void should_pass_if_facility_not_found_in_ref_data() throws Exception {
     //given
     StockEventDto eventDto = createStockEventDto();
+    createContextWithFacility(eventDto);
+
     eventDto.setFacilityId(null);
-    eventDto.getLineItems().get(0).setDestinationId(UUID.randomUUID());
+    eventDto.getLineItems().get(0).setDestinationId(node.getId());
     eventDto.getLineItems().get(0).setSourceId(null);
-    eventDto.setContext(new StockEventProcessContext());
 
     //when
     sourceDestinationAssignmentValidator.validate(eventDto);

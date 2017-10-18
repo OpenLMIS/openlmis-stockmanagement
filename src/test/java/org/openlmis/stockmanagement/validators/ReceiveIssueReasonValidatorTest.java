@@ -15,6 +15,8 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static java.util.Collections.singleton;
+import static java.util.Collections.singletonList;
 import static org.junit.rules.ExpectedException.none;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.domain.reason.ReasonCategory.ADJUSTMENT;
@@ -102,10 +104,14 @@ public class ReceiveIssueReasonValidatorTest {
     StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.getLineItems().get(0).setSourceId(UUID.randomUUID());
     stockEventDto.getLineItems().get(0).setDestinationId(null);
-    stockEventDto.getLineItems().get(0).setReasonId(UUID.randomUUID());
 
-    when(reasonRepository.findOne(stockEventDto.getLineItems().get(0).getReasonId()))
-        .thenReturn(creditAdhocReason);
+    UUID reasonId = UUID.randomUUID();
+    stockEventDto.getLineItems().get(0).setReasonId(reasonId);
+
+    when(reasonRepository.findByIdIn(singleton(reasonId)))
+        .thenReturn(singletonList(creditAdhocReason));
+
+    creditAdhocReason.setId(reasonId);
 
     //when
     receiveIssueReasonValidator.validate(stockEventDto);
@@ -120,10 +126,13 @@ public class ReceiveIssueReasonValidatorTest {
     stockEventDto.getLineItems().get(0).setDestinationId(UUID.randomUUID());
     stockEventDto.getLineItems().get(0).setSourceId(null);
     //the following is a debit reason
-    stockEventDto.getLineItems().get(0).setReasonId(UUID.randomUUID());
+    UUID reasonId = UUID.randomUUID();
+    stockEventDto.getLineItems().get(0).setReasonId(reasonId);
 
-    when(reasonRepository.findOne(stockEventDto.getLineItems().get(0).getReasonId()))
-        .thenReturn(debitAdhocReason);
+    when(reasonRepository.findByIdIn(singleton(reasonId)))
+        .thenReturn(singletonList(debitAdhocReason));
+
+    debitAdhocReason.setId(reasonId);
 
     //when
     receiveIssueReasonValidator.validate(stockEventDto);
@@ -179,9 +188,11 @@ public class ReceiveIssueReasonValidatorTest {
     expectedEx.expectMessage(errorKey);
 
     //given
+    UUID reasonId = stockEventDto.getLineItems().get(0).getReasonId();
+    mockedReason.setId(reasonId);
 
-    when(reasonRepository.findOne(stockEventDto.getLineItems().get(0).getReasonId()))
-        .thenReturn(mockedReason);
+    when(reasonRepository.findByIdIn(singleton(reasonId)))
+        .thenReturn(singletonList(mockedReason));
 
     //when
     receiveIssueReasonValidator.validate(stockEventDto);

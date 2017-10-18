@@ -27,6 +27,12 @@ import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 /**
  * An adjustment should have a reason that is either DEBIT or CREDIT.
  * And it should have a reason category that is ADJUSTMENT
@@ -45,15 +51,28 @@ public class AdjustmentReasonValidator implements StockEventValidator {
       return;
     }
 
-    stockEventDto.getLineItems().forEach(lineItem -> {
+    List<StockEventLineItem> lineItems = stockEventDto.getLineItems();
+    Set<UUID> reasonIds = lineItems
+        .stream()
+        .filter(StockEventLineItem::hasReasonId)
+        .map(StockEventLineItem::getReasonId)
+        .collect(Collectors.toSet());
+
+    Map<UUID, StockCardLineItemReason> reasons = reasonRepository
+        .findByIdIn(reasonIds)
+        .stream()
+        .collect(Collectors.toMap(StockCardLineItemReason::getId, reason -> reason));
+
+    for (StockEventLineItem lineItem : lineItems) {
       if (lineItem.hasReasonId()) {
-        validateReason(lineItem);
+        validateReason(lineItem, reasons);
       }
-    });
+    }
   }
 
-  private void validateReason(StockEventLineItem lineItem) {
-    StockCardLineItemReason foundReason = reasonRepository.findOne(lineItem.getReasonId());
+  private void validateReason(StockEventLineItem lineItem,
+                              Map<UUID, StockCardLineItemReason> reasons) {
+    StockCardLineItemReason foundReason = reasons.get(lineItem.getReasonId());
     //this validator does not care if reason id not found in db
     //that is handled by other validators
     if (foundReason != null) {

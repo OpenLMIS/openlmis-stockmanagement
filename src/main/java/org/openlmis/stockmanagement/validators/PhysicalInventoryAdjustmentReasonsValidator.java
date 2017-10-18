@@ -28,10 +28,10 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
-import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -46,25 +46,24 @@ public class PhysicalInventoryAdjustmentReasonsValidator implements StockEventVa
   @Autowired
   private ValidReasonAssignmentRepository validReasonRepository;
 
-  @Autowired
-  private FacilityReferenceDataService facilityReferenceDataService;
-
   @Override
   public void validate(StockEventDto stockEventDto) {
 
     if (stockEventDto.isPhysicalInventory()) {
-      stockEventDto.getLineItems().forEach(line -> validateAdjustments(stockEventDto, line)
-      );
+      for (StockEventLineItem line : stockEventDto.getLineItems()) {
+        validateAdjustments(stockEventDto, line);
+      }
     }
   }
 
   private void validateAdjustments(StockEventDto event, StockEventLineItem line) {
     List<StockAdjustment> stockAdjustments = line.getStockAdjustments();
+
     if (stockAdjustments != null) {
-      stockAdjustments.forEach(adjustment -> {
+      for (StockAdjustment adjustment : stockAdjustments) {
         validateQuantity(adjustment.getQuantity());
-        validateReason(event.getProgramId(), event.getFacilityId(), adjustment.getReason());
-      });
+        validateReason(event, adjustment.getReason());
+      }
     }
   }
 
@@ -75,25 +74,28 @@ public class PhysicalInventoryAdjustmentReasonsValidator implements StockEventVa
     }
   }
 
-  private void validateReason(UUID programId, UUID facilityId, StockCardLineItemReason reason) {
+  private void validateReason(StockEventDto event, StockCardLineItemReason reason) {
     if (reason == null) {
       throw new ValidationMessageException(
           new Message(ERROR_PHYSICAL_INVENTORY_DISCREPANCY_REASON_NOT_PROVIDED));
     }
-    UUID facilityType = getFacilityType(facilityId);
+    UUID facilityType = getFacilityType(event);
     UUID reasonId = reason.getId();
+
+    UUID programId = event.getProgramId();
     if (!isReasonValid(programId, facilityType, reasonId)) {
       throwException(programId, facilityType, reasonId);
     }
   }
 
-  private UUID getFacilityType(UUID facilityId) {
-    FacilityDto facility =
-        facilityReferenceDataService.findOne(facilityId);
+  private UUID getFacilityType(StockEventDto event) {
+    FacilityDto facility = event.getContext().getFacility();
+
     if (facility == null) {
       throw new ValidationMessageException(
-          new Message(ERROR_EVENT_FACILITY_INVALID, facilityId));
+          new Message(ERROR_EVENT_FACILITY_INVALID, event.getFacilityId()));
     }
+
     return facility.getType().getId();
   }
 

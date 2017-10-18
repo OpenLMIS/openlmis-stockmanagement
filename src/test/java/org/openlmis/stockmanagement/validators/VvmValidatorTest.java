@@ -16,7 +16,7 @@
 package org.openlmis.stockmanagement.validators;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.anyListOf;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -89,8 +89,8 @@ public class VvmValidatorTest {
     OrderableDto orderable = new OrderableDto();
     orderable.setId(UUID.randomUUID());
 
-    given(orderableReferenceDataService.findOne(eq(orderable.getId())))
-        .willReturn(orderable);
+    given(orderableReferenceDataService.findByIds(anyListOf(UUID.class)))
+        .willReturn(Collections.singletonList(orderable));
 
     return orderable;
   }

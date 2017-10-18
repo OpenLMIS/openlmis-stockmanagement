@@ -15,7 +15,6 @@
 
 package org.openlmis.stockmanagement.validators;
 
-import static java.util.stream.Collectors.toList;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_REASON_NOT_EXIST;
 
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
@@ -28,7 +27,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component(value = "ReasonExistenceValidator")
 //this validator used to check if reason is in valid list of program&facility type
@@ -46,19 +48,26 @@ public class ReasonExistenceValidator implements StockEventValidator {
       return;
     }
 
-    List<UUID> reasonIds = stockEventDto.getLineItems().stream()
-        .filter(eventLineItem -> eventLineItem.getReasonId() != null)
+    List<StockEventLineItem> lineItems = stockEventDto.getLineItems();
+    Set<UUID> reasonIds = lineItems
+        .stream()
+        .filter(StockEventLineItem::hasReasonId)
         .map(StockEventLineItem::getReasonId)
-        .distinct()
-        .collect(toList());
+        .collect(Collectors.toSet());
 
-    reasonIds.forEach(reasonId -> {
-      StockCardLineItemReason foundReason = reasonRepo.findOne(reasonId);
+    Map<UUID, StockCardLineItemReason> reasons = reasonRepo
+        .findByIdIn(reasonIds)
+        .stream()
+        .collect(Collectors.toMap(StockCardLineItemReason::getId, reason -> reason));
+
+    for (UUID reasonId : reasonIds) {
+      StockCardLineItemReason foundReason = reasons.get(reasonId);
+
       if (foundReason == null) {
         throw new ValidationMessageException(
             new Message(ERROR_EVENT_REASON_NOT_EXIST, reasonId));
       }
-    });
+    }
   }
 
 }

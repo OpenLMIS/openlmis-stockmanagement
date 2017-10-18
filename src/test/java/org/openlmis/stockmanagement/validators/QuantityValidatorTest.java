@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.junit.rules.ExpectedException.none;
 import static org.mockito.BDDMockito.given;
@@ -51,7 +52,6 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -152,10 +152,10 @@ public class QuantityValidatorTest {
         firstDate.plusDays(1), 10);
 
     StockCard card = new StockCard();
-    card.setLineItems(Collections.singletonList(lineItem));
+    card.setLineItems(singletonList(lineItem));
 
     StockEventDto event = spy(createDebitEventDto(firstDate.plusDays(2), 5,
-        Collections.singletonList(createDebitAdjustment(5))));
+        singletonList(createDebitAdjustment(5))));
     given(event.isPhysicalInventory()).willReturn(true);
     mockCardFound(event, card);
 
@@ -176,10 +176,10 @@ public class QuantityValidatorTest {
         firstDate.plusDays(1), 15);
 
     StockCard card = new StockCard();
-    card.setLineItems(Collections.singletonList(lineItem));
+    card.setLineItems(singletonList(lineItem));
 
     StockEventDto event = spy(createDebitEventDto(firstDate.plusDays(2), 5,
-        Collections.singletonList(createCreditAdjustment(-2))));
+        singletonList(createCreditAdjustment(-2))));
     given(event.isPhysicalInventory()).willReturn(true);
     mockCardFound(event, card);
 
@@ -200,7 +200,7 @@ public class QuantityValidatorTest {
     StockCardLineItem lineItem = createCreditLineItem(firstDate.plusDays(1), 15);
 
     StockCard card = new StockCard();
-    card.setLineItems(Collections.singletonList(lineItem));
+    card.setLineItems(singletonList(lineItem));
 
     StockEventDto event = spy(createDebitEventDto(firstDate.plusDays(2), 5));
     given(event.isPhysicalInventory()).willReturn(true);
@@ -223,10 +223,10 @@ public class QuantityValidatorTest {
         firstDate.plusDays(1), 15);
 
     StockCard card = new StockCard();
-    card.setLineItems(Collections.singletonList(lineItem));
+    card.setLineItems(singletonList(lineItem));
 
     StockEventDto event = spy(createDebitEventDto(firstDate.plusDays(2), 5,
-        Collections.singletonList(createCreditAdjustment(5))));
+        singletonList(createCreditAdjustment(5))));
     given(event.isPhysicalInventory()).willReturn(true);
     mockCardFound(event, card);
 
@@ -318,12 +318,11 @@ public class QuantityValidatorTest {
   }
 
   private void mockCardFound(StockEventDto event, StockCard card) {
+    card.setOrderableId(event.getLineItems().get(0).getOrderableId());
+    card.setLotId(event.getLineItems().get(0).getLotId());
+
     when(stockCardRepository
-        .findByProgramIdAndFacilityIdAndOrderableIdAndLotId(
-            event.getProgramId(),
-            event.getFacilityId(),
-            event.getLineItems().get(0).getOrderableId(),
-            event.getLineItems().get(0).getLotId()))
-        .thenReturn(card);
+        .findByProgramIdAndFacilityId(event.getProgramId(), event.getFacilityId()))
+        .thenReturn(singletonList(card));
   }
 }

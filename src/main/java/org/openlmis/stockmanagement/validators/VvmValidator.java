@@ -24,8 +24,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -48,17 +48,19 @@ public class VvmValidator {
    * @param messageKey error message key for exception
    */
   public void validate(List<? extends VvmApplicable> vvmApplicables, String messageKey) {
-    Map<UUID, OrderableDto> orderables = vvmApplicables
+    Set<UUID> orderableIds = vvmApplicables
         .stream()
         .map(VvmApplicable::getOrderableId)
-        .distinct()
-        .collect(Collectors.toMap(
-            Function.identity(),
-            id -> orderableReferenceDataService.findOne(id)
-        ));
+        .collect(Collectors.toSet());
+
+    List<OrderableDto> orderables = orderableReferenceDataService.findByIds(orderableIds);
+
+    Map<UUID, OrderableDto> groupById = orderables
+        .stream()
+        .collect(Collectors.toMap(OrderableDto::getId, orderable -> orderable));
 
     for (VvmApplicable item : vvmApplicables) {
-      OrderableDto orderable = orderables.get(item.getOrderableId());
+      OrderableDto orderable = groupById.get(item.getOrderableId());
 
       boolean useVvm = false;
       boolean hasVvmStatus = false;

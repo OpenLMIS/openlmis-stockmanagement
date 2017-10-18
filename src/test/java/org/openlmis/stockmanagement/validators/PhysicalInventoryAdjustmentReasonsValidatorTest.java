@@ -39,7 +39,8 @@ import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityTypeDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
-import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
+import org.openlmis.stockmanagement.util.StockEventProcessContext;
+
 import java.util.Collections;
 import java.util.UUID;
 
@@ -52,18 +53,19 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest {
   @Mock
   private ValidReasonAssignmentRepository validReasonRepository;
 
-  @Mock
-  private FacilityReferenceDataService facilityReferenceDataService;
-
   @InjectMocks
   private PhysicalInventoryAdjustmentReasonsValidator validator;
   private UUID reasonId = UUID.randomUUID();
   private FacilityDto facility = mock(FacilityDto.class);
   private UUID facilityTypeId = UUID.randomUUID();
   private StockEventDto stockEventDto = spy(new StockEventDto());
+  private StockEventProcessContext context;
 
   @Before
   public void setUp() {
+    context = new StockEventProcessContext();
+    when(stockEventDto.getContext()).thenReturn(context);
+
     when(validReasonRepository
         .findByProgramIdAndFacilityTypeIdAndReasonId(
             any(UUID.class), any(UUID.class), any(UUID.class)))
@@ -93,8 +95,6 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest {
     verify(validReasonRepository)
         .findByProgramIdAndFacilityTypeIdAndReasonId(
             stockEventDto.getProgramId(), facilityTypeId, reasonId);
-    verify(facilityReferenceDataService)
-        .findOne(stockEventDto.getFacilityId());
   }
 
   @Test
@@ -143,15 +143,13 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest {
         Collections.singletonList(
             generateLineItem(5, generateReason())));
 
-    when(facilityReferenceDataService.findOne(any(UUID.class)))
-        .thenReturn(null);
+    context.setFacility(null);
 
     validator.validate(stockEventDto);
   }
 
   private void stubFacilityType() {
-    when(facilityReferenceDataService.findOne(any(UUID.class)))
-        .thenReturn(facility);
+    context.setFacility(facility);
     FacilityTypeDto facilityType = new FacilityTypeDto();
     facilityType.setId(facilityTypeId);
     when(facility.getType()).thenReturn(facilityType);
