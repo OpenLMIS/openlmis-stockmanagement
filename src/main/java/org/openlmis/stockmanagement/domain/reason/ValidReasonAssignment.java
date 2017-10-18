@@ -15,12 +15,15 @@
 
 package org.openlmis.stockmanagement.domain.reason;
 
+import org.hibernate.annotations.Type;
+import org.openlmis.stockmanagement.domain.BaseEntity;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Type;
-import org.openlmis.stockmanagement.domain.BaseEntity;
+
 import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -70,7 +73,7 @@ public class ValidReasonAssignment extends BaseEntity {
    * @param exporter exporter to export to
    */
   public void export(Exporter exporter) {
-    exporter.setId(id);
+    exporter.setId(getId());
     exporter.setProgramId(programId);
     exporter.setFacilityTypeId(facilityTypeId);
     exporter.setHidden(hidden);
