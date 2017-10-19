@@ -13,29 +13,67 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement;
+package org.openlmis.stockmanagement.validators;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.repository.NodeRepository;
+import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
+import org.openlmis.stockmanagement.repository.StockCardRepository;
+import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
+import org.openlmis.stockmanagement.repository.ValidSourceAssignmentRepository;
 import org.openlmis.stockmanagement.service.StockEventProcessContextBuilder;
+import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
 
-@TestPropertySource(locations = {"classpath:application.properties", "classpath:test.properties"})
-@DirtiesContext
-public abstract class BaseIntegrationTest {
+@RunWith(MockitoJUnitRunner.class)
+public abstract class BaseValidatorTest {
 
-  @Autowired
+  @Mock
+  FacilityReferenceDataService facilityService;
+
+  @Mock
+  ProgramReferenceDataService programService;
+
+  @Mock
+  ApprovedProductReferenceDataService approvedProductService;
+
+  @Mock
+  LotReferenceDataService lotReferenceDataService;
+
+  @Mock
+  StockCardLineItemReasonRepository reasonRepository;
+
+  @Mock
+  NodeRepository nodeRepository;
+
+  @Mock
+  StockCardRepository stockCardRepository;
+
+  @Mock
+  ValidSourceAssignmentRepository validSourceAssignmentRepository;
+
+  @Mock
+  ValidDestinationAssignmentRepository validDestinationAssignmentRepository;
+
+  @InjectMocks
   private StockEventProcessContextBuilder contextBuilder;
 
-  protected void mockAuthentication() throws Exception {
+  @Before
+  public void setUp() throws Exception {
     SecurityContext securityContext = mock(SecurityContext.class);
     SecurityContextHolder.setContext(securityContext);
 
@@ -45,7 +83,7 @@ public abstract class BaseIntegrationTest {
     when(authentication.isClientOnly()).thenReturn(true);
   }
 
-  protected void setContext(StockEventDto event) {
+  void setContext(StockEventDto event) {
     StockEventProcessContext context = contextBuilder.buildContext(event);
     event.setContext(context);
   }

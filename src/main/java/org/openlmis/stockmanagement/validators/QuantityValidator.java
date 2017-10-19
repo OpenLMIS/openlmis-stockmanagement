@@ -16,7 +16,6 @@
 package org.openlmis.stockmanagement.validators;
 
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toMap;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER;
@@ -27,41 +26,28 @@ import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
-import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
-import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
- * 1 This validator makes sure stock on hand does NOT go below zero for any stock card.
- * 2 This validator also makes sure soh does not be over upper limit of integer.
- * It does so by re-calculating soh of each orderable/lot combo.
- * The re-calculation does not apply to physical inventory.
- * This has a negative impact on performance. The impact grows larger as stock card line items
- * accumulates over time. Because re-calculation requires reading stock card line items from DB.
+ * 1 This validator makes sure stock on hand does NOT go below zero for any stock card. 2 This
+ * validator also makes sure soh does not be over upper limit of integer. It does so by
+ * re-calculating soh of each orderable/lot combo. The re-calculation does not apply to physical
+ * inventory. This has a negative impact on performance. The impact grows larger as stock card line
+ * items accumulates over time. Because re-calculation requires reading stock card line items from
+ * DB.
  */
 @Component(value = "QuantityValidator")
 public class QuantityValidator implements StockEventValidator {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(QuantityValidator.class);
-
-  @Autowired
-  private StockCardLineItemReasonRepository reasonRepository;
-
-  @Autowired
-  private StockCardRepository stockCardRepository;
 
   @Override
   public void validate(StockEventDto stockEventDto) {
@@ -70,50 +56,30 @@ public class QuantityValidator implements StockEventValidator {
       return;
     }
 
-    Map<OrderableLotIdentity, StockCard> cards = stockCardRepository
-        .findByProgramIdAndFacilityId(stockEventDto.getProgramId(), stockEventDto.getFacilityId())
-        .stream()
-        .collect(toMap(OrderableLotIdentity::identityOf, card -> card));
-
     Map<OrderableLotIdentity, List<StockEventLineItem>> sameOrderableGroups = stockEventDto
         .getLineItems()
         .stream()
         .collect(groupingBy(OrderableLotIdentity::identityOf));
 
-    List<StockEventLineItem> lineItems = stockEventDto.getLineItems();
-    Set<UUID> reasonIds = lineItems
-        .stream()
-        .filter(StockEventLineItem::hasReasonId)
-        .map(StockEventLineItem::getReasonId)
-        .collect(Collectors.toSet());
-
-    Map<UUID, StockCardLineItemReason> reasons = reasonRepository
-        .findByIdIn(reasonIds)
-        .stream()
-        .collect(Collectors.toMap(StockCardLineItemReason::getId, reason -> reason));
-
     for (List<StockEventLineItem> group : sameOrderableGroups.values()) {
       // increase may cause int overflow, decrease may cause below zero
-      validateEventItems(stockEventDto, group, cards, reasons);
+      validateEventItems(stockEventDto, group);
     }
   }
 
-  private void validateEventItems(StockEventDto event, List<StockEventLineItem> items,
-                                  Map<OrderableLotIdentity, StockCard> cards,
-                                  Map<UUID, StockCardLineItemReason> reasons) {
-    StockCard foundCard = tryFindCard(items.get(0), cards);
+  private void validateEventItems(StockEventDto event, List<StockEventLineItem> items) {
+    StockCard foundCard = tryFindCard(event, items.get(0));
 
     if (event.isPhysicalInventory()) {
       validateQuantities(items, foundCard.getStockOnHand());
     }
 
     // create line item from event line item and add it to stock card for recalculation
-    calculateStockOnHand(event, items, foundCard, reasons);
+    calculateStockOnHand(event, items, foundCard);
   }
 
-  private StockCard tryFindCard(StockEventLineItem lineItem,
-                                Map<OrderableLotIdentity, StockCard> cards) {
-    StockCard foundCard = cards.get(OrderableLotIdentity.identityOf(lineItem));
+  private StockCard tryFindCard(StockEventDto event, StockEventLineItem lineItem) {
+    StockCard foundCard = event.getContext().findCard(OrderableLotIdentity.identityOf(lineItem));
 
     if (foundCard == null) {
       StockCard emptyCard = new StockCard();
@@ -128,11 +94,6 @@ public class QuantityValidator implements StockEventValidator {
 
       return stockCard;
     }
-  }
-
-  private StockCardLineItemReason findReason(UUID reasonId,
-                                             Map<UUID, StockCardLineItemReason> reasons) {
-    return reasons.getOrDefault(reasonId, null);
   }
 
   private void validateQuantities(List<StockEventLineItem> items, Integer stockOnHand) {
@@ -157,9 +118,9 @@ public class QuantityValidator implements StockEventValidator {
         if (stockOnHand + adjustmentsQuantity != quantity) {
           LOGGER.warn(
               "Stock on hand [{}] and adjustments [{}] = [{}] differ from current stock [{}]. "
-                      + "Orderable: {}, lot: {}",
-                  stockOnHand, adjustmentsQuantity, stockOnHand + adjustmentsQuantity, quantity,
-                  item.getOrderableId(), item.getLotId());
+                  + "Orderable: {}, lot: {}",
+              stockOnHand, adjustmentsQuantity, stockOnHand + adjustmentsQuantity, quantity,
+              item.getOrderableId(), item.getLotId());
 
           debugAdjustments(adjustments);
 
@@ -172,27 +133,27 @@ public class QuantityValidator implements StockEventValidator {
 
   /**
    * Make sure each stock adjustment a non-negative quantity assigned.
+   *
    * @param adjustments adjustments to validate
    */
   private void validateStockAdjustments(List<StockAdjustment> adjustments) {
     // Check for valid quantities
     boolean hasNegative = adjustments
-            .stream()
-            .mapToInt(StockAdjustment::getQuantity)
-            .anyMatch(quantity -> quantity < 0);
+        .stream()
+        .mapToInt(StockAdjustment::getQuantity)
+        .anyMatch(quantity -> quantity < 0);
 
     if (hasNegative) {
       throw new ValidationMessageException(ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID);
     }
   }
 
-  private void calculateStockOnHand(
-      StockEventDto eventDto, List<StockEventLineItem> group, StockCard foundCard,
-      Map<UUID, StockCardLineItemReason> reasons) {
+  private void calculateStockOnHand(StockEventDto eventDto, List<StockEventLineItem> group,
+                                    StockCard foundCard) {
     for (StockEventLineItem lineItem : group) {
       StockCardLineItem stockCardLineItem = StockCardLineItem
           .createLineItemFrom(eventDto, lineItem, foundCard, null);
-      stockCardLineItem.setReason(findReason(lineItem.getReasonId(), reasons));
+      stockCardLineItem.setReason(eventDto.getContext().findEventReason(lineItem.getReasonId()));
     }
 
     foundCard.calculateStockOnHand();

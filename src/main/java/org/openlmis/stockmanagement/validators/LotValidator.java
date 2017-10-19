@@ -45,7 +45,7 @@ public class LotValidator implements StockEventValidator {
 
     stockEventDto.getLineItems().forEach(lineItem -> {
       if (lineItem.hasLotId()) {
-        LotDto lotDto = stockEventDto.getContext().getLots().get(lineItem.getLotId());
+        LotDto lotDto = stockEventDto.getContext().findLot(lineItem.getLotId());
         checkLotExists(lineItem, lotDto);
         checkLotOrderableMatches(stockEventDto, lineItem, lotDto);
       }

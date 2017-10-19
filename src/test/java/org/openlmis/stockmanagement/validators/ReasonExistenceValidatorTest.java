@@ -24,22 +24,17 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ReasonExistenceValidatorTest {
+public class ReasonExistenceValidatorTest extends BaseValidatorTest  {
   @Rule
   public ExpectedException expectedEx = none();
-
-  @Mock
-  private StockCardLineItemReasonRepository reasonRepository;
 
   @InjectMocks
   private ReasonExistenceValidator reasonExistenceValidator;
@@ -49,6 +44,7 @@ public class ReasonExistenceValidatorTest {
     //given
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.getLineItems().get(0).setReasonId(null);
+    setContext(stockEventDto);
 
     //when
     reasonExistenceValidator.validate(stockEventDto);
@@ -67,6 +63,7 @@ public class ReasonExistenceValidatorTest {
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     UUID reasonId = UUID.randomUUID();
     stockEventDto.getLineItems().get(0).setReasonId(reasonId);
+    setContext(stockEventDto);
 
     when(reasonRepository.findOne(reasonId)).thenReturn(null);
 

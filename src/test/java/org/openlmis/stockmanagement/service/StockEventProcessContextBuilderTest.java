@@ -108,6 +108,9 @@ public class StockEventProcessContextBuilderTest {
     //given
     UUID lotId = UUID.randomUUID();
 
+    LotDto lot = new LotDto();
+    lot.setId(lotId);
+
     StockEventDtoBuilder.createStockEventDto();
     stockEventDto.getLineItems().get(0).setLotId(lotId);
 
@@ -120,7 +123,6 @@ public class StockEventProcessContextBuilderTest {
     when(approvedProductService
         .getAllApprovedProducts(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
         .thenReturn(approvedProductDtos);
-    LotDto lot = new LotDto();
     when(lotReferenceDataService.findOne(lotId)).thenReturn(lot);
 
     //when
@@ -131,6 +133,6 @@ public class StockEventProcessContextBuilderTest {
     assertThat(context.getProgram(), is(programDto));
     assertThat(context.getFacility(), is(facilityDto));
     assertThat(context.getAllApprovedProducts(), is(approvedProductDtos));
-    assertThat(context.getLots().get(lotId), is(lot));
+    assertThat(context.findLot(lotId), is(lot));
   }
 }

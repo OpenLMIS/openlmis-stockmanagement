@@ -32,7 +32,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
@@ -42,8 +41,6 @@ import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
-import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
 import java.time.LocalDate;
@@ -56,19 +53,13 @@ import java.util.List;
 
 @RunWith(MockitoJUnitRunner.class)
 @SuppressWarnings("PMD.TooManyMethods")
-public class QuantityValidatorTest {
+public class QuantityValidatorTest extends BaseValidatorTest  {
 
   @Rule
   public ExpectedException expectedException = none();
 
   @InjectMocks
   private QuantityValidator quantityValidator;
-
-  @Mock
-  private StockCardRepository stockCardRepository;
-
-  @Mock
-  private StockCardLineItemReasonRepository reasonRepository;
 
   @Test
   public void shouldRejectWhenQuantityMakesStockOnHandBelowZero() throws Exception {
@@ -111,6 +102,8 @@ public class QuantityValidatorTest {
     StockEventLineItem invalidItem = event.getLineItems().get(0);
     invalidItem.setDestinationId(null);
 
+    setContext(event);
+
     when(reasonRepository.findOne(invalidItem.getReasonId())).thenReturn(null);
 
     //when
@@ -121,7 +114,7 @@ public class QuantityValidatorTest {
   public void shouldNotRejectWhenEventLineItemHasNoReason() throws Exception {
     //given
     StockEventDto event = createStockEventDto();
-    event.setContext(new StockEventProcessContext());
+    setContext(event);
 
     StockEventLineItem invalidItem = event.getLineItems().get(0);
     invalidItem.setDestinationId(randomUUID());
@@ -136,8 +129,9 @@ public class QuantityValidatorTest {
     //given
     LocalDate firstDate = dateFromYear(2015);
 
-    StockEventDto event = createDebitEventDto(firstDate.plusDays(1), 0);
-    given(event.isPhysicalInventory()).willReturn(true);
+    StockEventDto event = spy(createDebitEventDto(firstDate.plusDays(1), 0));
+    when(event.isPhysicalInventory()).thenReturn(true);
+    setContext(event);
 
     //when
     quantityValidator.validate(event);
@@ -257,7 +251,6 @@ public class QuantityValidatorTest {
                                             List<StockAdjustment> adjustments) {
 
     StockEventDto stockEventDto = createStockEventDto();
-    stockEventDto.setContext(new StockEventProcessContext());
 
     stockEventDto.getLineItems().get(0).setDestinationId(randomUUID());
     stockEventDto.getLineItems().get(0).setQuantity(quantity);
@@ -324,5 +317,7 @@ public class QuantityValidatorTest {
     when(stockCardRepository
         .findByProgramIdAndFacilityId(event.getProgramId(), event.getFacilityId()))
         .thenReturn(singletonList(card));
+
+    setContext(event);
   }
 }

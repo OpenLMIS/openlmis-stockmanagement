@@ -23,6 +23,7 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
+import org.openlmis.stockmanagement.util.LazyResource;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
 import java.time.ZonedDateTime;
@@ -35,7 +36,7 @@ public class StockEventDtoTest {
     UUID userId = UUID.randomUUID();
 
     StockEventProcessContext context = new StockEventProcessContext();
-    context.setCurrentUserId(userId);
+    context.setCurrentUserId(new LazyResource<>(() -> userId));
 
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.setContext(context);

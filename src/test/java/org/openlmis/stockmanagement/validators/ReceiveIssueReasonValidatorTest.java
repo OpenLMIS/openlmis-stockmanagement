@@ -36,23 +36,18 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ReceiveIssueReasonValidatorTest {
+public class ReceiveIssueReasonValidatorTest extends BaseValidatorTest  {
 
   @Rule
   public ExpectedException expectedEx = none();
-
-  @Mock
-  private StockCardLineItemReasonRepository reasonRepository;
 
   @InjectMocks
   private ReceiveIssueReasonValidator receiveIssueReasonValidator;
@@ -64,6 +59,7 @@ public class ReceiveIssueReasonValidatorTest {
 
   @Before
   public void setUp() throws Exception {
+    super.setUp();
     creditAdhocReason = builder().reasonType(CREDIT).reasonCategory(TRANSFER).build();
     debitAdhocReason = builder().reasonType(DEBIT).reasonCategory(TRANSFER).build();
     creditNonAdhocReason = builder().reasonType(CREDIT).reasonCategory(ADJUSTMENT).build();
@@ -77,6 +73,7 @@ public class ReceiveIssueReasonValidatorTest {
     stockEventDto.getLineItems().get(0).setSourceId(UUID.randomUUID());
     stockEventDto.getLineItems().get(0).setDestinationId(null);
     stockEventDto.getLineItems().get(0).setReasonId(null);
+    setContext(stockEventDto);
 
     //when
     receiveIssueReasonValidator.validate(stockEventDto);
@@ -91,6 +88,7 @@ public class ReceiveIssueReasonValidatorTest {
     stockEventDto.getLineItems().get(0).setDestinationId(UUID.randomUUID());
     stockEventDto.getLineItems().get(0).setSourceId(null);
     stockEventDto.getLineItems().get(0).setReasonId(null);
+    setContext(stockEventDto);
 
     //when
     receiveIssueReasonValidator.validate(stockEventDto);
@@ -107,6 +105,7 @@ public class ReceiveIssueReasonValidatorTest {
 
     UUID reasonId = UUID.randomUUID();
     stockEventDto.getLineItems().get(0).setReasonId(reasonId);
+    setContext(stockEventDto);
 
     when(reasonRepository.findByIdIn(singleton(reasonId)))
         .thenReturn(singletonList(creditAdhocReason));
@@ -128,6 +127,7 @@ public class ReceiveIssueReasonValidatorTest {
     //the following is a debit reason
     UUID reasonId = UUID.randomUUID();
     stockEventDto.getLineItems().get(0).setReasonId(reasonId);
+    setContext(stockEventDto);
 
     when(reasonRepository.findByIdIn(singleton(reasonId)))
         .thenReturn(singletonList(debitAdhocReason));
@@ -190,6 +190,8 @@ public class ReceiveIssueReasonValidatorTest {
     //given
     UUID reasonId = stockEventDto.getLineItems().get(0).getReasonId();
     mockedReason.setId(reasonId);
+
+    setContext(stockEventDto);
 
     when(reasonRepository.findByIdIn(singleton(reasonId)))
         .thenReturn(singletonList(mockedReason));

@@ -29,17 +29,10 @@ import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.util.Message;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * This validator makes sure that: If source and reason are both present, then reason must be
@@ -50,9 +43,6 @@ import java.util.stream.Collectors;
 @Component(value = "ReceiveIssueReasonValidator")
 public class ReceiveIssueReasonValidator implements StockEventValidator {
 
-  @Autowired
-  private StockCardLineItemReasonRepository reasonRepository;
-
   @Override
   public void validate(StockEventDto eventDto) {
     LOGGER.debug("Validate receive and issue reason");
@@ -61,52 +51,40 @@ public class ReceiveIssueReasonValidator implements StockEventValidator {
       return;
     }
 
-    List<StockEventLineItem> lineItems = eventDto.getLineItems();
-    Set<UUID> reasonIds = lineItems
-        .stream()
-        .map(StockEventLineItem::getReasonId)
-        .filter(Objects::nonNull)
-        .collect(Collectors.toSet());
-
-    Map<UUID, StockCardLineItemReason> reasons = reasonRepository
-        .findByIdIn(reasonIds)
-        .stream()
-        .collect(Collectors.toMap(StockCardLineItemReason::getId, reason -> reason));
-
-    for (StockEventLineItem eventLineItem : lineItems) {
+    for (StockEventLineItem eventLineItem : eventDto.getLineItems()) {
       if (eventLineItem.hasSourceId()) {
-        checkReceiveReason(eventLineItem, reasons);
+        checkReceiveReason(eventDto, eventLineItem);
       }
 
       if (eventLineItem.hasDestinationId()) {
-        checkIssueReason(eventLineItem, reasons);
+        checkIssueReason(eventDto, eventLineItem);
       }
     }
   }
 
-  private void checkReceiveReason(StockEventLineItem lineItem,
-                                  Map<UUID, StockCardLineItemReason> reasons) {
+  private void checkReceiveReason(StockEventDto event, StockEventLineItem lineItem) {
     checkReason(
-        lineItem, reasons, CREDIT,
+        event, lineItem, CREDIT,
         ERROR_EVENT_RECEIVE_REASON_TYPE_INVALID,
         ERROR_EVENT_RECEIVE_REASON_CATEGORY_INVALID
     );
   }
 
-  private void checkIssueReason(StockEventLineItem lineItem, Map<UUID,
-      StockCardLineItemReason> reasons) {
+  private void checkIssueReason(StockEventDto event, StockEventLineItem lineItem) {
     checkReason(
-        lineItem, reasons, DEBIT,
+        event, lineItem, DEBIT,
         ERROR_EVENT_ISSUE_REASON_TYPE_INVALID,
         ERROR_EVENT_ISSUE_REASON_CATEGORY_INVALID
     );
   }
 
-  private void checkReason(StockEventLineItem lineItem, Map<UUID, StockCardLineItemReason> reasons,
+  private void checkReason(StockEventDto event, StockEventLineItem lineItem,
                            ReasonType expectedReasonType, String typeErrorKey,
                            String categoryErrorKey) {
     if (lineItem.hasReasonId()) {
-      StockCardLineItemReason foundReason = reasons.get(lineItem.getReasonId());
+      StockCardLineItemReason foundReason = event
+          .getContext()
+          .findEventReason(lineItem.getReasonId());
       //this validator does not care if reason id points to something in DB
       //that is handled by other validators
       if (foundReason != null) {

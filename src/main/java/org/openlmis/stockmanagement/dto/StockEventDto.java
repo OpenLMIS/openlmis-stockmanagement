@@ -18,6 +18,10 @@ package org.openlmis.stockmanagement.dto;
 import static java.time.ZonedDateTime.now;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
+import com.google.common.collect.Sets;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
@@ -27,7 +31,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -89,4 +95,37 @@ public class StockEventDto {
   public boolean hasLineItems() {
     return !isEmpty(getLineItems());
   }
+
+  /**
+   * Retrieves all reason IDs from event line items.
+   */
+  @JsonIgnore
+  public Set<UUID> getReasonIds() {
+    return lineItems
+        .stream()
+        .filter(StockEventLineItem::hasReasonId)
+        .map(StockEventLineItem::getReasonId)
+        .collect(Collectors.toSet());
+  }
+
+  /**
+   * Retrieves all node IDS (both source and destination) from event line items.
+   */
+  @JsonIgnore
+  public Set<UUID> getNodeIds() {
+    Set<UUID> nodeIds = Sets.newHashSet();
+
+    for (StockEventLineItem lineItem : lineItems) {
+      if (lineItem.hasSourceId()) {
+        nodeIds.add(lineItem.getSourceId());
+      }
+
+      if (lineItem.hasDestinationId()) {
+        nodeIds.add(lineItem.getDestinationId());
+      }
+    }
+
+    return nodeIds;
+  }
+
 }

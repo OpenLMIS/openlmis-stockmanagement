@@ -15,34 +15,95 @@
 
 package org.openlmis.stockmanagement.util;
 
+import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
+import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
+import org.openlmis.stockmanagement.domain.sourcedestination.Node;
+import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAssignment;
+import org.openlmis.stockmanagement.domain.sourcedestination.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
 /**
- * Before processing a stock event, one instance of this class will be created
- * to hold all things needed from ref-data service.
- * By doing this, all network traffic is concentrated in one place, not scattered around
- * in different places.
+ * Before processing a stock event, one instance of this class will be created to hold all things
+ * needed from ref-data service. By doing this, all network traffic is concentrated in one place,
+ * not scattered around in different places. All resources use lazy loading so they are retrieved
+ * only when there is a need.
  */
+@Setter
 public class StockEventProcessContext {
-  private UUID currentUserId;
-  private ProgramDto program;
-  private FacilityDto facility;
-  private List<OrderableDto> allApprovedProducts;
-  private Map<UUID, LotDto> lots;
+  private LazyResource<UUID> currentUserId;
+  private LazyResource<ProgramDto> program;
+  private LazyResource<FacilityDto> facility;
+
+  private LazyList<OrderableDto> allApprovedProducts;
+  private LazyList<ValidSourceAssignment> sources;
+  private LazyList<ValidDestinationAssignment> destinations;
+
+  private LazyGrouping<UUID, LotDto> lots;
+  private LazyGrouping<UUID, StockCardLineItemReason> cardReasons;
+  private LazyGrouping<UUID, StockCardLineItemReason> eventReasons;
+  private LazyGrouping<UUID, Node> nodes;
+  private LazyGrouping<OrderableLotIdentity, StockCard> cards;
+
+  public UUID getCurrentUserId() {
+    return currentUserId.get();
+  }
+
+  public ProgramDto getProgram() {
+    return program.get();
+  }
+
+  public FacilityDto getFacility() {
+    return facility.get();
+  }
+
+  public UUID getFacilityTypeId() {
+    FacilityDto facilityDto = getFacility();
+    return null == facilityDto ? null : facilityDto.getType().getId();
+  }
+
+  public Collection<OrderableDto> getAllApprovedProducts() {
+    return allApprovedProducts.get();
+  }
+
+  public List<ValidSourceAssignment> getSources() {
+    return sources.get();
+  }
+
+  public List<ValidDestinationAssignment> getDestinations() {
+    return destinations.get();
+  }
+
+  public LotDto findLot(UUID lotId) {
+    return lots.get().get(lotId);
+  }
+
+  public StockCardLineItemReason findEventReason(UUID reasonId) {
+    return eventReasons.get().get(reasonId);
+  }
+
+  public StockCardLineItemReason findCardReason(UUID reasonId) {
+    return cardReasons.get().get(reasonId);
+  }
+
+  public Node findNode(UUID nodeId) {
+    return nodes.get().get(nodeId);
+  }
+
+  public StockCard findCard(OrderableLotIdentity identity) {
+    return cards.get().get(identity);
+  }
+
+  public void refreshCards() {
+    cards.refresh();
+  }
 }

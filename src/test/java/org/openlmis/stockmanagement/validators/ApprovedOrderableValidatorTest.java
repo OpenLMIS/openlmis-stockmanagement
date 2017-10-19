@@ -27,13 +27,14 @@ import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
+import org.openlmis.stockmanagement.util.LazyList;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
 import java.util.UUID;
 
 @SuppressWarnings("PMD.UnusedPrivateField")
 @RunWith(MockitoJUnitRunner.class)
-public class ApprovedOrderableValidatorTest {
+public class ApprovedOrderableValidatorTest extends BaseValidatorTest  {
 
   @Mock
   private OrderableReferenceDataService orderableReferenceDataService;
@@ -50,8 +51,10 @@ public class ApprovedOrderableValidatorTest {
     OrderableDto orderableDto = new OrderableDto();
     orderableDto.setId(UUID.randomUUID());
 
-    stockEventDto.setContext(StockEventProcessContext.builder()
-        .allApprovedProducts(singletonList(orderableDto)).build());
+    StockEventProcessContext context = new StockEventProcessContext();
+    context.setAllApprovedProducts(new LazyList<>(() -> singletonList(orderableDto)));
+
+    stockEventDto.setContext(context);
 
     //when:
     approvedOrderableValidator.validate(stockEventDto);
@@ -70,8 +73,10 @@ public class ApprovedOrderableValidatorTest {
     OrderableDto orderableDto = new OrderableDto();
     orderableDto.setId(UUID.fromString(orderableIdString));
 
-    stockEventDto.setContext(StockEventProcessContext.builder()
-        .allApprovedProducts(singletonList(orderableDto)).build());
+    StockEventProcessContext context = new StockEventProcessContext();
+    context.setAllApprovedProducts(new LazyList<>(() -> singletonList(orderableDto)));
+
+    stockEventDto.setContext(context);
 
     //when:
     approvedOrderableValidator.validate(stockEventDto);

@@ -17,29 +17,19 @@ package org.openlmis.stockmanagement.validators;
 
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_REASON_NOT_EXIST;
 
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.util.Message;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Component(value = "ReasonExistenceValidator")
 //this validator used to check if reason is in valid list of program&facility type
 //but that rule has been removed when stock adjustment's UI is implemented
 //if that rule comes back, you can find "ReasonAssignmentValidator.java" in commit history
 public class ReasonExistenceValidator implements StockEventValidator {
-
-  @Autowired
-  private StockCardLineItemReasonRepository reasonRepo;
 
   @Override
   public void validate(StockEventDto stockEventDto) {
@@ -48,20 +38,8 @@ public class ReasonExistenceValidator implements StockEventValidator {
       return;
     }
 
-    List<StockEventLineItem> lineItems = stockEventDto.getLineItems();
-    Set<UUID> reasonIds = lineItems
-        .stream()
-        .filter(StockEventLineItem::hasReasonId)
-        .map(StockEventLineItem::getReasonId)
-        .collect(Collectors.toSet());
-
-    Map<UUID, StockCardLineItemReason> reasons = reasonRepo
-        .findByIdIn(reasonIds)
-        .stream()
-        .collect(Collectors.toMap(StockCardLineItemReason::getId, reason -> reason));
-
-    for (UUID reasonId : reasonIds) {
-      StockCardLineItemReason foundReason = reasons.get(reasonId);
+    for (UUID reasonId : stockEventDto.getReasonIds()) {
+      StockCardLineItemReason foundReason = stockEventDto.getContext().findEventReason(reasonId);
 
       if (foundReason == null) {
         throw new ValidationMessageException(

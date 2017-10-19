@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.validator;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_REASON_CATEGORY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_REASON_TYPE_INVALID;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -49,6 +50,11 @@ public class AdjustmentReasonValidatorIntegrationTest extends BaseIntegrationTes
   @Rule
   public ExpectedException expectedEx = ExpectedException.none();
 
+  @Before
+  public void setUp() throws Exception {
+    mockAuthentication();
+  }
+
   @Test
   public void incorrect_reason_type_should_not_pass_when_event_has_no_source_and_destination()
       throws Exception {
@@ -62,6 +68,7 @@ public class AdjustmentReasonValidatorIntegrationTest extends BaseIntegrationTes
         .build();
     StockEventDto stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
     stockEventDto.getLineItems().get(0).setReasonId(reasonRepository.save(reason).getId());
+    setContext(stockEventDto);
 
     expectedEx.expect(ValidationMessageException.class);
     expectedEx.expectMessage(
@@ -85,6 +92,7 @@ public class AdjustmentReasonValidatorIntegrationTest extends BaseIntegrationTes
         .build();
     StockEventDto stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
     stockEventDto.getLineItems().get(0).setReasonId(reasonRepository.save(reason).getId());
+    setContext(stockEventDto);
 
     expectedEx.expect(ValidationMessageException.class);
     expectedEx.expectMessage(
@@ -100,6 +108,7 @@ public class AdjustmentReasonValidatorIntegrationTest extends BaseIntegrationTes
     //given
     StockEventDto stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
     stockEventDto.getLineItems().get(0).setReasonId(null);
+    setContext(stockEventDto);
 
     //when
     adjustmentReasonValidator.validate(stockEventDto);
@@ -111,6 +120,7 @@ public class AdjustmentReasonValidatorIntegrationTest extends BaseIntegrationTes
     //given
     StockEventDto stockEventDto = StockEventDtoBuilder.createNoSourceDestinationStockEventDto();
     stockEventDto.getLineItems().get(0).setReasonId(UUID.randomUUID());
+    setContext(stockEventDto);
 
     //when
     adjustmentReasonValidator.validate(stockEventDto);
@@ -121,6 +131,7 @@ public class AdjustmentReasonValidatorIntegrationTest extends BaseIntegrationTes
     //given
     StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
     stockEventDto.getLineItems().get(0).setReasonId(null);
+    setContext(stockEventDto);
 
     //when
     adjustmentReasonValidator.validate(stockEventDto);

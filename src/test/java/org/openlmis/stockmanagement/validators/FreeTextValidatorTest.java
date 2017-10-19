@@ -15,7 +15,6 @@
 
 package org.openlmis.stockmanagement.validators;
 
-import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
@@ -34,36 +33,25 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.repository.NodeRepository;
-import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 
 import java.util.UUID;
 
-@RunWith(MockitoJUnitRunner.class)
-public class FreeTextValidatorTest {
+public class FreeTextValidatorTest extends BaseValidatorTest {
 
   @Rule
   public ExpectedException exception = ExpectedException.none();
 
   @InjectMocks
-  FreeTextValidator freeTextValidator;
-
-  @Mock
-  NodeRepository nodeRepository;
-
-  @Mock
-  StockCardLineItemReasonRepository stockCardLineItemReasonRepository;
+  private FreeTextValidator freeTextValidator;
 
   @Before
   public void setUp() throws Exception {
+    super.setUp();
     when(nodeRepository.findOne(null)).thenThrow(new IllegalArgumentException());
   }
 
@@ -72,6 +60,7 @@ public class FreeTextValidatorTest {
     StockEventDto eventDto = createNoSourceDestinationStockEventDto();
     eventDto.getLineItems().get(0).setSourceId(null);
     eventDto.getLineItems().get(0).setSourceFreeText("source free text");
+    setContext(eventDto);
 
     exception.expect(ValidationMessageException.class);
     exception.expectMessage(containsString(ERROR_SOURCE_FREE_TEXT_NOT_ALLOWED));
@@ -84,6 +73,7 @@ public class FreeTextValidatorTest {
       throws Exception {
     StockEventDto eventDto = createNoSourceDestinationStockEventDto();
     eventDto.getLineItems().get(0).setDestinationFreeText("destination free text");
+    setContext(eventDto);
 
     exception.expect(ValidationMessageException.class);
     exception.expectMessage(containsString(ERROR_DESTINATION_FREE_TEXT_NOT_ALLOWED));
@@ -96,6 +86,7 @@ public class FreeTextValidatorTest {
     StockEventDto eventDto = createNoSourceDestinationStockEventDto();
     eventDto.getLineItems().get(0).setReasonId(null);
     eventDto.getLineItems().get(0).setReasonFreeText("reason free text");
+    setContext(eventDto);
 
     exception.expect(ValidationMessageException.class);
     exception.expectMessage(containsString(ERROR_REASON_FREE_TEXT_NOT_ALLOWED));
@@ -110,6 +101,7 @@ public class FreeTextValidatorTest {
     eventDto.getLineItems().get(0).setDestinationId(randomUUID());
     eventDto.getLineItems().get(0).setSourceFreeText("source free text");
     eventDto.getLineItems().get(0).setDestinationFreeText("destination free text");
+    setContext(eventDto);
 
     exception.expect(ValidationMessageException.class);
     exception.expectMessage(containsString(ERROR_SOURCE_DESTINATION_FREE_TEXT_BOTH_PRESENT));
@@ -121,14 +113,15 @@ public class FreeTextValidatorTest {
   public void should_fail_when_source_node_is_refdata_with_free_text() throws Exception {
     UUID sourceId = fromString("0bd28568-43f1-4836-934d-ec5fb11398e8");
 
-    Node mockNode = mock(Node.class);
-    when(mockNode.getId()).thenReturn(sourceId);
-    when(nodeRepository.findByIdIn(singleton(sourceId))).thenReturn(singletonList(mockNode));
-    when(mockNode.isRefDataFacility()).thenReturn(true);
-
     StockEventDto eventDto = createNoSourceDestinationStockEventDto();
     eventDto.getLineItems().get(0).setSourceId(sourceId);
     eventDto.getLineItems().get(0).setSourceFreeText("source free text");
+    setContext(eventDto);
+
+    Node mockNode = mock(Node.class);
+    when(mockNode.getId()).thenReturn(sourceId);
+    when(mockNode.isRefDataFacility()).thenReturn(true);
+    when(nodeRepository.findByIdIn(eventDto.getNodeIds())).thenReturn(singletonList(mockNode));
 
     exception.expect(ValidationMessageException.class);
     exception.expectMessage(containsString(ERROR_SOURCE_FREE_TEXT_NOT_ALLOWED));
@@ -140,14 +133,15 @@ public class FreeTextValidatorTest {
   public void should_fail_when_destination_node_is_refdata_with_free_text() throws Exception {
     UUID destinationId = fromString("0bd28568-43f1-4836-934d-ec5fb11398e8");
 
-    Node mockNode = mock(Node.class);
-    when(mockNode.getId()).thenReturn(destinationId);
-    when(nodeRepository.findByIdIn(singleton(destinationId))).thenReturn(singletonList(mockNode));
-    when(mockNode.isRefDataFacility()).thenReturn(true);
-
     StockEventDto eventDto = createNoSourceDestinationStockEventDto();
     eventDto.getLineItems().get(0).setDestinationId(destinationId);
     eventDto.getLineItems().get(0).setDestinationFreeText("destination free text");
+    setContext(eventDto);
+
+    Node mockNode = mock(Node.class);
+    when(mockNode.getId()).thenReturn(destinationId);
+    when(mockNode.isRefDataFacility()).thenReturn(true);
+    when(nodeRepository.findByIdIn(eventDto.getNodeIds())).thenReturn(singletonList(mockNode));
 
     exception.expect(ValidationMessageException.class);
     exception.expectMessage(containsString(ERROR_DESTINATION_FREE_TEXT_NOT_ALLOWED));
@@ -158,12 +152,13 @@ public class FreeTextValidatorTest {
   @Test
   public void should_fail_when_reason_free_text_not_allowed_but_exist() throws Exception {
     StockCardLineItemReason mockReason = mock(StockCardLineItemReason.class);
-    when(stockCardLineItemReasonRepository.findOne(any(UUID.class))).thenReturn(mockReason);
+    when(reasonRepository.findOne(any(UUID.class))).thenReturn(mockReason);
     when(mockReason.getIsFreeTextAllowed()).thenReturn(false);
 
     StockEventDto eventDto = createNoSourceDestinationStockEventDto();
     eventDto.getLineItems().get(0).setReasonId(fromString("e3fc3cf3-da18-44b0-a220-77c985202e06"));
     eventDto.getLineItems().get(0).setReasonFreeText("reason free text");
+    setContext(eventDto);
 
     exception.expect(ValidationMessageException.class);
     exception.expectMessage(containsString(ERROR_REASON_FREE_TEXT_NOT_ALLOWED));

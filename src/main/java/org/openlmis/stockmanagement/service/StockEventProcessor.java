@@ -15,18 +15,16 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static java.util.stream.Collectors.toMap;
 import static org.openlmis.stockmanagement.dto.PhysicalInventoryDto.fromEventDto;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
-import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
-import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.service.notifier.StockoutNotifier;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
@@ -38,13 +36,7 @@ import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * A service that is in charge of saving stock events and generating stock cards and line items from
@@ -67,10 +59,6 @@ public class StockEventProcessor {
   private StockEventsRepository stockEventsRepository;
   @Autowired
   private StockoutNotifier stockoutNotifier;
-  @Autowired
-  private StockCardRepository stockCardRepository;
-  @Autowired
-  private StockCardLineItemReasonRepository reasonRepository;
 
   /**
    * Validate and persist event and create stock card and line items from it.
@@ -120,68 +108,31 @@ public class StockEventProcessor {
     profiler.start("SAVE_FROM_EVENT");
     stockCardService.saveFromEvent(eventDto, savedEventId);
 
-    profiler.start("GET_CARDS_FOR_PROGRAM_AND_FACILITY");
-    List<StockCard> cards = stockCardRepository
-        .findByProgramIdAndFacilityId(eventDto.getProgramId(), eventDto.getFacilityId());
-
-    Map<UUID, StockCardLineItemReason> reasons = getReasons(
-        cards, profiler.startNested("GET_REASONS")
-    );
-
-    profiler.start("GROUP_CARDS_BY_IDENTITY");
-    Map<OrderableLotIdentity, StockCard> groupCardsByIdentity = cards
-        .stream()
-        //use a shallow copy of stock card to do recalculation, because some domain model will be
-        //modified during recalculation, this will avoid persistence of those modified models
-        .map(StockCard::shallowCopy)
-        .collect(toMap(OrderableLotIdentity::identityOf, card -> card));
-
     profiler.start("CALL_NOTIFICATIONS");
     eventDto
         .getLineItems()
-        .stream()
-        .map(OrderableLotIdentity::identityOf)
-        .map(groupCardsByIdentity::get)
-        .forEach(card -> callNotifications(card, reasons));
+        .forEach(line -> callNotifications(eventDto, line));
 
     return savedEventId;
   }
 
-  private void callNotifications(StockCard foundCard, Map<UUID, StockCardLineItemReason> reasons) {
-    for (StockCardLineItem line : foundCard.getLineItems()) {
+  private void callNotifications(StockEventDto event, StockEventLineItem eventLine) {
+    OrderableLotIdentity identity = OrderableLotIdentity.identityOf(eventLine);
+    StockCard card = event.getContext().findCard(identity);
+
+    for (StockCardLineItem line : card.getLineItems()) {
       StockCardLineItemReason reason = line.getReason();
 
       if (null != reason) {
-        UUID key = reason.getId();
-        line.setReason(reasons.get(key));
+        line.setReason(event.getContext().findCardReason(reason.getId()));
       }
     }
 
-    foundCard.calculateStockOnHand();
+    card.calculateStockOnHand();
 
-    if (foundCard.getStockOnHand() == 0) {
-      stockoutNotifier.notifyStockEditors(foundCard);
+    if (card.getStockOnHand() == 0) {
+      stockoutNotifier.notifyStockEditors(card);
     }
-  }
-
-  private Map<UUID, StockCardLineItemReason> getReasons(List<StockCard> cards, Profiler profiler) {
-    profiler.start("GET_IDS_FROM_CARDS");
-    Set<UUID> reasonIds = cards
-        .stream()
-        .map(StockCard::getLineItems)
-        .flatMap(Collection::stream)
-        .map(StockCardLineItem::getReason)
-        .filter(Objects::nonNull)
-        .map(StockCardLineItemReason::getId)
-        .collect(Collectors.toSet());
-
-    profiler.start("DB_CALL");
-    List<StockCardLineItemReason> reasons = reasonRepository.findByIdIn(reasonIds);
-
-    profiler.start("GROUP_BY_ID");
-    return reasons
-        .stream()
-        .collect(Collectors.toMap(StockCardLineItemReason::getId, reason -> reason));
   }
 
 }

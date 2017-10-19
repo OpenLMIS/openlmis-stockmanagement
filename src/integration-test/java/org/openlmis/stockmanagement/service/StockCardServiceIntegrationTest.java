@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.BaseIntegrationTest;
@@ -47,7 +48,6 @@ import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataServic
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
-import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -87,6 +87,11 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
   @MockBean
   private PermissionService permissionService;
+
+  @Before
+  public void setUp() throws Exception {
+    mockAuthentication();
+  }
 
   @After
   public void tearDown() throws Exception {
@@ -259,10 +264,8 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
   }
 
   private StockEvent save(StockEventDto eventDto, UUID userId) {
-    StockEventProcessContext context = new StockEventProcessContext();
-    context.setCurrentUserId(userId);
-
-    eventDto.setContext(context);
+    eventDto.setUserId(userId);
+    setContext(eventDto);
 
     StockEvent event = eventDto.toEvent();
     StockEvent savedEvent = stockEventsRepository.save(event);

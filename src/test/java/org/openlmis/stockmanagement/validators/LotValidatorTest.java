@@ -18,10 +18,11 @@ package org.openlmis.stockmanagement.validators;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
+import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LOT_NOT_EXIST;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LOT_ORDERABLE_NOT_MATCH;
-import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -31,13 +32,12 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
-import org.openlmis.stockmanagement.util.StockEventProcessContext;
+import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 
-import java.util.HashMap;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
-public class LotValidatorTest {
+public class LotValidatorTest  extends BaseValidatorTest {
 
   @Rule
   public ExpectedException expectedEx = ExpectedException.none();
@@ -45,23 +45,27 @@ public class LotValidatorTest {
   @InjectMocks
   private LotValidator lotValidator;
 
+  private StockEventDto stockEventDto;
+
+  @Before
+  public void setUp() throws Exception {
+    super.setUp();
+    stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    setContext(stockEventDto);
+  }
+
   @Test
   public void should_fail_if_lot_does_not_exist() throws Exception {
     //expect
     expectedEx.expectMessage(ERROR_EVENT_LOT_NOT_EXIST);
 
     //given
-    StockEventDto stockEventDto = createStockEventDto();
-
     UUID lotId = randomUUID();
     stockEventDto.getLineItems().get(0).setLotId(lotId);
 
-    HashMap<UUID, LotDto> lots = new HashMap<>();
-    StockEventProcessContext context = new StockEventProcessContext();
-    context.setLots(lots);
-    stockEventDto.setContext(context);
-
     //when
+    when(lotReferenceDataService.findOne(lotId)).thenReturn(null);
+
     lotValidator.validate(stockEventDto);
   }
 
@@ -71,28 +75,24 @@ public class LotValidatorTest {
     expectedEx.expectMessage(ERROR_EVENT_LOT_ORDERABLE_NOT_MATCH);
 
     //given
-    StockEventDto stockEventDto = createStockEventDto();
-
     UUID lotId = randomUUID();
     stockEventDto.getLineItems().get(0).setLotId(lotId);
 
     LotDto lotDto = new LotDto();
+    lotDto.setId(lotId);
     lotDto.setTradeItemId(UUID.randomUUID());
 
-    HashMap<UUID, LotDto> lots = new HashMap<>();
-    lots.put(lotId, lotDto);
-
-    StockEventProcessContext context = new StockEventProcessContext();
-    context.setLots(lots);
-    context.setAllApprovedProducts(
-        singletonList(OrderableDto.builder()
-            .id(stockEventDto.getLineItems().get(0).getOrderableId())
-            .identifiers(emptyMap())
-            .build()));
-
-    stockEventDto.setContext(context);
+    OrderableDto product = OrderableDto.builder()
+        .id(stockEventDto.getLineItems().get(0).getOrderableId())
+        .identifiers(emptyMap())
+        .build();
 
     //when
+    when(lotReferenceDataService.findOne(lotId)).thenReturn(lotDto);
+    when(approvedProductService
+        .getAllApprovedProducts(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
+        .thenReturn(singletonList(product));
+
     lotValidator.validate(stockEventDto);
   }
 }

@@ -18,17 +18,33 @@ package org.openlmis.stockmanagement.service;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.slf4j.ext.XLoggerFactory.getXLogger;
 
+import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
+import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
+import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
+import org.openlmis.stockmanagement.domain.sourcedestination.Node;
+import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAssignment;
+import org.openlmis.stockmanagement.domain.sourcedestination.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
+import org.openlmis.stockmanagement.repository.NodeRepository;
+import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
+import org.openlmis.stockmanagement.repository.StockCardRepository;
+import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
+import org.openlmis.stockmanagement.repository.ValidSourceAssignmentRepository;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
+import org.openlmis.stockmanagement.util.LazyGrouping;
+import org.openlmis.stockmanagement.util.LazyList;
+import org.openlmis.stockmanagement.util.LazyResource;
+import org.openlmis.stockmanagement.util.ReferenceDataSupplier;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import org.slf4j.Logger;
 import org.slf4j.ext.XLogger;
@@ -38,9 +54,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -49,6 +71,8 @@ import java.util.stream.Collectors;
  * all around the place.
  */
 @Service
+@NoArgsConstructor
+@AllArgsConstructor
 public class StockEventProcessContextBuilder {
   private static final Logger LOGGER = getLogger(StockEventProcessContextBuilder.class);
   private static final XLogger XLOGGER = getXLogger(StockEventProcessContextBuilder.class);
@@ -68,6 +92,21 @@ public class StockEventProcessContextBuilder {
   @Autowired
   private LotReferenceDataService lotReferenceDataService;
 
+  @Autowired
+  private StockCardLineItemReasonRepository reasonRepository;
+
+  @Autowired
+  private NodeRepository nodeRepository;
+
+  @Autowired
+  private StockCardRepository stockCardRepository;
+
+  @Autowired
+  private ValidSourceAssignmentRepository validSourceAssignmentRepository;
+
+  @Autowired
+  private ValidDestinationAssignmentRepository validDestinationAssignmentRepository;
+
   /**
    * Before processing events, put all needed ref data into context so we don't have to do frequent
    * network requests.
@@ -81,44 +120,97 @@ public class StockEventProcessContextBuilder {
     profiler.setLogger(XLOGGER);
 
     LOGGER.info("build stock event process context");
-    profiler.start("CREATE_BUILDER");
-    StockEventProcessContext.StockEventProcessContextBuilder builder = StockEventProcessContext
-        .builder();
+    StockEventProcessContext context = new StockEventProcessContext();
 
+    profiler.start("CREATE_LAZY_USER");
     OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder
         .getContext()
         .getAuthentication();
 
+    Supplier<UUID> userIdSupplier;
+
     if (authentication.isClientOnly()) {
-      profiler.start("GET_USER");
-      builder.currentUserId(eventDto.getUserId());
+      userIdSupplier = eventDto::getUserId;
     } else {
-      profiler.start("GET_CURRENT_USER");
-      builder.currentUserId(authenticationHelper.getCurrentUser().getId());
+      userIdSupplier = () -> authenticationHelper.getCurrentUser().getId();
     }
 
-    profiler.start("GET_PROGRAM");
+    LazyResource<UUID> userId = new LazyResource<>(userIdSupplier);
+    context.setCurrentUserId(userId);
+
+    profiler.start("CREATE_LAZY_PROGRAM");
     UUID programId = eventDto.getProgramId();
-    ProgramDto program = programService.findOne(programId);
+    Supplier<ProgramDto> programSupplier = new ReferenceDataSupplier<>(
+        programService, programId
+    );
+    LazyResource<ProgramDto> program = new LazyResource<>(programSupplier);
+    context.setProgram(program);
 
-    profiler.start("GET_FACILITY");
+    profiler.start("CREATE_LAZY_FACILITY");
     UUID facilityId = eventDto.getFacilityId();
-    FacilityDto facility = facilityService.findOne(facilityId);
+    Supplier<FacilityDto> facilitySupplier = new ReferenceDataSupplier<>(
+        facilityService, facilityId
+    );
+    LazyResource<FacilityDto> facility = new LazyResource<>(facilitySupplier);
+    context.setFacility(facility);
 
-    profiler.start("GET_APPROVED_PRODUCTS");
-    List<OrderableDto> approvedProducts = approvedProductService
+    profiler.start("CREATE_LAZY_APPROVED_PRODUCTS");
+    Supplier<List<OrderableDto>> productsSupplier = () -> approvedProductService
         .getAllApprovedProducts(programId, facilityId);
+    LazyList<OrderableDto> products = new LazyList<>(productsSupplier);
+    context.setAllApprovedProducts(products);
 
-    profiler.start("GET_LOTS");
-    Map<UUID, LotDto> lots = getLots(eventDto);
+    profiler.start("CREATE_LAZY_LOTS");
+    Supplier<List<LotDto>> lotsSupplier = () -> getLots(eventDto);
+    LazyList<LotDto> lots = new LazyList<>(lotsSupplier);
+    LazyGrouping<UUID, LotDto> lotsGroupedById = new LazyGrouping<>(lots, LotDto::getId);
+    context.setLots(lotsGroupedById);
 
-    profiler.start("BUILD");
-    StockEventProcessContext context = builder
-        .program(program)
-        .facility(facility)
-        .allApprovedProducts(approvedProducts)
-        .lots(lots)
-        .build();
+    profiler.start("CREATE_LAZY_EVENT_REASONS");
+    Supplier<List<StockCardLineItemReason>> eventReasonsSupplier = () -> reasonRepository
+        .findByIdIn(eventDto.getReasonIds());
+    LazyList<StockCardLineItemReason> eventReasons = new LazyList<>(eventReasonsSupplier);
+    LazyGrouping<UUID, StockCardLineItemReason> eventReasonsGroupedById = new LazyGrouping<>(
+        eventReasons, StockCardLineItemReason::getId
+    );
+    context.setEventReasons(eventReasonsGroupedById);
+
+    profiler.start("CREATE_LAZY_NODES");
+    Supplier<List<Node>> nodesSupplier = () -> nodeRepository
+        .findByIdIn(eventDto.getNodeIds());
+    LazyList<Node> nodes = new LazyList<>(nodesSupplier);
+    LazyGrouping<UUID, Node> nodesGroupedById = new LazyGrouping<>(nodes, Node::getId);
+    context.setNodes(nodesGroupedById);
+
+    profiler.start("CREATE_LAZY_STOCK_CARDS");
+    Supplier<List<StockCard>> cardsSupplier = () -> stockCardRepository
+        .findByProgramIdAndFacilityId(eventDto.getProgramId(), eventDto.getFacilityId());
+    LazyList<StockCard> cards = new LazyList<>(cardsSupplier);
+    LazyGrouping<OrderableLotIdentity, StockCard> cardsGroupedByIdentity = new LazyGrouping<>(
+        cards, OrderableLotIdentity::identityOf
+    );
+    context.setCards(cardsGroupedByIdentity);
+
+    profiler.start("CREATE_LAZY_CARD_REASONS");
+    Supplier<List<StockCardLineItemReason>> cardReasonsSupplier = () -> getCardReasons(eventDto);
+    LazyList<StockCardLineItemReason> cardReasons = new LazyList<>(cardReasonsSupplier);
+    LazyGrouping<UUID, StockCardLineItemReason> cardReasonsGroupedById = new LazyGrouping<>(
+        cardReasons, StockCardLineItemReason::getId
+    );
+    context.setCardReasons(cardReasonsGroupedById);
+
+    profiler.start("CREATE_LAZY_SOURCES");
+    Supplier<List<ValidSourceAssignment>> sourcesSupplier = () -> validSourceAssignmentRepository
+        .findByProgramIdAndFacilityTypeId(eventDto.getProgramId(), context.getFacilityTypeId());
+    LazyList<ValidSourceAssignment> sources = new LazyList<>(sourcesSupplier);
+    context.setSources(sources);
+
+    profiler.start("CREATE_LAZY_DESTINATIONS");
+    Supplier<List<ValidDestinationAssignment>> destinationsSupplier = () ->
+        validDestinationAssignmentRepository
+        .findByProgramIdAndFacilityTypeId(eventDto.getProgramId(), context.getFacilityTypeId());
+    LazyList<ValidDestinationAssignment> destinations = new LazyList<>(destinationsSupplier);
+    context.setDestinations(destinations);
 
     profiler.stop().log();
     XLOGGER.exit(context);
@@ -126,13 +218,28 @@ public class StockEventProcessContextBuilder {
     return context;
   }
 
-  private Map<UUID, LotDto> getLots(StockEventDto eventDto) {
+  private List<LotDto> getLots(StockEventDto eventDto) {
     return eventDto
         .getLineItems()
         .stream()
         .filter(item -> item.getLotId() != null)
         .map(StockEventLineItem::getLotId)
         .distinct()
-        .collect(Collectors.toMap(id -> id, id -> lotReferenceDataService.findOne(id)));
+        .map(lotReferenceDataService::findOne)
+        .collect(Collectors.toList());
+  }
+
+  private List<StockCardLineItemReason> getCardReasons(StockEventDto eventDto) {
+    Set<UUID> reasonIds = stockCardRepository
+        .findByProgramIdAndFacilityId(eventDto.getProgramId(), eventDto.getFacilityId())
+        .stream()
+        .map(StockCard::getLineItems)
+        .flatMap(Collection::stream)
+        .map(StockCardLineItem::getReason)
+        .filter(Objects::nonNull)
+        .map(StockCardLineItemReason::getId)
+        .collect(Collectors.toSet());
+
+    return reasonRepository.findByIdIn(reasonIds);
   }
 }

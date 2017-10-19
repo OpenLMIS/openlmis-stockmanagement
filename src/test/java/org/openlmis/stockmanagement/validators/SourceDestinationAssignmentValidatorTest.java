@@ -17,7 +17,6 @@ package org.openlmis.stockmanagement.validators;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_NOT_IN_VALID_LIST;
@@ -25,9 +24,10 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINA
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_IN_VALID_LIST;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
 
-import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -39,21 +39,15 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityTypeDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
-import org.openlmis.stockmanagement.repository.ValidSourceAssignmentRepository;
-import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
 import java.util.ArrayList;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SourceDestinationAssignmentValidatorTest {
+public class SourceDestinationAssignmentValidatorTest extends BaseValidatorTest {
 
-  @Mock
-  private ValidSourceAssignmentRepository validSourceAssignmentRepository;
-
-  @Mock
-  private ValidDestinationAssignmentRepository validDestinationAssignmentRepository;
+  @Rule
+  public ExpectedException expectedEx = ExpectedException.none();
 
   @InjectMocks
   private SourceDestinationAssignmentValidator sourceDestinationAssignmentValidator;
@@ -69,6 +63,7 @@ public class SourceDestinationAssignmentValidatorTest {
 
   @Before
   public void setUp() throws Exception {
+    super.setUp();
     when(validSourceAssignment.getNode()).thenReturn(node);
     when(validDestinationAssignment.getNode()).thenReturn(node);
     when(node.getId()).thenReturn(UUID.randomUUID());
@@ -91,17 +86,11 @@ public class SourceDestinationAssignmentValidatorTest {
     eventDto.getLineItems().get(0).setSourceId(UUID.randomUUID());
     eventDto.getLineItems().get(0).setDestinationId(UUID.randomUUID());
 
-    //when
-    try {
-      sourceDestinationAssignmentValidator.validate(eventDto);
-    } catch (ValidationMessageException ex) {
-      //then
-      assertThat(ex.asMessage().toString(), containsString(
-          ERROR_SOURCE_DESTINATION_BOTH_PRESENT));
-      return;
-    }
+    expectedEx.expect(ValidationMessageException.class);
+    expectedEx.expectMessage(containsString(ERROR_SOURCE_DESTINATION_BOTH_PRESENT));
 
-    Assert.fail();
+    //when
+    sourceDestinationAssignmentValidator.validate(eventDto);
   }
 
   @Test
@@ -117,16 +106,11 @@ public class SourceDestinationAssignmentValidatorTest {
         .findByProgramIdAndFacilityTypeId(any(UUID.class), any(UUID.class)))
         .thenReturn(new ArrayList<>());
 
-    //when
-    try {
-      sourceDestinationAssignmentValidator.validate(eventDto);
-    } catch (ValidationMessageException ex) {
-      //then
-      assertThat(ex.asMessage().toString(), containsString(ERROR_SOURCE_NOT_IN_VALID_LIST));
-      return;
-    }
+    expectedEx.expect(ValidationMessageException.class);
+    expectedEx.expectMessage(containsString(ERROR_SOURCE_NOT_IN_VALID_LIST));
 
-    Assert.fail();
+    //when
+    sourceDestinationAssignmentValidator.validate(eventDto);
   }
 
   @Test
@@ -142,16 +126,11 @@ public class SourceDestinationAssignmentValidatorTest {
         .findByProgramIdAndFacilityTypeId(any(UUID.class), any(UUID.class)))
         .thenReturn(new ArrayList<>());
 
-    //when
-    try {
-      sourceDestinationAssignmentValidator.validate(eventDto);
-    } catch (ValidationMessageException ex) {
-      //then
-      assertThat(ex.asMessage().toString(), containsString(ERROR_DESTINATION_NOT_IN_VALID_LIST));
-      return;
-    }
+    expectedEx.expect(ValidationMessageException.class);
+    expectedEx.expectMessage(containsString(ERROR_DESTINATION_NOT_IN_VALID_LIST));
 
-    Assert.fail();
+    //when
+    sourceDestinationAssignmentValidator.validate(eventDto);
   }
 
   @Test
@@ -194,7 +173,11 @@ public class SourceDestinationAssignmentValidatorTest {
     FacilityTypeDto facilityTypeDto = new FacilityTypeDto();
     facilityTypeDto.setId(UUID.randomUUID());
     FacilityDto facilityDto = new FacilityDto();
+    facilityDto.setId(eventDto.getFacilityId());
     facilityDto.setType(facilityTypeDto);
-    eventDto.setContext(StockEventProcessContext.builder().facility(facilityDto).build());
+
+    when(facilityService.findOne(eventDto.getFacilityId())).thenReturn(facilityDto);
+
+    setContext(eventDto);
   }
 }

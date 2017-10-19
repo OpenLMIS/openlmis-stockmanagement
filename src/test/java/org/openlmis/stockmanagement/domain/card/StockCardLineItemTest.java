@@ -36,6 +36,7 @@ import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.util.LazyResource;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
 import java.time.ZonedDateTime;
@@ -57,7 +58,7 @@ public class StockCardLineItemTest {
     UUID userId = randomUUID();
 
     StockEventProcessContext context = new StockEventProcessContext();
-    context.setCurrentUserId(userId);
+    context.setCurrentUserId(new LazyResource<>(() -> userId));
 
     StockEventDto eventDto = createStockEventDto();
     eventDto.setContext(context);

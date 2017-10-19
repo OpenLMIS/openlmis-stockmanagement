@@ -22,16 +22,8 @@ import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.util.Message;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * An adjustment should have a reason that is either DEBIT or CREDIT.
@@ -39,9 +31,6 @@ import java.util.stream.Collectors;
  */
 @Component(value = "AdjustmentReasonValidator")
 public class AdjustmentReasonValidator implements StockEventValidator {
-
-  @Autowired
-  private StockCardLineItemReasonRepository reasonRepository;
 
   @Override
   public void validate(StockEventDto stockEventDto) {
@@ -51,28 +40,18 @@ public class AdjustmentReasonValidator implements StockEventValidator {
       return;
     }
 
-    List<StockEventLineItem> lineItems = stockEventDto.getLineItems();
-    Set<UUID> reasonIds = lineItems
-        .stream()
-        .filter(StockEventLineItem::hasReasonId)
-        .map(StockEventLineItem::getReasonId)
-        .collect(Collectors.toSet());
-
-    Map<UUID, StockCardLineItemReason> reasons = reasonRepository
-        .findByIdIn(reasonIds)
-        .stream()
-        .collect(Collectors.toMap(StockCardLineItemReason::getId, reason -> reason));
-
-    for (StockEventLineItem lineItem : lineItems) {
+    for (StockEventLineItem lineItem : stockEventDto.getLineItems()) {
       if (lineItem.hasReasonId()) {
-        validateReason(lineItem, reasons);
+        validateReason(stockEventDto, lineItem);
       }
     }
   }
 
-  private void validateReason(StockEventLineItem lineItem,
-                              Map<UUID, StockCardLineItemReason> reasons) {
-    StockCardLineItemReason foundReason = reasons.get(lineItem.getReasonId());
+  private void validateReason(StockEventDto event, StockEventLineItem lineItem) {
+    StockCardLineItemReason foundReason = event
+        .getContext()
+        .findEventReason(lineItem.getReasonId());
+
     //this validator does not care if reason id not found in db
     //that is handled by other validators
     if (foundReason != null) {

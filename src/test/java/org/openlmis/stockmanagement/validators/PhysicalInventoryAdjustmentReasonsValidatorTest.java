@@ -39,13 +39,12 @@ import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityTypeDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
-import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
 import java.util.Collections;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PhysicalInventoryAdjustmentReasonsValidatorTest {
+public class PhysicalInventoryAdjustmentReasonsValidatorTest extends BaseValidatorTest  {
 
   @Rule
   public ExpectedException expectedException = none();
@@ -59,12 +58,11 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest {
   private FacilityDto facility = mock(FacilityDto.class);
   private UUID facilityTypeId = UUID.randomUUID();
   private StockEventDto stockEventDto = spy(new StockEventDto());
-  private StockEventProcessContext context;
 
   @Before
-  public void setUp() {
-    context = new StockEventProcessContext();
-    when(stockEventDto.getContext()).thenReturn(context);
+  public void setUp() throws Exception {
+    super.setUp();
+    setContext(stockEventDto);
 
     when(validReasonRepository
         .findByProgramIdAndFacilityTypeIdAndReasonId(
@@ -143,13 +141,16 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest {
         Collections.singletonList(
             generateLineItem(5, generateReason())));
 
-    context.setFacility(null);
+    when(facilityService.findOne(stockEventDto.getFacilityId())).thenReturn(null);
+
+    setContext(stockEventDto);
 
     validator.validate(stockEventDto);
   }
 
   private void stubFacilityType() {
-    context.setFacility(facility);
+    when(facilityService.findOne(stockEventDto.getFacilityId())).thenReturn(facility);
+
     FacilityTypeDto facilityType = new FacilityTypeDto();
     facilityType.setId(facilityTypeId);
     when(facility.getType()).thenReturn(facilityType);

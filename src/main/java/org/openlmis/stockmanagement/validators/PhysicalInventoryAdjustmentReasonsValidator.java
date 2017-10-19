@@ -25,7 +25,6 @@ import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
 import org.openlmis.stockmanagement.dto.StockEventDto;
-import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
 import org.openlmis.stockmanagement.util.Message;
@@ -89,14 +88,14 @@ public class PhysicalInventoryAdjustmentReasonsValidator implements StockEventVa
   }
 
   private UUID getFacilityType(StockEventDto event) {
-    FacilityDto facility = event.getContext().getFacility();
+    UUID typeId = event.getContext().getFacilityTypeId();
 
-    if (facility == null) {
+    if (null == typeId) {
       throw new ValidationMessageException(
           new Message(ERROR_EVENT_FACILITY_INVALID, event.getFacilityId()));
     }
 
-    return facility.getType().getId();
+    return typeId;
   }
 
   private boolean isReasonValid(UUID programId, UUID facilityTypeId, UUID reasonId) {

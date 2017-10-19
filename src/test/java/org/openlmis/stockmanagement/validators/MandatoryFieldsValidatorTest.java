@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.validators;
 
 import static java.util.Collections.emptyList;
+import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_FACILITY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_NO_LINE_ITEMS;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_OCCURRED_DATE_INVALID;
@@ -36,7 +37,6 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
-import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -44,7 +44,7 @@ import java.util.UUID;
 
 @SuppressWarnings("PMD.TooManyMethods")
 @RunWith(MockitoJUnitRunner.class)
-public class MandatoryFieldsValidatorTest {
+public class MandatoryFieldsValidatorTest extends BaseValidatorTest  {
 
   @InjectMocks
   private MandatoryFieldsValidator mandatoryFieldsValidator;
@@ -56,18 +56,19 @@ public class MandatoryFieldsValidatorTest {
 
   @Before
   public void setUp() throws Exception {
-    StockEventProcessContext stockEventContext = StockEventProcessContext.builder()
-        .facility(new FacilityDto())
-        .program(new ProgramDto()).build();
+    super.setUp();
     stockEventDto = StockEventDtoBuilder.createStockEventDto();
-    stockEventDto.setContext(stockEventContext);
+
+    when(facilityService.findOne(stockEventDto.getFacilityId())).thenReturn(new FacilityDto());
+    when(programService.findOne(stockEventDto.getProgramId())).thenReturn(new ProgramDto());
+
+    setContext(stockEventDto);
   }
 
   @Test
-  public void stock_event_with_incorrect_facility_id_should_not_pass_validation()
-      throws Exception {
+  public void stock_event_with_incorrect_facility_id_should_not_pass_validation() throws Exception {
     UUID facilityId = UUID.randomUUID();
-    stockEventDto.getContext().setFacility(null);
+    when(facilityService.findOne(facilityId)).thenReturn(null);
 
     expectFacilityException(facilityId);
   }
@@ -75,14 +76,13 @@ public class MandatoryFieldsValidatorTest {
   @Test
   public void stock_event_with_incorrect_program_id_should_not_pass_validation() throws Exception {
     UUID programId = UUID.randomUUID();
-    stockEventDto.getContext().setProgram(null);
+    when(programService.findOne(programId)).thenReturn(null);
 
     expectProgramException(programId);
   }
 
   @Test()
-  public void stock_event_without_orderable_should_not_pass_validation()
-      throws Exception {
+  public void stock_event_without_orderable_should_not_pass_validation() throws Exception {
     expectOrderableException(null);
   }
 
@@ -145,6 +145,7 @@ public class MandatoryFieldsValidatorTest {
   private void expectFacilityException(UUID facilityId) {
     //given
     stockEventDto.setFacilityId(facilityId);
+    setContext(stockEventDto);
 
     //when
     String suffix = facilityId != null ? facilityId.toString() : "";
@@ -155,6 +156,7 @@ public class MandatoryFieldsValidatorTest {
   private void expectProgramException(UUID programId) {
     //given
     stockEventDto.setProgramId(programId);
+    setContext(stockEventDto);
 
     //when
     String suffix = programId != null ? programId.toString() : "";

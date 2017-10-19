@@ -43,7 +43,6 @@ import org.openlmis.stockmanagement.repository.StockCardLineItemRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.service.notifier.StockoutNotifier;
-import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -61,9 +60,6 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
 
   @MockBean
   private StockEventValidationsService stockEventValidationsService;
-
-  @MockBean
-  private StockEventProcessContextBuilder contextBuilder;
 
   @MockBean
   private StockoutNotifier stockoutNotifier;
@@ -92,6 +88,8 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
   @Mock
   private OAuth2Authentication authentication;
 
+  private UUID userId = UUID.randomUUID();
+
   private long cardSize;
   private long eventSize;
   private long lineItemSize;
@@ -102,17 +100,9 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
     eventSize = stockEventsRepository.count();
     lineItemSize = lineItemRepository.count();
 
-    UUID userId = UUID.randomUUID();
-
-    StockEventProcessContext eventProcessContext = new StockEventProcessContext();
-    eventProcessContext.setCurrentUserId(userId);
-
-    when(contextBuilder.buildContext(any(StockEventDto.class)))
-        .thenReturn(eventProcessContext);
-
     SecurityContextHolder.setContext(securityContext);
     when(securityContext.getAuthentication()).thenReturn(authentication);
-    when(authentication.isClientOnly()).thenReturn(false);
+    when(authentication.isClientOnly()).thenReturn(true);
   }
 
   @After
@@ -127,6 +117,8 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
       throws Exception {
     //given
     StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.setUserId(userId);
+    setContext(stockEventDto);
 
     Mockito.doThrow(new RuntimeException("something wrong from validations service"))
         .when(stockEventValidationsService)
@@ -147,6 +139,8 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
   @Test
   public void should_save_event_and_line_items_when_validation_service_passes() throws Exception {
     StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.setUserId(userId);
+    setContext(stockEventDto);
 
     //when
     stockEventProcessor.process(stockEventDto);
@@ -160,9 +154,11 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
       throws Exception {
     //given
     StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.setUserId(userId);
     stockEventDto.getLineItems().get(0).setReasonId(null);
     stockEventDto.getLineItems().get(0).setSourceId(null);
     stockEventDto.getLineItems().get(0).setDestinationId(null);
+    setContext(stockEventDto);
 
     //when
     stockEventProcessor.process(stockEventDto);
@@ -176,8 +172,10 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
   public void shouldCallStockoutNotifierWhenStockOnHandIsZero() throws Exception {
     //given
     StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.setUserId(userId);
     StockEventLineItem firstLineItem = stockEventDto.getLineItems().get(0);
     firstLineItem.setQuantity(0);
+    setContext(stockEventDto);
 
     //when
     stockEventProcessor.process(stockEventDto);
@@ -200,12 +198,14 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
   public void shouldCallStockoutNotifierForEveryCard() throws Exception {
     //given
     StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.setUserId(userId);
     StockEventLineItem firstLineItem = stockEventDto.getLineItems().get(0);
     firstLineItem.setQuantity(0);
 
     StockEventLineItem secondLineItem = createStockEventLineItem();
     secondLineItem.setQuantity(0);
     stockEventDto.setLineItems(Arrays.asList(firstLineItem, secondLineItem));
+    setContext(stockEventDto);
 
     //when
     stockEventProcessor.process(stockEventDto);

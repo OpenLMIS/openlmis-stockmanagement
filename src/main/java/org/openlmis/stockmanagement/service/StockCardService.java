@@ -16,9 +16,9 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toMap;
 import static org.openlmis.stockmanagement.domain.card.StockCard.createStockCardFrom;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemFrom;
+import static org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity.identityOf;
 import static org.openlmis.stockmanagement.domain.reason.ReasonCategory.PHYSICAL_INVENTORY;
 
 import com.google.common.collect.Lists;
@@ -26,7 +26,6 @@ import com.google.common.collect.Lists;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
-import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
@@ -44,7 +43,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -88,21 +86,17 @@ public class StockCardService extends StockCardBaseService {
    * @param savedEventId  saved event id.
    */
   void saveFromEvent(StockEventDto stockEventDto, UUID savedEventId) {
-    Map<OrderableLotIdentity, StockCard> cards = cardRepository
-        .findByProgramIdAndFacilityId(stockEventDto.getProgramId(), stockEventDto.getFacilityId())
-        .stream()
-        .collect(toMap(OrderableLotIdentity::identityOf, card -> card));
-
     List<StockCard> cardsToUpdate = Lists.newArrayList();
 
     for (StockEventLineItem eventLineItem : stockEventDto.getLineItems()) {
-      StockCard stockCard = findOrCreateCard(cards, stockEventDto, eventLineItem, savedEventId);
+      StockCard stockCard = findOrCreateCard(stockEventDto, eventLineItem, savedEventId);
       createLineItemFrom(stockEventDto, eventLineItem, stockCard, savedEventId);
 
       cardsToUpdate.add(stockCard);
     }
 
     cardRepository.save(cardsToUpdate);
+    stockEventDto.getContext().refreshCards();
 
     LOGGER.debug("Stock cards and line items saved");
   }
@@ -132,12 +126,15 @@ public class StockCardService extends StockCardBaseService {
     return cardDto;
   }
 
-  private StockCard findOrCreateCard(Map<OrderableLotIdentity, StockCard> cards,
-                                     StockEventDto eventDto, StockEventLineItem eventLineItem,
+  private StockCard findOrCreateCard(StockEventDto eventDto, StockEventLineItem eventLineItem,
                                      UUID savedEventId) {
-    return cards.computeIfAbsent(
-        OrderableLotIdentity.identityOf(eventLineItem),
-        key -> createStockCardFrom(eventDto, eventLineItem, savedEventId));
+    StockCard card = eventDto.getContext().findCard(identityOf(eventLineItem));
+
+    if (null == card) {
+      card = createStockCardFrom(eventDto, eventLineItem, savedEventId);
+    }
+
+    return card;
   }
 
   private void assignSourceDestinationReasonNameForLineItems(StockCardDto stockCardDto) {
