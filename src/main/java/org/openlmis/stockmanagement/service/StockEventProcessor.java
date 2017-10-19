@@ -119,8 +119,9 @@ public class StockEventProcessor {
   private void callNotifications(StockEventDto event, StockEventLineItem eventLine) {
     OrderableLotIdentity identity = OrderableLotIdentity.identityOf(eventLine);
     StockCard card = event.getContext().findCard(identity);
+    StockCard copy = card.shallowCopy();
 
-    for (StockCardLineItem line : card.getLineItems()) {
+    for (StockCardLineItem line : copy.getLineItems()) {
       StockCardLineItemReason reason = line.getReason();
 
       if (null != reason) {
@@ -128,10 +129,10 @@ public class StockEventProcessor {
       }
     }
 
-    card.calculateStockOnHand();
+    copy.calculateStockOnHand();
 
-    if (card.getStockOnHand() == 0) {
-      stockoutNotifier.notifyStockEditors(card);
+    if (copy.getStockOnHand() == 0) {
+      stockoutNotifier.notifyStockEditors(copy);
     }
   }
 
