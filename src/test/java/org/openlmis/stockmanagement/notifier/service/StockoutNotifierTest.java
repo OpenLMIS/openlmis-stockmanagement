@@ -50,7 +50,7 @@ import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataSe
 import org.openlmis.stockmanagement.service.referencedata.RightReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.SupervisingUsersReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.SupervisoryNodeReferenceDataService;
-import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.util.Message;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 import java.text.MessageFormat;

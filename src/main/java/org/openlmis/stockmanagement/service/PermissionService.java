@@ -25,7 +25,7 @@ import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
-import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;

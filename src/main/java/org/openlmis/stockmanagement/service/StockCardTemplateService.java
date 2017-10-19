@@ -32,7 +32,7 @@ import org.openlmis.stockmanagement.repository.AvailableStockCardFieldsRepositor
 import org.openlmis.stockmanagement.repository.AvailableStockCardLineItemFieldsRepository;
 import org.openlmis.stockmanagement.repository.StockCardTemplatesRepository;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
-import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Service;

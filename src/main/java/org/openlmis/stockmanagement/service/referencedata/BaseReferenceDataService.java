@@ -18,7 +18,7 @@ package org.openlmis.stockmanagement.service.referencedata;
 import static org.openlmis.stockmanagement.util.RequestHelper.createEntity;
 
 import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
-import org.openlmis.stockmanagement.utils.DynamicParametrizedTypeReference;
+import org.openlmis.stockmanagement.util.DynamicParametrizedTypeReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

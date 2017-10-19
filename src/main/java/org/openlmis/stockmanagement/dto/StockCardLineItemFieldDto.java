@@ -21,7 +21,7 @@ import org.openlmis.stockmanagement.domain.template.AvailableStockCardLineItemFi
 import org.openlmis.stockmanagement.domain.template.StockCardLineItemFields;
 import org.openlmis.stockmanagement.domain.template.StockCardTemplate;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.util.Message;
 
 import java.util.List;
 import java.util.Optional;

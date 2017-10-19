@@ -21,7 +21,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_NOT_FO
 import org.openlmis.stockmanagement.dto.referencedata.FacilityTypeDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

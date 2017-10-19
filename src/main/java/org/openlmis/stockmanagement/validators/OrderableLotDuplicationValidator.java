@@ -21,7 +21,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ORDERABL
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.util.Message;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;

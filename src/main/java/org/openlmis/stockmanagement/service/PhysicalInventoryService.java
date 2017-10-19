@@ -30,7 +30,7 @@ import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
-import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.validators.PhysicalInventoryValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

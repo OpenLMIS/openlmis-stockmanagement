@@ -30,7 +30,7 @@ import net.sf.jasperreports.engine.JasperReport;
 import org.openlmis.stockmanagement.domain.JasperTemplate;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.TemplateRepository;
-import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

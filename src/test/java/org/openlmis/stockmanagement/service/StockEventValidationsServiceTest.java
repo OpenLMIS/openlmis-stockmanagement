@@ -28,7 +28,7 @@ import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
-import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.validators.AdjustmentReasonValidator;
 import org.openlmis.stockmanagement.validators.ApprovedOrderableValidator;
 import org.openlmis.stockmanagement.validators.PhysicalInventoryAdjustmentReasonsValidator;

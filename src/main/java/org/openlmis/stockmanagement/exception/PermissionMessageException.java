@@ -15,7 +15,7 @@
 
 package org.openlmis.stockmanagement.exception;
 
-import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.util.Message;
 
 public class PermissionMessageException extends BaseMessageException {
 

@@ -13,7 +13,7 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.utils;
+package org.openlmis.stockmanagement.util;
 
 import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
 import org.springframework.core.ParameterizedTypeReference;

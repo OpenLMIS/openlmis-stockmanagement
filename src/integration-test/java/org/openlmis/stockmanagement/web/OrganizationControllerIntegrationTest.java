@@ -31,7 +31,7 @@ import org.openlmis.stockmanagement.domain.sourcedestination.Organization;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.service.PermissionService;
-import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.util.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;

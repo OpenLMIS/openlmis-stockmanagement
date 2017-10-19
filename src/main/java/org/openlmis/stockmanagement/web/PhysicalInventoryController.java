@@ -36,7 +36,7 @@ import org.openlmis.stockmanagement.service.JasperTemplateService;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.PhysicalInventoryService;
 import org.openlmis.stockmanagement.util.ReportUtils;
-import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;

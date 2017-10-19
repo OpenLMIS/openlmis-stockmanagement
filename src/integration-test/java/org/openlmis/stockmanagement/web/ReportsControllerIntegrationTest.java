@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.service.JasperReportService;
 import org.openlmis.stockmanagement.service.PermissionService;
-import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.util.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.servlet.ModelAndView;

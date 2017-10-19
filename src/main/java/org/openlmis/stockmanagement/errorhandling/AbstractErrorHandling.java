@@ -18,7 +18,7 @@ package org.openlmis.stockmanagement.errorhandling;
 import org.openlmis.stockmanagement.exception.BaseMessageException;
 import org.openlmis.stockmanagement.i18n.MessageService;
 import org.openlmis.stockmanagement.util.ErrorResponse;
-import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.util.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

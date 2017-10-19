@@ -34,7 +34,7 @@ import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardService;
 import org.openlmis.stockmanagement.service.StockCardSummariesService;
 import org.openlmis.stockmanagement.testutils.StockCardDtoBuilder;
-import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.util.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;

@@ -28,7 +28,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_QUANTITY
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.util.Message;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;

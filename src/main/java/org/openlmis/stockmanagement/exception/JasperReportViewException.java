@@ -17,7 +17,7 @@ package org.openlmis.stockmanagement.exception;
 
 import static java.lang.String.format;
 
-import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.util.Message;
 
 public class JasperReportViewException extends BaseMessageException {
 

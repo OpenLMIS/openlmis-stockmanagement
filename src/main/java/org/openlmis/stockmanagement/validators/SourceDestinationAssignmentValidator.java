@@ -29,7 +29,7 @@ import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
 import org.openlmis.stockmanagement.repository.ValidSourceAssignmentRepository;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
-import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

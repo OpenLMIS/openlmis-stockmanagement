@@ -48,7 +48,7 @@ import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceData
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
-import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;

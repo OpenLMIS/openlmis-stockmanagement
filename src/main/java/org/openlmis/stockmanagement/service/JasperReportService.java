@@ -33,7 +33,7 @@ import org.openlmis.stockmanagement.domain.JasperTemplate;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.exception.JasperReportViewException;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
-import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;

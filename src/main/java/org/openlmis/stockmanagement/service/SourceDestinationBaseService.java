@@ -27,7 +27,7 @@ import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.repository.SourceDestinationAssignmentRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
-import org.openlmis.stockmanagement.utils.Message;
+import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
