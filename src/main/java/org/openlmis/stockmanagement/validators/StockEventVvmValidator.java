@@ -33,6 +33,10 @@ public class StockEventVvmValidator implements StockEventValidator {
 
   @Override
   public void validate(StockEventDto stockEventDto) {
-    vvmValidator.validate(stockEventDto.getLineItems(), ERROR_STOCK_EVENT_ORDERABLE_DISABLED_VVM);
+    // we set ignoreMissingOrderable parameter on true
+    // because this case is handled by another validator
+    vvmValidator.validate(
+        stockEventDto.getLineItems(), ERROR_STOCK_EVENT_ORDERABLE_DISABLED_VVM, true
+    );
   }
 }

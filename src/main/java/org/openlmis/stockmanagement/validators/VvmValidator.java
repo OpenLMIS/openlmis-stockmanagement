@@ -15,6 +15,8 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ORDERABLE_INVALID;
+
 import org.openlmis.stockmanagement.domain.common.VvmApplicable;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
@@ -43,11 +45,12 @@ public class VvmValidator {
   /**
    * Validates whether the vvm applicables have proper vvm status (if applicable).
    * Throws ValidationMessageException if any of items is in invalid state.
-   *
-   * @param vvmApplicables list of items to test
+   *  @param vvmApplicables list of items to test
    * @param messageKey error message key for exception
+   * @param ignoreMissingOrderable whether should
    */
-  public void validate(List<? extends VvmApplicable> vvmApplicables, String messageKey) {
+  public void validate(List<? extends VvmApplicable> vvmApplicables, String messageKey,
+                       boolean ignoreMissingOrderable) {
     Set<UUID> orderableIds = vvmApplicables
         .stream()
         .map(VvmApplicable::getOrderableId)
@@ -61,6 +64,14 @@ public class VvmValidator {
 
     for (VvmApplicable item : vvmApplicables) {
       OrderableDto orderable = groupById.get(item.getOrderableId());
+
+      if (null == orderable) {
+        if (ignoreMissingOrderable) {
+          continue;
+        } else {
+          throw new ValidationMessageException(ERROR_EVENT_ORDERABLE_INVALID);
+        }
+      }
 
       boolean useVvm = false;
       boolean hasVvmStatus = false;

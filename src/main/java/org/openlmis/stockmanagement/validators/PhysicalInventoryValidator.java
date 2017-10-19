@@ -63,7 +63,7 @@ public class PhysicalInventoryValidator {
 
     List<PhysicalInventoryLineItemDto> lineItems = inventory.getLineItems();
     validateLineItems(lineItems);
-    vvmValidator.validate(lineItems, ERROR_PHYSICAL_INVENTORY_ORDERABLE_DISABLED_VVM);
+    vvmValidator.validate(lineItems, ERROR_PHYSICAL_INVENTORY_ORDERABLE_DISABLED_VVM, false);
   }
 
   /**

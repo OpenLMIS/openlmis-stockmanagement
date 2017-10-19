@@ -51,7 +51,7 @@ public class VvmValidatorTest {
     VvmApplicable lineItem = generateVvmApplicable(orderable);
     lineItem.setExtraData(Collections.singletonMap("vvmStatus", "status"));
 
-    validator.validate(Collections.singletonList(lineItem), ERROR_MESSAGE);
+    validator.validate(Collections.singletonList(lineItem), ERROR_MESSAGE, false);
   }
 
   @Test(expected = ValidationMessageException.class)
@@ -61,7 +61,7 @@ public class VvmValidatorTest {
     VvmApplicable lineItem = generateVvmApplicable(orderable);
     lineItem.setExtraData(Collections.singletonMap("vvmStatus", "status"));
 
-    validator.validate(Collections.singletonList(lineItem), ERROR_MESSAGE);
+    validator.validate(Collections.singletonList(lineItem), ERROR_MESSAGE, false);
   }
 
   @Test
@@ -72,7 +72,7 @@ public class VvmValidatorTest {
     VvmApplicable lineItem = generateVvmApplicable(orderable);
     lineItem.setExtraData(Collections.singletonMap("vvmStatus", "status"));
 
-    validator.validate(Collections.singletonList(lineItem), ERROR_MESSAGE);
+    validator.validate(Collections.singletonList(lineItem), ERROR_MESSAGE, false);
   }
 
   @Test
@@ -82,7 +82,7 @@ public class VvmValidatorTest {
 
     VvmApplicable lineItem = generateVvmApplicable(orderable);
 
-    validator.validate(Collections.singletonList(lineItem), ERROR_MESSAGE);
+    validator.validate(Collections.singletonList(lineItem), ERROR_MESSAGE, false);
   }
 
   private OrderableDto generateOrderable() {

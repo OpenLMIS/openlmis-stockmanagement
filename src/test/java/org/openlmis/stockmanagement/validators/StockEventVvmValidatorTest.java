@@ -47,12 +47,13 @@ public class StockEventVvmValidatorTest {
     stockEvent.setLineItems(Collections.emptyList());
 
     doNothing()
-        .when(vvmValidator).validate(eq(stockEvent.getLineItems()), anyString());
+        .when(vvmValidator).validate(eq(stockEvent.getLineItems()), anyString(), eq(true));
 
     // when
     validator.validate(stockEvent);
 
     // then
-    verify(vvmValidator, atLeastOnce()).validate(eq(stockEvent.getLineItems()), anyString());
+    verify(vvmValidator, atLeastOnce())
+        .validate(eq(stockEvent.getLineItems()), anyString(), eq(true));
   }
 }

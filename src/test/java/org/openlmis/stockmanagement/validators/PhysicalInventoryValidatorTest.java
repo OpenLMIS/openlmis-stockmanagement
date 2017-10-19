@@ -64,13 +64,14 @@ public class PhysicalInventoryValidatorTest {
     PhysicalInventoryDto inventory = newInventory();
 
     doNothing()
-        .when(vvmValidator).validate(any(), anyString());
+        .when(vvmValidator).validate(any(), anyString(), eq(false));
 
     // when
     validator.validateDraft(inventory, UUID.fromString(inventory.getId().toString()));
 
     // then
-    verify(vvmValidator, atLeastOnce()).validate(eq(inventory.getLineItems()), anyString());
+    verify(vvmValidator, atLeastOnce())
+        .validate(eq(inventory.getLineItems()), anyString(), eq(false));
   }
 
   @Test(expected = ValidationMessageException.class)
@@ -80,13 +81,14 @@ public class PhysicalInventoryValidatorTest {
     inventory.setLineItems(Collections.emptyList());
 
     doNothing()
-        .when(vvmValidator).validate(eq(inventory.getLineItems()), anyString());
+        .when(vvmValidator).validate(eq(inventory.getLineItems()), anyString(), eq(false));
 
     // when
     validator.validateDraft(inventory, inventory.getId());
 
     // then
-    verify(vvmValidator, atLeastOnce()).validate(eq(inventory.getLineItems()), anyString());
+    verify(vvmValidator, atLeastOnce())
+        .validate(eq(inventory.getLineItems()), anyString(), eq(false));
   }
 
   @Test(expected = ValidationMessageException.class)
@@ -96,13 +98,14 @@ public class PhysicalInventoryValidatorTest {
     inventory.setLineItems(Collections.singletonList(new PhysicalInventoryLineItemDto()));
 
     doNothing()
-        .when(vvmValidator).validate(eq(inventory.getLineItems()), anyString());
+        .when(vvmValidator).validate(eq(inventory.getLineItems()), anyString(), eq(false));
 
     // when
     validator.validateDraft(inventory, inventory.getId());
 
     // then
-    verify(vvmValidator, atLeastOnce()).validate(eq(inventory.getLineItems()), anyString());
+    verify(vvmValidator, atLeastOnce())
+        .validate(eq(inventory.getLineItems()), anyString(), eq(false));
   }
 
   @Test(expected = ValidationMessageException.class)
