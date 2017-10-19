@@ -46,8 +46,8 @@ scenarios:
       facility_type_id: ac1d268b-ce10-455f-bf87-9c667da8f060
       # Nandumbo Health Center
       facility_id: 176c4276-1fb1-4507-8ad2-cdfba0f47445
-      # Family Planning
-      program_id: dce17f2e-af3e-40ad-8e00-3496adef44c3
+      # Essential Meds
+      program_id: 10845cb9-d365-4aaa-badd-b4fa39c6a26a
       # Administrator
       user_id: a337ec45-31a0-4f2b-9b2e-a105c4b669bb
     requests:
