@@ -18,6 +18,22 @@ scenarios:
         extract-jsonpath:
           access_token:
             jsonpath: $.access_token
+  get-facility-type:
+    requests:
+      - url: ${__P(base-uri)}/api/facilities/${facility_id}
+        method: GET
+        label: GetFacilityType
+        headers:
+          Authorization: Bearer ${access_token}
+          Content-Type: application/json
+        extract-jsonpath:
+          facility_type_id:
+            jsonpath: $.type.id
+        jsr223:
+          script-text: |
+            def uuid = vars.get("facility_type_id");
+            uuid = uuid.replaceAll(/"|\[|\]/, "");
+            vars.put("facility_type_id", uuid);
   get-approved-products:
     requests:
       - url: ${__P(base-uri)}/api/facilities/${facility_id}/approvedProducts?programId=${program_id}&fullSupply=true
@@ -29,22 +45,32 @@ scenarios:
         extract-jsonpath:
           products:
             jsonpath: $..orderable
-  get-valid-reasons:
+  get-two-reasons:
     requests:
       - url: ${__P(base-uri)}/api/validReasons?program=${program_id}&facilityType=${facility_type_id}
         method: GET
-        label: GetValidReasons
+        label: GetTwoReasons
         headers:
           Authorization: Bearer ${access_token}
           Content-Type: application/json
         extract-jsonpath:
           valid_reasons:
             jsonpath: $..reason
+        jsr223:
+          script-text: |
+            import groovy.json.JsonOutput
+            import groovy.json.JsonSlurper
+
+            def validReasons = parser.parseText(vars.get("valid_reasons"))
+
+            def consumed = validReasons.find { it.id == "b5c27da7-bdda-4790-925a-9484c5dfb594" }
+            def receipts = validReasons.find { it.id == "313f2f5f-0c22-4626-8c49-3554ef763de3" }
+
+            vars.put("consumed_reason", JsonOutput.toJson(consumed))
+            vars.put("receipts_reason", JsonOutput.toJson(receipts))
   send-stock-event:
     variables:
-      # Health Center
-      facility_type_id: ac1d268b-ce10-455f-bf87-9c667da8f060
-      # Nandumbo Health Center
+      # Asoka
       facility_id: 176c4276-1fb1-4507-8ad2-cdfba0f47445
       # Essential Meds
       program_id: 10845cb9-d365-4aaa-badd-b4fa39c6a26a
@@ -52,8 +78,9 @@ scenarios:
       user_id: a337ec45-31a0-4f2b-9b2e-a105c4b669bb
     requests:
       - include-scenario: get-user-token
+      - include-scenario: get-facility-type
       - include-scenario: get-approved-products
-      - include-scenario: get-valid-reasons
+      - include-scenario: get-two-reasons
       - url: ${__P(base-uri)}/api/stockEvents
         method: POST
         label: SendStockEvent
@@ -68,24 +95,20 @@ scenarios:
 
             def parser = new JsonSlurper()
 
-            def validReasons = parser.parseText(vars.get("valid_reasons"))
-
-            def reasons = [
-              consumed: validReasons.find { it.id == "b5c27da7-bdda-4790-925a-9484c5dfb594" },
-              receipts: validReasons.find { it.id == "313f2f5f-0c22-4626-8c49-3554ef763de3" },
-            ]
+            def consumed = parser.parseText(vars.get("consumed_reason"))
+            def receipts = parser.parseText(vars.get("receipts_reason"))
+            def products = parser.parseText(vars.get("products")).sort { it.id }
 
             def eventLineItems = new ArrayList()
 
-            def products = parser.parseText(vars.get("products")).sort { it.id }
             products.eachWithIndex { it, index ->
               eventLineItems.add([
                 orderableId: it.id,
                 quantity: (index + 1) * 10,
                 occurredDate: new Date().format('yyyy-MM-dd'),
                 stockAdjustments: [
-                  [quantity: (index + 1) * 5, reason: reasons.receipts],
-                  [quantity: (index + 1) * 5, reason: reasons.consumed]
+                  [quantity: (index + 1) * 5, reason: receipts],
+                  [quantity: (index + 1) * 5, reason: consumed]
                 ]
               ])
             }
