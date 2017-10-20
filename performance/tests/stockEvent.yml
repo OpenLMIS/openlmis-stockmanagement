@@ -61,6 +61,7 @@ scenarios:
             import groovy.json.JsonOutput
             import groovy.json.JsonSlurper
 
+            def parser = new JsonSlurper()
             def validReasons = parser.parseText(vars.get("valid_reasons"))
 
             def consumed = validReasons.find { it.id == "b5c27da7-bdda-4790-925a-9484c5dfb594" }
@@ -70,8 +71,8 @@ scenarios:
             vars.put("receipts_reason", JsonOutput.toJson(receipts))
   send-stock-event:
     variables:
-      # Asoka
-      facility_id: 176c4276-1fb1-4507-8ad2-cdfba0f47445
+      # Pannier
+      facility_id: 3896d37a-cce1-4713-b151-39996e8d11ab
       # Essential Meds
       program_id: 10845cb9-d365-4aaa-badd-b4fa39c6a26a
       # Administrator
