@@ -71,8 +71,8 @@ scenarios:
             vars.put("receipts_reason", JsonOutput.toJson(receipts))
   send-stock-event:
     variables:
-      # Pannier
-      facility_id: 3896d37a-cce1-4713-b151-39996e8d11ab
+      # Balaka District Hospital
+      facility_id: 13037147-1769-4735-90a7-b9b310d128b8
       # Essential Meds
       program_id: 10845cb9-d365-4aaa-badd-b4fa39c6a26a
       # Administrator
