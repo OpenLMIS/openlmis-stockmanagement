@@ -118,10 +118,7 @@ public class FreeTextValidatorTest extends BaseValidatorTest {
     eventDto.getLineItems().get(0).setSourceFreeText("source free text");
     setContext(eventDto);
 
-    Node mockNode = mock(Node.class);
-    when(mockNode.getId()).thenReturn(sourceId);
-    when(mockNode.isRefDataFacility()).thenReturn(true);
-    when(nodeRepository.findByIdIn(eventDto.getNodeIds())).thenReturn(singletonList(mockNode));
+    mockNode(sourceId, eventDto);
 
     exception.expect(ValidationMessageException.class);
     exception.expectMessage(containsString(ERROR_SOURCE_FREE_TEXT_NOT_ALLOWED));
@@ -138,10 +135,7 @@ public class FreeTextValidatorTest extends BaseValidatorTest {
     eventDto.getLineItems().get(0).setDestinationFreeText("destination free text");
     setContext(eventDto);
 
-    Node mockNode = mock(Node.class);
-    when(mockNode.getId()).thenReturn(destinationId);
-    when(mockNode.isRefDataFacility()).thenReturn(true);
-    when(nodeRepository.findByIdIn(eventDto.getNodeIds())).thenReturn(singletonList(mockNode));
+    mockNode(destinationId, eventDto);
 
     exception.expect(ValidationMessageException.class);
     exception.expectMessage(containsString(ERROR_DESTINATION_FREE_TEXT_NOT_ALLOWED));
@@ -164,5 +158,13 @@ public class FreeTextValidatorTest extends BaseValidatorTest {
     exception.expectMessage(containsString(ERROR_REASON_FREE_TEXT_NOT_ALLOWED));
 
     freeTextValidator.validate(eventDto);
+  }
+
+  private void mockNode(UUID destinationId, StockEventDto eventDto) {
+    Node mockNode = mock(Node.class);
+
+    when(mockNode.getId()).thenReturn(destinationId);
+    when(mockNode.isRefDataFacility()).thenReturn(true);
+    when(nodeRepository.findByIdIn(eventDto.getNodeIds())).thenReturn(singletonList(mockNode));
   }
 }
