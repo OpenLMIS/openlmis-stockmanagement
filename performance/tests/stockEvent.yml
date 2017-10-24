@@ -51,19 +51,6 @@ scenarios:
           extract-jsonpath:
             full_products:
               jsonpath: $..orderable
-  get-non-full-supply-approved-products:
-    requests:
-    - if: '${__javaScript(vars.get("non_full_products") == null)}'
-      then:
-        - url: ${__P(base-uri)}/api/facilities/${facility_id}/approvedProducts?programId=${program_id}&fullSupply=false
-          method: GET
-          label: GetNonFullSupplyApprovedProducts
-          headers:
-            Authorization: Bearer ${access_token}
-            Content-Type: application/json
-          extract-jsonpath:
-            non_full_products:
-              jsonpath: $..orderable
   get-two-reasons:
     requests:
     - if: '${__javaScript(vars.get("consumed_reason") == null)} && ${__javaScript(vars.get("receipts_reason") == null)}'
@@ -100,7 +87,6 @@ scenarios:
       - include-scenario: get-user-token
       - include-scenario: get-facility-type
       - include-scenario: get-full-supply-approved-products
-      - include-scenario: get-non-full-supply-approved-products
       - include-scenario: get-two-reasons
       - url: ${__P(base-uri)}/api/stockEvents
         method: POST
@@ -117,10 +103,8 @@ scenarios:
             def parser = new JsonSlurper()
             def consumed = parser.parseText(vars.get("consumed_reason"))
             def receipts = parser.parseText(vars.get("receipts_reason"))
-            def fullProducts = parser.parseText(vars.get("full_products"))
-            def nonFullProducts = parser.parseText(vars.get("non_full_products"))
 
-            def products = fullProducts + nonFullProducts
+            def products = parser.parseText(vars.get("full_products"))
             products = products.sort { it.id }
 
             def eventLineItems = new ArrayList()
