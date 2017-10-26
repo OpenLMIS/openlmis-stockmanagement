@@ -1,0 +1,1 @@
+CREATE INDEX ON stock_card_line_items (stockcardid);
