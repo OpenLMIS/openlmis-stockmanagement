@@ -24,6 +24,9 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,9 +56,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.List;
-import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -150,6 +150,7 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     //then
     StockCard savedCard = stockCardRepository.findByOriginEvent(existingEvent);
     List<StockCardLineItem> lineItems = savedCard.getLineItems();
+    lineItems.sort(Comparator.comparing(StockCardLineItem::getProcessedDate));
     StockCardLineItem latestLineItem = lineItems.get(lineItems.size() - 1);
 
     assertThat(cardAmountAfterSave, is(cardAmountBeforeSave));
