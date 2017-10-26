@@ -1,0 +1,1 @@
+CREATE INDEX ON physical_inventory_line_items (physicalinventoryid);
