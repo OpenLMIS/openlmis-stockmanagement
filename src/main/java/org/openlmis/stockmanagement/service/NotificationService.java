@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
@@ -61,8 +61,11 @@ public class NotificationService {
           RequestHelper.createEntity(authService.obtainAccessToken(),
               request),
           Object.class);
-    } catch (RestClientException ex) {
-      logger.error("Can not send notification ", ex);
+    } catch (HttpStatusCodeException ex) {
+      logger.error(
+          "Unable to send notification. Error code: {}, response message: {}",
+          ex.getStatusCode(), ex.getResponseBodyAsString()
+      );
       return false;
     }
     return true;
