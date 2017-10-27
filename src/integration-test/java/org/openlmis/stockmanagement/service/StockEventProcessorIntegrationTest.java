@@ -17,32 +17,26 @@ package org.openlmis.stockmanagement.service;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
-import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventLineItem;
 
+import java.util.UUID;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.openlmis.stockmanagement.BaseIntegrationTest;
-import org.openlmis.stockmanagement.domain.card.StockCard;
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
 import org.openlmis.stockmanagement.repository.StockCardLineItemRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
-import org.openlmis.stockmanagement.service.notifier.StockoutNotifier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -50,9 +44,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.Arrays;
-import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -62,11 +53,8 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
   private StockEventValidationsService stockEventValidationsService;
 
   @MockBean
-  private StockoutNotifier stockoutNotifier;
-
-  @MockBean
   private PhysicalInventoryService physicalInventoryService;
-
+  
   @Autowired
   private StockEventProcessor stockEventProcessor;
 
@@ -166,52 +154,6 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
     //then
     verify(physicalInventoryService)
         .submitPhysicalInventory(any(PhysicalInventoryDto.class), any(UUID.class));
-  }
-
-  @Test
-  public void shouldCallStockoutNotifierWhenStockOnHandIsZero() throws Exception {
-    //given
-    StockEventDto stockEventDto = createStockEventDto();
-    stockEventDto.setUserId(userId);
-    StockEventLineItem firstLineItem = stockEventDto.getLineItems().get(0);
-    firstLineItem.setQuantity(0);
-    setContext(stockEventDto);
-
-    //when
-    stockEventProcessor.process(stockEventDto);
-
-    //then
-    ArgumentCaptor<StockCard> captor = ArgumentCaptor.forClass(StockCard.class);
-    verify(stockoutNotifier).notifyStockEditors(captor.capture());
-
-    StockCard createdCard = stockCardRepository.findByProgramIdAndFacilityIdAndOrderableIdAndLotId(
-        stockEventDto.getProgramId(), stockEventDto.getFacilityId(),
-        firstLineItem.getOrderableId(), firstLineItem.getLotId());
-    assertEquals(createdCard.getId(), captor.getValue().getId());
-    assertEquals(stockEventDto.getProgramId(), captor.getValue().getProgramId());
-    assertEquals(stockEventDto.getFacilityId(), captor.getValue().getFacilityId());
-    assertEquals(firstLineItem.getOrderableId(), captor.getValue().getOrderableId());
-    assertEquals(firstLineItem.getLotId(), captor.getValue().getLotId());
-  }
-
-  @Test
-  public void shouldCallStockoutNotifierForEveryCard() throws Exception {
-    //given
-    StockEventDto stockEventDto = createStockEventDto();
-    stockEventDto.setUserId(userId);
-    StockEventLineItem firstLineItem = stockEventDto.getLineItems().get(0);
-    firstLineItem.setQuantity(0);
-
-    StockEventLineItem secondLineItem = createStockEventLineItem();
-    secondLineItem.setQuantity(0);
-    stockEventDto.setLineItems(Arrays.asList(firstLineItem, secondLineItem));
-    setContext(stockEventDto);
-
-    //when
-    stockEventProcessor.process(stockEventDto);
-
-    //then
-    verify(stockoutNotifier, times(2)).notifyStockEditors(any(StockCard.class));
   }
 
   private void assertSize(long cardSize, long eventSize, long lineItemSize) {

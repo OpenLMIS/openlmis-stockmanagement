@@ -17,16 +17,11 @@ package org.openlmis.stockmanagement.service;
 
 import static org.openlmis.stockmanagement.dto.PhysicalInventoryDto.fromEventDto;
 
-import org.openlmis.stockmanagement.domain.card.StockCard;
-import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
+import java.util.UUID;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
-import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
-import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
-import org.openlmis.stockmanagement.service.notifier.StockoutNotifier;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,8 +30,6 @@ import org.slf4j.ext.XLoggerFactory;
 import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.UUID;
 
 /**
  * A service that is in charge of saving stock events and generating stock cards and line items from
@@ -58,7 +51,7 @@ public class StockEventProcessor {
   @Autowired
   private StockEventsRepository stockEventsRepository;
   @Autowired
-  private StockoutNotifier stockoutNotifier;
+  private StockEventNotificationProcessor stockEventNotificationProcessor;
 
   /**
    * Validate and persist event and create stock card and line items from it.
@@ -109,31 +102,8 @@ public class StockEventProcessor {
     stockCardService.saveFromEvent(eventDto, savedEventId);
 
     profiler.start("CALL_NOTIFICATIONS");
-    eventDto
-        .getLineItems()
-        .forEach(line -> callNotifications(eventDto, line));
+    stockEventNotificationProcessor.callAllNotifications(eventDto);
 
     return savedEventId;
   }
-
-  private void callNotifications(StockEventDto event, StockEventLineItem eventLine) {
-    OrderableLotIdentity identity = OrderableLotIdentity.identityOf(eventLine);
-    StockCard card = event.getContext().findCard(identity);
-    StockCard copy = card.shallowCopy();
-
-    for (StockCardLineItem line : copy.getLineItems()) {
-      StockCardLineItemReason reason = line.getReason();
-
-      if (null != reason) {
-        line.setReason(event.getContext().findCardReason(reason.getId()));
-      }
-    }
-
-    copy.calculateStockOnHand();
-
-    if (copy.getStockOnHand() == 0) {
-      stockoutNotifier.notifyStockEditors(copy);
-    }
-  }
-
 }

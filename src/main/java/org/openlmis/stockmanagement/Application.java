@@ -26,6 +26,7 @@ import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Profile;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 
@@ -33,6 +34,7 @@ import java.util.Locale;
 
 @SpringBootApplication
 @ImportResource("applicationContext.xml")
+@EnableAsync
 public class Application {
   private Logger logger = LoggerFactory.getLogger(Application.class);
 
