@@ -55,6 +55,8 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
   @MockBean
   private PhysicalInventoryService physicalInventoryService;
   
+  @MockBean StockEventNotificationProcessor stockEventNotificationProcessor;
+  
   @Autowired
   private StockEventProcessor stockEventProcessor;
 
@@ -125,7 +127,8 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  public void should_save_event_and_line_items_when_validation_service_passes() throws Exception {
+  public void shouldSaveEventAndLineItemsAndCallNotificationsWhenValidationServicePasses() 
+      throws Exception {
     StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.setUserId(userId);
     setContext(stockEventDto);
@@ -135,6 +138,7 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
 
     //then
     assertSize(cardSize + 1, eventSize + 1, lineItemSize + 1);
+    verify(stockEventNotificationProcessor).callAllNotifications(stockEventDto);
   }
 
   @Test
