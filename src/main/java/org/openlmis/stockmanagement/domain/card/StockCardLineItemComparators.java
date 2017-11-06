@@ -38,6 +38,9 @@ final class StockCardLineItemComparators {
     return BY_REASON_PRIORITY;
   }
 
+  /**
+   * Comparator that will use occurred date to compare instance of {@link StockCardLineItem}.
+   */
   private static final class ByOccurredDate implements Comparator<StockCardLineItem> {
 
     @Override
@@ -47,6 +50,9 @@ final class StockCardLineItemComparators {
 
   }
 
+  /**
+   * Comparator that will use processed date to compare instance of {@link StockCardLineItem}.
+   */
   private static final class ByProcessedDate implements Comparator<StockCardLineItem> {
 
     @Override
@@ -56,6 +62,10 @@ final class StockCardLineItemComparators {
 
   }
 
+  /**
+   * Comparator that will use reason priority to compare instance of {@link StockCardLineItem}.
+   * The stock card line item with higher reason priority will be first in the list.
+   */
   private static final class ByReasonPriority implements Comparator<StockCardLineItem> {
 
     @Override
