@@ -20,29 +20,55 @@ import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 
+import lombok.NoArgsConstructor;
+
+import java.util.UUID;
+
+@NoArgsConstructor
 public class StockCardLineItemReasonBuilder {
-  /**
-   * Create a stock card line item reason.
-   *
-   * @return created reason
-   */
-  public static StockCardLineItemReason createReason() {
-    return createReason("Donation");
+  private UUID id = UUID.randomUUID();
+  private String name = "Donation";
+  private String description = "Donation from the donor";
+  private ReasonType reasonType = ReasonType.CREDIT;
+  private ReasonCategory reasonCategory = ReasonCategory.TRANSFER;
+  private Boolean isFreeTextAllowed = true;
+
+  public StockCardLineItemReasonBuilder withoutId() {
+    id = null;
+    return this;
+  }
+
+  public StockCardLineItemReasonBuilder withName(String newName) {
+    name = newName;
+    return this;
+  }
+
+  public StockCardLineItemReasonBuilder withDescription(String newDescription) {
+    description = newDescription;
+    return this;
+  }
+
+  public StockCardLineItemReasonBuilder withCreditType() {
+    reasonType = ReasonType.CREDIT;
+    return this;
+  }
+
+  public StockCardLineItemReasonBuilder withDebitType() {
+    reasonType = ReasonType.DEBIT;
+    return this;
   }
 
   /**
-   * Create a stock card line item reason with name.
-   *
-   * @param name reason name
-   * @return created reason
+   * Creates new instance of {@link StockCardLineItemReason} with properties.
+   * @return created stock card line item reason.
    */
-  public static StockCardLineItemReason createReason(String name) {
-    StockCardLineItemReason reason = new StockCardLineItemReason();
-    reason.setName(name);
-    reason.setDescription("Donation from the donor");
-    reason.setReasonType(ReasonType.CREDIT);
-    reason.setReasonCategory(ReasonCategory.TRANSFER);
-    reason.setIsFreeTextAllowed(true);
+  public StockCardLineItemReason build() {
+    StockCardLineItemReason reason = new StockCardLineItemReason(
+        name, description, reasonType, reasonCategory, isFreeTextAllowed
+    );
+    reason.setId(id);
+
     return reason;
   }
+
 }

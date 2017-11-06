@@ -15,12 +15,13 @@
 
 package org.openlmis.stockmanagement.domain.card;
 
-import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.toList;
 import static javax.persistence.CascadeType.ALL;
 import static org.apache.commons.beanutils.BeanUtils.cloneBean;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.hibernate.annotations.LazyCollectionOption.FALSE;
+import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparators.byOccurredDate;
+import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparators.byProcessedDate;
+import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparators.byReasonPriority;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.SERVER_ERROR_SHALLOW_COPY;
 
 import org.hibernate.annotations.LazyCollection;
@@ -138,7 +139,7 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
       return;
     }
 
-    reorderLineItemsByDates();
+    reorderLineItems();
     int previousSoh = 0;
     for (StockCardLineItem lineItem : getLineItems()) {
       lineItem.calculateStockOnHand(previousSoh);
@@ -178,14 +179,11 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
     return clone;
   }
 
-  private void reorderLineItemsByDates() {
-    Comparator<StockCardLineItem> byOccurred =
-        comparing(StockCardLineItem::getOccurredDate);
-    Comparator<StockCardLineItem> byProcessed =
-        comparing(StockCardLineItem::getProcessedDate);
+  private void reorderLineItems() {
+    Comparator<StockCardLineItem> comparator = byOccurredDate()
+        .thenComparing(byProcessedDate())
+        .thenComparing(byReasonPriority());
 
-    setLineItems(lineItems.stream()
-        .sorted(byOccurred.thenComparing(byProcessed))
-        .collect(toList()));
+    lineItems.sort(comparator);
   }
 }
