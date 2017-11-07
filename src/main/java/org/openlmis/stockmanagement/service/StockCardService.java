@@ -26,7 +26,6 @@ import com.google.common.collect.Lists;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
-import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
@@ -90,11 +89,10 @@ public class StockCardService extends StockCardBaseService {
     List<StockCard> cardsToUpdate = Lists.newArrayList();
 
     for (StockEventLineItem eventLineItem : stockEventDto.getLineItems()) {
-      StockCard stockCard = findOrCreateCard(
-          stockEventDto, eventLineItem, savedEventId, cardsToUpdate
-      );
-
+      StockCard stockCard = findOrCreateCard(stockEventDto, eventLineItem, savedEventId);
       createLineItemFrom(stockEventDto, eventLineItem, stockCard, savedEventId);
+
+      cardsToUpdate.add(stockCard);
     }
 
     cardRepository.save(cardsToUpdate);
@@ -129,24 +127,11 @@ public class StockCardService extends StockCardBaseService {
   }
 
   private StockCard findOrCreateCard(StockEventDto eventDto, StockEventLineItem eventLineItem,
-                                     UUID savedEventId, List<StockCard> cardsToUpdate) {
-    OrderableLotIdentity identity = identityOf(eventLineItem);
-    StockCard card = eventDto.getContext().findCard(identity);
-
-    if (null == card) {
-      card = cardsToUpdate
-          .stream()
-          .filter(elem -> identityOf(elem).equals(identity))
-          .findFirst()
-          .orElse(null);
-    }
+                                     UUID savedEventId) {
+    StockCard card = eventDto.getContext().findCard(identityOf(eventLineItem));
 
     if (null == card) {
       card = createStockCardFrom(eventDto, eventLineItem, savedEventId);
-    }
-
-    if (cardsToUpdate.stream().noneMatch(elem -> identityOf(elem).equals(identity))) {
-      cardsToUpdate.add(card);
     }
 
     return card;
