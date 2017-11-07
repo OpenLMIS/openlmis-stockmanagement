@@ -22,12 +22,6 @@ public enum ReasonType {
   DEBIT(1),
   BALANCE_ADJUSTMENT(0);
 
-  /**
-   * Value of this field will be used to set correct order of stock card line items if both
-   * occurred and processed dates have the same date for the following line items. It is
-   * important that types that are used to increase (like {@link #CREDIT}) should have higher
-   * priority than types that are used to decrease (like {@link #DEBIT}).
-   */
   @Getter
   private int priority;
 
