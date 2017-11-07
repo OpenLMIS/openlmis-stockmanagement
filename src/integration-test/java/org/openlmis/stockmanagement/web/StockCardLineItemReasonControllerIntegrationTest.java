@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.testutils.StockCardLineItemReasonBuilder.createReason;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -29,7 +30,6 @@ import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardLineItemReasonService;
-import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonBuilder;
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -52,10 +52,7 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebTes
   @Test
   public void should_return_201_when_reason_successfully_created() throws Exception {
     //given
-    StockCardLineItemReason createdReason = new StockCardLineItemReasonBuilder()
-        .withoutId()
-        .build();
-
+    StockCardLineItemReason createdReason = createReason();
     when(stockCardLineItemReasonService.saveOrUpdate(any(StockCardLineItemReason.class)))
         .thenReturn(createdReason);
 
@@ -83,10 +80,9 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebTes
   @Test
   public void should_return_200_when_reason_successfully_updated() throws Exception {
     //given
-    StockCardLineItemReason updatedReason = new StockCardLineItemReasonBuilder()
-        .withDescription("test reason")
-        .build();
-
+    StockCardLineItemReason updatedReason = createReason();
+    updatedReason.setId(UUID.randomUUID());
+    updatedReason.setDescription("test reason");
     when(stockCardLineItemReasonService.saveOrUpdate(any(StockCardLineItemReason.class)))
         .thenReturn(updatedReason);
 
@@ -115,11 +111,12 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebTes
   @Test
   public void should_return_200_when_user_get_all_reasons() throws Exception {
     //given
-    StockCardLineItemReason reason1 = new StockCardLineItemReasonBuilder().build();
+    StockCardLineItemReason reason1 = createReason();
+    reason1.setId(UUID.randomUUID());
 
-    StockCardLineItemReason reason2 = new StockCardLineItemReasonBuilder()
-        .withName("Another test reason")
-        .build();
+    StockCardLineItemReason reason2 = createReason();
+    reason2.setName("Another test reason");
+    reason2.setId(UUID.randomUUID());
 
     when(stockCardLineItemReasonService.findReasons()).thenReturn(Arrays.asList(reason1, reason2));
 

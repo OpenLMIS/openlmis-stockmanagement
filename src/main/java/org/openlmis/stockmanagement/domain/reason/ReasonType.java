@@ -15,17 +15,8 @@
 
 package org.openlmis.stockmanagement.domain.reason;
 
-import lombok.Getter;
-
 public enum ReasonType {
-  CREDIT(2),
-  DEBIT(1),
-  BALANCE_ADJUSTMENT(0);
-
-  @Getter
-  private int priority;
-
-  ReasonType(int priority) {
-    this.priority = priority;
-  }
+  CREDIT,
+  DEBIT,
+  BALANCE_ADJUSTMENT
 }

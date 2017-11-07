@@ -16,66 +16,71 @@
 package org.openlmis.stockmanagement.domain.card;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.testutils.DatesUtil.getBaseDate;
+import static org.openlmis.stockmanagement.testutils.DatesUtil.getBaseDateTime;
+import static org.openlmis.stockmanagement.testutils.DatesUtil.oneDayLater;
+import static org.openlmis.stockmanagement.testutils.DatesUtil.oneHourEarlier;
+import static org.openlmis.stockmanagement.testutils.DatesUtil.oneHourLater;
 
 import org.junit.Test;
-import org.openlmis.stockmanagement.testutils.StockCardLineItemBuilder;
+import org.mockito.Mockito;
+
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 
 
 public class StockCardTest {
 
   @Test
-  public void shouldReorderLineItemsWhenCalculateSoh() throws Exception {
+  public void should_reorder_line_items_by_occurred_then_by_processed_when_calculate_soh()
+      throws Exception {
     //given
-    StockCardLineItem lineItem1 = new StockCardLineItemBuilder()
-        .withProcessedDateNextDay()
-        .withQuantity(10)
-        .withDebitReason()
-        .build();
+    LocalDate baseDate = getBaseDate();
+    ZonedDateTime baseDateTime = getBaseDateTime();
 
-    StockCardLineItem lineItem2 = new StockCardLineItemBuilder()
-        .withProcessedDateNextDay()
-        .withQuantity(20)
-        .withCreditReason()
-        .build();
+    StockCardLineItem lineItem1 = new StockCardLineItem();
+    lineItem1.setOccurredDate(baseDate);
+    lineItem1.setProcessedDate(oneDayLater(baseDateTime));
+    lineItem1.setQuantity(1);
 
-    StockCardLineItem lineItem3 = new StockCardLineItemBuilder()
-        .withProcessedDateHourEarlier()
-        .withCreditReason()
-        .build();
+    StockCardLineItem lineItem2 = new StockCardLineItem();
+    lineItem2.setOccurredDate(baseDate);
+    lineItem2.setProcessedDate(oneHourLater(baseDateTime));
+    lineItem2.setQuantity(1);
 
-    StockCardLineItem lineItem4 = new StockCardLineItemBuilder()
-        .withOccurredDatePreviousDay()
-        .withProcessedDateHourEarlier()
-        .withCreditReason()
-        .build();
+    StockCardLineItem lineItem3 = new StockCardLineItem();
+    lineItem3.setOccurredDate(baseDate.minusDays(1));
+    lineItem3.setProcessedDate(oneHourEarlier(baseDateTime));
+    lineItem3.setQuantity(1);
 
-    StockCard stockCard = StockCard
-        .builder()
-        .lineItems(asList(lineItem1, lineItem2, lineItem3, lineItem4))
-        .build();
+    StockCard stockCard = new StockCard();
+    stockCard.setLineItems(asList(lineItem1, lineItem2, lineItem3));
 
     //when
     stockCard.calculateStockOnHand();
 
     //then
-    assertThat(stockCard.getLineItems().get(0), is(lineItem4));
-    assertThat(stockCard.getLineItems().get(1), is(lineItem3));
-    assertThat(stockCard.getLineItems().get(2), is(lineItem2));
-    assertThat(stockCard.getLineItems().get(3), is(lineItem1));
+    assertThat(stockCard.getLineItems().get(0), is(lineItem3));
+    assertThat(stockCard.getLineItems().get(1), is(lineItem2));
+    assertThat(stockCard.getLineItems().get(2), is(lineItem1));
   }
 
   @Test
-  public void shouldGetSohByCalculatingSohOfEachLineItem() throws Exception {
+  public void should_get_soh_by_calculating_soh_of_each_line_item_() throws Exception {
     //given
-    StockCardLineItem lineItem1 = new StockCardLineItemBuilder().withStockOnHand(123).buildMock();
-    StockCardLineItem lineItem2 = new StockCardLineItemBuilder()
-        .withOccurredDateNextDay()
-        .withStockOnHand(456)
-        .buildMock();
+    StockCardLineItem lineItem1 = mock(StockCardLineItem.class);
+    StockCardLineItem lineItem2 = mock(StockCardLineItem.class);
+
+    when(lineItem1.getOccurredDate()).thenReturn(getBaseDate());
+    when(lineItem2.getOccurredDate()).thenReturn(getBaseDate().plusDays(1));
+    when(lineItem1.getStockOnHand()).thenReturn(123);
+    when(lineItem2.getStockOnHand()).thenReturn(456);
 
     StockCard card = new StockCard();
     card.setLineItems(asList(lineItem1, lineItem2));
@@ -84,19 +89,22 @@ public class StockCardTest {
     card.calculateStockOnHand();
 
     //then
-    verify(lineItem1).calculateStockOnHand(0);
-    verify(lineItem2).calculateStockOnHand(123);
+    verify(lineItem1, Mockito.times(1)).calculateStockOnHand(0);
+    verify(lineItem2, Mockito.times(1)).calculateStockOnHand(123);
 
     assertThat(card.getStockOnHand(), is(456));
   }
 
   @Test
-  public void shouldShallowCopyLineItems() throws Exception {
+  public void should_shallow_copy_line_items() throws Exception {
     //given
-    StockCardLineItem lineItem = new StockCardLineItemBuilder().withQuantity(5).build();
-
     StockCard stockCard = new StockCard();
-    stockCard.setLineItems(singletonList(lineItem));
+
+    StockCardLineItem lineItem = new StockCardLineItem();
+    lineItem.setQuantity(5);
+
+    stockCard.setLineItems(new ArrayList<>());
+    stockCard.getLineItems().add(lineItem);
 
     //when
     StockCard copy = stockCard.shallowCopy();

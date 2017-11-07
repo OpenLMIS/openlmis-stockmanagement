@@ -21,6 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.testutils.StockCardLineItemReasonBuilder.createReason;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,7 +31,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
-import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonBuilder;
 
 import java.util.List;
 import java.util.UUID;
@@ -64,10 +64,9 @@ public class StockCardLineItemReasonServiceTest {
   public void should_throw_exception_when_creating_reason_name_is_duplicate_with_other_one()
       throws Exception {
     //given
-    StockCardLineItemReason creatingReason = new StockCardLineItemReasonBuilder()
-        .withoutId()
-        .build();
-    StockCardLineItemReason existingReason = new StockCardLineItemReasonBuilder().build();
+    StockCardLineItemReason creatingReason = createReason();
+    StockCardLineItemReason existingReason = createReason();
+    existingReason.setId(UUID.randomUUID());
     when(reasonRepository.findByName(creatingReason.getName())).thenReturn(existingReason);
 
     //when
@@ -78,8 +77,10 @@ public class StockCardLineItemReasonServiceTest {
   public void should_throw_exception_when_updating_reason_name_is_duplicate_with_other_one()
       throws Exception {
     //given
-    StockCardLineItemReason updatingReason = new StockCardLineItemReasonBuilder().build();
-    StockCardLineItemReason existingReason = new StockCardLineItemReasonBuilder().build();
+    StockCardLineItemReason updatingReason = createReason();
+    updatingReason.setId(UUID.randomUUID());
+    StockCardLineItemReason existingReason = createReason();
+    existingReason.setId(UUID.randomUUID());
     when(reasonRepository.findByName(updatingReason.getName())).thenReturn(existingReason);
 
     //when
@@ -90,9 +91,9 @@ public class StockCardLineItemReasonServiceTest {
   public void should_get_all_reasons_when_pass_validation() throws Exception {
     //given
     when(reasonRepository.findAll()).thenReturn(
-        asList(new StockCardLineItemReasonBuilder().withName("test reason 1").build(),
-            new StockCardLineItemReasonBuilder().withName("test reason 2").build(),
-            new StockCardLineItemReasonBuilder().withName("test reason 3").build()));
+        asList(createReason("test reason 1"),
+            createReason("test reason 2"),
+            createReason("test reason 3")));
 
     //when
     List<StockCardLineItemReason> reasons = reasonService.findReasons();
@@ -107,7 +108,7 @@ public class StockCardLineItemReasonServiceTest {
   @Test
   public void should_save_reason_when_pass_null_value_validation() throws Exception {
     //when
-    StockCardLineItemReason reason = new StockCardLineItemReasonBuilder().withoutId().build();
+    StockCardLineItemReason reason = createReason();
     reasonService.saveOrUpdate(reason);
 
     //then
