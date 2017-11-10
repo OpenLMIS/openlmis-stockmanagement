@@ -21,7 +21,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVEN
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_DISCREPANCY_REASON_NOT_VALID;
 
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
-import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
 import org.openlmis.stockmanagement.dto.StockEventDto;
@@ -56,10 +56,10 @@ public class PhysicalInventoryAdjustmentReasonsValidator implements StockEventVa
   }
 
   private void validateAdjustments(StockEventDto event, StockEventLineItem line) {
-    List<StockAdjustment> stockAdjustments = line.getStockAdjustments();
+    List<PhysicalInventoryLineItemAdjustment> stockAdjustments = line.getStockAdjustments();
 
     if (stockAdjustments != null) {
-      for (StockAdjustment adjustment : stockAdjustments) {
+      for (PhysicalInventoryLineItemAdjustment adjustment : stockAdjustments) {
         validateQuantity(adjustment.getQuantity());
         validateReason(event, adjustment.getReason());
       }

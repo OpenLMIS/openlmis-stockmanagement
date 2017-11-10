@@ -26,7 +26,7 @@ import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.ExtraDataConverter;
 import org.openlmis.stockmanagement.domain.common.VvmApplicable;
 import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
-import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
 
 import lombok.Data;
 
@@ -88,7 +88,7 @@ public class StockEventLineItem extends BaseEntity
       fetch = FetchType.EAGER,
       orphanRemoval = true)
   @JoinColumn(name = "stockEventLineItemId")
-  private List<StockAdjustment> stockAdjustments;
+  private List<PhysicalInventoryLineItemAdjustment> stockAdjustments;
 
   public boolean hasReasonId() {
     return this.reasonId != null;
@@ -125,10 +125,12 @@ public class StockEventLineItem extends BaseEntity
   /**
    * Returns clean copy of stock adjustments.
    */
-  public List<StockAdjustment> stockAdjustments() {
+  public List<PhysicalInventoryLineItemAdjustment> stockAdjustments() {
     if (getStockAdjustments() != null) {
-      List<StockAdjustment> newAdjustments = new ArrayList<>(stockAdjustments.size());
-      getStockAdjustments().forEach(stockAdjustment -> newAdjustments.add(StockAdjustment.builder()
+      List<PhysicalInventoryLineItemAdjustment> newAdjustments =
+              new ArrayList<>(stockAdjustments.size());
+      getStockAdjustments().forEach(stockAdjustment ->
+              newAdjustments.add(PhysicalInventoryLineItemAdjustment.builder()
           .reason(stockAdjustment.getReason())
           .quantity(stockAdjustment.getQuantity())
           .build()));

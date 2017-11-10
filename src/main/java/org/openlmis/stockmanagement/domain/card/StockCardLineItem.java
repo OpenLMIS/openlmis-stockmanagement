@@ -31,7 +31,7 @@ import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.ExtraDataConverter;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
-import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
@@ -128,7 +128,7 @@ public class StockCardLineItem extends BaseEntity {
       fetch = FetchType.LAZY,
       orphanRemoval = true)
   @JoinColumn(name = "stockCardLineItemId")
-  private List<StockAdjustment> stockAdjustments;
+  private List<PhysicalInventoryLineItemAdjustment> stockAdjustments;
 
   /**
    * Create line item from eventDto.

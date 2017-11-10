@@ -25,7 +25,7 @@ import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
-import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.slf4j.Logger;
@@ -100,7 +100,7 @@ public class QuantityValidator implements StockEventValidator {
     for (StockEventLineItem item : items) {
       Integer quantity = item.getQuantity();
       if (stockOnHand != null && quantity != null) {
-        List<StockAdjustment> adjustments = item.getStockAdjustments();
+        List<PhysicalInventoryLineItemAdjustment> adjustments = item.getStockAdjustments();
 
         int adjustmentsQuantity = 0;
 
@@ -108,7 +108,7 @@ public class QuantityValidator implements StockEventValidator {
           validateStockAdjustments(adjustments);
           adjustmentsQuantity = adjustments
               .stream()
-              .mapToInt(StockAdjustment::getSignedQuantity)
+              .mapToInt(PhysicalInventoryLineItemAdjustment::getSignedQuantity)
               .sum();
         } else if (!stockOnHand.equals(quantity)) {
           throw new ValidationMessageException(
@@ -136,11 +136,11 @@ public class QuantityValidator implements StockEventValidator {
    *
    * @param adjustments adjustments to validate
    */
-  private void validateStockAdjustments(List<StockAdjustment> adjustments) {
+  private void validateStockAdjustments(List<PhysicalInventoryLineItemAdjustment> adjustments) {
     // Check for valid quantities
     boolean hasNegative = adjustments
         .stream()
-        .mapToInt(StockAdjustment::getQuantity)
+        .mapToInt(PhysicalInventoryLineItemAdjustment::getQuantity)
         .anyMatch(quantity -> quantity < 0);
 
     if (hasNegative) {
@@ -159,10 +159,10 @@ public class QuantityValidator implements StockEventValidator {
     foundCard.calculateStockOnHand();
   }
 
-  private void debugAdjustments(List<StockAdjustment> adjustments) {
+  private void debugAdjustments(List<PhysicalInventoryLineItemAdjustment> adjustments) {
     if (LOGGER.isDebugEnabled() && CollectionUtils.isNotEmpty(adjustments)) {
       LOGGER.debug("Logging adjustments");
-      for (StockAdjustment adj : adjustments) {
+      for (PhysicalInventoryLineItemAdjustment adj : adjustments) {
         LOGGER.debug("Adjustment {}: {}", adj.getReason().getName(), adj.getQuantity());
       }
     }

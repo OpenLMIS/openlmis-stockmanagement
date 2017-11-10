@@ -21,7 +21,7 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
-import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
 import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
@@ -48,7 +48,7 @@ public class PhysicalInventoryLineItemDtoTest {
     assertThat(lineItemDto.getStockAdjustments(), is(lineItem.getStockAdjustments()));
   }
 
-  private StockAdjustment createStockAdjustment() {
+  private PhysicalInventoryLineItemAdjustment createStockAdjustment() {
     StockCardLineItemReason reason = StockCardLineItemReason.builder()
         .name("test reason")
         .reasonType(ReasonType.CREDIT)
@@ -56,7 +56,7 @@ public class PhysicalInventoryLineItemDtoTest {
         .isFreeTextAllowed(false)
         .build();
 
-    return StockAdjustment.builder()
+    return PhysicalInventoryLineItemAdjustment.builder()
         .quantity(10)
         .reason(reason)
         .build();

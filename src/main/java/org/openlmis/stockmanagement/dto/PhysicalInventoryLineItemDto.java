@@ -20,7 +20,7 @@ import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
-import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -41,7 +41,7 @@ public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot,
   private UUID lotId;
   private Integer stockOnHand;
   private Integer quantity;
-  private List<StockAdjustment> stockAdjustments;
+  private List<PhysicalInventoryLineItemAdjustment> stockAdjustments;
   private Map<String, String> extraData;
 
   /**

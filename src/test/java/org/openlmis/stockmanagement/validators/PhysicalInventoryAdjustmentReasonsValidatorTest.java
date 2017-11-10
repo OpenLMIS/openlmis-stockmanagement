@@ -31,7 +31,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
-import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
 import org.openlmis.stockmanagement.dto.StockEventDto;
@@ -163,7 +163,7 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest extends BaseValidat
   }
 
   private StockEventLineItem generateLineItem(Integer quantity, StockCardLineItemReason reason) {
-    StockAdjustment adjustment = StockAdjustment.builder()
+    PhysicalInventoryLineItemAdjustment adjustment = PhysicalInventoryLineItemAdjustment.builder()
         .quantity(quantity)
         .reason(reason)
         .build();

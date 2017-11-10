@@ -30,7 +30,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
-import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
 import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
@@ -222,7 +222,7 @@ public class StockCardLineItemTest {
     assertThat(lineItem.getReason().getReasonCategory(), is(ReasonCategory.PHYSICAL_INVENTORY));
   }
 
-  private static StockAdjustment createStockAdjustment() {
+  private static PhysicalInventoryLineItemAdjustment createStockAdjustment() {
     StockCardLineItemReason reason = StockCardLineItemReason.builder()
         .name("test reason")
         .reasonType(ReasonType.CREDIT)
@@ -230,7 +230,7 @@ public class StockCardLineItemTest {
         .isFreeTextAllowed(false)
         .build();
 
-    return StockAdjustment.builder()
+    return PhysicalInventoryLineItemAdjustment.builder()
         .quantity(10)
         .reason(reason)
         .build();

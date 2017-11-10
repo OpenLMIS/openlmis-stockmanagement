@@ -36,7 +36,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
-import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.dto.StockEventDto;
@@ -237,7 +237,8 @@ public class QuantityValidatorTest extends BaseValidatorTest  {
     for (int value : adjustments) {
       StockCardLineItemReason reason = value < 0
           ? StockCardLineItemReason.physicalDebit() : StockCardLineItemReason.physicalCredit();
-      item.getStockAdjustments().add(new StockAdjustment(reason, Math.abs(value)));
+      item.getStockAdjustments().add(
+              new PhysicalInventoryLineItemAdjustment(reason, Math.abs(value)));
     }
 
     return item;
@@ -248,7 +249,7 @@ public class QuantityValidatorTest extends BaseValidatorTest  {
   }
   
   private StockEventDto createDebitEventDto(LocalDate date, int quantity,
-                                            List<StockAdjustment> adjustments) {
+                                            List<PhysicalInventoryLineItemAdjustment> adjustments) {
 
     StockEventDto stockEventDto = createStockEventDto();
 
@@ -278,7 +279,7 @@ public class QuantityValidatorTest extends BaseValidatorTest  {
   }
 
   private StockCardLineItem createCreditLineItem(
-      LocalDate date, int quantity, List<StockAdjustment> adjustments) {
+      LocalDate date, int quantity, List<PhysicalInventoryLineItemAdjustment> adjustments) {
     return StockCardLineItem
         .builder()
         .quantity(quantity)
@@ -294,16 +295,16 @@ public class QuantityValidatorTest extends BaseValidatorTest  {
     return createCreditLineItem(date, quantity, new ArrayList<>());
   }
 
-  private StockAdjustment createCreditAdjustment(int quantity) {
-    return StockAdjustment
+  private PhysicalInventoryLineItemAdjustment createCreditAdjustment(int quantity) {
+    return PhysicalInventoryLineItemAdjustment
         .builder()
         .reason(StockCardLineItemReason.physicalCredit())
         .quantity(quantity)
         .build();
   }
 
-  private StockAdjustment createDebitAdjustment(int quantity) {
-    return StockAdjustment
+  private PhysicalInventoryLineItemAdjustment createDebitAdjustment(int quantity) {
+    return PhysicalInventoryLineItemAdjustment
         .builder()
         .reason(StockCardLineItemReason.physicalDebit())
         .quantity(quantity)

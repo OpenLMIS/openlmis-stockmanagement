@@ -30,10 +30,10 @@ import javax.persistence.Table;
 @Data
 @Builder
 @Entity
-@Table(name = "physical_inventory_line_item_reasons")
+@Table(name = "physical_inventory_line_item_adjustments")
 @NoArgsConstructor
 @AllArgsConstructor
-public class StockAdjustment extends BaseEntity {
+public class PhysicalInventoryLineItemAdjustment extends BaseEntity {
 
   @ManyToOne
   @JoinColumn(name = "reasonId", nullable = false)

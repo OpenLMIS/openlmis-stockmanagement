@@ -70,7 +70,7 @@ public class PhysicalInventoryLineItem
           fetch = FetchType.LAZY,
           orphanRemoval = true)
   @JoinColumn(name = "physicalInventoryLineItemId")
-  private List<StockAdjustment> stockAdjustments;
+  private List<PhysicalInventoryLineItemAdjustment> stockAdjustments;
 
   private Integer previousStockOnHandWhenSubmitted;
 }
