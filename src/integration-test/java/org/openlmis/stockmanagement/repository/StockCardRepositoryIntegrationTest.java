@@ -17,14 +17,12 @@ package org.openlmis.stockmanagement.repository;
 
 import static java.util.UUID.randomUUID;
 
-import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.card.StockCard;
-import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.testutils.StockCardBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
 
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -54,24 +52,17 @@ public class StockCardRepositoryIntegrationTest
   }
 
   private StockCard generateInstance(UUID facility, UUID program, UUID product, UUID lot) {
-    StockEvent event = new StockEvent();
-    event.setFacilityId(facility);
-    event.setProgramId(program);
-    event.setUserId(randomUUID());
-    event.setProcessedDate(ZonedDateTime.now());
-
-    event = stockEventsRepository.save(event);
-
-    return StockCard
-        .builder()
-        .originEvent(event)
-        .facilityId(facility)
-        .programId(program)
-        .orderableId(product)
-        .lotId(lot)
-        .lineItems(Lists.newArrayList())
-        .stockOnHand(0)
+    StockCard card = new StockCardBuilder()
+        .withoutId()
+        .withFacility(facility)
+        .withProgram(program)
+        .withOrderable(product)
+        .withLot(lot)
         .build();
+
+    card.setOriginEvent(stockEventsRepository.save(card.getOriginEvent()));
+
+    return card;
   }
 
   @Test(expected = PersistenceException.class)
