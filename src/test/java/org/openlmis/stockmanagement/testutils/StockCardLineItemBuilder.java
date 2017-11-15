@@ -27,7 +27,7 @@ import com.google.common.collect.Maps;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
-import org.openlmis.stockmanagement.domain.physicalinventory.StockAdjustment;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 
@@ -55,7 +55,7 @@ public class StockCardLineItemBuilder {
   private ZonedDateTime processedDateTime = getBaseDateTime();
   private UUID userId = UUID.randomUUID();
   private Integer stockOnHand = 0;
-  private List<StockAdjustment> stockAdjustments = Lists.newArrayList();
+  private List<PhysicalInventoryLineItemAdjustment> stockAdjustments = Lists.newArrayList();
 
   public StockCardLineItemBuilder withCreditReason() {
     reason = new StockCardLineItemReasonBuilder().withCreditType().build();
