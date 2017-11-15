@@ -26,7 +26,7 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
-import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
+import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
 import org.openlmis.stockmanagement.util.LazyList;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
@@ -46,7 +46,7 @@ public class ApprovedOrderableValidatorTest extends BaseValidatorTest  {
   public void stock_event_with_orderable_id_not_in_approved_list_should_not_pass_validation()
       throws Exception {
     //given:
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
 
     OrderableDto orderableDto = new OrderableDto();
     orderableDto.setId(UUID.randomUUID());
@@ -67,7 +67,7 @@ public class ApprovedOrderableValidatorTest extends BaseValidatorTest  {
     String orderableIdString = "d8290082-f9fa-4a37-aefb-a3d76ff805a8";
     UUID orderableId = UUID.fromString(orderableIdString);
 
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
     stockEventDto.getLineItems().get(0).setOrderableId(orderableId);
 
     OrderableDto orderableDto = new OrderableDto();
@@ -86,14 +86,14 @@ public class ApprovedOrderableValidatorTest extends BaseValidatorTest  {
   public void should_not_throw_validation_exception_if_event_has_no_program_and_facility_id()
       throws Exception {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
     stockEventDto.setProgramId(null);
 
     //when
     approvedOrderableValidator.validate(stockEventDto);
 
     //given
-    stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
     stockEventDto.setFacilityId(null);
 
     //when

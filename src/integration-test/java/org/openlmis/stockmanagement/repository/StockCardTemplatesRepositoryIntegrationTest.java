@@ -17,7 +17,7 @@ package org.openlmis.stockmanagement.repository;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.openlmis.stockmanagement.testutils.StockCardTemplateBuilder.createTemplate;
+import static org.openlmis.stockmanagement.testutils.StockCardTemplateDataBuilder.createTemplate;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

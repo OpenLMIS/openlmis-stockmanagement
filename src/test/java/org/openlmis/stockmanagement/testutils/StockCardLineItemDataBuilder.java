@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class StockCardLineItemBuilder {
+public class StockCardLineItemDataBuilder {
   private UUID id = UUID.randomUUID();
   private StockCard stockCard = null;
   private StockEvent originEvent = null;
@@ -57,42 +57,42 @@ public class StockCardLineItemBuilder {
   private Integer stockOnHand = 0;
   private List<PhysicalInventoryLineItemAdjustment> stockAdjustments = Lists.newArrayList();
 
-  public StockCardLineItemBuilder withCreditReason() {
-    reason = new StockCardLineItemReasonBuilder().withCreditType().build();
+  public StockCardLineItemDataBuilder withCreditReason() {
+    reason = new StockCardLineItemReasonDataBuilder().withCreditType().build();
     return this;
   }
 
-  public StockCardLineItemBuilder withDebitReason() {
-    reason = new StockCardLineItemReasonBuilder().withDebitType().build();
+  public StockCardLineItemDataBuilder withDebitReason() {
+    reason = new StockCardLineItemReasonDataBuilder().withDebitType().build();
     return this;
   }
 
-  public StockCardLineItemBuilder withQuantity(int newQuantity) {
+  public StockCardLineItemDataBuilder withQuantity(int newQuantity) {
     quantity = newQuantity;
     return this;
   }
 
-  public StockCardLineItemBuilder withStockOnHand(int newStockOnHand) {
+  public StockCardLineItemDataBuilder withStockOnHand(int newStockOnHand) {
     stockOnHand = newStockOnHand;
     return this;
   }
 
-  public StockCardLineItemBuilder withOccurredDatePreviousDay() {
+  public StockCardLineItemDataBuilder withOccurredDatePreviousDay() {
     occurredDate = occurredDate.minusDays(1);
     return this;
   }
 
-  public StockCardLineItemBuilder withOccurredDateNextDay() {
+  public StockCardLineItemDataBuilder withOccurredDateNextDay() {
     occurredDate = occurredDate.plusDays(1);
     return this;
   }
 
-  public StockCardLineItemBuilder withProcessedDateNextDay() {
+  public StockCardLineItemDataBuilder withProcessedDateNextDay() {
     processedDateTime = processedDateTime.plusDays(1);
     return this;
   }
 
-  public StockCardLineItemBuilder withProcessedDateHourEarlier() {
+  public StockCardLineItemDataBuilder withProcessedDateHourEarlier() {
     processedDateTime = processedDateTime.minusHours(1);
     return this;
   }

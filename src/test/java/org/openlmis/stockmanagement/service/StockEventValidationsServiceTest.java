@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
+import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.validators.AdjustmentReasonValidator;
 import org.openlmis.stockmanagement.validators.ApprovedOrderableValidator;
@@ -117,7 +117,7 @@ public class StockEventValidationsServiceTest {
   @Test
   public void should_validate_with_all_implementations_of_validators() throws Exception {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
 
     //when:
     stockEventValidationsService.validate(stockEventDto);
@@ -130,7 +130,7 @@ public class StockEventValidationsServiceTest {
   @Test
   public void should_not_run_next_validator_if_previous_validator_failed() throws Exception {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
     doThrow(new ValidationMessageException(new Message("some error")))
         .when(validator1).validate(stockEventDto);
 

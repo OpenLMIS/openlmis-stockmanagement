@@ -30,7 +30,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
-import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonBuilder;
+import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonDataBuilder;
 
 import java.util.List;
 import java.util.UUID;
@@ -64,10 +64,10 @@ public class StockCardLineItemReasonServiceTest {
   public void should_throw_exception_when_creating_reason_name_is_duplicate_with_other_one()
       throws Exception {
     //given
-    StockCardLineItemReason creatingReason = new StockCardLineItemReasonBuilder()
+    StockCardLineItemReason creatingReason = new StockCardLineItemReasonDataBuilder()
         .withoutId()
         .build();
-    StockCardLineItemReason existingReason = new StockCardLineItemReasonBuilder().build();
+    StockCardLineItemReason existingReason = new StockCardLineItemReasonDataBuilder().build();
     when(reasonRepository.findByName(creatingReason.getName())).thenReturn(existingReason);
 
     //when
@@ -78,8 +78,8 @@ public class StockCardLineItemReasonServiceTest {
   public void should_throw_exception_when_updating_reason_name_is_duplicate_with_other_one()
       throws Exception {
     //given
-    StockCardLineItemReason updatingReason = new StockCardLineItemReasonBuilder().build();
-    StockCardLineItemReason existingReason = new StockCardLineItemReasonBuilder().build();
+    StockCardLineItemReason updatingReason = new StockCardLineItemReasonDataBuilder().build();
+    StockCardLineItemReason existingReason = new StockCardLineItemReasonDataBuilder().build();
     when(reasonRepository.findByName(updatingReason.getName())).thenReturn(existingReason);
 
     //when
@@ -90,9 +90,9 @@ public class StockCardLineItemReasonServiceTest {
   public void should_get_all_reasons_when_pass_validation() throws Exception {
     //given
     when(reasonRepository.findAll()).thenReturn(
-        asList(new StockCardLineItemReasonBuilder().withName("test reason 1").build(),
-            new StockCardLineItemReasonBuilder().withName("test reason 2").build(),
-            new StockCardLineItemReasonBuilder().withName("test reason 3").build()));
+        asList(new StockCardLineItemReasonDataBuilder().withName("test reason 1").build(),
+            new StockCardLineItemReasonDataBuilder().withName("test reason 2").build(),
+            new StockCardLineItemReasonDataBuilder().withName("test reason 3").build()));
 
     //when
     List<StockCardLineItemReason> reasons = reasonService.findReasons();
@@ -107,7 +107,7 @@ public class StockCardLineItemReasonServiceTest {
   @Test
   public void should_save_reason_when_pass_null_value_validation() throws Exception {
     //when
-    StockCardLineItemReason reason = new StockCardLineItemReasonBuilder().withoutId().build();
+    StockCardLineItemReason reason = new StockCardLineItemReasonDataBuilder().withoutId().build();
     reasonService.saveOrUpdate(reason);
 
     //then

@@ -28,7 +28,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ISSUE_RE
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ISSUE_REASON_TYPE_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_RECEIVE_REASON_CATEGORY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_RECEIVE_REASON_TYPE_INVALID;
-import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
+import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 
 import org.junit.Before;
 import org.junit.Rule;

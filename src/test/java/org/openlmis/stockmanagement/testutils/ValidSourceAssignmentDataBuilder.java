@@ -16,25 +16,25 @@
 package org.openlmis.stockmanagement.testutils;
 
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
-import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAssignment;
+import org.openlmis.stockmanagement.domain.sourcedestination.ValidSourceAssignment;
 
 import java.util.UUID;
 
-public class ValidDestinationAssignmentBuilder {
+public class ValidSourceAssignmentDataBuilder {
   /**
-   * Create a valid destination assignment.
+   * Create a valid source assignment.
    *
    * @param programId      program ID
    * @param facilityTypeId facility type ID
-   * @param destinationId  destination ID
-   * @return valid destination assignment
+   * @param sourceId       source ID
+   * @return valid source assignment
    */
-  public static ValidDestinationAssignment createDestination(
-      UUID programId, UUID facilityTypeId, UUID destinationId) {
+  public static ValidSourceAssignment createSource(
+      UUID programId, UUID facilityTypeId, UUID sourceId) {
     Node node = new Node();
-    node.setReferenceId(destinationId);
+    node.setReferenceId(sourceId);
 
-    ValidDestinationAssignment assignment = new ValidDestinationAssignment();
+    ValidSourceAssignment assignment = new ValidSourceAssignment();
     assignment.setProgramId(programId);
     assignment.setFacilityTypeId(facilityTypeId);
     assignment.setNode(node);

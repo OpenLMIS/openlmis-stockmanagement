@@ -24,7 +24,7 @@ import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparat
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparators.byReasonPriority;
 
 import org.junit.Test;
-import org.openlmis.stockmanagement.testutils.StockCardLineItemBuilder;
+import org.openlmis.stockmanagement.testutils.StockCardLineItemDataBuilder;
 
 @SuppressWarnings("PMD.TooManyMethods")
 public class StockCardLineItemComparatorsTest {
@@ -32,8 +32,8 @@ public class StockCardLineItemComparatorsTest {
   @Test
   public void shouldReturnZeroIfOccurredDatesAreSame() throws Exception {
     // when
-    StockCardLineItem left = new StockCardLineItemBuilder().build();
-    StockCardLineItem right = new StockCardLineItemBuilder().build();
+    StockCardLineItem left = new StockCardLineItemDataBuilder().build();
+    StockCardLineItem right = new StockCardLineItemDataBuilder().build();
 
     // then
     assertThat(byOccurredDate().compare(left, right), is(0));
@@ -42,8 +42,8 @@ public class StockCardLineItemComparatorsTest {
   @Test
   public void shouldReturnNegativeIfFirstOccurredDateIsEarlier() throws Exception {
     // when
-    StockCardLineItem left = new StockCardLineItemBuilder().build();
-    StockCardLineItem right = new StockCardLineItemBuilder().withOccurredDateNextDay().build();
+    StockCardLineItem left = new StockCardLineItemDataBuilder().build();
+    StockCardLineItem right = new StockCardLineItemDataBuilder().withOccurredDateNextDay().build();
 
     // then
     assertThat(byOccurredDate().compare(left, right), lessThan(0));
@@ -52,8 +52,10 @@ public class StockCardLineItemComparatorsTest {
   @Test
   public void shouldReturnPositiveIfFirstOccurredDateIsLater() throws Exception {
     // when
-    StockCardLineItem left = new StockCardLineItemBuilder().build();
-    StockCardLineItem right = new StockCardLineItemBuilder().withOccurredDatePreviousDay().build();
+    StockCardLineItem left = new StockCardLineItemDataBuilder().build();
+    StockCardLineItem right = new StockCardLineItemDataBuilder()
+        .withOccurredDatePreviousDay()
+        .build();
 
     // then
     assertThat(byOccurredDate().compare(left, right), greaterThan(0));
@@ -62,8 +64,8 @@ public class StockCardLineItemComparatorsTest {
   @Test
   public void shouldReturnZeroIfProcessedDatesAreSame() throws Exception {
     // when
-    StockCardLineItem left = new StockCardLineItemBuilder().build();
-    StockCardLineItem right = new StockCardLineItemBuilder().build();
+    StockCardLineItem left = new StockCardLineItemDataBuilder().build();
+    StockCardLineItem right = new StockCardLineItemDataBuilder().build();
 
     // then
     assertThat(byProcessedDate().compare(left, right), is(0));
@@ -72,8 +74,8 @@ public class StockCardLineItemComparatorsTest {
   @Test
   public void shouldReturnNegativeIfFirstProcessedDateIsEarlier() throws Exception {
     // when
-    StockCardLineItem left = new StockCardLineItemBuilder().build();
-    StockCardLineItem right = new StockCardLineItemBuilder().withProcessedDateNextDay().build();
+    StockCardLineItem left = new StockCardLineItemDataBuilder().build();
+    StockCardLineItem right = new StockCardLineItemDataBuilder().withProcessedDateNextDay().build();
 
     // then
     assertThat(byProcessedDate().compare(left, right), lessThan(0));
@@ -82,8 +84,10 @@ public class StockCardLineItemComparatorsTest {
   @Test
   public void shouldReturnPositiveIfFirstProcessedDateIsLater() throws Exception {
     // when
-    StockCardLineItem left = new StockCardLineItemBuilder().build();
-    StockCardLineItem right = new StockCardLineItemBuilder().withProcessedDateHourEarlier().build();
+    StockCardLineItem left = new StockCardLineItemDataBuilder().build();
+    StockCardLineItem right = new StockCardLineItemDataBuilder()
+        .withProcessedDateHourEarlier()
+        .build();
 
     // then
     assertThat(byProcessedDate().compare(left, right), greaterThan(0));
@@ -92,8 +96,8 @@ public class StockCardLineItemComparatorsTest {
   @Test
   public void shouldReturnZeroIfReasonPrioritiesAreSame() throws Exception {
     // when
-    StockCardLineItem left = new StockCardLineItemBuilder().withCreditReason().build();
-    StockCardLineItem right = new StockCardLineItemBuilder().withCreditReason().build();
+    StockCardLineItem left = new StockCardLineItemDataBuilder().withCreditReason().build();
+    StockCardLineItem right = new StockCardLineItemDataBuilder().withCreditReason().build();
 
     // then
     assertThat(byReasonPriority().compare(left, right), is(0));
@@ -102,8 +106,8 @@ public class StockCardLineItemComparatorsTest {
   @Test
   public void shouldReturnNegativeIfFirstReasonPriorityIsHigher() throws Exception {
     // when
-    StockCardLineItem left = new StockCardLineItemBuilder().withCreditReason().build();
-    StockCardLineItem right = new StockCardLineItemBuilder().withDebitReason().build();
+    StockCardLineItem left = new StockCardLineItemDataBuilder().withCreditReason().build();
+    StockCardLineItem right = new StockCardLineItemDataBuilder().withDebitReason().build();
 
     // then
     assertThat(byReasonPriority().compare(left, right), lessThan(0));
@@ -112,8 +116,8 @@ public class StockCardLineItemComparatorsTest {
   @Test
   public void shouldReturnPositiveIfFirstReasonPriorityIsLower() throws Exception {
     // when
-    StockCardLineItem left = new StockCardLineItemBuilder().withDebitReason().build();
-    StockCardLineItem right = new StockCardLineItemBuilder().withCreditReason().build();
+    StockCardLineItem left = new StockCardLineItemDataBuilder().withDebitReason().build();
+    StockCardLineItem right = new StockCardLineItemDataBuilder().withCreditReason().build();
 
     // then
     assertThat(byReasonPriority().compare(left, right), greaterThan(0));
@@ -122,8 +126,8 @@ public class StockCardLineItemComparatorsTest {
   @Test
   public void shouldReturnZeroIfReasonPrioritiesAreNull() throws Exception {
     // when
-    StockCardLineItem left = new StockCardLineItemBuilder().build();
-    StockCardLineItem right = new StockCardLineItemBuilder().build();
+    StockCardLineItem left = new StockCardLineItemDataBuilder().build();
+    StockCardLineItem right = new StockCardLineItemDataBuilder().build();
 
     // then
     assertThat(byReasonPriority().compare(left, right), is(0));
@@ -132,8 +136,8 @@ public class StockCardLineItemComparatorsTest {
   @Test
   public void shouldReturnPositiveIfFirstReasonIsNull() throws Exception {
     // when
-    StockCardLineItem left = new StockCardLineItemBuilder().build();
-    StockCardLineItem right = new StockCardLineItemBuilder().withCreditReason().build();
+    StockCardLineItem left = new StockCardLineItemDataBuilder().build();
+    StockCardLineItem right = new StockCardLineItemDataBuilder().withCreditReason().build();
 
     // then
     assertThat(byReasonPriority().compare(left, right), greaterThan(0));
@@ -142,8 +146,8 @@ public class StockCardLineItemComparatorsTest {
   @Test
   public void shouldReturnPositiveIfSecondReasonIsNull() throws Exception {
     // when
-    StockCardLineItem left = new StockCardLineItemBuilder().withCreditReason().build();
-    StockCardLineItem right = new StockCardLineItemBuilder().build();
+    StockCardLineItem left = new StockCardLineItemDataBuilder().withCreditReason().build();
+    StockCardLineItem right = new StockCardLineItemDataBuilder().build();
 
     // then
     assertThat(byReasonPriority().compare(left, right), lessThan(0));

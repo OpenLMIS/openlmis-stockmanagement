@@ -22,7 +22,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
-import org.openlmis.stockmanagement.testutils.StockCardLineItemBuilder;
+import org.openlmis.stockmanagement.testutils.StockCardLineItemDataBuilder;
 
 
 public class StockCardTest {
@@ -30,24 +30,24 @@ public class StockCardTest {
   @Test
   public void shouldReorderLineItemsWhenCalculateSoh() throws Exception {
     //given
-    StockCardLineItem lineItem1 = new StockCardLineItemBuilder()
+    StockCardLineItem lineItem1 = new StockCardLineItemDataBuilder()
         .withProcessedDateNextDay()
         .withQuantity(10)
         .withDebitReason()
         .build();
 
-    StockCardLineItem lineItem2 = new StockCardLineItemBuilder()
+    StockCardLineItem lineItem2 = new StockCardLineItemDataBuilder()
         .withProcessedDateNextDay()
         .withQuantity(20)
         .withCreditReason()
         .build();
 
-    StockCardLineItem lineItem3 = new StockCardLineItemBuilder()
+    StockCardLineItem lineItem3 = new StockCardLineItemDataBuilder()
         .withProcessedDateHourEarlier()
         .withCreditReason()
         .build();
 
-    StockCardLineItem lineItem4 = new StockCardLineItemBuilder()
+    StockCardLineItem lineItem4 = new StockCardLineItemDataBuilder()
         .withOccurredDatePreviousDay()
         .withProcessedDateHourEarlier()
         .withCreditReason()
@@ -71,8 +71,10 @@ public class StockCardTest {
   @Test
   public void shouldGetSohByCalculatingSohOfEachLineItem() throws Exception {
     //given
-    StockCardLineItem lineItem1 = new StockCardLineItemBuilder().withStockOnHand(123).buildMock();
-    StockCardLineItem lineItem2 = new StockCardLineItemBuilder()
+    StockCardLineItem lineItem1 = new StockCardLineItemDataBuilder()
+        .withStockOnHand(123)
+        .buildMock();
+    StockCardLineItem lineItem2 = new StockCardLineItemDataBuilder()
         .withOccurredDateNextDay()
         .withStockOnHand(456)
         .buildMock();
@@ -93,7 +95,7 @@ public class StockCardTest {
   @Test
   public void shouldShallowCopyLineItems() throws Exception {
     //given
-    StockCardLineItem lineItem = new StockCardLineItemBuilder().withQuantity(5).build();
+    StockCardLineItem lineItem = new StockCardLineItemDataBuilder().withQuantity(5).build();
 
     StockCard stockCard = new StockCard();
     stockCard.setLineItems(singletonList(lineItem));

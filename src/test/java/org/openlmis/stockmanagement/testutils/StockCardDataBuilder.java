@@ -23,7 +23,7 @@ import org.openlmis.stockmanagement.domain.event.StockEvent;
 import java.util.List;
 import java.util.UUID;
 
-public class StockCardBuilder {
+public class StockCardDataBuilder {
   private UUID id = UUID.randomUUID();
   private UUID orderableId = UUID.randomUUID();
   private UUID lotId = UUID.randomUUID();
@@ -31,24 +31,24 @@ public class StockCardBuilder {
   private Integer stockOnHand = 0;
   private StockEvent originalEvent;
 
-  public StockCardBuilder(StockEvent originalEvent) {
+  public StockCardDataBuilder(StockEvent originalEvent) {
     this.originalEvent = originalEvent;
   }
 
   /**
    * Sets id field as null. The event field will also have null value in id field.
    */
-  public StockCardBuilder withoutId() {
+  public StockCardDataBuilder withoutId() {
     id = null;
     return this;
   }
 
-  public StockCardBuilder withOrderable(UUID orderable) {
+  public StockCardDataBuilder withOrderable(UUID orderable) {
     orderableId = orderable;
     return this;
   }
 
-  public StockCardBuilder withLot(UUID lot) {
+  public StockCardDataBuilder withLot(UUID lot) {
     lotId = lot;
     return this;
   }

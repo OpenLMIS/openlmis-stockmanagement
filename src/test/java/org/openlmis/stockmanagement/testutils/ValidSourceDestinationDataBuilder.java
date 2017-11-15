@@ -19,7 +19,7 @@ import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidSourceAssignment;
 
-public class ValidSourceDestinationBuilder {
+public class ValidSourceDestinationDataBuilder {
 
   public static ValidSourceAssignment createFacilitySourceAssignment(Node facilityNode) {
     return getValidSourceAssignment(facilityNode);

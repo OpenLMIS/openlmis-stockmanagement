@@ -21,8 +21,8 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_QUANTITY
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_NOT_SUPPORTED;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_ADJUST;
-import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createNoSourceDestinationStockEventDto;
-import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
+import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createNoSourceDestinationStockEventDto;
+import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;

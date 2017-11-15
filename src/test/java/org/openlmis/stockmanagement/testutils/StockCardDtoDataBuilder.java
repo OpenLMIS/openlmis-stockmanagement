@@ -28,7 +28,7 @@ import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import java.time.LocalDate;
 import java.util.Arrays;
 
-public class StockCardDtoBuilder {
+public class StockCardDtoDataBuilder {
   /**
    * Create stock card dto.
    *

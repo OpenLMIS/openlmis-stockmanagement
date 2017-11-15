@@ -23,7 +23,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
-public class StockEventBuilder {
+public class StockEventDataBuilder {
   private UUID id = UUID.randomUUID();
   private UUID facilityId = UUID.randomUUID();
   private UUID programId = UUID.randomUUID();
@@ -33,17 +33,17 @@ public class StockEventBuilder {
   private String documentNumber;
   private List<StockEventLineItem> lineItems = Lists.newArrayList();
 
-  public StockEventBuilder withoutId() {
+  public StockEventDataBuilder withoutId() {
     id = null;
     return this;
   }
 
-  public StockEventBuilder withFacility(UUID facility) {
+  public StockEventDataBuilder withFacility(UUID facility) {
     this.facilityId = facility;
     return this;
   }
 
-  public StockEventBuilder withProgram(UUID program) {
+  public StockEventDataBuilder withProgram(UUID program) {
     this.programId = program;
     return this;
   }

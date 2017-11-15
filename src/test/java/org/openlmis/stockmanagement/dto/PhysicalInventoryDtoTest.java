@@ -22,7 +22,7 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
-import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
+import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
 import java.time.LocalDate;
 import java.util.Collections;
 
@@ -30,7 +30,7 @@ public class PhysicalInventoryDtoTest {
   @Test
   public void should_convert_from_stock_event_dto() throws Exception {
     //given
-    StockEventDto eventDto = StockEventDtoBuilder.createStockEventDto();
+    StockEventDto eventDto = StockEventDtoDataBuilder.createStockEventDto();
 
     //when
     PhysicalInventoryDto piDto = PhysicalInventoryDto.fromEventDto(eventDto);

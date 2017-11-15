@@ -31,7 +31,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
-import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
+import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
 import java.util.List;
@@ -51,7 +51,7 @@ public class StockCardServiceTest {
 
   @Test
   public void shouldNotDuplicateCardsForOrderableLots() throws Exception {
-    StockEventDto event = StockEventDtoBuilder.createStockEventDtoWithTwoLineItems();
+    StockEventDto event = StockEventDtoDataBuilder.createStockEventDtoWithTwoLineItems();
     event.setContext(mock(StockEventProcessContext.class));
 
     UUID savedEventId = UUID.randomUUID();

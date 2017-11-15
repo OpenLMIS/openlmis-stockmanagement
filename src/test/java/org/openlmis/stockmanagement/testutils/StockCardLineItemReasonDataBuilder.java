@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 @NoArgsConstructor
-public class StockCardLineItemReasonBuilder {
+public class StockCardLineItemReasonDataBuilder {
   private UUID id = UUID.randomUUID();
   private String name = "Donation";
   private String description = "Donation from the donor";
@@ -33,27 +33,27 @@ public class StockCardLineItemReasonBuilder {
   private ReasonCategory reasonCategory = ReasonCategory.TRANSFER;
   private Boolean isFreeTextAllowed = true;
 
-  public StockCardLineItemReasonBuilder withoutId() {
+  public StockCardLineItemReasonDataBuilder withoutId() {
     id = null;
     return this;
   }
 
-  public StockCardLineItemReasonBuilder withName(String newName) {
+  public StockCardLineItemReasonDataBuilder withName(String newName) {
     name = newName;
     return this;
   }
 
-  public StockCardLineItemReasonBuilder withDescription(String newDescription) {
+  public StockCardLineItemReasonDataBuilder withDescription(String newDescription) {
     description = newDescription;
     return this;
   }
 
-  public StockCardLineItemReasonBuilder withCreditType() {
+  public StockCardLineItemReasonDataBuilder withCreditType() {
     reasonType = ReasonType.CREDIT;
     return this;
   }
 
-  public StockCardLineItemReasonBuilder withDebitType() {
+  public StockCardLineItemReasonDataBuilder withDebitType() {
     reasonType = ReasonType.DEBIT;
     return this;
   }

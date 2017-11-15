@@ -27,7 +27,7 @@ import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
+import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
 
 import java.util.UUID;
 
@@ -42,7 +42,7 @@ public class ReasonExistenceValidatorTest extends BaseValidatorTest  {
   @Test
   public void should_not_throw_error_if_event_has_no_reason_id() throws Exception {
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
     stockEventDto.getLineItems().get(0).setReasonId(null);
     setContext(stockEventDto);
 
@@ -60,7 +60,7 @@ public class ReasonExistenceValidatorTest extends BaseValidatorTest  {
     expectedEx.expectMessage(ERROR_EVENT_REASON_NOT_EXIST);
 
     //given
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
     UUID reasonId = UUID.randomUUID();
     stockEventDto.getLineItems().get(0).setReasonId(reasonId);
     setContext(stockEventDto);

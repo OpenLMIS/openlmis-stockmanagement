@@ -21,8 +21,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventDto;
-import static org.openlmis.stockmanagement.testutils.StockEventDtoBuilder.createStockEventLineItem;
+import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
+import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventLineItem;
 
 import java.util.Arrays;
 import java.util.UUID;

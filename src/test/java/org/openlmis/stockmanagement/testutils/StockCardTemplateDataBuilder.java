@@ -26,7 +26,7 @@ import org.openlmis.stockmanagement.dto.StockCardTemplateDto;
 
 import java.util.UUID;
 
-public class StockCardTemplateBuilder {
+public class StockCardTemplateDataBuilder {
 
   /**
    * Create test object for stock card template.

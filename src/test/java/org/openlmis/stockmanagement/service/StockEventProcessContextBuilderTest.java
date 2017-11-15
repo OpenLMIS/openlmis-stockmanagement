@@ -34,7 +34,7 @@ import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferen
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
-import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
+import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import org.powermock.api.mockito.PowerMockito;
@@ -91,12 +91,12 @@ public class StockEventProcessContextBuilderTest {
   public void shouldBuildContextWithRefDataNeededByProcessor() throws Exception {
     when(authenticationHelper.getCurrentUser()).thenReturn(userDto);
 
-    testBuildContext(StockEventDtoBuilder.createStockEventDto());
+    testBuildContext(StockEventDtoDataBuilder.createStockEventDto());
   }
 
   @Test
   public void shouldBuildContextWithUserIdFromDtoWhenClientAuthentication() throws Exception {
-    StockEventDto stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
     stockEventDto.setUserId(userDto.getId());
 
     when(authentication.isClientOnly()).thenReturn(true);
@@ -111,7 +111,7 @@ public class StockEventProcessContextBuilderTest {
     LotDto lot = new LotDto();
     lot.setId(lotId);
 
-    StockEventDtoBuilder.createStockEventDto();
+    StockEventDtoDataBuilder.createStockEventDto();
     stockEventDto.getLineItems().get(0).setLotId(lotId);
 
     ProgramDto programDto = new ProgramDto();

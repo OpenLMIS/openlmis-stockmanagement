@@ -36,7 +36,7 @@ import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
-import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
+import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -57,7 +57,7 @@ public class MandatoryFieldsValidatorTest extends BaseValidatorTest  {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
 
     when(facilityService.findOne(stockEventDto.getFacilityId())).thenReturn(new FacilityDto());
     when(programService.findOne(stockEventDto.getProgramId())).thenReturn(new ProgramDto());

@@ -32,7 +32,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
-import org.openlmis.stockmanagement.testutils.StockEventDtoBuilder;
+import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
 
 import java.util.UUID;
 
@@ -50,7 +50,7 @@ public class LotValidatorTest  extends BaseValidatorTest {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    stockEventDto = StockEventDtoBuilder.createStockEventDto();
+    stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
     setContext(stockEventDto);
   }
 

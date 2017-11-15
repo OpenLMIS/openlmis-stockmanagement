@@ -20,8 +20,8 @@ import static java.util.UUID.randomUUID;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
-import org.openlmis.stockmanagement.testutils.StockCardBuilder;
-import org.openlmis.stockmanagement.testutils.StockEventBuilder;
+import org.openlmis.stockmanagement.testutils.StockCardDataBuilder;
+import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
 
@@ -54,7 +54,7 @@ public class StockCardRepositoryIntegrationTest
   }
 
   private StockCard generateInstance(UUID facility, UUID program, UUID product, UUID lot) {
-    StockEvent event = new StockEventBuilder()
+    StockEvent event = new StockEventDataBuilder()
         .withoutId()
         .withFacility(facility)
         .withProgram(program)
@@ -62,7 +62,7 @@ public class StockCardRepositoryIntegrationTest
 
     event = stockEventsRepository.save(event);
 
-    return new StockCardBuilder(event)
+    return new StockCardDataBuilder(event)
         .withoutId()
         .withOrderable(product)
         .withLot(lot)

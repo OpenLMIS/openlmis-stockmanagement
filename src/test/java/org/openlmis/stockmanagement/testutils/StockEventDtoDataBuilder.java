@@ -25,7 +25,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.UUID;
 
-public class StockEventDtoBuilder {
+public class StockEventDtoDataBuilder {
 
   /**
    * Create stock event dto object for testing with two line items.

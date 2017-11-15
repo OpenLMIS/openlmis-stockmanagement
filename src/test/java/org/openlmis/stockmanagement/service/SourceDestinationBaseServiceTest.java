@@ -25,12 +25,12 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.testutils.ValidDestinationAssignmentBuilder.createDestination;
-import static org.openlmis.stockmanagement.testutils.ValidSourceAssignmentBuilder.createSource;
-import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationBuilder.createFacilityDestination;
-import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationBuilder.createFacilitySourceAssignment;
-import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationBuilder.createOrganizationDestination;
-import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationBuilder.createOrganizationSourceAssignment;
+import static org.openlmis.stockmanagement.testutils.ValidDestinationAssignmentDataBuilder.createDestination;
+import static org.openlmis.stockmanagement.testutils.ValidSourceAssignmentDataBuilder.createSource;
+import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationDataBuilder.createFacilityDestination;
+import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationDataBuilder.createFacilitySourceAssignment;
+import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationDataBuilder.createOrganizationDestination;
+import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationDataBuilder.createOrganizationSourceAssignment;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

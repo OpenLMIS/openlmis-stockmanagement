@@ -29,7 +29,7 @@ import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardLineItemReasonService;
-import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonBuilder;
+import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -52,7 +52,7 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebTes
   @Test
   public void should_return_201_when_reason_successfully_created() throws Exception {
     //given
-    StockCardLineItemReason createdReason = new StockCardLineItemReasonBuilder()
+    StockCardLineItemReason createdReason = new StockCardLineItemReasonDataBuilder()
         .withoutId()
         .build();
 
@@ -83,7 +83,7 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebTes
   @Test
   public void should_return_200_when_reason_successfully_updated() throws Exception {
     //given
-    StockCardLineItemReason updatedReason = new StockCardLineItemReasonBuilder()
+    StockCardLineItemReason updatedReason = new StockCardLineItemReasonDataBuilder()
         .withDescription("test reason")
         .build();
 
@@ -115,9 +115,9 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebTes
   @Test
   public void should_return_200_when_user_get_all_reasons() throws Exception {
     //given
-    StockCardLineItemReason reason1 = new StockCardLineItemReasonBuilder().build();
+    StockCardLineItemReason reason1 = new StockCardLineItemReasonDataBuilder().build();
 
-    StockCardLineItemReason reason2 = new StockCardLineItemReasonBuilder()
+    StockCardLineItemReason reason2 = new StockCardLineItemReasonDataBuilder()
         .withName("Another test reason")
         .build();
 

@@ -21,7 +21,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_TYPE_
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_NOT_FOUND;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARD_TEMPLATES_MANAGE;
-import static org.openlmis.stockmanagement.testutils.StockCardTemplateBuilder.createTemplateDto;
+import static org.openlmis.stockmanagement.testutils.StockCardTemplateDataBuilder.createTemplateDto;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;

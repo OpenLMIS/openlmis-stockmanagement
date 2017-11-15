@@ -20,7 +20,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
-import static org.openlmis.stockmanagement.testutils.StockCardTemplateBuilder.createTemplateDto;
+import static org.openlmis.stockmanagement.testutils.StockCardTemplateDataBuilder.createTemplateDto;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
