@@ -19,7 +19,9 @@ import static java.util.UUID.randomUUID;
 
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.testutils.StockCardBuilder;
+import org.openlmis.stockmanagement.testutils.StockEventBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
 
@@ -52,17 +54,19 @@ public class StockCardRepositoryIntegrationTest
   }
 
   private StockCard generateInstance(UUID facility, UUID program, UUID product, UUID lot) {
-    StockCard card = new StockCardBuilder()
+    StockEvent event = new StockEventBuilder()
         .withoutId()
         .withFacility(facility)
         .withProgram(program)
+        .build();
+
+    event = stockEventsRepository.save(event);
+
+    return new StockCardBuilder(event)
+        .withoutId()
         .withOrderable(product)
         .withLot(lot)
         .build();
-
-    card.setOriginEvent(stockEventsRepository.save(card.getOriginEvent()));
-
-    return card;
   }
 
   @Test(expected = PersistenceException.class)

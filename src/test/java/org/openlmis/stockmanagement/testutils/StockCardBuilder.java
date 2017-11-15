@@ -25,28 +25,21 @@ import java.util.UUID;
 
 public class StockCardBuilder {
   private UUID id = UUID.randomUUID();
-  private StockEventBuilder eventBuilder = new StockEventBuilder();
   private UUID orderableId = UUID.randomUUID();
   private UUID lotId = UUID.randomUUID();
   private List<StockCardLineItem> lineItems = Lists.newArrayList();
   private Integer stockOnHand = 0;
+  private StockEvent originalEvent;
+
+  public StockCardBuilder(StockEvent originalEvent) {
+    this.originalEvent = originalEvent;
+  }
 
   /**
    * Sets id field as null. The event field will also have null value in id field.
    */
   public StockCardBuilder withoutId() {
-    eventBuilder.withoutId();
     id = null;
-    return this;
-  }
-
-  public StockCardBuilder withFacility(UUID facility) {
-    eventBuilder.withFacility(facility);
-    return this;
-  }
-
-  public StockCardBuilder withProgram(UUID program) {
-    eventBuilder.withProgram(program);
     return this;
   }
 
@@ -64,10 +57,9 @@ public class StockCardBuilder {
    * Creates stock card based on parameters from the builder.
    */
   public StockCard build() {
-    StockEvent event = eventBuilder.build();
     StockCard card = new StockCard(
-        event, event.getFacilityId(), event.getProgramId(), orderableId, lotId, lineItems,
-        stockOnHand
+        originalEvent, originalEvent.getFacilityId(), originalEvent.getProgramId(), orderableId,
+        lotId, lineItems, stockOnHand
     );
     card.setId(id);
 
