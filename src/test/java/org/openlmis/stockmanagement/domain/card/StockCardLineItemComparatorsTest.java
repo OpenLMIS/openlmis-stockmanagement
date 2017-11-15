@@ -15,7 +15,9 @@
 
 package org.openlmis.stockmanagement.domain.card;
 
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertThat;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparators.byOccurredDate;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparators.byProcessedDate;
@@ -24,97 +26,126 @@ import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparat
 import org.junit.Test;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemBuilder;
 
+@SuppressWarnings("PMD.TooManyMethods")
 public class StockCardLineItemComparatorsTest {
 
   @Test
-  public void shouldSortByOccurredDate() throws Exception {
+  public void shouldReturnZeroIfOccurredDatesAreSame() throws Exception {
     // when
     StockCardLineItem left = new StockCardLineItemBuilder().build();
     StockCardLineItem right = new StockCardLineItemBuilder().build();
 
     // then
     assertThat(byOccurredDate().compare(left, right), is(0));
-
-    // when
-    right = new StockCardLineItemBuilder().withOccurredDateNextDay().build();
-
-    // then
-    assertThat(byOccurredDate().compare(left, right), is(-1));
-
-    // when
-    right = new StockCardLineItemBuilder().withOccurredDatePreviousDay().build();
-
-    // then
-    assertThat(byOccurredDate().compare(left, right), is(1));
   }
 
   @Test
-  public void shouldSortByProcessedDate() throws Exception {
+  public void shouldReturnNegativeIfFirstOccurredDateIsEarlier() throws Exception {
+    // when
+    StockCardLineItem left = new StockCardLineItemBuilder().build();
+    StockCardLineItem right = new StockCardLineItemBuilder().withOccurredDateNextDay().build();
+
+    // then
+    assertThat(byOccurredDate().compare(left, right), lessThan(0));
+  }
+
+  @Test
+  public void shouldReturnPositiveIfFirstOccurredDateIsLater() throws Exception {
+    // when
+    StockCardLineItem left = new StockCardLineItemBuilder().build();
+    StockCardLineItem right = new StockCardLineItemBuilder().withOccurredDatePreviousDay().build();
+
+    // then
+    assertThat(byOccurredDate().compare(left, right), greaterThan(0));
+  }
+
+  @Test
+  public void shouldReturnZeroIfProcessedDatesAreSame() throws Exception {
     // when
     StockCardLineItem left = new StockCardLineItemBuilder().build();
     StockCardLineItem right = new StockCardLineItemBuilder().build();
 
     // then
     assertThat(byProcessedDate().compare(left, right), is(0));
-
-    // when
-    right = new StockCardLineItemBuilder().withProcessedDateNextDay().build();
-
-    // then
-    assertThat(byProcessedDate().compare(left, right), is(-1));
-
-    // when
-    right = new StockCardLineItemBuilder().withProcessedDateHourEarlier().build();
-
-    // then
-    assertThat(byProcessedDate().compare(left, right), is(1));
   }
 
   @Test
-  public void shouldSortByReasonPriority() throws Exception {
+  public void shouldReturnNegativeIfFirstProcessedDateIsEarlier() throws Exception {
+    // when
+    StockCardLineItem left = new StockCardLineItemBuilder().build();
+    StockCardLineItem right = new StockCardLineItemBuilder().withProcessedDateNextDay().build();
+
+    // then
+    assertThat(byProcessedDate().compare(left, right), lessThan(0));
+  }
+
+  @Test
+  public void shouldReturnPositiveIfFirstProcessedDateIsLater() throws Exception {
+    // when
+    StockCardLineItem left = new StockCardLineItemBuilder().build();
+    StockCardLineItem right = new StockCardLineItemBuilder().withProcessedDateHourEarlier().build();
+
+    // then
+    assertThat(byProcessedDate().compare(left, right), greaterThan(0));
+  }
+
+  @Test
+  public void shouldReturnZeroIfReasonPrioritiesAreSame() throws Exception {
     // when
     StockCardLineItem left = new StockCardLineItemBuilder().withCreditReason().build();
     StockCardLineItem right = new StockCardLineItemBuilder().withCreditReason().build();
 
     // then
     assertThat(byReasonPriority().compare(left, right), is(0));
-
-    // when
-    left = new StockCardLineItemBuilder().withCreditReason().build();
-    right = new StockCardLineItemBuilder().withDebitReason().build();
-
-    // then
-    assertThat(byReasonPriority().compare(left, right), is(-1));
-
-    // when
-    left = new StockCardLineItemBuilder().withDebitReason().build();
-    right = new StockCardLineItemBuilder().withCreditReason().build();
-
-    // then
-    assertThat(byReasonPriority().compare(left, right), is(1));
   }
 
   @Test
-  public void shouldSortByReasonPriorityIfReasonIsNull() throws Exception {
+  public void shouldReturnNegativeIfFirstReasonPriorityIsHigher() throws Exception {
+    // when
+    StockCardLineItem left = new StockCardLineItemBuilder().withCreditReason().build();
+    StockCardLineItem right = new StockCardLineItemBuilder().withDebitReason().build();
+
+    // then
+    assertThat(byReasonPriority().compare(left, right), lessThan(0));
+  }
+
+  @Test
+  public void shouldReturnPositiveIfFirstReasonPriorityIsLower() throws Exception {
+    // when
+    StockCardLineItem left = new StockCardLineItemBuilder().withDebitReason().build();
+    StockCardLineItem right = new StockCardLineItemBuilder().withCreditReason().build();
+
+    // then
+    assertThat(byReasonPriority().compare(left, right), greaterThan(0));
+  }
+
+  @Test
+  public void shouldReturnZeroIfReasonPrioritiesAreNull() throws Exception {
     // when
     StockCardLineItem left = new StockCardLineItemBuilder().build();
     StockCardLineItem right = new StockCardLineItemBuilder().build();
 
     // then
     assertThat(byReasonPriority().compare(left, right), is(0));
+  }
 
+  @Test
+  public void shouldReturnPositiveIfFirstReasonIsNull() throws Exception {
     // when
-    left = new StockCardLineItemBuilder().build();
-    right = new StockCardLineItemBuilder().withCreditReason().build();
+    StockCardLineItem left = new StockCardLineItemBuilder().build();
+    StockCardLineItem right = new StockCardLineItemBuilder().withCreditReason().build();
 
     // then
-    assertThat(byReasonPriority().compare(left, right), is(1));
+    assertThat(byReasonPriority().compare(left, right), greaterThan(0));
+  }
 
+  @Test
+  public void shouldReturnPositiveIfSecondReasonIsNull() throws Exception {
     // when
-    left = new StockCardLineItemBuilder().withCreditReason().build();
-    right = new StockCardLineItemBuilder().build();
+    StockCardLineItem left = new StockCardLineItemBuilder().withCreditReason().build();
+    StockCardLineItem right = new StockCardLineItemBuilder().build();
 
     // then
-    assertThat(byReasonPriority().compare(left, right), is(-1));
+    assertThat(byReasonPriority().compare(left, right), lessThan(0));
   }
 }
