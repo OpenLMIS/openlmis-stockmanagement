@@ -185,6 +185,8 @@ sonarqube {
     }
 }
 
+project.tasks["sonarqube"].dependsOn integrationTest
+
 pmd {
     toolVersion = '5.4.0'
     consoleOutput = true

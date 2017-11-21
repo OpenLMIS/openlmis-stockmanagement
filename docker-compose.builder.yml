@@ -16,6 +16,9 @@ services:
     env_file: .env
   sonar:
     image: openlmis/dev:2
+    links:
+      - db
+      - log
     volumes:
       - '.:/app'
     entrypoint:
