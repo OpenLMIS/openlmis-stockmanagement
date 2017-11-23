@@ -328,7 +328,7 @@
 							<textField isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="80" height="30" uuid="3442e65e-4567-4aa5-9baf-75de733717ed"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{lineItem}.getOccurredDate().toLocalDate().toString()]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{lineItem}.getOccurredDate().toString()]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>

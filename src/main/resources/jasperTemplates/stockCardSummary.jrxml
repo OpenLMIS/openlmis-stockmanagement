@@ -85,7 +85,7 @@
 		<field name="program" class="org.openlmis.stockmanagement.dto.referencedata.ProgramDto"/>
 		<field name="orderable" class="org.openlmis.stockmanagement.dto.referencedata.OrderableDto"/>
 		<field name="stockOnHand" class="java.lang.Integer"/>
-		<field name="lastUpdate" class="java.time.ZonedDateTime"/>
+		<field name="lastUpdate" class="java.time.LocalDate"/>
 		<field name="lot" class="org.openlmis.stockmanagement.dto.referencedata.LotDto"/>
 	</subDataset>
 	<parameter name="program" class="org.openlmis.stockmanagement.dto.referencedata.ProgramDto" isForPrompting="false"/>
@@ -383,7 +383,7 @@
 							<textField isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="102" height="30" uuid="e8a313ec-9db5-4892-9671-fc221c5e6abd"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{lastUpdate}.toLocalDate().toString()]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{lastUpdate}.toString()]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
