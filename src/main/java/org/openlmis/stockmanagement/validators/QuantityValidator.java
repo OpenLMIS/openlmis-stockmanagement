@@ -16,17 +16,18 @@
 package org.openlmis.stockmanagement.validators;
 
 import static java.util.stream.Collectors.groupingBy;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
-import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
+import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
+import org.openlmis.stockmanagement.dto.StockEventAdjustmentDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,29 +57,29 @@ public class QuantityValidator implements StockEventValidator {
       return;
     }
 
-    Map<OrderableLotIdentity, List<StockEventLineItem>> sameOrderableGroups = stockEventDto
+    Map<OrderableLotIdentity, List<StockEventLineItemDto>> sameOrderableGroups = stockEventDto
         .getLineItems()
         .stream()
         .collect(groupingBy(OrderableLotIdentity::identityOf));
 
-    for (List<StockEventLineItem> group : sameOrderableGroups.values()) {
+    for (List<StockEventLineItemDto> group : sameOrderableGroups.values()) {
       // increase may cause int overflow, decrease may cause below zero
       validateEventItems(stockEventDto, group);
     }
   }
 
-  private void validateEventItems(StockEventDto event, List<StockEventLineItem> items) {
+  private void validateEventItems(StockEventDto event, List<StockEventLineItemDto> items) {
     StockCard foundCard = tryFindCard(event, items.get(0));
 
     if (event.isPhysicalInventory()) {
-      validateQuantities(items, foundCard.getStockOnHand());
+      validateQuantities(event, items, foundCard.getStockOnHand());
     }
 
     // create line item from event line item and add it to stock card for recalculation
     calculateStockOnHand(event, items, foundCard);
   }
 
-  private StockCard tryFindCard(StockEventDto event, StockEventLineItem lineItem) {
+  private StockCard tryFindCard(StockEventDto event, StockEventLineItemDto lineItem) {
     StockCard foundCard = event.getContext().findCard(OrderableLotIdentity.identityOf(lineItem));
 
     if (foundCard == null) {
@@ -96,20 +97,17 @@ public class QuantityValidator implements StockEventValidator {
     }
   }
 
-  private void validateQuantities(List<StockEventLineItem> items, Integer stockOnHand) {
-    for (StockEventLineItem item : items) {
+  private void validateQuantities(StockEventDto event, List<StockEventLineItemDto> items,
+                                  Integer stockOnHand) {
+    for (StockEventLineItemDto item : items) {
       Integer quantity = item.getQuantity();
       if (stockOnHand != null && quantity != null) {
-        List<PhysicalInventoryLineItemAdjustment> adjustments = item.getStockAdjustments();
-
+        List<StockEventAdjustmentDto> adjustments = item.getStockAdjustments();
         int adjustmentsQuantity = 0;
 
-        if (adjustments != null && !adjustments.isEmpty()) {
+        if (isNotEmpty(adjustments)) {
           validateStockAdjustments(adjustments);
-          adjustmentsQuantity = adjustments
-              .stream()
-              .mapToInt(PhysicalInventoryLineItemAdjustment::getSignedQuantity)
-              .sum();
+          adjustmentsQuantity = calculateAdjustmentsQuantity(event, adjustments);
         } else if (!stockOnHand.equals(quantity)) {
           throw new ValidationMessageException(
               ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED);
@@ -122,7 +120,7 @@ public class QuantityValidator implements StockEventValidator {
               stockOnHand, adjustmentsQuantity, stockOnHand + adjustmentsQuantity, quantity,
               item.getOrderableId(), item.getLotId());
 
-          debugAdjustments(adjustments);
+          debugAdjustments(event, adjustments);
 
           throw new ValidationMessageException(
               ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER);
@@ -131,16 +129,38 @@ public class QuantityValidator implements StockEventValidator {
     }
   }
 
+  private int calculateAdjustmentsQuantity(StockEventDto event,
+                                           List<StockEventAdjustmentDto> adjustments) {
+    int adjustmentsQuantity = 0;
+
+    for (StockEventAdjustmentDto adjustment : adjustments) {
+      StockCardLineItemReason reason = event
+          .getContext()
+          .findEventReason(adjustment.getReasonId());
+
+      // we check if reason exists in ReasonExistenceValidator
+      if (null == reason) {
+        continue;
+      }
+
+      int sign = reason.isDebitReasonType() ? -1 : 1;
+
+      adjustmentsQuantity += sign * adjustment.getQuantity();
+    }
+
+    return adjustmentsQuantity;
+  }
+
   /**
    * Make sure each stock adjustment a non-negative quantity assigned.
    *
    * @param adjustments adjustments to validate
    */
-  private void validateStockAdjustments(List<PhysicalInventoryLineItemAdjustment> adjustments) {
+  private void validateStockAdjustments(List<StockEventAdjustmentDto> adjustments) {
     // Check for valid quantities
     boolean hasNegative = adjustments
         .stream()
-        .mapToInt(PhysicalInventoryLineItemAdjustment::getQuantity)
+        .mapToInt(StockEventAdjustmentDto::getQuantity)
         .anyMatch(quantity -> quantity < 0);
 
     if (hasNegative) {
@@ -148,9 +168,9 @@ public class QuantityValidator implements StockEventValidator {
     }
   }
 
-  private void calculateStockOnHand(StockEventDto eventDto, List<StockEventLineItem> group,
+  private void calculateStockOnHand(StockEventDto eventDto, List<StockEventLineItemDto> group,
                                     StockCard foundCard) {
-    for (StockEventLineItem lineItem : group) {
+    for (StockEventLineItemDto lineItem : group) {
       StockCardLineItem stockCardLineItem = StockCardLineItem
           .createLineItemFrom(eventDto, lineItem, foundCard, null);
       stockCardLineItem.setReason(eventDto.getContext().findEventReason(lineItem.getReasonId()));
@@ -159,11 +179,18 @@ public class QuantityValidator implements StockEventValidator {
     foundCard.calculateStockOnHand();
   }
 
-  private void debugAdjustments(List<PhysicalInventoryLineItemAdjustment> adjustments) {
-    if (LOGGER.isDebugEnabled() && CollectionUtils.isNotEmpty(adjustments)) {
+  private void debugAdjustments(StockEventDto event, List<StockEventAdjustmentDto> adjustments) {
+    if (LOGGER.isDebugEnabled() && isNotEmpty(adjustments)) {
       LOGGER.debug("Logging adjustments");
-      for (PhysicalInventoryLineItemAdjustment adj : adjustments) {
-        LOGGER.debug("Adjustment {}: {}", adj.getReason().getName(), adj.getQuantity());
+      for (StockEventAdjustmentDto adj : adjustments) {
+        StockCardLineItemReason reason = event.getContext().findEventReason(adj.getReasonId());
+
+        // we check if reason exists in ReasonExistenceValidator
+        if (null == reason) {
+          continue;
+        }
+
+        LOGGER.debug("Adjustment {}: {}", reason.getName(), adj.getQuantity());
       }
     }
   }

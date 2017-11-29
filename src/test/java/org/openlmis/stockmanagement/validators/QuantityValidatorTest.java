@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.junit.rules.ExpectedException.none;
@@ -27,6 +28,8 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVEN
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 
+import org.assertj.core.util.Lists;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -35,31 +38,49 @@ import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
+import org.openlmis.stockmanagement.dto.StockEventAdjustmentDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.util.StockEventProcessContext;
+import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonDataBuilder;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @RunWith(MockitoJUnitRunner.class)
 @SuppressWarnings("PMD.TooManyMethods")
-public class QuantityValidatorTest extends BaseValidatorTest  {
+public class QuantityValidatorTest extends BaseValidatorTest {
 
   @Rule
   public ExpectedException expectedException = none();
 
   @InjectMocks
   private QuantityValidator quantityValidator;
+
+  private StockCardLineItemReason physicalCredit;
+  private StockCardLineItemReason physicalDebit;
+
+  @Override
+  @Before
+  public void setUp() throws Exception {
+    super.setUp();
+
+    physicalCredit = new StockCardLineItemReasonDataBuilder()
+        .withPhysicalInventoryCategory()
+        .build();
+
+    physicalDebit = new StockCardLineItemReasonDataBuilder()
+        .withPhysicalInventoryCategory()
+        .withDebitType()
+        .build();
+  }
 
   @Test
   public void shouldRejectWhenQuantityMakesStockOnHandBelowZero() throws Exception {
@@ -71,7 +92,7 @@ public class QuantityValidatorTest extends BaseValidatorTest  {
     LocalDate firstDate = dateFromYear(2015);
 
     StockCard card = new StockCard();
-    card.setLineItems(Arrays.asList(
+    card.setLineItems(asList(
         createCreditLineItem(firstDate.plusDays(1), 5),
         createDebitLineItem(firstDate.plusDays(3), 1),
         createCreditLineItem(firstDate.plusDays(4), 2)
@@ -97,14 +118,11 @@ public class QuantityValidatorTest extends BaseValidatorTest  {
   public void shouldNotRejectWhenEventReasonIdIsNotFound() throws Exception {
     //given
     StockEventDto event = createStockEventDto();
-    event.setContext(new StockEventProcessContext());
 
-    StockEventLineItem invalidItem = event.getLineItems().get(0);
+    StockEventLineItemDto invalidItem = event.getLineItems().get(0);
     invalidItem.setDestinationId(null);
 
     setContext(event);
-
-    when(reasonRepository.findOne(invalidItem.getReasonId())).thenReturn(null);
 
     //when
     quantityValidator.validate(event);
@@ -116,7 +134,7 @@ public class QuantityValidatorTest extends BaseValidatorTest  {
     StockEventDto event = createStockEventDto();
     setContext(event);
 
-    StockEventLineItem invalidItem = event.getLineItems().get(0);
+    StockEventLineItemDto invalidItem = event.getLineItems().get(0);
     invalidItem.setDestinationId(randomUUID());
     invalidItem.setReasonId(null);
 
@@ -228,28 +246,12 @@ public class QuantityValidatorTest extends BaseValidatorTest  {
     quantityValidator.validate(event);
   }
 
-  private StockCardLineItem generateLineItemWithAdjustments(
-      LocalDate date, int quantity, int... adjustments) {
-    int absQuantity = Math.abs(quantity);
-    StockCardLineItem item = quantity < 0
-        ? createDebitLineItem(date, absQuantity) : createCreditLineItem(date, absQuantity);
-
-    for (int value : adjustments) {
-      StockCardLineItemReason reason = value < 0
-          ? StockCardLineItemReason.physicalDebit() : StockCardLineItemReason.physicalCredit();
-      item.getStockAdjustments().add(
-              new PhysicalInventoryLineItemAdjustment(reason, Math.abs(value)));
-    }
-
-    return item;
-  }
-
   private LocalDate dateFromYear(int year) {
     return LocalDate.of(year, 1, 1);
   }
-  
+
   private StockEventDto createDebitEventDto(LocalDate date, int quantity,
-                                            List<PhysicalInventoryLineItemAdjustment> adjustments) {
+                                            List<StockEventAdjustmentDto> adjustments) {
 
     StockEventDto stockEventDto = createStockEventDto();
 
@@ -273,7 +275,7 @@ public class QuantityValidatorTest extends BaseValidatorTest  {
         .occurredDate(date)
         .processedDate(ZonedDateTime.of(date, LocalTime.NOON, ZoneOffset.UTC))
         .destination(new Node())
-        .reason(StockCardLineItemReason.physicalDebit())
+        .reason(physicalDebit)
         .stockAdjustments(new ArrayList<>())
         .build();
   }
@@ -286,7 +288,7 @@ public class QuantityValidatorTest extends BaseValidatorTest  {
         .occurredDate(date)
         .processedDate(ZonedDateTime.of(date, LocalTime.NOON, ZoneOffset.UTC))
         .destination(new Node())
-        .reason(StockCardLineItemReason.physicalCredit())
+        .reason(physicalCredit)
         .stockAdjustments(adjustments)
         .build();
   }
@@ -295,20 +297,12 @@ public class QuantityValidatorTest extends BaseValidatorTest  {
     return createCreditLineItem(date, quantity, new ArrayList<>());
   }
 
-  private PhysicalInventoryLineItemAdjustment createCreditAdjustment(int quantity) {
-    return PhysicalInventoryLineItemAdjustment
-        .builder()
-        .reason(StockCardLineItemReason.physicalCredit())
-        .quantity(quantity)
-        .build();
+  private StockEventAdjustmentDto createCreditAdjustment(int quantity) {
+    return new StockEventAdjustmentDto(physicalCredit.getId(), quantity);
   }
 
-  private PhysicalInventoryLineItemAdjustment createDebitAdjustment(int quantity) {
-    return PhysicalInventoryLineItemAdjustment
-        .builder()
-        .reason(StockCardLineItemReason.physicalDebit())
-        .quantity(quantity)
-        .build();
+  private StockEventAdjustmentDto createDebitAdjustment(int quantity) {
+    return new StockEventAdjustmentDto(physicalDebit.getId(), quantity);
   }
 
   private void mockCardFound(StockEventDto event, StockCard card) {
@@ -320,5 +314,6 @@ public class QuantityValidatorTest extends BaseValidatorTest  {
         .thenReturn(singletonList(card));
 
     setContext(event);
+    setReasons(event, Lists.newArrayList(physicalCredit, physicalDebit));
   }
 }

@@ -58,6 +58,11 @@ public class StockCardLineItemReasonDataBuilder {
     return this;
   }
 
+  public StockCardLineItemReasonDataBuilder withPhysicalInventoryCategory() {
+    reasonCategory = ReasonCategory.PHYSICAL_INVENTORY;
+    return this;
+  }
+
   /**
    * Creates new instance of {@link StockCardLineItemReason} with properties.
    * @return created stock card line item reason.

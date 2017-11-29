@@ -39,7 +39,7 @@
       "items": {
         "type": "object",
         "title": "StockAdjustment",
-        "$ref": "stockAdjustment.json"
+        "$ref": "stockEventAdjustmentDto.json"
       }
     },
     "reasonId": {

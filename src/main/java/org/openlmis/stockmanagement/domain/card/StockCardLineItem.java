@@ -30,12 +30,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.ExtraDataConverter;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.util.Message;
 import org.slf4j.Logger;
@@ -139,7 +139,7 @@ public class StockCardLineItem extends BaseEntity {
    * @return created line item.
    */
   public static StockCardLineItem createLineItemFrom(
-      StockEventDto eventDto, StockEventLineItem eventLineItem,
+      StockEventDto eventDto, StockEventLineItemDto eventLineItem,
       StockCard stockCard, UUID savedEventId) {
     StockCardLineItemBuilder builder = StockCardLineItem.builder();
 

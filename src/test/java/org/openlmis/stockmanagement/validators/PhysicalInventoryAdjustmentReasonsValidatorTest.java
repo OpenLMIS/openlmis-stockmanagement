@@ -22,6 +22,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,11 +31,10 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
-import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
-import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
+import org.openlmis.stockmanagement.dto.StockEventAdjustmentDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityTypeDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
@@ -44,7 +44,7 @@ import java.util.Collections;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PhysicalInventoryAdjustmentReasonsValidatorTest extends BaseValidatorTest  {
+public class PhysicalInventoryAdjustmentReasonsValidatorTest extends BaseValidatorTest {
 
   @Rule
   public ExpectedException expectedException = none();
@@ -86,7 +86,7 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest extends BaseValidat
     stockEventDto.setFacilityId(UUID.randomUUID());
     stockEventDto.setLineItems(
         Collections.singletonList(
-            generateLineItem(5, generateReason())));
+            generateLineItem(generateAdjustment(reasonId, 5))));
 
     validator.validate(stockEventDto);
 
@@ -98,7 +98,7 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest extends BaseValidat
   @Test
   public void shouldPassWhenNoStockAdjustments() {
     stockEventDto.setLineItems(
-        Collections.singletonList(new StockEventLineItem()));
+        Collections.singletonList(new StockEventLineItemDto()));
 
     validator.validate(stockEventDto);
   }
@@ -107,7 +107,7 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest extends BaseValidat
   public void shouldNotPassWhenReasonIsNotValid() {
     stockEventDto.setLineItems(
         Collections.singletonList(
-            generateLineItem(5, generateReason())));
+            generateLineItem(generateAdjustment(reasonId, 5))));
 
     when(validReasonRepository
         .findByProgramIdAndFacilityTypeIdAndReasonId(
@@ -121,7 +121,7 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest extends BaseValidat
   public void shouldNotPassWhenNoReason() {
     stockEventDto.setLineItems(
         Collections.singletonList(
-            generateLineItem(5, null)));
+            generateLineItem(generateAdjustment(null, 5))));
 
     validator.validate(stockEventDto);
   }
@@ -130,7 +130,7 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest extends BaseValidat
   public void shouldNotPassWhenNoQuantity() {
     stockEventDto.setLineItems(
         Collections.singletonList(
-            generateLineItem(null, generateReason())));
+            generateLineItem(generateAdjustment(reasonId, null))));
 
     validator.validate(stockEventDto);
   }
@@ -139,7 +139,7 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest extends BaseValidat
   public void shouldNotPassWhenFacilityIdIsInvalid() {
     stockEventDto.setLineItems(
         Collections.singletonList(
-            generateLineItem(5, generateReason())));
+            generateLineItem(generateAdjustment(reasonId, 5))));
 
     when(facilityService.findOne(stockEventDto.getFacilityId())).thenReturn(null);
 
@@ -156,21 +156,20 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest extends BaseValidat
     when(facility.getType()).thenReturn(facilityType);
   }
 
-  private StockCardLineItemReason generateReason() {
-    StockCardLineItemReason stockCardLineItemReason = new StockCardLineItemReason();
-    stockCardLineItemReason.setId(reasonId);
-    return stockCardLineItemReason;
+  private StockEventAdjustmentDto generateAdjustment(UUID reasonId, Integer quantity) {
+    return new StockEventAdjustmentDto(reasonId, quantity);
   }
 
-  private StockEventLineItem generateLineItem(Integer quantity, StockCardLineItemReason reason) {
-    PhysicalInventoryLineItemAdjustment adjustment = PhysicalInventoryLineItemAdjustment.builder()
-        .quantity(quantity)
-        .reason(reason)
-        .build();
+  private StockEventLineItemDto generateLineItem(StockEventAdjustmentDto adjustment) {
+    StockEventLineItemDto lineItem = new StockEventLineItemDto();
 
-    return StockEventLineItem.builder()
-        .stockAdjustments(Collections.singletonList(adjustment))
-        .build();
+    if (null == adjustment) {
+      return lineItem;
+    }
+
+    lineItem.setStockAdjustments(Lists.newArrayList(adjustment));
+
+    return lineItem;
   }
 
 }

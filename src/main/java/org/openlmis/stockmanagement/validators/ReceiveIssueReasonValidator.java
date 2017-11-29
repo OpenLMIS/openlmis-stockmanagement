@@ -23,11 +23,11 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ISSUE_RE
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_RECEIVE_REASON_CATEGORY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_RECEIVE_REASON_TYPE_INVALID;
 
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.stereotype.Component;
@@ -51,7 +51,7 @@ public class ReceiveIssueReasonValidator implements StockEventValidator {
       return;
     }
 
-    for (StockEventLineItem eventLineItem : eventDto.getLineItems()) {
+    for (StockEventLineItemDto eventLineItem : eventDto.getLineItems()) {
       if (eventLineItem.hasSourceId()) {
         checkReceiveReason(eventDto, eventLineItem);
       }
@@ -62,7 +62,7 @@ public class ReceiveIssueReasonValidator implements StockEventValidator {
     }
   }
 
-  private void checkReceiveReason(StockEventDto event, StockEventLineItem lineItem) {
+  private void checkReceiveReason(StockEventDto event, StockEventLineItemDto lineItem) {
     checkReason(
         event, lineItem, CREDIT,
         ERROR_EVENT_RECEIVE_REASON_TYPE_INVALID,
@@ -70,7 +70,7 @@ public class ReceiveIssueReasonValidator implements StockEventValidator {
     );
   }
 
-  private void checkIssueReason(StockEventDto event, StockEventLineItem lineItem) {
+  private void checkIssueReason(StockEventDto event, StockEventLineItemDto lineItem) {
     checkReason(
         event, lineItem, DEBIT,
         ERROR_EVENT_ISSUE_REASON_TYPE_INVALID,
@@ -78,7 +78,7 @@ public class ReceiveIssueReasonValidator implements StockEventValidator {
     );
   }
 
-  private void checkReason(StockEventDto event, StockEventLineItem lineItem,
+  private void checkReason(StockEventDto event, StockEventLineItemDto lineItem,
                            ReasonType expectedReasonType, String typeErrorKey,
                            String categoryErrorKey) {
     if (lineItem.hasReasonId()) {

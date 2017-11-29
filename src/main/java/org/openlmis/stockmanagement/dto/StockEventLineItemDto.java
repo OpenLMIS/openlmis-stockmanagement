@@ -13,79 +13,51 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.domain.event;
+package org.openlmis.stockmanagement.dto;
 
-import static javax.persistence.CascadeType.ALL;
+import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
+import static java.util.Collections.emptyList;
 
-import org.openlmis.stockmanagement.domain.BaseEntity;
-import org.openlmis.stockmanagement.domain.ExtraDataConverter;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import org.openlmis.stockmanagement.domain.common.VvmApplicable;
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@Entity
-@Table(name = "stock_event_line_items", schema = "stockmanagement")
-public class StockEventLineItem extends BaseEntity
-    implements IdentifiableByOrderableLot, VvmApplicable {
-
-  @Column(nullable = false)
+@Setter
+@Getter
+public class StockEventLineItemDto implements IdentifiableByOrderableLot, VvmApplicable {
   private UUID orderableId;
-
   private UUID lotId;
-
-  @Column(nullable = false)
   private Integer quantity;
-
-  @Column(name = "extradata", columnDefinition = "jsonb")
-  @Convert(converter = ExtraDataConverter.class)
   private Map<String, String> extraData;
-
-  @Column(nullable = false)
+  @JsonFormat(shape = STRING, pattern = "yyyy-MM-dd")
   private LocalDate occurredDate;
-
   private UUID reasonId;
   private String reasonFreeText;
-
   private UUID sourceId;
   private String sourceFreeText;
-
   private UUID destinationId;
   private String destinationFreeText;
+  private List<StockEventAdjustmentDto> stockAdjustments;
 
-  @ManyToOne()
-  @JoinColumn(nullable = false)
-  private StockEvent stockEvent;
-
-  @OneToMany(
-      cascade = ALL,
-      fetch = FetchType.EAGER,
-      orphanRemoval = true)
-  @JoinColumn(name = "stockEventLineItemId")
-  private List<PhysicalInventoryLineItemAdjustment> stockAdjustments;
+  StockEventLineItem toEventLineItem() {
+    // event is set in StockEventDto.toEvent()
+    return new StockEventLineItem(
+        orderableId, lotId, quantity, extraData, occurredDate, reasonId, reasonFreeText, sourceId,
+        sourceFreeText, destinationId, destinationFreeText, null, stockAdjustments()
+    );
+  }
 
   public boolean hasReasonId() {
     return this.reasonId != null;
@@ -115,25 +87,17 @@ public class StockEventLineItem extends BaseEntity
     return this.destinationId != null;
   }
 
-  public boolean isPhysicalInventory() {
-    return sourceId == null && destinationId == null && reasonId == null;
-  }
-
   /**
-   * Returns clean copy of stock adjustments.
+   * Gets stock adjustments as {@link PhysicalInventoryLineItemAdjustment}.
    */
   public List<PhysicalInventoryLineItemAdjustment> stockAdjustments() {
-    if (getStockAdjustments() != null) {
-      List<PhysicalInventoryLineItemAdjustment> newAdjustments =
-              new ArrayList<>(stockAdjustments.size());
-      getStockAdjustments().forEach(stockAdjustment ->
-              newAdjustments.add(PhysicalInventoryLineItemAdjustment.builder()
-          .reason(stockAdjustment.getReason())
-          .quantity(stockAdjustment.getQuantity())
-          .build()));
-      return newAdjustments;
+    if (null == stockAdjustments) {
+      return emptyList();
     }
-    return null;
-  }
 
+    return stockAdjustments
+        .stream()
+        .map(StockEventAdjustmentDto::toAdjustment)
+        .collect(Collectors.toList());
+  }
 }

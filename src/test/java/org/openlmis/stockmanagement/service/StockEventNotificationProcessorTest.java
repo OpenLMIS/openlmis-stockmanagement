@@ -24,8 +24,6 @@ import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventLineItem;
 
-import java.util.Arrays;
-import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,11 +32,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.service.notifier.StockoutNotifier;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
+
+import java.util.Arrays;
+import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StockEventNotificationProcessorTest {
@@ -59,7 +60,7 @@ public class StockEventNotificationProcessorTest {
   private StockCard stockCard;
   private StockEventProcessContext context;
   private StockEventDto stockEventDto;
-  private StockEventLineItem firstLineItem;
+  private StockEventLineItemDto firstLineItem;
 
   @Before
   public void setUp() {
@@ -110,7 +111,7 @@ public class StockEventNotificationProcessorTest {
         null, 0);
     anotherStockCard.setId(anotherStockCardId);
 
-    StockEventLineItem secondLineItem = createStockEventLineItem();
+    StockEventLineItemDto secondLineItem = createStockEventLineItem();
     secondLineItem.setOrderableId(anotherOrderableId);
     secondLineItem.setLotId(anotherLotId);
     secondLineItem.setQuantity(0);

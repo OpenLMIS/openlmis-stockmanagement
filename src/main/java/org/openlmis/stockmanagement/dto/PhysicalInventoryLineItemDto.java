@@ -16,7 +16,6 @@
 package org.openlmis.stockmanagement.dto;
 
 import org.openlmis.stockmanagement.domain.common.VvmApplicable;
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
@@ -83,7 +82,7 @@ public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot,
    * @param lineItems stock event line items.
    * @return created dtos.
    */
-  public static List<PhysicalInventoryLineItemDto> from(List<StockEventLineItem> lineItems) {
+  public static List<PhysicalInventoryLineItemDto> from(List<StockEventLineItemDto> lineItems) {
     return lineItems
         .stream()
         .map(lineItem -> PhysicalInventoryLineItemDto

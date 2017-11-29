@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.dto;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertThat;
 
@@ -48,7 +49,7 @@ public class StockEventDtoTest {
     assertThat(event.getDocumentNumber(), is(stockEventDto.getDocumentNumber()));
     assertThat(event.getSignature(), is(stockEventDto.getSignature()));
 
-    assertThat(event.getLineItems(), is(stockEventDto.getLineItems()));
+    assertThat(event.getLineItems(), hasSize(stockEventDto.getLineItems().size()));
 
     assertThat(event.getProgramId(), is(stockEventDto.getProgramId()));
     assertThat(event.getFacilityId(), is(stockEventDto.getFacilityId()));
@@ -59,8 +60,6 @@ public class StockEventDtoTest {
     long between = SECONDS.between(processedDate, ZonedDateTime.now());
 
     assertThat(between, lessThan(2L));
-
-    assertThat(event.getLineItems(), is(stockEventDto.getLineItems()));
   }
 
 }

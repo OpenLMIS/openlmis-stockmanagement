@@ -27,9 +27,9 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.SERVER_ERROR_SHALLOW
 import org.hibernate.annotations.LazyCollection;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.util.Message;
 import org.slf4j.Logger;
@@ -97,7 +97,8 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
    * @return Created stock card.
    */
   public static StockCard createStockCardFrom(StockEventDto stockEventDto,
-                                              StockEventLineItem eventLineItem, UUID savedEventId) {
+                                              StockEventLineItemDto eventLineItem,
+                                              UUID savedEventId) {
     StockCardBuilder builder = StockCard.builder();
 
     if (null != savedEventId) {

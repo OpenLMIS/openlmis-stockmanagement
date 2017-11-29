@@ -1,5 +1,8 @@
-2.0.1 / WIP
+3.0.0 / WIP
 ==================
+
+Contract breaking changes:
+* [OLMIS-3295](https://openlmis.atlassian.net/browse/OLMIS-3295): Modified stock event structure
 
 Bug fixes, security and performance improvements, also backwards-compatible:
 

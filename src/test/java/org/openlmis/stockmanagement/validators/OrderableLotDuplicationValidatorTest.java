@@ -26,8 +26,8 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -63,8 +63,8 @@ public class OrderableLotDuplicationValidatorTest {
 
   private StockEventDto createStockEventDtoWithDuplicateOrderableLot(UUID reasonId) {
     //given: an event with orderable appear twice
-    StockEventLineItem eventLineItem1 = new StockEventLineItem();
-    StockEventLineItem eventLineItem2 = new StockEventLineItem();
+    StockEventLineItemDto eventLineItem1 = new StockEventLineItemDto();
+    StockEventLineItemDto eventLineItem2 = new StockEventLineItemDto();
     eventLineItem1.setReasonId(reasonId);
     eventLineItem2.setReasonId(reasonId);
 

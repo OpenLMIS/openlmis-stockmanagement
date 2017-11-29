@@ -25,11 +25,11 @@ import com.google.common.collect.Lists;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.i18n.MessageService;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
@@ -89,7 +89,7 @@ public class StockCardService extends StockCardBaseService {
   void saveFromEvent(StockEventDto stockEventDto, UUID savedEventId) {
     List<StockCard> cardsToUpdate = Lists.newArrayList();
 
-    for (StockEventLineItem eventLineItem : stockEventDto.getLineItems()) {
+    for (StockEventLineItemDto eventLineItem : stockEventDto.getLineItems()) {
       StockCard stockCard = findOrCreateCard(
           stockEventDto, eventLineItem, savedEventId, cardsToUpdate
       );
@@ -128,7 +128,7 @@ public class StockCardService extends StockCardBaseService {
     return cardDto;
   }
 
-  private StockCard findOrCreateCard(StockEventDto eventDto, StockEventLineItem eventLineItem,
+  private StockCard findOrCreateCard(StockEventDto eventDto, StockEventLineItemDto eventLineItem,
                                      UUID savedEventId, List<StockCard> cardsToUpdate) {
     OrderableLotIdentity identity = identityOf(eventLineItem);
     StockCard card = eventDto.getContext().findCard(identity);

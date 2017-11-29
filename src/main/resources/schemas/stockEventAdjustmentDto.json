@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "A single stockAdjustment.",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "reasonId": {
+      "type": "string",
+      "title": "Reason ID",
+      "description": "Indicates reason for an adjustment."
+    },
+    "quantity": {
+      "type": "integer",
+      "description": "Indicates quantity for an adjustment"
+    }
+  },
+  "required": [
+    "reasonId",
+    "quantity"
+  ]
+}

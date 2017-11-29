@@ -32,8 +32,8 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
@@ -136,7 +136,7 @@ public class MandatoryFieldsValidatorTest extends BaseValidatorTest  {
     expectLineItemsError(emptyList());
   }
 
-  private void expectLineItemsError(List<StockEventLineItem> lineItems) {
+  private void expectLineItemsError(List<StockEventLineItemDto> lineItems) {
     stockEventDto.setLineItems(lineItems);
     expectedEx.expectMessage(ERROR_EVENT_NO_LINE_ITEMS);
     mandatoryFieldsValidator.validate(stockEventDto);
@@ -186,7 +186,7 @@ public class MandatoryFieldsValidatorTest extends BaseValidatorTest  {
 
   private void expectQuantityException(Integer quantity) {
     //given
-    List<StockEventLineItem> lineItems = stockEventDto.getLineItems();
+    List<StockEventLineItemDto> lineItems = stockEventDto.getLineItems();
     lineItems.get(0).setQuantity(quantity);
 
     //when

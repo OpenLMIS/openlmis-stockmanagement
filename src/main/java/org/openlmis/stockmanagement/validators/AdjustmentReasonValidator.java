@@ -18,9 +18,9 @@ package org.openlmis.stockmanagement.validators;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_REASON_CATEGORY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_REASON_TYPE_INVALID;
 
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.stereotype.Component;
@@ -40,14 +40,14 @@ public class AdjustmentReasonValidator implements StockEventValidator {
       return;
     }
 
-    for (StockEventLineItem lineItem : stockEventDto.getLineItems()) {
+    for (StockEventLineItemDto lineItem : stockEventDto.getLineItems()) {
       if (lineItem.hasReasonId()) {
         validateReason(stockEventDto, lineItem);
       }
     }
   }
 
-  private void validateReason(StockEventDto event, StockEventLineItem lineItem) {
+  private void validateReason(StockEventDto event, StockEventLineItemDto lineItem) {
     StockCardLineItemReason foundReason = event
         .getContext()
         .findEventReason(lineItem.getReasonId());

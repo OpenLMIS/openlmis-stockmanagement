@@ -15,13 +15,12 @@
 
 package org.openlmis.stockmanagement.service;
 
-import java.util.concurrent.Future;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.service.notifier.StockoutNotifier;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
@@ -30,6 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.Future;
 
 /**
  * A service that helps the StockEventProcessor to determine notification.
@@ -60,7 +61,7 @@ public class StockEventNotificationProcessor {
     return new AsyncResult<>(null);
   }
 
-  private void callNotifications(StockEventDto event, StockEventLineItem eventLine) {
+  private void callNotifications(StockEventDto event, StockEventLineItemDto eventLine) {
     XLOGGER.entry(event, eventLine);
     Profiler profiler = new Profiler("CALL_NOTIFICATION_FOR_LINE_ITEM");
     profiler.setLogger(XLOGGER);

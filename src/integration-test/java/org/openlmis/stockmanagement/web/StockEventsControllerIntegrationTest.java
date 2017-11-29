@@ -24,8 +24,8 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_ASSIGNM
 
 import org.junit.Before;
 import org.junit.Test;
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.HomeFacilityPermissionService;
 import org.openlmis.stockmanagement.service.StockEventProcessor;
@@ -124,8 +124,8 @@ public class StockEventsControllerIntegrationTest extends BaseWebIntegrationTest
     return stockEvent;
   }
 
-  private StockEventLineItem generateStockEventLineItem() {
-    StockEventLineItem item = new StockEventLineItem();
+  private StockEventLineItemDto generateStockEventLineItem() {
+    StockEventLineItemDto item = new StockEventLineItemDto();
 
     item.setOrderableId(UUID.randomUUID());
     item.setLotId(UUID.randomUUID());

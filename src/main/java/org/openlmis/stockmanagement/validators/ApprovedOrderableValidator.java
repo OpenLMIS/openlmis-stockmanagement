@@ -19,8 +19,8 @@ import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_ORDERABLE_NOT_IN_APPROVED_LIST;
 
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
@@ -79,7 +79,7 @@ public class ApprovedOrderableValidator implements StockEventValidator {
         .collect(toList());
 
     return stockEventDto.getLineItems().stream()
-        .map(StockEventLineItem::getOrderableId)
+        .map(StockEventLineItemDto::getOrderableId)
         .filter(id -> !approvedIds.contains(id))
         .collect(toList());
   }

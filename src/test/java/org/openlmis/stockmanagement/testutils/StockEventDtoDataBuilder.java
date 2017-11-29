@@ -18,8 +18,8 @@ package org.openlmis.stockmanagement.testutils;
 import static java.util.Collections.singletonList;
 import static org.openlmis.stockmanagement.testutils.DatesUtil.getBaseDate;
 
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -40,14 +40,14 @@ public class StockEventDtoDataBuilder {
     UUID orderable = UUID.randomUUID();
     UUID lot = UUID.randomUUID();
 
-    StockEventLineItem lineItem1 = new StockEventLineItem();
+    StockEventLineItemDto lineItem1 = new StockEventLineItemDto();
     lineItem1.setOrderableId(orderable);
     lineItem1.setLotId(lot);
     lineItem1.setQuantity(20);
     lineItem1.setOccurredDate(getBaseDate());
     lineItem1.setReasonId(UUID.fromString("279d55bd-42e3-438c-a63d-9c021b185dae"));
 
-    StockEventLineItem lineItem2 = new StockEventLineItem();
+    StockEventLineItemDto lineItem2 = new StockEventLineItemDto();
     lineItem2.setOrderableId(orderable);
     lineItem2.setLotId(lot);
     lineItem2.setQuantity(10);
@@ -72,7 +72,7 @@ public class StockEventDtoDataBuilder {
     stockEventDto.setProgramId(UUID.randomUUID());
     stockEventDto.setFacilityId(UUID.randomUUID());
 
-    StockEventLineItem eventLineItemDto = createStockEventLineItem();
+    StockEventLineItemDto eventLineItemDto = createStockEventLineItem();
 
     stockEventDto.setLineItems(singletonList(eventLineItemDto));
     return stockEventDto;
@@ -83,8 +83,8 @@ public class StockEventDtoDataBuilder {
    *
    * @return created dto object.
    */
-  public static StockEventLineItem createStockEventLineItem() {
-    StockEventLineItem eventLineItemDto = new StockEventLineItem();
+  public static StockEventLineItemDto createStockEventLineItem() {
+    StockEventLineItemDto eventLineItemDto = new StockEventLineItemDto();
     eventLineItemDto.setReasonFreeText("d");
     eventLineItemDto.setReasonId(UUID.fromString("e3fc3cf3-da18-44b0-a220-77c985202e06"));
     eventLineItemDto.setQuantity(1);
@@ -104,7 +104,7 @@ public class StockEventDtoDataBuilder {
    */
   public static StockEventDto createNoSourceDestinationStockEventDto() {
     StockEventDto stockEventDto = createStockEventDto();
-    StockEventLineItem stockEventLineItem = stockEventDto.getLineItems().get(0);
+    StockEventLineItemDto stockEventLineItem = stockEventDto.getLineItems().get(0);
     stockEventLineItem.setSourceId(null);
     stockEventLineItem.setDestinationId(null);
     stockEventLineItem.setSourceFreeText(null);

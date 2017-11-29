@@ -20,13 +20,13 @@ import static org.slf4j.ext.XLoggerFactory.getXLogger;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
@@ -223,7 +223,7 @@ public class StockEventProcessContextBuilder {
         .getLineItems()
         .stream()
         .filter(item -> item.getLotId() != null)
-        .map(StockEventLineItem::getLotId)
+        .map(StockEventLineItemDto::getLotId)
         .distinct()
         .map(lotReferenceDataService::findOne)
         .collect(Collectors.toList());

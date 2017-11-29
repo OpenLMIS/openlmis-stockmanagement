@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.repository.NodeRepository;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
@@ -38,6 +39,8 @@ import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+
+import java.util.List;
 
 @RunWith(MockitoJUnitRunner.class)
 public abstract class BaseValidatorTest {
@@ -86,6 +89,11 @@ public abstract class BaseValidatorTest {
   void setContext(StockEventDto event) {
     StockEventProcessContext context = contextBuilder.buildContext(event);
     event.setContext(context);
+  }
+
+  void setReasons(StockEventDto event, List<StockCardLineItemReason> reasons) {
+    when(reasonRepository.findByIdIn(event.getReasonIds()))
+        .thenReturn(reasons);
   }
 
 }

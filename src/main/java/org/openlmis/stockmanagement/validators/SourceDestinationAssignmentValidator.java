@@ -19,9 +19,9 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_NO
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_BOTH_PRESENT;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_IN_VALID_LIST;
 
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.sourcedestination.SourceDestinationAssignment;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
@@ -61,7 +61,7 @@ public class SourceDestinationAssignmentValidator implements StockEventValidator
     }
   }
 
-  private void checkIsValidAssignment(StockEventDto eventDto, StockEventLineItem eventLineItem) {
+  private void checkIsValidAssignment(StockEventDto eventDto, StockEventLineItemDto eventLineItem) {
     if (eventLineItem.hasSourceId()) {
       checkSourceAssignment(eventDto.getContext(), eventLineItem);
     }
@@ -71,7 +71,7 @@ public class SourceDestinationAssignmentValidator implements StockEventValidator
     }
   }
 
-  private void checkSourceDestinationBothPresent(StockEventLineItem eventLineItem) {
+  private void checkSourceDestinationBothPresent(StockEventLineItemDto eventLineItem) {
     if (eventLineItem.hasSourceId() && eventLineItem.hasDestinationId()) {
       throwError(ERROR_SOURCE_DESTINATION_BOTH_PRESENT,
           eventLineItem.getSourceId(), eventLineItem.getDestinationId());
@@ -79,7 +79,7 @@ public class SourceDestinationAssignmentValidator implements StockEventValidator
   }
 
   private void checkSourceAssignment(StockEventProcessContext context,
-                                     StockEventLineItem eventLineItem) {
+                                     StockEventLineItemDto eventLineItem) {
     boolean isInValidList = checkAssignment(context.getSources(), eventLineItem.getSourceId());
 
     if (!isInValidList) {
@@ -88,7 +88,7 @@ public class SourceDestinationAssignmentValidator implements StockEventValidator
   }
 
   private void checkDestinationAssignment(StockEventProcessContext context,
-                                          StockEventLineItem eventLineItem) {
+                                          StockEventLineItemDto eventLineItem) {
     boolean isInValidList = checkAssignment(
         context.getDestinations(), eventLineItem.getDestinationId()
     );

@@ -20,10 +20,10 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_FREE_TE
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_FREE_TEXT_BOTH_PRESENT;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_FREE_TEXT_NOT_ALLOWED;
 
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.stereotype.Component;
@@ -45,7 +45,7 @@ public class FreeTextValidator implements StockEventValidator {
       return;
     }
 
-    for (StockEventLineItem eventLineItem : stockEventDto.getLineItems()) {
+    for (StockEventLineItemDto eventLineItem : stockEventDto.getLineItems()) {
       checkSourceDestinationFreeTextBothPresent(eventLineItem);
 
       checkNodeFreeText(
@@ -63,7 +63,7 @@ public class FreeTextValidator implements StockEventValidator {
     }
   }
 
-  private void checkSourceDestinationFreeTextBothPresent(StockEventLineItem eventLineItem) {
+  private void checkSourceDestinationFreeTextBothPresent(StockEventLineItemDto eventLineItem) {
     if (eventLineItem.hasSourceFreeText() && eventLineItem.hasDestinationFreeText()) {
       throwError(ERROR_SOURCE_DESTINATION_FREE_TEXT_BOTH_PRESENT,
           eventLineItem.getSourceFreeText(), eventLineItem.getDestinationFreeText());
@@ -84,7 +84,7 @@ public class FreeTextValidator implements StockEventValidator {
     }
   }
 
-  private void checkReasonFreeText(StockEventDto event, StockEventLineItem lineItem) {
+  private void checkReasonFreeText(StockEventDto event, StockEventLineItemDto lineItem) {
     if (!lineItem.hasReasonFreeText()) {
       return;//if there is no reason free text, then there is no need to validate
     }
@@ -98,7 +98,7 @@ public class FreeTextValidator implements StockEventValidator {
     }
   }
 
-  private boolean isFreeTextAllowed(StockEventDto event, StockEventLineItem lineItem) {
+  private boolean isFreeTextAllowed(StockEventDto event, StockEventLineItemDto lineItem) {
     StockCardLineItemReason reason = event.getContext().findEventReason(lineItem.getReasonId());
     return reason != null && reason.getIsFreeTextAllowed();
   }

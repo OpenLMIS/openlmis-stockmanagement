@@ -19,8 +19,8 @@ import static java.util.UUID.fromString;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LOT_NOT_EXIST;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LOT_ORDERABLE_NOT_MATCH;
 
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
@@ -53,7 +53,7 @@ public class LotValidator implements StockEventValidator {
   }
 
   private void checkLotOrderableMatches(StockEventDto stockEventDto,
-                                        StockEventLineItem lineItem, LotDto lotDto) {
+                                        StockEventLineItemDto lineItem, LotDto lotDto) {
     Optional<OrderableDto> foundOrderableDto = stockEventDto.getContext()
         .getAllApprovedProducts().stream()
         .filter(orderableDto -> orderableDto.getId().equals(lineItem.getOrderableId()))
@@ -69,7 +69,7 @@ public class LotValidator implements StockEventValidator {
     }
   }
 
-  private void checkLotExists(StockEventLineItem lineItem, LotDto lotDto) {
+  private void checkLotExists(StockEventLineItemDto lineItem, LotDto lotDto) {
     if (lotDto == null) {
       throw new ValidationMessageException(
           new Message(ERROR_EVENT_LOT_NOT_EXIST, lineItem.getLotId()));

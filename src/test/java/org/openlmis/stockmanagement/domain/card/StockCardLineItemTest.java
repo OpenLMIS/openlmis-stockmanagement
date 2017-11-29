@@ -29,13 +29,13 @@ import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.cr
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
-import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
 import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
+import org.openlmis.stockmanagement.dto.StockEventAdjustmentDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.util.LazyResource;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
@@ -63,7 +63,7 @@ public class StockCardLineItemTest {
     StockEventDto eventDto = createStockEventDto();
     eventDto.setContext(context);
 
-    StockEventLineItem eventLineItem = eventDto.getLineItems().get(0);
+    StockEventLineItemDto eventLineItem = eventDto.getLineItems().get(0);
     eventLineItem.setStockAdjustments(singletonList(createStockAdjustment()));
 
     UUID eventId = randomUUID();
@@ -91,7 +91,7 @@ public class StockCardLineItemTest {
 
     assertThat(cardLineItem.getUserId(), is(userId));
 
-    assertEquals(cardLineItem.getStockAdjustments(), eventLineItem.getStockAdjustments());
+    assertEquals(cardLineItem.getStockAdjustments(), eventLineItem.stockAdjustments());
 
     ZonedDateTime processedDate = cardLineItem.getProcessedDate();
     long between = SECONDS.between(processedDate, ZonedDateTime.now());
@@ -222,17 +222,7 @@ public class StockCardLineItemTest {
     assertThat(lineItem.getReason().getReasonCategory(), is(ReasonCategory.PHYSICAL_INVENTORY));
   }
 
-  private static PhysicalInventoryLineItemAdjustment createStockAdjustment() {
-    StockCardLineItemReason reason = StockCardLineItemReason.builder()
-        .name("test reason")
-        .reasonType(ReasonType.CREDIT)
-        .reasonCategory(ReasonCategory.PHYSICAL_INVENTORY)
-        .isFreeTextAllowed(false)
-        .build();
-
-    return PhysicalInventoryLineItemAdjustment.builder()
-        .quantity(10)
-        .reason(reason)
-        .build();
+  private static StockEventAdjustmentDto createStockAdjustment() {
+    return new StockEventAdjustmentDto(UUID.randomUUID(), 10);
   }
 }
