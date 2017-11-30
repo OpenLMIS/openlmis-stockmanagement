@@ -97,7 +97,7 @@ public class StockEventLineItemDto implements IdentifiableByOrderableLot, VvmApp
 
     return stockAdjustments
         .stream()
-        .map(StockEventAdjustmentDto::toAdjustment)
+        .map(StockEventAdjustmentDto::toPhysicalInventoryLineItemAdjustment)
         .collect(Collectors.toList());
   }
 }

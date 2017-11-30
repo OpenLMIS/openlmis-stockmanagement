@@ -33,7 +33,7 @@ public class StockEventAdjustmentDto {
   private UUID reasonId;
   private Integer quantity;
 
-  PhysicalInventoryLineItemAdjustment toAdjustment() {
+  PhysicalInventoryLineItemAdjustment toPhysicalInventoryLineItemAdjustment() {
     StockCardLineItemReason reason = new StockCardLineItemReason();
     reason.setId(reasonId);
 
