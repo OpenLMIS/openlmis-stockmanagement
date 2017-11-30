@@ -116,7 +116,7 @@ public class StockEventDto {
   }
 
   /**
-   * Retrieves all reason IDs from event line items.
+   * Retrieves all reason IDs from event line items and related with them stock adjustments.
    */
   @JsonIgnore
   public Set<UUID> getReasonIds() {
