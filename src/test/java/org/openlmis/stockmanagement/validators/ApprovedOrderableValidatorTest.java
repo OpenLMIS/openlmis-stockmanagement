@@ -43,7 +43,7 @@ public class ApprovedOrderableValidatorTest extends BaseValidatorTest  {
   private ApprovedOrderableValidator approvedOrderableValidator;
 
   @Test(expected = ValidationMessageException.class)
-  public void stock_event_with_orderable_id_not_in_approved_list_should_not_pass_validation()
+  public void stockEventWithOrderableIdNotInApprovedListShouldNotPassValidation()
       throws Exception {
     //given:
     StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
@@ -61,7 +61,7 @@ public class ApprovedOrderableValidatorTest extends BaseValidatorTest  {
   }
 
   @Test
-  public void stock_event_with_orderable_id_in_approved_list_should_pass()
+  public void stockEventWithOrderableIdInApprovedListShouldPass()
       throws Exception {
     //given:
     String orderableIdString = "d8290082-f9fa-4a37-aefb-a3d76ff805a8";
@@ -83,7 +83,7 @@ public class ApprovedOrderableValidatorTest extends BaseValidatorTest  {
   }
 
   @Test
-  public void should_not_throw_validation_exception_if_event_has_no_program_and_facility_id()
+  public void shouldNotThrowValidationExceptionIfEventHasNoProgramAndFacilityId()
       throws Exception {
     //given
     StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();

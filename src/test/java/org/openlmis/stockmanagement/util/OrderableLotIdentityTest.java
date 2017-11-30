@@ -25,7 +25,7 @@ import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 
 public class OrderableLotIdentityTest {
   @Test
-  public void same_orderable_and_lot_id_should_equal_and_have_same_hash() throws Exception {
+  public void sameOrderableAndLotIdShouldEqualAndHaveSameHash() throws Exception {
     //given
     OrderableLotIdentity identity1 = new OrderableLotIdentity(randomUUID(), randomUUID());
 

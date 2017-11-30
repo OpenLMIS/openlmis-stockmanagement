@@ -34,7 +34,7 @@ public class JasperReportServiceTest {
   private StockCardService stockCardService;
 
   @Test(expected = ResourceNotFoundException.class)
-  public void should_throw_resource_not_found_exception_when_stock_card_not_exists()
+  public void shouldThrowResourceNotFoundExceptionWhenStockCardNotExists()
       throws Exception {
     //given
     UUID stockCardId = UUID.randomUUID();

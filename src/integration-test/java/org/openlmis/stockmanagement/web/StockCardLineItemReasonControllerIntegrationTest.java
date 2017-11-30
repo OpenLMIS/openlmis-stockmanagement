@@ -50,7 +50,7 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebTes
   private PermissionService permissionService;
 
   @Test
-  public void should_return_201_when_reason_successfully_created() throws Exception {
+  public void shouldReturn201WhenReasonSuccessfullyCreated() throws Exception {
     //given
     StockCardLineItemReason createdReason = new StockCardLineItemReasonDataBuilder()
         .withoutId()
@@ -81,7 +81,7 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebTes
   }
 
   @Test
-  public void should_return_200_when_reason_successfully_updated() throws Exception {
+  public void shouldReturn200WhenReasonSuccessfullyUpdated() throws Exception {
     //given
     StockCardLineItemReason updatedReason = new StockCardLineItemReasonDataBuilder()
         .withDescription("test reason")
@@ -113,7 +113,7 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebTes
   }
 
   @Test
-  public void should_return_200_when_user_get_all_reasons() throws Exception {
+  public void shouldReturn200WhenUserGetAllReasons() throws Exception {
     //given
     StockCardLineItemReason reason1 = new StockCardLineItemReasonDataBuilder().build();
 
@@ -134,7 +134,7 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebTes
   }
 
   @Test
-  public void should_return_403_when_user_has_no_permission_to_manage_reasons()
+  public void shouldReturn403WhenUserHasNoPermissionToManageReasons()
       throws Exception {
     doThrow(new PermissionMessageException(new Message("key")))
         .when(permissionService).canManageReasons();

@@ -45,7 +45,7 @@ public class ReportsControllerIntegrationTest extends BaseWebTest {
   private PermissionService permissionService;
 
   @Test
-  public void return_200_when_stock_card_report_generated() throws Exception {
+  public void return200WhenStockCardReportGenerated() throws Exception {
     //given
     UUID stockCardId = UUID.randomUUID();
     when(reportService.getStockCardReportView(stockCardId))
@@ -60,7 +60,7 @@ public class ReportsControllerIntegrationTest extends BaseWebTest {
   }
 
   @Test
-  public void return_200_when_stock_card_summary_report_generated() throws Exception {
+  public void return200WhenStockCardSummaryReportGenerated() throws Exception {
     //given
     UUID program = UUID.randomUUID();
     UUID facility = UUID.randomUUID();
@@ -79,7 +79,7 @@ public class ReportsControllerIntegrationTest extends BaseWebTest {
   }
 
   @Test
-  public void return_403_when_user_has_no_permission_to_view_stock_card() throws Exception {
+  public void return403WhenUserHasNoPermissionToViewStockCard() throws Exception {
     //given
     UUID programId = UUID.randomUUID();
     UUID facilityId = UUID.randomUUID();

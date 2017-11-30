@@ -60,7 +60,7 @@ public class StockEventsControllerrIntegrationTest extends BaseWebTest {
   private StockEventProcessor stockEventProcessor;
 
   @Test
-  public void should_return_201_when_event_successfully_created() throws Exception {
+  public void shouldReturn201WhenEventSuccessfullyCreated() throws Exception {
     //given
     UUID uuid = UUID.randomUUID();
     when(stockEventProcessor.process(any(StockEventDto.class)))
@@ -83,7 +83,7 @@ public class StockEventsControllerrIntegrationTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_403_when_user_has_no_permission_to_adjust_stock() throws Exception {
+  public void shouldReturn403WhenUserHasNoPermissionToAdjustStock() throws Exception {
     //given
     Mockito.doThrow(new PermissionMessageException(
         new Message(ERROR_NO_FOLLOWING_PERMISSION, STOCK_ADJUST)))
@@ -94,7 +94,7 @@ public class StockEventsControllerrIntegrationTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_403_when_user_home_facility_does_not_support_provided_program()
+  public void shouldReturn403WhenUserHomeFacilityDoesNotSupportProvidedProgram()
       throws Exception {
     //given
     StockEventDto eventDto = createNoSourceDestinationStockEventDto();
@@ -107,7 +107,7 @@ public class StockEventsControllerrIntegrationTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_403_when_user_has_no_permission_to_perform_physical_inventory()
+  public void shouldReturn403WhenUserHasNoPermissionToPerformPhysicalInventory()
       throws Exception {
     //given
     Mockito.doThrow(new PermissionMessageException(
@@ -120,7 +120,7 @@ public class StockEventsControllerrIntegrationTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_400_when_validation_fails() throws Exception {
+  public void shouldReturn400WhenValidationFails() throws Exception {
     //given
     Mockito.doThrow(new ValidationMessageException(new Message(ERROR_EVENT_QUANTITY_INVALID)))
         .when(stockEventProcessor).process(any());

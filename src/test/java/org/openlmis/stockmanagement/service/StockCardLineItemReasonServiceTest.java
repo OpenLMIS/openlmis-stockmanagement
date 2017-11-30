@@ -44,7 +44,7 @@ public class StockCardLineItemReasonServiceTest {
   private StockCardLineItemReasonRepository reasonRepository;
 
   @Test(expected = ValidationMessageException.class)
-  public void should_throw_validation_exception_with_unavailable_reason_dto() throws Exception {
+  public void shouldThrowValidationExceptionWithUnavailableReasonDto() throws Exception {
     //given
     StockCardLineItemReason reason = new StockCardLineItemReason();
 
@@ -53,7 +53,7 @@ public class StockCardLineItemReasonServiceTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void should_throw_validation_exception_when_reason_id_not_found_in_db() throws Exception {
+  public void shouldThrowValidationExceptionWhenReasonIdNotFoundInDb() throws Exception {
     //given
     UUID reasonId = UUID.randomUUID();
     when(reasonRepository.findOne(reasonId)).thenReturn(null);
@@ -61,7 +61,7 @@ public class StockCardLineItemReasonServiceTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void should_throw_exception_when_creating_reason_name_is_duplicate_with_other_one()
+  public void shouldThrowExceptionWhenCreatingReasonNameIsDuplicateWithOtherOne()
       throws Exception {
     //given
     StockCardLineItemReason creatingReason = new StockCardLineItemReasonDataBuilder()
@@ -75,7 +75,7 @@ public class StockCardLineItemReasonServiceTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void should_throw_exception_when_updating_reason_name_is_duplicate_with_other_one()
+  public void shouldThrowExceptionWhenUpdatingReasonNameIsDuplicateWithOtherOne()
       throws Exception {
     //given
     StockCardLineItemReason updatingReason = new StockCardLineItemReasonDataBuilder().build();
@@ -87,7 +87,7 @@ public class StockCardLineItemReasonServiceTest {
   }
 
   @Test
-  public void should_get_all_reasons_when_pass_validation() throws Exception {
+  public void shouldGetAllReasonsWhenPassValidation() throws Exception {
     //given
     when(reasonRepository.findAll()).thenReturn(
         asList(new StockCardLineItemReasonDataBuilder().withName("test reason 1").build(),
@@ -105,7 +105,7 @@ public class StockCardLineItemReasonServiceTest {
   }
 
   @Test
-  public void should_save_reason_when_pass_null_value_validation() throws Exception {
+  public void shouldSaveReasonWhenPassNullValueValidation() throws Exception {
     //when
     StockCardLineItemReason reason = new StockCardLineItemReasonDataBuilder().withoutId().build();
     reasonService.saveOrUpdate(reason);

@@ -40,7 +40,7 @@ public class ReasonExistenceValidatorTest extends BaseValidatorTest  {
   private ReasonExistenceValidator reasonExistenceValidator;
 
   @Test
-  public void should_not_throw_error_if_event_has_no_reason_id() throws Exception {
+  public void shouldNotThrowErrorIfEventHasNoReasonId() throws Exception {
     //given
     StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
     stockEventDto.getLineItems().get(0).setReasonId(null);
@@ -53,7 +53,7 @@ public class ReasonExistenceValidatorTest extends BaseValidatorTest  {
   }
 
   @Test
-  public void should_throw_error_if_event_reason_id_not_found_in_db()
+  public void shouldThrowErrorIfEventReasonIdNotFoundInDb()
       throws Exception {
     //expect
     expectedEx.expect(ValidationMessageException.class);

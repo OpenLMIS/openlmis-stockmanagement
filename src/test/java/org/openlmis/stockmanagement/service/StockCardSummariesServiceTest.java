@@ -82,7 +82,7 @@ public class StockCardSummariesServiceTest {
   private StockCardSummariesService stockCardSummariesService;
 
   @Test
-  public void should_create_dummy_cards()
+  public void shouldCreateDummyCards()
       throws Exception {
     //given
     UUID orderable1Id = randomUUID();
@@ -159,7 +159,7 @@ public class StockCardSummariesServiceTest {
   }
 
   @Test
-  public void should_find_existing_stock_cards()
+  public void shouldFindExistingStockCards()
       throws Exception {
     //given
     UUID orderable1Id = randomUUID();
@@ -214,7 +214,7 @@ public class StockCardSummariesServiceTest {
   }
 
   @Test
-  public void should_return_page_of_stock_cards() throws Exception {
+  public void shouldReturnPageOfStockCards() throws Exception {
     //given
     UUID programId = randomUUID();
     UUID facilityId = randomUUID();

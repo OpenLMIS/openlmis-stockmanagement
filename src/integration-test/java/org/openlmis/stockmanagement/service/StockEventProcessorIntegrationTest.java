@@ -104,7 +104,7 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  public void should_not_save_events_if_anything_goes_wrong_in_validations_service()
+  public void shouldNotSaveEventsIfAnythingGoesWrongInValidationsService()
       throws Exception {
     //given
     StockEventDto stockEventDto = createStockEventDto();

@@ -50,7 +50,7 @@ public class ProgramFacilityTypeExistenceServiceTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void throw_validation_message_exception_when_program_not_found() throws Exception {
+  public void throwValidationMessageExceptionWhenProgramNotFound() throws Exception {
     UUID facilityTypeId = randomUUID();
     UUID programId = randomUUID();
     when(programRefDataService.findOne(programId)).thenThrow(
@@ -60,7 +60,7 @@ public class ProgramFacilityTypeExistenceServiceTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void throw_validation_message_exception_when_facility_type_not_found() throws Exception {
+  public void throwValidationMessageExceptionWhenFacilityTypeNotFound() throws Exception {
     UUID facilityTypeId = randomUUID();
     UUID programId = randomUUID();
     when(facilityTypeRefDataService.findOne(facilityTypeId)).thenThrow(
@@ -70,7 +70,7 @@ public class ProgramFacilityTypeExistenceServiceTest {
   }
 
   @Test
-  public void should_not_throw_validation_message_exception_in_happy_path() throws Exception {
+  public void shouldNotThrowValidationMessageExceptionInHappyPath() throws Exception {
     UUID facilityTypeId = randomUUID();
     UUID programId = randomUUID();
 

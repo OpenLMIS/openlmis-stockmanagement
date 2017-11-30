@@ -56,7 +56,7 @@ public class FreeTextValidatorTest extends BaseValidatorTest {
   }
 
   @Test
-  public void should_fail_when_source_not_exist_but_source_free_text_exist() throws Exception {
+  public void shouldFailWhenSourceNotExistButSourceFreeTextExist() throws Exception {
     StockEventDto eventDto = createNoSourceDestinationStockEventDto();
     eventDto.getLineItems().get(0).setSourceId(null);
     eventDto.getLineItems().get(0).setSourceFreeText("source free text");
@@ -69,7 +69,7 @@ public class FreeTextValidatorTest extends BaseValidatorTest {
   }
 
   @Test
-  public void should_fail_when_destination_not_exist_but_destination_free_text_exist()
+  public void shouldFailWhenDestinationNotExistButDestinationFreeTextExist()
       throws Exception {
     StockEventDto eventDto = createNoSourceDestinationStockEventDto();
     eventDto.getLineItems().get(0).setDestinationFreeText("destination free text");
@@ -82,7 +82,7 @@ public class FreeTextValidatorTest extends BaseValidatorTest {
   }
 
   @Test
-  public void should_fail_when_reason_not_exist_but_reason_free_text_exist() throws Exception {
+  public void shouldFailWhenReasonNotExistButReasonFreeTextExist() throws Exception {
     StockEventDto eventDto = createNoSourceDestinationStockEventDto();
     eventDto.getLineItems().get(0).setReasonId(null);
     eventDto.getLineItems().get(0).setReasonFreeText("reason free text");
@@ -95,7 +95,7 @@ public class FreeTextValidatorTest extends BaseValidatorTest {
   }
 
   @Test
-  public void should_fail_when_event_has_both_source_and_destination_free_text() throws Exception {
+  public void shouldFailWhenEventHasBothSourceAndDestinationFreeText() throws Exception {
     StockEventDto eventDto = createStockEventDto();
     eventDto.getLineItems().get(0).setReasonId(randomUUID());
     eventDto.getLineItems().get(0).setDestinationId(randomUUID());
@@ -110,7 +110,7 @@ public class FreeTextValidatorTest extends BaseValidatorTest {
   }
 
   @Test
-  public void should_fail_when_source_node_is_refdata_with_free_text() throws Exception {
+  public void shouldFailWhenSourceNodeIsRefdataWithFreeText() throws Exception {
     UUID sourceId = fromString("0bd28568-43f1-4836-934d-ec5fb11398e8");
 
     StockEventDto eventDto = createNoSourceDestinationStockEventDto();
@@ -127,7 +127,7 @@ public class FreeTextValidatorTest extends BaseValidatorTest {
   }
 
   @Test
-  public void should_fail_when_destination_node_is_refdata_with_free_text() throws Exception {
+  public void shouldFailWhenDestinationNodeIsRefdataWithFreeText() throws Exception {
     UUID destinationId = fromString("0bd28568-43f1-4836-934d-ec5fb11398e8");
 
     StockEventDto eventDto = createNoSourceDestinationStockEventDto();
@@ -144,7 +144,7 @@ public class FreeTextValidatorTest extends BaseValidatorTest {
   }
 
   @Test
-  public void should_fail_when_reason_free_text_not_allowed_but_exist() throws Exception {
+  public void shouldFailWhenReasonFreeTextNotAllowedButExist() throws Exception {
     StockCardLineItemReason mockReason = mock(StockCardLineItemReason.class);
     when(reasonRepository.findOne(any(UUID.class))).thenReturn(mockReason);
     when(mockReason.getIsFreeTextAllowed()).thenReturn(false);

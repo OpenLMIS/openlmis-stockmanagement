@@ -78,7 +78,7 @@ public class SourceDestinationAssignmentValidatorTest extends BaseValidatorTest 
   }
 
   @Test
-  public void should_not_pass_when_event_has_both_source_and_destination() throws Exception {
+  public void shouldNotPassWhenEventHasBothSourceAndDestination() throws Exception {
     //given
     StockEventDto eventDto = createStockEventDto();
     createContextWithFacility(eventDto);
@@ -94,7 +94,7 @@ public class SourceDestinationAssignmentValidatorTest extends BaseValidatorTest 
   }
 
   @Test
-  public void should_not_pass_when_event_has_source_not_in_valid_list() throws Exception {
+  public void shouldNotPassWhenEventHasSourceNotInValidList() throws Exception {
     //given
     StockEventDto eventDto = createStockEventDto();
     createContextWithFacility(eventDto);
@@ -114,7 +114,7 @@ public class SourceDestinationAssignmentValidatorTest extends BaseValidatorTest 
   }
 
   @Test
-  public void should_not_pass_when_event_has_destination_not_in_valid_list() throws Exception {
+  public void shouldNotPassWhenEventHasDestinationNotInValidList() throws Exception {
     //given
     StockEventDto eventDto = createStockEventDto();
     createContextWithFacility(eventDto);
@@ -136,7 +136,7 @@ public class SourceDestinationAssignmentValidatorTest extends BaseValidatorTest 
   @Test
   //this validator does not care if program missing
   //that is handled in other validators
-  public void should_pass_if_program_missing() throws Exception {
+  public void shouldPassIfProgramMissing() throws Exception {
     //given
     StockEventDto eventDto = createStockEventDto();
     createContextWithFacility(eventDto);
@@ -154,7 +154,7 @@ public class SourceDestinationAssignmentValidatorTest extends BaseValidatorTest 
   @Test
   //this validator does not care if facility type not found in ref data
   //that is handled in other validators
-  public void should_pass_if_facility_not_found_in_ref_data() throws Exception {
+  public void shouldPassIfFacilityNotFoundInRefData() throws Exception {
     //given
     StockEventDto eventDto = createStockEventDto();
     createContextWithFacility(eventDto);

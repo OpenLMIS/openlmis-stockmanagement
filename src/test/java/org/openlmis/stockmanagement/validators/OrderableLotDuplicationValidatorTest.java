@@ -42,7 +42,7 @@ public class OrderableLotDuplicationValidatorTest {
   private OrderableLotDuplicationValidator orderableLotDuplicationValidator;
 
   @Test
-  public void adjustment_event_with_same_orderable_and_lot_appear_twice_should_pass()
+  public void adjustmentEventWithSameOrderableAndLotAppearTwiceShouldPass()
       throws Exception {
     StockEventDto eventDto = createStockEventDtoWithDuplicateOrderableLot(randomUUID());
 
@@ -51,7 +51,7 @@ public class OrderableLotDuplicationValidatorTest {
   }
 
   @Test
-  public void physical_inventory_event_with_same_orderable_and_lot_appear_twice_should_not_pass()
+  public void physicalInventoryEventWithSameOrderableAndLotAppearTwiceShouldNotPass()
       throws Exception {
     //expect: exception
     expectedEx.expectMessage(ERROR_EVENT_ORDERABLE_LOT_DUPLICATION);

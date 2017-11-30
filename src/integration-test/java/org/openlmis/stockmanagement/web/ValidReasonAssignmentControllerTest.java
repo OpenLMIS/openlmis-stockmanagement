@@ -75,7 +75,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   }
 
   @Test
-  public void get_valid_reason_assignment_by_program_and_facility_type() throws Exception {
+  public void getValidReasonAssignmentByProgramAndFacilityType() throws Exception {
     //given
     UUID programId = UUID.randomUUID();
     UUID facilityTypeId = UUID.randomUUID();
@@ -170,7 +170,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   }
 
   @Test
-  public void should_ignore_assignment_id_when_request_body_specified_it() throws Exception {
+  public void shouldIgnoreAssignmentIdWhenRequestBodySpecifiedIt() throws Exception {
     //given
     ValidReasonAssignment assignment = mockedValidReasonAssignment(UUID.randomUUID());
     assignment.setId(UUID.randomUUID());
@@ -189,7 +189,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   }
 
   @Test
-  public void should_not_assign_same_reason_twice() throws Exception {
+  public void shouldNotAssignSameReasonTwice() throws Exception {
     //given
     UUID reasonId = UUID.randomUUID();
     StockCardLineItemReason reason = new StockCardLineItemReason();
@@ -218,7 +218,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_400_if_reason_id_is_null() throws Exception {
+  public void shouldReturn400IfReasonIdIsNull() throws Exception {
     //when
     ResultActions resultActions = mvc.perform(
         post(VALID_REASON_API)
@@ -232,7 +232,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_400_if_reason_not_exist() throws Exception {
+  public void shouldReturn400IfReasonNotExist() throws Exception {
     //given
     UUID reasonId = UUID.randomUUID();
     StockCardLineItemReason reason = new StockCardLineItemReason();
@@ -255,7 +255,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   }
 
   @Test
-  public void return_400_when_permission_check_fails() throws Exception {
+  public void return400WhenPermissionCheckFails() throws Exception {
     //given
     //not exist in demo data
     UUID programId = randomUUID();
@@ -276,7 +276,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   }
 
   @Test
-  public void return_204_when_remove_reason_success() throws Exception {
+  public void return204WhenRemoveReasonSuccess() throws Exception {
     UUID assignmentId = randomUUID();
     when(reasonAssignmentRepository.exists(assignmentId)).thenReturn(true);
 
@@ -290,7 +290,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   }
 
   @Test
-  public void return_400_when_reason_is_not_found() throws Exception {
+  public void return400WhenReasonIsNotFound() throws Exception {
     UUID assignmentId = randomUUID();
     when(reasonAssignmentRepository.exists(assignmentId)).thenReturn(false);
 

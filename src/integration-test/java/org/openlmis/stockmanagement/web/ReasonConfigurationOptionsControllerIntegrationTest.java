@@ -39,7 +39,7 @@ public class ReasonConfigurationOptionsControllerIntegrationTest extends BaseWeb
   private PermissionService permissionService;
 
   @Test
-  public void should_get_reason_types() throws Exception {
+  public void shouldGetReasonTypes() throws Exception {
     //when
     ResultActions resultActions = mvc.perform(get(reasonTypesApi)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
@@ -54,7 +54,7 @@ public class ReasonConfigurationOptionsControllerIntegrationTest extends BaseWeb
   }
 
   @Test
-  public void should_get_reason_categories() throws Exception {
+  public void shouldGetReasonCategories() throws Exception {
     //when
     ResultActions resultActions = mvc.perform(get(reasonCategoriesApi)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
@@ -68,13 +68,13 @@ public class ReasonConfigurationOptionsControllerIntegrationTest extends BaseWeb
   }
 
   @Test
-  public void should_return_403_for_reason_type_access_if_user_has_no_permission()
+  public void shouldReturn403ForReasonTypeAccessIfUserHasNoPermission()
       throws Exception {
     shouldThrow403(reasonTypesApi);
   }
 
   @Test
-  public void should_return_403_for_reason_category_access_if_user_has_no_permission()
+  public void shouldReturn403ForReasonCategoryAccessIfUserHasNoPermission()
       throws Exception {
     shouldThrow403(reasonCategoriesApi);
   }

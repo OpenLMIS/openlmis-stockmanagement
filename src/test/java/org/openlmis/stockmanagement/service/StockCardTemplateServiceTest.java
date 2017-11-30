@@ -47,7 +47,7 @@ public class StockCardTemplateServiceTest {
   private ProgramFacilityTypeExistenceService programFacilityTypeExistenceService;
 
   @Test
-  public void should_update_existing_template() {
+  public void shouldUpdateExistingTemplate() {
     //given: there is an existing template
     StockCardTemplateDto savedTemplate = stockCardTemplateService.saveOrUpdate(createTemplateDto());
     UUID facilityTypeId = savedTemplate.getFacilityTypeId();
@@ -72,7 +72,7 @@ public class StockCardTemplateServiceTest {
   }
 
   @Test
-  public void should_get_default_stock_card_template() {
+  public void shouldGetDefaultStockCardTemplate() {
     //when
     StockCardTemplateDto template = stockCardTemplateService.getDefaultStockCardTemplate();
 
@@ -85,7 +85,7 @@ public class StockCardTemplateServiceTest {
   }
 
   @Test
-  public void should_return_null_when_no_template_found() {
+  public void shouldReturnNullWhenNoTemplateFound() {
 
     //when: searching for non-existing template
     StockCardTemplateDto dto = stockCardTemplateService
@@ -96,7 +96,7 @@ public class StockCardTemplateServiceTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void should_not_save_template_with_unavailable_field() {
+  public void shouldNotSaveTemplateWithUnavailableField() {
     //given
     StockCardTemplateDto templateDto = createTemplateDto();
     templateDto.getStockCardFields().add(new StockCardFieldDto("i do not exist", false, 1));
@@ -106,7 +106,7 @@ public class StockCardTemplateServiceTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void should_not_save_template_with_non_existing_program_and_facility_type() {
+  public void shouldNotSaveTemplateWithNonExistingProgramAndFacilityType() {
     //given: program and facility can not be found in ref data service
     doThrow(new ValidationMessageException("errorKey")).when(programFacilityTypeExistenceService)
         .checkProgramAndFacilityTypeExist(any(UUID.class), any(UUID.class));
@@ -118,7 +118,7 @@ public class StockCardTemplateServiceTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void should_throw_validation_exception_when_program_id_missing() throws Exception {
+  public void shouldThrowValidationExceptionWhenProgramIdMissing() throws Exception {
     StockCardTemplateDto templateDto = createTemplateDto();
     templateDto.setProgramId(null);
 
@@ -127,7 +127,7 @@ public class StockCardTemplateServiceTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void should_throw_validation_exception_when_facility_type_id_missing() throws Exception {
+  public void shouldThrowValidationExceptionWhenFacilityTypeIdMissing() throws Exception {
     StockCardTemplateDto templateDto = createTemplateDto();
     templateDto.setFacilityTypeId(null);
 
@@ -136,7 +136,7 @@ public class StockCardTemplateServiceTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void should_throw_exception_when_card_fields_duplicated() throws Exception {
+  public void shouldThrowExceptionWhenCardFieldsDuplicated() throws Exception {
     StockCardTemplateDto dto = createTemplateDto();
     dto.getStockCardFields().add(new StockCardFieldDto("packSize", true, 124));
 
@@ -144,7 +144,7 @@ public class StockCardTemplateServiceTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void should_throw_exception_when_line_item_fields_duplicated() throws Exception {
+  public void shouldThrowExceptionWhenLineItemFieldsDuplicated() throws Exception {
     StockCardTemplateDto dto = createTemplateDto();
     dto.getStockCardLineItemFields().add(new StockCardLineItemFieldDto("documentNo", true, 457));
 

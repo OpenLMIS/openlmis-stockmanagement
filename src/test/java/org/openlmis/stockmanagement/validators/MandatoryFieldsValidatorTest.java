@@ -66,7 +66,7 @@ public class MandatoryFieldsValidatorTest extends BaseValidatorTest  {
   }
 
   @Test
-  public void stock_event_with_incorrect_facility_id_should_not_pass_validation() throws Exception {
+  public void stockEventWithIncorrectFacilityIdShouldNotPassValidation() throws Exception {
     UUID facilityId = UUID.randomUUID();
     when(facilityService.findOne(facilityId)).thenReturn(null);
 
@@ -74,7 +74,7 @@ public class MandatoryFieldsValidatorTest extends BaseValidatorTest  {
   }
 
   @Test
-  public void stock_event_with_incorrect_program_id_should_not_pass_validation() throws Exception {
+  public void stockEventWithIncorrectProgramIdShouldNotPassValidation() throws Exception {
     UUID programId = UUID.randomUUID();
     when(programService.findOne(programId)).thenReturn(null);
 
@@ -82,57 +82,57 @@ public class MandatoryFieldsValidatorTest extends BaseValidatorTest  {
   }
 
   @Test()
-  public void stock_event_without_orderable_should_not_pass_validation() throws Exception {
+  public void stockEventWithoutOrderableShouldNotPassValidation() throws Exception {
     expectOrderableException(null);
   }
 
   @Test
-  public void stock_event_with_facility_program_orderable_should_pass_validation()
+  public void stockEventWithFacilityProgramOrderableShouldPassValidation()
       throws Exception {
     mandatoryFieldsValidator.validate(stockEventDto);
   }
 
   @Test()
-  public void stock_event_without_occurred_date_should_not_pass_validation()
+  public void stockEventWithoutOccurredDateShouldNotPassValidation()
       throws Exception {
     expectOccurredDateException(null,
         ERROR_EVENT_OCCURRED_DATE_INVALID);
   }
 
   @Test()
-  public void stock_event_with_future_occurred_date_should_not_pass_validation() throws Exception {
+  public void stockEventWithFutureOccurredDateShouldNotPassValidation() throws Exception {
     //given
     expectOccurredDateException(LocalDate.now().plusDays(1),
         ERROR_EVENT_OCCURRED_DATE_IN_FUTURE);
   }
 
   @Test
-  public void stock_event_with_right_occurred_date_should_pass_validation() throws Exception {
+  public void stockEventWithRightOccurredDateShouldPassValidation() throws Exception {
     mandatoryFieldsValidator.validate(stockEventDto);
   }
 
   @Test()
-  public void stock_event_without_quantity_should_not_pass_validation() throws Exception {
+  public void stockEventWithoutQuantityShouldNotPassValidation() throws Exception {
     expectQuantityException(null);
   }
 
   @Test()
-  public void stock_event_with_negative_quantity_should_not_pass_validation() throws Exception {
+  public void stockEventWithNegativeQuantityShouldNotPassValidation() throws Exception {
     expectQuantityException(-100);
   }
 
   @Test
-  public void stock_event_with_positive_or_zero_quantity_should_pass_validation() throws Exception {
+  public void stockEventWithPositiveOrZeroQuantityShouldPassValidation() throws Exception {
     mandatoryFieldsValidator.validate(stockEventDto);
   }
 
   @Test
-  public void should_not_pass_if_no_line_items() throws Exception {
+  public void shouldNotPassIfNoLineItems() throws Exception {
     expectLineItemsError(null);
   }
 
   @Test
-  public void should_not_pass_if_empty_line_items() throws Exception {
+  public void shouldNotPassIfEmptyLineItems() throws Exception {
     expectLineItemsError(emptyList());
   }
 

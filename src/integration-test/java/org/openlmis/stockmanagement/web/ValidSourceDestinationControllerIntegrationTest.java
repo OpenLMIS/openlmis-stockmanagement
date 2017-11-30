@@ -64,7 +64,7 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
   private PermissionService permissionService;
 
   @Test
-  public void should_get_valid_sources_or_destinations_by_program_and_facilityType()
+  public void shouldGetValidSourcesOrDestinationsByProgramAndFacilityType()
       throws Exception {
     //given
     ValidSourceDestinationDto destinationAssignmentDto = new ValidSourceDestinationDto();
@@ -89,7 +89,7 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
   }
 
   @Test
-  public void should_return_400_when_permission_check_fails()
+  public void shouldReturn400WhenPermissionCheckFails()
       throws Exception {
     //given
     UUID programId = randomUUID();
@@ -110,7 +110,7 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
   }
 
   @Test
-  public void return_201_when_assign_source_successfully() throws Exception {
+  public void return201WhenAssignSourceSuccessfully() throws Exception {
     //given
     UUID programId = randomUUID();
     UUID facilityTypeId = randomUUID();
@@ -140,7 +140,7 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
   }
 
   @Test
-  public void return_201_when_assign_destination_successfully() throws Exception {
+  public void return201WhenAssignDestinationSuccessfully() throws Exception {
     //given
     UUID programId = UUID.randomUUID();
     UUID facilityTypeId = UUID.randomUUID();
@@ -171,7 +171,7 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
   }
 
   @Test
-  public void should_return_200_when_destination_assignment_already_exist() throws Exception {
+  public void shouldReturn200WhenDestinationAssignmentAlreadyExist() throws Exception {
     //given
     UUID programId = UUID.randomUUID();
     UUID facilityTypeId = UUID.randomUUID();
@@ -201,7 +201,7 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
   }
 
   @Test
-  public void should_return_200_when_source_assignment_already_exist() throws Exception {
+  public void shouldReturn200WhenSourceAssignmentAlreadyExist() throws Exception {
     //given
     UUID programId = randomUUID();
     UUID facilityTypeId = randomUUID();
@@ -231,14 +231,14 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
   }
 
   @Test
-  public void should_return_204_when_source_assignment_removed() throws Exception {
+  public void shouldReturn204WhenSourceAssignmentRemoved() throws Exception {
     mvc.perform(delete(API_VALID_SOURCES + "/" + randomUUID().toString())
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE))
         .andExpect(status().isNoContent());
   }
 
   @Test
-  public void should_return_204_when_destination_assignment_removed() throws Exception {
+  public void shouldReturn204WhenDestinationAssignmentRemoved() throws Exception {
     mvc.perform(delete(API_VALID_DESTINATIONS + "/" + randomUUID().toString())
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE))
         .andExpect(status().isNoContent());

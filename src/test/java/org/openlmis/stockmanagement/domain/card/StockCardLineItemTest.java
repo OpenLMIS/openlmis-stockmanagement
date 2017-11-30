@@ -49,7 +49,7 @@ public class StockCardLineItemTest {
   public final ExpectedException exception = ExpectedException.none();
 
   @Test
-  public void should_create_line_item_from_stock_event() throws Exception {
+  public void shouldCreateLineItemFromStockEvent() throws Exception {
     //given
     StockCard stockCard = new StockCard();
     stockCard.setLineItems(new ArrayList<>());
@@ -100,7 +100,7 @@ public class StockCardLineItemTest {
   }
 
   @Test
-  public void should_increase_soh_of_line_item_with_credit_reason() throws Exception {
+  public void shouldIncreaseSohOfLineItemWithCreditReason() throws Exception {
     //given
     StockCardLineItemReason creditReason = StockCardLineItemReason.builder()
         .reasonType(ReasonType.CREDIT).build();
@@ -116,7 +116,7 @@ public class StockCardLineItemTest {
   }
 
   @Test
-  public void should_not_increase_soh_over_int_limit() throws Exception {
+  public void shouldNotIncreaseSohOverIntLimit() throws Exception {
     //expect
     exception.expectMessage("exceed.upperLimit");
 
@@ -133,7 +133,7 @@ public class StockCardLineItemTest {
   }
 
   @Test
-  public void should_decrease_soh_of_line_item_with_debit_reason() throws Exception {
+  public void shouldDecreaseSohOfLineItemWithDebitReason() throws Exception {
     //given
     StockCardLineItemReason debitReason = StockCardLineItemReason.builder()
         .reasonType(ReasonType.DEBIT).build();
@@ -149,7 +149,7 @@ public class StockCardLineItemTest {
   }
 
   @Test
-  public void should_increase_soh_of_line_item_when_receive_from() throws Exception {
+  public void shouldIncreaseSohOfLineItemWhenReceiveFrom() throws Exception {
     //given
     StockCardLineItem lineItem = StockCardLineItem.builder()
         .source(new Node())
@@ -162,7 +162,7 @@ public class StockCardLineItemTest {
   }
 
   @Test
-  public void should_decrease_soh_of_line_item_when_issue_to() throws Exception {
+  public void shouldDecreaseSohOfLineItemWhenIssueTo() throws Exception {
     //given
     StockCardLineItem lineItem = StockCardLineItem.builder()
         .destination(new Node())
@@ -175,7 +175,7 @@ public class StockCardLineItemTest {
   }
 
   @Test
-  public void should_assign_credit_reason_and_return_quantity_as_soh_for_physical_overstock()
+  public void shouldAssignCreditReasonAndReturnQuantityAsSohForPhysicalOverstock()
       throws Exception {
     //given
     StockCardLineItem lineItem = StockCardLineItem.builder()
@@ -191,7 +191,7 @@ public class StockCardLineItemTest {
   }
 
   @Test
-  public void should_assign_debit_reason_and_return_quantity_as_soh_for_physical_understock()
+  public void shouldAssignDebitReasonAndReturnQuantityAsSohForPhysicalUnderstock()
       throws Exception {
     //given
     StockCardLineItem lineItem = StockCardLineItem.builder()
@@ -207,7 +207,7 @@ public class StockCardLineItemTest {
   }
 
   @Test
-  public void should_assign_balance_reason_and_return_quantity_as_soh_for_physical_balance()
+  public void shouldAssignBalanceReasonAndReturnQuantityAsSohForPhysicalBalance()
       throws Exception {
     //given
     StockCardLineItem lineItem = StockCardLineItem.builder()

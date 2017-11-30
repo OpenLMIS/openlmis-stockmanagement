@@ -47,7 +47,7 @@ public class OrganizationControllerIntegrationTest extends BaseWebTest {
   private OrganizationRepository organizationRepository;
 
   @Test
-  public void should_return_201_when_organization_created_successfully() throws Exception {
+  public void shouldReturn201WhenOrganizationCreatedSuccessfully() throws Exception {
     //given
     Organization organization = createOrganization("New Org");
     when(organizationRepository.save(organization)).thenReturn(organization);
@@ -64,7 +64,7 @@ public class OrganizationControllerIntegrationTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_200_when_user_has_permission_to_get_organizations() throws Exception {
+  public void shouldReturn200WhenUserHasPermissionToGetOrganizations() throws Exception {
     //given
     when(organizationRepository.findAll()).thenReturn(
         asList(createOrganization("Existing Org1"),
@@ -81,7 +81,7 @@ public class OrganizationControllerIntegrationTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_200_when_organization_update_completed() throws Exception {
+  public void shouldReturn200WhenOrganizationUpdateCompleted() throws Exception {
     //given
     Organization organization = createOrganization("Updated Org");
     organization.setId(UUID.randomUUID());
@@ -102,7 +102,7 @@ public class OrganizationControllerIntegrationTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_403_when_user_has_no_permission_to_manage_organizations()
+  public void shouldReturn403WhenUserHasNoPermissionToManageOrganizations()
       throws Exception {
     //given
     doThrow(new PermissionMessageException(new Message("key")))
@@ -132,7 +132,7 @@ public class OrganizationControllerIntegrationTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_200_when_try_to_create_organizations_has_existed() throws Exception {
+  public void shouldReturn200WhenTryToCreateOrganizationsHasExisted() throws Exception {
     //given
     Organization organization = createOrganization("Test Org");
     when(organizationRepository.findByName(organization.getName())).thenReturn(organization);
@@ -148,7 +148,7 @@ public class OrganizationControllerIntegrationTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_400_when_reason_without_name() throws Exception {
+  public void shouldReturn400WhenReasonWithoutName() throws Exception {
     //when
     ResultActions resultActions = mvc.perform(post(ORGANIZATION_API)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
@@ -160,7 +160,7 @@ public class OrganizationControllerIntegrationTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_400_when_would_be_updated_organization_content_exists()
+  public void shouldReturn400WhenWouldBeUpdatedOrganizationContentExists()
       throws Exception {
     //given
     Organization updateOrg = createOrganization("Existing Org Name");

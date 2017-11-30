@@ -45,7 +45,7 @@ public class ActiveStockCardsValidatorTest {
   private ActiveStockCardsValidator activeStockCardsValidator;
 
   @Test
-  public void should_throw_exception_if_existing_card_orderable_not_covered() throws Exception {
+  public void shouldThrowExceptionIfExistingCardOrderableNotCovered() throws Exception {
     expectedEx.expectMessage(ERROR_PHYSICAL_INVENTORY_NOT_INCLUDE_ACTIVE_STOCK_CARD);
 
     //given
@@ -61,7 +61,7 @@ public class ActiveStockCardsValidatorTest {
   }
 
   @Test
-  public void should_throw_exception_if_existing_card_lot_not_covered() throws Exception {
+  public void shouldThrowExceptionIfExistingCardLotNotCovered() throws Exception {
     expectedEx.expectMessage(ERROR_PHYSICAL_INVENTORY_NOT_INCLUDE_ACTIVE_STOCK_CARD);
 
     //given

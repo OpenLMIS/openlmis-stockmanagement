@@ -102,7 +102,7 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  public void should_save_stock_card_line_items_and_create_stock_card_for_first_movement()
+  public void shouldSaveStockCardLineItemsAndCreateStockCardForFirstMovement()
       throws Exception {
     //given
     UUID userId = randomUUID();
@@ -128,7 +128,7 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  public void should_save_line_items_with_program_facility_orderable_for_non_first_movement()
+  public void shouldSaveLineItemsWithProgramFacilityOrderableForNonFirstMovement()
       throws Exception {
     //given
     //1. there is an existing event that caused a stock card to exist
@@ -161,7 +161,7 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  public void should_get_refdata_and_convert_organizations_when_find_stock_card()
+  public void shouldGetRefdataAndConvertOrganizationsWhenFindStockCard()
       throws Exception {
     //given
     UUID userId = randomUUID();
@@ -208,7 +208,7 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  public void should_get_stock_card_with_calculated_soh_when_find_stock_card() throws Exception {
+  public void shouldGetStockCardWithCalculatedSohWhenFindStockCard() throws Exception {
     //given
     StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
     stockEventDto.getLineItems().get(0).setSourceId(null);
@@ -224,7 +224,7 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  public void should_reassign_physical_inventory_reason_names() throws Exception {
+  public void shouldReassignPhysicalInventoryReasonNames() throws Exception {
     //given
     StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
     stockEventDto.getLineItems().get(0).setSourceId(null);
@@ -242,7 +242,7 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  public void should_return_null_when_can_not_find_stock_card_by_id() throws Exception {
+  public void shouldReturnNullWhenCanNotFindStockCardById() throws Exception {
     //when
     UUID nonExistingCardId = randomUUID();
     StockCardDto cardDto = stockCardService.findStockCardById(nonExistingCardId);
@@ -252,7 +252,7 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test(expected = PermissionMessageException.class)
-  public void should_throw_permission_exception_if_user_has_no_permission_to_view_card()
+  public void shouldThrowPermissionExceptionIfUserHasNoPermissionToViewCard()
       throws Exception {
     //given
     StockEvent savedEvent = save(createStockEventDto(), randomUUID());

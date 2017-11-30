@@ -36,7 +36,7 @@ public class StockCardTemplatesRepositoryIntegrationTest {
   private StockCardTemplatesRepository stockCardTemplatesRepository;
 
   @Test
-  public void should_search_for_stock_card_template_by_facility_type_and_program()
+  public void shouldSearchForStockCardTemplateByFacilityTypeAndProgram()
       throws Exception {
     //given
     StockCardTemplate template = createTemplate();

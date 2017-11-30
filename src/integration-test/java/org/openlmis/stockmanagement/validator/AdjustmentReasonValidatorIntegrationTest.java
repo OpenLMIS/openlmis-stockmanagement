@@ -56,7 +56,7 @@ public class AdjustmentReasonValidatorIntegrationTest extends BaseIntegrationTes
   }
 
   @Test
-  public void incorrect_reason_type_should_not_pass_when_event_has_no_source_and_destination()
+  public void incorrectReasonTypeShouldNotPassWhenEventHasNoSourceAndDestination()
       throws Exception {
     //given
     StockCardLineItemReason reason = StockCardLineItemReason
@@ -79,7 +79,7 @@ public class AdjustmentReasonValidatorIntegrationTest extends BaseIntegrationTes
   }
 
   @Test
-  public void incorrect_reason_category_should_not_pass_when_event_has_no_source_and_destination()
+  public void incorrectReasonCategoryShouldNotPassWhenEventHasNoSourceAndDestination()
       throws Exception {
     //given
 
@@ -103,7 +103,7 @@ public class AdjustmentReasonValidatorIntegrationTest extends BaseIntegrationTes
   }
 
   @Test
-  public void should_not_throw_exception_if_event_has_no_source_destination_reason_id()
+  public void shouldNotThrowExceptionIfEventHasNoSourceDestinationReasonId()
       throws Exception {
     //given
     StockEventDto stockEventDto = StockEventDtoDataBuilder.createNoSourceDestinationStockEventDto();
@@ -115,7 +115,7 @@ public class AdjustmentReasonValidatorIntegrationTest extends BaseIntegrationTes
   }
 
   @Test
-  public void should_not_throw_error_for_event_with_no_source_destination_and_reason_not_in_db()
+  public void shouldNotThrowErrorForEventWithNoSourceDestinationAndReasonNotInDb()
       throws Exception {
     //given
     StockEventDto stockEventDto = StockEventDtoDataBuilder.createNoSourceDestinationStockEventDto();
@@ -127,7 +127,7 @@ public class AdjustmentReasonValidatorIntegrationTest extends BaseIntegrationTes
   }
 
   @Test
-  public void should_not_throw_error_for_event_with_no_reason_id() throws Exception {
+  public void shouldNotThrowErrorForEventWithNoReasonId() throws Exception {
     //given
     StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
     stockEventDto.getLineItems().get(0).setReasonId(null);

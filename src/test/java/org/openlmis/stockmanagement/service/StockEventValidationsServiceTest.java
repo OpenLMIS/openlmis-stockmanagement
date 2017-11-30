@@ -115,7 +115,7 @@ public class StockEventValidationsServiceTest {
   }
 
   @Test
-  public void should_validate_with_all_implementations_of_validators() throws Exception {
+  public void shouldValidateWithAllImplementationsOfValidators() throws Exception {
     //given
     StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
 
@@ -128,7 +128,7 @@ public class StockEventValidationsServiceTest {
   }
 
   @Test
-  public void should_not_run_next_validator_if_previous_validator_failed() throws Exception {
+  public void shouldNotRunNextValidatorIfPreviousValidatorFailed() throws Exception {
     //given
     StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
     doThrow(new ValidationMessageException(new Message("some error")))

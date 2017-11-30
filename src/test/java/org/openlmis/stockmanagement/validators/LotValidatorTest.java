@@ -55,7 +55,7 @@ public class LotValidatorTest  extends BaseValidatorTest {
   }
 
   @Test
-  public void should_fail_if_lot_does_not_exist() throws Exception {
+  public void shouldFailIfLotDoesNotExist() throws Exception {
     //expect
     expectedEx.expectMessage(ERROR_EVENT_LOT_NOT_EXIST);
 
@@ -70,7 +70,7 @@ public class LotValidatorTest  extends BaseValidatorTest {
   }
 
   @Test
-  public void should_fail_if_lot_does_not_match_orderable() throws Exception {
+  public void shouldFailIfLotDoesNotMatchOrderable() throws Exception {
     //expect
     expectedEx.expectMessage(ERROR_EVENT_LOT_ORDERABLE_NOT_MATCH);
 

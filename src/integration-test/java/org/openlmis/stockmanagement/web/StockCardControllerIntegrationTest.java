@@ -60,7 +60,7 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
   private PermissionService permissionService;
 
   @Test
-  public void should_404_when_stock_card_not_found_by_id() throws Exception {
+  public void should404WhenStockCardNotFoundById() throws Exception {
     //given
     when(stockCardService.findStockCardById(any(UUID.class))).thenReturn(null);
 
@@ -74,7 +74,7 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
   }
 
   @Test
-  public void should_get_stock_card_by_id() throws Exception {
+  public void shouldGetStockCardById() throws Exception {
     //given
     UUID stockCardId = UUID.randomUUID();
     StockCardDto stockCardDto = createStockCardDto();
@@ -106,7 +106,7 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_403_when_user_does_not_have_permission_to_view_card_summaries()
+  public void shouldReturn403WhenUserDoesNotHavePermissionToViewCardSummaries()
       throws Exception {
     //given
     UUID programId = UUID.randomUUID();
@@ -127,7 +127,7 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
   }
 
   @Test
-  public void should_get_paged_stock_card_summaries_when_permission_is_granted() throws Exception {
+  public void shouldGetPagedStockCardSummariesWhenPermissionIsGranted() throws Exception {
     //given
     UUID programId = UUID.randomUUID();
     UUID facilityId = UUID.randomUUID();

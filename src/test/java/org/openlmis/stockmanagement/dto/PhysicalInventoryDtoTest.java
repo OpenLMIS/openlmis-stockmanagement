@@ -28,7 +28,7 @@ import java.util.Collections;
 
 public class PhysicalInventoryDtoTest {
   @Test
-  public void should_convert_from_stock_event_dto() throws Exception {
+  public void shouldConvertFromStockEventDto() throws Exception {
     //given
     StockEventDto eventDto = StockEventDtoDataBuilder.createStockEventDto();
 
@@ -44,7 +44,7 @@ public class PhysicalInventoryDtoTest {
   }
 
   @Test
-  public void should_convert_into_inventory_jpa_model_for_submit() throws Exception {
+  public void shouldConvertIntoInventoryJpaModelForSubmit() throws Exception {
     //given
     PhysicalInventoryDto piDto = createInventoryDto();
 
@@ -58,7 +58,7 @@ public class PhysicalInventoryDtoTest {
   }
 
   @Test
-  public void should_convert_into_inventory_jpa_model_for_draft() throws Exception {
+  public void shouldConvertIntoInventoryJpaModelForDraft() throws Exception {
     //given
     PhysicalInventoryDto piDto = createInventoryDto();
 
@@ -72,7 +72,7 @@ public class PhysicalInventoryDtoTest {
   }
 
   @Test
-  public void should_create_dto_from_jpa_model() throws Exception {
+  public void shouldCreateDtoFromJpaModel() throws Exception {
     //given
     PhysicalInventory inventory = createInventoryDto().toPhysicalInventoryForDraft();
 

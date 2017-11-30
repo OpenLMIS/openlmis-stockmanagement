@@ -112,7 +112,7 @@ public class PermissionServiceTest {
   }
 
   @Test
-  public void admin_can_view_all_valid_reasons_sources_destinations() throws Exception {
+  public void adminCanViewAllValidReasonsSourcesDestinations() throws Exception {
     //given
     hasRight(null, true);//null right id is in the mocked right dtos
 

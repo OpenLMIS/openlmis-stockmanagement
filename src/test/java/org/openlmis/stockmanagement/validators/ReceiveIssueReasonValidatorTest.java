@@ -67,7 +67,7 @@ public class ReceiveIssueReasonValidatorTest extends BaseValidatorTest  {
   }
 
   @Test
-  public void event_that_has_source_but_no_reason_should_pass() throws Exception {
+  public void eventThatHasSourceButNoReasonShouldPass() throws Exception {
     //given
     StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.getLineItems().get(0).setSourceId(UUID.randomUUID());
@@ -82,7 +82,7 @@ public class ReceiveIssueReasonValidatorTest extends BaseValidatorTest  {
   }
 
   @Test
-  public void event_that_has_destination_but_no_reason_should_pass() throws Exception {
+  public void eventThatHasDestinationButNoReasonShouldPass() throws Exception {
     //given
     StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.getLineItems().get(0).setDestinationId(UUID.randomUUID());
@@ -97,7 +97,7 @@ public class ReceiveIssueReasonValidatorTest extends BaseValidatorTest  {
   }
 
   @Test
-  public void event_that_has_source_and_a_reason_of_credit_should_pass() throws Exception {
+  public void eventThatHasSourceAndA_reasonOfCreditShouldPass() throws Exception {
     //given
     StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.getLineItems().get(0).setSourceId(UUID.randomUUID());
@@ -119,7 +119,7 @@ public class ReceiveIssueReasonValidatorTest extends BaseValidatorTest  {
   }
 
   @Test
-  public void event_that_has_destination_and_a_reason_of_debit_should_pass() throws Exception {
+  public void eventThatHasDestinationAndA_reasonOfDebitShouldPass() throws Exception {
     //given
     StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.getLineItems().get(0).setDestinationId(UUID.randomUUID());
@@ -141,7 +141,7 @@ public class ReceiveIssueReasonValidatorTest extends BaseValidatorTest  {
   }
 
   @Test
-  public void event_that_has_source_and_a_reason_of_debit_should_not_pass() throws Exception {
+  public void eventThatHasSourceAndA_reasonOfDebitShouldNotPass() throws Exception {
     StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.getLineItems().get(0).setSourceId(UUID.randomUUID());
     stockEventDto.getLineItems().get(0).setDestinationId(null);
@@ -150,7 +150,7 @@ public class ReceiveIssueReasonValidatorTest extends BaseValidatorTest  {
   }
 
   @Test
-  public void event_that_has_destination_and_a_reason_of_credit_should_not_pass() throws Exception {
+  public void eventThatHasDestinationAndA_reasonOfCreditShouldNotPass() throws Exception {
     StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.getLineItems().get(0).setDestinationId(UUID.randomUUID());
     stockEventDto.getLineItems().get(0).setSourceId(null);
@@ -160,7 +160,7 @@ public class ReceiveIssueReasonValidatorTest extends BaseValidatorTest  {
   }
 
   @Test
-  public void event_that_has_source_and_a_reason_of_non_adhoc_category_should_not_pass()
+  public void eventThatHasSourceAndA_reasonOfNonAdhocCategoryShouldNotPass()
       throws Exception {
     StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.getLineItems().get(0).setSourceId(UUID.randomUUID());
@@ -171,7 +171,7 @@ public class ReceiveIssueReasonValidatorTest extends BaseValidatorTest  {
   }
 
   @Test
-  public void event_that_has_destination_and_a_reason_of_non_adhoc_category_should_not_pass()
+  public void eventThatHasDestinationAndA_reasonOfNonAdhocCategoryShouldNotPass()
       throws Exception {
     StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.getLineItems().get(0).setDestinationId(UUID.randomUUID());

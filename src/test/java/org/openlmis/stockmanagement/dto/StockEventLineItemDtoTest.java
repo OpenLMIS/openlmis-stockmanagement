@@ -24,7 +24,7 @@ import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
 
 public class StockEventLineItemDtoTest {
   @Test
-  public void should_convert_from_dto_to_jpa_model() throws Exception {
+  public void shouldConvertFromDtoToJpaModel() throws Exception {
     //given
     StockEventLineItemDto lineItemDto = StockEventDtoDataBuilder.createStockEventLineItem();
 

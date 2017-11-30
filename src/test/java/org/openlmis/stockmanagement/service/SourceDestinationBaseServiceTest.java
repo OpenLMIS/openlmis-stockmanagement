@@ -86,7 +86,7 @@ public class SourceDestinationBaseServiceTest {
   private NodeRepository nodeRepository;
 
   @Test(expected = ValidationMessageException.class)
-  public void should_throw_validation_exception_when_program_and_facilityType_not_found()
+  public void shouldThrowValidationExceptionWhenProgramAndFacilityTypeNotFound()
       throws Exception {
     //given
     UUID programId = randomUUID();
@@ -99,7 +99,7 @@ public class SourceDestinationBaseServiceTest {
   }
 
   @Test
-  public void should_return_source_dto_when_found_existing_one() throws Exception {
+  public void shouldReturnSourceDtoWhenFoundExistingOne() throws Exception {
     UUID programId = randomUUID();
     UUID facilityTypeId = randomUUID();
     UUID sourceId = randomUUID();
@@ -124,7 +124,7 @@ public class SourceDestinationBaseServiceTest {
   }
 
   @Test
-  public void should_return_source_assignment_when_source_is_a_facility_without_node()
+  public void shouldReturnSourceAssignmentWhenSourceIsA_facilityWithoutNode()
       throws Exception {
     //given
     UUID programId = randomUUID();
@@ -153,7 +153,7 @@ public class SourceDestinationBaseServiceTest {
   }
 
   @Test
-  public void should_return_source_assignment_when_source_is_an_organization() throws Exception {
+  public void shouldReturnSourceAssignmentWhenSourceIsAnOrganization() throws Exception {
     //given
     UUID programId = randomUUID();
     UUID facilityTypeId = randomUUID();
@@ -181,7 +181,7 @@ public class SourceDestinationBaseServiceTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void should_return_400_when_source_not_found() throws Exception {
+  public void shouldReturn400WhenSourceNotFound() throws Exception {
     //given
     UUID programId = randomUUID();
     UUID facilityTypeId = randomUUID();
@@ -195,7 +195,7 @@ public class SourceDestinationBaseServiceTest {
   }
 
   @Test
-  public void should_return_destination_dto_when_found_existing_one() throws Exception {
+  public void shouldReturnDestinationDtoWhenFoundExistingOne() throws Exception {
     UUID programId = randomUUID();
     UUID facilityTypeId = randomUUID();
     UUID destinationId = randomUUID();
@@ -221,7 +221,7 @@ public class SourceDestinationBaseServiceTest {
   }
 
   @Test
-  public void should_return_destination_assignment_when_destination_is_a_facility_without_node()
+  public void shouldReturnDestinationAssignmentWhenDestinationIsA_facilityWithoutNode()
       throws Exception {
     //given
     UUID programId = randomUUID();
@@ -251,7 +251,7 @@ public class SourceDestinationBaseServiceTest {
   }
 
   @Test
-  public void should_return_destination_assignment_when_destination_is_a_organization()
+  public void shouldReturnDestinationAssignmentWhenDestinationIsA_organization()
       throws Exception {
     //given
     UUID programId = randomUUID();
@@ -281,7 +281,7 @@ public class SourceDestinationBaseServiceTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void should_return_400_when_destination_not_found() throws Exception {
+  public void shouldReturn400WhenDestinationNotFound() throws Exception {
     //given
     UUID programId = randomUUID();
     UUID facilityTypeId = randomUUID();
@@ -296,7 +296,7 @@ public class SourceDestinationBaseServiceTest {
   }
 
   @Test
-  public void should_return_list_of_destination_dtos_when_find_valid_destination_assignment()
+  public void shouldReturnListOfDestinationDtosWhenFindValidDestinationAssignment()
       throws Exception {
     //given
     UUID programId = randomUUID();
@@ -328,7 +328,7 @@ public class SourceDestinationBaseServiceTest {
   }
 
   @Test
-  public void should_return_list_of_source_dtos_when_find_valid_source_assignment()
+  public void shouldReturnListOfSourceDtosWhenFindValidSourceAssignment()
       throws Exception {
     //given
     UUID programId = randomUUID();
@@ -360,7 +360,7 @@ public class SourceDestinationBaseServiceTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void should_throw_exception_when_delete_source_assignment_not_exists()
+  public void shouldThrowExceptionWhenDeleteSourceAssignmentNotExists()
       throws Exception {
     UUID assignmentId = randomUUID();
     when(sourceRepository.exists(assignmentId)).thenReturn(false);
@@ -368,7 +368,7 @@ public class SourceDestinationBaseServiceTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void should_throw_exception_when_delete_destination_assignment_not_exists()
+  public void shouldThrowExceptionWhenDeleteDestinationAssignmentNotExists()
       throws Exception {
     UUID assignmentId = randomUUID();
     when(destinationRepository.exists(assignmentId)).thenReturn(false);
@@ -376,7 +376,7 @@ public class SourceDestinationBaseServiceTest {
   }
 
   @Test
-  public void should_delete_source_assignment_by_id() throws Exception {
+  public void shouldDeleteSourceAssignmentById() throws Exception {
     //given
     UUID assignmentId = randomUUID();
     when(sourceRepository.exists(assignmentId)).thenReturn(true);
@@ -389,7 +389,7 @@ public class SourceDestinationBaseServiceTest {
   }
 
   @Test
-  public void should_delete_destination_assignment_by_id() throws Exception {
+  public void shouldDeleteDestinationAssignmentById() throws Exception {
     //given
     UUID assignmentId = randomUUID();
     when(destinationRepository.exists(assignmentId)).thenReturn(true);

@@ -57,7 +57,7 @@ public class StockCardTemplatesControllerIntegrationTest extends BaseWebTest {
   private UUID facilityTypeId = UUID.randomUUID();
 
   @Test
-  public void should_get_default_stock_card_templates_without_params() throws Exception {
+  public void shouldGetDefaultStockCardTemplatesWithoutParams() throws Exception {
     //given
     when(stockCardTemplateService.getDefaultStockCardTemplate())
         .thenReturn(createTemplateDto());
@@ -77,7 +77,7 @@ public class StockCardTemplatesControllerIntegrationTest extends BaseWebTest {
   }
 
   @Test
-  public void should_search_for_stock_card_templates() throws Exception {
+  public void shouldSearchForStockCardTemplates() throws Exception {
 
     //given
     when(stockCardTemplateService.findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
@@ -99,7 +99,7 @@ public class StockCardTemplatesControllerIntegrationTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_404_when_template_not_found() throws Exception {
+  public void shouldReturn404WhenTemplateNotFound() throws Exception {
     //given
     when(stockCardTemplateService.findByProgramIdAndFacilityTypeId(any(), any()))
         .thenReturn(null);
@@ -116,7 +116,7 @@ public class StockCardTemplatesControllerIntegrationTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_201_when_create_template() throws Exception {
+  public void shouldReturn201WhenCreateTemplate() throws Exception {
 
     //given
     Mockito.doNothing().when(permissionService).canCreateStockCardTemplate();
@@ -134,7 +134,7 @@ public class StockCardTemplatesControllerIntegrationTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_403_when_create_template_permission_not_found() throws Exception {
+  public void shouldReturn403WhenCreateTemplatePermissionNotFound() throws Exception {
     //given
     Mockito.doThrow(new PermissionMessageException(
         new Message(ERROR_NO_FOLLOWING_PERMISSION, STOCK_CARD_TEMPLATES_MANAGE)))
@@ -151,7 +151,7 @@ public class StockCardTemplatesControllerIntegrationTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_401_when_user_unauthorized() throws Exception {
+  public void shouldReturn401WhenUserUnauthorized() throws Exception {
     //given
     Mockito.doThrow(new AuthenticationException("MANAGE_STOCK_CARD_TEMPLATES"))
         .when(permissionService).canCreateStockCardTemplate();
@@ -167,12 +167,12 @@ public class StockCardTemplatesControllerIntegrationTest extends BaseWebTest {
   }
 
   @Test
-  public void should_return_400_when_program_not_found() throws Exception {
+  public void shouldReturn400WhenProgramNotFound() throws Exception {
     throwValidationExceptionWith(ERROR_PROGRAM_NOT_FOUND);
   }
 
   @Test
-  public void should_return_400_when_facility_type_not_found() throws Exception {
+  public void shouldReturn400WhenFacilityTypeNotFound() throws Exception {
     throwValidationExceptionWith(ERROR_FACILITY_TYPE_NOT_FOUND);
   }
 

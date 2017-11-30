@@ -79,20 +79,20 @@ public class HomeFacilityPermissionServiceTest {
   }
 
   @Test(expected = PermissionMessageException.class)
-  public void throw_exception_when_facility_type_and_home_facility_type_not_match()
+  public void throwExceptionWhenFacilityTypeAndHomeFacilityTypeNotMatch()
       throws Exception {
 
     homeFacilityPermissionService.checkProgramAndFacilityType(programId, randomUUID());
   }
 
   @Test(expected = PermissionMessageException.class)
-  public void throw_exception_when_program_is_not_supported_by_the_facility() throws Exception {
+  public void throwExceptionWhenProgramIsNotSupportedByTheFacility() throws Exception {
 
     homeFacilityPermissionService.checkProgramAndFacilityType(randomUUID(), facilityTypeId);
   }
 
   @Test
-  public void check_program_facility_happy_path() throws Exception {
+  public void checkProgramFacilityHappyPath() throws Exception {
 
     homeFacilityPermissionService.checkProgramAndFacilityType(programId, facilityTypeId);
   }

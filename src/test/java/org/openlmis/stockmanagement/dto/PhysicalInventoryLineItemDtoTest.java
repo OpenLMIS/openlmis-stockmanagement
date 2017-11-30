@@ -29,7 +29,7 @@ import java.util.UUID;
 
 public class PhysicalInventoryLineItemDtoTest {
   @Test
-  public void should_create_dto_from_jpa_model() throws Exception {
+  public void shouldCreateDtoFromJpaModel() throws Exception {
     //given
     PhysicalInventoryLineItem lineItem = PhysicalInventoryLineItem.builder()
         .quantity(123)
