@@ -15,12 +15,14 @@
 
 package org.openlmis.stockmanagement.domain.physicalinventory;
 
+import org.openlmis.stockmanagement.domain.BaseEntity;
+import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.openlmis.stockmanagement.domain.BaseEntity;
-import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -42,11 +44,4 @@ public class PhysicalInventoryLineItemAdjustment extends BaseEntity {
   @Column(nullable = false)
   private Integer quantity;
 
-  /**
-   * Returns quantity as signed integer, based on reason type (negative for debit).
-   * @return signed quantity
-   */
-  public int getSignedQuantity() {
-    return reason.isDebitReasonType() ? -quantity : quantity;
-  }
 }

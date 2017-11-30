@@ -87,38 +87,6 @@ public class StockEventLineItem extends BaseEntity
   @JoinColumn(name = "stockEventLineItemId")
   private List<PhysicalInventoryLineItemAdjustment> stockAdjustments;
 
-  public boolean hasReasonId() {
-    return this.reasonId != null;
-  }
-
-  public boolean hasReasonFreeText() {
-    return this.reasonFreeText != null;
-  }
-
-  public boolean hasLotId() {
-    return this.lotId != null;
-  }
-
-  public boolean hasDestinationFreeText() {
-    return this.destinationFreeText != null;
-  }
-
-  public boolean hasSourceFreeText() {
-    return this.sourceFreeText != null;
-  }
-
-  public boolean hasSourceId() {
-    return this.sourceId != null;
-  }
-
-  public boolean hasDestinationId() {
-    return this.destinationId != null;
-  }
-
-  public boolean isPhysicalInventory() {
-    return sourceId == null && destinationId == null && reasonId == null;
-  }
-
   /**
    * Returns clean copy of stock adjustments.
    */
