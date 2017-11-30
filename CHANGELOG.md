@@ -3,6 +3,7 @@
 
 Contract breaking changes:
 * [OLMIS-3295](https://openlmis.atlassian.net/browse/OLMIS-3295): Modified stock event structure
+  * adjustments in each stock event line item contains only reasonId and quantity fields
 
 Bug fixes, security and performance improvements, also backwards-compatible:
 
