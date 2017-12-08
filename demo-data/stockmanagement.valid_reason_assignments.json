@@ -533,5 +533,61 @@
     "facilityTypeId": "caecea08-6b2f-4ba9-98b2-b87702ba57ba",
     "reasonId": "6f8d0431-6ec5-4280-9019-c6024b168b23",
     "hidden": false
+  },
+  {
+    "id": "eba40974-9d98-4d29-b6e7-d06d847e7543",
+    "programId": "418bdc1d-c303-4bd0-b2d3-d8901150a983",
+    "facilityTypeId": "ac1d268b-ce10-455f-bf87-9c667da8f060",
+    "reasonId": "b5c27da7-bdda-4790-925a-9484c5dfb594",
+    "hidden": true
+  },
+  {
+    "id": "486b7afa-08ed-4f07-8dbd-f4b923f0f4f9",
+    "programId": "418bdc1d-c303-4bd0-b2d3-d8901150a983",
+    "facilityTypeId": "ac1d268b-ce10-455f-bf87-9c667da8f060",
+    "reasonId": "313f2f5f-0c22-4626-8c49-3554ef763de3",
+    "hidden": true
+  },
+  {
+    "id": "461fe98c-4292-4fd6-b13b-6d3942adcc01",
+    "programId": "418bdc1d-c303-4bd0-b2d3-d8901150a983",
+    "facilityTypeId": "ac1d268b-ce10-455f-bf87-9c667da8f060",
+    "reasonId": "84eb13c3-3e54-4687-8a5f-a9f20dcd0dac",
+    "hidden": true
+  },
+  {
+    "id": "a43b1d35-56d9-4a6d-a185-a9552bda33c8",
+    "programId": "418bdc1d-c303-4bd0-b2d3-d8901150a983",
+    "facilityTypeId": "ac1d268b-ce10-455f-bf87-9c667da8f060",
+    "reasonId": "f8bb41e2-ab43-4781-ae7a-7bf3b5116b82",
+    "hidden": true
+  },
+  {
+    "id": "b1417a30-de97-4217-805b-d78f0e04f87d",
+    "programId": "418bdc1d-c303-4bd0-b2d3-d8901150a983",
+    "facilityTypeId": "5fc213c6-1bd7-46f0-9883-57c05250ca90",
+    "reasonId": "b5c27da7-bdda-4790-925a-9484c5dfb594",
+    "hidden": true
+  },
+  {
+    "id": "e534c1fc-d731-4819-8bbe-47fcdc1d29dd",
+    "programId": "418bdc1d-c303-4bd0-b2d3-d8901150a983",
+    "facilityTypeId": "5fc213c6-1bd7-46f0-9883-57c05250ca90",
+    "reasonId": "313f2f5f-0c22-4626-8c49-3554ef763de3",
+    "hidden": true
+  },
+  {
+    "id": "a2f6c2cc-f60f-43bf-a86c-5d6ab3e9877f",
+    "programId": "418bdc1d-c303-4bd0-b2d3-d8901150a983",
+    "facilityTypeId": "5fc213c6-1bd7-46f0-9883-57c05250ca90",
+    "reasonId": "84eb13c3-3e54-4687-8a5f-a9f20dcd0dac",
+    "hidden": true
+  },
+  {
+    "id": "6fb07d52-45fe-46fc-85dc-3c871929e885",
+    "programId": "418bdc1d-c303-4bd0-b2d3-d8901150a983",
+    "facilityTypeId": "5fc213c6-1bd7-46f0-9883-57c05250ca90",
+    "reasonId": "f8bb41e2-ab43-4781-ae7a-7bf3b5116b82",
+    "hidden": true
   }
 ]
