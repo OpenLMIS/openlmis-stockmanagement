@@ -48,7 +48,8 @@ For the EPI program:
 
 Defined in stockmanagement.stock_cards.json and stockmanagement.stock_card_line_items.json.
 
-For the EPI program, all vaccine products have a stock card at the Cuamba district store. An 
+For the EPI program, all vaccine products have a stock card at the Cuamba district store, and the
+facilities Cuamba (N003) in the Cuamba district and Assumane (N036) in the Lichinga district. An 
 initial stock card was created for each product and a few stock movements are recorded.
 
 ## Physical Inventories
@@ -56,9 +57,8 @@ initial stock card was created for each product and a few stock movements are re
 Defined in stockmanagement.physical_inventories.json and 
 stockmanagement.physical_inventory_line_items.json.
 
-For the EPI program, two physical inventories are recorded for two health facilities (Cuamba and 
-Lurio in the Cuamba district) from two requisitions in the requisition service going through final 
-approval. All vaccine products are recorded to have a stock quantity of 50.
+For the EPI program, two physical inventories are recorded for two health facilities (Cuamba in the
+Cuamba district and Assumane in the Lichinga district).
 
 ## Stock Events
 
