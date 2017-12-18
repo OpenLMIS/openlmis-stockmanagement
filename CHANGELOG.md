@@ -9,6 +9,8 @@ Bug fixes, security and performance improvements, also backwards-compatible:
 
 * [OLMIS-3533](https://openlmis.atlassian.net/browse/OLMIS-3533): Avoid creating duplicate stock cards for the same pair of orderable and lot
 * [OLMIS-3485](https://openlmis.atlassian.net/browse/OLMIS-3485): Fixed jasper report for stock view and summaries
+* [OLMIS-3135](https://openlmis.atlassian.net/browse/OLMIS-3135): Handle API Key requests.
+  * For now all requests are blocked.
 
 2.0.0 / 2017-11-09
 ==================
