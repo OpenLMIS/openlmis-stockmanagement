@@ -27,6 +27,7 @@ import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataServi
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
@@ -59,6 +60,9 @@ public class PermissionService {
 
   @Autowired
   private HomeFacilityPermissionService homeFacilityPermissionService;
+
+  @Value("${auth.server.clientId}")
+  private String serviceTokenClientId;
 
   /**
    * Checks if current user has permission to submit a stock card template.
@@ -173,12 +177,27 @@ public class PermissionService {
     }
   }
 
-  private ResultDto<Boolean> getRightResult(
-      String rightName, UUID program, UUID facility, UUID warehouse) {
-    OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder.getContext()
+  private ResultDto<Boolean> getRightResult(String rightName, UUID program, UUID facility,
+                                            UUID warehouse) {
+    return getRightResult(rightName, program, facility, warehouse, true, true, false);
+  }
+
+  private ResultDto<Boolean> getRightResult(String rightName, UUID program, UUID facility,
+                                            UUID warehouse, boolean allowUserTokens,
+                                            boolean allowServiceTokens, boolean allowApiKey) {
+    OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder
+        .getContext()
         .getAuthentication();
-    if (authentication.isClientOnly()) {
-      return new ResultDto<>(true);
+
+    return authentication.isClientOnly()
+        ? checkServiceToken(allowServiceTokens, allowApiKey, authentication)
+        : checkUserToken(rightName, program, facility, warehouse, allowUserTokens);
+  }
+
+  private ResultDto<Boolean> checkUserToken(String rightName, UUID program, UUID facility,
+                                            UUID warehouse, boolean allowUserTokens) {
+    if (!allowUserTokens) {
+      return new ResultDto<>(false);
     }
 
     UserDto user = authenticationHelper.getCurrentUser();
@@ -194,5 +213,13 @@ public class PermissionService {
 
     throw new PermissionMessageException(
         new Message(ERROR_PERMISSION_CHECK_FAILED, refDataErrorMsg));
+  }
+
+  private ResultDto<Boolean> checkServiceToken(boolean allowServiceTokens, boolean allowApiKey,
+                                               OAuth2Authentication authentication) {
+    String clientId = authentication.getOAuth2Request().getClientId();
+    boolean isServiceToken = serviceTokenClientId.equals(clientId);
+
+    return new ResultDto<>(isServiceToken ? allowServiceTokens : allowApiKey);
   }
 }

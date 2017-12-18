@@ -19,6 +19,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
+import static org.openlmis.stockmanagement.service.OAuth2AuthenticationDataBuilder.SERVICE_CLIENT_ID;
 import static org.openlmis.stockmanagement.service.PermissionService.REASONS_MANAGE;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARD_TEMPLATES_MANAGE;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_DESTINATIONS_MANAGE;
@@ -42,6 +43,7 @@ import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.UUID;
 
@@ -67,8 +69,7 @@ public class PermissionServiceTest {
   @Mock
   private RightDto manageStockCardTemplatesRight;
 
-  @Mock
-  private OAuth2Authentication userAuthentication;
+  private OAuth2Authentication userClient;
 
   private UUID userId = UUID.randomUUID();
   private UUID manageStockCardTemplatesRightId = UUID.randomUUID();
@@ -76,6 +77,8 @@ public class PermissionServiceTest {
 
   @Before
   public void setUp() {
+    userClient = new OAuth2AuthenticationDataBuilder().buildUserAuthentication();
+
     when(user.getId()).thenReturn(userId);
 
     when(manageStockCardTemplatesRight.getId()).thenReturn(manageStockCardTemplatesRightId);
@@ -92,8 +95,9 @@ public class PermissionServiceTest {
     securityContext = mock(SecurityContext.class);
     SecurityContextHolder.setContext(securityContext);
 
-    when(securityContext.getAuthentication()).thenReturn(userAuthentication);
-    when(userAuthentication.isClientOnly()).thenReturn(false);
+    when(securityContext.getAuthentication()).thenReturn(userClient);
+
+    ReflectionTestUtils.setField(permissionService, "serviceTokenClientId", SERVICE_CLIENT_ID);
   }
 
   @Test
