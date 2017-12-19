@@ -77,11 +77,11 @@ public class StockCardLineItem extends BaseEntity {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCardLineItem.class);
 
-  @ManyToOne()
+  @ManyToOne
   @JoinColumn(nullable = false)
   private StockCard stockCard;
 
-  @ManyToOne()
+  @ManyToOne
   @JoinColumn(nullable = false)
   private StockEvent originEvent;
 
@@ -92,8 +92,8 @@ public class StockCardLineItem extends BaseEntity {
   @Convert(converter = ExtraDataConverter.class)
   private Map<String, String> extraData;
 
-  @ManyToOne()
-  @JoinColumn()
+  @ManyToOne
+  @JoinColumn
   private StockCardLineItemReason reason;
 
   private String sourceFreeText;
@@ -102,12 +102,12 @@ public class StockCardLineItem extends BaseEntity {
   private String reasonFreeText;
   private String signature;
 
-  @ManyToOne()
-  @JoinColumn()
+  @ManyToOne
+  @JoinColumn
   private Node source;
 
-  @ManyToOne()
-  @JoinColumn()
+  @ManyToOne
+  @JoinColumn
   private Node destination;
 
   @Column(nullable = false)

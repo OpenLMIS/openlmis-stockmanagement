@@ -17,10 +17,13 @@ package org.openlmis.stockmanagement.repository;
 
 import static java.util.UUID.randomUUID;
 
+import com.google.common.collect.Maps;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.testutils.StockCardDataBuilder;
+import org.openlmis.stockmanagement.testutils.StockCardLineItemDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
@@ -62,11 +65,20 @@ public class StockCardRepositoryIntegrationTest
 
     event = stockEventsRepository.save(event);
 
-    return new StockCardDataBuilder(event)
+    StockCardLineItem lineItem = new StockCardLineItemDataBuilder()
+        .withoutId()
+        .withOriginEvent(event)
+        .build();
+
+    StockCard stockCard = new StockCardDataBuilder(event)
         .withoutId()
         .withOrderable(product)
         .withLot(lot)
+        .withLineItem(lineItem)
         .build();
+    lineItem.setStockCard(stockCard);
+
+    return stockCard;
   }
 
   @Test(expected = PersistenceException.class)
@@ -93,6 +105,26 @@ public class StockCardRepositoryIntegrationTest
 
     stockCardRepository.save(one);
     stockCardRepository.save(two);
+
+    entityManager.flush();
+  }
+
+  @Test
+  public void shouldPersistWithNullExtraData() throws Exception {
+    StockCard one = generateInstance();
+    one.getLineItems().get(0).setExtraData(null);
+
+    stockCardRepository.save(one);
+
+    entityManager.flush();
+  }
+
+  @Test
+  public void shouldPersistWithEmptyExtraData() throws Exception {
+    StockCard one = generateInstance();
+    one.getLineItems().get(0).setExtraData(Maps.newHashMap());
+
+    stockCardRepository.save(one);
 
     entityManager.flush();
   }

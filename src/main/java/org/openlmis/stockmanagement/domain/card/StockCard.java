@@ -68,7 +68,7 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCard.class);
 
-  @ManyToOne()
+  @ManyToOne
   @JoinColumn(nullable = false)
   private StockEvent originEvent;
 

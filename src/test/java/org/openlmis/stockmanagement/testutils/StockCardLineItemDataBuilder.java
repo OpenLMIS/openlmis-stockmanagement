@@ -21,28 +21,27 @@ import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.DatesUtil.getBaseDate;
 import static org.openlmis.stockmanagement.testutils.DatesUtil.getBaseDateTime;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
-
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@SuppressWarnings("PMD.TooManyMethods")
 public class StockCardLineItemDataBuilder {
   private UUID id = UUID.randomUUID();
   private StockCard stockCard = null;
   private StockEvent originEvent = null;
   private Integer quantity = 0;
-  private Map<String, String> extraData = Maps.newHashMap();
+  private Map<String, String> extraData = ImmutableMap.of("extra-key", "value");
   private StockCardLineItemReason reason = null;
   private String sourceFreeText = EMPTY;
   private String destinationFreeText = EMPTY;
@@ -94,6 +93,16 @@ public class StockCardLineItemDataBuilder {
 
   public StockCardLineItemDataBuilder withProcessedDateHourEarlier() {
     processedDateTime = processedDateTime.minusHours(1);
+    return this;
+  }
+
+  public StockCardLineItemDataBuilder withoutId() {
+    id = null;
+    return this;
+  }
+
+  public StockCardLineItemDataBuilder withOriginEvent(StockEvent event) {
+    originEvent = event;
     return this;
   }
 

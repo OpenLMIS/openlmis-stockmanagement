@@ -53,6 +53,11 @@ public class StockCardDataBuilder {
     return this;
   }
 
+  public StockCardDataBuilder withLineItem(StockCardLineItem lineItem) {
+    lineItems.add(lineItem);
+    return this;
+  }
+
   /**
    * Creates stock card based on parameters from the builder.
    */
