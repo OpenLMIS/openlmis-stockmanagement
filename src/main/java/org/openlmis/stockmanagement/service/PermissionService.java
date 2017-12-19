@@ -179,17 +179,12 @@ public class PermissionService {
 
   private ResultDto<Boolean> getRightResult(String rightName, UUID program, UUID facility,
                                             UUID warehouse) {
-    return getRightResult(rightName, program, facility, warehouse, false);
-  }
-
-  private ResultDto<Boolean> getRightResult(String rightName, UUID program, UUID facility,
-                                            UUID warehouse, boolean allowApiKey) {
     OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder
         .getContext()
         .getAuthentication();
 
     return authentication.isClientOnly()
-        ? checkServiceToken(allowApiKey, authentication)
+        ? checkServiceToken(authentication)
         : checkUserToken(rightName, program, facility, warehouse);
   }
 
@@ -208,11 +203,10 @@ public class PermissionService {
     }
   }
 
-  private ResultDto<Boolean> checkServiceToken(boolean allowApiKey,
-                                               OAuth2Authentication authentication) {
+  private ResultDto<Boolean> checkServiceToken(OAuth2Authentication authentication) {
     String clientId = authentication.getOAuth2Request().getClientId();
     boolean isServiceToken = serviceTokenClientId.equals(clientId);
 
-    return new ResultDto<>(isServiceToken || allowApiKey);
+    return new ResultDto<>(isServiceToken);
   }
 }
