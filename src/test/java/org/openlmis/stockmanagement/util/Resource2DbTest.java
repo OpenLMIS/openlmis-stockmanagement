@@ -76,8 +76,20 @@ public class Resource2DbTest {
     assertFalse(resource.isOpen());
   }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void resourceCsvToBatchedPairShouldThrowException() throws IOException {
+    // given
+    Resource resource = mock(Resource.class);
+    InputStream inputStream = spy(IOUtils.toInputStream("Col1,Col2\na,b,c"));
+    when(resource.getInputStream()).thenReturn(inputStream);
+    when(template.batchUpdate(any(String.class), any(List.class))).thenReturn(new int[]{1});
+
+    // when
+    resource2Db.resourceCsvToBatchedPair(resource);
+  }
+
   @Test(expected = NullPointerException.class)
-  public void resource2DbWithNullResourceShouldThrowExecption() {
+  public void resource2DbWithNullResourceShouldThrowException() {
     new Resource2Db(null);
   }
 

@@ -109,7 +109,7 @@ public class Resource2Db {
    and Pair.right is the rows of data which go into those columns (each row is an array, the array
    matches the order of the columns
    */
-  private Pair<List<String>, List<Object[]>> resourceCsvToBatchedPair(final Resource resource)
+  Pair<List<String>, List<Object[]>> resourceCsvToBatchedPair(final Resource resource)
       throws IOException {
     XLOGGER.entry(resource.getDescription());
 
