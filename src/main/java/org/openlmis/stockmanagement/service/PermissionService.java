@@ -198,16 +198,14 @@ public class PermissionService {
     UserDto user = authenticationHelper.getCurrentUser();
     RightDto right = authenticationHelper.getRight(rightName);
 
-    String refDataErrorMsg;
     try {
       return userReferenceDataService.hasRight(
           user.getId(), right.getId(), program, facility, warehouse);
     } catch (HttpClientErrorException httpException) {
-      refDataErrorMsg = httpException.getMessage();
-    }
+      throw new PermissionMessageException(
+          new Message(ERROR_PERMISSION_CHECK_FAILED, httpException.getMessage()), httpException);
 
-    throw new PermissionMessageException(
-        new Message(ERROR_PERMISSION_CHECK_FAILED, refDataErrorMsg));
+    }
   }
 
   private ResultDto<Boolean> checkServiceToken(boolean allowApiKey,

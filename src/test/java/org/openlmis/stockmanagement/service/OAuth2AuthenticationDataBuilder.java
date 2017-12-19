@@ -23,7 +23,7 @@ import lombok.EqualsAndHashCode;
 public class OAuth2AuthenticationDataBuilder {
   private static final String CLIENT_CLIENT_ID = "user-client";
   public static final String SERVICE_CLIENT_ID = "trusted-client";
-  private static final String API_KEY_CLIENT_ID = "api-key-client-20171214111354128";
+  public static final String API_KEY_CLIENT_ID = "api-key-client-20171214111354128";
 
   public OAuth2Authentication buildUserAuthentication() {
     return new DummyOAuth2Authentication(CLIENT_CLIENT_ID, "admin");

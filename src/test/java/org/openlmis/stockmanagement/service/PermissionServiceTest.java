@@ -82,11 +82,13 @@ public class PermissionServiceTest {
   private SecurityContext securityContext;
   private OAuth2Authentication serviceClient;
   private OAuth2Authentication userClient;
+  private OAuth2Authentication apiKeyClient;
 
   @Before
   public void setUp() {
     userClient = new OAuth2AuthenticationDataBuilder().buildUserAuthentication();
     serviceClient = new OAuth2AuthenticationDataBuilder().buildServiceAuthentication();
+    apiKeyClient = new OAuth2AuthenticationDataBuilder().buildApiKeyAuthentication();
 
     when(user.getId()).thenReturn(userId);
 
@@ -281,6 +283,15 @@ public class PermissionServiceTest {
     permissionService.canManageReasons();
     permissionService.canManageOrganizations();
     permissionService.canManageSystemSettings();
+  }
+
+  @Test
+  public void apiKeysCannotDoAnything() {
+    when(securityContext.getAuthentication()).thenReturn(apiKeyClient);
+
+    expectException(STOCK_CARD_TEMPLATES_MANAGE);
+
+    permissionService.canCreateStockCardTemplate();
   }
 
   private void hasRight(UUID rightId, boolean hasRight) {
