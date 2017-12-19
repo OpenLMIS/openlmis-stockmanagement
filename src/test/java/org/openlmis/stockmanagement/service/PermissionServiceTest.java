@@ -127,7 +127,7 @@ public class PermissionServiceTest {
 
     permissionService.canEditPhysicalInventory(programId, facilityId);
 
-    verifyUserRightWithProgramFacility(STOCK_INVENTORIES_EDIT, rightId);
+    verifyUserRight(STOCK_INVENTORIES_EDIT, rightId, programId, facilityId);
   }
 
   @Test
@@ -144,7 +144,7 @@ public class PermissionServiceTest {
 
     permissionService.canAdjustStock(programId, facilityId);
 
-    verifyUserRightWithProgramFacility(STOCK_ADJUST, rightId);
+    verifyUserRight(STOCK_ADJUST, rightId, programId, facilityId);
   }
 
   @Test
@@ -161,7 +161,7 @@ public class PermissionServiceTest {
 
     permissionService.canViewStockCard(programId, facilityId);
 
-    verifyUserRightWithProgramFacility(STOCK_CARDS_VIEW, rightId);
+    verifyUserRight(STOCK_CARDS_VIEW, rightId, programId, facilityId);
   }
 
   @Test
@@ -304,7 +304,8 @@ public class PermissionServiceTest {
     verifyRight(order, rightName, rightId);
   }
 
-  private void verifyUserRightWithProgramFacility(String rightName, UUID rightId) {
+  private void verifyUserRight(String rightName, UUID rightId,
+                               UUID programId, UUID facilityId) {
     InOrder order = inOrder(authenticationHelper, userReferenceDataService);
     verifyRight(order, rightName, rightId, programId, facilityId);
   }
