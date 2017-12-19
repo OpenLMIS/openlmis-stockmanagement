@@ -21,6 +21,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PERMISSION_CHECK_FAILED;
 import static org.openlmis.stockmanagement.service.OAuth2AuthenticationDataBuilder.SERVICE_CLIENT_ID;
 import static org.openlmis.stockmanagement.service.PermissionService.REASONS_MANAGE;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_ADJUST;
@@ -47,10 +48,12 @@ import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.client.HttpClientErrorException;
 import java.util.UUID;
 
 @SuppressWarnings("PMD.TooManyMethods")
@@ -119,6 +122,17 @@ public class PermissionServiceTest {
   @Test
   public void cannotCreateStockCardTemplates() {
     expectException(STOCK_CARD_TEMPLATES_MANAGE);
+
+    permissionService.canCreateStockCardTemplate();
+  }
+
+  @Test
+  public void shouldThrowPermissionMessageExceptionWhenUserReferenceDataServiceThrows4xx() {
+    exception.expect(PermissionMessageException.class);
+    exception.expectMessage(ERROR_PERMISSION_CHECK_FAILED);
+    when(userReferenceDataService
+        .hasRight(userId, rightId, null, null, null)
+    ).thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
 
     permissionService.canCreateStockCardTemplate();
   }
