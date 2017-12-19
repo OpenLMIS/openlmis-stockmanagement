@@ -159,7 +159,7 @@ public class PermissionService {
   }
 
   public void canManageSystemSettings() {
-    getRightResult(SYSTEM_SETTINGS_MANAGE, null, null, null);
+    hasPermission(SYSTEM_SETTINGS_MANAGE, null, null, null);
   }
 
   private void hasPermission(String rightName, UUID program, UUID facility, UUID warehouse) {
@@ -179,27 +179,22 @@ public class PermissionService {
 
   private ResultDto<Boolean> getRightResult(String rightName, UUID program, UUID facility,
                                             UUID warehouse) {
-    return getRightResult(rightName, program, facility, warehouse, true, true, false);
+    return getRightResult(rightName, program, facility, warehouse, false);
   }
 
   private ResultDto<Boolean> getRightResult(String rightName, UUID program, UUID facility,
-                                            UUID warehouse, boolean allowUserTokens,
-                                            boolean allowServiceTokens, boolean allowApiKey) {
+                                            UUID warehouse, boolean allowApiKey) {
     OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder
         .getContext()
         .getAuthentication();
 
     return authentication.isClientOnly()
-        ? checkServiceToken(allowServiceTokens, allowApiKey, authentication)
-        : checkUserToken(rightName, program, facility, warehouse, allowUserTokens);
+        ? checkServiceToken(allowApiKey, authentication)
+        : checkUserToken(rightName, program, facility, warehouse);
   }
 
   private ResultDto<Boolean> checkUserToken(String rightName, UUID program, UUID facility,
-                                            UUID warehouse, boolean allowUserTokens) {
-    if (!allowUserTokens) {
-      return new ResultDto<>(false);
-    }
-
+                                            UUID warehouse) {
     UserDto user = authenticationHelper.getCurrentUser();
     RightDto right = authenticationHelper.getRight(rightName);
 
@@ -215,11 +210,11 @@ public class PermissionService {
         new Message(ERROR_PERMISSION_CHECK_FAILED, refDataErrorMsg));
   }
 
-  private ResultDto<Boolean> checkServiceToken(boolean allowServiceTokens, boolean allowApiKey,
+  private ResultDto<Boolean> checkServiceToken(boolean allowApiKey,
                                                OAuth2Authentication authentication) {
     String clientId = authentication.getOAuth2Request().getClientId();
     boolean isServiceToken = serviceTokenClientId.equals(clientId);
 
-    return new ResultDto<>(isServiceToken ? allowServiceTokens : allowApiKey);
+    return new ResultDto<>(isServiceToken || allowApiKey);
   }
 }
