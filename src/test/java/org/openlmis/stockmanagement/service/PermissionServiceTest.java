@@ -106,7 +106,7 @@ public class PermissionServiceTest {
   }
 
   @Test
-  public void canCreateStockCardTemplates() throws Exception {
+  public void canCreateStockCardTemplates() {
     hasRight(rightId, true);
 
     permissionService.canCreateStockCardTemplate();
@@ -115,14 +115,14 @@ public class PermissionServiceTest {
   }
 
   @Test
-  public void cannotCreateStockCardTemplates() throws Exception {
+  public void cannotCreateStockCardTemplates() {
     expectException(STOCK_CARD_TEMPLATES_MANAGE);
 
     permissionService.canCreateStockCardTemplate();
   }
 
   @Test
-  public void canEditPhysicalInventory() throws Exception {
+  public void canEditPhysicalInventory() {
     hasRight(rightId, programId, facilityId, true);
 
     permissionService.canEditPhysicalInventory(programId, facilityId);
@@ -131,7 +131,7 @@ public class PermissionServiceTest {
   }
 
   @Test
-  public void cannotEditPhysicalInventory() throws Exception {
+  public void cannotEditPhysicalInventory() {
     expectException(STOCK_INVENTORIES_EDIT);
     hasRight(rightId, programId, facilityId, false);
 
@@ -139,7 +139,7 @@ public class PermissionServiceTest {
   }
 
   @Test
-  public void canAdjustStock() throws Exception {
+  public void canAdjustStock() {
     hasRight(rightId, programId, facilityId, true);
 
     permissionService.canAdjustStock(programId, facilityId);
@@ -148,7 +148,7 @@ public class PermissionServiceTest {
   }
 
   @Test
-  public void cannotAdjustStock() throws Exception {
+  public void cannotAdjustStock() {
     expectException(STOCK_ADJUST);
     hasRight(rightId, programId, facilityId, false);
 
@@ -156,7 +156,7 @@ public class PermissionServiceTest {
   }
 
   @Test
-  public void canViewStockCard() throws Exception {
+  public void canViewStockCard() {
     hasRight(rightId, programId, facilityId, true);
 
     permissionService.canViewStockCard(programId, facilityId);
@@ -165,7 +165,7 @@ public class PermissionServiceTest {
   }
 
   @Test
-  public void cannotViewStockCard() throws Exception {
+  public void cannotViewStockCard() {
     expectException(STOCK_CARDS_VIEW);
     hasRight(rightId, programId, facilityId, false);
 
@@ -173,7 +173,7 @@ public class PermissionServiceTest {
   }
 
   @Test
-  public void canManageStockSources() throws Exception {
+  public void canManageStockSources() {
     hasRight(rightId, true);
 
     permissionService.canManageStockSources();
@@ -182,7 +182,7 @@ public class PermissionServiceTest {
   }
 
   @Test
-  public void cannotManageStockSources() throws Exception {
+  public void cannotManageStockSources() {
     expectException(STOCK_SOURCES_MANAGE);
     hasRight(rightId, false);
 
@@ -190,7 +190,7 @@ public class PermissionServiceTest {
   }
 
   @Test
-  public void canManageStockDestinations() throws Exception {
+  public void canManageStockDestinations() {
     hasRight(rightId, true);
 
     permissionService.canManageStockDestinations();
@@ -199,7 +199,7 @@ public class PermissionServiceTest {
   }
 
   @Test
-  public void cannotManageStockDestinations() throws Exception {
+  public void cannotManageStockDestinations() {
     expectException(STOCK_DESTINATIONS_MANAGE);
     hasRight(rightId, false);
 
@@ -207,7 +207,7 @@ public class PermissionServiceTest {
   }
 
   @Test
-  public void canManageReasons() throws Exception {
+  public void canManageReasons() {
     hasRight(rightId, true);
 
     permissionService.canManageReasons();
@@ -216,7 +216,7 @@ public class PermissionServiceTest {
   }
 
   @Test
-  public void cannotManageReasons() throws Exception {
+  public void cannotManageReasons() {
     expectException(REASONS_MANAGE);
     hasRight(rightId, false);
 
@@ -224,7 +224,7 @@ public class PermissionServiceTest {
   }
 
   @Test
-  public void canManageOrganizations() throws Exception {
+  public void canManageOrganizations() {
     hasRight(rightId, true);
 
     permissionService.canManageOrganizations();
@@ -233,7 +233,7 @@ public class PermissionServiceTest {
   }
 
   @Test
-  public void cannotManageOrganizations() throws Exception {
+  public void cannotManageOrganizations() {
     expectException(STOCK_ORGANIZATIONS_MANAGE);
     hasRight(rightId, false);
 
@@ -241,7 +241,7 @@ public class PermissionServiceTest {
   }
 
   @Test
-  public void canManageSystemSettings() throws Exception {
+  public void canManageSystemSettings() {
     hasRight(rightId, true);
 
     permissionService.canManageSystemSettings();
@@ -250,7 +250,7 @@ public class PermissionServiceTest {
   }
 
   @Test
-  public void cannotManageSystemSettings() throws Exception {
+  public void cannotManageSystemSettings() {
     expectException(SYSTEM_SETTINGS_MANAGE);
     hasRight(rightId, false);
 
@@ -258,7 +258,7 @@ public class PermissionServiceTest {
   }
 
   @Test
-  public void adminCanViewAllValidReasonsSourcesDestinations() throws Exception {
+  public void adminCanViewAllValidReasonsSourcesDestinations() {
     //given
     hasRight(rightId, true);
 
@@ -269,7 +269,7 @@ public class PermissionServiceTest {
   }
 
   @Test
-  public void serviceTokensCanDoAnything() throws Exception {
+  public void serviceTokensCanDoAnything() {
     when(securityContext.getAuthentication()).thenReturn(serviceClient);
 
     permissionService.canCreateStockCardTemplate();
