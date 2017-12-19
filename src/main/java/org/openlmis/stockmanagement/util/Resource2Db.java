@@ -142,7 +142,7 @@ public class Resource2Db {
   /*
    runs the list of SQL strings directly on the database - could be insert / update
    */
-  private void updateDbFromSqlStrings(final List<String> sqlLines) {
+  void updateDbFromSqlStrings(final List<String> sqlLines) {
     XLOGGER.entry();
 
     if (CollectionUtils.isEmpty(sqlLines)) {
