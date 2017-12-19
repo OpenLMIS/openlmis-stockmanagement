@@ -64,7 +64,7 @@ public class Version {
         timeStamp = properties.getProperty("Timestamp", Instant.now().toString());
       }
     } catch (IOException ex) {
-      LOGGER.error("Error loading version properties file");
+      LOGGER.error("Error loading version properties file", ex);
     }
   }
 }
