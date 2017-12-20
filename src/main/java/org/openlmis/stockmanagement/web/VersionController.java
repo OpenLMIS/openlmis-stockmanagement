@@ -15,7 +15,7 @@
 
 package org.openlmis.stockmanagement.web;
 
-import org.openlmis.stockmanagement.util.Version;
+import org.openlmis.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
