@@ -22,6 +22,10 @@
       "title": "Lot",
       "$ref": "lot.json"
     },
+    "extraData": {
+      "type": "object",
+      "title": "extraData"
+    },
     "stockOnHand": {
       "type": "integer"
     },

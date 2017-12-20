@@ -5,6 +5,9 @@ Contract breaking changes:
 * [OLMIS-3295](https://openlmis.atlassian.net/browse/OLMIS-3295): Modified stock event structure
   * adjustments in each stock event line item contains only reasonId and quantity fields
 
+Improveemnts:
+* [OLMIS-3614](https://openlmis.atlassian.net/browse/OLMIS-3614): Added extraData field to Stock Card Summary.
+
 Bug fixes, security and performance improvements, also backwards-compatible:
 
 * [OLMIS-3533](https://openlmis.atlassian.net/browse/OLMIS-3533): Avoid creating duplicate stock cards for the same pair of orderable and lot

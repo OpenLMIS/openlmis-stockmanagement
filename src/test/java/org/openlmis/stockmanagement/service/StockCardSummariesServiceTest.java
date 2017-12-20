@@ -19,7 +19,6 @@ import static java.time.ZoneOffset.UTC;
 import static java.time.ZonedDateTime.of;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
@@ -52,10 +51,10 @@ import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataSe
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -220,13 +219,15 @@ public class StockCardSummariesServiceTest {
     UUID facilityId = randomUUID();
     PageRequest pageRequest = new PageRequest(0, 1);
 
-    StockCard card = new StockCard();
-    card.setLineItems(emptyList());
+    UUID orderableId = randomUUID();
+    OrderableDto orderable = createOrderableDto(orderableId, "");
+
+    StockCard card = createStockCard(orderableId, randomUUID());
     when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId, pageRequest))
         .thenReturn(new PageImpl<>(singletonList(card), pageRequest, 10));
 
     when(approvedProductReferenceDataService.getAllApprovedProducts(programId, facilityId))
-        .thenReturn(singletonList(OrderableDto.builder().identifiers(emptyMap()).build()));
+        .thenReturn(singletonList(orderable));
 
     when(lotReferenceDataService.getAllLotsOf(any(UUID.class)))
         .thenReturn(emptyList());
@@ -238,21 +239,28 @@ public class StockCardSummariesServiceTest {
     //then
     assertThat(stockCards.getContent().size(), is(1));
     assertThat(stockCards.getTotalElements(), is(10L));
+    assertThat(stockCards.getContent().get(0).getExtraData().get("vvmStatus"), is("STAGE_2"));
   }
 
   private StockCard createStockCard(UUID orderableId, UUID cardId) {
     StockCard stockCard = new StockCard();
     stockCard.setOrderableId(orderableId);
     stockCard.setId(cardId);
+    Map<String, String> oldExtraData = new HashMap<>();
+    oldExtraData.put("vvmStatus", "STAGE_1");
+    Map<String, String> newExtraData = new HashMap<>();
+    newExtraData.put("vvmStatus", "STAGE_2");
     StockCardLineItem lineItem1 = StockCardLineItem.builder()
         .occurredDate(LocalDate.of(2017, 3, 17))
         .processedDate(of(2017, 3, 17, 15, 10, 31, 100, UTC))
         .quantity(1)
+        .extraData(oldExtraData)
         .build();
     StockCardLineItem lineItem2 = StockCardLineItem.builder()
         .occurredDate(LocalDate.of(2017, 3, 18))
         .processedDate(of(2017, 3, 18, 15, 10, 31, 100, UTC))
         .quantity(1)
+        .extraData(newExtraData)
         .build();
     stockCard.setLineItems(asList(lineItem1, lineItem2, lineItem1));
     return stockCard;

@@ -85,6 +85,7 @@ public abstract class StockCardBaseService {
     List<StockCardLineItemDto> lineItems = cardDto.getLineItems();
     if (!isEmpty(lineItems)) {
       cardDto.setLastUpdate(lineItems.get(lineItems.size() - 1).getLineItem().getOccurredDate());
+      cardDto.setExtraData(lineItems.get(lineItems.size() - 1).getLineItem().getExtraData());
     }
 
     return cardDto;
