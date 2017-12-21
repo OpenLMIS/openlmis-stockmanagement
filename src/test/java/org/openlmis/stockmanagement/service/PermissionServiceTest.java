@@ -22,6 +22,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PERMISSION_CHECK_FAILED;
+import static org.openlmis.stockmanagement.service.OAuth2AuthenticationDataBuilder.API_KEY_PREFIX;
 import static org.openlmis.stockmanagement.service.OAuth2AuthenticationDataBuilder.SERVICE_CLIENT_ID;
 import static org.openlmis.stockmanagement.service.PermissionService.REASONS_MANAGE;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_ADJUST;
@@ -108,6 +109,7 @@ public class PermissionServiceTest {
     when(securityContext.getAuthentication()).thenReturn(userClient);
 
     ReflectionTestUtils.setField(permissionService, "serviceTokenClientId", SERVICE_CLIENT_ID);
+    ReflectionTestUtils.setField(permissionService, "apiKeyPrefix", API_KEY_PREFIX);
   }
 
   @Test

@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.service;
 
 
+import static org.apache.commons.lang3.StringUtils.startsWith;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PERMISSION_CHECK_FAILED;
 
@@ -63,6 +64,9 @@ public class PermissionService {
 
   @Value("${auth.server.clientId}")
   private String serviceTokenClientId;
+
+  @Value("${auth.server.clientId.apiKey.prefix}")
+  private String apiKeyPrefix;
 
   /**
    * Checks if current user has permission to submit a stock card template.
@@ -163,7 +167,7 @@ public class PermissionService {
   }
 
   private void hasPermission(String rightName, UUID program, UUID facility, UUID warehouse) {
-    ResultDto<Boolean> result = getRightResult(rightName, program, facility, warehouse);
+    ResultDto<Boolean> result = getRightResult(rightName, program, facility, warehouse, false);
     if (null == result || !result.getResult()) {
       throw new PermissionMessageException(
           new Message(ERROR_NO_FOLLOWING_PERMISSION, rightName, program, facility));
@@ -171,20 +175,20 @@ public class PermissionService {
   }
 
   private void canViewStockAssignable(String rightName, UUID program, UUID facilityType) {
-    ResultDto<Boolean> result = getRightResult(rightName, null, null, null);
+    ResultDto<Boolean> result = getRightResult(rightName, null, null, null, false);
     if (null == result || !result.getResult()) {
       homeFacilityPermissionService.checkProgramAndFacilityType(program, facilityType);
     }
   }
 
   private ResultDto<Boolean> getRightResult(String rightName, UUID program, UUID facility,
-                                            UUID warehouse) {
+                                            UUID warehouse, boolean allowApiKey) {
     OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder
         .getContext()
         .getAuthentication();
 
     return authentication.isClientOnly()
-        ? checkServiceToken(authentication)
+        ? checkServiceToken(allowApiKey, authentication)
         : checkUserToken(rightName, program, facility, warehouse);
   }
 
@@ -203,10 +207,18 @@ public class PermissionService {
     }
   }
 
-  private ResultDto<Boolean> checkServiceToken(OAuth2Authentication authentication) {
+  private ResultDto<Boolean> checkServiceToken(boolean allowApiKey,
+                                               OAuth2Authentication authentication) {
     String clientId = authentication.getOAuth2Request().getClientId();
-    boolean isServiceToken = serviceTokenClientId.equals(clientId);
 
-    return new ResultDto<>(isServiceToken);
+    if (serviceTokenClientId.equals(clientId)) {
+      return new ResultDto<>(true);
+    }
+
+    if (startsWith(clientId, apiKeyPrefix)) {
+      return new ResultDto<>(allowApiKey);
+    }
+
+    return new ResultDto<>(false);
   }
 }
