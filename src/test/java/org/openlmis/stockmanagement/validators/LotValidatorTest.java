@@ -89,8 +89,8 @@ public class LotValidatorTest  extends BaseValidatorTest {
 
     //when
     when(lotReferenceDataService.findOne(lotId)).thenReturn(lotDto);
-    when(approvedProductService
-        .getAllApprovedProducts(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
+    when(orderableReferenceDataService
+        .findAll())
         .thenReturn(singletonList(product));
 
     lotValidator.validate(stockEventDto);

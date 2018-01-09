@@ -56,4 +56,8 @@ public class OrderableReferenceDataService
         ? Collections.emptyList()
         : getPage("search", of("size", ids.size()), of("ids", ids)).getContent();
   }
+
+  public List<OrderableDto> findAll() {
+    return getPage("", Collections.emptyMap()).getContent();
+  }
 }

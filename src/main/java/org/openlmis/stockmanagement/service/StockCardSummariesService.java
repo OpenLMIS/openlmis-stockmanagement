@@ -29,8 +29,8 @@ import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
-import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +58,7 @@ public class StockCardSummariesService extends StockCardBaseService {
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCardSummariesService.class);
 
   @Autowired
-  private ApprovedProductReferenceDataService approvedProductService;
+  private OrderableReferenceDataService orderableReferenceDataService;
 
   @Autowired
   private LotReferenceDataService lotReferenceDataService;
@@ -110,7 +110,7 @@ public class StockCardSummariesService extends StockCardBaseService {
 
     LOGGER.info("Calling ref data to get all approved orderables");
     Map<OrderableLotIdentity, OrderableLot> orderableLotsMap = createOrderableLots(
-        approvedProductService.getAllApprovedProducts(programId, facilityId));
+        orderableReferenceDataService.findAll());
 
     //create dummy(fake/not persisted) cards for approved orderables that don't have cards yet
     List<StockCard> dummyCards = createDummyCards(programId, facilityId, orderableLotsMap.values(),
@@ -121,7 +121,7 @@ public class StockCardSummariesService extends StockCardBaseService {
   private List<StockCardDto> cardsToDtos(UUID programId, UUID facilityId, List<StockCard> cards) {
     LOGGER.info("Calling ref data to get all approved orderables");
     Map<OrderableLotIdentity, OrderableLot> orderableLotsMap = createOrderableLots(
-        approvedProductService.getAllApprovedProducts(programId, facilityId));
+        orderableReferenceDataService.findAll());
 
     return assignOrderableLotRemoveLineItems(createDtos(cards), orderableLotsMap);
   }

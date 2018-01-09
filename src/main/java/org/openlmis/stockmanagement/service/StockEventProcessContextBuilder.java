@@ -36,9 +36,9 @@ import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
 import org.openlmis.stockmanagement.repository.ValidSourceAssignmentRepository;
-import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.util.LazyGrouping;
@@ -87,7 +87,7 @@ public class StockEventProcessContextBuilder {
   private ProgramReferenceDataService programService;
 
   @Autowired
-  private ApprovedProductReferenceDataService approvedProductService;
+  private OrderableReferenceDataService orderableReferenceDataService;
 
   @Autowired
   private LotReferenceDataService lotReferenceDataService;
@@ -155,8 +155,8 @@ public class StockEventProcessContextBuilder {
     context.setFacility(facility);
 
     profiler.start("CREATE_LAZY_APPROVED_PRODUCTS");
-    Supplier<List<OrderableDto>> productsSupplier = () -> approvedProductService
-        .getAllApprovedProducts(programId, facilityId);
+    Supplier<List<OrderableDto>> productsSupplier = () -> orderableReferenceDataService
+        .findAll();
     LazyList<OrderableDto> products = new LazyList<>(productsSupplier);
     context.setAllApprovedProducts(products);
 

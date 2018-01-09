@@ -30,9 +30,9 @@ import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
-import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
@@ -64,7 +64,7 @@ public class StockEventProcessContextBuilderTest {
   private LotReferenceDataService lotReferenceDataService;
 
   @Mock
-  private ApprovedProductReferenceDataService approvedProductService;
+  private OrderableReferenceDataService orderableReferenceDataService;
 
   @Mock
   private SecurityContext securityContext;
@@ -120,8 +120,8 @@ public class StockEventProcessContextBuilderTest {
 
     when(programService.findOne(stockEventDto.getProgramId())).thenReturn(programDto);
     when(facilityService.findOne(stockEventDto.getFacilityId())).thenReturn(facilityDto);
-    when(approvedProductService
-        .getAllApprovedProducts(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
+    when(orderableReferenceDataService
+        .findAll())
         .thenReturn(approvedProductDtos);
     when(lotReferenceDataService.findOne(lotId)).thenReturn(lot);
 

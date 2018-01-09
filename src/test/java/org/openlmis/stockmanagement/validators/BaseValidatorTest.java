@@ -31,9 +31,9 @@ import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
 import org.openlmis.stockmanagement.repository.ValidSourceAssignmentRepository;
 import org.openlmis.stockmanagement.service.StockEventProcessContextBuilder;
-import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import org.springframework.security.core.context.SecurityContext;
@@ -52,7 +52,7 @@ public abstract class BaseValidatorTest {
   ProgramReferenceDataService programService;
 
   @Mock
-  ApprovedProductReferenceDataService approvedProductService;
+  OrderableReferenceDataService orderableReferenceDataService;
 
   @Mock
   LotReferenceDataService lotReferenceDataService;

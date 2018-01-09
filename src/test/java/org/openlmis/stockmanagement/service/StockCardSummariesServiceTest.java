@@ -44,9 +44,9 @@ import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
-import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -61,7 +61,7 @@ import java.util.UUID;
 public class StockCardSummariesServiceTest {
 
   @Mock
-  private ApprovedProductReferenceDataService approvedProductReferenceDataService;
+  private OrderableReferenceDataService orderableReferenceDataService;
 
   @Mock
   @SuppressWarnings("PMD")
@@ -99,8 +99,8 @@ public class StockCardSummariesServiceTest {
     UUID facilityId = randomUUID();
 
     //1,2,3,4 all approved
-    when(approvedProductReferenceDataService
-        .getAllApprovedProducts(programId, facilityId))
+    when(orderableReferenceDataService
+        .findAll())
         .thenReturn(asList(orderable1, orderable2, orderable3, orderable4));
 
     //but only 1, 3 have cards. 2, 4 don't have cards.
@@ -173,8 +173,8 @@ public class StockCardSummariesServiceTest {
 
     UUID programId = randomUUID();
     UUID facilityId = randomUUID();
-    when(approvedProductReferenceDataService
-        .getAllApprovedProducts(programId, facilityId))
+    when(orderableReferenceDataService
+        .findAll())
         .thenReturn(asList(orderable1, orderable2, orderable3, orderable4));
 
     when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId))
@@ -226,7 +226,7 @@ public class StockCardSummariesServiceTest {
     when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId, pageRequest))
         .thenReturn(new PageImpl<>(singletonList(card), pageRequest, 10));
 
-    when(approvedProductReferenceDataService.getAllApprovedProducts(programId, facilityId))
+    when(orderableReferenceDataService.findAll())
         .thenReturn(singletonList(orderable));
 
     when(lotReferenceDataService.getAllLotsOf(any(UUID.class)))
