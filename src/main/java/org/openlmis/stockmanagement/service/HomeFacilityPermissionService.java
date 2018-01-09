@@ -23,6 +23,8 @@ import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.util.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +37,8 @@ public class HomeFacilityPermissionService {
   
   @Autowired
   private FacilityReferenceDataService facilityService;
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(HomeFacilityPermissionService.class);
 
   /**
    * 1 Check if program is supported by user's home facility.
@@ -59,6 +63,11 @@ public class HomeFacilityPermissionService {
     FacilityDto homeFacility = null;
     if (homeFacilityId != null) {
       homeFacility = facilityService.findOne(homeFacilityId);
+    }
+
+    LOGGER.debug("Home facility: ", homeFacility);
+    if (homeFacility != null) {
+      LOGGER.debug("Supported programs: ", homeFacility.getSupportedPrograms());
     }
 
     boolean isSupported = homeFacility != null
