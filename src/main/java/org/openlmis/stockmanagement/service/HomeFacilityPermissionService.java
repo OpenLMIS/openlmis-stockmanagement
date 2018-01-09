@@ -65,9 +65,9 @@ public class HomeFacilityPermissionService {
       homeFacility = facilityService.findOne(homeFacilityId);
     }
 
-    LOGGER.debug("Home facility: ", homeFacility);
+    LOGGER.warn("Home facility: ", homeFacility);
     if (homeFacility != null) {
-      LOGGER.debug("Supported programs: ", homeFacility.getSupportedPrograms());
+      LOGGER.warn("Supported programs: ", homeFacility.getSupportedPrograms());
     }
 
     boolean isSupported = homeFacility != null
