@@ -11,7 +11,7 @@ services:
   db:
     image: openlmis/postgres:9.6-postgis
     ports:
-      - "8767:5432"
+      - "5432"
     env_file: .env
 
   log:
