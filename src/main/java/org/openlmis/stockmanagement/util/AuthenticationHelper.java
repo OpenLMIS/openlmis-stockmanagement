@@ -15,6 +15,8 @@
 
 package org.openlmis.stockmanagement.util;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_USER_NOT_FOUND;
+
 import org.openlmis.stockmanagement.dto.referencedata.RightDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.exception.AuthenticationException;
@@ -23,6 +25,7 @@ import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataServi
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import java.util.UUID;
 
 @Component
 public class AuthenticationHelper {
@@ -41,13 +44,11 @@ public class AuthenticationHelper {
    * @throws AuthenticationException if user cannot be found.
    */
   public UserDto getCurrentUser() {
-    String username =
-        (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    UserDto user = userReferenceDataService.findUser(username);
+    UUID userId = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    UserDto user = userReferenceDataService.findOne(userId);
 
     if (user == null) {
-      // TODO: change to localized message
-      throw new AuthenticationException("User with name \"" + username + "\" not found.");
+      throw new AuthenticationException(new Message(ERROR_USER_NOT_FOUND, userId));
     }
 
     return user;

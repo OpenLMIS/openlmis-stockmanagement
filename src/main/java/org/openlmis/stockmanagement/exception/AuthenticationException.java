@@ -15,11 +15,17 @@
 
 package org.openlmis.stockmanagement.exception;
 
+import org.openlmis.stockmanagement.util.Message;
+
 /**
  * Signals user being unauthorized in external api.
  */
 public class AuthenticationException extends BaseMessageException {
   public AuthenticationException(String message) {
+    super(message);
+  }
+
+  public AuthenticationException(Message message) {
     super(message);
   }
 }

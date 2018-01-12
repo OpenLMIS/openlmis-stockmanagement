@@ -37,6 +37,7 @@ import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataServi
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AuthenticationHelperTest {
@@ -50,10 +51,12 @@ public class AuthenticationHelperTest {
   @InjectMocks
   private AuthenticationHelper authenticationHelper;
 
+  private UUID userId = UUID.randomUUID();
+
   @Before
   public void setUp() {
     Authentication authentication = mock(Authentication.class);
-    when(authentication.getPrincipal()).thenReturn("username");
+    when(authentication.getPrincipal()).thenReturn(userId);
 
     SecurityContext securityContext = mock(SecurityContext.class);
     when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -65,7 +68,7 @@ public class AuthenticationHelperTest {
   public void shouldReturnUser() {
     // given
     UserDto userMock = mock(UserDto.class);
-    when(userReferenceDataService.findUser(any(String.class))).thenReturn(userMock);
+    when(userReferenceDataService.findOne(userId)).thenReturn(userMock);
 
     // when
     UserDto user = authenticationHelper.getCurrentUser();
@@ -77,7 +80,7 @@ public class AuthenticationHelperTest {
   @Test(expected = AuthenticationException.class)
   public void shouldThrowExceptionIfUserDoesNotExist() {
     // given
-    when(userReferenceDataService.findUser(any(String.class))).thenReturn(null);
+    when(userReferenceDataService.findOne(any(UUID.class))).thenReturn(null);
 
     // when
     authenticationHelper.getCurrentUser();

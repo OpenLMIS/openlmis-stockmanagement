@@ -21,6 +21,7 @@ public abstract class MessageKeys {
   private static final String ERROR_PREFIX = SERVICE_PREFIX + ".error";
   private static final String EVENT_ERROR_PREFIX = ERROR_PREFIX + ".event";
   private static final String PHYSICAL_INVENTORY_ERROR_PREFIX = ERROR_PREFIX + ".physicalInventory";
+  public static final String ERROR_USER_NOT_FOUND = ERROR_PREFIX + ".user.notFound";
 
   //stock card templates
   public static final String ERROR_STOCK_CARD_FIELD_INVALID =
