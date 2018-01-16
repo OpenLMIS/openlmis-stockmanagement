@@ -17,7 +17,7 @@ package org.openlmis.stockmanagement.web;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_QUANTITY_INVALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_QUANTITIES_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_NOT_SUPPORTED;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_ADJUST;
@@ -122,7 +122,7 @@ public class StockEventsControllerrIntegrationTest extends BaseWebTest {
   @Test
   public void shouldReturn400WhenValidationFails() throws Exception {
     //given
-    Mockito.doThrow(new ValidationMessageException(new Message(ERROR_EVENT_QUANTITY_INVALID)))
+    Mockito.doThrow(new ValidationMessageException(new Message(ERROR_EVENT_QUANTITIES_INVALID)))
         .when(stockEventProcessor).process(any());
 
     //when

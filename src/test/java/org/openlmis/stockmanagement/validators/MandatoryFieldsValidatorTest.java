@@ -23,7 +23,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_OCCURRED
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_OCCURRED_DATE_IN_FUTURE;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ORDERABLE_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_PROGRAM_INVALID;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_QUANTITY_INVALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_QUANTITIES_INVALID;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -190,7 +190,7 @@ public class MandatoryFieldsValidatorTest extends BaseValidatorTest  {
     lineItems.get(0).setQuantity(quantity);
 
     //when
-    expectedEx.expectMessage(ERROR_EVENT_QUANTITY_INVALID + ": " + Collections.singleton(quantity));
+    expectedEx.expectMessage(ERROR_EVENT_QUANTITIES_INVALID + ": " + Collections.singleton(quantity));
     mandatoryFieldsValidator.validate(stockEventDto);
   }
 }

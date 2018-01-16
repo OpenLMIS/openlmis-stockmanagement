@@ -23,7 +23,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_OCCURRED
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_OCCURRED_DATE_IN_FUTURE;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ORDERABLE_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_PROGRAM_INVALID;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_QUANTITY_INVALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_QUANTITIES_INVALID;
 
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
@@ -79,7 +79,7 @@ public class MandatoryFieldsValidator implements StockEventValidator {
 
     if (!isEmpty(invalidQuantities)) {
       throw new ValidationMessageException(
-          new Message(ERROR_EVENT_QUANTITY_INVALID, invalidQuantities));
+          new Message(ERROR_EVENT_QUANTITIES_INVALID, invalidQuantities));
     }
   }
 
