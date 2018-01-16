@@ -37,8 +37,8 @@ import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
-
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -190,7 +190,7 @@ public class MandatoryFieldsValidatorTest extends BaseValidatorTest  {
     lineItems.get(0).setQuantity(quantity);
 
     //when
-    expectedEx.expectMessage(ERROR_EVENT_QUANTITY_INVALID + ": " + lineItems);
+    expectedEx.expectMessage(ERROR_EVENT_QUANTITY_INVALID + ": " + Collections.singleton(quantity));
     mandatoryFieldsValidator.validate(stockEventDto);
   }
 }

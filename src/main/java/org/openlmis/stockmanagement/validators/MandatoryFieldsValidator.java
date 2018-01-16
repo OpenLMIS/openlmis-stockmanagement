@@ -30,7 +30,6 @@ import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.stereotype.Component;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -73,8 +72,9 @@ public class MandatoryFieldsValidator implements StockEventValidator {
   }
 
   private void validateQuantity(StockEventDto stockEventDto) {
-    List<StockEventLineItemDto> invalidQuantities = stockEventDto.getLineItems().stream()
+    List<Integer> invalidQuantities = stockEventDto.getLineItems().stream()
         .filter(lineItem -> lineItem.getQuantity() == null || lineItem.getQuantity() < 0)
+        .map(StockEventLineItemDto::getQuantity)
         .collect(toList());
 
     if (!isEmpty(invalidQuantities)) {
