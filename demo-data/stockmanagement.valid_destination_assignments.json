@@ -24,6 +24,12 @@
     "nodeId": "d0d1953a-3067-45c0-80d3-2d85892a9e92"
   },
   {
+    "id": "aac4870a-e577-4117-b53c-6794f4bb7da8",
+    "facilityTypeId": "ac1d268b-ce10-455f-bf87-9c667da8f060",
+    "programId": "418bdc1d-c303-4bd0-b2d3-d8901150a983",
+    "nodeId": "0fd0f218-4f7a-4762-b7cf-5d76c797f880"
+  },
+  {
     "id": "968a5a39-13a3-459e-931e-fc9e6f81822e",
     "facilityTypeId": "caecea08-6b2f-4ba9-98b2-b87702ba57ba",
     "programId": "418bdc1d-c303-4bd0-b2d3-d8901150a983",
