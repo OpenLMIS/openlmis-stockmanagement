@@ -190,7 +190,8 @@ public class MandatoryFieldsValidatorTest extends BaseValidatorTest  {
     lineItems.get(0).setQuantity(quantity);
 
     //when
-    expectedEx.expectMessage(ERROR_EVENT_QUANTITIES_INVALID + ": " + Collections.singleton(quantity));
+    expectedEx.expectMessage(ERROR_EVENT_QUANTITIES_INVALID + ": "
+        + Collections.singleton(quantity));
     mandatoryFieldsValidator.validate(stockEventDto);
   }
 }
