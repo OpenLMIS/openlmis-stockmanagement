@@ -393,6 +393,14 @@
     "originEventId": "cd4ad6ef-fb15-443d-8241-f81b7ed2f7cb"
   },
   {
+    "id": "e8c099b1-ef1c-4b70-982c-b4df04db5570",
+    "facilityId": "c62dea9b-6974-4101-ba39-b09914165967",
+    "orderableId": "047638fa-92ce-4adf-9bbd-3bcb3216897a",
+    "lotId": "edd308be-dcdc-4841-be05-d577a668fd09",
+    "programId": "418bdc1d-c303-4bd0-b2d3-d8901150a983",
+    "originEventId": "cd4ad6ef-fb15-443d-8241-f81b7ed2f7cb"
+  },
+  {
     "id": "d9bbbb40-70e3-41f1-9ff0-3a9a0362edbb",
     "facilityId": "c62dea9b-6974-4101-ba39-b09914165967",
     "orderableId": "a852f785-d82e-4afe-bc6a-04f3236caf90",
