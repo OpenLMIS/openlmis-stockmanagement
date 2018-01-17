@@ -515,10 +515,7 @@
     "userId": "560be32a-ea2e-4d12-ae00-1f69376ad535",
     "originEventId": "cd4ad6ef-fb15-443d-8241-f81b7ed2f7cb",
     "sourceId": "e94d5aad-1c40-4370-bac2-d326d65d277c",
-    "stockCardId": "45db7822-cc9a-4f6e-b04d-ea55cff9775e",
-    "extraData" : {
-      "vvmStatus" : "STAGE_1"
-    }
+    "stockCardId": "45db7822-cc9a-4f6e-b04d-ea55cff9775e"
   },
   {
     "id": "f0b56cb4-4edf-4f13-a30e-221b720dd9fd",
@@ -528,10 +525,7 @@
     "userId": "560be32a-ea2e-4d12-ae00-1f69376ad535",
     "originEventId": "cd4ad6ef-fb15-443d-8241-f81b7ed2f7cb",
     "sourceId": "e94d5aad-1c40-4370-bac2-d326d65d277c",
-    "stockCardId": "05780441-4528-41e4-96f2-63d73f3665f8",
-    "extraData" : {
-      "vvmStatus" : "STAGE_2"
-    }
+    "stockCardId": "05780441-4528-41e4-96f2-63d73f3665f8"
   },
   {
     "id": "8e0074f5-ee3e-40b2-9429-d5a45277660c",
