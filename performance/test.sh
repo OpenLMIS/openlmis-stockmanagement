@@ -14,7 +14,7 @@ echo "Running performance tests against: $URL"
 export BASE_URL="${URL}"
 docker run --rm -e BASE_URL -v $(pwd):/bzt-configs \
   -v $(pwd)/../build/performance-artifacts:/tmp/artifacts \
-  undera/taurus \
+  blazemeter/taurus \
   -o modules.jmeter.properties.base-uri="${BASE_URL}" \
   -o reporting.2.dump-xml=/tmp/artifacts/stats.xml \
   config.yml \
