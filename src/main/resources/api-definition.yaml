@@ -7,7 +7,28 @@ protocols: [ HTTP, HTTPS ]
 
 documentation:
     - title: Getting Started
-      content: Welcome to the OpenLMIS Stock Management Service documentation.
+      content: |
+        OpenLMIS Stock Management is based around the concept of Stock Cards and the creation of a
+        permanent ledger accounting for all changes to the Stock on Hand over time.
+        Each Stock Card is composed of line items, each representing a specific change to a
+        particular set of Stock in Inventory. These ledgers expect that they may be updated as part
+        of a larger distributed system with occassional internet connectivity and so changes to the
+        ledger may come out of order and after the physical change to stock on hand occurred.
+
+        This service also has Resources for:
+        * Perparing and submitting a Physical Inventory.
+        * Stock Events:  the only way to update (write operation) a Stock Card.  Not only are
+          these events the only way to change a Stock Card, one event is one atomic transaction
+          to the type of Stock Event being described:  a single adjustment, a batch, a receipt, etc.
+        * The types of Organizations (facility, free text).
+        * Configuring the types of Reasons that might be given when adjusting, issuing, or
+          otherwise accounting for stock.
+        * Configuring the lists of valid desitnations and sources (places you may send and receive
+          stock).
+
+        This service does not currently support bin cards (ledgers for Stock in Inventory in a
+        particular bin, room, shelf, etc), though it's expected that functionality will be added
+        soon.
 
 schemas:
   - program: !include schemas/program.json
