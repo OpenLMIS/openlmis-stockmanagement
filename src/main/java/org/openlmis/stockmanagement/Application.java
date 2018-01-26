@@ -15,7 +15,8 @@
 
 package org.openlmis.stockmanagement;
 
-import org.flywaydb.core.Flyway;
+import java.util.Locale;
+
 import org.openlmis.stockmanagement.i18n.ExposedMessageSourceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,20 +31,18 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 
-import java.util.Locale;
-
 @SpringBootApplication
 @ImportResource("applicationContext.xml")
 @EnableAsync
 public class Application {
-  private Logger logger = LoggerFactory.getLogger(Application.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
+
+  @Value("${defaultLocale}")
+  private Locale locale;
 
   public static void main(String[] args) {
     SpringApplication.run(Application.class, args);
   }
-
-  @Value("${defaultLocale}")
-  private Locale locale;
 
   /**
    * Creates new LocaleResolver.
@@ -82,15 +81,10 @@ public class Application {
   @Bean
   @Profile("!production")
   public FlywayMigrationStrategy cleanMigrationStrategy() {
-    FlywayMigrationStrategy strategy = new FlywayMigrationStrategy() {
-      @Override
-      public void migrate(Flyway flyway) {
-        logger.info("Using clean-migrate flyway strategy -- production profile not active");
-        flyway.clean();
-        flyway.migrate();
-      }
+    return flyway -> {
+      LOGGER.info("Using clean-migrate flyway strategy -- production profile not active");
+      flyway.clean();
+      flyway.migrate();
     };
-
-    return strategy;
   }
 }
