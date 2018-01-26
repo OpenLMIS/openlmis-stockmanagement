@@ -48,5 +48,6 @@ public interface StockCardRepository extends
   StockCard findByOriginEvent(@Param("originEventId") StockEvent stockEvent);
 
   @Query(name = StockCard.QUERY_FIND_LOT_IDENT_BY_PROG_FACILITY)
-  List<OrderableLotIdentity> getIdentitiesBy(UUID programId, UUID facilityId);
+  List<OrderableLotIdentity> getIdentitiesBy(@Param(StockCard.PARAM_PROGRAM_ID) UUID programId,
+                                             @Param(StockCard.PARAM_FACILITY_ID) UUID facilityId);
 }

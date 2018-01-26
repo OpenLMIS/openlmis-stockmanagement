@@ -72,8 +72,8 @@ import org.slf4j.LoggerFactory;
 public class StockCard extends BaseEntity implements IdentifiableByOrderableLot {
   public static final String QUERY_FIND_LOT_IDENT_BY_PROG_FACILITY = "StockCard"
       + ".findLotIdentByProgFacility";
-  static final String PARAM_PROGRAM_ID = "programId";
-  static final String PARAM_FACILITY_ID = "facilityId";
+  public static final String PARAM_PROGRAM_ID = "programId";
+  public static final String PARAM_FACILITY_ID = "facilityId";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCard.class);
 
