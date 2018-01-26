@@ -24,6 +24,25 @@ import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparat
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparators.byReasonPriority;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.SERVER_ERROR_SHALLOW_COPY;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.LazyCollection;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
@@ -35,26 +54,12 @@ import org.openlmis.stockmanagement.util.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
+@NamedQuery(name = StockCard.QUERY_FIND_LOT_IDENT_BY_PROG_FACILITY,
+    query = "SELECT new org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity("
+      + "s.orderableId, s.lotId)"
+      + " FROM StockCard s"
+      + " WHERE s.programId = :" + StockCard.PARAM_PROGRAM_ID
+      + " AND s.facilityId = :" + StockCard.PARAM_FACILITY_ID)
 @Entity
 @Data
 @AllArgsConstructor
@@ -65,6 +70,10 @@ import javax.persistence.Transient;
 //the above line creates an index, it'll make select statements faster
 //especially for getStockCardIdBy method of StockCardRepository
 public class StockCard extends BaseEntity implements IdentifiableByOrderableLot {
+  public static final String QUERY_FIND_LOT_IDENT_BY_PROG_FACILITY = "StockCard"
+      + ".findLotIdentByProgFacility";
+  static final String PARAM_PROGRAM_ID = "programId";
+  static final String PARAM_FACILITY_ID = "facilityId";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCard.class);
 
