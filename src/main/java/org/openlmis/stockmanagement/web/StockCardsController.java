@@ -18,6 +18,9 @@ package org.openlmis.stockmanagement.web;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 
+import java.util.List;
+import java.util.UUID;
+
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardService;
@@ -32,9 +35,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
@@ -59,14 +59,14 @@ public class StockCardsController {
    */
   @RequestMapping(value = "/stockCards/{stockCardId}")
   public ResponseEntity<StockCardDto> getStockCard(@PathVariable("stockCardId") UUID stockCardId) {
-    LOGGER.debug("Try to find stock card with id: " + stockCardId);
+    LOGGER.debug("Try to find stock card with id: {}", stockCardId);
 
     StockCardDto stockCardDto = stockCardService.findStockCardById(stockCardId);
     if (stockCardDto == null) {
-      LOGGER.debug("Not found stock card with id: " + stockCardId);
+      LOGGER.debug("Not found stock card with id: {}", stockCardId);
       return new ResponseEntity<>(NOT_FOUND);
     } else {
-      LOGGER.debug("Found stock card with id: " + stockCardId);
+      LOGGER.debug("Found stock card with id: {}", stockCardId);
       return new ResponseEntity<>(stockCardDto, OK);
     }
   }

@@ -15,15 +15,14 @@
 
 package org.openlmis.stockmanagement.domain;
 
+import java.io.IOException;
+import java.util.Map;
+import javax.persistence.AttributeConverter;
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
-import java.util.Map;
-
-import javax.persistence.AttributeConverter;
-import javax.validation.constraints.NotNull;
 
 public class ExtraDataConverter implements AttributeConverter<Map<String, String>, String> {
 
@@ -42,7 +41,7 @@ public class ExtraDataConverter implements AttributeConverter<Map<String, String
   @Override
   public Map<String, String> convertToEntityAttribute(String databaseDataAsJsonString) {
     try {
-      if (databaseDataAsJsonString == null || databaseDataAsJsonString.equalsIgnoreCase("null")) {
+      if (null == databaseDataAsJsonString || "null".equalsIgnoreCase(databaseDataAsJsonString)) {
         return null;
       } else {
         TypeReference<Map<String, String>> typeRef = new TypeReference<Map<String, String>>() {
