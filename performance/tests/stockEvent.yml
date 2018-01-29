@@ -32,7 +32,7 @@ scenarios:
             Content-Type: application/json
           extract-jsonpath:
             full_products:
-              jsonpath: $..orderable
+              jsonpath: $
   send-stock-event:
     variables:
       # Balaka District Hospital
@@ -58,13 +58,13 @@ scenarios:
 
             def parser = new JsonSlurper()
             def products = parser.parseText(vars.get("full_products"))
-            products = products.sort { it.id }
+            products = products.sort { it -> it.orderable.id }
 
             def eventLineItems = new ArrayList()
 
             products.eachWithIndex { it, index ->
               eventLineItems.add([
-                orderableId: it.id,
+                orderableId: it.orderable.id,
                 quantity: (index + 1) * 10,
                 occurredDate: new Date().format('yyyy-MM-dd'),
                 stockAdjustments: [
