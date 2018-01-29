@@ -20,24 +20,6 @@ scenarios:
           extract-jsonpath:
             access_token:
               jsonpath: $.access_token
-  get-facility-type:
-    requests:
-    - if: '${__javaScript(vars.get("facility_type_id") == null)}'
-      then:
-        - url: ${__P(base-uri)}/api/facilities/${facility_id}
-          method: GET
-          label: GetFacilityType
-          headers:
-            Authorization: Bearer ${access_token}
-            Content-Type: application/json
-          extract-jsonpath:
-            facility_type_id:
-              jsonpath: $.type.id
-          jsr223:
-            script-text: |
-              def uuid = vars.get("facility_type_id");
-              uuid = uuid.replaceAll(/"|\[|\]/, "");
-              vars.put("facility_type_id", uuid);
   get-full-supply-approved-products:
     requests:
     - if: '${__javaScript(vars.get("full_products") == null)}'
@@ -51,30 +33,6 @@ scenarios:
           extract-jsonpath:
             full_products:
               jsonpath: $..orderable
-  get-two-reasons:
-    requests:
-    - if: '${__javaScript(vars.get("consumed_reason") == null)} && ${__javaScript(vars.get("receipts_reason") == null)}'
-      then:
-        - url: ${__P(base-uri)}/api/validReasons?program=${program_id}&facilityType=${facility_type_id}
-          method: GET
-          label: GetTwoReasons
-          headers:
-            Authorization: Bearer ${access_token}
-            Content-Type: application/json
-          extract-jsonpath:
-            consumed_reason:
-              jsonpath: $..reason[?(@.id == "b5c27da7-bdda-4790-925a-9484c5dfb594")]
-            receipts_reason:
-              jsonpath: $..reason[?(@.id == "313f2f5f-0c22-4626-8c49-3554ef763de3")]
-          jsr223:
-            script-text: |
-              def map = [
-                consumed: vars.get("consumed_reason"),
-                receipts: vars.get("receipts_reason")
-              ]
-
-              vars.put("consumed_reason", map.consumed.replaceAll(/\[|\]/, ""))
-              vars.put("receipts_reason", map.receipts.replaceAll(/\[|\]/, ""))
   send-stock-event:
     variables:
       # Balaka District Hospital
@@ -85,9 +43,7 @@ scenarios:
       user_id: a337ec45-31a0-4f2b-9b2e-a105c4b669bb
     requests:
       - include-scenario: get-user-token
-      - include-scenario: get-facility-type
       - include-scenario: get-full-supply-approved-products
-      - include-scenario: get-two-reasons
       - url: ${__P(base-uri)}/api/stockEvents
         method: POST
         label: SendStockEvent
@@ -101,9 +57,6 @@ scenarios:
             import groovy.json.JsonSlurper
 
             def parser = new JsonSlurper()
-            def consumed = parser.parseText(vars.get("consumed_reason"))
-            def receipts = parser.parseText(vars.get("receipts_reason"))
-
             def products = parser.parseText(vars.get("full_products"))
             products = products.sort { it.id }
 
@@ -115,8 +68,8 @@ scenarios:
                 quantity: (index + 1) * 10,
                 occurredDate: new Date().format('yyyy-MM-dd'),
                 stockAdjustments: [
-                  [quantity: (index + 1) * 5, reason: receipts],
-                  [quantity: (index + 1) * 5, reason: consumed]
+                  [quantity: (index + 1) * 5, reasonId: "313f2f5f-0c22-4626-8c49-3554ef763de3"],
+                  [quantity: (index + 1) * 5, reasonId: "b5c27da7-bdda-4790-925a-9484c5dfb594"]
                 ]
               ])
             }
