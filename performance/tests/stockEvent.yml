@@ -41,6 +41,10 @@ scenarios:
       program_id: 10845cb9-d365-4aaa-badd-b4fa39c6a26a
       # Administrator
       user_id: a337ec45-31a0-4f2b-9b2e-a105c4b669bb
+      # Consumed reason
+      consumed_reason_id: b5c27da7-bdda-4790-925a-9484c5dfb594
+      # Receipts reason
+      receipts_reason_id: 313f2f5f-0c22-4626-8c49-3554ef763de3
     requests:
       - include-scenario: get-user-token
       - include-scenario: get-full-supply-approved-products
@@ -68,8 +72,8 @@ scenarios:
                 quantity: (index + 1) * 10,
                 occurredDate: new Date().format('yyyy-MM-dd'),
                 stockAdjustments: [
-                  [quantity: (index + 1) * 5, reasonId: "313f2f5f-0c22-4626-8c49-3554ef763de3"],
-                  [quantity: (index + 1) * 5, reasonId: "b5c27da7-bdda-4790-925a-9484c5dfb594"]
+                  [quantity: (index + 1) * 5, reasonId: vars.get("receipts_reason_id")],
+                  [quantity: (index + 1) * 5, reasonId: vars.get("consumed_reason_id")]
                 ]
               ])
             }
