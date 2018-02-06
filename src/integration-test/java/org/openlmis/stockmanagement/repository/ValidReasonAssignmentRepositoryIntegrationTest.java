@@ -15,9 +15,9 @@
 
 package org.openlmis.stockmanagement.repository;
 
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -86,8 +86,7 @@ public class ValidReasonAssignmentRepositoryIntegrationTest
         .findByProgramIdAndFacilityTypeIdAndReasonIn(PROGRAM_ID, FACILITY_TYPE_ID, reasons);
 
     assertThat(validReasonAssignments.size(), is(2));
-    assertTrue(validReasonAssignments.containsAll(
-        Arrays.asList(validReasonAssignment, newAssignment)));
+    assertThat(validReasonAssignments, hasItems(validReasonAssignment, newAssignment));
   }
 
   @Override

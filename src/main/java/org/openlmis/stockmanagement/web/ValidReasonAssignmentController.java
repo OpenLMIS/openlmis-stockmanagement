@@ -49,6 +49,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.UUID;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/api")
@@ -80,7 +81,8 @@ public class ValidReasonAssignmentController {
    * @return A list of valid reason dto.
    */
   @RequestMapping(value = "/validReasons", method = GET)
-  public ResponseEntity<List<ValidReasonAssignmentDto>> getValidReasons(
+  @ResponseBody
+  public List<ValidReasonAssignmentDto> getValidReasons(
       @RequestParam("program") UUID program, @RequestParam("facilityType") UUID facilityType,
       @RequestParam(value = "reasonType", required = false) List<ReasonType> reasonTypes) {
     if (LOGGER.isDebugEnabled()) {
@@ -90,8 +92,7 @@ public class ValidReasonAssignmentController {
     }
     permissionService.canViewValidReasons(program, facilityType);
 
-    return new ResponseEntity<>(toDto(
-        validReasonAssignmentService.search(program, facilityType, reasonTypes)), OK);
+    return toDto(validReasonAssignmentService.search(program, facilityType, reasonTypes));
   }
 
   /**

@@ -111,20 +111,17 @@ public class ValidReasonAssignmentServiceTest {
   }
 
   private ValidReasonAssignment generateValidReasonAssignment(StockCardLineItemReason reason) {
-    ValidReasonAssignment validReasonAssignment = ValidReasonAssignment
+    return ValidReasonAssignment
         .builder()
         .reason(reason)
         .facilityTypeId(facilityTypeId)
         .programId(programId)
         .hidden(false)
         .build();
-    validReasonAssignmentRepository.save(validReasonAssignment);
-
-    return validReasonAssignment;
   }
 
   private StockCardLineItemReason generateStockCardLineItemReason() {
-    StockCardLineItemReason newReason = StockCardLineItemReason
+    return StockCardLineItemReason
         .builder()
         .name("Name")
         .description("Description")
@@ -132,9 +129,6 @@ public class ValidReasonAssignmentServiceTest {
         .reasonCategory(ReasonCategory.ADJUSTMENT)
         .reasonType(ReasonType.DEBIT)
         .build();
-    stockCardLineItemReasonRepository.save(newReason);
-
-    return newReason;
   }
 
 }
