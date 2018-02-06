@@ -81,9 +81,6 @@ public class ValidReasonAssignmentServiceTest {
   @Test
   public void shouldReturnValidReasonAssignmentsIfReasonTypeParamIsNull() {
 
-    when(stockCardLineItemReasonRepository.findByReasonTypeIn(Arrays.asList(
-        ReasonType.BALANCE_ADJUSTMENT, ReasonType.DEBIT))).thenReturn(Collections.emptyList());
-
     when(validReasonAssignmentRepository.findByProgramIdAndFacilityTypeId(
         programId, facilityTypeId)).thenReturn(Collections.singletonList(validReasonAssignment));
 
@@ -95,19 +92,15 @@ public class ValidReasonAssignmentServiceTest {
   }
 
   @Test
-  public void shouldReturnValidReasonAssignmentsIfNoStockCardLineItemsListIsEmpty() {
+  public void shouldReturnValidReasonAssignmentsIfStockCardLineItemsListIsEmpty() {
 
-    when(stockCardLineItemReasonRepository.findByReasonTypeIn(null))
-        .thenReturn(Collections.singletonList(newReason));
-
-    when(validReasonAssignmentRepository.findByProgramIdAndFacilityTypeId(
-        programId, facilityTypeId)).thenReturn(Collections.singletonList(validReasonAssignment));
+    when(stockCardLineItemReasonRepository.findByReasonTypeIn(Collections.singletonList(
+        ReasonType.DEBIT))).thenReturn(Collections.emptyList());
 
     List<ValidReasonAssignment> assignmentList = validReasonAssignmentService.search(
-        programId, facilityTypeId, null);
+        programId, facilityTypeId, Collections.singletonList(ReasonType.DEBIT));
 
-    assertThat(assignmentList.size(), is(1));
-    assertThat(assignmentList.get(0), is(validReasonAssignment));
+    assertThat(assignmentList.size(), is(0));
   }
 
   private ValidReasonAssignment generateValidReasonAssignment(StockCardLineItemReason reason) {

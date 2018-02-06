@@ -15,7 +15,7 @@
 
 package org.openlmis.stockmanagement.service;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.UUID;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
@@ -48,20 +48,20 @@ public class ValidReasonAssignmentService {
   public List<ValidReasonAssignment> search(UUID programId, UUID facilityTypeId,
       List<ReasonType> reasonTypes) {
 
-    List<ValidReasonAssignment> validReasonAssignments;
-    List<StockCardLineItemReason> stockCardLineItemReasons = new ArrayList<>();
+    List<ValidReasonAssignment> validReasonAssignments = Lists.newArrayList();
+    List<StockCardLineItemReason> stockCardLineItemReasons = Lists.newArrayList();
 
     if (!CollectionUtils.isEmpty(reasonTypes)) {
       stockCardLineItemReasons = stockCardLineItemReasonRepository.findByReasonTypeIn(reasonTypes);
+    } else {
+      validReasonAssignments = validReasonAssignmentRepository
+          .findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
     }
 
     if (!CollectionUtils.isEmpty(stockCardLineItemReasons)) {
       validReasonAssignments = validReasonAssignmentRepository
           .findByProgramIdAndFacilityTypeIdAndReasonIn(programId, facilityTypeId,
               stockCardLineItemReasons);
-    } else {
-      validReasonAssignments = validReasonAssignmentRepository
-          .findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
     }
     return validReasonAssignments;
   }
