@@ -16,13 +16,18 @@
 package org.openlmis.stockmanagement.service.referencedata;
 
 import static org.openlmis.stockmanagement.util.RequestHelper.createEntity;
+import static org.openlmis.stockmanagement.util.RequestHelper.createUri;
 
 import org.openlmis.stockmanagement.service.AuthService;
 import org.openlmis.stockmanagement.util.DynamicPageTypeReference;
 import org.openlmis.stockmanagement.util.PageImplRepresentation;
+import org.openlmis.stockmanagement.util.RequestParameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestOperations;
@@ -31,9 +36,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public abstract class BaseCommunicationService<T> {
   protected static final String ACCESS_TOKEN = "access_token";
+
+  protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   protected RestOperations restTemplate = new RestTemplate();
 
@@ -68,6 +76,72 @@ public abstract class BaseCommunicationService<T> {
     }
 
     return builder.build(true).toUri();
+  }
+
+  /**
+   * Return one object from service.
+   *
+   * @param id UUID of requesting object.
+   * @return Requesting reference data object.
+   */
+  public T findOne(UUID id) {
+    return findOne(id.toString(), RequestParameters.init());
+  }
+
+  /**
+   * Return one object from service.
+   *
+   * @param parameters Map of query parameters.
+   * @return Requesting reference data object.
+   */
+  public T findOne(RequestParameters parameters) {
+    return findOne(null, RequestParameters.init());
+  }
+
+  /**
+   * Return one object from service.
+   *
+   * @param resourceUrl Endpoint url.
+   * @param parameters  Map of query parameters.
+   * @return one reference data T objects.
+   */
+  public T findOne(String resourceUrl, RequestParameters parameters) {
+    return findOne(resourceUrl, parameters, getResultClass());
+  }
+
+  /**
+   * Return one object from service.
+   *
+   * @param resourceUrl Endpoint url.
+   * @param parameters  Map of query parameters.
+   * @param type        set to what type a response should be converted.
+   * @return one reference data T objects.
+   */
+  public T findOne(String resourceUrl, RequestParameters parameters, Class<T> type) {
+    String url = getServiceUrl() + getUrl() + resourceUrl;
+
+    RequestParameters params = RequestParameters
+        .init()
+        .setAll(parameters);
+
+    try {
+      ResponseEntity<T> responseEntity = restTemplate.exchange(
+          createUri(url, params), HttpMethod.GET, createEntity(obtainAccessToken()),
+          type);
+      return responseEntity.getBody();
+    } catch (HttpStatusCodeException ex) {
+      // rest template will handle 404 as an exception, instead of returning null
+      if (HttpStatus.NOT_FOUND == ex.getStatusCode()) {
+        logger.warn(
+            "{} matching params does not exist. Params: {}",
+            getResultClass().getSimpleName(), parameters
+        );
+
+        return null;
+      } else {
+        throw buildDataRetrievalException(ex);
+      }
+    }
   }
 
   protected Page<T> getPage(String resourceUrl, Map<String, Object> parameters) {

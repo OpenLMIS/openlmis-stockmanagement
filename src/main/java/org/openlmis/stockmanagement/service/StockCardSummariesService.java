@@ -26,10 +26,13 @@ import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.dto.StockCardDto;
+import org.openlmis.stockmanagement.dto.StockCardSummaryV2Dto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.OrderableFulfillReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +44,7 @@ import org.springframework.stereotype.Service;
 
 import lombok.Getter;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -61,10 +65,31 @@ public class StockCardSummariesService extends StockCardBaseService {
   private OrderableReferenceDataService orderableReferenceDataService;
 
   @Autowired
+  private OrderableFulfillReferenceDataService orderableFulfillService;
+
+  @Autowired
   private LotReferenceDataService lotReferenceDataService;
 
   @Autowired
   private StockCardRepository cardRepository;
+
+  /**
+   * Get a page of stock cards.
+   *
+   * @param params stock cards summaries search params.
+   * @return page of stock cards.
+   */
+  public Page<StockCardSummaryV2Dto> findStockCard(StockCardSummariesV2SearchParams params) {
+    Map<UUID, OrderableFulfillDto> orderables = orderableFulfillService
+        .findByIds(params.getOrderableId());
+
+    Page<StockCard> pageOfStockCards = cardRepository.findByProgramIdAndFacilityId(
+        params.getProgramId(), params.getFacilityId(), params.getPageable());
+
+    return new PageImpl<>(buildStockCardSummaries(pageOfStockCards.getContent(),
+        orderables, params.getAsOfDate()),
+        params.getPageable(), pageOfStockCards.getTotalElements());
+  }
 
   /**
    * Find all stock cards by program id and facility id. No paging, all in one.
@@ -116,6 +141,11 @@ public class StockCardSummariesService extends StockCardBaseService {
     List<StockCard> dummyCards = createDummyCards(programId, facilityId, orderableLotsMap.values(),
         existingCardIdentities).collect(toList());
     return assignOrderableLotRemoveLineItems(createDtos(dummyCards), orderableLotsMap);
+  }
+
+  private List<StockCardSummaryV2Dto> buildStockCardSummaries(List<StockCard> stockCards, Map<UUID,
+      OrderableFulfillDto> orderables, LocalDate asOfDate) {
+    
   }
 
   private List<StockCardDto> cardsToDtos(UUID programId, UUID facilityId, List<StockCard> cards) {

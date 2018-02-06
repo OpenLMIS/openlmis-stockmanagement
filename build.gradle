@@ -46,7 +46,7 @@ dependencies {
     compile "org.postgresql:postgresql:42.0.0"
     compile "com.github.tomakehurst:wiremock:1.58"
     compile 'org.webjars:swagger-ui:2.2.6'
-    compile 'org.apache.commons:commons-lang3:3.4'
+    compile 'org.apache.commons:commons-lang3:3.6'
     compile 'org.apache.commons:commons-csv:1.4'
     compile 'org.apache.commons:commons-collections4:4.1'
     compile 'commons-io:commons-io:2.5'
@@ -65,6 +65,8 @@ dependencies {
 
     testCompile "com.jayway.restassured:rest-assured:2.7.0"
     testCompile "guru.nidi.raml:raml-tester:0.8.9"
+    testCompile "nl.jqno.equalsverifier:equalsverifier:2.4"
+    testCompile "be.joengenduvel.java.verifiers:to-string:1.0.2"
 }
 
 idea {

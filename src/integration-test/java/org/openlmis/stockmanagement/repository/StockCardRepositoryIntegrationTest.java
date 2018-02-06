@@ -128,4 +128,19 @@ public class StockCardRepositoryIntegrationTest
 
     entityManager.flush();
   }
+
+  @Test
+  public void shouldGetStockCardFor() throws Exception {
+
+
+
+
+
+    StockCard one = generateInstance();
+    one.getLineItems().get(0).setExtraData(Maps.newHashMap());
+
+    stockCardRepository.save(one);
+
+    entityManager.flush();
+  }
 }
