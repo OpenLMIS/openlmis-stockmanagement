@@ -26,12 +26,15 @@ import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
+import java.util.ArrayList;
+import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
 import org.openlmis.stockmanagement.dto.ValidReasonAssignmentDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
 import org.openlmis.stockmanagement.service.PermissionService;
+import org.openlmis.stockmanagement.service.ValidReasonAssignmentService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
 import org.openlmis.stockmanagement.util.Message;
 import org.slf4j.Logger;
@@ -63,25 +66,32 @@ public class ValidReasonAssignmentController {
   @Autowired
   private PermissionService permissionService;
 
+  @Autowired
+  private ValidReasonAssignmentService validReasonAssignmentService;
+
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCardsController.class);
 
   /**
    * Get a list of valid reasons.
    *
-   * @param program      program id.
-   * @param facilityType facility type id.
-   * @return A list of valid reason.
+   * @param program       program id.
+   * @param facilityType  facility type id.
+   * @param reasonTypes   reason types' list.
+   * @return A list of valid reason dto.
    */
   @RequestMapping(value = "/validReasons", method = GET)
-  public ResponseEntity<List<ValidReasonAssignment>> getValidReasons(
-      @RequestParam("program") UUID program, @RequestParam("facilityType") UUID facilityType) {
+  public ResponseEntity<List<ValidReasonAssignmentDto>> getValidReasons(
+      @RequestParam("program") UUID program, @RequestParam("facilityType") UUID facilityType,
+      @RequestParam(value = "reasonType", required = false) List<ReasonType> reasonTypes) {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug(format(
           "Try to find stock card line item reason with program %s and facility type %s",
           program.toString(), facilityType.toString()));
     }
     permissionService.canViewValidReasons(program, facilityType);
-    return new ResponseEntity<>(getReasonsBy(program, facilityType), OK);
+
+    return new ResponseEntity<>(toDto(
+        validReasonAssignmentService.search(program, facilityType, reasonTypes)), OK);
   }
 
   /**
@@ -92,7 +102,7 @@ public class ValidReasonAssignmentController {
    */
   @RequestMapping(value = "/validReasons/{id}", method = DELETE)
   public ResponseEntity removeReasonAssignment(@PathVariable("id") UUID assignmentId) {
-    LOGGER.debug(format("Try to remove reason assignment %s.", assignmentId));
+    LOGGER.debug("Try to remove reason assignment {}", assignmentId);
 
     permissionService.canManageReasons();
 
@@ -151,9 +161,11 @@ public class ValidReasonAssignmentController {
     return new ResponseEntity<>(assignmentDto, CREATED);
   }
 
-  private List<ValidReasonAssignment> getReasonsBy(UUID program, UUID facilityType) {
-    return reasonAssignmentRepository
-        .findByProgramIdAndFacilityTypeId(program, facilityType);
+  private List<ValidReasonAssignmentDto> toDto(List<ValidReasonAssignment> validReasonAssignments) {
+    List<ValidReasonAssignmentDto> dtos = new ArrayList<>();
+    validReasonAssignments.forEach(validReasonAssignment -> dtos.add(
+        ValidReasonAssignmentDto.newInstance(validReasonAssignment)));
+    return dtos;
   }
 
 }

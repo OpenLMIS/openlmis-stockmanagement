@@ -7,6 +7,7 @@ Contract breaking changes:
 
 Improveemnts:
 * [OLMIS-3614](https://openlmis.atlassian.net/browse/OLMIS-3614): Added extraData field to Stock Card Summary.
+* [OLMIS-3996](https://openlmis.atlassian.net/browse/OLMIS-3996): Added reasonType parameter to GET /validReasons endpoint.
 
 Bug fixes, security and performance improvements, also backwards-compatible:
 

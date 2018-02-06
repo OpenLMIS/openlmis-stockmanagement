@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.repository;
 
+import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -31,4 +32,5 @@ public interface StockCardLineItemReasonRepository extends
 
   List<StockCardLineItemReason> findByIdIn(Collection<UUID> ids);
 
+  List<StockCardLineItemReason> findByReasonTypeIn(Collection<ReasonType> types);
 }

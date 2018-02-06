@@ -34,15 +34,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
 import org.openlmis.stockmanagement.service.PermissionService;
+import org.openlmis.stockmanagement.service.ValidReasonAssignmentService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -55,6 +58,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   private static final String VALID_REASON_API = "/api/validReasons";
   private static final String PROGRAM = "program";
   private static final String FACILITY_TYPE = "facilityType";
+  private static final String REASON_TYPE = "reasonType";
 
   @MockBean
   private ValidReasonAssignmentRepository reasonAssignmentRepository;
@@ -68,6 +72,9 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   @MockBean
   private StockCardLineItemReasonRepository reasonRepository;
 
+  @MockBean
+  private ValidReasonAssignmentService validReasonAssignmentService;
+
   @Before
   public void setUp() {
     when(reasonAssignmentRepository.save(any(ValidReasonAssignment.class)))
@@ -80,8 +87,8 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
     UUID programId = UUID.randomUUID();
     UUID facilityTypeId = UUID.randomUUID();
 
-    when(reasonAssignmentRepository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
-        .thenReturn(Collections.singletonList(new ValidReasonAssignment()));
+    when(validReasonAssignmentService.search(programId, facilityTypeId, null)).thenReturn(
+        Collections.singletonList(new ValidReasonAssignment()));
 
     //when
     ResultActions resultActions = mvc.perform(
@@ -97,10 +104,40 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   }
 
   @Test
+  public void getValidReasonAssignmentByProgramAndFacilityTypeAndReasonType() throws Exception {
+    //given
+    UUID programId = UUID.randomUUID();
+    UUID facilityTypeId = UUID.randomUUID();
+
+    ValidReasonAssignment firstAssignment =
+        mockedValidReasonAssignment(UUID.randomUUID(), ReasonType.DEBIT);
+    ValidReasonAssignment secondAssignment =
+        mockedValidReasonAssignment(UUID.randomUUID(), ReasonType.CREDIT);
+
+    when(validReasonAssignmentService.search(programId, facilityTypeId,
+        Arrays.asList(ReasonType.CREDIT, ReasonType.DEBIT))).thenReturn(
+            Arrays.asList(firstAssignment, secondAssignment));
+
+    //when
+    ResultActions resultActions = mvc.perform(
+        get(VALID_REASON_API)
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+            .param(PROGRAM, programId.toString())
+            .param(FACILITY_TYPE, facilityTypeId.toString())
+            .param(REASON_TYPE, ReasonType.CREDIT.toString())
+            .param(REASON_TYPE, ReasonType.DEBIT.toString()));
+
+    //then
+    resultActions
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(2)));
+  }
+
+  @Test
   public void shouldAssignReasonToProgramFacilityTypeAndSetAsShownByDefault() throws Exception {
     //given
     UUID reasonId = UUID.randomUUID();
-    ValidReasonAssignment assignment = mockedValidReasonAssignment(reasonId);
+    ValidReasonAssignment assignment = mockedValidReasonAssignment(reasonId, ReasonType.DEBIT);
 
     //when
     ResultActions resultActions = mvc.perform(
@@ -126,7 +163,8 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   @Test
   public void shouldSetValidReasonAsShownWhenHiddenIsFalse() throws Exception {
     //given1
-    ValidReasonAssignment assignment = mockedValidReasonAssignment(UUID.randomUUID());
+    ValidReasonAssignment assignment = mockedValidReasonAssignment(UUID.randomUUID(),
+        ReasonType.DEBIT);
     assignment.setHidden(false);
 
     //when
@@ -149,7 +187,8 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   @Test
   public void shouldSetValidReasonAsHiddenWhenHiddenIsTrue() throws Exception {
     //given1
-    ValidReasonAssignment assignment = mockedValidReasonAssignment(UUID.randomUUID());
+    ValidReasonAssignment assignment = mockedValidReasonAssignment(UUID.randomUUID(),
+        ReasonType.DEBIT);
     assignment.setHidden(true);
 
     //when
@@ -172,7 +211,8 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   @Test
   public void shouldIgnoreAssignmentIdWhenRequestBodySpecifiedIt() throws Exception {
     //given
-    ValidReasonAssignment assignment = mockedValidReasonAssignment(UUID.randomUUID());
+    ValidReasonAssignment assignment = mockedValidReasonAssignment(UUID.randomUUID(),
+        ReasonType.DEBIT);
     assignment.setId(UUID.randomUUID());
 
     //when
@@ -301,9 +341,10 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
     resultActions.andExpect(status().isBadRequest());
   }
 
-  private ValidReasonAssignment mockedValidReasonAssignment(UUID reasonId) {
+  private ValidReasonAssignment mockedValidReasonAssignment(UUID reasonId, ReasonType reasonType) {
     StockCardLineItemReason reason = new StockCardLineItemReason();
     reason.setId(reasonId);
+    reason.setReasonType(reasonType);
 
     ValidReasonAssignment assignment = new ValidReasonAssignment();
     assignment.setReason(reason);

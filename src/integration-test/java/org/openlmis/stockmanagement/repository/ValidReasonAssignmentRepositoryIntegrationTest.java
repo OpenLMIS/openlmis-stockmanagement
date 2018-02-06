@@ -15,6 +15,12 @@
 
 package org.openlmis.stockmanagement.repository;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
+import java.util.List;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
@@ -52,6 +58,36 @@ public class ValidReasonAssignmentRepositoryIntegrationTest
     repository.save(duplicateValidReason);
 
     entityManager.flush();
+  }
+
+  @Test
+  public void shouldReturnValidReasonWithProgramAndFacilityTypeAndReasonTypes() throws Exception {
+    ValidReasonAssignment validReasonAssignment = generateInstance();
+    repository.save(validReasonAssignment);
+
+    StockCardLineItemReason newReason = StockCardLineItemReason
+        .builder()
+        .name("Name")
+        .description("Description")
+        .isFreeTextAllowed(true)
+        .reasonCategory(ReasonCategory.ADJUSTMENT)
+        .reasonType(ReasonType.DEBIT)
+        .build();
+    reasonRepository.save(newReason);
+
+    ValidReasonAssignment newAssignment = new ValidReasonAssignment(
+        PROGRAM_ID, FACILITY_TYPE_ID, false, newReason);
+    repository.save(newAssignment);
+
+    List<StockCardLineItemReason> reasons = Arrays.asList(validReasonAssignment.getReason(),
+        newReason);
+
+    List<ValidReasonAssignment> validReasonAssignments = repository
+        .findByProgramIdAndFacilityTypeIdAndReasonIn(PROGRAM_ID, FACILITY_TYPE_ID, reasons);
+
+    assertThat(validReasonAssignments.size(), is(2));
+    assertTrue(validReasonAssignments.containsAll(
+        Arrays.asList(validReasonAssignment, newAssignment)));
   }
 
   @Override

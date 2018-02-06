@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.domain.reason;
 
+import lombok.Builder;
 import org.hibernate.annotations.Type;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 
@@ -32,6 +33,7 @@ import javax.persistence.Table;
 
 @Entity
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "valid_reason_assignments", schema = "stockmanagement")

@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.repository;
 
+import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -32,4 +33,7 @@ public interface ValidReasonAssignmentRepository extends
       @Param("programId") UUID programId,
       @Param("facilityTypeId") UUID facilityTypeId,
       @Param("reasonId") UUID reasonId);
+
+  List<ValidReasonAssignment> findByProgramIdAndFacilityTypeIdAndReasonIn(UUID programId,
+      UUID facilityTypeId, List<StockCardLineItemReason> reasons);
 }
