@@ -572,6 +572,11 @@ traits:
             description: Reason type
             type: string
             required: false
+            repeat: true
+            enum:
+              - CREDIT
+              - DEBIT
+              - BALANCE_ADJUSTMENT
 
         responses:
           200:
