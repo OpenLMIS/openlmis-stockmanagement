@@ -18,8 +18,6 @@ package org.openlmis.stockmanagement.validators;
 import static java.util.stream.Collectors.groupingBy;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
@@ -32,7 +30,6 @@ import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -103,52 +100,11 @@ public class QuantityValidator implements StockEventValidator {
       Integer quantity = item.getQuantity();
       if (stockOnHand != null && quantity != null) {
         List<StockEventAdjustmentDto> adjustments = item.getStockAdjustments();
-        int adjustmentsQuantity = 0;
-
         if (isNotEmpty(adjustments)) {
           validateStockAdjustments(adjustments);
-          adjustmentsQuantity = calculateAdjustmentsQuantity(event, adjustments);
-        } else if (!stockOnHand.equals(quantity)) {
-          throw new ValidationMessageException(
-              ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED);
-        }
-
-        if (stockOnHand + adjustmentsQuantity != quantity) {
-          LOGGER.warn(
-              "Stock on hand [{}] and adjustments [{}] = [{}] differ from current stock [{}]. "
-                  + "Orderable: {}, lot: {}",
-              stockOnHand, adjustmentsQuantity, stockOnHand + adjustmentsQuantity, quantity,
-              item.getOrderableId(), item.getLotId());
-
-          debugAdjustments(event, adjustments);
-
-          throw new ValidationMessageException(
-              ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER);
         }
       }
     }
-  }
-
-  private int calculateAdjustmentsQuantity(StockEventDto event,
-                                           List<StockEventAdjustmentDto> adjustments) {
-    int adjustmentsQuantity = 0;
-
-    for (StockEventAdjustmentDto adjustment : adjustments) {
-      StockCardLineItemReason reason = event
-          .getContext()
-          .findEventReason(adjustment.getReasonId());
-
-      // we check if reason exists in ReasonExistenceValidator
-      if (null == reason) {
-        continue;
-      }
-
-      int sign = reason.isDebitReasonType() ? -1 : 1;
-
-      adjustmentsQuantity += sign * adjustment.getQuantity();
-    }
-
-    return adjustmentsQuantity;
   }
 
   /**

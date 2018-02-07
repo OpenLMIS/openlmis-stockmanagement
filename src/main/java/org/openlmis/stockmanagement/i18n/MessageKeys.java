@@ -220,12 +220,6 @@ public abstract class MessageKeys {
   public static final String ERROR_PHYSICAL_INVENTORY_ORDERABLE_DISABLED_VVM =
       PHYSICAL_INVENTORY_ERROR_PREFIX + ".orderable.disabled.vvm";
 
-  public static final String ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER =
-      PHYSICAL_INVENTORY_ERROR_PREFIX + ".lineItems.stockOnHand.currentStock.differ";
-
-  public static final String ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED =
-      PHYSICAL_INVENTORY_ERROR_PREFIX + ".lineItems.stockAdjustments.notProvided";
-
   public static final String ERROR_PHYSICAL_INVENTORY_DISCREPANCY_REASON_NOT_VALID =
       PHYSICAL_INVENTORY_ERROR_PREFIX + ".lineItems.stockAdjustments.reason.notValid";
 

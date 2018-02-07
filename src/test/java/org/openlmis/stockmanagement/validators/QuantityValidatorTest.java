@@ -24,8 +24,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 
 import org.assertj.core.util.Lists;
@@ -46,7 +44,6 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonDataBuilder;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
@@ -200,12 +197,7 @@ public class QuantityValidatorTest extends BaseValidatorTest {
   }
 
   @Test
-  public void shouldRejectWhenStockOnHandDoesNotMatchQuantityAndNoAdjustmentsProvided()
-      throws Exception {
-    //expect
-    expectedException.expect(ValidationMessageException.class);
-    expectedException.expectMessage(ERROR_PHYSICAL_INVENTORY_STOCK_ADJUSTMENTS_NOT_PROVIDED);
-
+  public void shouldNotRejectWhenStockOnHandDoesNotMatchQuantityAndNoAdjustmentsProvided() {
     //given
     LocalDate firstDate = dateFromYear(2015);
 
@@ -223,11 +215,7 @@ public class QuantityValidatorTest extends BaseValidatorTest {
   }
 
   @Test
-  public void shouldRejectWhenStockOnHandWithAdjustmentsDoesNotMatchQuantity() throws Exception {
-    //expect
-    expectedException.expect(ValidationMessageException.class);
-    expectedException.expectMessage(ERROR_PHYSICAL_INVENTORY_STOCK_ON_HAND_CURRENT_STOCK_DIFFER);
-
+  public void shouldNotRejectWhenStockOnHandWithAdjustmentsDoesNotMatchQuantity() {
     //given
     LocalDate firstDate = dateFromYear(2015);
 
