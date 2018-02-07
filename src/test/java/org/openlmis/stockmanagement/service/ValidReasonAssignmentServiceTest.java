@@ -30,12 +30,13 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
+import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonDataBuilder;
+import org.openlmis.stockmanagement.testutils.ValidReasonAssignmentDataBuilder;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ValidReasonAssignmentServiceTest {
@@ -104,23 +105,18 @@ public class ValidReasonAssignmentServiceTest {
   }
 
   private ValidReasonAssignment generateValidReasonAssignment(StockCardLineItemReason reason) {
-    return ValidReasonAssignment
-        .builder()
-        .reason(reason)
-        .facilityTypeId(facilityTypeId)
-        .programId(programId)
-        .hidden(false)
+    return new ValidReasonAssignmentDataBuilder()
+        .withReason(reason)
+        .withFacilityType(facilityTypeId)
+        .withProgram(programId)
         .build();
   }
 
   private StockCardLineItemReason generateStockCardLineItemReason() {
-    return StockCardLineItemReason
-        .builder()
-        .name("Name")
-        .description("Description")
-        .isFreeTextAllowed(true)
-        .reasonCategory(ReasonCategory.ADJUSTMENT)
-        .reasonType(ReasonType.DEBIT)
+    return new StockCardLineItemReasonDataBuilder()
+        .withName("Name")
+        .withDescription("Description")
+        .withDebitType()
         .build();
   }
 

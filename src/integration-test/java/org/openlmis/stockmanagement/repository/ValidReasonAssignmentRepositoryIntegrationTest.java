@@ -22,10 +22,9 @@ import static org.junit.Assert.assertThat;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Test;
-import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
-import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
+import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonDataBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
 import java.util.UUID;
@@ -65,13 +64,10 @@ public class ValidReasonAssignmentRepositoryIntegrationTest
     ValidReasonAssignment validReasonAssignment = generateInstance();
     repository.save(validReasonAssignment);
 
-    StockCardLineItemReason newReason = StockCardLineItemReason
-        .builder()
-        .name("Name")
-        .description("Description")
-        .isFreeTextAllowed(true)
-        .reasonCategory(ReasonCategory.ADJUSTMENT)
-        .reasonType(ReasonType.DEBIT)
+    StockCardLineItemReason newReason = new StockCardLineItemReasonDataBuilder()
+        .withoutId()
+        .withName("Damage")
+        .withDebitType()
         .build();
     reasonRepository.save(newReason);
 
@@ -97,12 +93,10 @@ public class ValidReasonAssignmentRepositoryIntegrationTest
   @Override
   ValidReasonAssignment generateInstance() throws Exception {
     int instanceNumber = getNextInstanceNumber();
-    StockCardLineItemReason reason = StockCardLineItemReason.builder()
-        .name("Name" + instanceNumber)
-        .description("Description" + instanceNumber)
-        .isFreeTextAllowed(instanceNumber % 2 == 0)
-        .reasonCategory(ReasonCategory.ADJUSTMENT)
-        .reasonType(ReasonType.CREDIT)
+    StockCardLineItemReason reason = new StockCardLineItemReasonDataBuilder()
+        .withoutId()
+        .withName("Name" + instanceNumber)
+        .withCreditType()
         .build();
     reasonRepository.save(reason);
     return new ValidReasonAssignment(PROGRAM_ID, FACILITY_TYPE_ID, false, reason);

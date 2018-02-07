@@ -568,6 +568,10 @@ traits:
             description: Facility type id
             type: string
             required: true
+          reasonType:
+            description: Reason type
+            type: string
+            required: false
 
         responses:
           200:
