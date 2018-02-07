@@ -49,6 +49,7 @@ schemas:
   - stockEventLineItemDto: !include schemas/stockEventLineItemDto.json
 
   - stockCard: !include schemas/stockCard.json
+  - stockCardSummariesPage: !include schemas/stockCardSummaryV2Page.json
   - stockCardSummaries: !include schemas/stockCardSummaries.json
   - validSourceDestination: !include schemas/validSourceDestination.json
   - validSourceDestinations: |
@@ -302,6 +303,47 @@ traits:
               body:
                 application/json:
                   schema: localizedMessage
+
+  /v2/stockCardSummaries:
+    get:
+      is: [ secured, paginated ]
+      description: Get summaries of stock cards, which contains SOH, product name, and other essential information. This will NOT return any line items. (This could be used by front end for list view.)
+      queryParameters:
+        facilityId:
+          required: true
+          description: Facility id, indicates the facility that the queried stock card summaries should belong to.
+          repeat: false
+          type: string
+        programId:
+          required: true
+          description: Program id, indicates the program that the queries stock card summaries is under.
+          repeat: false
+          type: string
+        orderableId:
+          required: false
+          description: Orderable id, indicates the orderable that the queries stock card summaries is under, can specify multiple orderable ids.
+          repeat: true
+          type: string
+        asOfDate:
+          required: false
+          description: Program id, indicates the program that the queries stock card summaries is under.
+          repeat: false
+          type: string
+
+      responses:
+        200:
+          body:
+            application/json:
+              schema: stockCardSummariesPage
+        400:
+          body:
+            application/json:
+              schema: localizedMessage
+        403:
+          description: User does not have permission to view stock cards of given facility and program.
+          body:
+            application/json:
+              schema: localizedMessage
 
   /stockCardSummaries/noCards:
       get:

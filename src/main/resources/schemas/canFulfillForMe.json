@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Can fulfill for me.",
+  "properties": {
+    "stockCard": {
+      "type": "object",
+      "title": "Stock Card",
+      "$ref": "referenceObjectDto.json"
+    },
+    "orderable": {
+      "type": "object",
+      "title": "Orderable",
+      "$ref": "referenceObjectDto.json"
+    },
+    "lot": {
+      "type": "object",
+      "title": "Lot",
+      "$ref": "referenceObjectDto.json"
+    },
+    "stockOnHand": {
+      "type": "integer"
+    },
+    "processedDate": {
+      "type": "string",
+      "format": "date"
+    }
+  }
+}
