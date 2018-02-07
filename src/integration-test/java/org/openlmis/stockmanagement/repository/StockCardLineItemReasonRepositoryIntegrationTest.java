@@ -46,8 +46,6 @@ public class StockCardLineItemReasonRepositoryIntegrationTest
 
   @Before
   public void setUp() throws Exception {
-    reasonRepository.deleteAll();
-
     firstReason = generateInstance();
     reasonRepository.save(firstReason);
 
@@ -67,7 +65,7 @@ public class StockCardLineItemReasonRepositoryIntegrationTest
     List<StockCardLineItemReason> reasons =
         reasonRepository.findByReasonTypeIn(Arrays.asList(ReasonType.DEBIT, ReasonType.CREDIT));
 
-    assertThat(reasons.size(), is(2));
+    assertThat(reasons.size(), is(6));
     assertThat(reasons, hasItems(firstReason, secondReason));
   }
 
