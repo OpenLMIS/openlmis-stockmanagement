@@ -19,7 +19,9 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
+import static org.openlmis.stockmanagement.testutils.DatesUtil.getBaseDateTime;
 
 import org.junit.Test;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemDataBuilder;
@@ -111,5 +113,19 @@ public class StockCardTest {
 
     //then
     assertThat(stockCard.getLineItems().get(0).getQuantity(), is(5));
+  }
+
+  @Test
+  public void shouldGetLineItemAsOfDate() throws Exception {
+    StockCard stockCard = new StockCard();
+    stockCard.setLineItems(asList(
+        new StockCardLineItemDataBuilder().build(),
+        new StockCardLineItemDataBuilder().withProcessedDateHourEarlier().build(),
+        new StockCardLineItemDataBuilder().withProcessedDateNextDay().build()));
+
+    assertEquals(getBaseDateTime().plusDays(1),
+        stockCard.getLineItemAsOfDate(getBaseDateTime().plusDays(2)).getProcessedDate());
+
+    assertEquals(null, stockCard.getLineItemAsOfDate(getBaseDateTime().minusDays(1)));
   }
 }

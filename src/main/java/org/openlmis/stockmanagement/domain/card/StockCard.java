@@ -25,6 +25,7 @@ import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparat
 import static org.openlmis.stockmanagement.i18n.MessageKeys.SERVER_ERROR_SHALLOW_COPY;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -157,6 +158,21 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
     }
     setStockOnHand(previousSoh);
     LOGGER.debug("Calculated stock on hand: {}", previousSoh);
+  }
+
+  /**
+   * Returns latest line item  before given date.
+   */
+  public StockCardLineItem getLineItemAsOfDate(ZonedDateTime date) {
+    if (isEmpty(lineItems)) {
+      return null;
+    }
+
+    return lineItems.stream()
+        .filter(a -> a.getProcessedDate().isBefore(date))
+        .sorted(Comparator.comparing(StockCardLineItem::getProcessedDate).reversed())
+        .findFirst()
+        .orElse(null);
   }
 
   /**

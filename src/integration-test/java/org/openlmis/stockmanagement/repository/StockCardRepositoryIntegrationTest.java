@@ -15,7 +15,10 @@
 
 package org.openlmis.stockmanagement.repository;
 
+import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Maps;
 import org.junit.Test;
@@ -26,6 +29,8 @@ import org.openlmis.stockmanagement.testutils.StockCardDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.UUID;
@@ -73,6 +78,7 @@ public class StockCardRepositoryIntegrationTest
     StockCard stockCard = new StockCardDataBuilder(event)
         .withoutId()
         .withOrderable(product)
+        .withOriginalEvent(event)
         .withLot(lot)
         .withLineItem(lineItem)
         .build();
@@ -127,5 +133,33 @@ public class StockCardRepositoryIntegrationTest
     stockCardRepository.save(one);
 
     entityManager.flush();
+  }
+
+  @Test
+  public void shouldGetStockCardForProgramIdAndFacilityIdAndOrderableIds() throws Exception {
+    UUID programId = randomUUID();
+    UUID facilityId = randomUUID();
+    UUID orderableId1 = randomUUID();
+    UUID orderableId2 = randomUUID();
+
+    stockCardRepository.save(
+        generateInstance(facilityId, randomUUID(), orderableId1, randomUUID()));
+    stockCardRepository.save(
+        generateInstance(randomUUID(), programId, orderableId2, randomUUID()));
+    stockCardRepository.save(
+        generateInstance(facilityId, programId, randomUUID(), randomUUID()));
+    StockCard card1 = stockCardRepository.save(
+        generateInstance(facilityId, programId, orderableId1, randomUUID()));
+    StockCard card2 = stockCardRepository.save(
+        generateInstance(facilityId, programId, orderableId2, randomUUID()));
+
+    Page<StockCard> page = stockCardRepository.findByProgramIdAndFacilityIdAndOrderableIdIn(
+        programId, facilityId, asList(orderableId1, orderableId2), new PageRequest(0, 10));
+
+    assertEquals(2, page.getTotalElements());
+    assertTrue(page.getContent().get(0).getId().equals(card1.getId())
+        || page.getContent().get(0).getId().equals(card2.getId()));
+    assertTrue(page.getContent().get(1).getId().equals(card1.getId())
+        || page.getContent().get(1).getId().equals(card2.getId()));
   }
 }

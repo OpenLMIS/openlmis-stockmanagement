@@ -58,6 +58,11 @@ public class StockCardDataBuilder {
     return this;
   }
 
+  public StockCardDataBuilder withOriginalEvent(StockEvent originalEvent) {
+    this.originalEvent = originalEvent;
+    return this;
+  }
+
   /**
    * Creates stock card based on parameters from the builder.
    */

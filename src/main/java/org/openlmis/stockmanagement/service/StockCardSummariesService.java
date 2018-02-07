@@ -20,16 +20,22 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.empty;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity.identityOf;
 
+import lombok.Getter;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.dto.StockCardDto;
+import org.openlmis.stockmanagement.dto.StockCardSummaryV2Dto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
+import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.OrderableFulfillReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +44,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import lombok.Getter;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -61,10 +64,46 @@ public class StockCardSummariesService extends StockCardBaseService {
   private OrderableReferenceDataService orderableReferenceDataService;
 
   @Autowired
+  private OrderableFulfillReferenceDataService orderableFulfillService;
+
+  @Autowired
   private LotReferenceDataService lotReferenceDataService;
 
   @Autowired
+  private ApprovedProductReferenceDataService approvedProductReferenceDataService;
+
+  @Autowired
   private StockCardRepository cardRepository;
+
+  @Autowired
+  private StockCardSummariesV2Builder stockCardSummariesV2Builder;
+
+  /**
+   * Get a page of stock cards.
+   *
+   * @param params stock cards summaries search params.
+   * @return page of stock cards.
+   */
+  public Page<StockCardSummaryV2Dto> findStockCard(StockCardSummariesV2SearchParams params) {
+    List<OrderableDto> approvedProducts = approvedProductReferenceDataService
+        .getAllApprovedProducts(params.getProgramId(), params.getFacilityId());
+
+    if (!isEmpty(params.getOrderableId())) {
+      approvedProducts = approvedProducts.stream()
+          .filter(p -> params.getOrderableId().contains(p.getId())).collect(toList());
+    }
+
+    Map<UUID, OrderableFulfillDto> orderableFulfillList = orderableFulfillService
+        .findByIds(approvedProducts.stream().map(OrderableDto::getId).collect(toList()));
+
+    Page<StockCard> pageOfStockCards = cardRepository
+        .findByProgramIdAndFacilityIdAndOrderableIdIn(params.getProgramId(), params.getFacilityId(),
+            orderableFulfillList.keySet(), params.getPageable());
+
+    return new PageImpl<>(stockCardSummariesV2Builder.build(pageOfStockCards.getContent(),
+        orderableFulfillList, params.getAsOfDate()),
+        params.getPageable(), pageOfStockCards.getTotalElements());
+  }
 
   /**
    * Find all stock cards by program id and facility id. No paging, all in one.
