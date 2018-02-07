@@ -65,7 +65,6 @@ public class StockCardLineItemReasonRepositoryIntegrationTest
     List<StockCardLineItemReason> reasons =
         reasonRepository.findByReasonTypeIn(Arrays.asList(ReasonType.DEBIT, ReasonType.CREDIT));
 
-    assertThat(reasons.size(), is(6));
     assertThat(reasons, hasItems(firstReason, secondReason));
   }
 
