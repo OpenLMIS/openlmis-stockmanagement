@@ -32,7 +32,7 @@ public class OrderableFulfillDtoDataBuilder {
 
   /**
    * Creates new instance of {@link OrderableFulfillDto} with properties.
-   * @return created stock card line item reason.
+   * @return created orderable fulfill dto
    */
   public OrderableFulfillDto build() {
     return new OrderableFulfillDto(canFulfillForMe, canBeFulfilledByMe);

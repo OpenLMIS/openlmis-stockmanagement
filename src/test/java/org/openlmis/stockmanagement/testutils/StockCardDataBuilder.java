@@ -58,8 +58,8 @@ public class StockCardDataBuilder {
     return this;
   }
 
-  public StockCardDataBuilder withOriginalEvent(StockEvent originalEvent) {
-    this.originalEvent = originalEvent;
+  public StockCardDataBuilder withStockOnHand(Integer stockOnHand) {
+    this.stockOnHand = stockOnHand;
     return this;
   }
 

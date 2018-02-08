@@ -40,7 +40,7 @@ public class CanFulfillForMeEntryDtoDataBuilder {
 
   /**
    * Creates new instance of {@link CanFulfillForMeEntryDto} with properties.
-   * @return created object reference.
+   * @return created can fulfill for me entry
    */
   public CanFulfillForMeEntryDto build() {
     return new CanFulfillForMeEntryDto(stockCard, orderable, lot, stockOnHand, processedDate);

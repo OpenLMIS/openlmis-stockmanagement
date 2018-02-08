@@ -15,29 +15,26 @@
 
 package org.openlmis.stockmanagement.dto.referencedata;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
+import org.junit.Test;
+import org.openlmis.stockmanagement.testutils.ApprovedProductDtoDataBuilder;
+import org.openlmis.stockmanagement.testutils.ToStringTestUtils;
 
-import java.util.Map;
-import java.util.UUID;
+public class ApprovedProductDtoTest {
 
-@Getter
-@Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
-@ToString
-public class OrderableDto {
-  private UUID id;
-  private String productCode;
-  private String fullProductName;
-  private DispensableDto dispensable;
-  private Map<String, String> identifiers;
-  private Map<String, String> extraData;
+  @Test
+  public void equalsContract() {
+    EqualsVerifier
+        .forClass(ApprovedProductDto.class)
+        .withRedefinedSuperclass()
+        .suppress(Warning.NONFINAL_FIELDS) // DTO fields cannot be final
+        .verify();
+  }
+
+  @Test
+  public void shouldImplementToString() {
+    ApprovedProductDto approvedProductDto = new ApprovedProductDtoDataBuilder().build();
+    ToStringTestUtils.verify(ApprovedProductDto.class, approvedProductDto);
+  }
 }

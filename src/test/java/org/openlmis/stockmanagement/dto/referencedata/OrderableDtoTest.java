@@ -13,29 +13,28 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.testutils;
+package org.openlmis.stockmanagement.dto.referencedata;
 
-import org.openlmis.stockmanagement.dto.CanFulfillForMeEntryDto;
-import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
-import org.openlmis.stockmanagement.dto.StockCardSummaryV2Dto;
-import java.util.ArrayList;
-import java.util.List;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
+import org.junit.Test;
+import org.openlmis.stockmanagement.testutils.OrderableDtoDataBuilder;
+import org.openlmis.stockmanagement.testutils.ToStringTestUtils;
 
-public class StockCardV2DtoDataBuilder {
+public class OrderableDtoTest {
 
-  private ObjectReferenceDto orderable;
-  private List<CanFulfillForMeEntryDto> canFulfillForMe;
-
-  public StockCardV2DtoDataBuilder() {
-    orderable = new ObjectReferenceDtoDataBuilder().withPath("api/orderables").build();
-    canFulfillForMe = new ArrayList<>();
+  @Test
+  public void equalsContract() {
+    EqualsVerifier
+        .forClass(OrderableDto.class)
+        .suppress(Warning.STRICT_INHERITANCE)
+        .suppress(Warning.NONFINAL_FIELDS) // DTO fields cannot be final
+        .verify();
   }
 
-  /**
-   * Creates new instance of {@link StockCardSummaryV2Dto} with properties.
-   * @return created stock card V2
-   */
-  public StockCardSummaryV2Dto build() {
-    return new StockCardSummaryV2Dto(orderable, canFulfillForMe);
+  @Test
+  public void shouldImplementToString() {
+    OrderableDto orderableDto = new OrderableDtoDataBuilder().build();
+    ToStringTestUtils.verify(OrderableDto.class, orderableDto);
   }
 }

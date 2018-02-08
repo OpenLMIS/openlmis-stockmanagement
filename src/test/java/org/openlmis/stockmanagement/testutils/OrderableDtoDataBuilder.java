@@ -13,31 +13,49 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.dto.referencedata;
+package org.openlmis.stockmanagement.testutils;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-
+import org.openlmis.stockmanagement.dto.referencedata.DispensableDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-@Getter
-@Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
-@ToString
-public class OrderableDto {
+public class OrderableDtoDataBuilder {
+
+  private static int instanceNumber = 0;
+
   private UUID id;
   private String productCode;
   private String fullProductName;
   private DispensableDto dispensable;
   private Map<String, String> identifiers;
   private Map<String, String> extraData;
+
+  /**
+   * Creates builder for creating new instance of {@link OrderableDtoDataBuilder}.
+   */
+  public OrderableDtoDataBuilder() {
+    instanceNumber++;
+
+    id = UUID.randomUUID();
+    productCode = "P" + instanceNumber;
+    fullProductName = "Product " + instanceNumber;
+    dispensable = new DispensableDto("pack");
+    identifiers = new HashMap<>();
+    extraData = null;
+  }
+
+  /**
+   * Creates new instance of {@link OrderableDto} with properties.
+   * @return created orderable.
+   */
+  public OrderableDto build() {
+    return new OrderableDto(id, productCode, fullProductName, dispensable, identifiers, extraData);
+  }
+
+  public OrderableDtoDataBuilder withId(UUID id) {
+    this.id = id;
+    return this;
+  }
 }

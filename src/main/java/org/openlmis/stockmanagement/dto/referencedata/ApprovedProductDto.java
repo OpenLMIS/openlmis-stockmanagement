@@ -15,12 +15,18 @@
 
 package org.openlmis.stockmanagement.dto.referencedata;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import org.openlmis.stockmanagement.dto.BaseDto;
 
-import java.util.UUID;
-
-@Data
-public class ApprovedProductDto {
-  private UUID id;
+@Getter
+@Setter
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+@ToString
+public final class ApprovedProductDto extends BaseDto {
   private OrderableDto orderable;
 }

@@ -13,31 +13,29 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.dto.referencedata;
+package org.openlmis.stockmanagement.testutils;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import org.openlmis.stockmanagement.dto.CanFulfillForMeEntryDto;
+import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
+import org.openlmis.stockmanagement.dto.StockCardSummaryV2Dto;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.util.Map;
-import java.util.UUID;
+public class StockCardSummaryV2DtoDataBuilder {
 
-@Getter
-@Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
-@ToString
-public class OrderableDto {
-  private UUID id;
-  private String productCode;
-  private String fullProductName;
-  private DispensableDto dispensable;
-  private Map<String, String> identifiers;
-  private Map<String, String> extraData;
+  private ObjectReferenceDto orderable;
+  private List<CanFulfillForMeEntryDto> canFulfillForMe;
+
+  public StockCardSummaryV2DtoDataBuilder() {
+    orderable = new ObjectReferenceDtoDataBuilder().withPath("api/orderables").build();
+    canFulfillForMe = new ArrayList<>();
+  }
+
+  /**
+   * Creates new instance of {@link StockCardSummaryV2Dto} with properties.
+   * @return created stock summary card V2
+   */
+  public StockCardSummaryV2Dto build() {
+    return new StockCardSummaryV2Dto(orderable, canFulfillForMe);
+  }
 }

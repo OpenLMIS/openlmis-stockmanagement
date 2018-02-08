@@ -13,31 +13,26 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.dto.referencedata;
+package org.openlmis.stockmanagement.testutils;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import org.openlmis.stockmanagement.dto.referencedata.ApprovedProductDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 
-import java.util.Map;
-import java.util.UUID;
+public class ApprovedProductDtoDataBuilder {
 
-@Getter
-@Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
-@ToString
-public class OrderableDto {
-  private UUID id;
-  private String productCode;
-  private String fullProductName;
-  private DispensableDto dispensable;
-  private Map<String, String> identifiers;
-  private Map<String, String> extraData;
+  private OrderableDto orderable;
+
+  public ApprovedProductDtoDataBuilder() {
+    orderable = new OrderableDtoDataBuilder().build();
+  }
+
+  /**
+   * Creates new instance of {@link ApprovedProductDto} with properties.
+   * @return created orderable fulfill dto
+   */
+  public ApprovedProductDto build() {
+    ApprovedProductDto approvedProductDto = new ApprovedProductDto(orderable);
+    approvedProductDto.setId(orderable.getId());
+    return approvedProductDto;
+  }
 }

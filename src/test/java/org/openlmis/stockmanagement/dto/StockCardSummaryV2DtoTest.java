@@ -18,7 +18,7 @@ package org.openlmis.stockmanagement.dto;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.junit.Test;
-import org.openlmis.stockmanagement.testutils.StockCardV2DtoDataBuilder;
+import org.openlmis.stockmanagement.testutils.StockCardSummaryV2DtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.ToStringTestUtils;
 
 public class StockCardSummaryV2DtoTest {
@@ -32,7 +32,7 @@ public class StockCardSummaryV2DtoTest {
 
   @Test
   public void shouldImplementToString() {
-    StockCardSummaryV2Dto stockCard = new StockCardV2DtoDataBuilder().build();
+    StockCardSummaryV2Dto stockCard = new StockCardSummaryV2DtoDataBuilder().build();
     ToStringTestUtils.verify(StockCardSummaryV2Dto.class, stockCard);
   }
 }
