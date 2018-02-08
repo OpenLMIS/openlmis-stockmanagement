@@ -28,7 +28,7 @@ import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDate;
-import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -41,7 +41,7 @@ public final class StockCardSummariesV2SearchParams {
 
   private UUID programId;
   private UUID facilityId;
-  private Collection<UUID> orderableId;
+  private List<UUID> orderableId;
   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
   private LocalDate asOfDate;
   private Pageable pageable;

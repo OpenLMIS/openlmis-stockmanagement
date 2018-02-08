@@ -15,19 +15,20 @@
 
 package org.openlmis.stockmanagement.testutils;
 
+import static java.util.Arrays.asList;
+
 import org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 public class StockCardSummariesV2SearchParamsDataBuilder {
 
   private UUID programId;
   private UUID facilityId;
-  private Collection<UUID> orderableId;
+  private List<UUID> orderableId;
   private LocalDate asOfDate;
   private Pageable pageable;
 
@@ -37,7 +38,7 @@ public class StockCardSummariesV2SearchParamsDataBuilder {
   public StockCardSummariesV2SearchParamsDataBuilder() {
     programId = UUID.randomUUID();
     facilityId = UUID.randomUUID();
-    orderableId = Collections.singletonList(UUID.randomUUID());
+    orderableId = asList(UUID.randomUUID(), UUID.randomUUID());
     asOfDate = LocalDate.now();
     pageable = new PageRequest(0, 10);
   }
@@ -58,6 +59,11 @@ public class StockCardSummariesV2SearchParamsDataBuilder {
 
   public StockCardSummariesV2SearchParamsDataBuilder withoutProgramId() {
     this.programId = null;
+    return this;
+  }
+
+  public StockCardSummariesV2SearchParamsDataBuilder withOrderableIds(List<UUID> orderableId) {
+    this.orderableId = orderableId;
     return this;
   }
 }

@@ -15,18 +15,19 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Stream.concat;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
 import org.openlmis.stockmanagement.dto.referencedata.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class ApprovedProductReferenceDataService extends
@@ -52,37 +53,25 @@ public class ApprovedProductReferenceDataService extends
    *
    * @param facilityId id of the facility
    * @param programId  id of the program
-   * @param fullSupply whether the full supply or non-full supply products should be retrieved
+   * @param pageable   pagination parameters
    * @return a collection of approved products matching the search criteria
    */
-  public Collection<ApprovedProductDto> getApprovedProducts(UUID facilityId, UUID programId,
-                                                            boolean fullSupply) {
+  public Page<OrderableDto> getApprovedProducts(UUID facilityId, UUID programId,
+                                                Collection<UUID> orderableIds, Pageable pageable) {
     Map<String, Object> parameters = new HashMap<>();
     parameters.put("programId", programId);
-    parameters.put("fullSupply", fullSupply);
+    parameters.put("size", pageable.getPageSize());
+    parameters.put("page", pageable.getPageNumber());
 
-    return findAll(facilityId + "/approvedProducts", parameters);
+    if (!isEmpty(orderableIds)) {
+      parameters.put("orderableId", orderableIds);
+    }
+
+    Page<ApprovedProductDto> approvedProductPage =
+        getPage(facilityId + "/approvedProducts", parameters);
+
+    return new PageImpl<>(approvedProductPage.getContent().stream()
+        .map(ApprovedProductDto::getOrderable).collect(Collectors.toList()),
+        pageable, approvedProductPage.getTotalElements());
   }
-
-  /**
-   * Retrieves all facility approved products from the reference data service, based on the
-   * provided facility. It can be optionally filtered by the program ID.
-   *
-   * @param facilityId id of the facility
-   * @param programId  id of the program
-   * @return a collection of approved products matching the search criteria.
-   */
-  public List<OrderableDto> getAllApprovedProducts(UUID programId, UUID facilityId) {
-    Collection<ApprovedProductDto> fullSupply =
-        getApprovedProducts(facilityId, programId, true);
-
-    Collection<ApprovedProductDto> nonFullSupply =
-        getApprovedProducts(facilityId, programId, false);
-
-    return concat(fullSupply.stream(), nonFullSupply.stream())
-        .map(ApprovedProductDto::getOrderable)
-        .distinct()
-        .collect(toList());
-  }
-
 }

@@ -20,7 +20,6 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.empty;
-import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity.identityOf;
 
 import lombok.Getter;
@@ -84,25 +83,21 @@ public class StockCardSummariesService extends StockCardBaseService {
    * @param params stock cards summaries search params.
    * @return page of stock cards.
    */
-  public Page<StockCardSummaryV2Dto> findStockCard(StockCardSummariesV2SearchParams params) {
-    List<OrderableDto> approvedProducts = approvedProductReferenceDataService
-        .getAllApprovedProducts(params.getProgramId(), params.getFacilityId());
+  public Page<StockCardSummaryV2Dto> findStockCards(StockCardSummariesV2SearchParams params) {
+    Page<OrderableDto> approvedProducts = approvedProductReferenceDataService
+        .getApprovedProducts(params.getProgramId(), params.getFacilityId(),
+            params.getOrderableId(), params.getPageable());
 
-    if (!isEmpty(params.getOrderableId())) {
-      approvedProducts = approvedProducts.stream()
-          .filter(p -> params.getOrderableId().contains(p.getId())).collect(toList());
-    }
+    Map<UUID, OrderableFulfillDto> orderableFulfillList = orderableFulfillService.findByIds(
+        approvedProducts.getContent().stream().map(OrderableDto::getId).collect(toList()));
 
-    Map<UUID, OrderableFulfillDto> orderableFulfillList = orderableFulfillService
-        .findByIds(approvedProducts.stream().map(OrderableDto::getId).collect(toList()));
+    List<StockCard> stockCards = cardRepository
+        .findByProgramIdAndFacilityId(params.getProgramId(),
+            params.getFacilityId());
 
-    Page<StockCard> pageOfStockCards = cardRepository
-        .findByProgramIdAndFacilityIdAndOrderableIdIn(params.getProgramId(), params.getFacilityId(),
-            orderableFulfillList.keySet(), params.getPageable());
-
-    return new PageImpl<>(stockCardSummariesV2Builder.build(pageOfStockCards.getContent(),
+    return new PageImpl<>(stockCardSummariesV2Builder.build(stockCards,
         orderableFulfillList, params.getAsOfDate()),
-        params.getPageable(), pageOfStockCards.getTotalElements());
+        params.getPageable(), approvedProducts.getTotalElements());
   }
 
   /**

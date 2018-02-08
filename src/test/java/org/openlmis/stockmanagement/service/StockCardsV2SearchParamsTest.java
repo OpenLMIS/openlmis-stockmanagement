@@ -52,12 +52,11 @@ public class StockCardsV2SearchParamsTest {
         .withoutProgramId()
         .build()
         .validate();
-
   }
 
   @Test
   public void shouldValidateParams() {
-    new StockCardSummariesV2SearchParamsDataBuilder().build();
+    new StockCardSummariesV2SearchParamsDataBuilder().build().validate();
   }
 
   @Test

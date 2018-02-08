@@ -28,8 +28,10 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
@@ -39,15 +41,26 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
+import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.dto.StockCardDto;
+import org.openlmis.stockmanagement.dto.StockCardSummaryV2Dto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
+import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.OrderableFulfillReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
+import org.openlmis.stockmanagement.testutils.OrderableDtoDataBuilder;
+import org.openlmis.stockmanagement.testutils.OrderableFulfillDtoDataBuilder;
+import org.openlmis.stockmanagement.testutils.StockCardDataBuilder;
+import org.openlmis.stockmanagement.testutils.StockCardSummariesV2SearchParamsDataBuilder;
+import org.openlmis.stockmanagement.testutils.StockCardSummaryV2DtoDataBuilder;
+import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -59,6 +72,12 @@ import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StockCardSummariesServiceTest {
+
+  @Mock
+  private ApprovedProductReferenceDataService approvedProductReferenceDataService;
+
+  @Mock
+  private OrderableFulfillReferenceDataService orderableFulfillReferenceDataService;
 
   @Mock
   private OrderableReferenceDataService orderableReferenceDataService;
@@ -76,6 +95,9 @@ public class StockCardSummariesServiceTest {
 
   @Mock
   private StockCardRepository cardRepository;
+
+  @Mock
+  private StockCardSummariesV2Builder stockCardSummariesV2Builder;
 
   @InjectMocks
   private StockCardSummariesService stockCardSummariesService;
@@ -240,6 +262,70 @@ public class StockCardSummariesServiceTest {
     assertThat(stockCards.getContent().size(), is(1));
     assertThat(stockCards.getTotalElements(), is(10L));
     assertThat(stockCards.getContent().get(0).getExtraData().get("vvmStatus"), is("STAGE_2"));
+  }
+
+  @Test
+  public void shouldFindStockCards() throws Exception {
+
+    OrderableDto orderable = new OrderableDtoDataBuilder().build();
+    OrderableDto orderable2 = new OrderableDtoDataBuilder().build();
+    OrderableDto orderable3 = new OrderableDtoDataBuilder().build();
+
+    StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParamsDataBuilder()
+        .withOrderableIds(asList(orderable.getId(), orderable2.getId()))
+        .build();
+
+    when(approvedProductReferenceDataService
+        .getApprovedProducts(eq(params.getProgramId()), eq(params.getFacilityId()),
+            eq(params.getOrderableId()), eq(params.getPageable())))
+        .thenReturn(
+            new PageImpl<>(asList(orderable, orderable2, orderable3), params.getPageable(), 3));
+
+    Map<UUID, OrderableFulfillDto> fulfillMap = new HashMap<>();
+    fulfillMap.put(orderable.getId(), new OrderableFulfillDtoDataBuilder()
+        .withCanFulfillForMe(asList(orderable2.getId(), orderable3.getId())).build());
+    fulfillMap.put(orderable2.getId(), new OrderableFulfillDtoDataBuilder()
+        .withCanFulfillForMe(asList(orderable.getId(), orderable3.getId())).build());
+
+    when(orderableFulfillReferenceDataService
+        .findByIds(asList(orderable.getId(), orderable2.getId(), orderable3.getId())))
+        .thenReturn(fulfillMap);
+
+    StockEvent event = new StockEventDataBuilder()
+        .withFacility(params.getFacilityId())
+        .withProgram(params.getProgramId())
+        .build();
+
+    StockCard stockCard = new StockCardDataBuilder(event)
+        .withOrderable(orderable.getId())
+        .withStockOnHand(12)
+        .build();
+
+    StockCard stockCard1 = new StockCardDataBuilder(event)
+        .withOrderable(orderable3.getId())
+        .withStockOnHand(26)
+        .build();
+
+    List<StockCard> stockCards = asList(stockCard, stockCard1);
+
+    when(cardRepository.findByProgramIdAndFacilityId(
+        params.getProgramId(),
+        params.getFacilityId()))
+        .thenReturn(stockCards);
+
+    StockCardSummaryV2Dto summary = new StockCardSummaryV2DtoDataBuilder().build();
+    StockCardSummaryV2Dto summary2 = new StockCardSummaryV2DtoDataBuilder().build();
+    StockCardSummaryV2Dto summary3 = new StockCardSummaryV2DtoDataBuilder().build();
+
+    when(stockCardSummariesV2Builder.build(stockCards, fulfillMap, params.getAsOfDate()))
+        .thenReturn(asList(summary, summary2, summary3));
+
+    Page<StockCardSummaryV2Dto> result = stockCardSummariesService.findStockCards(params);
+
+    assertEquals(3, result.getContent().size());
+    assertEquals(summary, result.getContent().get(0));
+    assertEquals(summary2, result.getContent().get(1));
+    assertEquals(summary3, result.getContent().get(2));
   }
 
   private StockCard createStockCard(UUID orderableId, UUID cardId) {
