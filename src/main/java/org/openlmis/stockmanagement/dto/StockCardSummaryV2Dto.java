@@ -38,8 +38,8 @@ public final class StockCardSummaryV2Dto {
   private List<CanFulfillForMeEntryDto> canFulfillForMe;
 
   /**
-   * Sums all stock on hands from can fulfill for me entries.
-   * @return sum of all stock on hands from can fulfill me entries
+   * Sums stock on hand values from all {@link CanFulfillForMeEntryDto} instances.
+   * @return sum of all stock on hand values
    */
   public Integer getStockOnHand() {
     return canFulfillForMe
