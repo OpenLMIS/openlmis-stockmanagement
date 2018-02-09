@@ -21,7 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
-import static org.openlmis.stockmanagement.testutils.DatesUtil.getBaseDateTime;
+import static org.openlmis.stockmanagement.testutils.DatesUtil.getBaseDate;
 
 import org.junit.Test;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemDataBuilder;
@@ -120,12 +120,12 @@ public class StockCardTest {
     StockCard stockCard = new StockCard();
     stockCard.setLineItems(asList(
         new StockCardLineItemDataBuilder().build(),
-        new StockCardLineItemDataBuilder().withProcessedDateHourEarlier().build(),
-        new StockCardLineItemDataBuilder().withProcessedDateNextDay().build()));
+        new StockCardLineItemDataBuilder().withOccurredDatePreviousDay().build(),
+        new StockCardLineItemDataBuilder().withOccurredDateNextDay().build()));
 
-    assertEquals(getBaseDateTime().plusDays(1),
-        stockCard.getLineItemAsOfDate(getBaseDateTime().plusDays(2)).getProcessedDate());
+    assertEquals(getBaseDate().plusDays(1),
+        stockCard.getLineItemAsOfDate(getBaseDate().plusDays(2)).getOccurredDate());
 
-    assertEquals(null, stockCard.getLineItemAsOfDate(getBaseDateTime().minusDays(1)));
+    assertEquals(null, stockCard.getLineItemAsOfDate(getBaseDate().minusDays(2)));
   }
 }

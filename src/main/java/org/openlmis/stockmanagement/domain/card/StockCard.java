@@ -24,22 +24,6 @@ import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparat
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparators.byReasonPriority;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.SERVER_ERROR_SHALLOW_COPY;
 
-import java.lang.reflect.InvocationTargetException;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -54,6 +38,21 @@ import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.util.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @NamedQuery(name = StockCard.QUERY_FIND_LOT_IDENT_BY_PROG_FACILITY,
     query = "SELECT new org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity("
@@ -163,14 +162,14 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
   /**
    * Returns latest line item  before given date.
    */
-  public StockCardLineItem getLineItemAsOfDate(ZonedDateTime date) {
+  public StockCardLineItem getLineItemAsOfDate(LocalDate date) {
     if (isEmpty(lineItems)) {
       return null;
     }
 
     return lineItems.stream()
-        .filter(a -> a.getProcessedDate().isBefore(date))
-        .sorted(Comparator.comparing(StockCardLineItem::getProcessedDate).reversed())
+        .filter(a -> a.getOccurredDate().isBefore(date))
+        .sorted(Comparator.comparing(StockCardLineItem::getOccurredDate).reversed())
         .findFirst()
         .orElse(null);
   }

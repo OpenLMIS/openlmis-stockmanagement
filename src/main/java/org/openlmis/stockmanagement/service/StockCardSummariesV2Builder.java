@@ -24,9 +24,6 @@ import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -63,7 +60,7 @@ public class StockCardSummariesV2Builder {
         createOrderableReference(orderableId),
         fulfills.getCanFulfillForMe()
             .stream()
-            .map(id -> buildFulfillsEntry(orderableId,
+            .map(id -> buildFulfillsEntry(id,
                 findStockCardByOrderableId(id, stockCards),
                 asOfDate))
             .collect(Collectors.toList()));
@@ -76,10 +73,9 @@ public class StockCardSummariesV2Builder {
     } else {
       StockCardLineItem lineItem;
       if (asOfDate == null) {
-        lineItem = stockCard.getLineItemAsOfDate(ZonedDateTime.now());
+        lineItem = stockCard.getLineItemAsOfDate(LocalDate.now());
       } else {
-        lineItem = stockCard.getLineItemAsOfDate(asOfDate.atTime(LocalTime.MAX)
-            .atZone(ZoneOffset.UTC));
+        lineItem = stockCard.getLineItemAsOfDate(asOfDate);
       }
 
       return new CanFulfillForMeEntryDto(
