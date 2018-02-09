@@ -27,7 +27,9 @@ import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.CanFulfillForMeEntryDto;
 import org.openlmis.stockmanagement.dto.StockCardSummaryV2Dto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
+import org.openlmis.stockmanagement.testutils.OrderableDtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.OrderableFulfillDtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemDataBuilder;
@@ -48,9 +50,9 @@ public class StockCardSummariesV2BuilderTest {
   public void shouldBuildStockCardSummaries() throws Exception {
     UUID programId = randomUUID();
     UUID facilityId = randomUUID();
-    UUID orderable1Id = randomUUID();
-    UUID orderable2Id = randomUUID();
-    UUID orderable3Id = randomUUID();
+    OrderableDto orderable1 = new OrderableDtoDataBuilder().build();
+    OrderableDto orderable2 = new OrderableDtoDataBuilder().build();
+    OrderableDto orderable3 = new OrderableDtoDataBuilder().build();
 
     StockEvent event = new StockEventDataBuilder()
         .withFacility(facilityId)
@@ -59,44 +61,48 @@ public class StockCardSummariesV2BuilderTest {
     StockCard stockCard = new StockCardDataBuilder(event)
         .buildWithStockOnHandAndLineItemAndOrderableId(12,
             new StockCardLineItemDataBuilder().buildWithStockOnHand(16),
-            orderable1Id);
+            orderable1.getId());
     StockCard stockCard1 = new StockCardDataBuilder(event)
         .buildWithStockOnHandAndLineItemAndOrderableId(26,
             new StockCardLineItemDataBuilder().buildWithStockOnHand(30),
-            orderable3Id);
+            orderable3.getId());
     List<StockCard> stockCards = asList(stockCard, stockCard1);
 
     Map<UUID, OrderableFulfillDto> fulfillMap = new HashMap<>();
-    fulfillMap.put(orderable1Id, new OrderableFulfillDtoDataBuilder()
-        .withCanFulfillForMe(asList(orderable2Id, orderable3Id)).build());
-    fulfillMap.put(orderable2Id, new OrderableFulfillDtoDataBuilder()
-        .withCanFulfillForMe(asList(orderable1Id, orderable3Id)).build());
+    fulfillMap.put(orderable1.getId(), new OrderableFulfillDtoDataBuilder()
+        .withCanFulfillForMe(asList(orderable2.getId(), orderable3.getId())).build());
+    fulfillMap.put(orderable2.getId(), new OrderableFulfillDtoDataBuilder()
+        .withCanFulfillForMe(asList(orderable1.getId(), orderable3.getId())).build());
 
     LocalDate asOfDate = LocalDate.now();
 
-    List<StockCardSummaryV2Dto> result = builder.build(stockCards,fulfillMap, asOfDate);
+    List<StockCardSummaryV2Dto> result = builder.build(asList(orderable1, orderable2, orderable3),
+        stockCards,fulfillMap, asOfDate);
 
-    assertEquals(2, result.size());
+    assertEquals(3, result.size());
 
     for (StockCardSummaryV2Dto summary : result) {
-      if (summary.getOrderable().getId().equals(orderable1Id)) {
+      if (summary.getOrderable().getId().equals(orderable1.getId())) {
         assertEquals(new Integer(30), summary.getStockOnHand());
         for (CanFulfillForMeEntryDto entry : summary.getCanFulfillForMe()) {
-          if (entry.getOrderable().getId().equals(orderable2Id)) {
+          if (entry.getOrderable().getId().equals(orderable2.getId())) {
             assertEquals(null, entry.getStockCard());
           } else {
             assertEquals(new Integer(30), entry.getStockOnHand());
           }
         }
-      } else {
+      } else if (summary.getOrderable().getId().equals(orderable2.getId())) {
         assertEquals(new Integer(46), summary.getStockOnHand());
         for (CanFulfillForMeEntryDto entry : summary.getCanFulfillForMe()) {
-          if (entry.getOrderable().getId().equals(orderable1Id)) {
+          if (entry.getOrderable().getId().equals(orderable1.getId())) {
             assertEquals(new Integer(16), entry.getStockOnHand());
           } else {
             assertEquals(new Integer(30), entry.getStockOnHand());
           }
         }
+      } else {
+        assertEquals(null, summary.getStockOnHand());
+        assertEquals(null, summary.getCanFulfillForMe());
       }
     }
   }

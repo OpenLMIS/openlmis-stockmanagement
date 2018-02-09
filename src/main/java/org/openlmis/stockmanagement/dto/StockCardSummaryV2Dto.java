@@ -15,6 +15,8 @@
 
 package org.openlmis.stockmanagement.dto;
 
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
+
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -42,7 +44,7 @@ public final class StockCardSummaryV2Dto {
    * @return sum of all stock on hand values
    */
   public Integer getStockOnHand() {
-    return canFulfillForMe
+    return isEmpty(canFulfillForMe) ? null : canFulfillForMe
         .stream()
         .filter(a -> a.getStockOnHand() != null)
         .mapToInt(CanFulfillForMeEntryDto::getStockOnHand)

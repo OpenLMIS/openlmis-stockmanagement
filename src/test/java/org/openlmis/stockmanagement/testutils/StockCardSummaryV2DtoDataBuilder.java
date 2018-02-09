@@ -44,4 +44,10 @@ public class StockCardSummaryV2DtoDataBuilder {
     this.canFulfillForMe.add(canFulfillForMe);
     return this;
   }
+
+  public StockCardSummaryV2DtoDataBuilder withCanFulfillForMe(
+      List<CanFulfillForMeEntryDto> canFulfillForMe) {
+    this.canFulfillForMe = canFulfillForMe;
+    return this;
+  }
 }

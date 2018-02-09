@@ -320,7 +320,8 @@ public class StockCardSummariesServiceTest {
     StockCardSummaryV2Dto summary2 = new StockCardSummaryV2DtoDataBuilder().build();
     StockCardSummaryV2Dto summary3 = new StockCardSummaryV2DtoDataBuilder().build();
 
-    when(stockCardSummariesV2Builder.build(stockCards, fulfillMap, params.getAsOfDate()))
+    when(stockCardSummariesV2Builder.build(asList(orderable, orderable2, orderable3),
+        stockCards, fulfillMap, params.getAsOfDate()))
         .thenReturn(asList(summary, summary2, summary3));
 
     Page<StockCardSummaryV2Dto> result = stockCardSummariesService.findStockCards(params, pageable);
