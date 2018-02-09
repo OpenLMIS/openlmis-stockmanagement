@@ -45,4 +45,9 @@ public class CanFulfillForMeEntryDtoDataBuilder {
   public CanFulfillForMeEntryDto build() {
     return new CanFulfillForMeEntryDto(stockCard, orderable, lot, stockOnHand, processedDate);
   }
+
+  public CanFulfillForMeEntryDtoDataBuilder withStockOnHand(Integer stockOnHand) {
+    this.stockOnHand = stockOnHand;
+    return this;
+  }
 }

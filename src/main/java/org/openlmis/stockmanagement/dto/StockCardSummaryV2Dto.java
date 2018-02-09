@@ -44,6 +44,7 @@ public final class StockCardSummaryV2Dto {
   public Integer getStockOnHand() {
     return canFulfillForMe
         .stream()
+        .filter(a -> a.getStockOnHand() != null)
         .mapToInt(CanFulfillForMeEntryDto::getStockOnHand)
         .sum();
   }

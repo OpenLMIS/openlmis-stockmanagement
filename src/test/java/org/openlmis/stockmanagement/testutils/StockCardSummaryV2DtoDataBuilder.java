@@ -38,4 +38,10 @@ public class StockCardSummaryV2DtoDataBuilder {
   public StockCardSummaryV2Dto build() {
     return new StockCardSummaryV2Dto(orderable, canFulfillForMe);
   }
+
+  public StockCardSummaryV2DtoDataBuilder withCanFulfillForMe(
+      CanFulfillForMeEntryDto canFulfillForMe) {
+    this.canFulfillForMe.add(canFulfillForMe);
+    return this;
+  }
 }

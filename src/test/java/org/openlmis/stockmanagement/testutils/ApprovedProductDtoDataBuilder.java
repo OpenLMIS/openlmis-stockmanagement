@@ -28,7 +28,7 @@ public class ApprovedProductDtoDataBuilder {
 
   /**
    * Creates new instance of {@link ApprovedProductDto} with properties.
-   * @return created orderable fulfill dto
+   * @return created approved product dto
    */
   public ApprovedProductDto build() {
     ApprovedProductDto approvedProductDto = new ApprovedProductDto(orderable);
