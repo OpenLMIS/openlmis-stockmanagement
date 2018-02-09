@@ -25,7 +25,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDate;
 import java.util.List;
@@ -44,7 +43,6 @@ public final class StockCardSummariesV2SearchParams {
   private List<UUID> orderableId;
   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
   private LocalDate asOfDate;
-  private Pageable pageable;
 
   /**
    * Validates if this search params contains a valid parameters.

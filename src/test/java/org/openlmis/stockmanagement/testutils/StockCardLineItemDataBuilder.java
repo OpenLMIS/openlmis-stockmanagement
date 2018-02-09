@@ -111,7 +111,7 @@ public class StockCardLineItemDataBuilder {
    *
    * @return created line item.
    */
-  public StockCardLineItem buildWithStockOnHand(int newStockOnHand) {
+  public StockCardLineItem buildWithStockOnHand(int stockOnHand) {
     return this.withStockOnHand(stockOnHand).build();
   }
 

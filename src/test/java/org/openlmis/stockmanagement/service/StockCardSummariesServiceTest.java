@@ -64,6 +64,7 @@ import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -275,11 +276,13 @@ public class StockCardSummariesServiceTest {
         .withOrderableIds(asList(orderable.getId(), orderable2.getId()))
         .build();
 
+    Pageable pageable = new PageRequest(0, 10);
+
     when(approvedProductReferenceDataService
         .getApprovedProducts(eq(params.getProgramId()), eq(params.getFacilityId()),
-            eq(params.getOrderableId()), eq(params.getPageable())))
+            eq(params.getOrderableId()), eq(pageable)))
         .thenReturn(
-            new PageImpl<>(asList(orderable, orderable2, orderable3), params.getPageable(), 3));
+            new PageImpl<>(asList(orderable, orderable2, orderable3), pageable, 3));
 
     Map<UUID, OrderableFulfillDto> fulfillMap = new HashMap<>();
     fulfillMap.put(orderable.getId(), new OrderableFulfillDtoDataBuilder()
@@ -320,7 +323,7 @@ public class StockCardSummariesServiceTest {
     when(stockCardSummariesV2Builder.build(stockCards, fulfillMap, params.getAsOfDate()))
         .thenReturn(asList(summary, summary2, summary3));
 
-    Page<StockCardSummaryV2Dto> result = stockCardSummariesService.findStockCards(params);
+    Page<StockCardSummaryV2Dto> result = stockCardSummariesService.findStockCards(params, pageable);
 
     assertEquals(3, result.getContent().size());
     assertEquals(summary, result.getContent().get(0));

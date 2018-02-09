@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,7 +49,8 @@ public class StockCardSummariesV2Controller {
    */
   @GetMapping
   public Page<StockCardSummaryV2Dto> getStockCardSummaries(
-      StockCardSummariesV2SearchParams params) {
+      StockCardSummariesV2SearchParams params,
+      @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable) {
     Profiler profiler = new Profiler("GET_STOCK_CARDS_V2");
     profiler.setLogger(LOGGER);
 
@@ -58,7 +61,7 @@ public class StockCardSummariesV2Controller {
     permissionService.canViewStockCard(params.getProgramId(), params.getFacilityId());
 
     profiler.start("GET_STOCK_CARD_SUMMARIES");
-    Page<StockCardSummaryV2Dto> page = stockCardSummariesService.findStockCards(params);
+    Page<StockCardSummaryV2Dto> page = stockCardSummariesService.findStockCards(params, pageable);
 
     profiler.stop().log();
     return page;
