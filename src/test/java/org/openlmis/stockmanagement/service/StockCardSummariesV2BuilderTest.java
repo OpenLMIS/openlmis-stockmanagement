@@ -57,17 +57,13 @@ public class StockCardSummariesV2BuilderTest {
         .withProgram(programId)
         .build();
     StockCard stockCard = new StockCardDataBuilder(event)
-        .withOrderable(orderable1Id)
-        .withStockOnHand(12)
-        .withLineItem(new StockCardLineItemDataBuilder()
-            .withStockOnHand(16).build())
-        .build();
+        .buildWithStockOnHandAndLineItemAndOrderableId(12,
+            new StockCardLineItemDataBuilder().withStockOnHand(16).build(),
+            orderable1Id);
     StockCard stockCard1 = new StockCardDataBuilder(event)
-        .withOrderable(orderable3Id)
-        .withStockOnHand(26)
-        .withLineItem(new StockCardLineItemDataBuilder()
-            .withStockOnHand(30).build())
-        .build();
+        .buildWithStockOnHandAndLineItemAndOrderableId(26,
+            new StockCardLineItemDataBuilder().withStockOnHand(30).build(),
+            orderable3Id);
     List<StockCard> stockCards = asList(stockCard, stockCard1);
 
     Map<UUID, OrderableFulfillDto> fulfillMap = new HashMap<>();

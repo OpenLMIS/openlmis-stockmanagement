@@ -66,6 +66,19 @@ public class StockCardDataBuilder {
   /**
    * Creates stock card based on parameters from the builder.
    */
+  public StockCard buildWithStockOnHandAndLineItemAndOrderableId(Integer stockOnHand,
+                                                                 StockCardLineItem lineItem,
+                                                                 UUID orderableId) {
+    return this
+        .withOrderable(orderableId)
+        .withStockOnHand(stockOnHand)
+        .withLineItem(lineItem)
+        .build();
+  }
+
+  /**
+   * Creates stock card based on parameters from the builder.
+   */
   public StockCard build() {
     StockCard card = new StockCard(
         originalEvent, originalEvent.getFacilityId(), originalEvent.getProgramId(), orderableId,
