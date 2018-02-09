@@ -27,7 +27,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.util.ArrayList;
-import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
 import org.openlmis.stockmanagement.dto.ValidReasonAssignmentDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
@@ -84,7 +83,7 @@ public class ValidReasonAssignmentController {
   @ResponseBody
   public List<ValidReasonAssignmentDto> getValidReasons(
       @RequestParam("program") UUID program, @RequestParam("facilityType") UUID facilityType,
-      @RequestParam(value = "reasonType", required = false) List<ReasonType> reasonTypes) {
+      @RequestParam(value = "reasonType", required = false) List<String> reasonTypes) {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug(format(
           "Try to find stock card line item reason with program %s and facility type %s",

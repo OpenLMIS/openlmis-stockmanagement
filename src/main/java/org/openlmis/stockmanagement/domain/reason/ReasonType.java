@@ -15,6 +15,8 @@
 
 package org.openlmis.stockmanagement.domain.reason;
 
+import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
+
 import lombok.Getter;
 
 public enum ReasonType {
@@ -33,5 +35,22 @@ public enum ReasonType {
 
   ReasonType(int priority) {
     this.priority = priority;
+  }
+
+  /**
+   * Find a correct {@link ReasonType} instance based on the passed string. The method ignores
+   * the case.
+   *
+   * @param arg string representation of one of reason type.
+   * @return instance of {@link ReasonType} if the given string matches type; otherwise null.
+   */
+  public static ReasonType fromString(String arg) {
+    for (ReasonType status : values()) {
+      if (equalsIgnoreCase(arg, status.name())) {
+        return status;
+      }
+    }
+
+    return null;
   }
 }

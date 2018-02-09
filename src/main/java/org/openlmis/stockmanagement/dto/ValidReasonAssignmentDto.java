@@ -15,6 +15,10 @@
 
 package org.openlmis.stockmanagement.dto;
 
+import static org.openlmis.stockmanagement.service.ResourceNames.FACILITY_TYPES;
+import static org.openlmis.stockmanagement.service.ResourceNames.PROGRAMS;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,17 +27,57 @@ import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
 import java.util.UUID;
 
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class ValidReasonAssignmentDto
     implements ValidReasonAssignment.Exporter, ValidReasonAssignment.Importer {
+
+  @Setter
+  private String serviceUrl;
+
+  @Getter
+  @Setter
   private UUID id;
-  private UUID programId;
-  private UUID facilityTypeId;
+
+  @Getter
+  @Setter
+  private ObjectReferenceDto program;
+
+  @Getter
+  @Setter
+  private ObjectReferenceDto facilityType;
+
+  @Getter
+  @Setter
   private Boolean hidden;
+
+  @Getter
+  @Setter
   private StockCardLineItemReason reason;
+
+  @Override
+  @JsonIgnore
+  public UUID getProgramId() {
+    return null == program ? null : program.getId();
+  }
+
+  @Override
+  @JsonIgnore
+  public void setProgramId(UUID programId) {
+    this.program = new ObjectReferenceDto(programId, serviceUrl, PROGRAMS);
+  }
+
+  @Override
+  @JsonIgnore
+  public UUID getFacilityTypeId() {
+    return null == facilityType ? null : facilityType.getId();
+  }
+
+  @Override
+  @JsonIgnore
+  public void setFacilityTypeId(UUID facilityTypeId) {
+    this.facilityType = new ObjectReferenceDto(facilityTypeId, serviceUrl, FACILITY_TYPES);
+  }
 
   /**
    * Creates new instance based on data from {@link ValidReasonAssignment}

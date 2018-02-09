@@ -41,6 +41,7 @@ import org.mockito.ArgumentCaptor;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
+import org.openlmis.stockmanagement.dto.ValidReasonAssignmentDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
@@ -109,14 +110,15 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
     UUID programId = UUID.randomUUID();
     UUID facilityTypeId = UUID.randomUUID();
 
-    ValidReasonAssignment firstAssignment =
+    ValidReasonAssignmentDto firstAssignment =
         mockedValidReasonAssignment(UUID.randomUUID(), ReasonType.DEBIT);
-    ValidReasonAssignment secondAssignment =
+    ValidReasonAssignmentDto secondAssignment =
         mockedValidReasonAssignment(UUID.randomUUID(), ReasonType.CREDIT);
 
     when(validReasonAssignmentService.search(programId, facilityTypeId,
-        Arrays.asList(ReasonType.CREDIT, ReasonType.DEBIT))).thenReturn(
-            Arrays.asList(firstAssignment, secondAssignment));
+        Arrays.asList("CREDIT","DEBIT"))).thenReturn(
+            Arrays.asList(ValidReasonAssignment.newInstance(firstAssignment),
+                ValidReasonAssignment.newInstance(secondAssignment)));
 
     //when
     ResultActions resultActions = mvc.perform(
@@ -124,8 +126,8 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
             .param(PROGRAM, programId.toString())
             .param(FACILITY_TYPE, facilityTypeId.toString())
-            .param(REASON_TYPE, ReasonType.CREDIT.toString())
-            .param(REASON_TYPE, ReasonType.DEBIT.toString()));
+            .param(REASON_TYPE, "CREDIT")
+            .param(REASON_TYPE, "DEBIT"));
 
     //then
     resultActions
@@ -137,7 +139,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   public void shouldAssignReasonToProgramFacilityTypeAndSetAsShownByDefault() throws Exception {
     //given
     UUID reasonId = UUID.randomUUID();
-    ValidReasonAssignment assignment = mockedValidReasonAssignment(reasonId, ReasonType.DEBIT);
+    ValidReasonAssignmentDto assignment = mockedValidReasonAssignment(reasonId, ReasonType.DEBIT);
 
     //when
     ResultActions resultActions = mvc.perform(
@@ -163,7 +165,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   @Test
   public void shouldSetValidReasonAsShownWhenHiddenIsFalse() throws Exception {
     //given1
-    ValidReasonAssignment assignment = mockedValidReasonAssignment(UUID.randomUUID(),
+    ValidReasonAssignmentDto assignment = mockedValidReasonAssignment(UUID.randomUUID(),
         ReasonType.DEBIT);
     assignment.setHidden(false);
 
@@ -187,7 +189,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   @Test
   public void shouldSetValidReasonAsHiddenWhenHiddenIsTrue() throws Exception {
     //given1
-    ValidReasonAssignment assignment = mockedValidReasonAssignment(UUID.randomUUID(),
+    ValidReasonAssignmentDto assignment = mockedValidReasonAssignment(UUID.randomUUID(),
         ReasonType.DEBIT);
     assignment.setHidden(true);
 
@@ -211,7 +213,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
   @Test
   public void shouldIgnoreAssignmentIdWhenRequestBodySpecifiedIt() throws Exception {
     //given
-    ValidReasonAssignment assignment = mockedValidReasonAssignment(UUID.randomUUID(),
+    ValidReasonAssignmentDto assignment = mockedValidReasonAssignment(UUID.randomUUID(),
         ReasonType.DEBIT);
     assignment.setId(UUID.randomUUID());
 
@@ -235,7 +237,7 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
     StockCardLineItemReason reason = new StockCardLineItemReason();
     reason.setId(reasonId);
 
-    ValidReasonAssignment assignment = new ValidReasonAssignment();
+    ValidReasonAssignmentDto assignment = new ValidReasonAssignmentDto();
     assignment.setReason(reason);
     assignment.setProgramId(UUID.randomUUID());
     assignment.setFacilityTypeId(UUID.randomUUID());
@@ -341,12 +343,13 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
     resultActions.andExpect(status().isBadRequest());
   }
 
-  private ValidReasonAssignment mockedValidReasonAssignment(UUID reasonId, ReasonType reasonType) {
+  private ValidReasonAssignmentDto mockedValidReasonAssignment(UUID reasonId,
+      ReasonType reasonType) {
     StockCardLineItemReason reason = new StockCardLineItemReason();
     reason.setId(reasonId);
     reason.setReasonType(reasonType);
 
-    ValidReasonAssignment assignment = new ValidReasonAssignment();
+    ValidReasonAssignmentDto assignment = new ValidReasonAssignmentDto();
     assignment.setReason(reason);
     assignment.setProgramId(reasonId);
     assignment.setFacilityTypeId(reasonId);

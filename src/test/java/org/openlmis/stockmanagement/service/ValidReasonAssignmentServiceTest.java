@@ -33,6 +33,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonDataBuilder;
@@ -73,14 +74,43 @@ public class ValidReasonAssignmentServiceTest {
         .thenReturn(Collections.singletonList(validReasonAssignment));
 
     List<ValidReasonAssignment> assignmentList = validReasonAssignmentService.search(
-        programId, facilityTypeId, Arrays.asList(ReasonType.CREDIT, ReasonType.DEBIT));
+        programId, facilityTypeId, Arrays.asList("CREDIT", "DEBIT"));
 
     assertThat(assignmentList.size(), is(1));
     assertThat(assignmentList.get(0), is(validReasonAssignment));
   }
 
+  @Test(expected = ValidationMessageException.class)
+  public void shouldThrowValidationMessageExceptionWhenReasonTypeParamIsNull()
+      throws ValidationMessageException {
+
+    when(stockCardLineItemReasonRepository.findByReasonTypeIn(Arrays.asList(
+        ReasonType.CREDIT, ReasonType.DEBIT))).thenReturn(Collections.singletonList(newReason));
+
+    when(validReasonAssignmentRepository.findByProgramIdAndFacilityTypeIdAndReasonIn(eq(programId),
+        eq(facilityTypeId), eq(Collections.singletonList(newReason))))
+        .thenReturn(Collections.singletonList(validReasonAssignment));
+
+    validReasonAssignmentService.search(programId, facilityTypeId, Arrays.asList("CREDIT", null));
+  }
+
+  @Test(expected = ValidationMessageException.class)
+  public void shouldThrowValidationMessageExceptionWhenReasonTypeParamIsInvalid()
+      throws ValidationMessageException {
+
+    when(stockCardLineItemReasonRepository.findByReasonTypeIn(Arrays.asList(
+        ReasonType.CREDIT, ReasonType.DEBIT))).thenReturn(Collections.singletonList(newReason));
+
+    when(validReasonAssignmentRepository.findByProgramIdAndFacilityTypeIdAndReasonIn(eq(programId),
+        eq(facilityTypeId), eq(Collections.singletonList(newReason))))
+        .thenReturn(Collections.singletonList(validReasonAssignment));
+
+    validReasonAssignmentService.search(programId, facilityTypeId,
+        Collections.singletonList("INVALID"));
+  }
+
   @Test
-  public void shouldReturnValidReasonAssignmentsIfReasonTypeParamIsNull() {
+  public void shouldReturnValidReasonAssignmentsIfReasonTypeParamIsNotSpecified() {
 
     when(validReasonAssignmentRepository.findByProgramIdAndFacilityTypeId(
         programId, facilityTypeId)).thenReturn(Collections.singletonList(validReasonAssignment));
@@ -99,7 +129,7 @@ public class ValidReasonAssignmentServiceTest {
         ReasonType.DEBIT))).thenReturn(Collections.emptyList());
 
     List<ValidReasonAssignment> assignmentList = validReasonAssignmentService.search(
-        programId, facilityTypeId, Collections.singletonList(ReasonType.DEBIT));
+        programId, facilityTypeId, Collections.singletonList("DEBIT"));
 
     assertThat(assignmentList.size(), is(0));
   }

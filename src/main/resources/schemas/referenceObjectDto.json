@@ -9,8 +9,18 @@
       "title": "id"
     },
     "href": {
+<<<<<<< HEAD
       "type": "string",
       "title": "href"
     }
   }
+=======
+      "type": ["string", "null"],
+      "title": "href"
+    }
+  },
+  "required": [
+    "id"
+  ]
+>>>>>>> OLMIS-3996: Updated dto to contain object references. Also updated service to throw exception when reason type is invalid
 }

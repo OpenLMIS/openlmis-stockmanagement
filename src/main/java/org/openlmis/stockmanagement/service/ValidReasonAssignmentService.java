@@ -15,14 +15,18 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_TYPE_INVALID;
+
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.UUID;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
+import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -36,7 +40,6 @@ public class ValidReasonAssignmentService {
   @Autowired
   private StockCardLineItemReasonRepository stockCardLineItemReasonRepository;
 
-
   /**
    * Find valid reason assignments by program ID, facility type ID and reason types.
    *
@@ -46,13 +49,14 @@ public class ValidReasonAssignmentService {
    * @return A list of valid reason assignments.
    */
   public List<ValidReasonAssignment> search(UUID programId, UUID facilityTypeId,
-      List<ReasonType> reasonTypes) {
+      List<String> reasonTypes) {
 
     List<ValidReasonAssignment> validReasonAssignments = Lists.newArrayList();
     List<StockCardLineItemReason> stockCardLineItemReasons = Lists.newArrayList();
 
     if (!CollectionUtils.isEmpty(reasonTypes)) {
-      stockCardLineItemReasons = stockCardLineItemReasonRepository.findByReasonTypeIn(reasonTypes);
+      stockCardLineItemReasons =
+          stockCardLineItemReasonRepository.findByReasonTypeIn(mapToEnum(reasonTypes));
     } else {
       validReasonAssignments = validReasonAssignmentRepository
           .findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
@@ -64,6 +68,22 @@ public class ValidReasonAssignmentService {
               stockCardLineItemReasons);
     }
     return validReasonAssignments;
+  }
+
+  private List<ReasonType> mapToEnum(List<String> reasonTypes) {
+    List<ReasonType> reasonTypeList = Lists.newArrayList();
+    reasonTypes.forEach(reasonType -> reasonTypeList.add(toEnum(reasonType)));
+    return reasonTypeList;
+  }
+
+  private ReasonType toEnum(String type) {
+    ReasonType reasonType = ReasonType.fromString(type);
+
+    if (null == reasonType) {
+      throw new ValidationMessageException(new Message(ERROR_REASON_TYPE_INVALID, type));
+    }
+
+    return reasonType;
   }
 
 }

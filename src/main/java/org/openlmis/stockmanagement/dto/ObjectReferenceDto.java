@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.dto;
 
+<<<<<<< HEAD
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,10 +34,40 @@ public final class ObjectReferenceDto extends BaseDto {
   @Getter
   @Setter
   private String href;
+=======
+import static org.openlmis.stockmanagement.service.ResourceNames.BASE_PATH;
+import static org.openlmis.stockmanagement.service.ResourceNames.SEPARATOR;
+
+import java.util.UUID;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import org.apache.commons.lang3.StringUtils;
+import org.openlmis.stockmanagement.domain.Identifiable;
+
+@EqualsAndHashCode
+@ToString
+public class ObjectReferenceDto implements Identifiable {
+
+  @Getter
+  private final UUID id;
+
+  @Getter
+  private final String href;
+
+  protected ObjectReferenceDto() {
+    this(null);
+  }
+
+  public ObjectReferenceDto(UUID id) {
+    this(id, null);
+  }
+>>>>>>> OLMIS-3996: Updated dto to contain object references. Also updated service to throw exception when reason type is invalid
 
   /**
    * Returns new object reference.
    *
+<<<<<<< HEAD
    * @param path resource path
    * @param id   object id
    */
@@ -44,4 +75,21 @@ public final class ObjectReferenceDto extends BaseDto {
     super(id);
     this.href = StringUtils.joinWith(SEPARATOR, serviceUrl + path, id);
   }
+=======
+   * @param id   object id
+   */
+  public ObjectReferenceDto(UUID id, String serviceUrl, String resourceName) {
+    this(id, StringUtils.joinWith(SEPARATOR, serviceUrl + BASE_PATH, resourceName, id));
+  }
+
+  private ObjectReferenceDto(UUID id, String href) {
+    this.id = id;
+    this.href = href;
+  }
+
+  public static ObjectReferenceDto create(UUID id, String serviceUrl, String resourceName) {
+    return new ObjectReferenceDto(id, serviceUrl, resourceName);
+  }
+
+>>>>>>> OLMIS-3996: Updated dto to contain object references. Also updated service to throw exception when reason type is invalid
 }

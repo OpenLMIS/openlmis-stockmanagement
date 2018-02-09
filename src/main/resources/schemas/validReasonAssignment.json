@@ -4,10 +4,14 @@
   "description": "Valid reason assignment.",
   "properties": {
     "programId": {
-      "type": "string"
+      "type": "object",
+      "title": "Program",
+      "$ref": "referenceObjectDto.json"
     },
     "facilityTypeId": {
-      "type": "string"
+      "type": "object",
+      "title": "FacilityType",
+      "$ref": "referenceObjectDto.json"
     },
     "reason": {
       "type": "object",
