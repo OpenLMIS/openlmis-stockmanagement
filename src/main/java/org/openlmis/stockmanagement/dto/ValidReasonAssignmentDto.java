@@ -64,7 +64,7 @@ public class ValidReasonAssignmentDto
   @Override
   @JsonIgnore
   public void setProgramId(UUID programId) {
-    this.program = new ObjectReferenceDto(programId, serviceUrl, PROGRAMS);
+    this.program = new ObjectReferenceDto(serviceUrl, PROGRAMS, programId);
   }
 
   @Override
@@ -76,7 +76,7 @@ public class ValidReasonAssignmentDto
   @Override
   @JsonIgnore
   public void setFacilityTypeId(UUID facilityTypeId) {
-    this.facilityType = new ObjectReferenceDto(facilityTypeId, serviceUrl, FACILITY_TYPES);
+    this.facilityType = new ObjectReferenceDto(serviceUrl, FACILITY_TYPES, facilityTypeId);
   }
 
   /**
