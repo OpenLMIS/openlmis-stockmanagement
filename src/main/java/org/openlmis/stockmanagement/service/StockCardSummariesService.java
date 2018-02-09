@@ -86,7 +86,7 @@ public class StockCardSummariesService extends StockCardBaseService {
   public Page<StockCardSummaryV2Dto> findStockCards(StockCardSummariesV2SearchParams params,
                                                     Pageable pageable) {
     Page<OrderableDto> approvedProducts = approvedProductReferenceDataService
-        .getApprovedProducts(params.getProgramId(), params.getFacilityId(),
+        .getApprovedProducts(params.getFacilityId(), params.getProgramId(),
             params.getOrderableId(), pageable);
 
     Map<UUID, OrderableFulfillDto> orderableFulfillList = orderableFulfillService.findByIds(

@@ -279,7 +279,7 @@ public class StockCardSummariesServiceTest {
     Pageable pageable = new PageRequest(0, 10);
 
     when(approvedProductReferenceDataService
-        .getApprovedProducts(eq(params.getProgramId()), eq(params.getFacilityId()),
+        .getApprovedProducts(eq(params.getFacilityId()), eq(params.getProgramId()),
             eq(params.getOrderableId()), eq(pageable)))
         .thenReturn(
             new PageImpl<>(asList(orderable, orderable2, orderable3), pageable, 3));
