@@ -20,6 +20,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_TYPE_IN
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
@@ -56,7 +57,8 @@ public class ValidReasonAssignmentService {
 
     if (!CollectionUtils.isEmpty(reasonTypes)) {
       stockCardLineItemReasons =
-          stockCardLineItemReasonRepository.findByReasonTypeIn(mapToEnum(reasonTypes));
+          stockCardLineItemReasonRepository.findByReasonTypeIn(
+              reasonTypes.stream().map(this::toEnum).collect(Collectors.toList()));
     } else {
       validReasonAssignments = validReasonAssignmentRepository
           .findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
@@ -68,12 +70,6 @@ public class ValidReasonAssignmentService {
               stockCardLineItemReasons);
     }
     return validReasonAssignments;
-  }
-
-  private List<ReasonType> mapToEnum(List<String> reasonTypes) {
-    List<ReasonType> reasonTypeList = Lists.newArrayList();
-    reasonTypes.forEach(reasonType -> reasonTypeList.add(toEnum(reasonType)));
-    return reasonTypeList;
   }
 
   private ReasonType toEnum(String type) {
