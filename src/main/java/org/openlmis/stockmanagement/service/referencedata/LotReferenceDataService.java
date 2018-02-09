@@ -68,6 +68,6 @@ public class LotReferenceDataService extends BaseReferenceDataService<LotDto> {
     HashMap<String, Object> params = new HashMap<>();
     params.put("tradeItemId", tradeItemId);
     params.put("page", pageNumber);
-    return getPage("", params);
+    return getPage(params);
   }
 }

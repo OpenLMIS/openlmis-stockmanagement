@@ -144,6 +144,10 @@ public abstract class BaseCommunicationService<T> {
     }
   }
 
+  protected Page<T> getPage(Map<String, Object> parameters) {
+    return getPage("", parameters);
+  }
+
   protected Page<T> getPage(String resourceUrl, Map<String, Object> parameters) {
     return getPage(resourceUrl, parameters, null, HttpMethod.GET, getResultClass());
   }
