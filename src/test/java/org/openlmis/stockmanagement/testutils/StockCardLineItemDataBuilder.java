@@ -111,6 +111,15 @@ public class StockCardLineItemDataBuilder {
    *
    * @return created line item.
    */
+  public StockCardLineItem buildWithStockOnHand(int newStockOnHand) {
+    return this.withStockOnHand(stockOnHand).build();
+  }
+
+  /**
+   * Creates new instance of {@link StockCardLineItem} with properties.
+   *
+   * @return created line item.
+   */
   public StockCardLineItem build() {
     StockCardLineItem lineItem = new StockCardLineItem(
         stockCard, originEvent, quantity, extraData, reason, sourceFreeText, destinationFreeText,

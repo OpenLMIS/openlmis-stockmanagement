@@ -58,11 +58,11 @@ public class StockCardSummariesV2BuilderTest {
         .build();
     StockCard stockCard = new StockCardDataBuilder(event)
         .buildWithStockOnHandAndLineItemAndOrderableId(12,
-            new StockCardLineItemDataBuilder().withStockOnHand(16).build(),
+            new StockCardLineItemDataBuilder().buildWithStockOnHand(16),
             orderable1Id);
     StockCard stockCard1 = new StockCardDataBuilder(event)
         .buildWithStockOnHandAndLineItemAndOrderableId(26,
-            new StockCardLineItemDataBuilder().withStockOnHand(30).build(),
+            new StockCardLineItemDataBuilder().buildWithStockOnHand(30),
             orderable3Id);
     List<StockCard> stockCards = asList(stockCard, stockCard1);
 
