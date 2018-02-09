@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.service;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anySetOf;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -66,8 +67,8 @@ public class ValidReasonAssignmentServiceTest {
   @Test
   public void shouldReturnValidReasonAssignments() {
 
-    when(stockCardLineItemReasonRepository.findByReasonTypeIn(Arrays.asList(
-        ReasonType.CREDIT, ReasonType.DEBIT))).thenReturn(Collections.singletonList(newReason));
+    when(stockCardLineItemReasonRepository.findByReasonTypeIn(anySetOf(ReasonType.class)))
+        .thenReturn(Collections.singletonList(newReason));
 
     when(validReasonAssignmentRepository.findByProgramIdAndFacilityTypeIdAndReasonIn(eq(programId),
         eq(facilityTypeId), eq(Collections.singletonList(newReason))))

@@ -58,7 +58,7 @@ public class ValidReasonAssignmentService {
     if (!CollectionUtils.isEmpty(reasonTypes)) {
       stockCardLineItemReasons =
           stockCardLineItemReasonRepository.findByReasonTypeIn(
-              reasonTypes.stream().map(this::toEnum).collect(Collectors.toList()));
+              reasonTypes.stream().map(this::toEnum).collect(Collectors.toSet()));
     } else {
       validReasonAssignments = validReasonAssignmentRepository
           .findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
