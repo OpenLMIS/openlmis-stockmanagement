@@ -26,9 +26,9 @@ import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-import java.util.ArrayList;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
 import org.openlmis.stockmanagement.dto.ValidReasonAssignmentDto;
+import org.openlmis.stockmanagement.dto.builder.ValidReasonAssignmentDtoBuilder;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
@@ -45,10 +45,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
 import java.util.UUID;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/api")
@@ -68,6 +68,9 @@ public class ValidReasonAssignmentController {
 
   @Autowired
   private ValidReasonAssignmentService validReasonAssignmentService;
+
+  @Autowired
+  private ValidReasonAssignmentDtoBuilder reasonAssignmentDtoBuilder;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCardsController.class);
 
@@ -91,7 +94,8 @@ public class ValidReasonAssignmentController {
     }
     permissionService.canViewValidReasons(program, facilityType);
 
-    return toDto(validReasonAssignmentService.search(program, facilityType, reasonTypes));
+    return reasonAssignmentDtoBuilder.build(
+        validReasonAssignmentService.search(program, facilityType, reasonTypes));
   }
 
   /**
@@ -160,12 +164,4 @@ public class ValidReasonAssignmentController {
         ValidReasonAssignmentDto.newInstance(reasonAssignmentRepository.save(assignment));
     return new ResponseEntity<>(assignmentDto, CREATED);
   }
-
-  private List<ValidReasonAssignmentDto> toDto(List<ValidReasonAssignment> validReasonAssignments) {
-    List<ValidReasonAssignmentDto> dtos = new ArrayList<>();
-    validReasonAssignments.forEach(validReasonAssignment -> dtos.add(
-        ValidReasonAssignmentDto.newInstance(validReasonAssignment)));
-    return dtos;
-  }
-
 }
