@@ -15,12 +15,15 @@
 
 package org.openlmis.stockmanagement.util;
 
-import com.google.common.collect.Maps;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
 public final class RequestParameters {
-  private Map<String, Object> params = Maps.newHashMap();
+  private MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
 
   private RequestParameters() {
   }
@@ -32,9 +35,22 @@ public final class RequestParameters {
   /**
    * Set parameter (key argument) with the value only if the value is not null.
    */
+  public RequestParameters set(String key, Collection valueCollection) {
+    if (null != valueCollection) {
+      for (Object value : valueCollection) {
+        params.add(key, value);
+      }
+    }
+
+    return this;
+  }
+
+  /**
+   * Set parameter (key argument) with the value only if the value is not null.
+   */
   public RequestParameters set(String key, Object value) {
     if (null != value) {
-      params.put(key, value);
+      params.add(key, value);
     }
 
     return this;
@@ -45,8 +61,7 @@ public final class RequestParameters {
     return this;
   }
 
-  public void forEach(Consumer<Map.Entry<String, Object>> action) {
+  public void forEach(Consumer<Map.Entry<String, List<Object>>> action) {
     params.entrySet().forEach(action);
   }
-
 }

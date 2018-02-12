@@ -18,6 +18,8 @@ package org.openlmis.stockmanagement.testutils;
 import static java.util.Arrays.asList;
 
 import org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -28,6 +30,7 @@ public class StockCardSummariesV2SearchParamsDataBuilder {
   private UUID facilityId;
   private List<UUID> orderableId;
   private LocalDate asOfDate;
+  private Pageable pageable;
 
   /**
    * Creates builder for creating new instance of {@link StockCardSummariesV2SearchParams}.
@@ -37,6 +40,7 @@ public class StockCardSummariesV2SearchParamsDataBuilder {
     facilityId = UUID.randomUUID();
     orderableId = asList(UUID.randomUUID(), UUID.randomUUID());
     asOfDate = LocalDate.now();
+    pageable = new PageRequest(0, 10);
   }
 
   /**
@@ -45,7 +49,7 @@ public class StockCardSummariesV2SearchParamsDataBuilder {
    */
   public StockCardSummariesV2SearchParams build() {
     return new StockCardSummariesV2SearchParams(programId, facilityId,
-        orderableId, asOfDate);
+        orderableId, asOfDate, pageable);
   }
 
   public StockCardSummariesV2SearchParamsDataBuilder withoutFacilityId() {

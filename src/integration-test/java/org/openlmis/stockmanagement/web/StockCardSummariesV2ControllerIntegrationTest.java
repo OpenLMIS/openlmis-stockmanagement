@@ -35,8 +35,6 @@ import org.openlmis.stockmanagement.testutils.StockCardSummaryV2DtoDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.ResultActions;
 import java.util.Collections;
 
@@ -58,18 +56,15 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
 
   private StockCardSummaryV2Dto stockCardSummary;
   private StockCardSummariesV2SearchParams params;
-  private Pageable pageable;
 
   @Before
   public void setUp() {
     stockCardSummary = new StockCardSummaryV2DtoDataBuilder().build();
     params = new StockCardSummariesV2SearchParamsDataBuilder().build();
-    pageable = new PageRequest(0, 10);
 
-    when(stockCardSummariesService.findStockCards(any(StockCardSummariesV2SearchParams.class),
-        any(Pageable.class)))
+    when(stockCardSummariesService.findStockCards(any(StockCardSummariesV2SearchParams.class)))
         .thenReturn(
-            new PageImpl<>(Collections.singletonList(stockCardSummary), pageable, 1));
+            new PageImpl<>(Collections.singletonList(stockCardSummary), params.getPageable(), 1));
   }
 
   @Test
@@ -77,13 +72,13 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
     ResultActions resultActions = mvc.perform(
         get(API_STOCK_CARD_SUMMARIES)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param(PAGE, String.valueOf(pageable.getPageNumber()))
-            .param(SIZE, String.valueOf(pageable.getPageSize()))
+            .param(PAGE, String.valueOf(params.getPageable().getPageNumber()))
+            .param(SIZE, String.valueOf(params.getPageable().getPageSize()))
             .param(PROGRAM_ID, params.getProgramId().toString())
             .param(FACILITY_ID, params.getFacilityId().toString())
             .param(AS_OF_DATE, params.getAsOfDate().toString())
-            .param(ORDERABLE_ID, params.getOrderableId().get(0).toString())
-            .param(ORDERABLE_ID, params.getOrderableId().get(1).toString()));
+            .param(ORDERABLE_ID, params.getOrderableIds().get(0).toString())
+            .param(ORDERABLE_ID, params.getOrderableIds().get(1).toString()));
 
     resultActions
         .andExpect(status().isOk())
@@ -95,12 +90,12 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
     ResultActions resultActions = mvc.perform(
         get(API_STOCK_CARD_SUMMARIES)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param(PAGE, String.valueOf(pageable.getPageNumber()))
-            .param(SIZE, String.valueOf(pageable.getPageSize()))
+            .param(PAGE, String.valueOf(params.getPageable().getPageNumber()))
+            .param(SIZE, String.valueOf(params.getPageable().getPageSize()))
             .param(PROGRAM_ID, params.getProgramId().toString())
             .param(AS_OF_DATE, params.getAsOfDate().toString())
-            .param(ORDERABLE_ID, params.getOrderableId().get(0).toString())
-            .param(ORDERABLE_ID, params.getOrderableId().get(1).toString()));
+            .param(ORDERABLE_ID, params.getOrderableIds().get(0).toString())
+            .param(ORDERABLE_ID, params.getOrderableIds().get(1).toString()));
 
     resultActions
         .andExpect(status().isBadRequest());
@@ -111,12 +106,12 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
     ResultActions resultActions = mvc.perform(
         get(API_STOCK_CARD_SUMMARIES)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param(PAGE, String.valueOf(pageable.getPageNumber()))
-            .param(SIZE, String.valueOf(pageable.getPageSize()))
+            .param(PAGE, String.valueOf(params.getPageable().getPageNumber()))
+            .param(SIZE, String.valueOf(params.getPageable().getPageSize()))
             .param(FACILITY_ID, params.getFacilityId().toString())
             .param(AS_OF_DATE, params.getAsOfDate().toString())
-            .param(ORDERABLE_ID, params.getOrderableId().get(0).toString())
-            .param(ORDERABLE_ID, params.getOrderableId().get(1).toString()));
+            .param(ORDERABLE_ID, params.getOrderableIds().get(0).toString())
+            .param(ORDERABLE_ID, params.getOrderableIds().get(1).toString()));
 
     resultActions
         .andExpect(status().isBadRequest());
@@ -131,8 +126,8 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
     ResultActions resultActions = mvc.perform(
         get(API_STOCK_CARD_SUMMARIES)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param(PAGE, String.valueOf(pageable.getPageNumber()))
-            .param(SIZE, String.valueOf(pageable.getPageSize()))
+            .param(PAGE, String.valueOf(params.getPageable().getPageNumber()))
+            .param(SIZE, String.valueOf(params.getPageable().getPageSize()))
             .param(PROGRAM_ID, params.getProgramId().toString())
             .param(FACILITY_ID, params.getFacilityId().toString()));
 

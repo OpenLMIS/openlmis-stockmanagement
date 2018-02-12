@@ -44,15 +44,15 @@ public final class RequestHelper {
     UriComponentsBuilder builder = UriComponentsBuilder.newInstance().uri(URI.create(url));
 
     if (parameters != null) {
-      parameters.forEach(e -> {
+      parameters.forEach(e -> e.getValue().forEach(one -> {
         try {
           builder.queryParam(e.getKey(),
-              UriUtils.encodeQueryParam(String.valueOf(e.getValue()),
+              UriUtils.encodeQueryParam(String.valueOf(one),
                   StandardCharsets.UTF_8.name()));
         } catch (UnsupportedEncodingException ex) {
           throw new EncodingException(ex);
         }
-      });
+      }));
     }
 
     return builder.build(true).toUri();
@@ -79,8 +79,8 @@ public final class RequestHelper {
    * @param token the token to put into the authorization header
    * @return the {@link HttpEntity} to use
    */
-  public static <E> HttpEntity<E> createEntity(String token) {
-    return new HttpEntity<>(createHeadersWithAuth(token));
+  public static HttpEntity createEntity(String token) {
+    return new HttpEntity(createHeadersWithAuth(token));
   }
 
   private static HttpHeaders createHeadersWithAuth(String token) {
