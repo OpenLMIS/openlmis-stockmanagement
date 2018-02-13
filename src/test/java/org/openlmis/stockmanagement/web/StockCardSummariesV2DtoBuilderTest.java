@@ -18,14 +18,15 @@ package org.openlmis.stockmanagement.web;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertEquals;
+import static org.openlmis.stockmanagement.dto.StockCardDto.createFrom;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.CanFulfillForMeEntryDto;
+import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockCardSummaryV2Dto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
@@ -59,15 +60,18 @@ public class StockCardSummariesV2DtoBuilderTest {
         .withFacility(facilityId)
         .withProgram(programId)
         .build();
-    StockCard stockCard = new StockCardDataBuilder(event)
+    StockCardDto stockCard = createFrom(new StockCardDataBuilder(event)
         .buildWithStockOnHandAndLineItemAndOrderableId(12,
             new StockCardLineItemDataBuilder().buildWithStockOnHand(16),
-            orderable1.getId());
-    StockCard stockCard1 = new StockCardDataBuilder(event)
+            orderable1.getId()));
+    stockCard.setOrderable(orderable1);
+    StockCardDto stockCard1 = createFrom(new StockCardDataBuilder(event)
         .buildWithStockOnHandAndLineItemAndOrderableId(26,
             new StockCardLineItemDataBuilder().buildWithStockOnHand(30),
-            orderable3.getId());
-    List<StockCard> stockCards = asList(stockCard, stockCard1);
+            orderable3.getId()));
+    stockCard1.setOrderable(orderable3);
+
+    List<StockCardDto> stockCards = asList(stockCard, stockCard1);
 
     Map<UUID, OrderableFulfillDto> fulfillMap = new HashMap<>();
     fulfillMap.put(orderable1.getId(), new OrderableFulfillDtoDataBuilder()

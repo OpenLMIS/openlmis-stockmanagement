@@ -39,7 +39,6 @@ import org.openlmis.stockmanagement.util.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.lang.reflect.InvocationTargetException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -157,21 +156,6 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
     }
     setStockOnHand(previousSoh);
     LOGGER.debug("Calculated stock on hand: {}", previousSoh);
-  }
-
-  /**
-   * Returns latest line item  before given date.
-   */
-  public StockCardLineItem getLineItemAsOfDate(LocalDate date) {
-    if (isEmpty(lineItems)) {
-      return null;
-    }
-
-    return lineItems.stream()
-        .filter(a -> a.getOccurredDate().isBefore(date))
-        .sorted(Comparator.comparing(StockCardLineItem::getOccurredDate).reversed())
-        .findFirst()
-        .orElse(null);
   }
 
   /**

@@ -15,6 +15,9 @@
 
 package org.openlmis.stockmanagement.dto;
 
+import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -47,6 +50,7 @@ public final class CanFulfillForMeEntryDto {
 
   @Getter
   @Setter
+  @JsonFormat(shape = STRING)
   private ZonedDateTime processedDate;
 
   public CanFulfillForMeEntryDto(ObjectReferenceDto orderable) {

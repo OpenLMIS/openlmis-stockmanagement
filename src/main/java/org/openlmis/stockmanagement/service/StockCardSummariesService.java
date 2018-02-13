@@ -96,8 +96,8 @@ public class StockCardSummariesService extends StockCardBaseService {
         .findByProgramIdAndFacilityId(params.getProgramId(),
             params.getFacilityId());
 
-    return new StockCardSummaries(approvedProducts.getContent(),
-        stockCards, orderableFulfillMap, params.getAsOfDate(), approvedProducts.getTotalElements());
+    return new StockCardSummaries(approvedProducts.getContent(), createDtos(stockCards),
+        orderableFulfillMap, params.getAsOfDate(), approvedProducts.getTotalElements());
   }
 
   /**
