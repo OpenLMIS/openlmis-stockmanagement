@@ -15,10 +15,14 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.MapType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
 import org.openlmis.stockmanagement.util.RequestParameters;
 import org.springframework.stereotype.Service;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -51,6 +55,12 @@ public class OrderableFulfillReferenceDataService extends BaseReferenceDataServi
         .init()
         .set("id", ids);
 
-    return findOne(parameters);
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.findAndRegisterModules();
+    TypeFactory factory = mapper.getTypeFactory();
+    MapType mapType =
+        factory.constructMapType(HashMap.class, UUID.class, OrderableFulfillDto.class);
+
+    return mapper.convertValue(findOne(parameters), mapType);
   }
 }
