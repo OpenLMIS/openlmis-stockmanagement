@@ -27,7 +27,6 @@ import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.dto.StockCardDto;
-import org.openlmis.stockmanagement.dto.StockCardSummaryV2Dto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
@@ -75,7 +74,7 @@ public class StockCardSummariesService extends StockCardBaseService {
   private StockCardRepository cardRepository;
 
   @Autowired
-  private StockCardSummariesV2Builder stockCardSummariesV2Builder;
+  private PermissionService permissionService;
 
   /**
    * Get a page of stock cards.
@@ -83,21 +82,22 @@ public class StockCardSummariesService extends StockCardBaseService {
    * @param params stock cards summaries search params.
    * @return page of stock cards.
    */
-  public Page<StockCardSummaryV2Dto> findStockCards(StockCardSummariesV2SearchParams params) {
+  public StockCardSummaries findStockCards(StockCardSummariesV2SearchParams params) {
+    permissionService.canViewStockCard(params.getProgramId(), params.getFacilityId());
+
     Page<OrderableDto> approvedProducts = approvedProductReferenceDataService
         .getApprovedProducts(params.getFacilityId(), params.getProgramId(),
             params.getOrderableIds(), params.getPageable());
 
-    Map<UUID, OrderableFulfillDto> orderableFulfillList = orderableFulfillService.findByIds(
+    Map<UUID, OrderableFulfillDto> orderableFulfillMap = orderableFulfillService.findByIds(
         approvedProducts.getContent().stream().map(OrderableDto::getId).collect(toList()));
 
     List<StockCard> stockCards = cardRepository
         .findByProgramIdAndFacilityId(params.getProgramId(),
             params.getFacilityId());
 
-    return new PageImpl<>(stockCardSummariesV2Builder.build(approvedProducts.getContent(),
-        stockCards, orderableFulfillList, params.getAsOfDate()),
-        params.getPageable(), approvedProducts.getTotalElements());
+    return new StockCardSummaries(approvedProducts.getContent(),
+        stockCards, orderableFulfillMap, params.getAsOfDate(), approvedProducts.getTotalElements());
   }
 
   /**

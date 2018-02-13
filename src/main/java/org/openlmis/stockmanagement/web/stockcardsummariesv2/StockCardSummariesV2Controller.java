@@ -13,17 +13,19 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.web;
+package org.openlmis.stockmanagement.web.stockcardsummariesv2;
 
 import org.openlmis.stockmanagement.dto.StockCardSummaryV2Dto;
-import org.openlmis.stockmanagement.service.PermissionService;
+import org.openlmis.stockmanagement.service.StockCardSummaries;
 import org.openlmis.stockmanagement.service.StockCardSummariesService;
 import org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams;
+import org.openlmis.stockmanagement.web.StockCardsController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,10 +39,10 @@ public class StockCardSummariesV2Controller {
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCardsController.class);
 
   @Autowired
-  private PermissionService permissionService;
+  private StockCardSummariesService stockCardSummariesService;
 
   @Autowired
-  private StockCardSummariesService stockCardSummariesService;
+  private StockCardSummariesV2DtoBuilder stockCardSummariesV2DtoBuilder;
 
   /**
    * Get stock card summaries by program and facility.
@@ -59,11 +61,15 @@ public class StockCardSummariesV2Controller {
     profiler.start("VALIDATE_PARAMS");
     params.validate();
 
-    profiler.start("CHECK_PERMISSIONS");
-    permissionService.canViewStockCard(params.getProgramId(), params.getFacilityId());
-
     profiler.start("GET_STOCK_CARD_SUMMARIES");
-    Page<StockCardSummaryV2Dto> page = stockCardSummariesService.findStockCards(params);
+    StockCardSummaries summaries = stockCardSummariesService.findStockCards(params);
+
+    PageImpl<StockCardSummaryV2Dto> page =
+        new PageImpl<>(
+            stockCardSummariesV2DtoBuilder.build(summaries.getPageOfApprovedProducts(),
+                summaries.getStockCardsForFulfillOrderables(), summaries.getOrderableFulfillMap(),
+                summaries.getAsOfDate()),
+            params.getPageable(), summaries.getTotalElements());
 
     profiler.stop().log();
     return page;

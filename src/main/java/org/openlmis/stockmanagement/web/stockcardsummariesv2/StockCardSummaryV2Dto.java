@@ -13,25 +13,43 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
+package org.openlmis.stockmanagement.web.stockcardsummariesv2;
 
-package org.openlmis.stockmanagement.dto.referencedata;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
+import org.openlmis.stockmanagement.dto.CanFulfillForMeEntryDto;
+import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
 import java.util.List;
-import java.util.UUID;
 
-@Getter
 @AllArgsConstructor
-@EqualsAndHashCode
+@NoArgsConstructor
 @ToString
-public final class OrderableFulfillDto {
+@EqualsAndHashCode
+public final class StockCardSummaryV2Dto {
 
   @Getter
-  private final List<UUID> canFulfillForMe;
+  @Setter
+  private ObjectReferenceDto orderable;
 
   @Getter
-  private final List<UUID> canBeFulfilledByMe;
+  @Setter
+  private List<CanFulfillForMeEntryDto> canFulfillForMe;
+
+  /**
+   * Sums stock on hand values from all {@link CanFulfillForMeEntryDto} instances.
+   * @return sum of all stock on hand values
+   */
+  public Integer getStockOnHand() {
+    return isEmpty(canFulfillForMe) ? null : canFulfillForMe
+        .stream()
+        .filter(a -> a.getStockOnHand() != null)
+        .mapToInt(CanFulfillForMeEntryDto::getStockOnHand)
+        .sum();
+  }
 }

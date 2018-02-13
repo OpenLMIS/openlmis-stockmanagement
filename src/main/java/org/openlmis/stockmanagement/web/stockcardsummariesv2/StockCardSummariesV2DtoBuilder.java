@@ -13,7 +13,7 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.service;
+package org.openlmis.stockmanagement.web.stockcardsummariesv2;
 
 import static org.apache.commons.collections.MapUtils.isEmpty;
 
@@ -33,7 +33,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
-public class StockCardSummariesV2Builder {
+public class StockCardSummariesV2DtoBuilder {
 
   private static final String API = "api/";
 

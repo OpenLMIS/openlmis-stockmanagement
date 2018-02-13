@@ -13,25 +13,28 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-
-package org.openlmis.stockmanagement.dto.referencedata;
+package org.openlmis.stockmanagement.service;
 
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.ToString;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
-@Getter
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
-public final class OrderableFulfillDto {
-
-  @Getter
-  private final List<UUID> canFulfillForMe;
-
-  @Getter
-  private final List<UUID> canBeFulfilledByMe;
+@NoArgsConstructor
+@Getter
+@Setter
+public class StockCardSummaries {
+  private List<OrderableDto> pageOfApprovedProducts;
+  private List<StockCard> stockCardsForFulfillOrderables;
+  private Map<UUID, OrderableFulfillDto> orderableFulfillMap;
+  private LocalDate asOfDate;
+  private Long totalElements;
 }

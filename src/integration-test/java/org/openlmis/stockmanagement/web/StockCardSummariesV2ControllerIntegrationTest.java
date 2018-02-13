@@ -15,7 +15,9 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -27,16 +29,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.stockmanagement.dto.StockCardSummaryV2Dto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
-import org.openlmis.stockmanagement.service.PermissionService;
+import org.openlmis.stockmanagement.service.StockCardSummaries;
 import org.openlmis.stockmanagement.service.StockCardSummariesService;
 import org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams;
+import org.openlmis.stockmanagement.testutils.ObjectGenerator;
 import org.openlmis.stockmanagement.testutils.StockCardSummariesV2SearchParamsDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardSummaryV2DtoDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
+import org.openlmis.stockmanagement.web.stockcardsummariesv2.StockCardSummariesV2DtoBuilder;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.test.web.servlet.ResultActions;
-import java.util.Collections;
 
 public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
 
@@ -52,19 +54,24 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
   private StockCardSummariesService stockCardSummariesService;
 
   @MockBean
-  private PermissionService permissionService;
+  private StockCardSummariesV2DtoBuilder stockCardSummariesV2DtoBuilder;
 
-  private StockCardSummaryV2Dto stockCardSummary;
-  private StockCardSummariesV2SearchParams params;
+  private StockCardSummaryV2Dto stockCardSummary = new StockCardSummaryV2DtoDataBuilder().build();
+  private StockCardSummaryV2Dto stockCardSummary2 = new StockCardSummaryV2DtoDataBuilder().build();
+  private StockCardSummariesV2SearchParams params =
+      new StockCardSummariesV2SearchParamsDataBuilder().build();
+  private StockCardSummaries summaries = ObjectGenerator.of(StockCardSummaries.class);
 
   @Before
   public void setUp() {
-    stockCardSummary = new StockCardSummaryV2DtoDataBuilder().build();
-    params = new StockCardSummariesV2SearchParamsDataBuilder().build();
-
     when(stockCardSummariesService.findStockCards(any(StockCardSummariesV2SearchParams.class)))
-        .thenReturn(
-            new PageImpl<>(Collections.singletonList(stockCardSummary), params.getPageable(), 1));
+        .thenReturn(summaries);
+
+    when(stockCardSummariesV2DtoBuilder
+        .build(summaries.getPageOfApprovedProducts(),
+            summaries.getStockCardsForFulfillOrderables(), summaries.getOrderableFulfillMap(),
+            summaries.getAsOfDate()))
+        .thenReturn(asList(stockCardSummary, stockCardSummary2));
   }
 
   @Test
@@ -82,7 +89,16 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
 
     resultActions
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.content", hasSize(1)));
+        .andExpect(jsonPath("$.content", hasSize(2)))
+        .andExpect(jsonPath("$.numberOfElements", is(2)))
+        .andExpect(jsonPath("$.number", is(params.getPageable().getPageNumber())))
+        .andExpect(jsonPath("$.size", is(params.getPageable().getPageSize())))
+        .andExpect(jsonPath("$.totalElements",
+            is(summaries.getTotalElements().intValue())))
+        .andExpect(jsonPath("$.content[0].orderable.id",
+            is(stockCardSummary.getOrderable().getId().toString())))
+        .andExpect(jsonPath("$.content[1].orderable.id",
+            is(stockCardSummary2.getOrderable().getId().toString())));
   }
 
   @Test
@@ -119,9 +135,9 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
 
   @Test
   public void shouldReturnForbiddenIfNoPermission() throws Exception {
-    doThrow(new
-        PermissionMessageException(new Message("no permission"))).when(permissionService)
-        .canViewStockCard(params.getProgramId(), params.getFacilityId());
+    doThrow(new PermissionMessageException(new Message("no permission")))
+        .when(stockCardSummariesService)
+        .findStockCards(any(StockCardSummariesV2SearchParams.class));
 
     ResultActions resultActions = mvc.perform(
         get(API_STOCK_CARD_SUMMARIES)

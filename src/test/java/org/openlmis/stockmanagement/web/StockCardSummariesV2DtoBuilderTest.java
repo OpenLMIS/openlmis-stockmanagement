@@ -13,7 +13,7 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.service;
+package org.openlmis.stockmanagement.web;
 
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
@@ -34,6 +34,7 @@ import org.openlmis.stockmanagement.testutils.OrderableFulfillDtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
+import org.openlmis.stockmanagement.web.stockcardsummariesv2.StockCardSummariesV2DtoBuilder;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -41,10 +42,10 @@ import java.util.Map;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
-public class StockCardSummariesV2BuilderTest {
+public class StockCardSummariesV2DtoBuilderTest {
 
   @InjectMocks
-  private StockCardSummariesV2Builder builder;
+  private StockCardSummariesV2DtoBuilder builder;
 
   @Test
   public void shouldBuildStockCardSummaries() throws Exception {

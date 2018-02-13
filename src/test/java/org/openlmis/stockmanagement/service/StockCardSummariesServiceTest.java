@@ -32,6 +32,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
@@ -44,10 +45,10 @@ import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.dto.StockCardDto;
-import org.openlmis.stockmanagement.dto.StockCardSummaryV2Dto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
+import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
@@ -59,8 +60,8 @@ import org.openlmis.stockmanagement.testutils.OrderableDtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.OrderableFulfillDtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardSummariesV2SearchParamsDataBuilder;
-import org.openlmis.stockmanagement.testutils.StockCardSummaryV2DtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
+import org.openlmis.stockmanagement.util.Message;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -97,7 +98,7 @@ public class StockCardSummariesServiceTest {
   private StockCardRepository cardRepository;
 
   @Mock
-  private StockCardSummariesV2Builder stockCardSummariesV2Builder;
+  private PermissionService permissionService;
 
   @InjectMocks
   private StockCardSummariesService stockCardSummariesService;
@@ -313,20 +314,22 @@ public class StockCardSummariesServiceTest {
         params.getFacilityId()))
         .thenReturn(stockCards);
 
-    StockCardSummaryV2Dto summary = new StockCardSummaryV2DtoDataBuilder().build();
-    StockCardSummaryV2Dto summary2 = new StockCardSummaryV2DtoDataBuilder().build();
-    StockCardSummaryV2Dto summary3 = new StockCardSummaryV2DtoDataBuilder().build();
+    StockCardSummaries result = stockCardSummariesService.findStockCards(params);
 
-    when(stockCardSummariesV2Builder.build(asList(orderable, orderable2, orderable3),
-        stockCards, fulfillMap, params.getAsOfDate()))
-        .thenReturn(asList(summary, summary2, summary3));
+    assertEquals(3, result.getPageOfApprovedProducts().size());
+  }
 
-    Page<StockCardSummaryV2Dto> result = stockCardSummariesService.findStockCards(params);
+  @Test(expected = PermissionMessageException.class)
+  public void shouldThrowExceptionIfNoPermission() {
+    StockCardSummariesV2SearchParams params =
+        new StockCardSummariesV2SearchParamsDataBuilder().build();
 
-    assertEquals(3, result.getContent().size());
-    assertEquals(summary, result.getContent().get(0));
-    assertEquals(summary2, result.getContent().get(1));
-    assertEquals(summary3, result.getContent().get(2));
+    doThrow(new
+        PermissionMessageException(new Message("no permission")))
+        .when(permissionService)
+        .canViewStockCard(params.getProgramId(), params.getFacilityId());
+
+    stockCardSummariesService.findStockCards(params);
   }
 
   private StockCard createStockCard(UUID orderableId, UUID cardId) {
