@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.service.referencedata;
 import static org.openlmis.stockmanagement.util.RequestHelper.createEntity;
 import static org.openlmis.stockmanagement.util.RequestHelper.createUri;
 
+import org.apache.commons.lang.StringUtils;
 import org.openlmis.stockmanagement.service.AuthService;
 import org.openlmis.stockmanagement.util.DynamicPageTypeReference;
 import org.openlmis.stockmanagement.util.PageImplRepresentation;
@@ -118,7 +119,7 @@ public abstract class BaseCommunicationService<T> {
    * @return one reference data T objects.
    */
   public T findOne(String resourceUrl, RequestParameters parameters, Class<T> type) {
-    String url = getServiceUrl() + getUrl() + resourceUrl;
+    String url = getServiceUrl() + getUrl() + StringUtils.defaultIfBlank(resourceUrl, "");
 
     RequestParameters params = RequestParameters
         .init()

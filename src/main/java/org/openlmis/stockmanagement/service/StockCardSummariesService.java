@@ -95,10 +95,6 @@ public class StockCardSummariesService extends StockCardBaseService {
         .findByProgramIdAndFacilityId(params.getProgramId(),
             params.getFacilityId());
 
-    LOGGER.debug("STOCK CARD SUMMARIES V2 ftap " + approvedProducts);
-    LOGGER.debug("STOCK CARD SUMMARIES V2 fulfills " + orderableFulfillList);
-    LOGGER.debug("STOCK CARD SUMMARIES V2 cards " + stockCards);
-
     return new PageImpl<>(stockCardSummariesV2Builder.build(approvedProducts.getContent(),
         stockCards, orderableFulfillList, params.getAsOfDate()),
         params.getPageable(), approvedProducts.getTotalElements());
