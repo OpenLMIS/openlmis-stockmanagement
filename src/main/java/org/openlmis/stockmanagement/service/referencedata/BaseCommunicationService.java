@@ -35,7 +35,6 @@ import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -150,6 +149,13 @@ public abstract class BaseCommunicationService<T> {
   }
 
   protected Page<T> getPage(String resourceUrl, Map<String, Object> parameters) {
+    RequestParameters params = RequestParameters.init();
+    parameters.entrySet().stream().forEach(e -> params.set(e.getKey(), e.getValue()));
+
+    return getPage(resourceUrl, params, null, HttpMethod.GET, getResultClass());
+  }
+
+  protected Page<T> getPage(String resourceUrl, RequestParameters parameters) {
     return getPage(resourceUrl, parameters, null, HttpMethod.GET, getResultClass());
   }
 
@@ -162,19 +168,19 @@ public abstract class BaseCommunicationService<T> {
    * @return Page of reference data T objects.
    */
   protected Page<T> getPage(String resourceUrl, Map<String, Object> parameters, Object payload) {
-    return getPage(resourceUrl, parameters, payload, HttpMethod.POST, getResultClass());
+    RequestParameters params = RequestParameters.init();
+    parameters.entrySet().stream().forEach(e -> params.set(e.getKey(), e.getValue()));
+
+    return getPage(resourceUrl, params, payload, HttpMethod.POST, getResultClass());
   }
 
-  protected <P> Page<P> getPage(String resourceUrl, Map<String, Object> parameters, Object payload,
+  protected <P> Page<P> getPage(String resourceUrl, RequestParameters parameters, Object payload,
                                 HttpMethod method, Class<P> type) {
     String url = getServiceUrl() + getUrl() + resourceUrl;
 
-    Map<String, Object> params = new HashMap<>();
-    params.putAll(parameters);
-
     try {
       ResponseEntity<PageImplRepresentation<P>> response = restTemplate.exchange(
-          buildUri(url, params),
+          createUri(url, parameters),
           method,
           createEntity(obtainAccessToken(), payload),
           new DynamicPageTypeReference<>(type)

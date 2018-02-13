@@ -26,14 +26,13 @@ import org.junit.Test;
 import org.openlmis.stockmanagement.dto.referencedata.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.testutils.ApprovedProductDtoDataBuilder;
+import org.openlmis.stockmanagement.util.RequestParameters;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class ApprovedProductReferenceDataServiceTest {
@@ -51,11 +50,11 @@ public class ApprovedProductReferenceDataServiceTest {
     Collection<UUID> orderableIds = asList(randomUUID(), randomUUID());
     Pageable pageable = new PageRequest(0, 10);
 
-    Map<String, Object> parameters = new HashMap<>();
-    parameters.put("programId", programId);
-    parameters.put("size", pageable.getPageSize());
-    parameters.put("page", pageable.getPageNumber());
-    parameters.put("orderableId", orderableIds);
+    RequestParameters parameters = RequestParameters.init();
+    parameters.set("programId", programId);
+    parameters.set("size", pageable.getPageSize());
+    parameters.set("page", pageable.getPageNumber());
+    parameters.set("orderableId", orderableIds);
 
     Page<ApprovedProductDto> productPage = new PageImpl<>(
         Collections.singletonList(new ApprovedProductDtoDataBuilder().build()), pageable, 1);

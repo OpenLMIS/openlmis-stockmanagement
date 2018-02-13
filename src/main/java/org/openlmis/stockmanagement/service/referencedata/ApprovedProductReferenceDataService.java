@@ -19,13 +19,12 @@ import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
 import org.openlmis.stockmanagement.dto.referencedata.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
+import org.openlmis.stockmanagement.util.RequestParameters;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -58,17 +57,18 @@ public class ApprovedProductReferenceDataService extends
    */
   public Page<OrderableDto> getApprovedProducts(UUID facilityId, UUID programId,
                                                 Collection<UUID> orderableIds, Pageable pageable) {
-    Map<String, Object> parameters = new HashMap<>();
-    parameters.put("programId", programId);
-    parameters.put("size", pageable.getPageSize());
-    parameters.put("page", pageable.getPageNumber());
+    RequestParameters params = RequestParameters.init();
+
+    params.set("programId", programId);
+    params.set("size", pageable.getPageSize());
+    params.set("page", pageable.getPageNumber());
 
     if (!isEmpty(orderableIds)) {
-      parameters.put("orderableId", orderableIds);
+      params.set("orderableId", orderableIds);
     }
 
     Page<ApprovedProductDto> approvedProductPage =
-        getPage(facilityId + "/approvedProducts", parameters);
+        getPage(facilityId + "/approvedProducts", params);
 
     return new PageImpl<>(approvedProductPage.getContent().stream()
         .map(ApprovedProductDto::getOrderable).collect(Collectors.toList()),

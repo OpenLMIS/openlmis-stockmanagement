@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.util;
 
+import lombok.EqualsAndHashCode;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import java.util.Collection;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+@EqualsAndHashCode
 public final class RequestParameters {
   private MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
 
