@@ -157,11 +157,11 @@ public class ValidReasonAssignmentController {
         .findByProgramIdAndFacilityTypeIdAndReasonId(programId, facilityTypeId, reasonId);
 
     if (foundAssignment != null) {
-      return new ResponseEntity<>(ValidReasonAssignmentDto.newInstance(foundAssignment), OK);
+      return new ResponseEntity<>(reasonAssignmentDtoBuilder.build(foundAssignment), OK);
     }
 
     ValidReasonAssignmentDto assignmentDto =
-        ValidReasonAssignmentDto.newInstance(reasonAssignmentRepository.save(assignment));
+        reasonAssignmentDtoBuilder.build(reasonAssignmentRepository.save(assignment));
     return new ResponseEntity<>(assignmentDto, CREATED);
   }
 }

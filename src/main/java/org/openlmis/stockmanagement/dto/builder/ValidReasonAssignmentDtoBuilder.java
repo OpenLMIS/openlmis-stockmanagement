@@ -55,7 +55,7 @@ public class ValidReasonAssignmentDtoBuilder {
    *
    * @param reasonAssignment instance used to create {@link ValidReasonAssignmentDto}
    * @return new instance of {@link ValidReasonAssignmentDto}.
-   *         {@code null}if passed argument is {@code null}.
+   *         {@code null} if passed argument is {@code null}.
    */
   public ValidReasonAssignmentDto build(ValidReasonAssignment reasonAssignment) {
     if (null == reasonAssignment) {
