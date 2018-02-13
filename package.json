@@ -2,9 +2,7 @@
   "name": "openlmis-stockmanagement",
   "version": "0.0.1",
   "devDependencies": {
-    "api-spec-converter": "~1.9.0",
-    "raml2html": "~2.4.0",
-    "raml-to-swagger": "1.0.1"
+    "raml2html": "~2.4.0"
   },
   "scripts": {
     "runApiSpecConverter": "api-spec-converter --from raml --to swagger_2 ./build/resources/main/api-definition-raml.yaml > ./build/resources/main/static/stockmanagement/docs/api-definition.json",

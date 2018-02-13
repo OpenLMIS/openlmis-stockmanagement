@@ -222,12 +222,12 @@ test {
 
 apply from: "documentation.gradle"
 integrationTest {
-    dependsOn ramlToSwagger
+    dependsOn ramlToHtml
 }
 
 processResources {
     // we want the generated swagger spec file included in the output jar
-    finalizedBy ramlToSwagger
+    finalizedBy ramlToHtml
     // update version information in build
     filesMatching('**/version.properties') {
         expand(project.properties)
