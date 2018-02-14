@@ -24,6 +24,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -44,10 +45,17 @@ public final class StockCardSummaryV2Dto {
    * @return sum of all stock on hand values
    */
   public Integer getStockOnHand() {
-    return isEmpty(canFulfillForMe) ? null : canFulfillForMe
-        .stream()
+    List<CanFulfillForMeEntryDto> canFulfillList = isEmpty(canFulfillForMe) ? null
+        : canFulfillForMe.stream()
         .filter(a -> a.getStockOnHand() != null)
-        .mapToInt(CanFulfillForMeEntryDto::getStockOnHand)
-        .sum();
+        .collect(Collectors.toList());
+
+    if (isEmpty(canFulfillList)) {
+      return null;
+    } else {
+      return canFulfillList.stream()
+          .mapToInt(CanFulfillForMeEntryDto::getStockOnHand)
+          .sum();
+    }
   }
 }

@@ -61,4 +61,17 @@ public class StockCardSummaryV2DtoTest {
     stockCard = new StockCardSummaryV2DtoDataBuilder().build();
     assertEquals(null, stockCard.getStockOnHand());
   }
+
+  @Test
+  public void shouldGetNullStockOnHandIfCanFulfillDoesNotHaveStockOnHand() {
+    StockCardSummaryV2Dto stockCard = new StockCardSummaryV2DtoDataBuilder()
+        .withCanFulfillForMe(new CanFulfillForMeEntryDtoDataBuilder()
+            .withStockOnHand(null)
+            .build())
+        .withCanFulfillForMe(new CanFulfillForMeEntryDtoDataBuilder()
+            .withStockOnHand(null)
+            .build())
+        .build();
+    assertEquals(null, stockCard.getStockOnHand());
+  }
 }
