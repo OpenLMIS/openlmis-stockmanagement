@@ -90,7 +90,8 @@ public class StockCardSummariesV2DtoBuilder {
           createOrderableReference(orderableId),
           stockCard.getLotId() == null ? null : createLotReference(stockCard.getLotId()),
           lineItem == null ? null : lineItem.getStockOnHand(),
-          lineItem == null ? null : lineItem.getProcessedDate()
+          lineItem == null ? null : lineItem.getProcessedDate(),
+          lineItem == null ? null : lineItem.getOccurredDate()
       );
     }
   }

@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.testutils;
 
 import org.openlmis.stockmanagement.dto.CanFulfillForMeEntryDto;
 import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
 public class CanFulfillForMeEntryDtoDataBuilder {
@@ -26,6 +27,7 @@ public class CanFulfillForMeEntryDtoDataBuilder {
   private ObjectReferenceDto lot;
   private Integer stockOnHand;
   private ZonedDateTime processedDate;
+  private LocalDate occurredDate;
 
   /**
    * Creates builder for creating new instance of {@link CanFulfillForMeEntryDto}.
@@ -36,6 +38,7 @@ public class CanFulfillForMeEntryDtoDataBuilder {
     lot = new ObjectReferenceDtoDataBuilder().withPath("api/lots").build();
     stockOnHand = 10;
     processedDate = ZonedDateTime.now();
+    occurredDate = LocalDate.now();
   }
 
   /**
@@ -43,7 +46,8 @@ public class CanFulfillForMeEntryDtoDataBuilder {
    * @return created can fulfill for me entry
    */
   public CanFulfillForMeEntryDto build() {
-    return new CanFulfillForMeEntryDto(stockCard, orderable, lot, stockOnHand, processedDate);
+    return new CanFulfillForMeEntryDto(stockCard, orderable, lot, stockOnHand,
+        processedDate, occurredDate);
   }
 
   public CanFulfillForMeEntryDtoDataBuilder withStockOnHand(Integer stockOnHand) {

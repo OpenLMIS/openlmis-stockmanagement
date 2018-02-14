@@ -34,6 +34,12 @@ public abstract class MessageKeys {
       ERROR_PREFIX + ".program.id.missing";
   public static final String ERROR_FACILITY_ID_MISSING =
       ERROR_PREFIX + ".facility.id.missing";
+  public static final String ERROR_UUID_WRONG_FORMAT =
+      ERROR_PREFIX + ".uuid.wrongFormat";
+  public static final String ERROR_DATE_WRONG_FORMAT =
+      ERROR_PREFIX + ".date.wrongFormat";
+  public static final String ERROR_PAGINATION_WRONG_PARAMETERS =
+      ERROR_PREFIX + ".pagination.wrongParameters";
   public static final String ERROR_FACILITY_TYPE_ID_MISSING =
       ERROR_PREFIX + ".facilityType.id.missing";
 

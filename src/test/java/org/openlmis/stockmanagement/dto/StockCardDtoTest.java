@@ -57,7 +57,7 @@ public class StockCardDtoTest {
     StockCardDto dto = StockCardDto.createFrom(stockCard);
 
     assertEquals(getBaseDate().plusDays(1),
-        dto.getLineItemAsOfDate(getBaseDate().plusDays(2)).getOccurredDate());
+        dto.getLineItemAsOfDate(getBaseDate().plusDays(1)).getOccurredDate());
 
     assertEquals(null, dto.getLineItemAsOfDate(getBaseDate().minusDays(2)));
   }

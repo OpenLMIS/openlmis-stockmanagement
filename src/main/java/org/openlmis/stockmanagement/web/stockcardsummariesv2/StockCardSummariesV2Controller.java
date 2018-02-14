@@ -53,12 +53,11 @@ public class StockCardSummariesV2Controller {
   public Page<StockCardSummaryV2Dto> getStockCardSummaries(
       @RequestParam MultiValueMap<String, String> parameters) {
 
-    StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParams(parameters);
-
     Profiler profiler = new Profiler("GET_STOCK_CARDS_V2");
     profiler.setLogger(LOGGER);
 
     profiler.start("VALIDATE_PARAMS");
+    StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParams(parameters);
     params.validate();
 
     profiler.start("GET_STOCK_CARD_SUMMARIES");

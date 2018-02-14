@@ -108,7 +108,7 @@ public final class StockCardDto implements IdentifiableByOrderableLot {
 
     return lineItems.stream()
         .map(StockCardLineItemDto::getLineItem)
-        .filter(a -> a.getOccurredDate().isBefore(date))
+        .filter(a -> !a.getOccurredDate().isAfter(date))
         .sorted(Comparator.comparing(StockCardLineItem::getOccurredDate).reversed())
         .findFirst()
         .orElse(null);

@@ -42,6 +42,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
+@SuppressWarnings("PMD.TooManyMethods")
 public class StockCardSummariesV2SearchParamsTest {
 
   @Rule
@@ -108,12 +109,12 @@ public class StockCardSummariesV2SearchParamsTest {
 
     StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParams(parameters);
 
-    assertEquals(params.getProgramId(), programId);
-    assertEquals(params.getFacilityId(), facilityId);
-    assertEquals(params.getAsOfDate(), asOfDate);
-    assertEquals(params.getPageable().getPageNumber(), 0);
-    assertEquals(params.getPageable().getPageSize(), 10);
-    assertEquals(params.getOrderableIds(), asList(orderableId1, orderableId2));
+    assertEquals(programId, params.getProgramId());
+    assertEquals(facilityId, params.getFacilityId());
+    assertEquals(asOfDate, params.getAsOfDate());
+    assertEquals(0, params.getPageable().getPageNumber());
+    assertEquals(10, params.getPageable().getPageSize());
+    assertEquals(asList(orderableId1, orderableId2), params.getOrderableIds());
   }
 
   @Test
@@ -128,5 +129,53 @@ public class StockCardSummariesV2SearchParamsTest {
     assertEquals(params.getPageable().getPageNumber(), 0);
     assertEquals(params.getPageable().getPageSize(), Integer.MAX_VALUE);
     assertTrue(isEmpty(params.getOrderableIds()));
+  }
+
+  @Test(expected = ValidationMessageException.class)
+  public void shouldThrowExceptionWhenProgramIdHasWrongFormat() {
+    MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+    parameters.add(PROGRAM_ID, "qwer");
+
+    new StockCardSummariesV2SearchParams(parameters);
+  }
+
+  @Test(expected = ValidationMessageException.class)
+  public void shouldThrowExceptionWhenFacilityIdHasWrongFormat() {
+    MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+    parameters.add(FACILITY_ID, "abcd");
+
+    new StockCardSummariesV2SearchParams(parameters);
+  }
+
+  @Test(expected = ValidationMessageException.class)
+  public void shouldThrowExceptionWhenOrderableIdHasWrongFormat() {
+    MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+    parameters.add(ORDERABLE_ID, "asdf");
+
+    new StockCardSummariesV2SearchParams(parameters);
+  }
+
+  @Test(expected = ValidationMessageException.class)
+  public void shouldThrowExceptionWhenAsOfDateHasWrongFormat() {
+    MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+    parameters.add(AS_OF_DATE, "abcd");
+
+    new StockCardSummariesV2SearchParams(parameters);
+  }
+
+  @Test(expected = ValidationMessageException.class)
+  public void shouldThrowExceptionWhenPageIsBelowZero() {
+    MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+    parameters.add(PAGE, "-1");
+
+    new StockCardSummariesV2SearchParams(parameters);
+  }
+
+  @Test(expected = ValidationMessageException.class)
+  public void shouldThrowExceptionWhenSizeIsBelowOne() {
+    MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+    parameters.add(SIZE, "0");
+
+    new StockCardSummariesV2SearchParams(parameters);
   }
 }

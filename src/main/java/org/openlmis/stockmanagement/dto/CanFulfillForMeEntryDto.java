@@ -24,6 +24,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
 @AllArgsConstructor
@@ -53,7 +54,12 @@ public final class CanFulfillForMeEntryDto {
   @JsonFormat(shape = STRING)
   private ZonedDateTime processedDate;
 
+  @Getter
+  @Setter
+  @JsonFormat(shape = STRING)
+  private LocalDate occurredDate;
+
   public CanFulfillForMeEntryDto(ObjectReferenceDto orderable) {
-    this(null, orderable, null, null, null);
+    this(null, orderable, null, null, null, null);
   }
 }

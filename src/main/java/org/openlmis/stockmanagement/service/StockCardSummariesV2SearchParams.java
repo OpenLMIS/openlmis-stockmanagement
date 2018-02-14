@@ -15,9 +15,13 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static org.apache.commons.collections4.MapUtils.isEmpty;
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DATE_WRONG_FORMAT;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_ID_MISSING;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PAGINATION_WRONG_PARAMETERS;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_ID_MISSING;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_UUID_WRONG_FORMAT;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -25,16 +29,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.apache.commons.collections.MapUtils;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.util.Message;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.MultiValueMap;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -64,37 +70,23 @@ public final class StockCardSummariesV2SearchParams {
     String page = null;
     String size = null;
 
-    if (!isEmpty(parameters)) {
-      String programId = parameters.getFirst(PROGRAM_ID);
-      if (null != programId) {
-        this.programId = UUID.fromString(programId);
-      }
-
-      String facilityId  = parameters.getFirst(FACILITY_ID);
-      if (null != facilityId) {
-        this.facilityId = UUID.fromString(facilityId);
-      }
-
-      String asOfDate  = parameters.getFirst(AS_OF_DATE);
-      if (null != asOfDate) {
-        this.asOfDate = LocalDate.parse(asOfDate, DateTimeFormatter.ISO_DATE);
-      }
-
-      List<String> orderableIds = parameters.get(ORDERABLE_ID);
-      if (null != orderableIds) {
-        this.orderableIds = parameters.get(ORDERABLE_ID).stream()
-            .map(UUID::fromString)
-            .collect(Collectors.toList());
-      } else {
-        this.orderableIds = new ArrayList<>();
-      }
+    if (!MapUtils.isEmpty(parameters)) {
+      this.programId = getId(PROGRAM_ID, parameters);
+      this.facilityId = getId(FACILITY_ID, parameters);
+      this.asOfDate = getDate(AS_OF_DATE, parameters);
+      this.orderableIds = getIds(ORDERABLE_ID, parameters);
 
       page = parameters.getFirst(PAGE);
       size = parameters.getFirst(SIZE);
     }
 
-    pageable = new PageRequest(page != null ? new Integer(page) : 0,
-        size != null ? new Integer(size) : Integer.MAX_VALUE);
+    try {
+      pageable = new PageRequest(page != null ? new Integer(page) : 0,
+          size != null ? new Integer(size) : Integer.MAX_VALUE);
+    } catch (IllegalArgumentException ex) {
+      throw new ValidationMessageException(ex,
+          new Message(ERROR_PAGINATION_WRONG_PARAMETERS, page, size));
+    }
   }
 
   /**
@@ -108,5 +100,45 @@ public final class StockCardSummariesV2SearchParams {
     if (null == programId) {
       throw new ValidationMessageException(ERROR_PROGRAM_ID_MISSING);
     }
+  }
+
+  private List<UUID> getIds(String fieldName, MultiValueMap<String, String> parameters) {
+    List<String> ids = parameters.get(fieldName);
+    if (!isEmpty(ids)) {
+      return ids.stream()
+          .map(id -> formatId(id, fieldName))
+          .collect(toList());
+    }
+    return new ArrayList<>();
+  }
+
+  private UUID getId(String fieldName, MultiValueMap<String, String> parameters) {
+    String id = parameters.getFirst(fieldName);
+    return formatId(id, fieldName);
+  }
+
+  private UUID formatId(String id, String fieldName) {
+    if (null != id) {
+      try {
+        return UUID.fromString(id);
+      } catch (IllegalArgumentException ex) {
+        throw new ValidationMessageException(ex,
+            new Message(ERROR_UUID_WRONG_FORMAT, id, fieldName));
+      }
+    }
+    return null;
+  }
+
+  private LocalDate getDate(String fieldName, MultiValueMap<String, String> parameters) {
+    String date = parameters.getFirst(fieldName);
+    if (null != date) {
+      try {
+        return LocalDate.parse(date, DateTimeFormatter.ISO_DATE);
+      } catch (DateTimeParseException ex) {
+        throw new ValidationMessageException(ex,
+            new Message(ERROR_DATE_WRONG_FORMAT, date, fieldName));
+      }
+    }
+    return null;
   }
 }
