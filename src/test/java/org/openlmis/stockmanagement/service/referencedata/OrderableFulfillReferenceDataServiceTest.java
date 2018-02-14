@@ -17,11 +17,19 @@ package org.openlmis.stockmanagement.service.referencedata;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
+import static org.powermock.api.mockito.PowerMockito.doReturn;
+import static org.powermock.api.mockito.PowerMockito.when;
 
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
 import org.openlmis.stockmanagement.testutils.OrderableFulfillDtoDataBuilder;
 import org.openlmis.stockmanagement.util.RequestParameters;
@@ -30,14 +38,25 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+@RunWith(MockitoJUnitRunner.class)
 public class OrderableFulfillReferenceDataServiceTest {
 
-  private OrderableFulfillReferenceDataService spy;
+  @Mock
+  private ObjectMapper objectMapper;
+
+  @InjectMocks
+  @Spy
+  private OrderableFulfillReferenceDataService service;
+
   private UUID id = UUID.randomUUID();
 
   @Before
   public void setUp() {
-    spy = spy(new OrderableFulfillReferenceDataService());
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.findAndRegisterModules();
+    TypeFactory factory = mapper.getTypeFactory();
+
+    when(objectMapper.getTypeFactory()).thenReturn(factory);
   }
 
   @Test
@@ -46,10 +65,11 @@ public class OrderableFulfillReferenceDataServiceTest {
     map.put(UUID.randomUUID(), new OrderableFulfillDtoDataBuilder().build());
 
     doReturn(map)
-        .when(spy)
-        .findOne(any(RequestParameters.class));
+        .when(service).findOne(any(RequestParameters.class));
+    when(objectMapper.convertValue(any(Object.class), any(JavaType.class)))
+        .thenReturn(map);
 
-    Map<UUID, OrderableFulfillDto> result = spy.findByIds(Collections.singletonList(id));
+    Map<UUID, OrderableFulfillDto> result = service.findByIds(Collections.singletonList(id));
 
     assertEquals(result, map);
   }

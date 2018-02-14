@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.type.MapType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
 import org.openlmis.stockmanagement.util.RequestParameters;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,6 +29,9 @@ import java.util.UUID;
 
 @Service
 public class OrderableFulfillReferenceDataService extends BaseReferenceDataService<Map> {
+
+  @Autowired
+  private ObjectMapper objectMapper;
 
   @Override
   protected String getUrl() {
@@ -55,12 +59,11 @@ public class OrderableFulfillReferenceDataService extends BaseReferenceDataServi
         .init()
         .set("id", ids);
 
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.findAndRegisterModules();
-    TypeFactory factory = mapper.getTypeFactory();
+    //we have to use mapper because finOne does not map response to proper object but LinkedHashMap
+    TypeFactory factory = objectMapper.getTypeFactory();
     MapType mapType =
         factory.constructMapType(HashMap.class, UUID.class, OrderableFulfillDto.class);
 
-    return mapper.convertValue(findOne(parameters), mapType);
+    return objectMapper.convertValue(findOne(parameters), mapType);
   }
 }
