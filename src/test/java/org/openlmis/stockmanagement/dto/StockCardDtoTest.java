@@ -24,6 +24,7 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.testutils.ObjectGenerator;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemDataBuilder;
 import org.openlmis.stockmanagement.testutils.ToStringTestUtils;
 
@@ -47,7 +48,7 @@ public class StockCardDtoTest {
 
   @Test
   public void shouldGetLineItemAsOfDate() throws Exception {
-    StockCard stockCard = new StockCard();
+    StockCard stockCard = ObjectGenerator.of(StockCard.class);
     stockCard.setLineItems(asList(
         new StockCardLineItemDataBuilder().build(),
         new StockCardLineItemDataBuilder().withOccurredDatePreviousDay().build(),
