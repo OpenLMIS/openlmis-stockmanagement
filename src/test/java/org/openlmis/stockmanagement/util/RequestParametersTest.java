@@ -21,11 +21,20 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.Maps;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.Test;
 import java.util.Collections;
 import java.util.Map;
 
 public class RequestParametersTest {
+
+  @Test
+  public void equalsContract() {
+    EqualsVerifier.forClass(RequestParameters.class)
+        .suppress(Warning.NONFINAL_FIELDS) // fields cannot be final
+        .verify();
+  }
 
   @Test
   public void shouldSetParameter() throws Exception {
