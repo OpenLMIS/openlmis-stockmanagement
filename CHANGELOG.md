@@ -6,6 +6,9 @@ Contract breaking changes:
   * adjustments in each stock event line item contains only reasonId and quantity fields
 * [OLMIS-3921](https://openlmis.atlassian.net/browse/OLMIS-3921): Removed validations from the Stock Management Physical Inventory API to allow reasons that do not account for the entire quantity. There may be a positive or negative unaccounted for quantity
 
+New functionality:
+* [OLMIS-4052](https://openlmis.atlassian.net/browse/OLMIS-4052): Added version 2 of stock card summaries endpoint that combines both regular and "no cards" endpoints.
+
 Improvements:
 * [OLMIS-3614](https://openlmis.atlassian.net/browse/OLMIS-3614): Added extraData field to Stock Card Summary.
 * [OLMIS-3996](https://openlmis.atlassian.net/browse/OLMIS-3996): Added reasonType parameter to GET /validReasons endpoint.
