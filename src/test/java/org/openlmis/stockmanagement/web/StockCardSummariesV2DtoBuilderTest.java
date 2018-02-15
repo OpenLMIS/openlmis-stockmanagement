@@ -20,6 +20,7 @@ import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertEquals;
 import static org.openlmis.stockmanagement.dto.StockCardDto.createFrom;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -48,36 +49,53 @@ public class StockCardSummariesV2DtoBuilderTest {
   @InjectMocks
   private StockCardSummariesV2DtoBuilder builder;
 
-  @Test
-  public void shouldBuildStockCardSummaries() throws Exception {
-    UUID programId = randomUUID();
-    UUID facilityId = randomUUID();
-    OrderableDto orderable1 = new OrderableDtoDataBuilder().build();
-    OrderableDto orderable2 = new OrderableDtoDataBuilder().build();
-    OrderableDto orderable3 = new OrderableDtoDataBuilder().build();
+  UUID programId = randomUUID();
+  UUID facilityId = randomUUID();
+  OrderableDto orderable1;
+  OrderableDto orderable2;
+  OrderableDto orderable3;
+  StockCardDto stockCard;
+  StockCardDto stockCard1;
+  StockCardDto stockCard2;
+  Map<UUID, OrderableFulfillDto> fulfillMap;
+
+  @Before
+  public void before() {
+    orderable1 = new OrderableDtoDataBuilder().build();
+    orderable2 = new OrderableDtoDataBuilder().build();
+    orderable3 = new OrderableDtoDataBuilder().build();
 
     StockEvent event = new StockEventDataBuilder()
         .withFacility(facilityId)
         .withProgram(programId)
         .build();
-    StockCardDto stockCard = createFrom(new StockCardDataBuilder(event)
+    stockCard = createFrom(new StockCardDataBuilder(event)
         .buildWithStockOnHandAndLineItemAndOrderableId(12,
             new StockCardLineItemDataBuilder().buildWithStockOnHand(16),
             orderable1.getId()));
     stockCard.setOrderable(orderable1);
-    StockCardDto stockCard1 = createFrom(new StockCardDataBuilder(event)
+    stockCard1 = createFrom(new StockCardDataBuilder(event)
         .buildWithStockOnHandAndLineItemAndOrderableId(26,
             new StockCardLineItemDataBuilder().buildWithStockOnHand(30),
             orderable3.getId()));
     stockCard1.setOrderable(orderable3);
+    stockCard2 = createFrom(new StockCardDataBuilder(event)
+        .withLot(UUID.randomUUID())
+        .buildWithStockOnHandAndLineItemAndOrderableId(22,
+            new StockCardLineItemDataBuilder().buildWithStockOnHand(10),
+            orderable3.getId()));
+    stockCard2.setOrderable(orderable3);
 
-    List<StockCardDto> stockCards = asList(stockCard, stockCard1);
-
-    Map<UUID, OrderableFulfillDto> fulfillMap = new HashMap<>();
+    fulfillMap = new HashMap<>();
     fulfillMap.put(orderable1.getId(), new OrderableFulfillDtoDataBuilder()
         .withCanFulfillForMe(asList(orderable2.getId(), orderable3.getId())).build());
     fulfillMap.put(orderable2.getId(), new OrderableFulfillDtoDataBuilder()
         .withCanFulfillForMe(asList(orderable1.getId(), orderable3.getId())).build());
+  }
+
+  @Test
+  public void shouldBuildStockCardSummaries() throws Exception {
+    List<StockCardDto> stockCards = asList(stockCard, stockCard1);
 
     LocalDate asOfDate = LocalDate.now();
 
@@ -105,6 +123,29 @@ public class StockCardSummariesV2DtoBuilderTest {
             assertEquals(new Integer(30), entry.getStockOnHand());
           }
         }
+      } else {
+        assertEquals(null, summary.getStockOnHand());
+        assertEquals(null, summary.getCanFulfillForMe());
+      }
+    }
+  }
+
+  @Test
+  public void shouldBuildStockCardSummariesWithMultipleStockCardsForOrderable() throws Exception {
+    List<StockCardDto> stockCards = asList(stockCard, stockCard1, stockCard2);
+
+    LocalDate asOfDate = LocalDate.now();
+
+    List<StockCardSummaryV2Dto> result = builder.build(asList(orderable1, orderable2, orderable3),
+        stockCards,fulfillMap, asOfDate);
+
+    assertEquals(3, result.size());
+
+    for (StockCardSummaryV2Dto summary : result) {
+      if (summary.getOrderable().getId().equals(orderable1.getId())) {
+        assertEquals(new Integer(40), summary.getStockOnHand());
+      } else if (summary.getOrderable().getId().equals(orderable2.getId())) {
+        assertEquals(new Integer(56), summary.getStockOnHand());
       } else {
         assertEquals(null, summary.getStockOnHand());
         assertEquals(null, summary.getCanFulfillForMe());

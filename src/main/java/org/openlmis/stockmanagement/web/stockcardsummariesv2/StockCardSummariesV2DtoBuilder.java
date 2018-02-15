@@ -15,8 +15,10 @@
 
 package org.openlmis.stockmanagement.web.stockcardsummariesv2;
 
-import static org.apache.commons.collections.MapUtils.isEmpty;
+import static java.util.stream.Collectors.toList;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.dto.CanFulfillForMeEntryDto;
@@ -28,10 +30,10 @@ import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Component
 public class StockCardSummariesV2DtoBuilder {
@@ -56,9 +58,9 @@ public class StockCardSummariesV2DtoBuilder {
                                            LocalDate asOfDate) {
     return approvedProducts.stream()
         .map(p -> build(stockCards, p.getId(),
-            isEmpty(orderables) ? null : orderables.get(p.getId()),
+            MapUtils.isEmpty(orderables) ? null : orderables.get(p.getId()),
             asOfDate))
-        .collect(Collectors.toList());
+        .collect(toList());
   }
 
   private StockCardSummaryV2Dto build(List<StockCardDto> stockCards, UUID orderableId,
@@ -67,41 +69,46 @@ public class StockCardSummariesV2DtoBuilder {
         createOrderableReference(orderableId),
         null == fulfills ? null : fulfills.getCanFulfillForMe()
             .stream()
-            .map(id -> buildFulfillsEntry(id,
+            .map(id -> buildFulfillsEntries(id,
                 findStockCardByOrderableId(id, stockCards),
                 asOfDate))
-            .collect(Collectors.toList()));
+            .flatMap(List::stream)
+            .collect(toList()));
   }
 
-  private CanFulfillForMeEntryDto buildFulfillsEntry(UUID orderableId, StockCardDto stockCard,
+  private List<CanFulfillForMeEntryDto> buildFulfillsEntries(UUID orderableId,
+                                                     List<StockCardDto> stockCards,
                                                      LocalDate asOfDate) {
-    if (stockCard == null) {
-      return new CanFulfillForMeEntryDto(createOrderableReference(orderableId));
+    if (CollectionUtils.isEmpty(stockCards)) {
+      return Collections.singletonList(
+          new CanFulfillForMeEntryDto(createOrderableReference(orderableId)));
     } else {
-      StockCardLineItem lineItem;
-      if (asOfDate == null) {
-        lineItem = stockCard.getLineItemAsOfDate(LocalDate.now());
-      } else {
-        lineItem = stockCard.getLineItemAsOfDate(asOfDate);
-      }
+      return stockCards.stream().map(stockCard -> {
+        StockCardLineItem lineItem;
+        if (asOfDate == null) {
+          lineItem = stockCard.getLineItemAsOfDate(LocalDate.now());
+        } else {
+          lineItem = stockCard.getLineItemAsOfDate(asOfDate);
+        }
 
-      return new CanFulfillForMeEntryDto(
-          createStockCardReference(stockCard.getId()),
-          createOrderableReference(orderableId),
-          stockCard.getLotId() == null ? null : createLotReference(stockCard.getLotId()),
-          lineItem == null ? null : lineItem.getStockOnHand(),
-          lineItem == null ? null : lineItem.getProcessedDate(),
-          lineItem == null ? null : lineItem.getOccurredDate()
-      );
+        return new CanFulfillForMeEntryDto(
+            createStockCardReference(stockCard.getId()),
+            createOrderableReference(orderableId),
+            stockCard.getLotId() == null ? null : createLotReference(stockCard.getLotId()),
+            lineItem == null ? null : lineItem.getStockOnHand(),
+            lineItem == null ? null : lineItem.getProcessedDate(),
+            lineItem == null ? null : lineItem.getOccurredDate()
+        );
+      }).collect(toList());
     }
   }
 
-  private StockCardDto findStockCardByOrderableId(UUID orderableId, List<StockCardDto> stockCards) {
+  private List<StockCardDto> findStockCardByOrderableId(UUID orderableId,
+                                                        List<StockCardDto> stockCards) {
     return stockCards
         .stream()
         .filter(card -> card.getOrderableId().equals(orderableId))
-        .findFirst()
-        .orElse(null);
+        .collect(toList());
   }
 
   private ObjectReferenceDto createOrderableReference(UUID id) {
