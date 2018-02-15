@@ -19,8 +19,12 @@ import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DATE_WRONG_FORMAT;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_ID_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_ID_MISSING;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_UUID_WRONG_FORMAT;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_VALUE_NOT_NUMERIC;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_WRONG_PAGINATION_PARAMETER;
 import static org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams.AS_OF_DATE;
 import static org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams.FACILITY_ID;
 import static org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams.ORDERABLE_ID;
@@ -53,10 +57,10 @@ public class StockCardSummariesV2SearchParamsTest {
     exception.expect(ValidationMessageException.class);
     exception.expectMessage(ERROR_FACILITY_ID_MISSING);
 
-    new StockCardSummariesV2SearchParamsDataBuilder()
-        .withoutFacilityId()
-        .build()
-        .validate();
+    MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+    parameters.add(PROGRAM_ID, UUID.randomUUID().toString());
+
+    new StockCardSummariesV2SearchParams(parameters);
   }
 
   @Test
@@ -64,15 +68,15 @@ public class StockCardSummariesV2SearchParamsTest {
     exception.expect(ValidationMessageException.class);
     exception.expectMessage(ERROR_PROGRAM_ID_MISSING);
 
-    new StockCardSummariesV2SearchParamsDataBuilder()
-        .withoutProgramId()
-        .build()
-        .validate();
+    MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+    parameters.add(FACILITY_ID, UUID.randomUUID().toString());
+
+    new StockCardSummariesV2SearchParams(parameters);
   }
 
   @Test
   public void shouldValidateParams() {
-    new StockCardSummariesV2SearchParamsDataBuilder().build().validate();
+    new StockCardSummariesV2SearchParamsDataBuilder().build();
   }
 
   @Test
@@ -131,50 +135,102 @@ public class StockCardSummariesV2SearchParamsTest {
     assertTrue(isEmpty(params.getOrderableIds()));
   }
 
-  @Test(expected = ValidationMessageException.class)
+  @Test
   public void shouldThrowExceptionWhenProgramIdHasWrongFormat() {
+    exception.expect(ValidationMessageException.class);
+    exception.expectMessage(ERROR_UUID_WRONG_FORMAT);
+
     MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
     parameters.add(PROGRAM_ID, "qwer");
 
     new StockCardSummariesV2SearchParams(parameters);
   }
 
-  @Test(expected = ValidationMessageException.class)
+  @Test
   public void shouldThrowExceptionWhenFacilityIdHasWrongFormat() {
+    exception.expect(ValidationMessageException.class);
+    exception.expectMessage(ERROR_UUID_WRONG_FORMAT);
+
     MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
     parameters.add(FACILITY_ID, "abcd");
 
     new StockCardSummariesV2SearchParams(parameters);
   }
 
-  @Test(expected = ValidationMessageException.class)
+  @Test
   public void shouldThrowExceptionWhenOrderableIdHasWrongFormat() {
+    exception.expect(ValidationMessageException.class);
+    exception.expectMessage(ERROR_UUID_WRONG_FORMAT);
+
     MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+    parameters.add(PROGRAM_ID, UUID.randomUUID().toString());
+    parameters.add(FACILITY_ID, UUID.randomUUID().toString());
     parameters.add(ORDERABLE_ID, "asdf");
 
     new StockCardSummariesV2SearchParams(parameters);
   }
 
-  @Test(expected = ValidationMessageException.class)
+  @Test
   public void shouldThrowExceptionWhenAsOfDateHasWrongFormat() {
+    exception.expect(ValidationMessageException.class);
+    exception.expectMessage(ERROR_DATE_WRONG_FORMAT);
+
     MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+    parameters.add(PROGRAM_ID, UUID.randomUUID().toString());
+    parameters.add(FACILITY_ID, UUID.randomUUID().toString());
     parameters.add(AS_OF_DATE, "abcd");
 
     new StockCardSummariesV2SearchParams(parameters);
   }
 
-  @Test(expected = ValidationMessageException.class)
+  @Test
   public void shouldThrowExceptionWhenPageIsBelowZero() {
+    exception.expect(ValidationMessageException.class);
+    exception.expectMessage(ERROR_VALUE_NOT_NUMERIC);
+
     MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+    parameters.add(PROGRAM_ID, UUID.randomUUID().toString());
+    parameters.add(FACILITY_ID, UUID.randomUUID().toString());
     parameters.add(PAGE, "-1");
 
     new StockCardSummariesV2SearchParams(parameters);
   }
 
-  @Test(expected = ValidationMessageException.class)
+  @Test
   public void shouldThrowExceptionWhenSizeIsBelowOne() {
+    exception.expect(ValidationMessageException.class);
+    exception.expectMessage(ERROR_WRONG_PAGINATION_PARAMETER);
+
     MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+    parameters.add(PROGRAM_ID, UUID.randomUUID().toString());
+    parameters.add(FACILITY_ID, UUID.randomUUID().toString());
     parameters.add(SIZE, "0");
+
+    new StockCardSummariesV2SearchParams(parameters);
+  }
+
+  @Test
+  public void shouldThrowExceptionWhenSizeIsNotNumeric() {
+    exception.expect(ValidationMessageException.class);
+    exception.expectMessage(ERROR_VALUE_NOT_NUMERIC);
+
+    MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+    parameters.add(PROGRAM_ID, UUID.randomUUID().toString());
+    parameters.add(FACILITY_ID, UUID.randomUUID().toString());
+    parameters.add(SIZE, "iop");
+
+    new StockCardSummariesV2SearchParams(parameters);
+  }
+
+  @Test
+  public void shouldThrowExceptionWhenPageIsNotNumeric() {
+    exception.expect(ValidationMessageException.class);
+    exception.expectMessage(ERROR_VALUE_NOT_NUMERIC);
+
+    MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+    parameters.add(PROGRAM_ID, UUID.randomUUID().toString());
+    parameters.add(FACILITY_ID, UUID.randomUUID().toString());
+    parameters.add(PAGE, "zxc");
 
     new StockCardSummariesV2SearchParams(parameters);
   }

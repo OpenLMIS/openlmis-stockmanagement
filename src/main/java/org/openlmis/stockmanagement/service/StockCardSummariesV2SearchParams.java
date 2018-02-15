@@ -17,11 +17,13 @@ package org.openlmis.stockmanagement.service;
 
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.isNumeric;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DATE_WRONG_FORMAT;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_ID_MISSING;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PAGINATION_WRONG_PARAMETERS;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_ID_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_UUID_WRONG_FORMAT;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_VALUE_NOT_NUMERIC;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_WRONG_PAGINATION_PARAMETER;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -67,39 +69,29 @@ public final class StockCardSummariesV2SearchParams {
    * Creates stock card summaries search params from multi value map.
    */
   public StockCardSummariesV2SearchParams(MultiValueMap<String, String> parameters) {
-    String page = null;
-    String size = null;
+    Integer page = null;
+    Integer size = null;
 
     if (!MapUtils.isEmpty(parameters)) {
       this.programId = getId(PROGRAM_ID, parameters);
       this.facilityId = getId(FACILITY_ID, parameters);
+
+      if (null == facilityId) {
+        throw new ValidationMessageException(ERROR_FACILITY_ID_MISSING);
+      }
+
+      if (null == programId) {
+        throw new ValidationMessageException(ERROR_PROGRAM_ID_MISSING);
+      }
+
       this.asOfDate = getDate(AS_OF_DATE, parameters);
       this.orderableIds = getIds(ORDERABLE_ID, parameters);
 
-      page = parameters.getFirst(PAGE);
-      size = parameters.getFirst(SIZE);
+      page = getInt(parameters.getFirst(PAGE), PAGE, 0);
+      size = getInt(parameters.getFirst(SIZE), SIZE, 1);
     }
 
-    try {
-      pageable = new PageRequest(page != null ? new Integer(page) : 0,
-          size != null ? new Integer(size) : Integer.MAX_VALUE);
-    } catch (IllegalArgumentException ex) {
-      throw new ValidationMessageException(ex,
-          new Message(ERROR_PAGINATION_WRONG_PARAMETERS, page, size));
-    }
-  }
-
-  /**
-   * Validates if this search params contains a valid parameters.
-   */
-  public void validate() {
-    if (null == facilityId) {
-      throw new ValidationMessageException(ERROR_FACILITY_ID_MISSING);
-    }
-
-    if (null == programId) {
-      throw new ValidationMessageException(ERROR_PROGRAM_ID_MISSING);
-    }
+    pageable = new PageRequest(page != null ? page : 0, size != null ? size : Integer.MAX_VALUE);
   }
 
   private List<UUID> getIds(String fieldName, MultiValueMap<String, String> parameters) {
@@ -138,6 +130,22 @@ public final class StockCardSummariesV2SearchParams {
         throw new ValidationMessageException(ex,
             new Message(ERROR_DATE_WRONG_FORMAT, date, fieldName));
       }
+    }
+    return null;
+  }
+
+  private Integer getInt(String value, String fieldName, int minValue) {
+    if (null != value) {
+      if (!isNumeric(value)) {
+        throw new ValidationMessageException(
+            new Message(ERROR_VALUE_NOT_NUMERIC, fieldName, value));
+      }
+      Integer result = new Integer(value);
+      if (result < minValue) {
+        throw new ValidationMessageException(
+            new Message(ERROR_WRONG_PAGINATION_PARAMETER, fieldName, minValue, result));
+      }
+      return result;
     }
     return null;
   }
