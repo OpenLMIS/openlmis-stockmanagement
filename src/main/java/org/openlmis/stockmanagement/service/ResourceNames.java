@@ -20,8 +20,8 @@ import org.apache.commons.lang3.StringUtils;
 public class ResourceNames {
   public static final String SEPARATOR = "/";
   public static final String BASE_PATH = "/api";
-  public static final String PROGRAMS = "/programs";
-  public static final String FACILITY_TYPES = "/facilityTypes";
+  public static final String PROGRAMS = "programs";
+  public static final String FACILITY_TYPES = "facilityTypes";
 
   private ResourceNames() {}
 

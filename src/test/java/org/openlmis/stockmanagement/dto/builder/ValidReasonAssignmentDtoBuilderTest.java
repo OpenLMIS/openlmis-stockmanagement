@@ -15,7 +15,13 @@
 
 package org.openlmis.stockmanagement.dto.builder;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import com.google.common.collect.Lists;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
@@ -27,16 +33,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 public class ValidReasonAssignmentDtoBuilderTest {
 
   private ValidReasonAssignmentDtoBuilder dtoBuilder = new ValidReasonAssignmentDtoBuilder();
 
-  private static final String SERVICE_URL = "localhost/";
+  private static final String SERVICE_URL = "localhost";
 
   @Before
   public void setUp() {
@@ -87,12 +88,15 @@ public class ValidReasonAssignmentDtoBuilderTest {
                                               ValidReasonAssignmentDto dto) {
     assertEquals(assignment.getId(), dto.getId());
     assertEquals(assignment.getHidden(), dto.getHidden());
-    assertEquals(SERVICE_URL + ResourceNames.SEPARATOR + ResourceNames.FACILITY_TYPES
-            + ResourceNames.SEPARATOR + assignment.getFacilityTypeId(),
-        dto.getFacilityType().getHref());
-    assertEquals(SERVICE_URL + ResourceNames.SEPARATOR + ResourceNames.PROGRAMS
-            + ResourceNames.SEPARATOR + assignment.getProgramId(),
-        dto.getProgram().getHref());
+
+    assertEquals(SERVICE_URL + ResourceNames.BASE_PATH + ResourceNames.SEPARATOR
+            + ResourceNames.FACILITY_TYPES + ResourceNames.SEPARATOR
+            + assignment.getFacilityTypeId(), dto.getFacilityType().getHref());
+
+    assertEquals(SERVICE_URL + ResourceNames.BASE_PATH + ResourceNames.SEPARATOR
+            + ResourceNames.PROGRAMS + ResourceNames.SEPARATOR
+            + assignment.getProgramId(), dto.getProgram().getHref());
+
     assertEquals(assignment.getProgramId(), dto.getProgramId());
     assertEquals(assignment.getFacilityTypeId(), dto.getFacilityTypeId());
   }

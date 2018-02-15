@@ -15,14 +15,17 @@
 
 package org.openlmis.stockmanagement.dto;
 
+import static org.openlmis.stockmanagement.service.ResourceNames.BASE_PATH;
 import static org.openlmis.stockmanagement.service.ResourceNames.SEPARATOR;
+
+import org.apache.commons.lang3.StringUtils;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.apache.commons.lang3.StringUtils;
+
 import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
@@ -42,6 +45,6 @@ public final class ObjectReferenceDto extends BaseDto {
    */
   public ObjectReferenceDto(String serviceUrl, String path, UUID id) {
     super(id);
-    this.href = StringUtils.joinWith(SEPARATOR, serviceUrl, path, id);
+    this.href = StringUtils.joinWith(SEPARATOR, serviceUrl + BASE_PATH, path, id);
   }
 }
