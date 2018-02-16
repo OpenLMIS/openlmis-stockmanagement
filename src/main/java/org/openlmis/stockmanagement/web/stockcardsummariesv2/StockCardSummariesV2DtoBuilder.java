@@ -23,7 +23,6 @@ import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.dto.CanFulfillForMeEntryDto;
 import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
-import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockCardSummaryV2Dto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
@@ -53,7 +52,7 @@ public class StockCardSummariesV2DtoBuilder {
    * @return list of {@link StockCardSummaryV2Dto}
    */
   public List<StockCardSummaryV2Dto> build(List<OrderableDto> approvedProducts,
-                                           List<StockCardDto> stockCards,
+                                           List<StockCard> stockCards,
                                            Map<UUID, OrderableFulfillDto> orderables,
                                            LocalDate asOfDate) {
     return approvedProducts.stream()
@@ -63,7 +62,7 @@ public class StockCardSummariesV2DtoBuilder {
         .collect(toList());
   }
 
-  private StockCardSummaryV2Dto build(List<StockCardDto> stockCards, UUID orderableId,
+  private StockCardSummaryV2Dto build(List<StockCard> stockCards, UUID orderableId,
                                       OrderableFulfillDto fulfills, LocalDate asOfDate) {
     return new StockCardSummaryV2Dto(
         createOrderableReference(orderableId),
@@ -77,7 +76,7 @@ public class StockCardSummariesV2DtoBuilder {
   }
 
   private List<CanFulfillForMeEntryDto> buildFulfillsEntries(UUID orderableId,
-                                                     List<StockCardDto> stockCards,
+                                                     List<StockCard> stockCards,
                                                      LocalDate asOfDate) {
     if (CollectionUtils.isEmpty(stockCards)) {
       return Collections.singletonList(
@@ -103,8 +102,8 @@ public class StockCardSummariesV2DtoBuilder {
     }
   }
 
-  private List<StockCardDto> findStockCardByOrderableId(UUID orderableId,
-                                                        List<StockCardDto> stockCards) {
+  private List<StockCard> findStockCardByOrderableId(UUID orderableId,
+                                                        List<StockCard> stockCards) {
     return stockCards
         .stream()
         .filter(card -> card.getOrderableId().equals(orderableId))

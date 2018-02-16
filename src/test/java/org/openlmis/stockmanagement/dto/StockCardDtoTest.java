@@ -15,16 +15,11 @@
 
 package org.openlmis.stockmanagement.dto;
 
-import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
 import static org.openlmis.stockmanagement.dto.StockCardLineItemDto.createFrom;
-import static org.openlmis.stockmanagement.testutils.DatesUtil.getBaseDate;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.junit.Test;
-import org.openlmis.stockmanagement.domain.card.StockCard;
-import org.openlmis.stockmanagement.testutils.ObjectGenerator;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemDataBuilder;
 import org.openlmis.stockmanagement.testutils.ToStringTestUtils;
 
@@ -44,21 +39,5 @@ public class StockCardDtoTest {
   public void shouldImplementToString() {
     StockCardDto stockCard = new StockCardDto();
     ToStringTestUtils.verify(StockCardDto.class, stockCard);
-  }
-
-  @Test
-  public void shouldGetLineItemAsOfDate() throws Exception {
-    StockCard stockCard = ObjectGenerator.of(StockCard.class);
-    stockCard.setLineItems(asList(
-        new StockCardLineItemDataBuilder().build(),
-        new StockCardLineItemDataBuilder().withOccurredDatePreviousDay().build(),
-        new StockCardLineItemDataBuilder().withOccurredDateNextDay().build()));
-
-    StockCardDto dto = StockCardDto.createFrom(stockCard);
-
-    assertEquals(getBaseDate().plusDays(1),
-        dto.getLineItemAsOfDate(getBaseDate().plusDays(1)).getOccurredDate());
-
-    assertEquals(null, dto.getLineItemAsOfDate(getBaseDate().minusDays(2)));
   }
 }

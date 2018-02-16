@@ -18,16 +18,15 @@ package org.openlmis.stockmanagement.web;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertEquals;
-import static org.openlmis.stockmanagement.dto.StockCardDto.createFrom;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.CanFulfillForMeEntryDto;
-import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockCardSummaryV2Dto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
@@ -54,9 +53,9 @@ public class StockCardSummariesV2DtoBuilderTest {
   OrderableDto orderable1;
   OrderableDto orderable2;
   OrderableDto orderable3;
-  StockCardDto stockCard;
-  StockCardDto stockCard1;
-  StockCardDto stockCard2;
+  StockCard stockCard;
+  StockCard stockCard1;
+  StockCard stockCard2;
   Map<UUID, OrderableFulfillDto> fulfillMap;
 
   @Before
@@ -69,22 +68,19 @@ public class StockCardSummariesV2DtoBuilderTest {
         .withFacility(facilityId)
         .withProgram(programId)
         .build();
-    stockCard = createFrom(new StockCardDataBuilder(event)
+    stockCard = new StockCardDataBuilder(event)
         .buildWithStockOnHandAndLineItemAndOrderableId(12,
             new StockCardLineItemDataBuilder().buildWithStockOnHand(16),
-            orderable1.getId()));
-    stockCard.setOrderable(orderable1);
-    stockCard1 = createFrom(new StockCardDataBuilder(event)
+            orderable1.getId());
+    stockCard1 = new StockCardDataBuilder(event)
         .buildWithStockOnHandAndLineItemAndOrderableId(26,
             new StockCardLineItemDataBuilder().buildWithStockOnHand(30),
-            orderable3.getId()));
-    stockCard1.setOrderable(orderable3);
-    stockCard2 = createFrom(new StockCardDataBuilder(event)
+            orderable3.getId());
+    stockCard2 = new StockCardDataBuilder(event)
         .withLot(UUID.randomUUID())
         .buildWithStockOnHandAndLineItemAndOrderableId(22,
             new StockCardLineItemDataBuilder().buildWithStockOnHand(10),
-            orderable3.getId()));
-    stockCard2.setOrderable(orderable3);
+            orderable3.getId());
 
     fulfillMap = new HashMap<>();
     fulfillMap.put(orderable1.getId(), new OrderableFulfillDtoDataBuilder()
@@ -95,7 +91,7 @@ public class StockCardSummariesV2DtoBuilderTest {
 
   @Test
   public void shouldBuildStockCardSummaries() throws Exception {
-    List<StockCardDto> stockCards = asList(stockCard, stockCard1);
+    List<StockCard> stockCards = asList(stockCard, stockCard1);
 
     LocalDate asOfDate = LocalDate.now();
 
@@ -132,7 +128,7 @@ public class StockCardSummariesV2DtoBuilderTest {
 
   @Test
   public void shouldBuildStockCardSummariesWithMultipleStockCardsForOrderable() throws Exception {
-    List<StockCardDto> stockCards = asList(stockCard, stockCard1, stockCard2);
+    List<StockCard> stockCards = asList(stockCard, stockCard1, stockCard2);
 
     LocalDate asOfDate = LocalDate.now();
 

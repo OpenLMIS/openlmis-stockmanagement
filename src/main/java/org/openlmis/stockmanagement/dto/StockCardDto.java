@@ -18,7 +18,6 @@ package org.openlmis.stockmanagement.dto;
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static java.util.stream.Collectors.toList;
-import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -31,14 +30,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.openlmis.stockmanagement.domain.card.StockCard;
-import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -96,21 +93,5 @@ public final class StockCardDto implements IdentifiableByOrderableLot {
             .map(StockCardLineItemDto::createFrom).collect(toList()))
         .stockOnHand(stockCard.getStockOnHand())
         .build();
-  }
-
-  /**
-   * Returns latest line item  before given date.
-   */
-  public StockCardLineItem getLineItemAsOfDate(LocalDate date) {
-    if (isEmpty(lineItems)) {
-      return null;
-    }
-
-    return lineItems.stream()
-        .map(StockCardLineItemDto::getLineItem)
-        .filter(a -> !a.getOccurredDate().isAfter(date))
-        .sorted(Comparator.comparing(StockCardLineItem::getOccurredDate).reversed())
-        .findFirst()
-        .orElse(null);
   }
 }
