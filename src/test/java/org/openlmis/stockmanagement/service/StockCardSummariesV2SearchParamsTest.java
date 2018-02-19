@@ -23,14 +23,10 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DATE_WRONG_FOR
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_ID_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_ID_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_UUID_WRONG_FORMAT;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_VALUE_NOT_NUMERIC;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_WRONG_PAGINATION_PARAMETER;
 import static org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams.AS_OF_DATE;
 import static org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams.FACILITY_ID;
 import static org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams.ORDERABLE_ID;
-import static org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams.PAGE;
 import static org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams.PROGRAM_ID;
-import static org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams.SIZE;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
@@ -106,8 +102,6 @@ public class StockCardSummariesV2SearchParamsTest {
     parameters.add(PROGRAM_ID, programId.toString());
     parameters.add(FACILITY_ID, facilityId.toString());
     parameters.add(AS_OF_DATE, asOfDate.format(DateTimeFormatter.ISO_DATE));
-    parameters.add(PAGE, "0");
-    parameters.add(SIZE, "10");
     parameters.add(ORDERABLE_ID, orderableId1.toString());
     parameters.add(ORDERABLE_ID, orderableId2.toString());
 
@@ -116,8 +110,6 @@ public class StockCardSummariesV2SearchParamsTest {
     assertEquals(programId, params.getProgramId());
     assertEquals(facilityId, params.getFacilityId());
     assertEquals(asOfDate, params.getAsOfDate());
-    assertEquals(0, params.getPageable().getPageNumber());
-    assertEquals(10, params.getPageable().getPageSize());
     assertEquals(asList(orderableId1, orderableId2), params.getOrderableIds());
   }
 
@@ -130,8 +122,6 @@ public class StockCardSummariesV2SearchParamsTest {
     assertEquals(params.getProgramId(), null);
     assertEquals(params.getFacilityId(), null);
     assertEquals(params.getAsOfDate(), null);
-    assertEquals(params.getPageable().getPageNumber(), 0);
-    assertEquals(params.getPageable().getPageSize(), Integer.MAX_VALUE);
     assertTrue(isEmpty(params.getOrderableIds()));
   }
 
@@ -179,58 +169,6 @@ public class StockCardSummariesV2SearchParamsTest {
     parameters.add(PROGRAM_ID, UUID.randomUUID().toString());
     parameters.add(FACILITY_ID, UUID.randomUUID().toString());
     parameters.add(AS_OF_DATE, "abcd");
-
-    new StockCardSummariesV2SearchParams(parameters);
-  }
-
-  @Test
-  public void shouldThrowExceptionWhenPageIsBelowZero() {
-    exception.expect(ValidationMessageException.class);
-    exception.expectMessage(ERROR_VALUE_NOT_NUMERIC);
-
-    MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
-    parameters.add(PROGRAM_ID, UUID.randomUUID().toString());
-    parameters.add(FACILITY_ID, UUID.randomUUID().toString());
-    parameters.add(PAGE, "-1");
-
-    new StockCardSummariesV2SearchParams(parameters);
-  }
-
-  @Test
-  public void shouldThrowExceptionWhenSizeIsBelowOne() {
-    exception.expect(ValidationMessageException.class);
-    exception.expectMessage(ERROR_WRONG_PAGINATION_PARAMETER);
-
-    MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
-    parameters.add(PROGRAM_ID, UUID.randomUUID().toString());
-    parameters.add(FACILITY_ID, UUID.randomUUID().toString());
-    parameters.add(SIZE, "0");
-
-    new StockCardSummariesV2SearchParams(parameters);
-  }
-
-  @Test
-  public void shouldThrowExceptionWhenSizeIsNotNumeric() {
-    exception.expect(ValidationMessageException.class);
-    exception.expectMessage(ERROR_VALUE_NOT_NUMERIC);
-
-    MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
-    parameters.add(PROGRAM_ID, UUID.randomUUID().toString());
-    parameters.add(FACILITY_ID, UUID.randomUUID().toString());
-    parameters.add(SIZE, "iop");
-
-    new StockCardSummariesV2SearchParams(parameters);
-  }
-
-  @Test
-  public void shouldThrowExceptionWhenPageIsNotNumeric() {
-    exception.expect(ValidationMessageException.class);
-    exception.expectMessage(ERROR_VALUE_NOT_NUMERIC);
-
-    MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
-    parameters.add(PROGRAM_ID, UUID.randomUUID().toString());
-    parameters.add(FACILITY_ID, UUID.randomUUID().toString());
-    parameters.add(PAGE, "zxc");
 
     new StockCardSummariesV2SearchParams(parameters);
   }

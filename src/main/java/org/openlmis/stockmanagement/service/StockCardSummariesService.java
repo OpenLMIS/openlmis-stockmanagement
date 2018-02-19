@@ -82,12 +82,13 @@ public class StockCardSummariesService extends StockCardBaseService {
    * @param params stock cards summaries search params.
    * @return page of stock cards.
    */
-  public StockCardSummaries findStockCards(StockCardSummariesV2SearchParams params) {
+  public StockCardSummaries findStockCards(StockCardSummariesV2SearchParams params,
+                                           Pageable pageable) {
     permissionService.canViewStockCard(params.getProgramId(), params.getFacilityId());
 
     Page<OrderableDto> approvedProducts = approvedProductReferenceDataService
         .getApprovedProducts(params.getFacilityId(), params.getProgramId(),
-            params.getOrderableIds(), params.getPageable());
+            params.getOrderableIds(), pageable);
 
     Map<UUID, OrderableFulfillDto> orderableFulfillMap = orderableFulfillService.findByIds(
         approvedProducts.getContent().stream().map(OrderableDto::getId).collect(toList()));

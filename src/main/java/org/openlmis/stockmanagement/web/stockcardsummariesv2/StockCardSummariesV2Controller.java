@@ -26,6 +26,7 @@ import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,7 +52,8 @@ public class StockCardSummariesV2Controller {
    */
   @GetMapping
   public Page<StockCardSummaryV2Dto> getStockCardSummaries(
-      @RequestParam MultiValueMap<String, String> parameters) {
+      @RequestParam MultiValueMap<String, String> parameters,
+      Pageable pageable) {
 
     Profiler profiler = new Profiler("GET_STOCK_CARDS_V2");
     profiler.setLogger(LOGGER);
@@ -60,14 +62,14 @@ public class StockCardSummariesV2Controller {
     StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParams(parameters);
 
     profiler.start("GET_STOCK_CARD_SUMMARIES");
-    StockCardSummaries summaries = stockCardSummariesService.findStockCards(params);
+    StockCardSummaries summaries = stockCardSummariesService.findStockCards(params, pageable);
 
     PageImpl<StockCardSummaryV2Dto> page =
         new PageImpl<>(
             stockCardSummariesV2DtoBuilder.build(summaries.getPageOfApprovedProducts(),
                 summaries.getStockCardsForFulfillOrderables(), summaries.getOrderableFulfillMap(),
                 summaries.getAsOfDate()),
-            params.getPageable(), summaries.getTotalElements());
+            pageable, summaries.getTotalElements());
 
     profiler.stop().log();
     return page;

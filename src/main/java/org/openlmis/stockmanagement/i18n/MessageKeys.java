@@ -38,10 +38,6 @@ public abstract class MessageKeys {
       ERROR_PREFIX + ".uuid.wrongFormat";
   public static final String ERROR_DATE_WRONG_FORMAT =
       ERROR_PREFIX + ".date.wrongFormat";
-  public static final String ERROR_VALUE_NOT_NUMERIC =
-      ERROR_PREFIX + ".value.notNumeric";
-  public static final String ERROR_WRONG_PAGINATION_PARAMETER =
-      ERROR_PREFIX + ".pagination.wrongParameter";
   public static final String ERROR_FACILITY_TYPE_ID_MISSING =
       ERROR_PREFIX + ".facilityType.id.missing";
 

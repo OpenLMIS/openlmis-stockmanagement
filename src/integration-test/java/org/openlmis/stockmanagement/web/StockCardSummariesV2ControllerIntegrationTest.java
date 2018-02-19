@@ -19,6 +19,7 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -38,6 +39,8 @@ import org.openlmis.stockmanagement.testutils.StockCardSummaryV2DtoDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.web.stockcardsummariesv2.StockCardSummariesV2DtoBuilder;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.ResultActions;
 
 public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
@@ -61,10 +64,12 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
   private StockCardSummariesV2SearchParams params =
       new StockCardSummariesV2SearchParamsDataBuilder().build();
   private StockCardSummaries summaries = ObjectGenerator.of(StockCardSummaries.class);
+  private Pageable pageable = new PageRequest(0, 10);
 
   @Before
   public void setUp() {
-    when(stockCardSummariesService.findStockCards(any(StockCardSummariesV2SearchParams.class)))
+    when(stockCardSummariesService
+        .findStockCards(any(StockCardSummariesV2SearchParams.class), any(Pageable.class)))
         .thenReturn(summaries);
 
     when(stockCardSummariesV2DtoBuilder
@@ -79,8 +84,8 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
     ResultActions resultActions = mvc.perform(
         get(API_STOCK_CARD_SUMMARIES)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param(PAGE, String.valueOf(params.getPageable().getPageNumber()))
-            .param(SIZE, String.valueOf(params.getPageable().getPageSize()))
+            .param(PAGE, String.valueOf(pageable.getPageNumber()))
+            .param(SIZE, String.valueOf(pageable.getPageSize()))
             .param(PROGRAM_ID, params.getProgramId().toString())
             .param(FACILITY_ID, params.getFacilityId().toString())
             .param(AS_OF_DATE, params.getAsOfDate().toString())
@@ -91,8 +96,8 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.content", hasSize(2)))
         .andExpect(jsonPath("$.numberOfElements", is(2)))
-        .andExpect(jsonPath("$.number", is(params.getPageable().getPageNumber())))
-        .andExpect(jsonPath("$.size", is(params.getPageable().getPageSize())))
+        .andExpect(jsonPath("$.number", is(pageable.getPageNumber())))
+        .andExpect(jsonPath("$.size", is(pageable.getPageSize())))
         .andExpect(jsonPath("$.totalElements",
             is(summaries.getTotalElements().intValue())))
         .andExpect(jsonPath("$.content[0].orderable.id",
@@ -106,8 +111,8 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
     ResultActions resultActions = mvc.perform(
         get(API_STOCK_CARD_SUMMARIES)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param(PAGE, String.valueOf(params.getPageable().getPageNumber()))
-            .param(SIZE, String.valueOf(params.getPageable().getPageSize()))
+            .param(PAGE, String.valueOf(pageable.getPageNumber()))
+            .param(SIZE, String.valueOf(pageable.getPageSize()))
             .param(PROGRAM_ID, params.getProgramId().toString())
             .param(AS_OF_DATE, params.getAsOfDate().toString())
             .param(ORDERABLE_ID, params.getOrderableIds().get(0).toString())
@@ -122,8 +127,8 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
     ResultActions resultActions = mvc.perform(
         get(API_STOCK_CARD_SUMMARIES)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param(PAGE, String.valueOf(params.getPageable().getPageNumber()))
-            .param(SIZE, String.valueOf(params.getPageable().getPageSize()))
+            .param(PAGE, String.valueOf(pageable.getPageNumber()))
+            .param(SIZE, String.valueOf(pageable.getPageSize()))
             .param(FACILITY_ID, params.getFacilityId().toString())
             .param(AS_OF_DATE, params.getAsOfDate().toString())
             .param(ORDERABLE_ID, params.getOrderableIds().get(0).toString())
@@ -137,13 +142,13 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
   public void shouldReturnForbiddenIfNoPermission() throws Exception {
     doThrow(new PermissionMessageException(new Message("no permission")))
         .when(stockCardSummariesService)
-        .findStockCards(any(StockCardSummariesV2SearchParams.class));
+        .findStockCards(any(StockCardSummariesV2SearchParams.class), eq(pageable));
 
     ResultActions resultActions = mvc.perform(
         get(API_STOCK_CARD_SUMMARIES)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param(PAGE, String.valueOf(params.getPageable().getPageNumber()))
-            .param(SIZE, String.valueOf(params.getPageable().getPageSize()))
+            .param(PAGE, String.valueOf(pageable.getPageNumber()))
+            .param(SIZE, String.valueOf(pageable.getPageSize()))
             .param(PROGRAM_ID, params.getProgramId().toString())
             .param(FACILITY_ID, params.getFacilityId().toString()));
 

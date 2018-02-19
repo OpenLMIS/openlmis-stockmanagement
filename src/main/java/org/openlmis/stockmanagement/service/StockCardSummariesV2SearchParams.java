@@ -17,13 +17,10 @@ package org.openlmis.stockmanagement.service;
 
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
-import static org.apache.commons.lang.StringUtils.isNumeric;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DATE_WRONG_FORMAT;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_ID_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_ID_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_UUID_WRONG_FORMAT;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_VALUE_NOT_NUMERIC;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_WRONG_PAGINATION_PARAMETER;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -34,8 +31,6 @@ import lombok.ToString;
 import org.apache.commons.collections.MapUtils;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.util.Message;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.util.MultiValueMap;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -56,22 +51,16 @@ public final class StockCardSummariesV2SearchParams {
   static final String FACILITY_ID = "facilityId";
   static final String AS_OF_DATE = "asOfDate";
   static final String ORDERABLE_ID = "orderableId";
-  static final String PAGE = "page";
-  static final String SIZE = "size";
 
   private UUID programId;
   private UUID facilityId;
   private List<UUID> orderableIds;
   private LocalDate asOfDate;
-  private Pageable pageable;
 
   /**
    * Creates stock card summaries search params from multi value map.
    */
   public StockCardSummariesV2SearchParams(MultiValueMap<String, String> parameters) {
-    Integer page = null;
-    Integer size = null;
-
     if (!MapUtils.isEmpty(parameters)) {
       this.programId = getId(PROGRAM_ID, parameters);
       this.facilityId = getId(FACILITY_ID, parameters);
@@ -86,12 +75,7 @@ public final class StockCardSummariesV2SearchParams {
 
       this.asOfDate = getDate(AS_OF_DATE, parameters);
       this.orderableIds = getIds(ORDERABLE_ID, parameters);
-
-      page = getInt(parameters.getFirst(PAGE), PAGE, 0);
-      size = getInt(parameters.getFirst(SIZE), SIZE, 1);
     }
-
-    pageable = new PageRequest(page != null ? page : 0, size != null ? size : Integer.MAX_VALUE);
   }
 
   private List<UUID> getIds(String fieldName, MultiValueMap<String, String> parameters) {
@@ -130,22 +114,6 @@ public final class StockCardSummariesV2SearchParams {
         throw new ValidationMessageException(ex,
             new Message(ERROR_DATE_WRONG_FORMAT, date, fieldName));
       }
-    }
-    return null;
-  }
-
-  private Integer getInt(String value, String fieldName, int minValue) {
-    if (null != value) {
-      if (!isNumeric(value)) {
-        throw new ValidationMessageException(
-            new Message(ERROR_VALUE_NOT_NUMERIC, fieldName, value));
-      }
-      Integer result = new Integer(value);
-      if (result < minValue) {
-        throw new ValidationMessageException(
-            new Message(ERROR_WRONG_PAGINATION_PARAMETER, fieldName, minValue, result));
-      }
-      return result;
     }
     return null;
   }
