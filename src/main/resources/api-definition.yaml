@@ -252,7 +252,7 @@ traits:
   /stockCardSummaries:
       get:
         is: [ secured , paginated ]
-        description: Get summaries of stock cards, which contains SOH, product name, and other essential information. This will NOT return any line items. (This could be used by front end for list view.)
+        description: Get summaries of stock cards, which contains SOH, product name, and other essential information. This will NOT return any line items. This could be used by front end for list view. This endpoint is deprecated.
         queryParameters:
           facility:
             required: true
