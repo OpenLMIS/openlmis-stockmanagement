@@ -13,11 +13,15 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.web;
+package org.openlmis.stockmanagement.web.stockcardsummariesv2;
 
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.openlmis.stockmanagement.web.stockcardsummariesv2.StockCardSummariesV2DtoBuilder.ORDERABLES;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,17 +30,19 @@ import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
-import org.openlmis.stockmanagement.dto.CanFulfillForMeEntryDto;
 import org.openlmis.stockmanagement.dto.StockCardSummaryV2Dto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
+import org.openlmis.stockmanagement.testutils.CanFulfillForMeEntryDtoDataBuilder;
+import org.openlmis.stockmanagement.testutils.ObjectReferenceDtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.OrderableDtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.OrderableFulfillDtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
-import org.openlmis.stockmanagement.web.stockcardsummariesv2.StockCardSummariesV2DtoBuilder;
+import org.springframework.test.util.ReflectionTestUtils;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +66,8 @@ public class StockCardSummariesV2DtoBuilderTest {
 
   @Before
   public void before() {
+    ReflectionTestUtils.setField(builder, "serviceUrl", "https://openlmis/");
+
     orderable1 = new OrderableDtoDataBuilder().build();
     orderable2 = new OrderableDtoDataBuilder().build();
     orderable3 = new OrderableDtoDataBuilder().build();
@@ -86,7 +94,7 @@ public class StockCardSummariesV2DtoBuilderTest {
     fulfillMap.put(orderable1.getId(), new OrderableFulfillDtoDataBuilder()
         .withCanFulfillForMe(asList(orderable2.getId(), orderable3.getId())).build());
     fulfillMap.put(orderable2.getId(), new OrderableFulfillDtoDataBuilder()
-        .withCanFulfillForMe(asList(orderable1.getId(), orderable3.getId())).build());
+        .withCanFulfillForMe(Collections.singletonList(orderable1.getId())).build());
   }
 
   @Test
@@ -96,34 +104,45 @@ public class StockCardSummariesV2DtoBuilderTest {
     LocalDate asOfDate = LocalDate.now();
 
     List<StockCardSummaryV2Dto> result = builder.build(asList(orderable1, orderable2, orderable3),
-        stockCards,fulfillMap, asOfDate);
+        stockCards, fulfillMap, asOfDate);
+
+    StockCardSummaryV2Dto summary1 = new StockCardSummaryV2Dto(
+        new ObjectReferenceDtoDataBuilder()
+            .withPath(ORDERABLES)
+            .withId(orderable1.getId())
+            .build(),
+        asSet(
+            new CanFulfillForMeEntryDtoDataBuilder()
+                .buildWithStockCardAndOrderable(null, orderable2, asOfDate),
+            new CanFulfillForMeEntryDtoDataBuilder()
+                .buildWithStockCardAndOrderable(stockCard1, orderable3, asOfDate),
+            new CanFulfillForMeEntryDtoDataBuilder()
+                .buildWithStockCardAndOrderable(stockCard, orderable1, asOfDate))
+    );
+
+    StockCardSummaryV2Dto summary2 = new StockCardSummaryV2Dto(
+        new ObjectReferenceDtoDataBuilder()
+            .withPath(ORDERABLES)
+            .withId(orderable2.getId())
+            .build(),
+        asSet(
+            new CanFulfillForMeEntryDtoDataBuilder()
+                .buildWithStockCardAndOrderable(null, orderable2, asOfDate),
+            new CanFulfillForMeEntryDtoDataBuilder()
+                .buildWithStockCardAndOrderable(stockCard, orderable1, asOfDate))
+    );
+
+    StockCardSummaryV2Dto summary3 = new StockCardSummaryV2Dto(
+        new ObjectReferenceDtoDataBuilder()
+            .withPath(ORDERABLES)
+            .withId(orderable3.getId())
+            .build(),
+        asSet(new CanFulfillForMeEntryDtoDataBuilder()
+            .buildWithStockCardAndOrderable(stockCard1, orderable3, asOfDate))
+    );
 
     assertEquals(3, result.size());
-
-    for (StockCardSummaryV2Dto summary : result) {
-      if (summary.getOrderable().getId().equals(orderable1.getId())) {
-        assertEquals(new Integer(30), summary.getStockOnHand());
-        for (CanFulfillForMeEntryDto entry : summary.getCanFulfillForMe()) {
-          if (entry.getOrderable().getId().equals(orderable2.getId())) {
-            assertEquals(null, entry.getStockCard());
-          } else {
-            assertEquals(new Integer(30), entry.getStockOnHand());
-          }
-        }
-      } else if (summary.getOrderable().getId().equals(orderable2.getId())) {
-        assertEquals(new Integer(46), summary.getStockOnHand());
-        for (CanFulfillForMeEntryDto entry : summary.getCanFulfillForMe()) {
-          if (entry.getOrderable().getId().equals(orderable1.getId())) {
-            assertEquals(new Integer(16), entry.getStockOnHand());
-          } else {
-            assertEquals(new Integer(30), entry.getStockOnHand());
-          }
-        }
-      } else {
-        assertEquals(null, summary.getStockOnHand());
-        assertEquals(null, summary.getCanFulfillForMe());
-      }
-    }
+    assertThat(result, hasItems(summary1, summary2, summary3));
   }
 
   @Test
@@ -135,17 +154,48 @@ public class StockCardSummariesV2DtoBuilderTest {
     List<StockCardSummaryV2Dto> result = builder.build(asList(orderable1, orderable2, orderable3),
         stockCards,fulfillMap, asOfDate);
 
-    assertEquals(3, result.size());
+    StockCardSummaryV2Dto summary1 = new StockCardSummaryV2Dto(
+        new ObjectReferenceDtoDataBuilder()
+            .withPath(ORDERABLES)
+            .withId(orderable1.getId())
+            .build(),
+        asSet(
+            new CanFulfillForMeEntryDtoDataBuilder()
+                .buildWithStockCardAndOrderable(null, orderable2, asOfDate),
+            new CanFulfillForMeEntryDtoDataBuilder()
+                .buildWithStockCardAndOrderable(stockCard1, orderable3, asOfDate),
+            new CanFulfillForMeEntryDtoDataBuilder()
+                .buildWithStockCardAndOrderable(stockCard2, orderable3, asOfDate),
+            new CanFulfillForMeEntryDtoDataBuilder()
+                .buildWithStockCardAndOrderable(stockCard, orderable1, asOfDate))
+    );
 
-    for (StockCardSummaryV2Dto summary : result) {
-      if (summary.getOrderable().getId().equals(orderable1.getId())) {
-        assertEquals(new Integer(40), summary.getStockOnHand());
-      } else if (summary.getOrderable().getId().equals(orderable2.getId())) {
-        assertEquals(new Integer(56), summary.getStockOnHand());
-      } else {
-        assertEquals(null, summary.getStockOnHand());
-        assertEquals(null, summary.getCanFulfillForMe());
-      }
-    }
+    StockCardSummaryV2Dto summary2 = new StockCardSummaryV2Dto(
+        new ObjectReferenceDtoDataBuilder()
+            .withPath(ORDERABLES)
+            .withId(orderable2.getId())
+            .build(),
+        asSet(
+            new CanFulfillForMeEntryDtoDataBuilder()
+                .buildWithStockCardAndOrderable(null, orderable2, asOfDate),
+            new CanFulfillForMeEntryDtoDataBuilder()
+                .buildWithStockCardAndOrderable(stockCard, orderable1, asOfDate))
+    );
+
+    StockCardSummaryV2Dto summary3 = new StockCardSummaryV2Dto(
+        new ObjectReferenceDtoDataBuilder()
+            .withPath(ORDERABLES)
+            .withId(orderable3.getId())
+            .build(),
+        asSet(
+            new CanFulfillForMeEntryDtoDataBuilder()
+                .buildWithStockCardAndOrderable(stockCard1, orderable3, asOfDate),
+            new CanFulfillForMeEntryDtoDataBuilder()
+                .buildWithStockCardAndOrderable(stockCard2, orderable3, asOfDate)
+        )
+    );
+
+    assertEquals(3, result.size());
+    assertThat(result, hasItems(summary1, summary2, summary3));
   }
 }

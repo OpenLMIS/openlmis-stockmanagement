@@ -23,7 +23,7 @@ import org.junit.Test;
 import org.openlmis.stockmanagement.testutils.CanFulfillForMeEntryDtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardSummaryV2DtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.ToStringTestUtils;
-import java.util.List;
+import java.util.Set;
 
 public class StockCardSummaryV2DtoTest {
 
@@ -54,7 +54,7 @@ public class StockCardSummaryV2DtoTest {
   @Test
   public void shouldGetNullStockOnHandIfCanFulfillForMeIsNullOrEmpty() {
     StockCardSummaryV2Dto stockCard = new StockCardSummaryV2DtoDataBuilder()
-        .withCanFulfillForMe((List<CanFulfillForMeEntryDto>) null)
+        .withCanFulfillForMe((Set<CanFulfillForMeEntryDto>) null)
         .build();
     assertEquals(null, stockCard.getStockOnHand());
 

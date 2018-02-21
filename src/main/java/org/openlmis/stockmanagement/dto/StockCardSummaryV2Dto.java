@@ -24,6 +24,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -38,7 +39,7 @@ public final class StockCardSummaryV2Dto {
 
   @Getter
   @Setter
-  private List<CanFulfillForMeEntryDto> canFulfillForMe;
+  private Set<CanFulfillForMeEntryDto> canFulfillForMe;
 
   /**
    * Sums stock on hand values from all {@link CanFulfillForMeEntryDto} instances.

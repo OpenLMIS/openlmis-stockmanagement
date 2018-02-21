@@ -15,8 +15,10 @@
 
 package org.openlmis.stockmanagement.testutils;
 
+import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.dto.CanFulfillForMeEntryDto;
 import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
@@ -50,8 +52,69 @@ public class CanFulfillForMeEntryDtoDataBuilder {
         processedDate, occurredDate);
   }
 
+  /**
+   * Creates new instance of {@link CanFulfillForMeEntryDto} based on stock card and orderable.
+   * @return created can fulfill for me entry
+   */
+  public CanFulfillForMeEntryDto buildWithStockCardAndOrderable(StockCard stockCard,
+                                                                OrderableDto orderable,
+                                                                LocalDate asOfDate) {
+    return this
+        .withStockOnHand(stockCard != null
+            ? stockCard.getLineItemAsOfDate(asOfDate).getStockOnHand()
+            : null)
+        .withOrderable(new ObjectReferenceDtoDataBuilder()
+            .withPath("orderables")
+            .withId(orderable.getId())
+            .build())
+        .withStockCard(stockCard != null
+            ? new ObjectReferenceDtoDataBuilder()
+            .withPath("stockCards")
+            .withId(stockCard.getId())
+            .build()
+            : null)
+        .withLot(stockCard != null
+            ? new ObjectReferenceDtoDataBuilder()
+            .withPath("lots")
+            .withId(stockCard.getLotId())
+            .build()
+            : null)
+        .withProcessedDate(stockCard != null
+            ? stockCard.getLineItemAsOfDate(asOfDate).getProcessedDate()
+            : null)
+        .withOccuredDate(stockCard != null
+            ? stockCard.getLineItemAsOfDate(asOfDate).getOccurredDate()
+            : null)
+        .build();
+  }
+
   public CanFulfillForMeEntryDtoDataBuilder withStockOnHand(Integer stockOnHand) {
     this.stockOnHand = stockOnHand;
+    return this;
+  }
+
+  public CanFulfillForMeEntryDtoDataBuilder withStockCard(ObjectReferenceDto stockCard) {
+    this.stockCard = stockCard;
+    return this;
+  }
+
+  public CanFulfillForMeEntryDtoDataBuilder withOrderable(ObjectReferenceDto orderable) {
+    this.orderable = orderable;
+    return this;
+  }
+
+  public CanFulfillForMeEntryDtoDataBuilder withLot(ObjectReferenceDto lot) {
+    this.lot = lot;
+    return this;
+  }
+
+  public CanFulfillForMeEntryDtoDataBuilder withProcessedDate(ZonedDateTime processedDate) {
+    this.processedDate = processedDate;
+    return this;
+  }
+
+  public CanFulfillForMeEntryDtoDataBuilder withOccuredDate(LocalDate occurredDate) {
+    this.occurredDate = occurredDate;
     return this;
   }
 }

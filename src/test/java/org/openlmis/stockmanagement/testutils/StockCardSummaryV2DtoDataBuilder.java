@@ -18,17 +18,17 @@ package org.openlmis.stockmanagement.testutils;
 import org.openlmis.stockmanagement.dto.CanFulfillForMeEntryDto;
 import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
 import org.openlmis.stockmanagement.dto.StockCardSummaryV2Dto;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class StockCardSummaryV2DtoDataBuilder {
 
   private ObjectReferenceDto orderable;
-  private List<CanFulfillForMeEntryDto> canFulfillForMe;
+  private Set<CanFulfillForMeEntryDto> canFulfillForMe;
 
   public StockCardSummaryV2DtoDataBuilder() {
     orderable = new ObjectReferenceDtoDataBuilder().withPath("api/orderables").build();
-    canFulfillForMe = new ArrayList<>();
+    canFulfillForMe = new HashSet<>();
   }
 
   /**
@@ -46,7 +46,7 @@ public class StockCardSummaryV2DtoDataBuilder {
   }
 
   public StockCardSummaryV2DtoDataBuilder withCanFulfillForMe(
-      List<CanFulfillForMeEntryDto> canFulfillForMe) {
+      Set<CanFulfillForMeEntryDto> canFulfillForMe) {
     this.canFulfillForMe = canFulfillForMe;
     return this;
   }

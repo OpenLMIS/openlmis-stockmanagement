@@ -45,4 +45,9 @@ public class ObjectReferenceDtoDataBuilder {
     this.path = path;
     return this;
   }
+
+  public ObjectReferenceDtoDataBuilder withId(UUID id) {
+    this.id = id;
+    return this;
+  }
 }

@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.web.stockcardsummariesv2;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -29,15 +30,21 @@ import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 public class StockCardSummariesV2DtoBuilder {
 
-  private static final String API = "api/";
+  static final String ORDERABLES = "orderables";
+  static final String STOCK_CARDS = "stockCards";
+  static final String LOTS = "lots";
 
   @Value("${service.url}")
   private String serviceUrl;
@@ -64,15 +71,25 @@ public class StockCardSummariesV2DtoBuilder {
 
   private StockCardSummaryV2Dto build(List<StockCard> stockCards, UUID orderableId,
                                       OrderableFulfillDto fulfills, LocalDate asOfDate) {
+
+    Set<CanFulfillForMeEntryDto> canFulfillSet = null == fulfills ? new HashSet<>()
+        : fulfills.getCanFulfillForMe()
+        .stream()
+        .map(id -> buildFulfillsEntries(id,
+            findStockCardByOrderableId(id, stockCards),
+            asOfDate))
+        .flatMap(List::stream)
+        .collect(toSet());
+
+    canFulfillSet.addAll(
+        buildFulfillsEntries(
+            orderableId,
+            findStockCardByOrderableId(orderableId, stockCards),
+            asOfDate));
+
     return new StockCardSummaryV2Dto(
         createOrderableReference(orderableId),
-        null == fulfills ? null : fulfills.getCanFulfillForMe()
-            .stream()
-            .map(id -> buildFulfillsEntries(id,
-                findStockCardByOrderableId(id, stockCards),
-                asOfDate))
-            .flatMap(List::stream)
-            .collect(toList()));
+        canFulfillSet);
   }
 
   private List<CanFulfillForMeEntryDto> buildFulfillsEntries(UUID orderableId,
@@ -98,7 +115,7 @@ public class StockCardSummariesV2DtoBuilder {
             lineItem == null ? null : lineItem.getProcessedDate(),
             lineItem == null ? null : lineItem.getOccurredDate()
         );
-      }).collect(toList());
+      }).collect(Collectors.toCollection(ArrayList::new));
     }
   }
 
@@ -111,18 +128,18 @@ public class StockCardSummariesV2DtoBuilder {
   }
 
   private ObjectReferenceDto createOrderableReference(UUID id) {
-    return createReference(id, "orderables");
+    return createReference(id, ORDERABLES);
   }
 
   private ObjectReferenceDto createStockCardReference(UUID id) {
-    return createReference(id, "stockCards");
+    return createReference(id, STOCK_CARDS);
   }
 
   private ObjectReferenceDto createLotReference(UUID id) {
-    return createReference(id, "lots");
+    return createReference(id, LOTS);
   }
 
   private ObjectReferenceDto createReference(UUID id, String resourceName) {
-    return new ObjectReferenceDto(serviceUrl, API + resourceName, id);
+    return new ObjectReferenceDto(serviceUrl, resourceName, id);
   }
 }
