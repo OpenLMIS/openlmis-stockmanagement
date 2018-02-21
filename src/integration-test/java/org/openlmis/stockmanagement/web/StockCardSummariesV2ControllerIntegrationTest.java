@@ -107,6 +107,31 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
   }
 
   @Test
+  public void shouldSetIntegerMaxValueAsDefaultPageSize() throws Exception {
+    pageable = new PageRequest(0, Integer.MAX_VALUE);
+
+    ResultActions resultActions = mvc.perform(
+        get(API_STOCK_CARD_SUMMARIES)
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+            .param(PROGRAM_ID, params.getProgramId().toString())
+            .param(FACILITY_ID, params.getFacilityId().toString())
+            .param(AS_OF_DATE, params.getAsOfDate().toString())
+            .param(ORDERABLE_ID, params.getOrderableIds().get(0).toString())
+            .param(ORDERABLE_ID, params.getOrderableIds().get(1).toString()));
+
+    resultActions
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content", hasSize(2)))
+        .andExpect(jsonPath("$.numberOfElements", is(2)))
+        .andExpect(jsonPath("$.number", is(pageable.getPageNumber())))
+        .andExpect(jsonPath("$.size", is(pageable.getPageSize())))
+        .andExpect(jsonPath("$.content[0].orderable.id",
+            is(stockCardSummary.getOrderable().getId().toString())))
+        .andExpect(jsonPath("$.content[1].orderable.id",
+            is(stockCardSummary2.getOrderable().getId().toString())));
+  }
+
+  @Test
   public void shouldReturnBadRequestIfFacilityIdIsNotPresent() throws Exception {
     ResultActions resultActions = mvc.perform(
         get(API_STOCK_CARD_SUMMARIES)
