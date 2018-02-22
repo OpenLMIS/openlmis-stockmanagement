@@ -28,6 +28,7 @@ public class OrderableDtoDataBuilder {
   private UUID id;
   private String productCode;
   private String fullProductName;
+  private Long netContent;
   private DispensableDto dispensable;
   private Map<String, String> identifiers;
   private Map<String, String> extraData;
@@ -41,6 +42,7 @@ public class OrderableDtoDataBuilder {
     id = UUID.randomUUID();
     productCode = "P" + instanceNumber;
     fullProductName = "Product " + instanceNumber;
+    netContent = 10L;
     dispensable = new DispensableDto("pack");
     identifiers = new HashMap<>();
     extraData = null;
@@ -51,7 +53,9 @@ public class OrderableDtoDataBuilder {
    * @return created orderable.
    */
   public OrderableDto build() {
-    return new OrderableDto(id, productCode, fullProductName, dispensable, identifiers, extraData);
+    return new OrderableDto(
+        id, productCode, fullProductName, netContent, dispensable, identifiers, extraData
+    );
   }
 
   public OrderableDtoDataBuilder withId(UUID id) {

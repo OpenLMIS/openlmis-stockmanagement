@@ -37,6 +37,7 @@ public class OrderableDto {
   private UUID id;
   private String productCode;
   private String fullProductName;
+  private Long netContent;
   private DispensableDto dispensable;
   private Map<String, String> identifiers;
   private Map<String, String> extraData;
