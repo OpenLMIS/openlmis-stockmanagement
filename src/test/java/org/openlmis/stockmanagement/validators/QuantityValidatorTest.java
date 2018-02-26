@@ -5,28 +5,26 @@
  * This program is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation, either
  * version 3 of the License, or (at your option) any later version.
- *  
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details. You should have received a copy of
  * the GNU Affero General Public License along with this program. If not, see
- * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
+ * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
 package org.openlmis.stockmanagement.validators;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
+import static org.assertj.core.util.Lists.newArrayList;
 import static org.junit.rules.ExpectedException.none;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 
-import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,19 +34,21 @@ import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
-import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
-import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.dto.StockEventAdjustmentDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.testutils.StockCardDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonDataBuilder;
+import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
+import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
+import org.openlmis.stockmanagement.testutils.StockEventLineItemDtoDataBuilder;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.Month;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -61,26 +61,26 @@ public class QuantityValidatorTest extends BaseValidatorTest {
   @InjectMocks
   private QuantityValidator quantityValidator;
 
-  private StockCardLineItemReason physicalCredit;
-  private StockCardLineItemReason physicalDebit;
+  private StockCardLineItemReason creditAdjustmentReason;
+  private StockCardLineItemReason debitAdjustmentReason;
 
   @Override
   @Before
   public void setUp() throws Exception {
     super.setUp();
 
-    physicalCredit = new StockCardLineItemReasonDataBuilder()
-        .withPhysicalInventoryCategory()
+    creditAdjustmentReason = new StockCardLineItemReasonDataBuilder()
+        .withAdjustmentCategory()
         .build();
 
-    physicalDebit = new StockCardLineItemReasonDataBuilder()
-        .withPhysicalInventoryCategory()
+    debitAdjustmentReason = new StockCardLineItemReasonDataBuilder()
+        .withAdjustmentCategory()
         .withDebitType()
         .build();
   }
 
   @Test
-  public void shouldRejectWhenQuantityMakesStockOnHandBelowZero() throws Exception {
+  public void shouldRejectWhenQuantityMakesStockOnHandBelowZero() {
     //expect
     expectedException.expect(ValidationMessageException.class);
     expectedException.expectMessage(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH);
@@ -89,7 +89,7 @@ public class QuantityValidatorTest extends BaseValidatorTest {
     LocalDate firstDate = dateFromYear(2015);
 
     StockCard card = new StockCard();
-    card.setLineItems(asList(
+    card.setLineItems(newArrayList(
         createCreditLineItem(firstDate.plusDays(1), 5),
         createDebitLineItem(firstDate.plusDays(3), 1),
         createCreditLineItem(firstDate.plusDays(4), 2)
@@ -144,8 +144,7 @@ public class QuantityValidatorTest extends BaseValidatorTest {
     //given
     LocalDate firstDate = dateFromYear(2015);
 
-    StockEventDto event = spy(createDebitEventDto(firstDate.plusDays(1), 0));
-    when(event.isPhysicalInventory()).thenReturn(true);
+    StockEventDto event = createPhysicalInventoryEventDto(firstDate.plusDays(1), 0, null);
     setContext(event);
 
     //when
@@ -161,11 +160,10 @@ public class QuantityValidatorTest extends BaseValidatorTest {
         firstDate.plusDays(1), 10);
 
     StockCard card = new StockCard();
-    card.setLineItems(singletonList(lineItem));
+    card.setLineItems(newArrayList(lineItem));
 
-    StockEventDto event = spy(createDebitEventDto(firstDate.plusDays(2), 5,
+    StockEventDto event = spy(createPhysicalInventoryEventDto(firstDate.plusDays(2), 5,
         singletonList(createDebitAdjustment(5))));
-    given(event.isPhysicalInventory()).willReturn(true);
     mockCardFound(event, card);
 
     //when
@@ -187,9 +185,8 @@ public class QuantityValidatorTest extends BaseValidatorTest {
     StockCard card = new StockCard();
     card.setLineItems(singletonList(lineItem));
 
-    StockEventDto event = spy(createDebitEventDto(firstDate.plusDays(2), 5,
+    StockEventDto event = spy(createPhysicalInventoryEventDto(firstDate.plusDays(2), 5,
         singletonList(createCreditAdjustment(-2))));
-    given(event.isPhysicalInventory()).willReturn(true);
     mockCardFound(event, card);
 
     //when
@@ -204,10 +201,9 @@ public class QuantityValidatorTest extends BaseValidatorTest {
     StockCardLineItem lineItem = createCreditLineItem(firstDate.plusDays(1), 15);
 
     StockCard card = new StockCard();
-    card.setLineItems(singletonList(lineItem));
+    card.setLineItems(newArrayList(lineItem));
 
-    StockEventDto event = spy(createDebitEventDto(firstDate.plusDays(2), 5));
-    given(event.isPhysicalInventory()).willReturn(true);
+    StockEventDto event = createPhysicalInventoryEventDto(firstDate.plusDays(2), 5, null);
     mockCardFound(event, card);
 
     //when
@@ -223,37 +219,69 @@ public class QuantityValidatorTest extends BaseValidatorTest {
         firstDate.plusDays(1), 15);
 
     StockCard card = new StockCard();
-    card.setLineItems(singletonList(lineItem));
+    card.setLineItems(newArrayList(lineItem));
 
-    StockEventDto event = spy(createDebitEventDto(firstDate.plusDays(2), 5,
+    StockEventDto event = spy(createPhysicalInventoryEventDto(firstDate.plusDays(2), 5,
         singletonList(createCreditAdjustment(5))));
-    given(event.isPhysicalInventory()).willReturn(true);
     mockCardFound(event, card);
 
     //when
     quantityValidator.validate(event);
   }
 
+  @Test
+  public void shouldNotRejectWhenStockOnHandFromMiddleIsLessThanStockAdjustment() {
+    //given
+    StockCard card = new StockCardDataBuilder(new StockEventDataBuilder().build())
+        .withLineItem(buildPhysicalInventoryLineItem(100, Month.JANUARY))
+        .withLineItem(buildPhysicalInventoryLineItem(80, Month.MARCH))
+        .build();
+
+    StockEventDto event =
+        createPhysicalInventoryEventDto(LocalDate.of(2017, Month.FEBRUARY, 28), 15, null);
+    mockCardFound(event, card);
+
+    //when
+    quantityValidator.validate(event);
+  }
+
+  private StockCardLineItem buildPhysicalInventoryLineItem(int quantity, Month month) {
+    return StockCardLineItem
+        .builder()
+        .quantity(quantity)
+        .occurredDate(LocalDate.of(2017, month, 31))
+        .processedDate(getProcessedDateForLocalDate(LocalDate.now().minusDays(1)))
+        .build();
+  }
+
+  private ZonedDateTime getProcessedDateForLocalDate(LocalDate date) {
+    return ZonedDateTime.of(date, LocalTime.NOON, ZoneOffset.UTC);
+  }
+
   private LocalDate dateFromYear(int year) {
     return LocalDate.of(year, 1, 1);
   }
 
-  private StockEventDto createDebitEventDto(LocalDate date, int quantity,
-                                            List<StockEventAdjustmentDto> adjustments) {
-
-    StockEventDto stockEventDto = createStockEventDto();
-
-    stockEventDto.getLineItems().get(0).setDestinationId(randomUUID());
-    stockEventDto.getLineItems().get(0).setQuantity(quantity);
-    stockEventDto.getLineItems().get(0).setOccurredDate(date);
-    stockEventDto.getLineItems().get(0).setSourceId(null);
-    stockEventDto.getLineItems().get(0).setStockAdjustments(adjustments);
-
-    return stockEventDto;
+  private StockEventDto createDebitEventDto(LocalDate date, int quantity) {
+    return new StockEventDtoDataBuilder()
+        .addLineItem(new StockEventLineItemDtoDataBuilder()
+            .withReasonId(debitAdjustmentReason.getId())
+            .withQuantity(quantity)
+            .withOccurredDate(date)
+            .buildForAdjustment())
+        .build();
   }
 
-  private StockEventDto createDebitEventDto(LocalDate date, int quantity) {
-    return createDebitEventDto(date, quantity, null);
+  private StockEventDto createPhysicalInventoryEventDto(LocalDate date, int quantity,
+                                                        List<StockEventAdjustmentDto> adjustments) {
+
+    return new StockEventDtoDataBuilder()
+        .addLineItem(new StockEventLineItemDtoDataBuilder()
+            .addStockAdjustments(adjustments)
+            .withQuantity(quantity)
+            .withOccurredDate(date)
+            .buildForPhysicalInventory())
+        .build();
   }
 
   private StockCardLineItem createDebitLineItem(LocalDate date, int quantity) {
@@ -262,35 +290,26 @@ public class QuantityValidatorTest extends BaseValidatorTest {
         .quantity(quantity)
         .occurredDate(date)
         .processedDate(ZonedDateTime.of(date, LocalTime.NOON, ZoneOffset.UTC))
-        .destination(new Node())
-        .reason(physicalDebit)
-        .stockAdjustments(new ArrayList<>())
+        .reason(debitAdjustmentReason)
         .build();
   }
 
-  private StockCardLineItem createCreditLineItem(
-      LocalDate date, int quantity, List<PhysicalInventoryLineItemAdjustment> adjustments) {
+  private StockCardLineItem createCreditLineItem(LocalDate date, int quantity) {
     return StockCardLineItem
         .builder()
         .quantity(quantity)
         .occurredDate(date)
         .processedDate(ZonedDateTime.of(date, LocalTime.NOON, ZoneOffset.UTC))
-        .destination(new Node())
-        .reason(physicalCredit)
-        .stockAdjustments(adjustments)
+        .reason(creditAdjustmentReason)
         .build();
   }
 
-  private StockCardLineItem createCreditLineItem(LocalDate date, int quantity) {
-    return createCreditLineItem(date, quantity, new ArrayList<>());
-  }
-
   private StockEventAdjustmentDto createCreditAdjustment(int quantity) {
-    return new StockEventAdjustmentDto(physicalCredit.getId(), quantity);
+    return new StockEventAdjustmentDto(creditAdjustmentReason.getId(), quantity);
   }
 
   private StockEventAdjustmentDto createDebitAdjustment(int quantity) {
-    return new StockEventAdjustmentDto(physicalDebit.getId(), quantity);
+    return new StockEventAdjustmentDto(debitAdjustmentReason.getId(), quantity);
   }
 
   private void mockCardFound(StockEventDto event, StockCard card) {
@@ -302,6 +321,6 @@ public class QuantityValidatorTest extends BaseValidatorTest {
         .thenReturn(singletonList(card));
 
     setContext(event);
-    setReasons(event, Lists.newArrayList(physicalCredit, physicalDebit));
+    setReasons(event, newArrayList(creditAdjustmentReason, debitAdjustmentReason));
   }
 }

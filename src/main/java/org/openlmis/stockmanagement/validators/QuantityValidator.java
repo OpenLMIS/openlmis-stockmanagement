@@ -22,7 +22,6 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTME
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
-import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventAdjustmentDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
@@ -69,7 +68,7 @@ public class QuantityValidator implements StockEventValidator {
     StockCard foundCard = tryFindCard(event, items.get(0));
 
     if (event.isPhysicalInventory()) {
-      validateQuantities(event, items, foundCard.getStockOnHand());
+      validateQuantities(items);
     }
 
     // create line item from event line item and add it to stock card for recalculation
@@ -85,20 +84,14 @@ public class QuantityValidator implements StockEventValidator {
 
       return emptyCard;
     } else {
-      //use a shallow copy of stock card to do recalculation, because some domain model will be
-      //modified during recalculation, this will avoid persistence of those modified models
-      StockCard stockCard = foundCard.shallowCopy();
-      stockCard.calculateStockOnHand();
-
-      return stockCard;
+      return foundCard;
     }
   }
 
-  private void validateQuantities(StockEventDto event, List<StockEventLineItemDto> items,
-                                  Integer stockOnHand) {
+  private void validateQuantities(List<StockEventLineItemDto> items) {
     for (StockEventLineItemDto item : items) {
       Integer quantity = item.getQuantity();
-      if (stockOnHand != null && quantity != null) {
+      if (quantity != null) {
         List<StockEventAdjustmentDto> adjustments = item.getStockAdjustments();
         if (isNotEmpty(adjustments)) {
           validateStockAdjustments(adjustments);
@@ -133,21 +126,5 @@ public class QuantityValidator implements StockEventValidator {
     }
 
     foundCard.calculateStockOnHand();
-  }
-
-  private void debugAdjustments(StockEventDto event, List<StockEventAdjustmentDto> adjustments) {
-    if (LOGGER.isDebugEnabled() && isNotEmpty(adjustments)) {
-      LOGGER.debug("Logging adjustments");
-      for (StockEventAdjustmentDto adj : adjustments) {
-        StockCardLineItemReason reason = event.getContext().findEventReason(adj.getReasonId());
-
-        // we check if reason exists in ReasonExistenceValidator
-        if (null == reason) {
-          continue;
-        }
-
-        LOGGER.debug("Adjustment {}: {}", reason.getName(), adj.getQuantity());
-      }
-    }
   }
 }

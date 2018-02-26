@@ -20,6 +20,8 @@ import static java.util.Collections.emptyList;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.openlmis.stockmanagement.domain.common.VvmApplicable;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
@@ -36,6 +38,8 @@ import java.util.stream.Collectors;
 
 @Setter
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class StockEventLineItemDto implements IdentifiableByOrderableLot, VvmApplicable {
   private UUID orderableId;
   private UUID lotId;

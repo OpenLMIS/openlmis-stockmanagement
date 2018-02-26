@@ -18,14 +18,36 @@ package org.openlmis.stockmanagement.testutils;
 import static java.util.Collections.singletonList;
 import static org.openlmis.stockmanagement.testutils.DatesUtil.getBaseDate;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
-
+import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 public class StockEventDtoDataBuilder {
+
+  private UUID resourceId = UUID.randomUUID();
+  private UUID facilityId = UUID.randomUUID();
+  private UUID programId = UUID.randomUUID();
+  private String signature = RandomStringUtils.random(5);
+  private String documentNumber = RandomStringUtils.random(5);
+  private UUID userId = UUID.randomUUID();
+  private List<StockEventLineItemDto> lineItems = new ArrayList<>();
+  private StockEventProcessContext context;
+
+  public StockEventDto build() {
+    return new StockEventDto(resourceId, facilityId, programId, signature, documentNumber, userId,
+        lineItems, context);
+  }
+
+  public StockEventDtoDataBuilder addLineItem(StockEventLineItemDto lineItemDto) {
+    this.lineItems.add(lineItemDto);
+    return this;
+  }
 
   /**
    * Create stock event dto object for testing with two line items.

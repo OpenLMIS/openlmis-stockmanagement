@@ -205,5 +205,6 @@
     <module name="Header">
         <property name="headerFile" value="LICENSE-HEADER"/>
         <property name="fileExtensions" value="java"/>
+        <property name="ignoreLines" value="8, 10, 13"/>
     </module>
 </module>

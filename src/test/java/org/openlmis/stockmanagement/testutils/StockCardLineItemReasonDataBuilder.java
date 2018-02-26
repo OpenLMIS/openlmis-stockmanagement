@@ -63,6 +63,11 @@ public class StockCardLineItemReasonDataBuilder {
     return this;
   }
 
+  public StockCardLineItemReasonDataBuilder withAdjustmentCategory() {
+    reasonCategory = ReasonCategory.ADJUSTMENT;
+    return this;
+  }
+
   /**
    * Creates new instance of {@link StockCardLineItemReason} with properties.
    * @return created stock card line item reason.
