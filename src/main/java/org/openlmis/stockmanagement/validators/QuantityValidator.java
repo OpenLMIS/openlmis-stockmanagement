@@ -84,7 +84,8 @@ public class QuantityValidator implements StockEventValidator {
 
       return emptyCard;
     } else {
-      return foundCard;
+      //Model will be modified so we need to copy stock card to avoid persistence of modified model.
+      return foundCard.shallowCopy();
     }
   }
 
