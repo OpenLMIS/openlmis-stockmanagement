@@ -60,8 +60,11 @@ public class ApprovedProductReferenceDataService extends
     RequestParameters params = RequestParameters.init();
 
     params.set("programId", programId);
-    params.set("size", pageable.getPageSize());
-    params.set("page", pageable.getPageNumber());
+
+    if (null != pageable) {
+      params.set("size", pageable.getPageSize());
+      params.set("page", pageable.getPageNumber());
+    }
 
     if (!isEmpty(orderableIds)) {
       params.set("orderableId", orderableIds);

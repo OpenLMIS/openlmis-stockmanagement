@@ -82,13 +82,12 @@ public class StockCardSummariesService extends StockCardBaseService {
    * @param params stock cards summaries search params.
    * @return page of stock cards.
    */
-  public StockCardSummaries findStockCards(StockCardSummariesV2SearchParams params,
-                                           Pageable pageable) {
+  public StockCardSummaries findStockCards(StockCardSummariesV2SearchParams params) {
     permissionService.canViewStockCard(params.getProgramId(), params.getFacilityId());
 
     Page<OrderableDto> approvedProducts = approvedProductReferenceDataService
         .getApprovedProducts(params.getFacilityId(), params.getProgramId(),
-            params.getOrderableIds(), pageable);
+            params.getOrderableIds(), null);
 
     Map<UUID, OrderableFulfillDto> orderableFulfillMap = orderableFulfillService.findByIds(
         approvedProducts.getContent().stream().map(OrderableDto::getId).collect(toList()));
@@ -112,9 +111,7 @@ public class StockCardSummariesService extends StockCardBaseService {
    * @return found stock cards.
    */
   public List<StockCardDto> findStockCards(UUID programId, UUID facilityId) {
-    List<StockCard> cards = cardRepository.findByProgramIdAndFacilityId(programId, facilityId);
-
-    return cardsToDtos(programId, facilityId, cards);
+    return cardsToDtos(cardRepository.findByProgramIdAndFacilityId(programId, facilityId));
   }
 
   /**
@@ -129,7 +126,7 @@ public class StockCardSummariesService extends StockCardBaseService {
     Page<StockCard> pageOfCards = cardRepository
         .findByProgramIdAndFacilityId(programId, facilityId, pageable);
 
-    List<StockCardDto> cardDtos = cardsToDtos(programId, facilityId, pageOfCards.getContent());
+    List<StockCardDto> cardDtos = cardsToDtos(pageOfCards.getContent());
     return new PageImpl<>(cardDtos, pageable, pageOfCards.getTotalElements());
   }
 
@@ -155,7 +152,7 @@ public class StockCardSummariesService extends StockCardBaseService {
     return assignOrderableLotRemoveLineItems(createDtos(dummyCards), orderableLotsMap);
   }
 
-  private List<StockCardDto> cardsToDtos(UUID programId, UUID facilityId, List<StockCard> cards) {
+  private List<StockCardDto> cardsToDtos(List<StockCard> cards) {
     LOGGER.info("Calling ref data to get all approved orderables");
     Map<OrderableLotIdentity, OrderableLot> orderableLotsMap = createOrderableLots(
         orderableReferenceDataService.findAll());

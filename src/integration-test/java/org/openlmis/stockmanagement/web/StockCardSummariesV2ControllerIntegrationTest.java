@@ -19,7 +19,6 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -69,7 +68,7 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
   @Before
   public void setUp() {
     when(stockCardSummariesService
-        .findStockCards(any(StockCardSummariesV2SearchParams.class), any(Pageable.class)))
+        .findStockCards(any(StockCardSummariesV2SearchParams.class)))
         .thenReturn(summaries);
 
     when(stockCardSummariesV2DtoBuilder
@@ -98,8 +97,6 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
         .andExpect(jsonPath("$.numberOfElements", is(2)))
         .andExpect(jsonPath("$.number", is(pageable.getPageNumber())))
         .andExpect(jsonPath("$.size", is(pageable.getPageSize())))
-        .andExpect(jsonPath("$.totalElements",
-            is(summaries.getTotalElements().intValue())))
         .andExpect(jsonPath("$.content[0].orderable.id",
             is(stockCardSummary.getOrderable().getId().toString())))
         .andExpect(jsonPath("$.content[1].orderable.id",
@@ -167,7 +164,7 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
   public void shouldReturnForbiddenIfNoPermission() throws Exception {
     doThrow(new PermissionMessageException(new Message("no permission")))
         .when(stockCardSummariesService)
-        .findStockCards(any(StockCardSummariesV2SearchParams.class), eq(pageable));
+        .findStockCards(any(StockCardSummariesV2SearchParams.class));
 
     ResultActions resultActions = mvc.perform(
         get(API_STOCK_CARD_SUMMARIES)

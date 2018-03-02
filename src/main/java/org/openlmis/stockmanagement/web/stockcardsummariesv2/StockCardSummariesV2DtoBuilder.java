@@ -17,8 +17,8 @@ package org.openlmis.stockmanagement.web.stockcardsummariesv2;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -66,6 +67,7 @@ public class StockCardSummariesV2DtoBuilder {
         .map(p -> build(stockCards, p.getId(),
             MapUtils.isEmpty(orderables) ? null : orderables.get(p.getId()),
             asOfDate))
+        .filter(Objects::nonNull)
         .collect(toList());
   }
 
@@ -87,17 +89,15 @@ public class StockCardSummariesV2DtoBuilder {
             findStockCardByOrderableId(orderableId, stockCards),
             asOfDate));
 
-    return new StockCardSummaryV2Dto(
-        createOrderableReference(orderableId),
-        canFulfillSet);
+    return isEmpty(canFulfillSet) ? null
+        : new StockCardSummaryV2Dto(createOrderableReference(orderableId), canFulfillSet);
   }
 
   private List<CanFulfillForMeEntryDto> buildFulfillsEntries(UUID orderableId,
                                                      List<StockCard> stockCards,
                                                      LocalDate asOfDate) {
-    if (CollectionUtils.isEmpty(stockCards)) {
-      return Collections.singletonList(
-          new CanFulfillForMeEntryDto(createOrderableReference(orderableId)));
+    if (isEmpty(stockCards)) {
+      return Collections.emptyList();
     } else {
       return stockCards.stream().map(stockCard -> {
         StockCardLineItem lineItem;
@@ -107,16 +107,21 @@ public class StockCardSummariesV2DtoBuilder {
           lineItem = stockCard.getLineItemAsOfDate(asOfDate);
         }
 
-        return new CanFulfillForMeEntryDto(
-            createStockCardReference(stockCard.getId()),
-            createOrderableReference(orderableId),
-            stockCard.getLotId() == null ? null : createLotReference(stockCard.getLotId()),
-            lineItem == null ? null : lineItem.getStockOnHand(),
-            lineItem == null ? null : lineItem.getProcessedDate(),
-            lineItem == null ? null : lineItem.getOccurredDate()
-        );
+        return createCanFulfillForMeEntry(stockCard, orderableId, lineItem);
       }).collect(Collectors.toCollection(ArrayList::new));
     }
+  }
+
+  private CanFulfillForMeEntryDto createCanFulfillForMeEntry(StockCard stockCard, UUID orderableId,
+                                                             StockCardLineItem lineItem) {
+    return new CanFulfillForMeEntryDto(
+        createStockCardReference(stockCard.getId()),
+        createOrderableReference(orderableId),
+        stockCard.getLotId() == null ? null : createLotReference(stockCard.getLotId()),
+        lineItem == null ? null : lineItem.getStockOnHand(),
+        lineItem == null ? null : lineItem.getProcessedDate(),
+        lineItem == null ? null : lineItem.getOccurredDate()
+    );
   }
 
   private List<StockCard> findStockCardByOrderableId(UUID orderableId,

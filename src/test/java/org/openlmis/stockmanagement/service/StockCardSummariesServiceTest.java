@@ -65,7 +65,6 @@ import org.openlmis.stockmanagement.util.Message;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -268,9 +267,6 @@ public class StockCardSummariesServiceTest {
 
   @Test
   public void shouldFindStockCards() throws Exception {
-
-    Pageable pageable = new PageRequest(0, 10);
-
     OrderableDto orderable = new OrderableDtoDataBuilder().build();
     OrderableDto orderable2 = new OrderableDtoDataBuilder().build();
     OrderableDto orderable3 = new OrderableDtoDataBuilder().build();
@@ -281,9 +277,11 @@ public class StockCardSummariesServiceTest {
 
     when(approvedProductReferenceDataService
         .getApprovedProducts(eq(params.getFacilityId()), eq(params.getProgramId()),
-            eq(params.getOrderableIds()), eq(pageable)))
-        .thenReturn(
-            new PageImpl<>(asList(orderable, orderable2, orderable3), pageable, 3));
+            eq(params.getOrderableIds()), eq(null)))
+        .thenReturn(new PageImpl<>(
+            asList(orderable, orderable2, orderable3),
+            new PageRequest(0, Integer.MAX_VALUE),
+            3));
 
     Map<UUID, OrderableFulfillDto> fulfillMap = new HashMap<>();
     fulfillMap.put(orderable.getId(), new OrderableFulfillDtoDataBuilder()
@@ -317,15 +315,13 @@ public class StockCardSummariesServiceTest {
         params.getFacilityId()))
         .thenReturn(stockCards);
 
-    StockCardSummaries result = stockCardSummariesService.findStockCards(params, pageable);
+    StockCardSummaries result = stockCardSummariesService.findStockCards(params);
 
     assertEquals(3, result.getPageOfApprovedProducts().size());
   }
 
   @Test(expected = PermissionMessageException.class)
   public void shouldThrowExceptionIfNoPermission() {
-    Pageable pageable = new PageRequest(0, 10);
-
     StockCardSummariesV2SearchParams params =
         new StockCardSummariesV2SearchParamsDataBuilder().build();
 
@@ -334,7 +330,7 @@ public class StockCardSummariesServiceTest {
         .when(permissionService)
         .canViewStockCard(params.getProgramId(), params.getFacilityId());
 
-    stockCardSummariesService.findStockCards(params, pageable);
+    stockCardSummariesService.findStockCards(params);
   }
 
   private StockCard createStockCard(UUID orderableId, UUID cardId) {

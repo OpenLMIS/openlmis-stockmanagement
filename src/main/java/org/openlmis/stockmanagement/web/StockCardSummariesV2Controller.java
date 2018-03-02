@@ -13,19 +13,18 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.web.stockcardsummariesv2;
+package org.openlmis.stockmanagement.web;
 
 import org.openlmis.stockmanagement.dto.StockCardSummaryV2Dto;
 import org.openlmis.stockmanagement.service.StockCardSummaries;
 import org.openlmis.stockmanagement.service.StockCardSummariesService;
 import org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams;
-import org.openlmis.stockmanagement.web.StockCardsController;
+import org.openlmis.stockmanagement.web.stockcardsummariesv2.StockCardSummariesV2DtoBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.util.MultiValueMap;
@@ -33,6 +32,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v2/stockCardSummaries")
@@ -63,14 +63,17 @@ public class StockCardSummariesV2Controller {
     StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParams(parameters);
 
     profiler.start("GET_STOCK_CARD_SUMMARIES");
-    StockCardSummaries summaries = stockCardSummariesService.findStockCards(params, pageable);
+    StockCardSummaries summaries = stockCardSummariesService.findStockCards(params);
 
-    PageImpl<StockCardSummaryV2Dto> page =
-        new PageImpl<>(
-            stockCardSummariesV2DtoBuilder.build(summaries.getPageOfApprovedProducts(),
-                summaries.getStockCardsForFulfillOrderables(), summaries.getOrderableFulfillMap(),
-                summaries.getAsOfDate()),
-            pageable, summaries.getTotalElements());
+    profiler.start("TO_DTO");
+    List<StockCardSummaryV2Dto> dtos = stockCardSummariesV2DtoBuilder.build(
+        summaries.getPageOfApprovedProducts(),
+        summaries.getStockCardsForFulfillOrderables(),
+        summaries.getOrderableFulfillMap(),
+        summaries.getAsOfDate());
+
+    profiler.start("GET_PAGE");
+    Page<StockCardSummaryV2Dto> page = Pagination.getPage(dtos, pageable);
 
     profiler.stop().log();
     return page;

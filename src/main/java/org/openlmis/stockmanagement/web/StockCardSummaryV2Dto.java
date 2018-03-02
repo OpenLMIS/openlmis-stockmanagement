@@ -13,7 +13,7 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.web.stockcardsummariesv2;
+package org.openlmis.stockmanagement.web;
 
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 

@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.web.stockcardsummariesv2;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
@@ -113,8 +114,6 @@ public class StockCardSummariesV2DtoBuilderTest {
             .build(),
         asSet(
             new CanFulfillForMeEntryDtoDataBuilder()
-                .buildWithStockCardAndOrderable(null, orderable2, asOfDate),
-            new CanFulfillForMeEntryDtoDataBuilder()
                 .buildWithStockCardAndOrderable(stockCard1, orderable3, asOfDate),
             new CanFulfillForMeEntryDtoDataBuilder()
                 .buildWithStockCardAndOrderable(stockCard, orderable1, asOfDate))
@@ -126,8 +125,6 @@ public class StockCardSummariesV2DtoBuilderTest {
             .withId(orderable2.getId())
             .build(),
         asSet(
-            new CanFulfillForMeEntryDtoDataBuilder()
-                .buildWithStockCardAndOrderable(null, orderable2, asOfDate),
             new CanFulfillForMeEntryDtoDataBuilder()
                 .buildWithStockCardAndOrderable(stockCard, orderable1, asOfDate))
     );
@@ -161,8 +158,6 @@ public class StockCardSummariesV2DtoBuilderTest {
             .build(),
         asSet(
             new CanFulfillForMeEntryDtoDataBuilder()
-                .buildWithStockCardAndOrderable(null, orderable2, asOfDate),
-            new CanFulfillForMeEntryDtoDataBuilder()
                 .buildWithStockCardAndOrderable(stockCard1, orderable3, asOfDate),
             new CanFulfillForMeEntryDtoDataBuilder()
                 .buildWithStockCardAndOrderable(stockCard2, orderable3, asOfDate),
@@ -176,8 +171,6 @@ public class StockCardSummariesV2DtoBuilderTest {
             .withId(orderable2.getId())
             .build(),
         asSet(
-            new CanFulfillForMeEntryDtoDataBuilder()
-                .buildWithStockCardAndOrderable(null, orderable2, asOfDate),
             new CanFulfillForMeEntryDtoDataBuilder()
                 .buildWithStockCardAndOrderable(stockCard, orderable1, asOfDate))
     );
@@ -197,5 +190,17 @@ public class StockCardSummariesV2DtoBuilderTest {
 
     assertEquals(3, result.size());
     assertThat(result, hasItems(summary1, summary2, summary3));
+  }
+
+  @Test
+  public void shouldNotAddSummaryIfThereIsNoStockCards() throws Exception {
+    List<StockCard> stockCards = emptyList();
+
+    LocalDate asOfDate = LocalDate.now();
+
+    List<StockCardSummaryV2Dto> result = builder.build(asList(orderable1, orderable2, orderable3),
+        stockCards,fulfillMap, asOfDate);
+
+    assertEquals(0, result.size());
   }
 }
