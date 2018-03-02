@@ -13,7 +13,7 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.web;
+package org.openlmis.stockmanagement.web.stockcardsummariesv2;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.hasSize;
@@ -36,7 +36,7 @@ import org.openlmis.stockmanagement.testutils.ObjectGenerator;
 import org.openlmis.stockmanagement.testutils.StockCardSummariesV2SearchParamsDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardSummaryV2DtoDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
-import org.openlmis.stockmanagement.web.stockcardsummariesv2.StockCardSummariesV2DtoBuilder;
+import org.openlmis.stockmanagement.web.BaseWebTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
