@@ -16,7 +16,7 @@
 package org.openlmis.stockmanagement.testutils;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
-import org.openlmis.stockmanagement.dto.CanFulfillForMeEntryDto;
+import org.openlmis.stockmanagement.web.stockcardsummariesv2.CanFulfillForMeEntryDto;
 import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import java.time.LocalDate;

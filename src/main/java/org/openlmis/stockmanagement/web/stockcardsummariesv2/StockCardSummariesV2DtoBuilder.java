@@ -22,7 +22,6 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import org.apache.commons.collections4.MapUtils;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
-import org.openlmis.stockmanagement.dto.CanFulfillForMeEntryDto;
 import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
@@ -65,7 +64,7 @@ public class StockCardSummariesV2DtoBuilder {
         .map(p -> build(stockCards, p.getId(),
             MapUtils.isEmpty(orderables) ? null : orderables.get(p.getId()),
             asOfDate))
-        .sorted(this::sortStockCardSummaries)
+        .sorted()
         .collect(toList());
   }
 
@@ -127,14 +126,6 @@ public class StockCardSummariesV2DtoBuilder {
         .stream()
         .filter(card -> card.getOrderableId().equals(orderableId))
         .collect(toList());
-  }
-
-  private int sortStockCardSummaries(StockCardSummaryV2Dto summary1,
-                                     StockCardSummaryV2Dto summary2) {
-    if (summary1.getCanFulfillForMe().size() == summary2.getCanFulfillForMe().size()) {
-      return 0;
-    }
-    return isEmpty(summary1.getCanFulfillForMe()) ? 1 : -1;
   }
 
   private ObjectReferenceDto createOrderableReference(UUID id) {

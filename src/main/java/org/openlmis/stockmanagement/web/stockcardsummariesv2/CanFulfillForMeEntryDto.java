@@ -13,7 +13,7 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.dto;
+package org.openlmis.stockmanagement.web.stockcardsummariesv2;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
@@ -24,6 +24,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
@@ -58,8 +59,4 @@ public final class CanFulfillForMeEntryDto {
   @Setter
   @JsonFormat(shape = STRING)
   private LocalDate occurredDate;
-
-  public CanFulfillForMeEntryDto(ObjectReferenceDto orderable) {
-    this(null, orderable, null, null, null, null);
-  }
 }

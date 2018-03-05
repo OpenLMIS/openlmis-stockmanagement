@@ -20,6 +20,7 @@ import nl.jqno.equalsverifier.Warning;
 import org.junit.Test;
 import org.openlmis.stockmanagement.testutils.CanFulfillForMeEntryDtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.ToStringTestUtils;
+import org.openlmis.stockmanagement.web.stockcardsummariesv2.CanFulfillForMeEntryDto;
 
 public class CanFulfillForMeEntryDtoTest {
 

@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.openlmis.stockmanagement.testutils.CanFulfillForMeEntryDtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardSummaryV2DtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.ToStringTestUtils;
+import org.openlmis.stockmanagement.web.stockcardsummariesv2.CanFulfillForMeEntryDto;
 import org.openlmis.stockmanagement.web.stockcardsummariesv2.StockCardSummaryV2Dto;
 import java.util.Set;
 
@@ -74,5 +75,29 @@ public class StockCardSummaryV2DtoTest {
             .build())
         .build();
     assertEquals(null, stockCard.getStockOnHand());
+  }
+
+  @Test
+  public void shouldCompareStockCards() {
+    StockCardSummaryV2Dto stockCard1 = new StockCardSummaryV2DtoDataBuilder()
+        .withCanFulfillForMe(new CanFulfillForMeEntryDtoDataBuilder().build())
+        .build();
+    StockCardSummaryV2Dto stockCard2 = new StockCardSummaryV2DtoDataBuilder()
+        .build();
+    assertEquals(-1, stockCard1.compareTo(stockCard2));
+
+    stockCard2 = new StockCardSummaryV2DtoDataBuilder()
+        .withCanFulfillForMe(new CanFulfillForMeEntryDtoDataBuilder().build())
+        .build();
+    assertEquals(0, stockCard1.compareTo(stockCard2));
+
+    stockCard1 = new StockCardSummaryV2DtoDataBuilder().build();
+    stockCard2 = new StockCardSummaryV2DtoDataBuilder().build();
+    assertEquals(0, stockCard1.compareTo(stockCard2));
+
+    stockCard2 = new StockCardSummaryV2DtoDataBuilder()
+        .withCanFulfillForMe(new CanFulfillForMeEntryDtoDataBuilder().build())
+        .build();
+    assertEquals(1, stockCard1.compareTo(stockCard2));
   }
 }

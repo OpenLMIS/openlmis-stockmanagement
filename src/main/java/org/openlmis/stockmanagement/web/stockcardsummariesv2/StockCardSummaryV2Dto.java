@@ -24,7 +24,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.openlmis.stockmanagement.dto.CanFulfillForMeEntryDto;
 import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
 import java.util.List;
 import java.util.Set;
@@ -33,7 +32,7 @@ import java.util.Set;
 @NoArgsConstructor
 @ToString
 @EqualsAndHashCode
-public final class StockCardSummaryV2Dto {
+public final class StockCardSummaryV2Dto implements Comparable<StockCardSummaryV2Dto> {
 
   @Getter
   @Setter
@@ -56,5 +55,13 @@ public final class StockCardSummaryV2Dto {
     return isEmpty(fulfillEntries) ? null : fulfillEntries.stream()
         .mapToInt(CanFulfillForMeEntryDto::getStockOnHand)
         .sum();
+  }
+
+  @Override
+  public int compareTo(StockCardSummaryV2Dto stockCardSummary) {
+    if (this.getCanFulfillForMe().size() == stockCardSummary.getCanFulfillForMe().size()) {
+      return 0;
+    }
+    return isEmpty(this.getCanFulfillForMe()) ? 1 : -1;
   }
 }
