@@ -16,7 +16,6 @@
 package org.openlmis.stockmanagement.web.stockcardsummariesv2;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
@@ -31,7 +30,6 @@ import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
-import org.openlmis.stockmanagement.dto.StockCardSummaryV2Dto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
 import org.openlmis.stockmanagement.testutils.CanFulfillForMeEntryDtoDataBuilder;
@@ -55,15 +53,15 @@ public class StockCardSummariesV2DtoBuilderTest {
   @InjectMocks
   private StockCardSummariesV2DtoBuilder builder;
 
-  UUID programId = randomUUID();
-  UUID facilityId = randomUUID();
-  OrderableDto orderable1;
-  OrderableDto orderable2;
-  OrderableDto orderable3;
-  StockCard stockCard;
-  StockCard stockCard1;
-  StockCard stockCard2;
-  Map<UUID, OrderableFulfillDto> fulfillMap;
+  private UUID programId = randomUUID();
+  private UUID facilityId = randomUUID();
+  private OrderableDto orderable1;
+  private OrderableDto orderable2;
+  private OrderableDto orderable3;
+  private StockCard stockCard;
+  private StockCard stockCard1;
+  private StockCard stockCard2;
+  private Map<UUID, OrderableFulfillDto> fulfillMap;
 
   @Before
   public void before() {
@@ -149,7 +147,7 @@ public class StockCardSummariesV2DtoBuilderTest {
     LocalDate asOfDate = LocalDate.now();
 
     List<StockCardSummaryV2Dto> result = builder.build(asList(orderable1, orderable2, orderable3),
-        stockCards,fulfillMap, asOfDate);
+        stockCards, fulfillMap, asOfDate);
 
     StockCardSummaryV2Dto summary1 = new StockCardSummaryV2Dto(
         new ObjectReferenceDtoDataBuilder()
@@ -193,14 +191,41 @@ public class StockCardSummariesV2DtoBuilderTest {
   }
 
   @Test
-  public void shouldNotAddSummaryIfThereIsNoStockCards() throws Exception {
-    List<StockCard> stockCards = emptyList();
+  public void shouldSortStockCardSummaries() throws Exception {
+    List<StockCard> stockCards = asList(stockCard, stockCard1, stockCard2);
+
+    fulfillMap.remove(orderable1.getId());
 
     LocalDate asOfDate = LocalDate.now();
 
-    List<StockCardSummaryV2Dto> result = builder.build(asList(orderable1, orderable2, orderable3),
-        stockCards,fulfillMap, asOfDate);
+    List<StockCardSummaryV2Dto> result = builder.build(asList(orderable2, orderable3),
+        stockCards, fulfillMap, asOfDate);
 
-    assertEquals(0, result.size());
+    StockCardSummaryV2Dto summary2 = new StockCardSummaryV2Dto(
+        new ObjectReferenceDtoDataBuilder()
+            .withPath(ORDERABLES)
+            .withId(orderable2.getId())
+            .build(),
+        asSet(
+            new CanFulfillForMeEntryDtoDataBuilder()
+                .buildWithStockCardAndOrderable(stockCard, orderable1, asOfDate))
+    );
+
+    StockCardSummaryV2Dto summary3 = new StockCardSummaryV2Dto(
+        new ObjectReferenceDtoDataBuilder()
+            .withPath(ORDERABLES)
+            .withId(orderable3.getId())
+            .build(),
+        asSet(
+            new CanFulfillForMeEntryDtoDataBuilder()
+                .buildWithStockCardAndOrderable(stockCard1, orderable3, asOfDate),
+            new CanFulfillForMeEntryDtoDataBuilder()
+                .buildWithStockCardAndOrderable(stockCard2, orderable3, asOfDate)
+        )
+    );
+
+    assertEquals(2, result.size());
+    assertEquals(result.get(0), summary3);
+    assertEquals(result.get(1), summary2);
   }
 }

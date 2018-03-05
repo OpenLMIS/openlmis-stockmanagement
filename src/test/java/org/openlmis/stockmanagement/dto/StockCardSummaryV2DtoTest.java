@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.openlmis.stockmanagement.testutils.CanFulfillForMeEntryDtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardSummaryV2DtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.ToStringTestUtils;
+import org.openlmis.stockmanagement.web.stockcardsummariesv2.StockCardSummaryV2Dto;
 import java.util.Set;
 
 public class StockCardSummaryV2DtoTest {

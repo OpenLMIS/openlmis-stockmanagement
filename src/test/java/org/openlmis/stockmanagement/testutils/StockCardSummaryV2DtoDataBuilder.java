@@ -17,7 +17,7 @@ package org.openlmis.stockmanagement.testutils;
 
 import org.openlmis.stockmanagement.dto.CanFulfillForMeEntryDto;
 import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
-import org.openlmis.stockmanagement.dto.StockCardSummaryV2Dto;
+import org.openlmis.stockmanagement.web.stockcardsummariesv2.StockCardSummaryV2Dto;
 import java.util.HashSet;
 import java.util.Set;
 

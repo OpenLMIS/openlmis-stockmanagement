@@ -71,4 +71,29 @@ public class ApprovedProductReferenceDataServiceTest {
     assertEquals(1, result.getTotalElements());
     assertEquals(productPage.getContent().get(0).getOrderable(), result.getContent().get(0));
   }
+
+  @Test
+  public void shouldReturnAllProductsWhenThereIsNoPaginationParameters() {
+    UUID programId = randomUUID();
+    Collection<UUID> orderableIds = asList(randomUUID(), randomUUID());
+
+    RequestParameters parameters = RequestParameters.init();
+    parameters.set("programId", programId);
+    parameters.set("orderableId", orderableIds);
+
+    Page<ApprovedProductDto> productPage = new PageImpl<>(
+        Collections.singletonList(new ApprovedProductDtoDataBuilder().build()), null, 1);
+
+    UUID facilityId = randomUUID();
+
+    doReturn(productPage)
+        .when(spy)
+        .getPage(facilityId + "/approvedProducts", parameters);
+
+    Page<OrderableDto> result = spy
+        .getApprovedProducts(facilityId, programId, orderableIds, null);
+
+    assertEquals(1, result.getTotalElements());
+    assertEquals(productPage.getContent().get(0).getOrderable(), result.getContent().get(0));
+  }
 }

@@ -15,7 +15,8 @@
 
 package org.openlmis.stockmanagement.web.stockcardsummariesv2;
 
-import static org.apache.commons.collections.CollectionUtils.isEmpty;
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -26,6 +27,7 @@ import lombok.ToString;
 import org.openlmis.stockmanagement.dto.CanFulfillForMeEntryDto;
 import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
 import java.util.List;
+import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -39,16 +41,19 @@ public final class StockCardSummaryV2Dto {
 
   @Getter
   @Setter
-  private List<CanFulfillForMeEntryDto> canFulfillForMe;
+  private Set<CanFulfillForMeEntryDto> canFulfillForMe;
 
   /**
    * Sums stock on hand values from all {@link CanFulfillForMeEntryDto} instances.
    * @return sum of all stock on hand values
    */
   public Integer getStockOnHand() {
-    return isEmpty(canFulfillForMe) ? null : canFulfillForMe
+    List<CanFulfillForMeEntryDto> fulfillEntries = isEmpty(canFulfillForMe) ? null : canFulfillForMe
         .stream()
         .filter(a -> a.getStockOnHand() != null)
+        .collect(toList());
+
+    return isEmpty(fulfillEntries) ? null : fulfillEntries.stream()
         .mapToInt(CanFulfillForMeEntryDto::getStockOnHand)
         .sum();
   }

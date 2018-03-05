@@ -24,7 +24,6 @@ import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.dto.CanFulfillForMeEntryDto;
 import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
-import org.openlmis.stockmanagement.dto.StockCardSummaryV2Dto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,7 +34,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -67,7 +65,7 @@ public class StockCardSummariesV2DtoBuilder {
         .map(p -> build(stockCards, p.getId(),
             MapUtils.isEmpty(orderables) ? null : orderables.get(p.getId()),
             asOfDate))
-        .filter(Objects::nonNull)
+        .sorted(this::sortStockCardSummaries)
         .collect(toList());
   }
 
@@ -89,8 +87,7 @@ public class StockCardSummariesV2DtoBuilder {
             findStockCardByOrderableId(orderableId, stockCards),
             asOfDate));
 
-    return isEmpty(canFulfillSet) ? null
-        : new StockCardSummaryV2Dto(createOrderableReference(orderableId), canFulfillSet);
+    return new StockCardSummaryV2Dto(createOrderableReference(orderableId), canFulfillSet);
   }
 
   private List<CanFulfillForMeEntryDto> buildFulfillsEntries(UUID orderableId,
@@ -130,6 +127,14 @@ public class StockCardSummariesV2DtoBuilder {
         .stream()
         .filter(card -> card.getOrderableId().equals(orderableId))
         .collect(toList());
+  }
+
+  private int sortStockCardSummaries(StockCardSummaryV2Dto summary1,
+                                     StockCardSummaryV2Dto summary2) {
+    if (summary1.getCanFulfillForMe().size() == summary2.getCanFulfillForMe().size()) {
+      return 0;
+    }
+    return summary1.getCanFulfillForMe().size() == 0 ? 1 : -1;
   }
 
   private ObjectReferenceDto createOrderableReference(UUID id) {
