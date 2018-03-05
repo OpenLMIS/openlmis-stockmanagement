@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static com.google.common.primitives.Ints.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
@@ -22,11 +23,12 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PaginationTest {
+
+  private List<Integer> list = asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
 
   @Test
   public void getPageReturnsTheCorrectPage() {
@@ -34,7 +36,7 @@ public class PaginationTest {
     int size = 3;
     PageRequest pageRequest = new PageRequest(page, size);
 
-    Page<Integer> pagedList = Pagination.getPage(getList(), pageRequest);
+    Page<Integer> pagedList = Pagination.getPage(list, pageRequest);
 
     List<Integer> pagedListContent = pagedList.getContent();
 
@@ -52,7 +54,7 @@ public class PaginationTest {
     int size = 5;
     PageRequest pageRequest = new PageRequest(page, size);
 
-    Page<Integer> pagedList = Pagination.getPage(getList(), pageRequest);
+    Page<Integer> pagedList = Pagination.getPage(list, pageRequest);
 
     List<Integer> pagedListContent = pagedList.getContent();
     assertThat(pagedListContent.size()).isEqualTo(0);
@@ -65,10 +67,10 @@ public class PaginationTest {
     int size = Integer.MAX_VALUE;
     PageRequest pageRequest = new PageRequest(page, size);
 
-    Page<Integer> pagedList = Pagination.getPage(getList(), pageRequest);
+    Page<Integer> pagedList = Pagination.getPage(list, pageRequest);
 
     List<Integer> pagedListContent = pagedList.getContent();
-    assertThat(pagedListContent.size()).isEqualTo(getList().size());
+    assertThat(pagedListContent.size()).isEqualTo(list.size());
   }
 
   @Test
@@ -77,7 +79,7 @@ public class PaginationTest {
     int size = 7;
     PageRequest pageRequest = new PageRequest(page, size);
 
-    Page<Integer> pagedList = Pagination.getPage(getList(), pageRequest);
+    Page<Integer> pagedList = Pagination.getPage(list, pageRequest);
 
     List<Integer> pagedListContent = pagedList.getContent();
 
@@ -87,22 +89,4 @@ public class PaginationTest {
     assertThat(pagedListContent.get(1)).isEqualTo(8);
     assertThat(pagedListContent.get(2)).isEqualTo(9);
   }
-
-  private List<Integer> getList() {
-    List<Integer> values = new ArrayList<Integer>() {{
-        add(new Integer(0));
-        add(new Integer(1));
-        add(new Integer(2));
-        add(new Integer(3));
-        add(new Integer(4));
-        add(new Integer(5));
-        add(new Integer(6));
-        add(new Integer(7));
-        add(new Integer(8));
-        add(new Integer(9));
-      }
-    };
-    return values;
-  }
-
 }

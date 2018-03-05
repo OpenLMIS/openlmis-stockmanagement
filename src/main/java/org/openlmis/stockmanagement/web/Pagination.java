@@ -17,49 +17,17 @@ package org.openlmis.stockmanagement.web;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class Pagination {
 
-  /*
-    Because Spring itself uses 0 as the default pageNumber, this value probably shouldn't be changed
-   */
-  public static final int DEFAULT_PAGE_NUMBER = 0;
-
-  /*
-    Use this constant if you want to return all elements.
-   */
-  public static final int NO_PAGINATION = Integer.MAX_VALUE;
+  private static final int DEFAULT_PAGE_NUMBER = 0;
+  private static final int NO_PAGINATION = Integer.MAX_VALUE;
 
   private Pagination() {
     throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Returns the pageNumber of the specified pageable.
-   */
-  public static int getPageNumber(Pageable pageable) {
-    if (pageable == null) {
-      return DEFAULT_PAGE_NUMBER;
-    } else {
-      return pageable.getPageNumber();
-    }
-  }
-
-  /**
-   * Returns the pageSize of the specified pageable.
-   */
-  public static int getPageSize(Pageable pageable) {
-    if (pageable == null) {
-      return NO_PAGINATION;
-    } else {
-      return pageable.getPageSize();
-    }
   }
 
   /**
@@ -123,27 +91,17 @@ public class Pagination {
     return new PageImpl<>(subList, pageable, fullListSize);
   }
 
-  /**
-   * Static method that helps do some actions on resources by using page instances.
-   *
-   * @param data       function that will return data based on passed pageable instance.
-   * @param pageAction action that should be executed on each element on the page.
-   * @param <T>        type of resource.
-   */
-  public static <T> void handlePage(Function<Pageable, Page<T>> data,
-                                    Consumer<? super T> pageAction) {
-    Pageable pageable = new PageRequest(DEFAULT_PAGE_NUMBER, 2000);
-
-    while (true) {
-      Page<T> page = data.apply(pageable);
-
-      if (null == page || !page.hasContent()) {
-        break;
-      }
-
-      page.forEach(pageAction);
-
-      pageable = pageable.next();
+  private static int getPageNumber(Pageable pageable) {
+    if (pageable == null) {
+      return DEFAULT_PAGE_NUMBER;
     }
+    return pageable.getPageNumber();
+  }
+
+  private static int getPageSize(Pageable pageable) {
+    if (pageable == null) {
+      return NO_PAGINATION;
+    }
+    return pageable.getPageSize();
   }
 }
