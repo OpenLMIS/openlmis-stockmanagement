@@ -134,7 +134,7 @@ public class StockCardSummariesV2DtoBuilder {
     if (summary1.getCanFulfillForMe().size() == summary2.getCanFulfillForMe().size()) {
       return 0;
     }
-    return summary1.getCanFulfillForMe().size() == 0 ? 1 : -1;
+    return isEmpty(summary1.getCanFulfillForMe()) ? 1 : -1;
   }
 
   private ObjectReferenceDto createOrderableReference(UUID id) {
