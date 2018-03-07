@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.openlmis.stockmanagement.testutils.DatesUtil.getBaseDate;
 import static org.openlmis.stockmanagement.web.stockcardsummariesv2.StockCardSummariesV2DtoBuilder.ORDERABLES;
 
 import org.junit.Before;
@@ -227,5 +228,55 @@ public class StockCardSummariesV2DtoBuilderTest {
     assertEquals(2, result.size());
     assertEquals(result.get(0), summary3);
     assertEquals(result.get(1), summary2);
+  }
+
+  @Test
+  public void shouldBuildStockCardSummariesWithDateBeforeThereWereCards() throws Exception {
+    List<StockCard> stockCards = asList(stockCard, stockCard1);
+
+    LocalDate asOfDate = getBaseDate().minusDays(10);
+
+    List<StockCardSummaryV2Dto> result = builder.build(Collections.singletonList(orderable1),
+        stockCards, fulfillMap, asOfDate);
+
+    StockCardSummaryV2Dto summary1 = new StockCardSummaryV2Dto(
+        new ObjectReferenceDtoDataBuilder()
+            .withPath(ORDERABLES)
+            .withId(orderable1.getId())
+            .build(),
+        asSet(
+            new CanFulfillForMeEntryDtoDataBuilder()
+                .buildWithStockCardAndOrderable(stockCard1, orderable3, asOfDate),
+            new CanFulfillForMeEntryDtoDataBuilder()
+                .buildWithStockCardAndOrderable(stockCard, orderable1, asOfDate))
+    );
+
+    assertEquals(1, result.size());
+    assertThat(result, hasItems(summary1));
+  }
+
+  @Test
+  public void shouldBuildStockCardSummariesForCurrentDate() throws Exception {
+    List<StockCard> stockCards = asList(stockCard, stockCard1);
+
+    LocalDate asOfDate = LocalDate.now();
+
+    List<StockCardSummaryV2Dto> result = builder.build(Collections.singletonList(orderable1),
+        stockCards, fulfillMap, null);
+
+    StockCardSummaryV2Dto summary1 = new StockCardSummaryV2Dto(
+        new ObjectReferenceDtoDataBuilder()
+            .withPath(ORDERABLES)
+            .withId(orderable1.getId())
+            .build(),
+        asSet(
+            new CanFulfillForMeEntryDtoDataBuilder()
+                .buildWithStockCardAndOrderable(stockCard1, orderable3, asOfDate),
+            new CanFulfillForMeEntryDtoDataBuilder()
+                .buildWithStockCardAndOrderable(stockCard, orderable1, asOfDate))
+    );
+
+    assertEquals(1, result.size());
+    assertThat(result, hasItems(summary1));
   }
 }
