@@ -110,13 +110,23 @@ public class StockCardSummariesV2DtoBuilder {
 
   private CanFulfillForMeEntryDto createCanFulfillForMeEntry(StockCard stockCard, UUID orderableId,
                                                              StockCardLineItem lineItem) {
+    if (null != lineItem) {
+      return new CanFulfillForMeEntryDto(
+          createStockCardReference(stockCard.getId()),
+          createOrderableReference(orderableId),
+          stockCard.getLotId() == null ? null : createLotReference(stockCard.getLotId()),
+          lineItem.getStockOnHand(),
+          lineItem.getProcessedDate(),
+          lineItem.getOccurredDate()
+      );
+    }
     return new CanFulfillForMeEntryDto(
         createStockCardReference(stockCard.getId()),
         createOrderableReference(orderableId),
         stockCard.getLotId() == null ? null : createLotReference(stockCard.getLotId()),
-        lineItem == null ? null : lineItem.getStockOnHand(),
-        lineItem == null ? null : lineItem.getProcessedDate(),
-        lineItem == null ? null : lineItem.getOccurredDate()
+        null,
+        null,
+        null
     );
   }
 
