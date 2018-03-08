@@ -52,13 +52,131 @@ For the EPI program, all vaccine products have a stock card at the Cuamba distri
 facilities Cuamba (N003) and Lurio (N007) in the Cuamba district, and Assumane (N036) in the Lichinga district. An
 initial stock card was created for each product and a few stock movements are recorded.
 
+1. N003/Cuamba and N007/Lurio in the Cuamba District:
+* orderables:
+    * Intervax BCG (20 dose)
+        * lots:
+            * BCGI2017A
+            * BCGI2017B
+    * Intervax BCG Diluent (20 dose)
+    * Acme Gas (Cylinder)
+    * RotaTeq (1 dose)
+        * lots:
+            * ROTAM2017A
+            * ROTAM2017B
+    * MMR II (10 dose)
+    * MMR II Diluent (10 dose)
+    * Synflorix PCV10 (2 dose)
+    * Pentavac PFS (1 dose)
+    * Pentavac PFS (10 dose)
+    * IPOL (5 dose)
+    * GlaxoSmithKline Polio (20 dose)
+    * Acme Safety Box
+    * Acme Syringe 0.05ml
+    * Acme Syringe 0.5ml
+    * Acme Syringe 5ml
+    * Tenivac (10 dose)
+2. N036/Assumane in the Lichinga district:
+* orderables:
+    * GlaxoSmithKline Polio (20 dose)
+    * Acme Safety Box
+    * Acme Syringe 0.05ml
+    * Acme Syringe 0.5ml
+    * Acme Syringe 5ml
+    * Tenivac (10 dose)
+    * Intervax BCG (20 dose)
+        * lots:
+            * BCGI2017A
+            * BCGI2017B
+    * Intervax BCG Diluent (20 dose)
+    * Acme Gas (Cylinder)
+    * RotaTeq (1 dose)
+        * lots:
+            * ROTAM2017A
+            * ROTAM2017B
+    * MMR II (10 dose)
+    * MMR II Diluent (10 dose)
+    * Synflorix PCV10 (2 dose)
+    * Pentavac PFS (1 dose)
+    * Pentavac PFS (10 dose)
+    * IPOL (5 dose)
+
 ## Physical Inventories
 
 Defined in stockmanagement.physical_inventories.json and 
 stockmanagement.physical_inventory_line_items.json.
 
-For the EPI program, two physical inventories are recorded for three health facilities (Cuamba and Lurio in the
+For the EPI program, three physical inventories are recorded for three health facilities (Cuamba and Lurio in the
 Cuamba district and Assumane in the Lichinga district).
+
+1. N003/Cuamba and N007/Lurio in the Cuamba district:
+* orderables:
+    * Intervax BCG (20 dose)
+        * quantity: 50
+    * Intervax BCG Diluent (20 dose)
+        * quantity: 50
+    * Acme Gas (Cylinder)
+        * quantity: 50
+    * RotaTeq (1 dose)
+        * quantity: 50
+    * MMR II (10 dose)
+        * quantity: 50
+    * MMR II Diluent (10 dose)
+        * quantity: 50
+    * Synflorix PCV10 (2 dose)
+        * quantity: 50
+    * Pentavac PFS (1 dose)
+        * quantity: 50
+    * Pentavac PFS (10 dose)
+        * quantity: 50
+    * IPOL (5 dose)
+        * quantity: 50
+    * GlaxoSmithKline Polio (20 dose)
+        * quantity: 50
+    * Acme Safety Box
+        * quantity: 50
+    * Acme Syringe 0.05ml
+        * quantity: 50
+    * Acme Syringe 0.5ml
+        * quantity: 50
+    * Acme Syringe 5ml
+        * quantity: 50
+    * Tenivac (10 dose)
+        * quantity: 50
+2. N036/Assumane in the Lichinga district:
+* orderables:
+    * GlaxoSmithKline Polio (20 dose)
+        * quantity: 50
+    * Acme Safety Box
+        * quantity: 50
+    * Acme Syringe 0.05ml
+        * quantity: 50
+    * Acme Syringe 0.5ml
+        * quantity: 50
+    * Acme Syringe 5ml
+        * quantity: 50
+    * Tenivac (10 dose)
+        * quantity: 50
+    * Intervax BCG (20 dose)
+        * quantity: 50
+    * Intervax BCG Diluent (20 dose)
+        * quantity: 50
+    * Acme Gas (Cylinder)
+        * quantity: 50
+    * RotaTeq (1 dose)
+        * quantity: 50
+    * MMR II (10 dose)
+        * quantity: 50
+    * MMR II Diluent (10 dose)
+        * quantity: 50
+    * Synflorix PCV10 (2 dose)
+        * quantity: 50
+    * Pentavac PFS (1 dose)
+        * quantity: 50
+    * Pentavac PFS (10 dose)
+        * quantity: 50
+    * IPOL (5 dose)
+        * quantity: 50
 
 ## Stock Events
 
