@@ -78,21 +78,6 @@ initial stock card was created for each product and a few stock movements are re
     * Tenivac (10 dose)
 2. D001/Depósito Distrital Cuamba:
 * orderables:
-    * BCG
-    * Gas (Cylinder)
-    * IPV
-    * Measles
-    * PCV10
-    * Pentavalent (1 dose)
-    * Pentavalent (10 dose)
-    * Pentavalent (20 dose)
-    * Polio (20 dose)
-    * Rotavirus
-    * Safety Box
-    * Syringe 0.05ml
-    * Syringe 0.5ml
-    * Syringe 5ml
-    * VAT
     * MMR II Diluent (10 dose)
     * MMR II (10 dose)
     * Intervax BCG (20 dose)
