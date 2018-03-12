@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -69,6 +70,19 @@ public class StockCardsController {
       LOGGER.debug("Found stock card with id: {}", stockCardId);
       return new ResponseEntity<>(stockCardDto, OK);
     }
+  }
+
+  /**
+   * Search Stock Cards by multiple ids.
+   *
+   * @param params   stock cards search parameters
+   * @param pageable stock cards pagination parameters
+   * @return found stock card.
+   */
+  @RequestMapping(value = "/stockCards")
+  public Page<StockCardDto> search(@RequestParam MultiValueMap<String, Object> params,
+      Pageable pageable) {
+    return stockCardService.search(params, pageable);
   }
 
   /**

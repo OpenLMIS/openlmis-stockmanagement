@@ -20,10 +20,12 @@ import static org.apache.commons.lang3.StringUtils.startsWith;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PERMISSION_CHECK_FAILED;
 
+import java.util.UUID;
 import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
 import org.openlmis.stockmanagement.dto.referencedata.RightDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
+import org.openlmis.stockmanagement.service.referencedata.PermissionStrings;
 import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.util.Message;
@@ -33,8 +35,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
-
-import java.util.UUID;
 
 @Service
 @SuppressWarnings("PMD.TooManyMethods")
@@ -61,6 +61,9 @@ public class PermissionService {
 
   @Autowired
   private HomeFacilityPermissionService homeFacilityPermissionService;
+
+  @Autowired
+  private PermissionStrings permissionStrings;
 
   @Value("${auth.server.clientId}")
   private String serviceTokenClientId;
@@ -164,6 +167,10 @@ public class PermissionService {
 
   public void canManageSystemSettings() {
     hasPermission(SYSTEM_SETTINGS_MANAGE, null, null, null);
+  }
+
+  public PermissionStrings.Handler getPermissionStrings(UUID userId) {
+    return permissionStrings.forUser(userId);
   }
 
   private void hasPermission(String rightName, UUID program, UUID facility, UUID warehouse) {

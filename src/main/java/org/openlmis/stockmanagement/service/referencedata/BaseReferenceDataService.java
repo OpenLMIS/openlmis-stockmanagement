@@ -17,18 +17,25 @@ package org.openlmis.stockmanagement.service.referencedata;
 
 import static org.openlmis.stockmanagement.util.RequestHelper.createEntity;
 
-import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
-import org.openlmis.stockmanagement.util.DynamicParametrizedTypeReference;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
+import org.openlmis.stockmanagement.service.RequestHeaders;
+import org.openlmis.stockmanagement.service.ServiceResponse;
+import org.openlmis.stockmanagement.util.DynamicParametrizedTypeReference;
+import org.openlmis.stockmanagement.util.RequestHelper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestTemplate;
 
 public abstract class BaseReferenceDataService<T> extends BaseCommunicationService<T> {
 
@@ -75,6 +82,27 @@ public abstract class BaseReferenceDataService<T> extends BaseCommunicationServi
     return response.getBody();
   }
 
+  protected <P> ServiceResponse<List<P>> tryFindAll(String resourceUrl, Class<P[]> type,
+      String etag) {
+    String url = getServiceUrl() + getUrl() + resourceUrl;
+
+    try {
+      RequestHeaders headers = RequestHeaders.init().setIfNoneMatch(etag);
+      ResponseEntity<P[]> response = restTemplate.exchange(
+          url, HttpMethod.GET, RequestHelper.createEntity(null, addAuthHeader(headers)), type
+      );
+
+      if (response.getStatusCode() == HttpStatus.NOT_MODIFIED) {
+        return new ServiceResponse<>(null, response.getHeaders(), false);
+      } else {
+        List<P> list = Stream.of(response.getBody()).collect(Collectors.toList());
+        return new ServiceResponse<>(list, response.getHeaders(), true);
+      }
+    } catch (HttpStatusCodeException ex) {
+      throw buildDataRetrievalException(ex);
+    }
+  }
+
   private Collection<T> findAllWithMethod(String resourceUrl, Map<String, Object> uriParameters,
                                           Map<String, Object> payload, HttpMethod method) {
     String url = getServiceUrl() + getUrl() + resourceUrl;
@@ -92,6 +120,12 @@ public abstract class BaseReferenceDataService<T> extends BaseCommunicationServi
     } catch (HttpStatusCodeException ex) {
       throw buildDataRetrievalException(ex);
     }
+  }
+
+  private RequestHeaders addAuthHeader(RequestHeaders headers) {
+    return null == headers
+        ? RequestHeaders.init().setAuth(obtainAccessToken())
+        : headers.setAuth(obtainAccessToken());
   }
 
   protected abstract String getUrl();

@@ -15,16 +15,17 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
-import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
-import org.openlmis.stockmanagement.dto.referencedata.UserDto;
-import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Service;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
+import org.openlmis.stockmanagement.dto.referencedata.UserDto;
+import org.openlmis.stockmanagement.service.ServiceResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Service;
 
 @Service
 public class UserReferenceDataService extends BaseReferenceDataService<UserDto> {
@@ -90,4 +91,7 @@ public class UserReferenceDataService extends BaseReferenceDataService<UserDto> 
     return getValue(user + "/hasRight", parameters, Boolean.class);
   }
 
+  public ServiceResponse<List<String>> getPermissionStrings(UUID user, String etag) {
+    return tryFindAll(user + "/permissionStrings", String[].class, etag);
+  }
 }

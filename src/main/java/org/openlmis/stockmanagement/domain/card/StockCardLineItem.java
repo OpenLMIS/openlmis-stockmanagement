@@ -26,7 +26,26 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERRRO_EVENT_SOH_EXCE
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.ExtraDataConverter;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
@@ -41,30 +60,11 @@ import org.openlmis.stockmanagement.util.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 @Entity
-@Data
+@Getter
+@Setter
 @Builder
+@ToString(exclude = "stockCard")
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties({

@@ -15,10 +15,14 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static java.util.Collections.singleton;
+import static java.util.UUID.randomUUID;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PERMISSION_CHECK_FAILED;
@@ -34,6 +38,7 @@ import static org.openlmis.stockmanagement.service.PermissionService.STOCK_ORGAN
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_SOURCES_MANAGE;
 import static org.openlmis.stockmanagement.service.PermissionService.SYSTEM_SETTINGS_MANAGE;
 
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -47,6 +52,8 @@ import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
 import org.openlmis.stockmanagement.dto.referencedata.RightDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
+import org.openlmis.stockmanagement.service.referencedata.PermissionStringDto;
+import org.openlmis.stockmanagement.service.referencedata.PermissionStrings;
 import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.springframework.http.HttpStatus;
@@ -55,7 +62,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.HttpClientErrorException;
-import java.util.UUID;
 
 @SuppressWarnings("PMD.TooManyMethods")
 @RunWith(MockitoJUnitRunner.class)
@@ -69,6 +75,9 @@ public class PermissionServiceTest {
 
   @Mock
   private AuthenticationHelper authenticationHelper;
+
+  @Mock
+  private PermissionStrings permissionStrings;
 
   @InjectMocks
   private PermissionService permissionService;
@@ -308,6 +317,23 @@ public class PermissionServiceTest {
     expectException(STOCK_CARD_TEMPLATES_MANAGE);
 
     permissionService.canCreateStockCardTemplate();
+  }
+
+  @Test
+  public void shouldGetPermissionStrings() {
+    PermissionStrings.Handler handler = mock(PermissionStrings.Handler.class);
+    PermissionStringDto permission = PermissionStringDto
+        .create(STOCK_CARDS_VIEW, randomUUID(), randomUUID());
+
+    when(handler.get()).thenReturn(singleton(permission));
+
+    when(permissionStrings.forUser(any(UUID.class))).thenReturn(handler);
+
+    UUID userId = randomUUID();
+
+    permissionService.getPermissionStrings(userId);
+
+    verify(permissionStrings).forUser(userId);
   }
 
   private void hasRight(UUID rightId, boolean hasRight) {

@@ -16,13 +16,18 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.util.Collections.singletonList;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.domain.card.StockCard.createStockCardFrom;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemFrom;
 import static org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity.identityOf;
 import static org.openlmis.stockmanagement.domain.reason.ReasonCategory.PHYSICAL_INVENTORY;
+import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARDS_VIEW;
 
 import com.google.common.collect.Lists;
-
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
@@ -31,20 +36,26 @@ import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
+import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.i18n.MessageService;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.PermissionStringDto;
+import org.openlmis.stockmanagement.service.referencedata.PermissionStrings;
+import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.util.Message;
+import org.openlmis.stockmanagement.util.UuidUtil;
+import org.openlmis.stockmanagement.web.Pagination;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.UUID;
+import org.springframework.util.MultiValueMap;
 
 /**
  * This class is in charge of persisting and retrieving stock cards. For persisting, it may create
@@ -79,6 +90,9 @@ public class StockCardService extends StockCardBaseService {
 
   @Autowired
   private OrganizationRepository organizationRepository;
+
+  @Autowired
+  private AuthenticationHelper authenticationHelper;
 
   /**
    * Generate stock card line items and stock cards based on event, and persist them.
@@ -126,6 +140,51 @@ public class StockCardService extends StockCardBaseService {
     }
     assignSourceDestinationReasonNameForLineItems(cardDto);
     return cardDto;
+  }
+
+  /**
+   * Find stock card page by parameters. Allowed multiple id parameters.
+   *
+   * @param params   query params
+   * @param pageable pagination and sorting parameters
+   * @return page of filtered stock cards.
+   */
+  public Page<StockCardDto> search(MultiValueMap<String, Object> params, Pageable pageable) {
+    Set<UUID> ids = UuidUtil.getIds(params);
+    UserDto user = authenticationHelper.getCurrentUser();
+    Page<StockCard> page;
+
+    if (user != null) {
+      PermissionStrings.Handler handler = permissionService.getPermissionStrings(user.getId());
+      Set<PermissionStringDto> permissionStrings = handler.get();
+
+      Set<UUID> facilityIds = new HashSet<>();
+      Set<UUID> programIds = new HashSet<>();
+
+      permissionStrings.stream()
+          .filter(permissionString -> permissionString
+              .getRightName()
+              .equalsIgnoreCase(STOCK_CARDS_VIEW))
+          .forEach(permission -> {
+            facilityIds.add(permission.getFacilityId());
+            programIds.add(permission.getProgramId());
+          });
+
+      if (isEmpty(ids)) {
+        page = cardRepository.findByProgramIdInAndFacilityIdIn(programIds, facilityIds, pageable);
+      } else {
+        page = cardRepository
+            .findByProgramIdInAndFacilityIdInAndIdIn(programIds, facilityIds, ids, pageable);
+      }
+    } else {
+      if (isEmpty(ids)) {
+        page = cardRepository.findAll(pageable);
+      } else {
+        page = cardRepository.findByIdIn(ids, pageable);
+      }
+    }
+
+    return Pagination.getPage(createDtos(page.getContent()), pageable, page.getTotalElements());
   }
 
   private StockCard findOrCreateCard(StockEventDto eventDto, StockEventLineItemDto eventLineItem,
