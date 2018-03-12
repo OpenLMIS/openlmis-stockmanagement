@@ -15,9 +15,17 @@
 
 package org.openlmis.stockmanagement.repository;
 
+import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItems;
+import static org.junit.Assert.assertEquals;
 
 import com.google.common.collect.Maps;
+import java.util.UUID;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
@@ -26,11 +34,10 @@ import org.openlmis.stockmanagement.testutils.StockCardDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
-import java.util.UUID;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceException;
 
 public class StockCardRepositoryIntegrationTest
     extends BaseCrudRepositoryIntegrationTest<StockCard> {
@@ -125,5 +132,97 @@ public class StockCardRepositoryIntegrationTest
     stockCardRepository.save(one);
 
     entityManager.flush();
+  }
+
+  @Test
+  public void shouldGetStockCardPageByFacilityIdsAndProgramIdsAndIds() throws Exception {
+    UUID facilityId1 = randomUUID();
+    UUID facilityId2 = randomUUID();
+    UUID programId1 = randomUUID();
+    UUID programId2 = randomUUID();
+    Pageable pageable = new PageRequest(0, 10);
+
+    StockCard stockCard1 = stockCardRepository
+        .save(generateInstance(facilityId1, programId1, randomUUID(), randomUUID()));
+    StockCard stockCard2 = stockCardRepository
+        .save(generateInstance(facilityId2, programId2, randomUUID(), randomUUID()));
+    StockCard stockCard3 = stockCardRepository
+        .save(generateInstance(facilityId2, programId1, randomUUID(), randomUUID()));
+    StockCard stockCard4 = stockCardRepository
+        .save(generateInstance(facilityId1, programId2, randomUUID(), randomUUID()));
+    stockCardRepository.save(generateInstance(facilityId1, programId1, randomUUID(), randomUUID()));
+    stockCardRepository.save(generateInstance(facilityId2, programId2, randomUUID(), randomUUID()));
+    stockCardRepository.save(generateInstance(facilityId1, programId2, randomUUID(), randomUUID()));
+    stockCardRepository
+        .save(generateInstance(facilityId2, randomUUID(), randomUUID(), randomUUID()));
+    stockCardRepository
+        .save(generateInstance(randomUUID(), programId1, randomUUID(), randomUUID()));
+    StockCard stockCard5 = stockCardRepository
+        .save(generateInstance(randomUUID(), randomUUID(), randomUUID(), randomUUID()));
+
+    Page<StockCard> result = stockCardRepository.findByFacilityIdInAndProgramIdInAndIdIn(
+        asList(facilityId1, facilityId2),
+        asList(programId1, programId2),
+        asList(stockCard1.getId(), stockCard2.getId(), stockCard3.getId(),
+            stockCard4.getId(), stockCard5.getId()),
+        pageable);
+
+    assertEquals(10, result.getSize());
+    assertEquals(0, result.getNumber());
+    assertThat(result.getContent(), hasItems(stockCard1, stockCard2, stockCard3, stockCard4));
+  }
+
+  @Test
+  public void findByProgramIdInAndFacilityIdIn() throws Exception {
+    UUID facilityId1 = randomUUID();
+    UUID facilityId2 = randomUUID();
+    UUID programId1 = randomUUID();
+    UUID programId2 = randomUUID();
+    Pageable pageable = new PageRequest(0, 10);
+
+    final StockCard stockCard1 = stockCardRepository
+        .save(generateInstance(facilityId1, programId1, randomUUID(), randomUUID()));
+    final StockCard stockCard2 = stockCardRepository
+        .save(generateInstance(facilityId2, programId2, randomUUID(), randomUUID()));
+    final StockCard stockCard3 = stockCardRepository
+        .save(generateInstance(facilityId2, programId1, randomUUID(), randomUUID()));
+    final StockCard stockCard4 = stockCardRepository
+        .save(generateInstance(facilityId1, programId2, randomUUID(), randomUUID()));
+    stockCardRepository.save(generateInstance(facilityId1, programId1, randomUUID(), randomUUID()));
+    stockCardRepository.save(generateInstance(facilityId2, programId2, randomUUID(), randomUUID()));
+    stockCardRepository.save(generateInstance(facilityId1, programId2, randomUUID(), randomUUID()));
+    stockCardRepository
+        .save(generateInstance(facilityId2, randomUUID(), randomUUID(), randomUUID()));
+    stockCardRepository
+        .save(generateInstance(randomUUID(), programId1, randomUUID(), randomUUID()));
+    stockCardRepository
+        .save(generateInstance(randomUUID(), randomUUID(), randomUUID(), randomUUID()));
+
+    Page<StockCard> result = stockCardRepository.findByFacilityIdInAndProgramIdIn(
+        asList(facilityId1, facilityId2),
+        asList(programId1, programId2),
+        pageable);
+
+    assertEquals(10, result.getSize());
+    assertEquals(0, result.getNumber());
+    assertThat(result.getContent(), hasItems(stockCard1, stockCard2, stockCard3, stockCard4));
+  }
+
+  @Test
+  public void findByIds() throws Exception {
+    Pageable pageable = new PageRequest(0, 10);
+
+    StockCard stockCard1 = stockCardRepository.save(generateInstance());
+    StockCard stockCard2 = stockCardRepository.save(generateInstance());
+    stockCardRepository.save(generateInstance());
+    stockCardRepository.save(generateInstance());
+
+    Page<StockCard> result = stockCardRepository.findByIdIn(
+        asList(stockCard1.getId(), stockCard2.getId()),
+        pageable);
+
+    assertEquals(10, result.getSize());
+    assertEquals(0, result.getNumber());
+    assertThat(result.getContent(), hasItems(stockCard1, stockCard2));
   }
 }

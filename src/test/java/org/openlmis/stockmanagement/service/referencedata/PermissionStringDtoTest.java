@@ -23,6 +23,8 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,4 +75,13 @@ public class PermissionStringDtoTest {
     assertThat(parsed.getProgramId(), equalTo(programId));
     assertThat(parsed.toString(), equalTo(permissionString));
   }
+
+  @Test
+  public void equalsContract() {
+    EqualsVerifier
+        .forClass(PermissionStringDto.class)
+        .suppress(Warning.NONFINAL_FIELDS) // we can't make fields as final in DTO
+        .verify();
+  }
+
 }

@@ -18,6 +18,8 @@ package org.openlmis.stockmanagement.web;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.StockCardDtoDataBuilder.createStockCardDto;
@@ -27,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.UUID;
 import org.junit.Test;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
@@ -38,8 +41,10 @@ import org.openlmis.stockmanagement.util.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.ResultActions;
-import java.util.UUID;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 //the name of this controller test is intentional wrong: cardz insteads of cards
 //because there is a problem with "spring security test" that seems to be relates
@@ -49,6 +54,9 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
 
   private static final String API_STOCK_CARDS = "/api/stockCards/";
   private static final String API_STOCK_CARD_SUMMARIES = "/api/stockCardSummaries";
+  private static final String PAGE = "page";
+  private static final String SIZE = "size";
+  private static final String ID = "id";
 
   @MockBean
   private StockCardService stockCardService;
@@ -144,6 +152,36 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
             .param("size", "20")
             .param("program", programId.toString())
             .param("facility", facilityId.toString()));
+
+    resultActions.andExpect(status().isOk())
+        .andDo(print())
+        .andExpect(jsonPath("$.content", hasSize(1)));
+  }
+
+  @Test
+  public void shouldGetPagedStockCards() throws Exception {
+    UUID stockCardId1 = UUID.randomUUID();
+    UUID stockCardId2 = UUID.randomUUID();
+
+    Pageable pageable = new PageRequest(0, 10);
+
+    MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
+    params.add(ACCESS_TOKEN, ACCESS_TOKEN_VALUE);
+    params.add(ID, stockCardId1.toString());
+    params.add(ID, stockCardId2.toString());
+    params.add(PAGE, String.valueOf(pageable.getPageNumber()));
+    params.add(SIZE, String.valueOf(pageable.getPageSize()));
+
+    doReturn(new PageImpl<>(singletonList(StockCardDtoDataBuilder.createStockCardDto())))
+        .when(stockCardService).search(eq(params), eq(pageable));
+
+    ResultActions resultActions = mvc.perform(
+        get(API_STOCK_CARDS)
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+            .param(ID, stockCardId1.toString())
+            .param(ID, stockCardId2.toString())
+            .param(PAGE, String.valueOf(pageable.getPageNumber()))
+            .param(SIZE, String.valueOf(pageable.getPageSize())));
 
     resultActions.andExpect(status().isOk())
         .andDo(print())

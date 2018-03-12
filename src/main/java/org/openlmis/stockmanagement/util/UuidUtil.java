@@ -29,6 +29,8 @@ public class UuidUtil {
 
   static final String ID = "id";
 
+  private UuidUtil() {}
+
   /**
    * Gets a set of UUID from the query multi value map. It looks up the map key "id" and returns
    * all values associated with that key parsed to UUIDS.
@@ -53,6 +55,4 @@ public class UuidUtil {
 
     return ids;
   }
-
-  private UuidUtil() {}
 }

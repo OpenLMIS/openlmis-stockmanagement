@@ -171,10 +171,10 @@ public class StockCardService extends StockCardBaseService {
           });
 
       if (isEmpty(ids)) {
-        page = cardRepository.findByProgramIdInAndFacilityIdIn(programIds, facilityIds, pageable);
+        page = cardRepository.findByFacilityIdInAndProgramIdIn(programIds, facilityIds, pageable);
       } else {
         page = cardRepository
-            .findByProgramIdInAndFacilityIdInAndIdIn(programIds, facilityIds, ids, pageable);
+            .findByFacilityIdInAndProgramIdInAndIdIn(programIds, facilityIds, ids, pageable);
       }
     } else {
       if (isEmpty(ids)) {

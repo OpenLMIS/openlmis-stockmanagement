@@ -50,10 +50,10 @@ public interface StockCardRepository extends JpaRepository<StockCard, UUID> {
   List<OrderableLotIdentity> getIdentitiesBy(@Param(StockCard.PARAM_PROGRAM_ID) UUID programId,
                                              @Param(StockCard.PARAM_FACILITY_ID) UUID facilityId);
 
-  Page<StockCard> findByProgramIdInAndFacilityIdInAndIdIn(Collection<UUID> facilityIds,
+  Page<StockCard> findByFacilityIdInAndProgramIdInAndIdIn(Collection<UUID> facilityIds,
       Collection<UUID> programIds, Collection<UUID> ids, Pageable pageable);
 
-  Page<StockCard> findByProgramIdInAndFacilityIdIn(Collection<UUID> facilityIds,
+  Page<StockCard> findByFacilityIdInAndProgramIdIn(Collection<UUID> facilityIds,
       Collection<UUID> programIds, Pageable pageable);
 
   Page<StockCard> findByIdIn(Collection<UUID> ids, Pageable pageable);
