@@ -26,4 +26,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class DispensableDto {
   private String dispensingUnit;
+  private String displayUnit;
 }

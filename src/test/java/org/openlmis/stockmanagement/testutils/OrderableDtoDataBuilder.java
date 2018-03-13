@@ -43,7 +43,7 @@ public class OrderableDtoDataBuilder {
     productCode = "P" + instanceNumber;
     fullProductName = "Product " + instanceNumber;
     netContent = 10L;
-    dispensable = new DispensableDto("pack");
+    dispensable = new DispensableDto("pack", "Pack");
     identifiers = new HashMap<>();
     extraData = null;
   }
