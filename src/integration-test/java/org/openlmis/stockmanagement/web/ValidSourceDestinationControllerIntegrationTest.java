@@ -19,6 +19,7 @@ import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.ValidDestinationAssignmentDataBuilder.createDestination;
 import static org.openlmis.stockmanagement.testutils.ValidSourceAssignmentDataBuilder.createSource;
@@ -40,7 +41,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
-@SuppressWarnings("PMD.UnusedPrivateField")
 public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest {
 
   private static final String PROGRAM = "program";
@@ -77,6 +77,8 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
 
     when(validDestinationService.findDestinations(program, facilityType))
         .thenReturn(singletonList(sourceDestination));
+
+    verifyZeroInteractions(permissionService);
 
     //1. perform valid destinations
     performSourcesOrDestinations(program, facilityType, sourceDestination, API_VALID_DESTINATIONS);

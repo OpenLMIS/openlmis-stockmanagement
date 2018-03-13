@@ -23,6 +23,7 @@ Bug fixes, security and performance improvements, also backwards-compatible:
 * [OLMIS-3874](https://openlmis.atlassian.net/browse/OLMIS-3874): When getting orderables for stock cards, do not use FTAPs, but all orderables, to avoid a NullPointerException.
 * [OLMIS-3820](https://openlmis.atlassian.net/browse/OLMIS-3820): Add lot stock cards to Cuamba and Assumane in demo data.
 * [OLMIS-3778](https://openlmis.atlassian.net/browse/OLMIS-3778): Fixed service checks the rights of a wrong user
+* [OLMIS-4310](https://openlmis.atlassian.net/browse/OLMIS-4310): All valid reasons, sources and destinations can now be retrieved by any authenticated user.
 
 2.0.0 / 2017-11-09
 ==================

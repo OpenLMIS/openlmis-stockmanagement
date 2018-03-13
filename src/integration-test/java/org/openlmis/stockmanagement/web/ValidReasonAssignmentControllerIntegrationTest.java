@@ -25,6 +25,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -97,6 +98,7 @@ public class ValidReasonAssignmentControllerIntegrationTest extends BaseWebTest 
             .param(FACILITY_TYPE, facilityTypeId.toString()));
 
     //then
+    verifyZeroInteractions(permissionService);
     resultActions
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(1)));
@@ -128,6 +130,7 @@ public class ValidReasonAssignmentControllerIntegrationTest extends BaseWebTest 
             .param(REASON_TYPE, "DEBIT"));
 
     //then
+    verifyZeroInteractions(permissionService);
     resultActions
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(2)));
