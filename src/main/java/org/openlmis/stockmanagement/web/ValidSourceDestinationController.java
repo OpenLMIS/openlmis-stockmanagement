@@ -71,7 +71,6 @@ public class ValidSourceDestinationController {
       @RequestParam UUID facilityType) {
     LOGGER.debug(format("Try to find valid destinations with program %s and facility type %s",
         program.toString(), facilityType.toString()));
-    permissionService.canViewValidDestinations(program, facilityType);
     return new ResponseEntity<>(
         validDestinationService.findDestinations(program, facilityType), OK);
   }
@@ -111,7 +110,6 @@ public class ValidSourceDestinationController {
       @RequestParam UUID facilityType) {
     LOGGER.debug(format("Try to find valid sources with program %s and facility type %s",
         program.toString(), facilityType.toString()));
-    permissionService.canViewValidDestinations(program, facilityType);
     return new ResponseEntity<>(
         validSourceService.findSources(program, facilityType), OK);
   }

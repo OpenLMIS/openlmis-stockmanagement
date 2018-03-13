@@ -22,7 +22,6 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -35,6 +34,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -42,7 +43,6 @@ import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
 import org.openlmis.stockmanagement.dto.ValidReasonAssignmentDto;
-import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
 import org.openlmis.stockmanagement.service.PermissionService;
@@ -51,11 +51,9 @@ import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExi
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
-import java.util.Collections;
-import java.util.UUID;
 
 @SuppressWarnings("PMD.TooManyMethods")
-public class ValidReasonAssignmentControllerTest extends BaseWebTest {
+public class ValidReasonAssignmentControllerIntegrationTest extends BaseWebTest {
   private static final String VALID_REASON_API = "/api/validReasons";
   private static final String PROGRAM = "program";
   private static final String FACILITY_TYPE = "facilityType";
@@ -294,27 +292,6 @@ public class ValidReasonAssignmentControllerTest extends BaseWebTest {
     //then
     resultActions.andExpect(status().isBadRequest());
     verify(reasonAssignmentRepository, never()).save(any(ValidReasonAssignment.class));
-  }
-
-  @Test
-  public void return400WhenPermissionCheckFails() throws Exception {
-    //given
-    //not exist in demo data
-    UUID programId = randomUUID();
-    UUID facilityTypeId = UUID.fromString("ac1d268b-ce10-455f-bf87-9c667da8f060");
-
-    doThrow(new ValidationMessageException("errorKey")).when(permissionService)
-        .canViewValidReasons(programId, facilityTypeId);
-
-    //when
-    ResultActions resultActions = mvc.perform(
-        get(VALID_REASON_API)
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param(PROGRAM, programId.toString())
-            .param(FACILITY_TYPE, facilityTypeId.toString()));
-
-    //then
-    resultActions.andExpect(status().isBadRequest());
   }
 
   @Test

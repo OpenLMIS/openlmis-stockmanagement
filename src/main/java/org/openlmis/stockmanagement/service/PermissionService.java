@@ -60,9 +60,6 @@ public class PermissionService {
   private UserReferenceDataService userReferenceDataService;
 
   @Autowired
-  private HomeFacilityPermissionService homeFacilityPermissionService;
-
-  @Autowired
   private PermissionStrings permissionStrings;
 
   @Value("${auth.server.clientId}")
@@ -132,39 +129,6 @@ public class PermissionService {
     hasPermission(STOCK_ORGANIZATIONS_MANAGE, null, null, null);
   }
 
-  /**
-   * Check if user can view valid reasons. Admin with manage right can view all, regular users can
-   * only view the ones that match their home facility.
-   *
-   * @param program      program id.
-   * @param facilityType facility type id.
-   */
-  public void canViewValidReasons(UUID program, UUID facilityType) {
-    canViewStockAssignable(REASONS_MANAGE, program, facilityType);
-  }
-
-  /**
-   * Check if user can view valid sources. Admin with manage right can view all, regular users can
-   * only view the ones that match their home facility.
-   *
-   * @param program      program id.
-   * @param facilityType facility type id.
-   */
-  public void canViewValidSources(UUID program, UUID facilityType) {
-    canViewStockAssignable(STOCK_SOURCES_MANAGE, program, facilityType);
-  }
-
-  /**
-   * Check if user can view valid destinations. Admin with manage right can view all, regular users
-   * can only view the ones that match their home facility.
-   *
-   * @param program      program id.
-   * @param facilityType facility type id.
-   */
-  public void canViewValidDestinations(UUID program, UUID facilityType) {
-    canViewStockAssignable(STOCK_DESTINATIONS_MANAGE, program, facilityType);
-  }
-
   public void canManageSystemSettings() {
     hasPermission(SYSTEM_SETTINGS_MANAGE, null, null, null);
   }
@@ -178,13 +142,6 @@ public class PermissionService {
     if (null == result || !result.getResult()) {
       throw new PermissionMessageException(
           new Message(ERROR_NO_FOLLOWING_PERMISSION, rightName, program, facility));
-    }
-  }
-
-  private void canViewStockAssignable(String rightName, UUID program, UUID facilityType) {
-    ResultDto<Boolean> result = getRightResult(rightName, null, null, null, false);
-    if (null == result || !result.getResult()) {
-      homeFacilityPermissionService.checkProgramAndFacilityType(program, facilityType);
     }
   }
 

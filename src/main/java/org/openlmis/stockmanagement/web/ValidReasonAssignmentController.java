@@ -92,7 +92,6 @@ public class ValidReasonAssignmentController {
           "Try to find stock card line item reason with program %s and facility type %s",
           program.toString(), facilityType.toString()));
     }
-    permissionService.canViewValidReasons(program, facilityType);
 
     return reasonAssignmentDtoBuilder.build(
         validReasonAssignmentService.search(program, facilityType, reasonTypes));

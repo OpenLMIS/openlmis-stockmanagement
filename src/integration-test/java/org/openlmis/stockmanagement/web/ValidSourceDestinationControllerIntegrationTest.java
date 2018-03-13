@@ -19,9 +19,7 @@ import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_NOT_FOUND;
 import static org.openlmis.stockmanagement.testutils.ValidDestinationAssignmentDataBuilder.createDestination;
 import static org.openlmis.stockmanagement.testutils.ValidSourceAssignmentDataBuilder.createSource;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -30,20 +28,19 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.UUID;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
-import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.ValidDestinationService;
 import org.openlmis.stockmanagement.service.ValidSourceService;
-import org.openlmis.stockmanagement.util.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
-import java.util.UUID;
 
+@SuppressWarnings("PMD.UnusedPrivateField")
 public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest {
 
   private static final String PROGRAM = "program";
@@ -86,27 +83,6 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
 
     //2. perform valid sources
     performSourcesOrDestinations(program, facilityType, sourceDestination, API_VALID_SOURCES);
-  }
-
-  @Test
-  public void shouldReturn400WhenPermissionCheckFails()
-      throws Exception {
-    //given
-    UUID programId = randomUUID();
-    UUID facilityTypeId = randomUUID();
-    doThrow(new ValidationMessageException(
-        new Message(ERROR_PROGRAM_NOT_FOUND, programId.toString())))
-        .when(permissionService)
-        .canViewValidDestinations(programId, facilityTypeId);
-
-    //when
-    ResultActions resultActions = mvc.perform(get(API_VALID_DESTINATIONS)
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .param(PROGRAM, programId.toString())
-        .param(FACILITY_TYPE, facilityTypeId.toString()));
-
-    //then
-    resultActions.andExpect(status().isBadRequest());
   }
 
   @Test

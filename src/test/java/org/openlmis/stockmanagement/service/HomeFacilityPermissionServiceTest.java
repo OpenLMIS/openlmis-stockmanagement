@@ -79,22 +79,15 @@ public class HomeFacilityPermissionServiceTest {
   }
 
   @Test(expected = PermissionMessageException.class)
-  public void throwExceptionWhenFacilityTypeAndHomeFacilityTypeNotMatch()
-      throws Exception {
+  public void shouldThrowExceptionWhenProgramIsNotSupportedByTheFacility() throws Exception {
 
-    homeFacilityPermissionService.checkProgramAndFacilityType(programId, randomUUID());
-  }
-
-  @Test(expected = PermissionMessageException.class)
-  public void throwExceptionWhenProgramIsNotSupportedByTheFacility() throws Exception {
-
-    homeFacilityPermissionService.checkProgramAndFacilityType(randomUUID(), facilityTypeId);
+    homeFacilityPermissionService.checkProgramSupported(randomUUID());
   }
 
   @Test
-  public void checkProgramFacilityHappyPath() throws Exception {
+  public void shouldPassValidationIfProgramIsSupported() throws Exception {
 
-    homeFacilityPermissionService.checkProgramAndFacilityType(programId, facilityTypeId);
+    homeFacilityPermissionService.checkProgramSupported(programId);
   }
   
   private void mockUserDto() {

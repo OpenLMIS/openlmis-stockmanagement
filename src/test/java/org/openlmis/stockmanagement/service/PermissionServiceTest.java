@@ -285,17 +285,6 @@ public class PermissionServiceTest {
   }
 
   @Test
-  public void adminCanViewAllValidReasonsSourcesDestinations() {
-    //given
-    hasRight(rightId, true);
-
-    //when
-    permissionService.canViewValidReasons(UUID.randomUUID(), UUID.randomUUID());
-    permissionService.canViewValidSources(UUID.randomUUID(), UUID.randomUUID());
-    permissionService.canViewValidDestinations(UUID.randomUUID(), UUID.randomUUID());
-  }
-
-  @Test
   public void serviceTokensCanDoAnything() {
     when(securityContext.getAuthentication()).thenReturn(serviceClient);
 

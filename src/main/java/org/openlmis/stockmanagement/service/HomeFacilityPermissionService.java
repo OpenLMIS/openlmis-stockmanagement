@@ -15,9 +15,9 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_TYPE_HOME_FACILITY_TYPE_NOT_MATCH;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_NOT_SUPPORTED;
 
+import java.util.UUID;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
@@ -26,8 +26,6 @@ import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
-
 @Service
 public class HomeFacilityPermissionService {
   @Autowired
@@ -35,19 +33,6 @@ public class HomeFacilityPermissionService {
   
   @Autowired
   private FacilityReferenceDataService facilityService;
-
-  /**
-   * 1 Check if program is supported by user's home facility.
-   * 2 Check if facility type matches user's home facility's type.
-   * Will throw exception if any of the above two fails.
-   *
-   * @param programId      program id.
-   * @param facilityTypeId facility type id.
-   */
-  public void checkProgramAndFacilityType(UUID programId, UUID facilityTypeId) {
-    checkProgramSupported(programId);
-    checkFacilityTypeMatches(facilityTypeId);
-  }
 
   /**
    * Check if program is supported by user's home facility.
@@ -66,18 +51,6 @@ public class HomeFacilityPermissionService {
         .anyMatch(supportedProgram -> programId.equals(supportedProgram.getId()));
     if (!isSupported) {
       throwException(ERROR_PROGRAM_NOT_SUPPORTED, programId.toString());
-    }
-  }
-
-  private void checkFacilityTypeMatches(UUID facilityTypeId) {
-    UUID homeFacilityId = authenticationHelper.getCurrentUser().getHomeFacilityId();
-    FacilityDto homeFacility = null;
-    if (homeFacilityId != null) {
-      homeFacility = facilityService.findOne(homeFacilityId);
-    }
-
-    if (homeFacility == null || !facilityTypeId.equals(homeFacility.getType().getId())) {
-      throwException(ERROR_FACILITY_TYPE_HOME_FACILITY_TYPE_NOT_MATCH, facilityTypeId.toString());
     }
   }
 
