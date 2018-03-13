@@ -18,7 +18,6 @@ package org.openlmis.stockmanagement.web;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -29,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.google.common.collect.ImmutableSet;
 import java.util.UUID;
 import org.junit.Test;
 import org.openlmis.stockmanagement.dto.StockCardDto;
@@ -43,8 +43,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 //the name of this controller test is intentional wrong: cardz insteads of cards
 //because there is a problem with "spring security test" that seems to be relates
@@ -165,15 +163,8 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
 
     Pageable pageable = new PageRequest(0, 10);
 
-    MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
-    params.add(ACCESS_TOKEN, ACCESS_TOKEN_VALUE);
-    params.add(ID, stockCardId1.toString());
-    params.add(ID, stockCardId2.toString());
-    params.add(PAGE, String.valueOf(pageable.getPageNumber()));
-    params.add(SIZE, String.valueOf(pageable.getPageSize()));
-
     doReturn(new PageImpl<>(singletonList(StockCardDtoDataBuilder.createStockCardDto())))
-        .when(stockCardService).search(eq(params), eq(pageable));
+        .when(stockCardService).search(ImmutableSet.of(stockCardId1, stockCardId2), pageable);
 
     ResultActions resultActions = mvc.perform(
         get(API_STOCK_CARDS)

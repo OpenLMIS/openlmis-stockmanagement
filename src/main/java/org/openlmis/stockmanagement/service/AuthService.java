@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.service;
 
 import static org.openlmis.stockmanagement.util.RequestHelper.createUri;
 
+import java.util.Map;
 import org.apache.commons.codec.binary.Base64;
 import org.openlmis.stockmanagement.util.RequestParameters;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +28,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
-import java.util.Map;
 
 @Service
 public class AuthService {

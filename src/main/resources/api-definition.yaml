@@ -379,7 +379,7 @@ traits:
   /stockCards:
       get:
           is: [ secured, paginated, sorted ]
-          description: Search Stock Cards
+          description: Search for Stock Cards, result is an intersection of user rights and request parameters.
           queryParameters:
               id:
                   required: false

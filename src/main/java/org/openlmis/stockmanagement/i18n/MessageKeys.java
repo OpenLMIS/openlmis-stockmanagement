@@ -280,6 +280,8 @@ public abstract class MessageKeys {
       = SERVICE_PREFIX + ".error.shallowCopy";
   public static final String ERROR_IO = ERROR_PREFIX + ".io";
 
+  public static final String ERROR_ENCODING = ERROR_PREFIX + ".encoding.notSupported";
+
   private MessageKeys() {
     throw new UnsupportedOperationException();
   }

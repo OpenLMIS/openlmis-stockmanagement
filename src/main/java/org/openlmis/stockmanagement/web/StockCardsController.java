@@ -24,6 +24,7 @@ import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardService;
 import org.openlmis.stockmanagement.service.StockCardSummariesService;
+import org.openlmis.stockmanagement.util.UuidUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +82,7 @@ public class StockCardsController {
   @RequestMapping(value = "/stockCards")
   public Page<StockCardDto> search(@RequestParam MultiValueMap<String, Object> params,
       Pageable pageable) {
-    return stockCardService.search(params, pageable);
+    return stockCardService.search(UuidUtil.getIds(params), pageable);
   }
 
   /**

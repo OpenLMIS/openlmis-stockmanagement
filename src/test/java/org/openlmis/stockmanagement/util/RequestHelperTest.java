@@ -20,14 +20,16 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
+import java.net.URI;
 import org.junit.Test;
+import org.openlmis.stockmanagement.service.RequestHeaders;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import java.net.URI;
 
 public class RequestHelperTest {
 
   private static final String URL = "http://localhost";
+  private static final String BEARER = "Bearer ";
 
   @Test
   public void shouldCreateUriWithoutParameters() throws Exception {
@@ -48,20 +50,22 @@ public class RequestHelperTest {
   }
 
   @Test
-  public void shouldCreateUriWithIncorrectParameters() throws Exception {
+  public void shouldCreateUriWithEncodedParameters() throws Exception {
     URI uri = RequestHelper.createUri(URL, RequestParameters.init().set("a", "b c"));
     assertThat(uri.getQuery(), is("a=b c"));
   }
 
   @Test
-  public void shouldCreateEntityWithAnAuthHeader() {
+  public void shouldCreateEntityWithHeaders() {
     String body = "test";
     String token = "token";
 
-    HttpEntity<String> entity = RequestHelper.createEntity(token, body);
+    RequestHeaders headers = RequestHeaders.init()
+        .set(HttpHeaders.AUTHORIZATION, BEARER + token);
+    HttpEntity<String> entity = RequestHelper.createEntity(body, headers);
 
     assertThat(entity.getHeaders().get(HttpHeaders.AUTHORIZATION),
-        is(singletonList("Bearer " + token)));
+        is(singletonList(BEARER + token)));
     assertThat(entity.getBody(), is(body));
   }
 
@@ -69,9 +73,11 @@ public class RequestHelperTest {
   public void shouldCreateEntityWithNoBody() {
     String token = "token";
 
-    HttpEntity<String> entity = RequestHelper.createEntity(token, null);
+    RequestHeaders headers = RequestHeaders.init()
+        .set(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+    HttpEntity<String> entity = RequestHelper.createEntity(headers);
 
     assertThat(entity.getHeaders().get(HttpHeaders.AUTHORIZATION),
-        is(singletonList("Bearer " + token)));
+        is(singletonList(BEARER + token)));
   }
 }

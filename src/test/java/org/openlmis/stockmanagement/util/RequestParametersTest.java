@@ -21,11 +21,12 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.Maps;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.junit.Test;
-import java.util.Collections;
-import java.util.Map;
 
 public class RequestParametersTest {
 
@@ -37,25 +38,34 @@ public class RequestParametersTest {
   }
 
   @Test
-  public void shouldSetParameter() throws Exception {
+  public void shouldConstructFromMap() {
+    HashMap<String, Object> map = new HashMap<>();
+    map.put("a", "b");
+
+    RequestParameters requestParameters = RequestParameters.of(map);
+    assertThat(toMap(requestParameters), hasEntry("a", Collections.singletonList("b")));
+  }
+
+  @Test
+  public void shouldSetParameter() {
     RequestParameters params = RequestParameters.init().set("a", "b");
     assertThat(toMap(params), hasEntry("a", Collections.singletonList("b")));
   }
 
   @Test
-  public void shouldNotSetParametersValueCollectionIsNull() throws Exception {
+  public void shouldNotSetParametersValueCollectionIsNull() {
     RequestParameters params = RequestParameters.init().set("a", null);
     assertThat(toMap(params), not(hasKey("a")));
   }
 
   @Test
-  public void shouldNotSetParametersValueIsNull() throws Exception {
+  public void shouldNotSetParametersValueIsNull() {
     RequestParameters params = RequestParameters.init().set("a", (Object) null);
     assertThat(toMap(params), not(hasKey("a")));
   }
 
   @Test
-  public void shouldSetAllParametersFromOtherInstance() throws Exception {
+  public void shouldSetAllParametersFromOtherInstance() {
     RequestParameters parent = RequestParameters.init().set("a", "b");
     RequestParameters params = RequestParameters.init().setAll(parent);
 

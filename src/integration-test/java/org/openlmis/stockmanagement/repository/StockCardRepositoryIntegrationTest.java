@@ -51,6 +51,19 @@ public class StockCardRepositoryIntegrationTest
   @Autowired
   private StockEventsRepository stockEventsRepository;
 
+  private UUID facilityId1 = randomUUID();
+  private UUID facilityId2 = randomUUID();
+  private UUID programId1 = randomUUID();
+  private UUID programId2 = randomUUID();
+
+  private Pageable pageable = new PageRequest(0, 10);
+
+  private StockCard stockCard1;
+  private StockCard stockCard2;
+  private StockCard stockCard3;
+  private StockCard stockCard4;
+  private StockCard stockCard5;
+
   @Override
   CrudRepository<StockCard, UUID> getRepository() {
     return stockCardRepository;
@@ -88,77 +101,53 @@ public class StockCardRepositoryIntegrationTest
 
   @Test(expected = PersistenceException.class)
   public void shouldNotAllowCreatingCardForTheSameFacilityProgramProductAndLot() throws Exception {
-    StockCard one = generateInstance();
-    StockCard two = generateInstance(
-        one.getFacilityId(), one.getProgramId(), one.getOrderableId(), one.getLotId()
-    );
+    stockCard1 = generateInstance();
+    stockCard2 = generateInstance(stockCard1.getFacilityId(), stockCard1.getProgramId(),
+        stockCard1.getOrderableId(), stockCard1.getLotId());
 
-    stockCardRepository.save(one);
-    stockCardRepository.save(two);
+    stockCardRepository.save(stockCard1);
+    stockCardRepository.save(stockCard2);
 
     entityManager.flush();
   }
 
   @Test(expected = PersistenceException.class)
   public void shouldNotAllowCreatingCardForTheSameFacilityProgramAndProduct() throws Exception {
-    StockCard one = generateInstance();
-    one.setLotId(null);
+    stockCard1 = generateInstance();
+    stockCard1.setLotId(null);
 
-    StockCard two = generateInstance(
-        one.getFacilityId(), one.getProgramId(), one.getOrderableId(), one.getLotId()
-    );
+    stockCard2 = generateInstance(stockCard1.getFacilityId(), stockCard1.getProgramId(),
+        stockCard1.getOrderableId(), stockCard1.getLotId());
 
-    stockCardRepository.save(one);
-    stockCardRepository.save(two);
+    stockCardRepository.save(stockCard1);
+    stockCardRepository.save(stockCard2);
 
     entityManager.flush();
   }
 
   @Test
   public void shouldPersistWithNullExtraData() throws Exception {
-    StockCard one = generateInstance();
-    one.getLineItems().get(0).setExtraData(null);
+    stockCard1 = generateInstance();
+    stockCard1.getLineItems().get(0).setExtraData(null);
 
-    stockCardRepository.save(one);
+    stockCardRepository.save(stockCard1);
 
     entityManager.flush();
   }
 
   @Test
   public void shouldPersistWithEmptyExtraData() throws Exception {
-    StockCard one = generateInstance();
-    one.getLineItems().get(0).setExtraData(Maps.newHashMap());
+    stockCard1 = generateInstance();
+    stockCard1.getLineItems().get(0).setExtraData(Maps.newHashMap());
 
-    stockCardRepository.save(one);
+    stockCardRepository.save(stockCard1);
 
     entityManager.flush();
   }
 
   @Test
   public void shouldGetStockCardPageByFacilityIdsAndProgramIdsAndIds() throws Exception {
-    UUID facilityId1 = randomUUID();
-    UUID facilityId2 = randomUUID();
-    UUID programId1 = randomUUID();
-    UUID programId2 = randomUUID();
-    Pageable pageable = new PageRequest(0, 10);
-
-    StockCard stockCard1 = stockCardRepository
-        .save(generateInstance(facilityId1, programId1, randomUUID(), randomUUID()));
-    StockCard stockCard2 = stockCardRepository
-        .save(generateInstance(facilityId2, programId2, randomUUID(), randomUUID()));
-    StockCard stockCard3 = stockCardRepository
-        .save(generateInstance(facilityId2, programId1, randomUUID(), randomUUID()));
-    StockCard stockCard4 = stockCardRepository
-        .save(generateInstance(facilityId1, programId2, randomUUID(), randomUUID()));
-    stockCardRepository.save(generateInstance(facilityId1, programId1, randomUUID(), randomUUID()));
-    stockCardRepository.save(generateInstance(facilityId2, programId2, randomUUID(), randomUUID()));
-    stockCardRepository.save(generateInstance(facilityId1, programId2, randomUUID(), randomUUID()));
-    stockCardRepository
-        .save(generateInstance(facilityId2, randomUUID(), randomUUID(), randomUUID()));
-    stockCardRepository
-        .save(generateInstance(randomUUID(), programId1, randomUUID(), randomUUID()));
-    StockCard stockCard5 = stockCardRepository
-        .save(generateInstance(randomUUID(), randomUUID(), randomUUID(), randomUUID()));
+    initializeStockCardsForMultipleFacilitiesAndPrograms();
 
     Page<StockCard> result = stockCardRepository.findByFacilityIdInAndProgramIdInAndIdIn(
         asList(facilityId1, facilityId2),
@@ -174,29 +163,7 @@ public class StockCardRepositoryIntegrationTest
 
   @Test
   public void findByProgramIdInAndFacilityIdIn() throws Exception {
-    UUID facilityId1 = randomUUID();
-    UUID facilityId2 = randomUUID();
-    UUID programId1 = randomUUID();
-    UUID programId2 = randomUUID();
-    Pageable pageable = new PageRequest(0, 10);
-
-    final StockCard stockCard1 = stockCardRepository
-        .save(generateInstance(facilityId1, programId1, randomUUID(), randomUUID()));
-    final StockCard stockCard2 = stockCardRepository
-        .save(generateInstance(facilityId2, programId2, randomUUID(), randomUUID()));
-    final StockCard stockCard3 = stockCardRepository
-        .save(generateInstance(facilityId2, programId1, randomUUID(), randomUUID()));
-    final StockCard stockCard4 = stockCardRepository
-        .save(generateInstance(facilityId1, programId2, randomUUID(), randomUUID()));
-    stockCardRepository.save(generateInstance(facilityId1, programId1, randomUUID(), randomUUID()));
-    stockCardRepository.save(generateInstance(facilityId2, programId2, randomUUID(), randomUUID()));
-    stockCardRepository.save(generateInstance(facilityId1, programId2, randomUUID(), randomUUID()));
-    stockCardRepository
-        .save(generateInstance(facilityId2, randomUUID(), randomUUID(), randomUUID()));
-    stockCardRepository
-        .save(generateInstance(randomUUID(), programId1, randomUUID(), randomUUID()));
-    stockCardRepository
-        .save(generateInstance(randomUUID(), randomUUID(), randomUUID(), randomUUID()));
+    initializeStockCardsForMultipleFacilitiesAndPrograms();
 
     Page<StockCard> result = stockCardRepository.findByFacilityIdInAndProgramIdIn(
         asList(facilityId1, facilityId2),
@@ -210,10 +177,10 @@ public class StockCardRepositoryIntegrationTest
 
   @Test
   public void findByIds() throws Exception {
-    Pageable pageable = new PageRequest(0, 10);
+    pageable = new PageRequest(0, 10);
 
-    StockCard stockCard1 = stockCardRepository.save(generateInstance());
-    StockCard stockCard2 = stockCardRepository.save(generateInstance());
+    stockCard1 = stockCardRepository.save(generateInstance());
+    stockCard2 = stockCardRepository.save(generateInstance());
     stockCardRepository.save(generateInstance());
     stockCardRepository.save(generateInstance());
 
@@ -224,5 +191,26 @@ public class StockCardRepositoryIntegrationTest
     assertEquals(10, result.getSize());
     assertEquals(0, result.getNumber());
     assertThat(result.getContent(), hasItems(stockCard1, stockCard2));
+  }
+
+  private void initializeStockCardsForMultipleFacilitiesAndPrograms() {
+    stockCard1 = stockCardRepository
+        .save(generateInstance(facilityId1, programId1, randomUUID(), randomUUID()));
+    stockCard2 = stockCardRepository
+        .save(generateInstance(facilityId2, programId2, randomUUID(), randomUUID()));
+    stockCard3 = stockCardRepository
+        .save(generateInstance(facilityId2, programId1, randomUUID(), randomUUID()));
+    stockCard4 = stockCardRepository
+        .save(generateInstance(facilityId1, programId2, randomUUID(), randomUUID()));
+    stockCard5 = stockCardRepository
+        .save(generateInstance(randomUUID(), randomUUID(), randomUUID(), randomUUID()));
+
+    stockCardRepository.save(generateInstance(facilityId1, programId1, randomUUID(), randomUUID()));
+    stockCardRepository.save(generateInstance(facilityId2, programId2, randomUUID(), randomUUID()));
+    stockCardRepository.save(generateInstance(facilityId1, programId2, randomUUID(), randomUUID()));
+    stockCardRepository
+        .save(generateInstance(facilityId2, randomUUID(), randomUUID(), randomUUID()));
+    stockCardRepository
+        .save(generateInstance(randomUUID(), programId1, randomUUID(), randomUUID()));
   }
 }

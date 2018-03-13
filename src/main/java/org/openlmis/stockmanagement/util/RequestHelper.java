@@ -15,14 +15,17 @@
 
 package org.openlmis.stockmanagement.util;
 
-import org.openlmis.stockmanagement.exception.EncodingException;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_ENCODING;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.service.RequestHeaders;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
 
 public final class RequestHelper {
 
@@ -50,7 +53,7 @@ public final class RequestHelper {
               UriUtils.encodeQueryParam(String.valueOf(one),
                   StandardCharsets.UTF_8.name()));
         } catch (UnsupportedEncodingException ex) {
-          throw new EncodingException(ex);
+          throw new ValidationMessageException(ex, ERROR_ENCODING);
         }
       }));
     }
@@ -66,26 +69,30 @@ public final class RequestHelper {
    * @param <E> the type of the body for the request
    * @return the {@link HttpEntity} to use
    */
-  public static <E> HttpEntity<E> createEntity(String token, E payload) {
+  public static <E> HttpEntity<E> createEntity(E payload, String token) {
     if (payload == null) {
-      return createEntity(token);
+      return createEntity(createHeadersWithAuth(token));
     } else {
-      return new HttpEntity<>(payload, createHeadersWithAuth(token));
+      return createEntity(payload, createHeadersWithAuth(token));
     }
   }
 
   /**
-   * Creates an {@link HttpEntity} and adds an authorization header with the provided token.
-   * @param token the token to put into the authorization header
-   * @return the {@link HttpEntity} to use
+   * Creates an {@link HttpEntity} with the given payload as a body and headers.
    */
-  public static HttpEntity createEntity(String token) {
-    return new HttpEntity(createHeadersWithAuth(token));
+  public static <E> HttpEntity<E> createEntity(E payload, RequestHeaders headers) {
+    return new HttpEntity<>(payload, headers.toHeaders());
   }
 
-  private static HttpHeaders createHeadersWithAuth(String token) {
-    HttpHeaders headers = new HttpHeaders();
-    headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + token);
-    return headers;
+  /**
+   * Creates an {@link HttpEntity} with the given headers.
+   */
+  public static <E> HttpEntity<E> createEntity(RequestHeaders headers) {
+    return new HttpEntity<>(headers.toHeaders());
   }
+
+  private static RequestHeaders createHeadersWithAuth(String token) {
+    return RequestHeaders.init().set(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+  }
+
 }

@@ -17,13 +17,13 @@ package org.openlmis.stockmanagement.service.referencedata;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.service.ServiceResponse;
+import org.openlmis.stockmanagement.util.RequestParameters;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -73,22 +73,14 @@ public class UserReferenceDataService extends BaseReferenceDataService<UserDto> 
    */
   public ResultDto<Boolean> hasRight(UUID user, UUID right, UUID program, UUID facility,
                                      UUID warehouse) {
-    Map<String, Object> parameters = new HashMap<>();
-    parameters.put("rightId", right);
+    RequestParameters parameters = RequestParameters
+        .init()
+        .set("rightId", right)
+        .set("programId", program)
+        .set("facilityId", facility)
+        .set("warehouseId", warehouse);
 
-    if (null != program) {
-      parameters.put("programId", program);
-    }
-
-    if (null != facility) {
-      parameters.put("facilityId", facility);
-    }
-
-    if (null != warehouse) {
-      parameters.put("warehouseId", warehouse);
-    }
-
-    return getValue(user + "/hasRight", parameters, Boolean.class);
+    return getResult(user + "/hasRight", parameters, Boolean.class);
   }
 
   public ServiceResponse<List<String>> getPermissionStrings(UUID user, String etag) {
