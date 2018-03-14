@@ -5,12 +5,12 @@
  * This program is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation, either
  * version 3 of the License, or (at your option) any later version.
- *  
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details. You should have received a copy of
  * the GNU Affero General Public License along with this program. If not, see
- * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
+ * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
 package org.openlmis.stockmanagement.service;
@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import javax.validation.constraints.NotNull;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
@@ -54,6 +55,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 
 /**
@@ -148,12 +151,15 @@ public class StockCardService extends StockCardBaseService {
    * @param pageable pagination and sorting parameters
    * @return page of filtered stock cards.
    */
-  public Page<StockCardDto> search(Collection<UUID> ids, Pageable pageable) {
-    UserDto user = authenticationHelper.getCurrentUser();
+  public Page<StockCardDto> search(@NotNull Collection<UUID> ids, Pageable pageable) {
+    OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder
+        .getContext()
+        .getAuthentication();
     Page<StockCard> page;
-    LOGGER.info("list of ids:" + ids);
+    if (!authentication.isClientOnly()) {
+      UserDto user = authenticationHelper.getCurrentUser();
+      LOGGER.info("list of ids:" + ids);
 
-    if (user != null) {
       PermissionStrings.Handler handler = permissionService.getPermissionStrings(user.getId());
       Set<PermissionStringDto> permissionStrings = handler.get();
       LOGGER.info("list of permission strings:" + permissionStrings);
@@ -164,7 +170,7 @@ public class StockCardService extends StockCardBaseService {
       permissionStrings.stream()
           .filter(permissionString -> STOCK_CARDS_VIEW
               .equalsIgnoreCase(permissionString
-              .getRightName()))
+                  .getRightName()))
           .forEach(permission -> {
             facilityIds.add(permission.getFacilityId());
             programIds.add(permission.getProgramId());
@@ -190,7 +196,7 @@ public class StockCardService extends StockCardBaseService {
   }
 
   private StockCard findOrCreateCard(StockEventDto eventDto, StockEventLineItemDto eventLineItem,
-                                     UUID savedEventId, List<StockCard> cardsToUpdate) {
+      UUID savedEventId, List<StockCard> cardsToUpdate) {
     OrderableLotIdentity identity = identityOf(eventLineItem);
     StockCard card = eventDto.getContext().findCard(identity);
 
