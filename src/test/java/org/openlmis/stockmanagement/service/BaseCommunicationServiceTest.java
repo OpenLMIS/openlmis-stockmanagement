@@ -15,23 +15,18 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static com.google.common.collect.ImmutableList.of;
 import static java.util.Collections.singletonList;
-import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 import com.google.common.collect.ImmutableList;
 import java.net.URI;
 import java.util.UUID;
-import java.util.function.Consumer;
 import lombok.Getter;
 import org.junit.After;
 import org.junit.Before;
@@ -88,8 +83,8 @@ public abstract class BaseCommunicationServiceTest<T> {
 
   protected BaseCommunicationService<T> prepareService() {
     BaseCommunicationService<T> service = getService();
-    service.setRestTemplate(restTemplate);
     ReflectionTestUtils.setField(service, "authService", authService);
+    ReflectionTestUtils.setField(service, "restTemplate", restTemplate);
 
     return service;
   }
@@ -105,26 +100,6 @@ public abstract class BaseCommunicationServiceTest<T> {
 
   private void checkAuth() {
     verify(authService, atLeastOnce()).obtainAccessToken();
-  }
-
-  protected <P> void mockArrayRequest(HttpMethod method, Class<P[]> type) {
-    when(restTemplate.exchange(uriCaptor.capture(), eq(method), entityCaptor.capture(), eq(type)))
-        .thenReturn(arrayResponse);
-  }
-
-  protected void mockArrayResponse(Consumer<ResponseEntity> action) {
-    action.accept(arrayResponse);
-  }
-
-  protected URI getUri() {
-    return uriCaptor.getValue();
-  }
-
-  protected HttpEntity getEntity() {
-    HttpEntity entity = entityCaptor.getValue();
-    assertThat(entity.getHeaders(), hasEntry(AUTHORIZATION, of(getTokenHeader())));
-
-    return entity;
   }
 
   protected T mockPageResponseEntityAndGetDto() {
@@ -150,9 +125,5 @@ public abstract class BaseCommunicationServiceTest<T> {
         .thenReturn(response);
 
     return response;
-  }
-
-  String getTokenHeader() {
-    return "Bearer " + TOKEN;
   }
 }

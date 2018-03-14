@@ -52,9 +52,9 @@ public abstract class BaseCommunicationService<T> {
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   @Autowired
-  protected AuthService authService;
+  private AuthService authService;
 
-  protected RestOperations restTemplate = new RestTemplate();
+  private RestOperations restTemplate = new RestTemplate();
 
   protected abstract String getServiceUrl();
 
@@ -63,18 +63,6 @@ public abstract class BaseCommunicationService<T> {
   protected abstract Class<T> getResultClass();
 
   protected abstract Class<T[]> getArrayResultClass();
-
-  protected URI buildUri(String url) {
-    return createUri(url);
-  }
-
-  protected URI buildUri(String url, Map<String, Object> params) {
-    return createUri(url, RequestParameters.of(params));
-  }
-
-  public void setRestTemplate(RestOperations template) {
-    this.restTemplate = template;
-  }
 
   /**
    * Return one object from service.
@@ -150,18 +138,13 @@ public abstract class BaseCommunicationService<T> {
    * @return all reference data T objects.
    */
   protected Collection<T> findAll(String resourceUrl, Map<String, Object> parameters) {
-    return findAllWithMethod(resourceUrl, parameters, null, HttpMethod.GET);
-  }
-
-  protected Collection<T> findAllWithMethod(String resourceUrl, Map<String, Object> uriParameters,
-      Map<String, Object> payload, HttpMethod method) {
     String url = getServiceUrl() + getUrl() + resourceUrl;
 
-    Map<String, Object> params = new HashMap<>(uriParameters);
+    Map<String, Object> params = new HashMap<>(parameters);
 
     try {
       ResponseEntity<T[]> responseEntity = restTemplate.exchange(buildUri(url, params),
-          method, createEntity(payload), getArrayResultClass());
+          HttpMethod.GET, createEntity(), getArrayResultClass());
 
       return new ArrayList<>(Arrays.asList(responseEntity.getBody()));
     } catch (HttpStatusCodeException ex) {
@@ -262,11 +245,15 @@ public abstract class BaseCommunicationService<T> {
     return response.getBody();
   }
 
-  protected DataRetrievalException buildDataRetrievalException(HttpStatusCodeException ex) {
+  private URI buildUri(String url, Map<String, Object> params) {
+    return createUri(url, RequestParameters.of(params));
+  }
+
+  private DataRetrievalException buildDataRetrievalException(HttpStatusCodeException ex) {
     return new DataRetrievalException(getResultClass().getSimpleName(), ex);
   }
 
-  protected <E> HttpEntity<E> createEntity(E payload) {
+  private <E> HttpEntity<E> createEntity(E payload) {
     if (payload == null) {
       return createEntity();
     } else {
@@ -274,7 +261,7 @@ public abstract class BaseCommunicationService<T> {
     }
   }
 
-  protected  <E> HttpEntity<E> createEntity() {
+  private <E> HttpEntity<E> createEntity() {
     return RequestHelper.createEntity(createHeadersWithAuth());
   }
 
