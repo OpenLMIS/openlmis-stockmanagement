@@ -33,13 +33,11 @@ import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.service.referencedata.BaseReferenceDataServiceTest;
 import org.openlmis.stockmanagement.service.referencedata.SupervisingUsersReferenceDataService;
 import org.openlmis.stockmanagement.testutils.ObjectGenerator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 
 public class SupervisingUsersReferenceDataServiceTest
     extends BaseReferenceDataServiceTest<UserDto> {
 
-  @Autowired
   private SupervisingUsersReferenceDataService service;
 
   private UUID supervisoryNode = UUID.randomUUID();

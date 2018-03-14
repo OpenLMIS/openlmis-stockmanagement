@@ -27,7 +27,6 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.ImmutableList;
 import java.net.URI;
 import java.util.UUID;
-import lombok.Getter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -58,7 +57,7 @@ public abstract class BaseCommunicationServiceTest<T> {
   protected AuthService authService;
 
   @Mock
-  private ResponseEntity<T[]> arrayResponse;
+  protected ResponseEntity<T[]> arrayResponse;
 
   @Captor
   protected ArgumentCaptor<URI> uriCaptor;
