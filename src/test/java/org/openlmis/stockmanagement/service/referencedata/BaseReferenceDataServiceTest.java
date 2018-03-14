@@ -40,7 +40,6 @@ import org.springframework.web.client.HttpClientErrorException;
 public abstract class BaseReferenceDataServiceTest<T> extends BaseCommunicationServiceTest<T> {
 
   protected final String serviceUrl = "http://localhost";
-  private ResponseEntity<T[]> arrayResponse = mock(ResponseEntity.class);
 
   @Test
   public void shouldFindById() {
@@ -126,9 +125,4 @@ public abstract class BaseReferenceDataServiceTest<T> extends BaseCommunicationS
     return (BaseReferenceDataService<T>) service;
   }
 
-  protected void mockArrayResponse(T[] responseArray) {
-    when(restTemplate.exchange(any(URI.class), any(HttpMethod.class), any(HttpEntity.class),
-        any(Class.class))).thenReturn(arrayResponse);
-    when(arrayResponse.getBody()).thenReturn(responseArray);
-  }
 }

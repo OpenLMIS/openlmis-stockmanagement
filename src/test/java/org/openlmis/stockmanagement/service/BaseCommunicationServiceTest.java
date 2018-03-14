@@ -58,8 +58,7 @@ public abstract class BaseCommunicationServiceTest<T> {
   protected AuthService authService;
 
   @Mock
-  @Getter
-  private ResponseEntity arrayResponse;
+  private ResponseEntity<T[]> arrayResponse;
 
   @Captor
   protected ArgumentCaptor<URI> uriCaptor;
@@ -125,5 +124,11 @@ public abstract class BaseCommunicationServiceTest<T> {
         .thenReturn(response);
 
     return response;
+  }
+
+  protected void mockArrayResponse(T[] responseArray) {
+    when(restTemplate.exchange(any(URI.class), any(HttpMethod.class), any(HttpEntity.class),
+        any(Class.class))).thenReturn(arrayResponse);
+    when(arrayResponse.getBody()).thenReturn(responseArray);
   }
 }
