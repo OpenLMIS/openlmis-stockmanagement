@@ -20,12 +20,15 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
+import com.google.common.collect.ImmutableList;
 import java.net.URI;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -37,6 +40,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.openlmis.stockmanagement.testutils.ObjectGenerator;
+import org.openlmis.stockmanagement.util.DynamicPageTypeReference;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -44,8 +51,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 
+@SuppressWarnings("PMD.TooManyMethods")
 @RunWith(MockitoJUnitRunner.class)
-public abstract class BaseCommunicationServiceTest {
+public abstract class BaseCommunicationServiceTest<T> {
   private static final String TOKEN = UUID.randomUUID().toString();
 
   @Mock
@@ -74,10 +82,12 @@ public abstract class BaseCommunicationServiceTest {
     checkAuth();
   }
 
-  protected abstract BaseCommunicationService getService();
+  protected abstract BaseCommunicationService<T> getService();
 
-  protected BaseCommunicationService prepareService() {
-    BaseCommunicationService service = getService();
+  protected abstract T generateInstance();
+
+  protected BaseCommunicationService<T> prepareService() {
+    BaseCommunicationService<T> service = getService();
     service.setRestTemplate(restTemplate);
     ReflectionTestUtils.setField(service, "authService", authService);
 
@@ -115,6 +125,31 @@ public abstract class BaseCommunicationServiceTest {
     assertThat(entity.getHeaders(), hasEntry(AUTHORIZATION, of(getTokenHeader())));
 
     return entity;
+  }
+
+  protected T mockPageResponseEntityAndGetDto() {
+    T dto = ObjectGenerator.of((Class<T>) generateInstance().getClass());
+    mockPageResponseEntity(dto);
+    return dto;
+  }
+
+  protected void mockPageResponseEntity(Object dto) {
+    ResponseEntity<Page<T>> response = stubRestTemplateAndGetPageResponseEntity();
+
+    when(response.getBody())
+        .thenReturn((Page<T>) new PageImpl<>(ImmutableList.of(dto)));
+  }
+
+  private ResponseEntity<Page<T>> stubRestTemplateAndGetPageResponseEntity() {
+    ResponseEntity<Page<T>> response = mock(ResponseEntity.class);
+    when(restTemplate.exchange(
+        any(URI.class),
+        any(HttpMethod.class),
+        any(HttpEntity.class),
+        any(DynamicPageTypeReference.class)))
+        .thenReturn(response);
+
+    return response;
   }
 
   String getTokenHeader() {

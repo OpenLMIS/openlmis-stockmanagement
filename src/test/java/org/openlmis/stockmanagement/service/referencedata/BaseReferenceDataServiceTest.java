@@ -37,10 +37,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.HttpClientErrorException;
 
-public abstract class BaseReferenceDataServiceTest<T> extends BaseCommunicationServiceTest {
+public abstract class BaseReferenceDataServiceTest<T> extends BaseCommunicationServiceTest<T> {
 
   @Test
-  public void shouldFindById() throws Exception {
+  public void shouldFindById() {
     // given
     BaseReferenceDataService<T> service = prepareService();
     UUID id = UUID.randomUUID();
@@ -72,7 +72,7 @@ public abstract class BaseReferenceDataServiceTest<T> extends BaseCommunicationS
   }
 
   @Test
-  public void shouldReturnNullIfEntityCannotBeFoundById() throws Exception {
+  public void shouldReturnNullIfEntityCannotBeFoundById() {
     // given
     BaseReferenceDataService<T> service = prepareService();
     UUID id = UUID.randomUUID();
@@ -101,7 +101,7 @@ public abstract class BaseReferenceDataServiceTest<T> extends BaseCommunicationS
   }
 
   @Test(expected = DataRetrievalException.class)
-  public void shouldThrowExceptionIfThereIsOtherProblemWithFindingById() throws Exception {
+  public void shouldThrowExceptionIfThereIsOtherProblemWithFindingById() {
     // given
     BaseReferenceDataService<T> service = prepareService();
     UUID id = UUID.randomUUID();
@@ -116,14 +116,10 @@ public abstract class BaseReferenceDataServiceTest<T> extends BaseCommunicationS
 
   @Override
   protected BaseReferenceDataService<T> prepareService() {
-    BaseCommunicationService service = super.prepareService();
+    BaseCommunicationService<T> service = super.prepareService();
 
-    ReflectionTestUtils.setField(service, "referenceDataUrl", "http://localhost/referencedata");
+    ReflectionTestUtils.setField(service, "referenceDataUrl", "http://localhost");
 
     return (BaseReferenceDataService<T>) service;
   }
-
-  protected abstract BaseReferenceDataService<T> getService();
-
-  abstract T generateInstance();
 }
