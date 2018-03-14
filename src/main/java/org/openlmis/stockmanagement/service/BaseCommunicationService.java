@@ -172,12 +172,14 @@ public abstract class BaseCommunicationService<T> {
   protected <P> ServiceResponse<List<P>> tryFindAll(String resourceUrl, Class<P[]> type,
       String etag) {
     String url = getServiceUrl() + getUrl() + resourceUrl;
+    logger.info("permissionStrings url:" + url);
 
     try {
       RequestHeaders headers = RequestHeaders.init().setIfNoneMatch(etag);
       ResponseEntity<P[]> response = restTemplate.exchange(
           url, HttpMethod.GET, RequestHelper.createEntity(null, addAuthHeader(headers)), type
       );
+      logger.info("permissionStrings responseEntity:" + response);
 
       if (response.getStatusCode() == HttpStatus.NOT_MODIFIED) {
         return new ServiceResponse<>(null, response.getHeaders(), false);

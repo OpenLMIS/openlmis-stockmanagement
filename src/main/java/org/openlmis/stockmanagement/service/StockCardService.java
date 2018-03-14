@@ -151,10 +151,12 @@ public class StockCardService extends StockCardBaseService {
   public Page<StockCardDto> search(Collection<UUID> ids, Pageable pageable) {
     UserDto user = authenticationHelper.getCurrentUser();
     Page<StockCard> page;
+    LOGGER.info("list of ids:" + ids);
 
     if (user != null) {
       PermissionStrings.Handler handler = permissionService.getPermissionStrings(user.getId());
       Set<PermissionStringDto> permissionStrings = handler.get();
+      LOGGER.info("list of permission strings:" + permissionStrings);
 
       Set<UUID> facilityIds = new HashSet<>();
       Set<UUID> programIds = new HashSet<>();
@@ -167,12 +169,14 @@ public class StockCardService extends StockCardBaseService {
             facilityIds.add(permission.getFacilityId());
             programIds.add(permission.getProgramId());
           });
+      LOGGER.info("list of facility ids:" + facilityIds);
+      LOGGER.info("list of program ids:" + programIds);
 
       if (isEmpty(ids)) {
-        page = cardRepository.findByFacilityIdInAndProgramIdIn(programIds, facilityIds, pageable);
+        page = cardRepository.findByFacilityIdInAndProgramIdIn(facilityIds, programIds, pageable);
       } else {
         page = cardRepository
-            .findByFacilityIdInAndProgramIdInAndIdIn(programIds, facilityIds, ids, pageable);
+            .findByFacilityIdInAndProgramIdInAndIdIn(facilityIds, programIds, ids, pageable);
       }
     } else {
       if (isEmpty(ids)) {

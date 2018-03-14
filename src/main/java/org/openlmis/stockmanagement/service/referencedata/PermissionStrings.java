@@ -22,11 +22,15 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import org.openlmis.stockmanagement.service.ServiceResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PermissionStrings {
+  private static final Logger LOGGER = LoggerFactory.getLogger(PermissionStrings.class);
+
   private final Map<UUID, Handler> handlers = Maps.newConcurrentMap();
 
   @Autowired
@@ -50,6 +54,7 @@ public class PermissionStrings {
     public synchronized Set<PermissionStringDto> get() {
       ServiceResponse<List<String>> response = userReferenceDataService
           .getPermissionStrings(userId, etag);
+      LOGGER.info("permissionStrings response:" + response);
 
       if (response.isModified()) {
         permissionStrings = PermissionStringDto.from(response.getBody());
