@@ -41,8 +41,8 @@ import org.springframework.http.ResponseEntity;
 public class UserReferenceDataServiceTest extends BaseReferenceDataServiceTest<UserDto> {
 
   private static final String PERMISSION_STRING = "right-name|facility-id";
-  public static final String ETAG_FROM_RESPONSE = "new-etag";
-  public static final String ETAG = "etag";
+  private static final String ETAG_FROM_RESPONSE = "new-etag";
+  private static final String ETAG = "etag";
 
   @Mock
   private ResponseEntity<String[]> stringArrayResponse;
