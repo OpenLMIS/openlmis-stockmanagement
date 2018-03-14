@@ -68,7 +68,7 @@ public class OrderableReferenceDataServiceTest extends BaseReferenceDataServiceT
         refEq(new DynamicPageTypeReference<>(OrderableDto.class)));
 
     URI uri = uriCaptor.getValue();
-    assertEquals(service.getServiceUrl() + service.getUrl(), uri.toString());
+    assertEquals(serviceUrl + service.getUrl(), uri.toString());
 
     assertAuthHeader(entityCaptor.getValue());
     assertNull(entityCaptor.getValue().getBody());
