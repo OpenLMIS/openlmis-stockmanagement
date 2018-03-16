@@ -20,12 +20,15 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.refEq;
 import static org.mockito.Mockito.verify;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
@@ -72,5 +75,34 @@ public class OrderableReferenceDataServiceTest extends BaseReferenceDataServiceT
 
     assertAuthHeader(entityCaptor.getValue());
     assertNull(entityCaptor.getValue().getBody());
+  }
+
+  @Test
+  public void shouldReturnOrderablesById() {
+    OrderableDto product = mockPageResponseEntityAndGetDto();
+
+    UUID orderableId = UUID.randomUUID();
+    List<OrderableDto> response = service.findByIds(Collections.singleton(orderableId));
+
+    assertThat(response, hasSize(1));
+    assertThat(response, hasItem(product));
+
+    verify(restTemplate).exchange(
+        uriCaptor.capture(), eq(HttpMethod.GET), entityCaptor.capture(),
+        refEq(new DynamicPageTypeReference<>(OrderableDto.class)));
+
+    URI uri = uriCaptor.getValue();
+    assertEquals(serviceUrl + service.getUrl() + "?id=" + orderableId.toString(), uri.toString());
+
+    assertAuthHeader(entityCaptor.getValue());
+    assertNull(entityCaptor.getValue().getBody());
+  }
+
+  @Test
+  public void shouldReturnEmptyListIfEmptyParamProvided() {
+    checkAuth = false;
+    List<OrderableDto> response = service.findByIds(Collections.emptyList());
+
+    assertTrue(response.isEmpty());
   }
 }

@@ -65,6 +65,8 @@ public abstract class BaseCommunicationServiceTest<T> {
   @Captor
   protected ArgumentCaptor<HttpEntity<String>> entityCaptor;
 
+  protected boolean checkAuth = true;
+
   @Before
   public void setUp() throws Exception {
     mockAuth();
@@ -97,7 +99,9 @@ public abstract class BaseCommunicationServiceTest<T> {
   }
 
   private void checkAuth() {
-    verify(authService, atLeastOnce()).obtainAccessToken();
+    if (checkAuth) {
+      verify(authService, atLeastOnce()).obtainAccessToken();
+    }
   }
 
   protected T mockPageResponseEntityAndGetDto() {

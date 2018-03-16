@@ -190,6 +190,16 @@ public abstract class BaseCommunicationService<T> {
   /**
    * Return all reference data T objects for Page that need to be retrieved with GET request.
    *
+   * @param parameters  Map of query parameters.
+   * @return Page of reference data T objects.
+   */
+  public Page<T> getPage(RequestParameters parameters) {
+    return getPage("", parameters, null, HttpMethod.GET, getResultClass());
+  }
+
+  /**
+   * Return all reference data T objects for Page that need to be retrieved with GET request.
+   *
    * @param resourceUrl Endpoint url.
    * @param parameters  Map of query parameters.
    * @return Page of reference data T objects.

@@ -15,16 +15,14 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
-import static com.google.common.collect.ImmutableMap.of;
-
-import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
+import org.openlmis.stockmanagement.util.RequestParameters;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class OrderableReferenceDataService
@@ -54,10 +52,10 @@ public class OrderableReferenceDataService
   public List<OrderableDto> findByIds(Collection<UUID> ids) {
     return CollectionUtils.isEmpty(ids)
         ? Collections.emptyList()
-        : getPage("search", of("size", ids.size()), of("ids", ids)).getContent();
+        : getPage(RequestParameters.init().set("id", ids)).getContent();
   }
 
   public List<OrderableDto> findAll() {
-    return getPage("", Collections.emptyMap()).getContent();
+    return getPage(Collections.emptyMap()).getContent();
   }
 }
