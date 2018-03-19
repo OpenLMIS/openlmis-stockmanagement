@@ -29,8 +29,7 @@ import org.openlmis.stockmanagement.testutils.ApprovedProductDtoDataBuilder;
 import org.openlmis.stockmanagement.util.RequestParameters;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
@@ -48,34 +47,6 @@ public class ApprovedProductReferenceDataServiceTest {
   public void shouldReturnMapOfOrderableFulfills() {
     UUID programId = randomUUID();
     Collection<UUID> orderableIds = asList(randomUUID(), randomUUID());
-    Pageable pageable = new PageRequest(0, 10);
-
-    RequestParameters parameters = RequestParameters.init();
-    parameters.set("programId", programId);
-    parameters.set("size", pageable.getPageSize());
-    parameters.set("page", pageable.getPageNumber());
-    parameters.set("orderableId", orderableIds);
-
-    Page<ApprovedProductDto> productPage = new PageImpl<>(
-        Collections.singletonList(new ApprovedProductDtoDataBuilder().build()), pageable, 1);
-
-    UUID facilityId = randomUUID();
-
-    doReturn(productPage)
-        .when(spy)
-        .getPage(facilityId + "/approvedProducts", parameters);
-
-    Page<OrderableDto> result = spy
-        .getApprovedProducts(facilityId, programId, orderableIds, pageable);
-
-    assertEquals(1, result.getTotalElements());
-    assertEquals(productPage.getContent().get(0).getOrderable(), result.getContent().get(0));
-  }
-
-  @Test
-  public void shouldReturnAllProductsWhenThereIsNoPaginationParameters() {
-    UUID programId = randomUUID();
-    Collection<UUID> orderableIds = asList(randomUUID(), randomUUID());
 
     RequestParameters parameters = RequestParameters.init();
     parameters.set("programId", programId);
@@ -91,7 +62,7 @@ public class ApprovedProductReferenceDataServiceTest {
         .getPage(facilityId + "/approvedProducts", parameters);
 
     Page<OrderableDto> result = spy
-        .getApprovedProducts(facilityId, programId, orderableIds, null);
+        .getApprovedProducts(facilityId, programId, orderableIds);
 
     assertEquals(1, result.getTotalElements());
     assertEquals(productPage.getContent().get(0).getOrderable(), result.getContent().get(0));

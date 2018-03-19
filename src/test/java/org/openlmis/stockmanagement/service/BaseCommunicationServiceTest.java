@@ -15,18 +15,17 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.ImmutableList;
-import java.net.URI;
-import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -36,7 +35,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.testutils.ObjectGenerator;
 import org.openlmis.stockmanagement.util.DynamicPageTypeReference;
-import org.springframework.data.domain.Page;
+import org.openlmis.stockmanagement.util.PageImplRepresentation;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -44,6 +43,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
+
+import java.net.URI;
+import java.util.UUID;
 
 @SuppressWarnings("PMD.TooManyMethods")
 @RunWith(MockitoJUnitRunner.class)
@@ -85,6 +87,7 @@ public abstract class BaseCommunicationServiceTest<T> {
     BaseCommunicationService<T> service = getService();
     ReflectionTestUtils.setField(service, "authService", authService);
     ReflectionTestUtils.setField(service, "restTemplate", restTemplate);
+    ReflectionTestUtils.setField(service, "maxUrlLength", 2000);
 
     return service;
   }
@@ -111,14 +114,14 @@ public abstract class BaseCommunicationServiceTest<T> {
   }
 
   protected void mockPageResponseEntity(Object dto) {
-    ResponseEntity<Page<T>> response = stubRestTemplateAndGetPageResponseEntity();
-
-    when(response.getBody())
-        .thenReturn((Page<T>) new PageImpl<>(ImmutableList.of(dto)));
+    ResponseEntity<PageImplRepresentation<T>> response = stubRestTemplateAndGetPageResponseEntity();
+    doReturn(new PageImplRepresentation<>(new PageImpl<>(newArrayList(dto))))
+        .when(response)
+        .getBody();
   }
 
-  private ResponseEntity<Page<T>> stubRestTemplateAndGetPageResponseEntity() {
-    ResponseEntity<Page<T>> response = mock(ResponseEntity.class);
+  private ResponseEntity<PageImplRepresentation<T>> stubRestTemplateAndGetPageResponseEntity() {
+    ResponseEntity<PageImplRepresentation<T>> response = mock(ResponseEntity.class);
     when(restTemplate.exchange(
         any(URI.class),
         any(HttpMethod.class),

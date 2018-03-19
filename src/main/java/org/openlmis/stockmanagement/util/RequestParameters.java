@@ -15,19 +15,31 @@
 
 package org.openlmis.stockmanagement.util;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-import lombok.EqualsAndHashCode;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.springframework.web.util.UriUtils.encodeQueryParam;
+
+import org.openlmis.stockmanagement.exception.EncodingException;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import lombok.EqualsAndHashCode;
+
+import java.io.UnsupportedEncodingException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
+
 @EqualsAndHashCode
 public final class RequestParameters {
-  private MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
+  private final MultiValueMap<String, String> params;
 
-  private RequestParameters() {}
+  private RequestParameters() {
+    params = new LinkedMultiValueMap<>();
+  }
 
   public static RequestParameters init() {
     return new RequestParameters();
@@ -45,12 +57,11 @@ public final class RequestParameters {
   /**
    * Set parameter (key argument) with the value only if the value is not null.
    */
-  public RequestParameters set(String key, Collection valueCollection) {
-    if (null != valueCollection) {
-      for (Object value : valueCollection) {
-        params.add(key, value);
-      }
-    }
+  public RequestParameters set(String key, Collection<?> valueCollection) {
+    Optional
+        .ofNullable(valueCollection)
+        .orElse(Collections.emptyList())
+        .forEach(elem -> set(key, elem));
 
     return this;
   }
@@ -60,7 +71,13 @@ public final class RequestParameters {
    */
   public RequestParameters set(String key, Object value) {
     if (null != value) {
-      params.add(key, value);
+      try {
+        String valueAsString = encodeQueryParam(String.valueOf(value), UTF_8.name());
+
+        params.add(key, valueAsString);
+      } catch (UnsupportedEncodingException exp) {
+        throw new EncodingException(exp);
+      }
     }
 
     return this;
@@ -71,7 +88,47 @@ public final class RequestParameters {
     return this;
   }
 
-  public void forEach(Consumer<Map.Entry<String, List<Object>>> action) {
+  public void forEach(Consumer<Map.Entry<String, List<String>>> action) {
     params.entrySet().forEach(action);
+  }
+
+  /**
+   * Split this request parameters into two smaller chunks.
+   */
+  public RequestParameters[] split() {
+    if (params.isEmpty()) {
+      return new RequestParameters[]{this};
+    }
+
+    Set<Map.Entry<String, List<String>>> entries = params.entrySet();
+
+    if (entries.stream().noneMatch(entry -> entry.getValue().size() > 1)) {
+      return new RequestParameters[]{this};
+    }
+
+    Map.Entry<String, List<String>> max = entries.iterator().next();
+    for (Map.Entry<String, List<String>> entry : entries) {
+      if (entry.getValue().size() > max.getValue().size()) {
+        max = entry;
+      }
+    }
+
+    RequestParameters left = init().setAll(this);
+    RequestParameters right = init().setAll(this);
+
+    left.params.remove(max.getKey());
+    right.params.remove(max.getKey());
+
+    List<String> list = max.getValue();
+    int chunkSize = list.size() / 2;
+    int leftOver = list.size() % 2;
+
+    List<String> leftCollection = list.subList(0, chunkSize + leftOver);
+    List<String> rightCollection = list.subList(chunkSize + leftOver, list.size());
+
+    left.set(max.getKey(), leftCollection);
+    right.set(max.getKey(), rightCollection);
+
+    return new RequestParameters[]{left, right};
   }
 }

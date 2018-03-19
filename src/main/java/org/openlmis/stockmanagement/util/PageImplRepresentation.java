@@ -15,11 +15,13 @@
 
 package org.openlmis.stockmanagement.util;
 
+import com.google.common.collect.Lists;
+
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,9 +45,24 @@ public class PageImplRepresentation<T> extends PageImpl<T> {
 
   private List<T> content;
 
-
   public PageImplRepresentation() {
-    super(new ArrayList<T>());
+    this(new PageImpl<>(Lists.newArrayList()));
+  }
+
+  /**
+   * Creates new instance based on data from {@link Page} instance.
+   */
+  public PageImplRepresentation(Page<T> page) {
+    super(page.getContent());
+    this.last = page.isLast();
+    this.first = page.isFirst();
+    this.totalPages = page.getTotalPages();
+    this.totalElements = page.getTotalElements();
+    this.size = page.getSize();
+    this.number = page.getNumber();
+    this.numberOfElements = page.getNumberOfElements();
+    this.sort = page.getSort();
+    this.content = page.getContent();
   }
 
   public int getNumber() {

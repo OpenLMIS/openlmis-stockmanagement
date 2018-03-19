@@ -16,6 +16,34 @@
 package org.openlmis.stockmanagement.service;
 
 import static org.openlmis.stockmanagement.util.RequestHelper.createUri;
+import static org.openlmis.stockmanagement.util.RequestHelper.splitRequest;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.MapType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+
+import org.apache.commons.lang.StringUtils;
+import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
+import org.openlmis.stockmanagement.service.referencedata.DataRetrievalException;
+import org.openlmis.stockmanagement.util.Merger;
+import org.openlmis.stockmanagement.util.DynamicPageTypeReference;
+import org.openlmis.stockmanagement.util.DynamicParametrizedTypeReference;
+import org.openlmis.stockmanagement.util.PageImplRepresentation;
+import org.openlmis.stockmanagement.util.RequestHelper;
+import org.openlmis.stockmanagement.util.RequestParameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -27,25 +55,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.lang.StringUtils;
-import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
-import org.openlmis.stockmanagement.service.referencedata.DataRetrievalException;
-import org.openlmis.stockmanagement.util.DynamicPageTypeReference;
-import org.openlmis.stockmanagement.util.DynamicParametrizedTypeReference;
-import org.openlmis.stockmanagement.util.PageImplRepresentation;
-import org.openlmis.stockmanagement.util.RequestHelper;
-import org.openlmis.stockmanagement.util.RequestParameters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestOperations;
-import org.springframework.web.client.RestTemplate;
 
 @SuppressWarnings("PMD.TooManyMethods")
 public abstract class BaseCommunicationService<T> {
@@ -53,6 +62,12 @@ public abstract class BaseCommunicationService<T> {
 
   @Autowired
   private AuthService authService;
+
+  @Autowired
+  private ObjectMapper objectMapper;
+
+  @Value("${request.maxUrlLength}")
+  private int maxUrlLength;
 
   private RestOperations restTemplate = new RestTemplate();
 
@@ -140,12 +155,12 @@ public abstract class BaseCommunicationService<T> {
   protected Collection<T> findAll(String resourceUrl, Map<String, Object> parameters) {
     String url = getServiceUrl() + getUrl() + resourceUrl;
 
-    Map<String, Object> params = new HashMap<>(parameters);
+    RequestParameters params = RequestParameters.of(parameters);
 
     try {
-      ResponseEntity<T[]> responseEntity = restTemplate.exchange(buildUri(url, params),
-          HttpMethod.GET, createEntity(), getArrayResultClass());
-
+      ResponseEntity<T[]> responseEntity = doListRequest(
+          url, params, HttpMethod.GET, getArrayResultClass()
+      );
       return new ArrayList<>(Arrays.asList(responseEntity.getBody()));
     } catch (HttpStatusCodeException ex) {
       throw buildDataRetrievalException(ex);
@@ -229,11 +244,8 @@ public abstract class BaseCommunicationService<T> {
     String url = getServiceUrl() + getUrl() + resourceUrl;
 
     try {
-      ResponseEntity<PageImplRepresentation<P>> response = restTemplate.exchange(
-          createUri(url, parameters),
-          method,
-          createEntity(payload),
-          new DynamicPageTypeReference<>(type)
+      ResponseEntity<PageImplRepresentation<P>> response = doPageRequest(
+          url, parameters, payload, method, type
       );
       return response.getBody();
 
@@ -255,8 +267,51 @@ public abstract class BaseCommunicationService<T> {
     return response.getBody();
   }
 
-  private URI buildUri(String url, Map<String, Object> params) {
-    return createUri(url, RequestParameters.of(params));
+  protected <K, V> Map<K, V> getMap(String resourceUrl, RequestParameters parameters,
+                                    Class<K> keyType, Class<V> valueType) {
+    String url = getServiceUrl() + getUrl() + StringUtils.defaultIfBlank(resourceUrl, "");
+    TypeFactory factory = objectMapper.getTypeFactory();
+    MapType mapType = factory.constructMapType(HashMap.class, keyType, valueType);
+
+    HttpEntity<Object> entity = createEntity();
+    List<Map<K, V>> maps = new ArrayList<>();
+
+    for (URI uri : splitRequest(url, parameters, maxUrlLength)) {
+      ResponseEntity<Map> response = restTemplate.exchange(uri, HttpMethod.GET, entity, Map.class);
+      Map<K, V> map = objectMapper.convertValue(response.getBody(), mapType);
+      maps.add(map);
+    }
+
+    return Merger.mergeMaps(maps);
+  }
+
+  private <E> ResponseEntity<E[]> doListRequest(String url, RequestParameters parameters,
+                                                HttpMethod method, Class<E[]> type) {
+    HttpEntity<Object> entity = createEntity();
+    List<E[]> arrays = new ArrayList<>();
+
+    for (URI uri : splitRequest(url, parameters, maxUrlLength)) {
+      arrays.add(restTemplate.exchange(uri, method, entity, type).getBody());
+    }
+
+    return new ResponseEntity<>(Merger.mergeArrays(arrays), HttpStatus.OK);
+  }
+
+  private <E> ResponseEntity<PageImplRepresentation<E>> doPageRequest(String url,
+                                                                      RequestParameters parameters,
+                                                                      Object payload,
+                                                                      HttpMethod method,
+                                                                      Class<E> type) {
+    HttpEntity<Object> entity = createEntity(payload);
+    ParameterizedTypeReference<PageImplRepresentation<E>> parameterizedType =
+        new DynamicPageTypeReference<>(type);
+    List<PageImplRepresentation<E>> pages = new ArrayList<>();
+
+    for (URI uri : splitRequest(url, parameters, maxUrlLength)) {
+      pages.add(restTemplate.exchange(uri, method, entity, parameterizedType).getBody());
+    }
+
+    return new ResponseEntity<>(Merger.mergePages(pages), HttpStatus.OK);
   }
 
   private DataRetrievalException buildDataRetrievalException(HttpStatusCodeException ex) {

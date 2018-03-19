@@ -15,17 +15,14 @@
 
 package org.openlmis.stockmanagement.util;
 
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_ENCODING;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.RequestHeaders;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.web.util.UriUtils;
+
+import java.net.URI;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 public final class RequestHelper {
 
@@ -47,15 +44,7 @@ public final class RequestHelper {
     UriComponentsBuilder builder = UriComponentsBuilder.newInstance().uri(URI.create(url));
 
     if (parameters != null) {
-      parameters.forEach(e -> e.getValue().forEach(one -> {
-        try {
-          builder.queryParam(e.getKey(),
-              UriUtils.encodeQueryParam(String.valueOf(one),
-                  StandardCharsets.UTF_8.name()));
-        } catch (UnsupportedEncodingException ex) {
-          throw new ValidationMessageException(ex, ERROR_ENCODING);
-        }
-      }));
+      parameters.forEach(entry -> builder.queryParam(entry.getKey(), entry.getValue().toArray()));
     }
 
     return builder.build(true).toUri();
@@ -89,6 +78,29 @@ public final class RequestHelper {
    */
   public static <E> HttpEntity<E> createEntity(RequestHeaders headers) {
     return new HttpEntity<>(headers.toHeaders());
+  }
+
+  /**
+   * Split the given {@link RequestParameters} into smaller chunks.
+   */
+  public static URI[] splitRequest(String url, RequestParameters queryParams, int maxUrlLength) {
+    URI uri = createUri(url, queryParams);
+
+    if (uri.toString().length() > maxUrlLength) {
+      RequestParameters[] array = queryParams.split();
+
+      if (array.length >= 2) {
+        URI[] left = splitRequest(url, array[0], maxUrlLength);
+        URI[] right = splitRequest(url, array[1], maxUrlLength);
+
+        return Stream
+            .concat(Arrays.stream(left), Arrays.stream(right))
+            .distinct()
+            .toArray(URI[]::new);
+      }
+    }
+
+    return new URI[]{uri};
   }
 
   private static RequestHeaders createHeadersWithAuth(String token) {

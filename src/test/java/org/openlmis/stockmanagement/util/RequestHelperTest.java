@@ -15,21 +15,33 @@
 
 package org.openlmis.stockmanagement.util;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.singletonList;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
+import static org.springframework.web.util.UriUtils.encodeQueryParam;
 
-import java.net.URI;
+import com.google.common.collect.Lists;
+
+import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Test;
 import org.openlmis.stockmanagement.service.RequestHeaders;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 
-public class RequestHelperTest {
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.util.List;
 
+@SuppressWarnings("PMD.TooManyMethods")
+public class RequestHelperTest {
   private static final String URL = "http://localhost";
   private static final String BEARER = "Bearer ";
+
+  private static final int MAX_URL_LENGTH = 2000;
 
   @Test
   public void shouldCreateUriWithoutParameters() throws Exception {
@@ -79,5 +91,69 @@ public class RequestHelperTest {
 
     assertThat(entity.getHeaders().get(HttpHeaders.AUTHORIZATION),
         is(singletonList(BEARER + token)));
+  }
+
+  @Test
+  public void shouldSplitRequestIfItTooLong() throws UnsupportedEncodingException {
+    // no split | first split | second split
+    //    1     |      1      |      1
+    //    2     |      1      |      1
+    //    3     |      1      |      1
+    //    4     |      1      |      2
+    //    5     |      1      |      2
+    //    6     |      2      |      3
+    //    7     |      2      |      3
+    //    8     |      2      |      4
+    //    9     |      2      |      4
+    List<String> queryParamValues = Lists.newArrayList(
+        randomString(), randomString(), randomString(), randomString(),
+        randomString(), randomString(), randomString(), randomString(),
+        randomString()
+    );
+
+    URI[] uri = RequestHelper.splitRequest(
+        URL, RequestParameters.init().set("a", queryParamValues), MAX_URL_LENGTH
+    );
+    assertThat(uri.length, is(4));
+
+    assertThat(uri[0].toString(), startsWith(URL));
+    assertThat(uri[0].toString(), containsString("a=" + queryParamValues.get(0)));
+    assertThat(uri[0].toString(), containsString("a=" + queryParamValues.get(1)));
+    assertThat(uri[0].toString(), containsString("a=" + queryParamValues.get(2)));
+
+    assertThat(uri[1].toString(), startsWith(URL));
+    assertThat(uri[1].toString(), containsString("a=" + queryParamValues.get(3)));
+    assertThat(uri[1].toString(), containsString("a=" + queryParamValues.get(4)));
+
+    assertThat(uri[2].toString(), startsWith(URL));
+    assertThat(uri[2].toString(), containsString("a=" + queryParamValues.get(5)));
+    assertThat(uri[2].toString(), containsString("a=" + queryParamValues.get(6)));
+
+    assertThat(uri[3].toString(), startsWith(URL));
+    assertThat(uri[3].toString(), containsString("a=" + queryParamValues.get(7)));
+    assertThat(uri[3].toString(), containsString("a=" + queryParamValues.get(8)));
+  }
+
+  @Test
+  public void shouldNotSplitRequestIfQueryParamsCouldNotBeSplit() {
+    String queryParamValue = RandomStringUtils.randomAlphabetic(2500);
+    URI[] uri = RequestHelper
+        .splitRequest(URL, RequestParameters.init().set("a", queryParamValue), MAX_URL_LENGTH);
+    assertThat(uri.length, is(1));
+    assertThat(uri[0].toString(), startsWith(URL));
+    assertThat(uri[0].toString(), containsString("a=" + queryParamValue));
+  }
+
+  @Test
+  public void shouldNotSplitRequestIfLengthIsInRange() {
+    URI[] uri = RequestHelper
+        .splitRequest(URL, RequestParameters.init().set("a", "b"), MAX_URL_LENGTH);
+    assertThat(uri.length, is(1));
+    assertThat(uri[0].toString(), startsWith(URL));
+    assertThat(uri[0].toString(), containsString("a=b"));
+  }
+
+  private String randomString() throws UnsupportedEncodingException {
+    return encodeQueryParam(RandomStringUtils.randomAlphabetic(500), UTF_8.name());
   }
 }

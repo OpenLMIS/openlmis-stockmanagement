@@ -277,7 +277,7 @@ public class StockCardSummariesServiceTest {
 
     when(approvedProductReferenceDataService
         .getApprovedProducts(eq(params.getFacilityId()), eq(params.getProgramId()),
-            eq(params.getOrderableIds()), eq(null)))
+            eq(params.getOrderableIds())))
         .thenReturn(new PageImpl<>(
             asList(orderable, orderable2, orderable3),
             new PageRequest(0, Integer.MAX_VALUE),

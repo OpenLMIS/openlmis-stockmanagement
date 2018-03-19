@@ -22,7 +22,6 @@ import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.empty;
 import static org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity.identityOf;
 
-import lombok.Getter;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
@@ -42,6 +41,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import lombok.Getter;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +89,7 @@ public class StockCardSummariesService extends StockCardBaseService {
 
     Page<OrderableDto> approvedProducts = approvedProductReferenceDataService
         .getApprovedProducts(params.getFacilityId(), params.getProgramId(),
-            params.getOrderableIds(), null);
+            params.getOrderableIds());
 
     Map<UUID, OrderableFulfillDto> orderableFulfillMap = orderableFulfillService.findByIds(
         approvedProducts.getContent().stream().map(OrderableDto::getId).collect(toList()));
