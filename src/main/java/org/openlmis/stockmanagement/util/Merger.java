@@ -15,80 +15,151 @@
 
 package org.openlmis.stockmanagement.util;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.openlmis.stockmanagement.web.Pagination;
 import org.springframework.data.domain.Page;
+
+import lombok.AccessLevel;
+import lombok.Getter;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
+import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public final class Merger {
+@Getter(AccessLevel.PACKAGE)
+// we keep implementation classes inside this one to give a single access point by ofXXX methods.
+@SuppressWarnings("PMD.TooManyMethods")
+public abstract class Merger<T> {
+  private List<T> elements;
+  private Supplier<T> defaultValue;
 
-  private Merger() {
-    throw new UnsupportedOperationException();
+  public static <K, V> Merger<Map<K, V>> ofMaps(List<Map<K, V>> elements) {
+    return of(elements).orElseGet(() -> new MapsMerger<>(elements));
   }
 
-  /**
-   * Merge maps into single one that contain all key-value pairs from passed maps.
-   */
-  public static <K, V> Map<K, V> mergeMaps(List<Map<K, V>> maps) {
-    return handle(maps, elements -> startStream(elements)
-        .map(Map::entrySet)
-        .flatMap(Collection::stream)
-        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+  public static <E> Merger<E[]> ofArrays(List<E[]> elements) {
+    return of(elements).orElseGet(() -> new ArraysMerger<>(elements));
   }
 
-  /**
-   * Merge arrays into single one that contain all elements. If several arrays contain the same
-   * element, it will be only one time in the result array.
-   */
-  public static <E> E[] mergeArrays(List<E[]> arrays) {
-    return handle(arrays, elements -> startStream(elements)
-        .flatMap(Arrays::stream)
-        .distinct()
-        .toArray(size -> {
-          Class<?> componentType = arrays.get(0).getClass().getComponentType();
-          return (E[]) Array.newInstance(componentType, size);
-        }));
+  public static <E> Merger<PageImplRepresentation<E>> ofPages(
+      List<PageImplRepresentation<E>> elements) {
+    return of(elements).orElseGet(() -> new PageMerger<>(elements));
   }
 
-  /**
-   * Merge pages into single one that contain all elements. If several pages contain the same
-   * element, it will be only one time in the result page.
-   */
-  public static <E> PageImplRepresentation<E> mergePages(List<PageImplRepresentation<E>> pages) {
-    return handle(pages, elements -> {
-      List<E> content = startStream(elements)
+  private static <E> Optional<Merger<E>> of(List<E> elements) {
+    if (CollectionUtils.isEmpty(elements)) {
+      return Optional.of(new EmptyMerger<>());
+    }
+
+    if (elements.size() == 1) {
+      return Optional.of(new SingleMerger<>(elements));
+    }
+
+    return Optional.empty();
+  }
+
+  private Merger(List<T> elements) {
+    this.elements = elements;
+    this.defaultValue = () -> null;
+  }
+
+  public Merger<T> withDefaultValue(Supplier<T> defaultValue) {
+    this.defaultValue = defaultValue;
+    return this;
+  }
+
+  public abstract T merge();
+
+  private static final class EmptyMerger<T> extends Merger<T> {
+
+    private EmptyMerger() {
+      super(Collections.emptyList());
+    }
+
+    @Override
+    public T merge() {
+      return getDefaultValue().get();
+    }
+
+  }
+
+  private static final class SingleMerger<T> extends Merger<T> {
+
+    private SingleMerger(List<T> elements) {
+      super(elements);
+    }
+
+    @Override
+    public T merge() {
+      return getElements().get(0);
+    }
+  }
+
+
+  private static final class MapsMerger<K, V> extends Merger<Map<K, V>> {
+
+    private MapsMerger(List<Map<K, V>> elements) {
+      super(elements);
+    }
+
+    @Override
+    public Map<K, V> merge() {
+      return getElements()
+          .stream()
+          .filter(Objects::nonNull)
+          .map(Map::entrySet)
+          .flatMap(Collection::stream)
+          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+  }
+
+  private static final class ArraysMerger<T> extends Merger<T[]> {
+
+    private ArraysMerger(List<T[]> elements) {
+      super(elements);
+    }
+
+    @Override
+    public T[] merge() {
+      return getElements()
+          .stream()
+          .filter(Objects::nonNull)
+          .flatMap(Arrays::stream)
+          .distinct()
+          .toArray(size -> {
+            Class<?> componentType = getElements().get(0).getClass().getComponentType();
+            return (T[]) Array.newInstance(componentType, size);
+          });
+    }
+  }
+
+  private static final class PageMerger<T> extends Merger<PageImplRepresentation<T>> {
+
+    private PageMerger(List<PageImplRepresentation<T>> elements) {
+      super(elements);
+    }
+
+    @Override
+    public PageImplRepresentation<T> merge() {
+      List<T> content = getElements()
+          .stream()
+          .filter(Objects::nonNull)
           .map(PageImplRepresentation::getContent)
           .flatMap(Collection::stream)
           .distinct()
           .collect(Collectors.toList());
 
-      Page<E> page = Pagination.getPage(content);
+      Page<T> page = Pagination.getPage(content);
       return new PageImplRepresentation<>(page);
-    });
-  }
-
-  private static <E> E handle(List<E> list, Function<List<E>, E> mergeFunction) {
-    if (null == list || list.isEmpty()) {
-      return null;
     }
-
-    if (list.size() == 1) {
-      return list.get(0);
-    }
-
-    return mergeFunction.apply(list);
-  }
-
-  private static <E> Stream<E> startStream(List<E> list) {
-    return list.stream().filter(Objects::nonNull);
   }
 
 }

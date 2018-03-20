@@ -42,10 +42,12 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
+import java.lang.reflect.Array;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -279,7 +281,10 @@ public abstract class BaseCommunicationService<T> {
       maps.add(map);
     }
 
-    return Merger.mergeMaps(maps);
+    return Merger
+        .ofMaps(maps)
+        .withDefaultValue(Collections::emptyMap)
+        .merge();
   }
 
   private <E> ResponseEntity<E[]> doListRequest(String url, RequestParameters parameters,
@@ -291,7 +296,12 @@ public abstract class BaseCommunicationService<T> {
       arrays.add(restTemplate.exchange(uri, method, entity, type).getBody());
     }
 
-    return new ResponseEntity<>(Merger.mergeArrays(arrays), HttpStatus.OK);
+    E[] body = Merger
+        .ofArrays(arrays)
+        .withDefaultValue(() -> (E[]) Array.newInstance(type.getComponentType(), 0))
+        .merge();
+
+    return new ResponseEntity<>(body, HttpStatus.OK);
   }
 
   private <E> ResponseEntity<PageImplRepresentation<E>> doPageRequest(String url,
@@ -308,7 +318,12 @@ public abstract class BaseCommunicationService<T> {
       pages.add(restTemplate.exchange(uri, method, entity, parameterizedType).getBody());
     }
 
-    return new ResponseEntity<>(Merger.mergePages(pages), HttpStatus.OK);
+    PageImplRepresentation<E> body = Merger
+        .ofPages(pages)
+        .withDefaultValue(PageImplRepresentation::new)
+        .merge();
+
+    return new ResponseEntity<>(body, HttpStatus.OK);
   }
 
   private DataRetrievalException buildDataRetrievalException(HttpStatusCodeException ex) {
