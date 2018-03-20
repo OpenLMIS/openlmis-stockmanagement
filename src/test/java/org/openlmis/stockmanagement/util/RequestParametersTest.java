@@ -22,12 +22,15 @@ import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.Maps;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -90,19 +93,20 @@ public class RequestParametersTest {
         .init()
         .set(KEY, range(0, 10).mapToObj(String::valueOf).collect(toList()));
 
-    RequestParameters[] array = params.split();
+    Pair<RequestParameters, RequestParameters> split = params.split();
 
-    assertThat(array.length, is(2));
+    assertThat(split.getLeft(), is(notNullValue()));
+    assertThat(split.getRight(), is(notNullValue()));
 
     Set<Object> values0 = new HashSet<>();
     Set<Object> values1 = new HashSet<>();
 
-    array[0].forEach(entry -> {
+    split.getLeft().forEach(entry -> {
       assertThat(entry.getKey(), is(KEY));
       values0.addAll(entry.getValue());
     });
 
-    array[1].forEach(entry -> {
+    split.getRight().forEach(entry -> {
       assertThat(entry.getKey(), is(KEY));
       values1.addAll(entry.getValue());
     });
@@ -124,15 +128,16 @@ public class RequestParametersTest {
         .set(KEY, range(0, 10).mapToObj(String::valueOf).collect(toList()))
         .set(VALUE, range(0, 11).mapToObj(String::valueOf).collect(toList()));
 
-    RequestParameters[] array = params.split();
+    Pair<RequestParameters, RequestParameters> split = params.split();
 
-    assertThat(array.length, is(2));
+    assertThat(split.getLeft(), is(notNullValue()));
+    assertThat(split.getRight(), is(notNullValue()));
 
-    Map<String, List<String>> map0 = toMap(array[0]);
+    Map<String, List<String>> map0 = toMap(split.getLeft());
     assertThat(map0, hasEntry(is(KEY), hasSize(10)));
     assertThat(map0, hasEntry(is(VALUE), hasSize(6)));
 
-    Map<String, List<String>> map1 = toMap(array[1]);
+    Map<String, List<String>> map1 = toMap(split.getRight());
     assertThat(map1, hasEntry(is(KEY), hasSize(10)));
     assertThat(map1, hasEntry(is(VALUE), hasSize(5)));
   }
@@ -140,19 +145,19 @@ public class RequestParametersTest {
   @Test
   public void shouldNotSplitWhenListHasOneElement() {
     RequestParameters params = RequestParameters.init().set(KEY, VALUE);
-    RequestParameters[] array = params.split();
+    Pair<RequestParameters, RequestParameters> split = params.split();
 
-    assertThat(array.length, is(1));
-    assertThat(array[0], is(params));
+    assertThat(split.getLeft(), is(params));
+    assertThat(split.getRight(), is(nullValue()));
   }
 
   @Test
   public void shouldNotSplitWhenObjectIsEmpty() {
     RequestParameters params = RequestParameters.init();
-    RequestParameters[] array = params.split();
+    Pair<RequestParameters, RequestParameters> split = params.split();
 
-    assertThat(array.length, is(1));
-    assertThat(array[0], is(params));
+    assertThat(split.getLeft(), is(params));
+    assertThat(split.getRight(), is(nullValue()));
   }
 
 

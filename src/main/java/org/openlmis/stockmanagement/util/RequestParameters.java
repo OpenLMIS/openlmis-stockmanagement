@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.util;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.web.util.UriUtils.encodeQueryParam;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.openlmis.stockmanagement.exception.EncodingException;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -95,15 +96,15 @@ public final class RequestParameters {
   /**
    * Split this request parameters into two smaller chunks.
    */
-  public RequestParameters[] split() {
+  public Pair<RequestParameters, RequestParameters> split() {
     if (params.isEmpty()) {
-      return new RequestParameters[]{this};
+      return Pair.of(this, null);
     }
 
     Set<Map.Entry<String, List<String>>> entries = params.entrySet();
 
     if (entries.stream().noneMatch(entry -> entry.getValue().size() > 1)) {
-      return new RequestParameters[]{this};
+      return Pair.of(this, null);
     }
 
     Map.Entry<String, List<String>> max = entries.iterator().next();
@@ -129,6 +130,6 @@ public final class RequestParameters {
     left.set(max.getKey(), leftCollection);
     right.set(max.getKey(), rightCollection);
 
-    return new RequestParameters[]{left, right};
+    return Pair.of(left, right);
   }
 }

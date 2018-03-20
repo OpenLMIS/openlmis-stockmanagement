@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.util;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.openlmis.stockmanagement.service.RequestHeaders;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -87,11 +88,11 @@ public final class RequestHelper {
     URI uri = createUri(url, queryParams);
 
     if (uri.toString().length() > maxUrlLength) {
-      RequestParameters[] array = queryParams.split();
+      Pair<RequestParameters, RequestParameters> split = queryParams.split();
 
-      if (array.length >= 2) {
-        URI[] left = splitRequest(url, array[0], maxUrlLength);
-        URI[] right = splitRequest(url, array[1], maxUrlLength);
+      if (null != split.getLeft() && null != split.getRight()) {
+        URI[] left = splitRequest(url, split.getLeft(), maxUrlLength);
+        URI[] right = splitRequest(url, split.getRight(), maxUrlLength);
 
         return Stream
             .concat(Arrays.stream(left), Arrays.stream(right))
