@@ -18,29 +18,38 @@ package org.openlmis.stockmanagement.service.referencedata;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.stockmanagement.dto.referencedata.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
+import org.openlmis.stockmanagement.service.BaseCommunicationService;
 import org.openlmis.stockmanagement.testutils.ApprovedProductDtoDataBuilder;
 import org.openlmis.stockmanagement.util.RequestParameters;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.UUID;
 
-public class ApprovedProductReferenceDataServiceTest {
+public class ApprovedProductReferenceDataServiceTest
+    extends BaseReferenceDataServiceTest<ApprovedProductDto> {
 
-  private ApprovedProductReferenceDataService spy;
+  private ApprovedProductReferenceDataService service;
+
+  @Override
+  protected BaseCommunicationService<ApprovedProductDto> getService() {
+    return new ApprovedProductReferenceDataService();
+  }
+
+  @Override
+  protected ApprovedProductDto generateInstance() {
+    return new ApprovedProductDtoDataBuilder().build();
+  }
 
   @Before
-  public void setUp() {
-    spy = spy(new ApprovedProductReferenceDataService());
+  public void setUp() throws Exception {
+    super.setUp();
+    service = (ApprovedProductReferenceDataService) prepareService();
   }
 
   @Test
@@ -52,19 +61,15 @@ public class ApprovedProductReferenceDataServiceTest {
     parameters.set("programId", programId);
     parameters.set("orderableId", orderableIds);
 
-    Page<ApprovedProductDto> productPage = new PageImpl<>(
-        Collections.singletonList(new ApprovedProductDtoDataBuilder().build()), null, 1);
-
+    ApprovedProductDto approvedProduct = generateInstance();
     UUID facilityId = randomUUID();
 
-    doReturn(productPage)
-        .when(spy)
-        .getPage(facilityId + "/approvedProducts", parameters);
+    mockPageResponseEntity(approvedProduct);
 
-    Page<OrderableDto> result = spy
+    Page<OrderableDto> result = service
         .getApprovedProducts(facilityId, programId, orderableIds);
 
     assertEquals(1, result.getTotalElements());
-    assertEquals(productPage.getContent().get(0).getOrderable(), result.getContent().get(0));
+    assertEquals(approvedProduct.getOrderable(), result.getContent().get(0));
   }
 }
