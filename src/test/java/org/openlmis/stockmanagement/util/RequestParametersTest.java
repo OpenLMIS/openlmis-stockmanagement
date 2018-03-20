@@ -88,6 +88,13 @@ public class RequestParametersTest {
   }
 
   @Test
+  public void shouldHandleNullValueWhenTryToSetAllParametersFromOtherInstance() {
+    RequestParameters params = RequestParameters.init().setAll(null);
+
+    assertThat(toMap(params).entrySet(), hasSize(0));
+  }
+
+  @Test
   public void shouldSplit() {
     RequestParameters params = RequestParameters
         .init()

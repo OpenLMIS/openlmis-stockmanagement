@@ -85,7 +85,10 @@ public final class RequestParameters {
   }
 
   public RequestParameters setAll(RequestParameters parameters) {
-    parameters.forEach(entry -> set(entry.getKey(), entry.getValue()));
+    if (null != parameters) {
+      parameters.forEach(entry -> set(entry.getKey(), entry.getValue()));
+    }
+
     return this;
   }
 

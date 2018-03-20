@@ -85,10 +85,11 @@ public final class RequestHelper {
    * Split the given {@link RequestParameters} into smaller chunks.
    */
   public static URI[] splitRequest(String url, RequestParameters queryParams, int maxUrlLength) {
-    URI uri = createUri(url, queryParams);
+    RequestParameters safeQueryParams = RequestParameters.init().setAll(queryParams);
+    URI uri = createUri(url, safeQueryParams);
 
     if (uri.toString().length() > maxUrlLength) {
-      Pair<RequestParameters, RequestParameters> split = queryParams.split();
+      Pair<RequestParameters, RequestParameters> split = safeQueryParams.split();
 
       if (null != split.getLeft() && null != split.getRight()) {
         URI[] left = splitRequest(url, split.getLeft(), maxUrlLength);
