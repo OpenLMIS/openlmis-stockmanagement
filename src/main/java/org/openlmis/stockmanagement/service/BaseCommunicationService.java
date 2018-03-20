@@ -15,9 +15,6 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static org.openlmis.stockmanagement.util.RequestHelper.createUri;
-import static org.openlmis.stockmanagement.util.RequestHelper.splitRequest;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.MapType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
@@ -127,7 +124,7 @@ public abstract class BaseCommunicationService<T> {
 
     try {
       ResponseEntity<T> responseEntity = restTemplate.exchange(
-          createUri(url, params), HttpMethod.GET, createEntity(),
+          RequestHelper.createUri(url, params), HttpMethod.GET, createEntity(),
           type);
       return responseEntity.getBody();
     } catch (HttpStatusCodeException ex) {
@@ -259,7 +256,7 @@ public abstract class BaseCommunicationService<T> {
     String url = getServiceUrl() + getUrl() + resourceUrl;
 
     ResponseEntity<ResultDto<P>> response = restTemplate.exchange(
-        createUri(url, parameters),
+        RequestHelper.createUri(url, parameters),
         HttpMethod.GET,
         createEntity(),
         new DynamicParametrizedTypeReference<>(type));
@@ -276,7 +273,7 @@ public abstract class BaseCommunicationService<T> {
     HttpEntity<Object> entity = createEntity();
     List<Map<K, V>> maps = new ArrayList<>();
 
-    for (URI uri : splitRequest(url, parameters, maxUrlLength)) {
+    for (URI uri : RequestHelper.splitRequest(url, parameters, maxUrlLength)) {
       ResponseEntity<Map> response = restTemplate.exchange(uri, HttpMethod.GET, entity, Map.class);
       Map<K, V> map = objectMapper.convertValue(response.getBody(), mapType);
       maps.add(map);
@@ -290,7 +287,7 @@ public abstract class BaseCommunicationService<T> {
     HttpEntity<Object> entity = createEntity();
     List<E[]> arrays = new ArrayList<>();
 
-    for (URI uri : splitRequest(url, parameters, maxUrlLength)) {
+    for (URI uri : RequestHelper.splitRequest(url, parameters, maxUrlLength)) {
       arrays.add(restTemplate.exchange(uri, method, entity, type).getBody());
     }
 
@@ -307,7 +304,7 @@ public abstract class BaseCommunicationService<T> {
         new DynamicPageTypeReference<>(type);
     List<PageImplRepresentation<E>> pages = new ArrayList<>();
 
-    for (URI uri : splitRequest(url, parameters, maxUrlLength)) {
+    for (URI uri : RequestHelper.splitRequest(url, parameters, maxUrlLength)) {
       pages.add(restTemplate.exchange(uri, method, entity, parameterizedType).getBody());
     }
 
