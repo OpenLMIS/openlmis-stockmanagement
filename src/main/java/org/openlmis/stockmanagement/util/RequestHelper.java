@@ -44,9 +44,10 @@ public final class RequestHelper {
   public static URI createUri(String url, RequestParameters parameters) {
     UriComponentsBuilder builder = UriComponentsBuilder.newInstance().uri(URI.create(url));
 
-    if (parameters != null) {
-      parameters.forEach(entry -> builder.queryParam(entry.getKey(), entry.getValue().toArray()));
-    }
+    RequestParameters
+        .init()
+        .setAll(parameters)
+        .forEach(entry -> builder.queryParam(entry.getKey(), entry.getValue().toArray()));
 
     return builder.build(true).toUri();
   }

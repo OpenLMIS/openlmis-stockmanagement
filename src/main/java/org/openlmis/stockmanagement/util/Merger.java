@@ -40,6 +40,11 @@ public abstract class Merger<T> {
   private List<T> elements;
   private Supplier<T> defaultValue;
 
+  private Merger(List<T> elements) {
+    this.elements = elements;
+    this.defaultValue = () -> null;
+  }
+
   public static <K, V> Merger<Map<K, V>> ofMaps(List<Map<K, V>> elements) {
     return of(elements).orElseGet(() -> new MapsMerger<>(elements));
   }
@@ -63,11 +68,6 @@ public abstract class Merger<T> {
     }
 
     return Optional.empty();
-  }
-
-  private Merger(List<T> elements) {
-    this.elements = elements;
-    this.defaultValue = () -> null;
   }
 
   public Merger<T> withDefaultValue(Supplier<T> defaultValue) {

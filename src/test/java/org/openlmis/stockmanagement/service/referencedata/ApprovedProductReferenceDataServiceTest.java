@@ -17,7 +17,14 @@ package org.openlmis.stockmanagement.service.referencedata;
 
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.refEq;
+import static org.mockito.Mockito.verify;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,10 +32,13 @@ import org.openlmis.stockmanagement.dto.referencedata.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.service.BaseCommunicationService;
 import org.openlmis.stockmanagement.testutils.ApprovedProductDtoDataBuilder;
+import org.openlmis.stockmanagement.util.DynamicPageTypeReference;
 import org.openlmis.stockmanagement.util.RequestParameters;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpMethod;
 
-import java.util.Collection;
+import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 public class ApprovedProductReferenceDataServiceTest
@@ -53,9 +63,38 @@ public class ApprovedProductReferenceDataServiceTest
   }
 
   @Test
-  public void shouldReturnMapOfOrderableFulfills() {
+  public void shouldReturnFullMapOfOrderableFulfills() {
     UUID programId = randomUUID();
-    Collection<UUID> orderableIds = asList(randomUUID(), randomUUID());
+
+    RequestParameters parameters = RequestParameters.init();
+    parameters.set("programId", programId);
+
+    ApprovedProductDto approvedProduct = generateInstance();
+    UUID facilityId = randomUUID();
+
+    mockPageResponseEntity(approvedProduct);
+
+    Page<OrderableDto> result = service
+        .getApprovedProducts(facilityId, programId, null);
+
+    assertEquals(1, result.getTotalElements());
+    assertEquals(approvedProduct.getOrderable(), result.getContent().get(0));
+
+    verify(restTemplate).exchange(
+        uriCaptor.capture(), eq(HttpMethod.GET), entityCaptor.capture(),
+        refEq(new DynamicPageTypeReference<>(ApprovedProductDto.class)));
+
+    URI uri = uriCaptor.getValue();
+    assertThat(uri.toString(), not(containsString("orderableId")));
+
+    assertAuthHeader(entityCaptor.getValue());
+    assertNull(entityCaptor.getValue().getBody());
+  }
+
+  @Test
+  public void shouldReturnMapOfOrderableFulfillsForGivenOrderables() {
+    UUID programId = randomUUID();
+    List<UUID> orderableIds = asList(randomUUID(), randomUUID());
 
     RequestParameters parameters = RequestParameters.init();
     parameters.set("programId", programId);
@@ -71,5 +110,16 @@ public class ApprovedProductReferenceDataServiceTest
 
     assertEquals(1, result.getTotalElements());
     assertEquals(approvedProduct.getOrderable(), result.getContent().get(0));
+
+    verify(restTemplate).exchange(
+        uriCaptor.capture(), eq(HttpMethod.GET), entityCaptor.capture(),
+        refEq(new DynamicPageTypeReference<>(ApprovedProductDto.class)));
+
+    URI uri = uriCaptor.getValue();
+    assertThat(uri.toString(), containsString("orderableId=" + orderableIds.get(0)));
+    assertThat(uri.toString(), containsString("orderableId=" + orderableIds.get(1)));
+
+    assertAuthHeader(entityCaptor.getValue());
+    assertNull(entityCaptor.getValue().getBody());
   }
 }
