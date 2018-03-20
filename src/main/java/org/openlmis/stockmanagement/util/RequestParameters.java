@@ -84,6 +84,10 @@ public final class RequestParameters {
     return this;
   }
 
+  /**
+   * Copy parameters from the existing {@link RequestParameters}. If null value has been passed,
+   * the method will return non changed instance.
+   */
   public RequestParameters setAll(RequestParameters parameters) {
     if (null != parameters) {
       parameters.forEach(entry -> set(entry.getKey(), entry.getValue()));
