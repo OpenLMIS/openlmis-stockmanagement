@@ -15,17 +15,12 @@
 
 package org.openlmis.stockmanagement.util;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.springframework.web.util.UriUtils.encodeQueryParam;
-
 import org.apache.commons.lang3.tuple.Pair;
-import org.openlmis.stockmanagement.exception.EncodingException;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import lombok.EqualsAndHashCode;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -72,13 +67,7 @@ public final class RequestParameters {
    */
   public RequestParameters set(String key, Object value) {
     if (null != value) {
-      try {
-        String valueAsString = encodeQueryParam(String.valueOf(value), UTF_8.name());
-
-        params.add(key, valueAsString);
-      } catch (UnsupportedEncodingException exp) {
-        throw new EncodingException(exp);
-      }
+      params.add(key, String.valueOf(value));
     }
 
     return this;

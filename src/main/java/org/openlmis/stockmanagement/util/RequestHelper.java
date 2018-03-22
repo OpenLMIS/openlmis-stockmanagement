@@ -16,12 +16,16 @@
 package org.openlmis.stockmanagement.util;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.openlmis.stockmanagement.exception.EncodingException;
 import org.openlmis.stockmanagement.service.RequestHeaders;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -47,7 +51,15 @@ public final class RequestHelper {
     RequestParameters
         .init()
         .setAll(parameters)
-        .forEach(entry -> builder.queryParam(entry.getKey(), entry.getValue().toArray()));
+        .forEach(e -> e.getValue().forEach(one -> {
+          try {
+            builder.queryParam(e.getKey(),
+                UriUtils.encodeQueryParam(String.valueOf(one),
+                    StandardCharsets.UTF_8.name()));
+          } catch (UnsupportedEncodingException ex) {
+            throw new EncodingException(ex);
+          }
+        }));
 
     return builder.build(true).toUri();
   }

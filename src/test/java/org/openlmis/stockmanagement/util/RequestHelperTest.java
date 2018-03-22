@@ -64,7 +64,8 @@ public class RequestHelperTest {
   @Test
   public void shouldCreateUriWithEncodedParameters() throws Exception {
     URI uri = RequestHelper.createUri(URL, RequestParameters.init().set("a", "b c"));
-    assertThat(uri.getQuery(), is("a=b%20c"));
+    assertThat(uri.getQuery(), is("a=b c"));
+    assertThat(uri.getRawQuery(), is("a=b%20c"));
   }
 
   @Test
