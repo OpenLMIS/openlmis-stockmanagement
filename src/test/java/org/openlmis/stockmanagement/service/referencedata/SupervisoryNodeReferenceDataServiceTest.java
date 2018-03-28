@@ -21,22 +21,21 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.openlmis.stockmanagement.service.referencedata.SupervisoryNodeReferenceDataService.FACILITY_ID;
+import static org.openlmis.stockmanagement.service.referencedata.SupervisoryNodeReferenceDataService.PROGRAM_ID;
 
-import com.google.common.collect.ImmutableMap;
-import org.junit.Before;
-import org.junit.Test;
-import org.openlmis.stockmanagement.dto.referencedata.SupervisoryNodeDto;
-import org.openlmis.stockmanagement.testutils.DummyPage;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import org.junit.Before;
+import org.junit.Test;
+import org.openlmis.stockmanagement.dto.referencedata.SupervisoryNodeDto;
+import org.openlmis.stockmanagement.testutils.DummyPage;
+import org.openlmis.stockmanagement.util.RequestParameters;
 
 public class SupervisoryNodeReferenceDataServiceTest {
 
-  private static final String PROGRAM_ID = "programId";
-  private static final String FACILITY_ID = "facilityId";
-  private static final String SEARCH_URI = "search";
   private UUID facility = UUID.randomUUID();
   private UUID program = UUID.randomUUID();
   private SupervisoryNodeDto supervisoryNode = mock(SupervisoryNodeDto.class);
@@ -51,9 +50,9 @@ public class SupervisoryNodeReferenceDataServiceTest {
   public void shouldReturnNullIfEmptyPage() {
     doReturn(new DummyPage<SupervisoryNodeDto>(Collections.emptyList()))
         .when(spy)
-        .getPage(SEARCH_URI,
-            Collections.emptyMap(),
-            ImmutableMap.of(PROGRAM_ID, program, FACILITY_ID, facility));
+        .getPage(RequestParameters.init()
+            .set(PROGRAM_ID, program)
+            .set(FACILITY_ID, facility));
 
     assertNull(spy.findSupervisoryNode(program, facility));
   }
@@ -65,9 +64,9 @@ public class SupervisoryNodeReferenceDataServiceTest {
     List<SupervisoryNodeDto> found = Arrays.asList(supervisoryNode, secondNode);
     doReturn(new DummyPage<>(found))
         .when(spy)
-        .getPage(SEARCH_URI,
-            Collections.emptyMap(),
-            ImmutableMap.of(PROGRAM_ID, program, FACILITY_ID, facility));
+        .getPage(RequestParameters.init()
+            .set(PROGRAM_ID, program)
+            .set(FACILITY_ID, facility));
 
     SupervisoryNodeDto foundNode = spy.findSupervisoryNode(program, facility);
 
@@ -80,9 +79,9 @@ public class SupervisoryNodeReferenceDataServiceTest {
     SupervisoryNodeReferenceDataService spy = spy(new SupervisoryNodeReferenceDataService());
     doReturn(new DummyPage<>(Collections.singletonList(supervisoryNode)))
         .when(spy)
-        .getPage(SEARCH_URI,
-            Collections.emptyMap(),
-            ImmutableMap.of(PROGRAM_ID, program, FACILITY_ID, facility));
+        .getPage(RequestParameters.init()
+            .set(PROGRAM_ID, program)
+            .set(FACILITY_ID, facility));
 
     SupervisoryNodeDto foundNode = spy.findSupervisoryNode(program, facility);
 

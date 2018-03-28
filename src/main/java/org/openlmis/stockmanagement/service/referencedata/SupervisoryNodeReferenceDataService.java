@@ -15,17 +15,18 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
-import org.openlmis.stockmanagement.dto.referencedata.SupervisoryNodeDto;
-import org.springframework.stereotype.Service;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+import org.openlmis.stockmanagement.dto.referencedata.SupervisoryNodeDto;
+import org.openlmis.stockmanagement.util.RequestParameters;
+import org.springframework.stereotype.Service;
 
 @Service
 public class SupervisoryNodeReferenceDataService
     extends BaseReferenceDataService<SupervisoryNodeDto> {
+
+  static final String PROGRAM_ID = "programId";
+  static final String FACILITY_ID = "facilityId";
 
   @Override
   protected String getUrl() {
@@ -46,12 +47,10 @@ public class SupervisoryNodeReferenceDataService
    * Find a correct supervisory node by the provided facility and program.
    */
   public SupervisoryNodeDto findSupervisoryNode(UUID program, UUID facility) {
-    Map<String, Object> requestBody = new HashMap<>();
-    requestBody.put("programId", program);
-    requestBody.put("facilityId", facility);
-
-    List<SupervisoryNodeDto> content =
-        getPage("search", Collections.emptyMap(), requestBody).getContent();
+    List<SupervisoryNodeDto> content = getPage(RequestParameters.init()
+        .set(PROGRAM_ID, program)
+        .set(FACILITY_ID, facility))
+        .getContent();
     return content.size() > 0 ? content.get(0) : null;
   }
 
