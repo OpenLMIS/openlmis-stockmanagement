@@ -32,7 +32,7 @@ scenarios:
             Content-Type: application/json
           extract-jsonpath:
             full_products:
-              jsonpath: $
+              jsonpath: $.content
   send-stock-event:
     variables:
       # Balaka District Hospital
