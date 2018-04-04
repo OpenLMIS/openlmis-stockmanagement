@@ -81,7 +81,7 @@ public class StockoutNotifierTest {
   private static final String FACILITY_NAME = "Mock Facility";
   private static final String ORDERABLE_NAME = "Mock Orderable";
   private static final String URL_TO_VIEW_BIN_CARD =
-      "/stockCardSummaries/{0}?facility={1}&program={2}&supervised={3}";
+      "/stockCardSummaries/{0}";
   private static final String URL_TO_INITIATE_REQUISITION =
       "/requisitions/initiate?facility={1}&program={0}&emergency={2}&supervised={3}";
 
@@ -228,8 +228,7 @@ public class StockoutNotifierTest {
   }
 
   private void testNotificationBody(LocalDate stockoutDate, String stockoutDays) {
-    String urlToViewBinCard = MessageFormat.format(URL_TO_VIEW_BIN_CARD, stockCard.getId(),
-        stockCard.getFacilityId(), stockCard.getProgramId(), "false");
+    String urlToViewBinCard = MessageFormat.format(URL_TO_VIEW_BIN_CARD, stockCard.getId());
     String urlToInitiateRequisition = MessageFormat.format(URL_TO_INITIATE_REQUISITION,
         stockCard.getFacilityId(), stockCard.getProgramId(), "true", "false");
     String expected = "Dear editor:\n"

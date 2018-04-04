@@ -162,8 +162,7 @@ public class StockoutNotifier extends BaseNotifier {
   }
 
   private String getUrlToViewBinCard(StockCard stockCard) {
-    return MessageFormat.format(urlToViewBinCard, stockCard.getId(), stockCard.getFacilityId(),
-        stockCard.getProgramId(), "false");
+    return MessageFormat.format(urlToViewBinCard, stockCard.getId());
   }
 
   private String getUrlToInitiateRequisition(StockCard stockCard) {
