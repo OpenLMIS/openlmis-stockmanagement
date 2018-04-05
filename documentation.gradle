@@ -3,12 +3,13 @@ import org.apache.tools.ant.filters.ReplaceTokens
 def ramlToCopy = copySpec {
     from('src/main/resources') {
         include 'api-definition.yaml'
-        rename { 'api-definition-swagger.yaml' }
+        into 'static/stockmanagement/docs'
+        rename { 'api-definition.raml' }
         filter(ReplaceTokens, tokens: [
                 baseUrl: "http://localhost",
                 version: version])
-        filter {
-            line -> line.replaceAll("\"schemas(.*).json\"", "\"#/schemas\$1\"")
+        filter{
+            line -> line.replaceAll("\"schemas(.*).json\"","\"#/schemas\$1\"")
         }
     }
     from('src/main/resources') {
@@ -22,6 +23,11 @@ def ramlToCopy = copySpec {
         include '*.json'
         into 'schemas'
     }
+    // those files are needed by Api Console
+    from('src/main/resources/schemas') {
+        include '*.json'
+        into 'static/stockmanagement/docs/schemas'
+    }
 }
 
 def ramlHtmlToCopy = copySpec {
@@ -29,17 +35,10 @@ def ramlHtmlToCopy = copySpec {
     include 'api-definition.html'
 }
 
-task copyRamlToBuild(type: Copy) {
+task copyRamlToBuild(type:Copy) {
     with ramlToCopy
     into 'build/resources/main'
 }
-
-// Generate live documentation
-task ramlToSwagger(type: Exec) {
-    description = 'Convert RAML to Swagger'
-    commandLine 'npm', 'run', 'runApiSpecConverter'
-}
-ramlToSwagger.dependsOn(npm_install, copyRamlToBuild)
 
 // Generate static (offline) documentation
 task ramlToHtml(type: Exec) {
@@ -48,7 +47,7 @@ task ramlToHtml(type: Exec) {
 }
 ramlToHtml.dependsOn(npm_install, copyRamlToBuild)
 
-task copyRamlHtmlToBuild(type: Copy) {
+task copyRamlHtmlToBuild(type:Copy) {
     with ramlHtmlToCopy
     into 'build/resources/main'
 }

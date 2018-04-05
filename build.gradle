@@ -45,7 +45,7 @@ dependencies {
     compile "org.projectlombok:lombok:1.16.8"
     compile "org.postgresql:postgresql:42.0.0"
     compile "com.github.tomakehurst:wiremock:1.58"
-    compile 'org.webjars:swagger-ui:2.2.6'
+    compile 'org.webjars.npm:api-console:3.0.17'
     compile 'org.apache.commons:commons-lang3:3.6'
     compile 'org.apache.commons:commons-csv:1.4'
     compile 'org.apache.commons:commons-collections4:4.1'

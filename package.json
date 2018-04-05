@@ -5,7 +5,6 @@
     "raml2html": "~2.4.0"
   },
   "scripts": {
-    "runApiSpecConverter": "api-spec-converter --from raml --to swagger_2 ./build/resources/main/api-definition-raml.yaml > ./build/resources/main/static/stockmanagement/docs/api-definition.json",
     "runApiHtmlConverter": "raml2html --input ./build/resources/main/api-definition-raml.yaml --output ./build/resources/main/api-definition.html"
   }
 }
