@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -42,15 +41,6 @@ public class StockCardLineItemReasonService {
 
   @Autowired
   private StockCardLineItemReasonRepository reasonRepository;
-
-  /**
-   * Find all reasons.
-   *
-   * @return found reason list
-   */
-  public List<StockCardLineItemReason> findReasons() {
-    return reasonRepository.findAll();
-  }
 
   /**
    * Save or update stock card line item reason.

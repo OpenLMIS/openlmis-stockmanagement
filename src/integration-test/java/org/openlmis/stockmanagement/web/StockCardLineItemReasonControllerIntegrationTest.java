@@ -27,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
+import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardLineItemReasonService;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonDataBuilder;
@@ -45,6 +46,9 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebTes
 
   @MockBean
   private StockCardLineItemReasonService stockCardLineItemReasonService;
+
+  @MockBean
+  private StockCardLineItemReasonRepository stockCardLineItemReasonRepository;
 
   @MockBean
   private PermissionService permissionService;
@@ -121,7 +125,8 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebTes
         .withName("Another test reason")
         .build();
 
-    when(stockCardLineItemReasonService.findReasons()).thenReturn(Arrays.asList(reason1, reason2));
+    when(stockCardLineItemReasonRepository.findAll())
+        .thenReturn(Arrays.asList(reason1, reason2));
 
     //when
     ResultActions resultActions = mvc.perform(MockMvcRequestBuilders

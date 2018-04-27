@@ -22,6 +22,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
+import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardLineItemReasonService;
 import org.slf4j.Logger;
@@ -45,6 +46,9 @@ public class StockCardLineItemReasonController {
 
   @Autowired
   private StockCardLineItemReasonService reasonService;
+
+  @Autowired
+  private StockCardLineItemReasonRepository reasonRepository;
 
   @Autowired
   private PermissionService permissionService;
@@ -71,7 +75,7 @@ public class StockCardLineItemReasonController {
    */
   @RequestMapping(value = "stockCardLineItemReasons", method = GET)
   public ResponseEntity<List<StockCardLineItemReason>> getAllReasons() {
-    return new ResponseEntity<>(reasonService.findReasons(), OK);
+    return new ResponseEntity<>(reasonRepository.findAll(), OK);
   }
 
   /**

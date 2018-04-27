@@ -15,9 +15,6 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static java.util.Arrays.asList;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,7 +29,6 @@ import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonDataBuilder;
 
-import java.util.List;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -84,24 +80,6 @@ public class StockCardLineItemReasonServiceTest {
 
     //when
     reasonService.saveOrUpdate(updatingReason);
-  }
-
-  @Test
-  public void shouldGetAllReasonsWhenPassValidation() throws Exception {
-    //given
-    when(reasonRepository.findAll()).thenReturn(
-        asList(new StockCardLineItemReasonDataBuilder().withName("test reason 1").build(),
-            new StockCardLineItemReasonDataBuilder().withName("test reason 2").build(),
-            new StockCardLineItemReasonDataBuilder().withName("test reason 3").build()));
-
-    //when
-    List<StockCardLineItemReason> reasons = reasonService.findReasons();
-
-    //then
-    assertThat(reasons.size(), is(3));
-    assertThat(reasons.get(0).getName(), is("test reason 1"));
-    assertThat(reasons.get(1).getName(), is("test reason 2"));
-    assertThat(reasons.get(2).getName(), is("test reason 3"));
   }
 
   @Test
