@@ -15,18 +15,17 @@
 
 package org.openlmis.stockmanagement.dto;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_CATEGORY_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_TYPE_INVALID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
@@ -38,8 +37,8 @@ import org.openlmis.stockmanagement.util.Message;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@JsonInclude(NON_NULL)
-public class StockCardLineItemReasonDto
+@ToString
+public final class StockCardLineItemReasonDto
     extends BaseDto
     implements StockCardLineItemReason.Importer, StockCardLineItemReason.Exporter {
 
