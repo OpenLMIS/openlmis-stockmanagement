@@ -30,11 +30,17 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.config.ObjectMapperConfig;
 import com.jayway.restassured.config.RestAssuredConfig;
-
+import guru.nidi.ramltester.RamlDefinition;
+import guru.nidi.ramltester.RamlLoaders;
+import guru.nidi.ramltester.restassured.RestAssuredClient;
+import java.util.UUID;
+import javax.annotation.PostConstruct;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
+import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.service.PermissionService;
+import org.openlmis.stockmanagement.service.StockCardLineItemReasonService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.LocalServerPort;
@@ -45,14 +51,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import guru.nidi.ramltester.RamlDefinition;
-import guru.nidi.ramltester.RamlLoaders;
-import guru.nidi.ramltester.restassured.RestAssuredClient;
-
-import java.util.UUID;
-
-import javax.annotation.PostConstruct;
-
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -60,18 +58,25 @@ import javax.annotation.PostConstruct;
 @DirtiesContext
 @SuppressWarnings("PMD.TooManyMethods")
 public abstract class BaseWebIntegrationTest {
-
   protected static final String BASE_URL = System.getenv("BASE_URL");
   protected static final String CONTENT_TYPE = "Content-Type";
   protected static final String APPLICATION_JSON = MediaType.APPLICATION_JSON_VALUE;
   protected static final String RAML_ASSERT_MESSAGE =
       "HTTP request/response should match RAML definition.";
 
+  static final String ID_FIELD = "id";
+
   @Rule
   public WireMockRule wireMockRule = new WireMockRule(80);
 
   @MockBean
   protected AuthenticationHelper authenticationHelper;
+
+  @MockBean
+  protected StockCardLineItemReasonService stockCardLineItemReasonService;
+
+  @MockBean
+  protected StockCardLineItemReasonRepository stockCardLineItemReasonRepository;
 
   @MockBean
   protected PermissionService permissionService;
@@ -96,6 +101,7 @@ public abstract class BaseWebIntegrationTest {
     RestAssured.config = RestAssuredConfig.config().objectMapperConfig(
         new ObjectMapperConfig().jackson2ObjectMapperFactory((clazz, charset) -> objectMapper)
     );
+    RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
 
     RamlDefinition ramlDefinition = RamlLoaders.fromClasspath()
         .load("api-definition-raml.yaml").ignoringXheaders();

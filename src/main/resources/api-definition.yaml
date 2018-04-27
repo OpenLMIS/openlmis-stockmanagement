@@ -753,6 +753,15 @@ traits:
             required: true
             repeat: false
 
+        get:
+          is: [ secured ]
+          description: Get a stock card line item reason.
+          responses:
+            200:
+              body:
+                application/json:
+                  schema: reason
+
         put:
           is: [ secured ]
           description: Update a stock card line item reason.

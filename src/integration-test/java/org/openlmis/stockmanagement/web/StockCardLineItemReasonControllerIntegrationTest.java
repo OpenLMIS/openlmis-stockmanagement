@@ -17,45 +17,30 @@ package org.openlmis.stockmanagement.web;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import guru.nidi.ramltester.junit.RamlMatchers;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
+import org.openlmis.stockmanagement.dto.StockCardLineItemReasonDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
-import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
-import org.openlmis.stockmanagement.service.PermissionService;
-import org.openlmis.stockmanagement.service.StockCardLineItemReasonService;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import java.util.Arrays;
-import java.util.UUID;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 
 
-public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebTest {
-
-  private static final String STOCK_CARD_LINE_ITEM_REASON_API = "/api/stockCardLineItemReasons/";
-
-  @MockBean
-  private StockCardLineItemReasonService stockCardLineItemReasonService;
-
-  @MockBean
-  private StockCardLineItemReasonRepository stockCardLineItemReasonRepository;
-
-  @MockBean
-  private PermissionService permissionService;
+public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebIntegrationTest {
+  private static final String RESOURCE_URL = "/api/stockCardLineItemReasons";
+  private static final String ID_URL = RESOURCE_URL + "/{id}";
 
   @Test
-  public void shouldReturn201WhenReasonSuccessfullyCreated() throws Exception {
+  public void shouldCreateReason() {
     //given
     StockCardLineItemReason createdReason = new StockCardLineItemReasonDataBuilder()
         .withoutId()
@@ -65,22 +50,41 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebTes
         .thenReturn(createdReason);
 
     //when
-    ResultActions resultActions = mvc.perform(MockMvcRequestBuilders
-        .post(STOCK_CARD_LINE_ITEM_REASON_API)
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectToJsonString(createdReason)));
+    StockCardLineItemReasonDto response = restAssured
+        .given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
+        .body(createdReason)
+        .when()
+        .post(RESOURCE_URL)
+        .then()
+        .statusCode(HttpStatus.CREATED.value())
+        .extract()
+        .as(StockCardLineItemReasonDto.class);
 
     //then
-    resultActions
-        .andDo(print())
-        .andExpect(status().isCreated());
-
-    assertReasonInResponse(resultActions, createdReason, true);
+    assertThat(response, is(StockCardLineItemReasonDto.newInstance(createdReason)));
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
   @Test
-  public void shouldReturn200WhenReasonSuccessfullyUpdated() throws Exception {
+  public void shouldReturnErrorIfUserHasNoPermissionToCreate() {
+    doThrow(new PermissionMessageException(new Message("key")))
+        .when(permissionService).canManageReasons();
+
+    restAssured
+        .given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
+        .body(new StockCardLineItemReasonDto())
+        .when()
+        .post(RESOURCE_URL)
+        .then()
+        .statusCode(HttpStatus.FORBIDDEN.value());
+  }
+
+  @Test
+  public void shouldUpdateReason() {
     //given
     StockCardLineItemReason updatedReason = new StockCardLineItemReasonDataBuilder()
         .withDescription("test reason")
@@ -90,22 +94,42 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebTes
         .thenReturn(updatedReason);
 
     //when
-    ResultActions resultActions = mvc.perform(MockMvcRequestBuilders
-        .put(STOCK_CARD_LINE_ITEM_REASON_API + "/" + updatedReason.getId().toString())
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectToJsonString(updatedReason)));
+    StockCardLineItemReasonDto response = restAssured
+        .given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
+        .body(updatedReason)
+        .pathParam(ID_FIELD, updatedReason.getId())
+        .when()
+        .put(ID_URL)
+        .then()
+        .statusCode(HttpStatus.OK.value())
+        .extract()
+        .as(StockCardLineItemReasonDto.class);
 
     //then
-    resultActions
-        .andDo(print())
-        .andExpect(status().isOk());
-
-    assertReasonInResponse(resultActions, updatedReason, false);
+    assertThat(response, is(StockCardLineItemReasonDto.newInstance(updatedReason)));
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
   @Test
-  public void shouldReturn200WhenUserGetAllReasons() throws Exception {
+  public void shouldReturnErrorIfUserHasNoPermissionToUpdate() {
+    doThrow(new PermissionMessageException(new Message("key")))
+        .when(permissionService).canManageReasons();
+
+    restAssured
+        .given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
+        .body(new StockCardLineItemReasonDto())
+        .when()
+        .post(RESOURCE_URL)
+        .then()
+        .statusCode(HttpStatus.FORBIDDEN.value());
+  }
+
+  @Test
+  public void shouldReturnAllReasons() {
     //given
     StockCardLineItemReason reason1 = new StockCardLineItemReasonDataBuilder().build();
 
@@ -117,17 +141,23 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebTes
         .thenReturn(Arrays.asList(reason1, reason2));
 
     //when
-    ResultActions resultActions = mvc.perform(MockMvcRequestBuilders
-        .get(STOCK_CARD_LINE_ITEM_REASON_API)
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
+    List<StockCardLineItemReasonDto> response = restAssured
+        .given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .when()
+        .get(RESOURCE_URL)
+        .then()
+        .statusCode(HttpStatus.OK.value())
+        .extract()
+        .as(List.class);
 
     //then
-    resultActions.andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(2)));
+    assertThat(response, hasSize(2));
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
   @Test
-  public void shouldReturn200WhenUserGetReason() throws Exception {
+  public void shouldReturnReason() {
     //given
     StockCardLineItemReason reason = new StockCardLineItemReasonDataBuilder().build();
 
@@ -135,50 +165,20 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebTes
         .thenReturn(reason);
 
     //when
-    ResultActions resultActions = mvc.perform(MockMvcRequestBuilders
-        .get(STOCK_CARD_LINE_ITEM_REASON_API + reason.getId())
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
+    StockCardLineItemReasonDto response = restAssured
+        .given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .pathParam(ID_FIELD, reason.getId())
+        .when()
+        .get(ID_URL)
+        .then()
+        .statusCode(HttpStatus.OK.value())
+        .extract()
+        .as(StockCardLineItemReasonDto.class);
 
     //then
-    resultActions.andExpect(status().isOk());
-    assertReasonInResponse(resultActions, reason, false);
+    assertThat(response, is(StockCardLineItemReasonDto.newInstance(reason)));
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
-  @Test
-  public void shouldReturn403WhenUserHasNoPermissionToManageReasons()
-      throws Exception {
-    doThrow(new PermissionMessageException(new Message("key")))
-        .when(permissionService).canManageReasons();
-
-    //1.create reason
-    ResultActions postResults = mvc.perform(MockMvcRequestBuilders
-        .post(STOCK_CARD_LINE_ITEM_REASON_API)
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectToJsonString(new StockCardLineItemReason())));
-    postResults.andExpect(status().isForbidden());
-
-    //2.update reason
-    ResultActions putResults = mvc.perform(MockMvcRequestBuilders
-        .put(STOCK_CARD_LINE_ITEM_REASON_API + "/" + UUID.randomUUID().toString())
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectToJsonString(new StockCardLineItemReason())));
-    putResults.andExpect(status().isForbidden());
-  }
-
-  private void assertReasonInResponse(ResultActions actions, StockCardLineItemReason reason,
-                                      boolean created)
-      throws Exception {
-    if (!created) {
-      actions.andExpect(jsonPath("$.id", is(reason.getId().toString())));
-    }
-
-    actions
-        .andExpect(jsonPath("$.name", is(reason.getName())))
-        .andExpect(jsonPath("$.description", is(reason.getDescription())))
-        .andExpect(jsonPath("$.reasonType", is(reason.getReasonType().toString())))
-        .andExpect(jsonPath("$.reasonCategory", is(reason.getReasonCategory().toString())))
-        .andExpect(jsonPath("$.isFreeTextAllowed", is(reason.getIsFreeTextAllowed())));
-  }
 }
