@@ -33,6 +33,7 @@ import org.openlmis.stockmanagement.service.StockCardLineItemReasonService;
 import org.openlmis.stockmanagement.util.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,8 +44,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
 @RequestMapping("/api")
-public class StockCardLineItemReasonController {
-
+public class StockCardLineItemReasonController extends BaseController {
   private static final Logger LOGGER =
       LoggerFactory.getLogger(StockCardLineItemReasonController.class);
 
@@ -67,12 +67,23 @@ public class StockCardLineItemReasonController {
   @ResponseBody
   @ResponseStatus(CREATED)
   public StockCardLineItemReasonDto createReason(@RequestBody StockCardLineItemReasonDto reason) {
+    Profiler profiler = getProfiler("CREATE_REASON", reason);
+
     LOGGER.debug("Try to create a new stock card line item reason");
+    profiler.start("CHECK_PERMISSION");
     permissionService.canManageReasons();
+
+    profiler.start("CONVERT_DTO_TO_DOMAIN");
     reason.setId(null);
-    return StockCardLineItemReasonDto.newInstance(
-        reasonService.saveOrUpdate(StockCardLineItemReason.newInstance(reason))
-    );
+    StockCardLineItemReason domain = StockCardLineItemReason.newInstance(reason);
+
+    profiler.start("SAVE");
+    StockCardLineItemReason result = reasonService.saveOrUpdate(domain);
+
+    profiler.start("CREATE_DTO");
+    StockCardLineItemReasonDto response = StockCardLineItemReasonDto.newInstance(result);
+
+    return stopProfiler(profiler, response);
   }
 
   /**
@@ -83,11 +94,18 @@ public class StockCardLineItemReasonController {
   @RequestMapping(value = "stockCardLineItemReasons", method = GET)
   @ResponseBody
   public List<StockCardLineItemReasonDto> getAllReasons() {
-    return reasonRepository
-        .findAll()
+    Profiler profiler = getProfiler("GET_REASONS");
+
+    profiler.start("DB_CALL");
+    List<StockCardLineItemReason> db = reasonRepository.findAll();
+
+    profiler.start("CONVERT_TO_DTOS");
+    List<StockCardLineItemReasonDto> dtos = db
         .stream()
         .map(StockCardLineItemReasonDto::newInstance)
         .collect(Collectors.toList());
+
+    return stopProfiler(profiler, dtos);
   }
 
   /**
@@ -96,13 +114,19 @@ public class StockCardLineItemReasonController {
   @RequestMapping(value = "stockCardLineItemReasons/{id}", method = GET)
   @ResponseBody
   public StockCardLineItemReasonDto getReason(@PathVariable("id") UUID reasonId) {
+    Profiler profiler = getProfiler("GET_REASON");
+
+    profiler.start("DB_CALL");
     StockCardLineItemReason reason = reasonRepository.findOne(reasonId);
 
     if (null == reason) {
+      stopProfiler(profiler, null);
       throw new ValidationMessageException(new Message(ERROR_REASON_NOT_FOUND));
     }
 
-    return StockCardLineItemReasonDto.newInstance(reason);
+    StockCardLineItemReasonDto response = StockCardLineItemReasonDto.newInstance(reason);
+
+    return stopProfiler(profiler, response);
   }
 
   /**
@@ -116,13 +140,26 @@ public class StockCardLineItemReasonController {
   @ResponseBody
   public StockCardLineItemReasonDto updateReason(@PathVariable("id") UUID reasonId,
       @RequestBody StockCardLineItemReasonDto reason) {
+    Profiler profiler = getProfiler("UPDATE_REASON");
+
+    profiler.start("CHECK_PERMISSION");
     permissionService.canManageReasons();
+
+    profiler.start("CHECK_REASON_ID_EXISTS");
+    reasonService.checkUpdateReasonIdExists(reasonId);
+
+    profiler.start("CONVERT_TO_DOMAIN");
     LOGGER.debug("Try to update stock card line item reason with id: ", reasonId.toString());
     reason.setId(reasonId);
-    reasonService.checkUpdateReasonIdExists(reasonId);
-    return StockCardLineItemReasonDto.newInstance(
-        reasonService.saveOrUpdate(StockCardLineItemReason.newInstance(reason))
-    );
+    StockCardLineItemReason domain = StockCardLineItemReason.newInstance(reason);
+
+    profiler.start("UPDATE");
+    StockCardLineItemReason result = reasonService.saveOrUpdate(domain);
+
+    profiler.start("CREATE_DTO");
+    StockCardLineItemReasonDto response = StockCardLineItemReasonDto.newInstance(result);
+
+    return stopProfiler(profiler, response);
   }
 
 }

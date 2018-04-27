@@ -18,14 +18,13 @@ package org.openlmis.stockmanagement.web;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
+import java.util.UUID;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.service.HomeFacilityPermissionService;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockEventProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ext.XLogger;
-import org.slf4j.ext.XLoggerFactory;
 import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -36,17 +35,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.UUID;
-
 /**
  * Controller used to create stock event.
  */
 @Controller
 @Transactional
 @RequestMapping("/api")
-public class StockEventsController {
+public class StockEventsController extends BaseController {
   private static final Logger LOGGER = LoggerFactory.getLogger(StockEventsController.class);
-  private static final XLogger XLOGGER = XLoggerFactory.getXLogger(StockEventsController.class);
 
   @Autowired
   private PermissionService permissionService;
@@ -67,9 +63,7 @@ public class StockEventsController {
   public ResponseEntity<UUID> createStockEvent(@RequestBody StockEventDto eventDto) {
     LOGGER.debug("Try to create a stock event");
 
-    XLOGGER.entry(eventDto);
-    Profiler profiler = new Profiler("CREATE_STOCK_EVENT");
-    profiler.setLogger(XLOGGER);
+    Profiler profiler = getProfiler("CREATE_STOCK_EVENT", eventDto);
 
     checkPermission(eventDto, profiler.startNested("CHECK_PERMISSION"));
 
@@ -79,10 +73,7 @@ public class StockEventsController {
     profiler.start("CREATE_RESPONSE");
     ResponseEntity<UUID> response = new ResponseEntity<>(createdEventId, CREATED);
 
-    profiler.stop().log();
-    XLOGGER.exit(response);
-
-    return response;
+    return stopProfiler(profiler, response);
   }
 
   private void checkPermission(StockEventDto eventDto, Profiler profiler) {
