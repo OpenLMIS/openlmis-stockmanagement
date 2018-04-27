@@ -46,9 +46,6 @@ public abstract class MessageKeys {
   public static final String ERROR_FACILITY_TYPE_NOT_FOUND =
       ERROR_PREFIX + ".facilityType.notFound";
 
-  public static final String ERROR_REASON_TYPE_INVALID = ERROR_PREFIX
-      + ".validReasonAssignment.reasonType.invalid";
-
   //stock events creation: approved products
   public static final String ERROR_ORDERABLE_NOT_IN_APPROVED_LIST =
       EVENT_ERROR_PREFIX + ".orderable.not.in.approvedList";
@@ -153,6 +150,12 @@ public abstract class MessageKeys {
 
   public static final String ERROR_REASON_NOT_FOUND = ERROR_PREFIX
       + ".reason.notFound";
+
+  public static final String ERROR_REASON_TYPE_INVALID = ERROR_PREFIX
+      + ".reason.reasonType.invalid";
+
+  public static final String ERROR_REASON_CATEGORY_INVALID = ERROR_PREFIX
+      + ".reason.reasonCategory.invalid";
 
   public static final String ERROR_REASON_ASSIGNMENT_NOT_FOUND = ERROR_PREFIX
       + ".reasonAssignment.notFound";

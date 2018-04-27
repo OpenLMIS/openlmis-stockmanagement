@@ -15,25 +15,18 @@
 
 package org.openlmis.stockmanagement.domain.reason;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-
 import com.google.common.base.Strings;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-
-import org.openlmis.stockmanagement.domain.BaseEntity;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.openlmis.stockmanagement.domain.BaseEntity;
 
 @Entity
 @Data
@@ -41,7 +34,6 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "stock_card_line_item_reasons", schema = "stockmanagement")
-@JsonInclude(NON_NULL)
 public class StockCardLineItemReason extends BaseEntity {
 
   @Column(nullable = false, unique = true, columnDefinition = TEXT_COLUMN_DEFINITION)
@@ -60,6 +52,19 @@ public class StockCardLineItemReason extends BaseEntity {
 
   @Column(nullable = false)
   private Boolean isFreeTextAllowed = false;
+
+  /**
+   * Creates new instance from importer.
+   */
+  public static StockCardLineItemReason newInstance(Importer importer) {
+    StockCardLineItemReason reason = new StockCardLineItemReason(
+        importer.getName(), importer.getDescription(), importer.getReasonType(),
+        importer.getReasonCategory(), importer.getIsFreeTextAllowed()
+    );
+    reason.setId(importer.getId());
+
+    return reason;
+  }
 
   /**
    * Create physical credit reason.
@@ -100,38 +105,75 @@ public class StockCardLineItemReason extends BaseEntity {
         .build();
   }
 
-  @JsonIgnore
   public boolean isCreditReasonType() {
     return getReasonType() == ReasonType.CREDIT;
   }
 
-  @JsonIgnore
   public boolean isDebitReasonType() {
     return getReasonType() == ReasonType.DEBIT;
   }
 
-  @JsonIgnore
   public boolean isAdjustmentReasonCategory() {
     return getReasonCategory() == ReasonCategory.ADJUSTMENT;
   }
 
-  @JsonIgnore
   public boolean hasNoName() {
     return Strings.isNullOrEmpty(name);
   }
 
-  @JsonIgnore
   public boolean hasNoType() {
     return reasonType == null;
   }
 
-  @JsonIgnore
   public boolean hasNoCategory() {
     return reasonCategory == null;
   }
 
-  @JsonIgnore
   public boolean hasNoIsFreeTextAllowed() {
     return isFreeTextAllowed == null;
+  }
+
+  /**
+   * Exports data into exporter.
+   */
+  public void export(Exporter exporter) {
+    exporter.setId(getId());
+    exporter.setName(name);
+    exporter.setDescription(description);
+    exporter.setReasonType(reasonType);
+    exporter.setReasonCategory(reasonCategory);
+    exporter.setIsFreeTextAllowed(isFreeTextAllowed);
+  }
+
+  public interface Exporter {
+
+    void setId(UUID id);
+
+    void setName(String name);
+
+    void setDescription(String description);
+
+    void setReasonType(ReasonType reasonType);
+
+    void setReasonCategory(ReasonCategory reasonCategory);
+
+    void setIsFreeTextAllowed(Boolean isFreeTextAllowed);
+
+  }
+
+  public interface Importer {
+
+    UUID getId();
+
+    String getName();
+
+    String getDescription();
+
+    ReasonType getReasonType();
+
+    ReasonCategory getReasonCategory();
+
+    Boolean getIsFreeTextAllowed();
+
   }
 }

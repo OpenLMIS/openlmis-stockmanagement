@@ -15,6 +15,25 @@
 
 package org.openlmis.stockmanagement.domain.reason;
 
+import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
+
 public enum ReasonCategory {
-  TRANSFER, ADJUSTMENT, PHYSICAL_INVENTORY
+  TRANSFER, ADJUSTMENT, PHYSICAL_INVENTORY;
+
+  /**
+   * Find a correct {@link ReasonCategory} instance based on the passed string. The method ignores
+   * the case.
+   *
+   * @param arg string representation of one of reason category.
+   * @return instance of {@link ReasonCategory} if the given string matches type; otherwise null.
+   */
+  public static ReasonCategory fromString(String arg) {
+    for (ReasonCategory status : values()) {
+      if (equalsIgnoreCase(arg, status.name())) {
+        return status;
+      }
+    }
+
+    return null;
+  }
 }
