@@ -36,13 +36,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
 import java.util.Arrays;
 import java.util.UUID;
 
 
 public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebTest {
 
-  private static final String STOCK_CARD_LINE_ITEM_REASON_API = "/api/stockCardLineItemReasons";
+  private static final String STOCK_CARD_LINE_ITEM_REASON_API = "/api/stockCardLineItemReasons/";
 
   @MockBean
   private StockCardLineItemReasonService stockCardLineItemReasonService;
@@ -73,15 +74,9 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebTes
     //then
     resultActions
         .andDo(print())
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.name", is(createdReason.getName())))
-        .andExpect(jsonPath("$.description", is(createdReason.getDescription())))
-        .andExpect(jsonPath("$.reasonType",
-            is(createdReason.getReasonType().toString())))
-        .andExpect(jsonPath("$.reasonCategory",
-            is(createdReason.getReasonCategory().toString())))
-        .andExpect(jsonPath("$.isFreeTextAllowed",
-            is(createdReason.getIsFreeTextAllowed())));
+        .andExpect(status().isCreated());
+
+    assertReasonInResponse(resultActions, createdReason, true);
   }
 
   @Test
@@ -104,16 +99,9 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebTes
     //then
     resultActions
         .andDo(print())
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id", is(updatedReason.getId().toString())))
-        .andExpect(jsonPath("$.name", is(updatedReason.getName())))
-        .andExpect(jsonPath("$.description", is(updatedReason.getDescription())))
-        .andExpect(jsonPath("$.reasonType",
-            is(updatedReason.getReasonType().toString())))
-        .andExpect(jsonPath("$.reasonCategory",
-            is(updatedReason.getReasonCategory().toString())))
-        .andExpect(jsonPath("$.isFreeTextAllowed",
-            is(updatedReason.getIsFreeTextAllowed())));
+        .andExpect(status().isOk());
+
+    assertReasonInResponse(resultActions, updatedReason, false);
   }
 
   @Test
@@ -139,6 +127,24 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebTes
   }
 
   @Test
+  public void shouldReturn200WhenUserGetReason() throws Exception {
+    //given
+    StockCardLineItemReason reason = new StockCardLineItemReasonDataBuilder().build();
+
+    when(stockCardLineItemReasonRepository.findOne(reason.getId()))
+        .thenReturn(reason);
+
+    //when
+    ResultActions resultActions = mvc.perform(MockMvcRequestBuilders
+        .get(STOCK_CARD_LINE_ITEM_REASON_API + reason.getId())
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
+
+    //then
+    resultActions.andExpect(status().isOk());
+    assertReasonInResponse(resultActions, reason, false);
+  }
+
+  @Test
   public void shouldReturn403WhenUserHasNoPermissionToManageReasons()
       throws Exception {
     doThrow(new PermissionMessageException(new Message("key")))
@@ -159,5 +165,20 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebTes
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectToJsonString(new StockCardLineItemReason())));
     putResults.andExpect(status().isForbidden());
+  }
+
+  private void assertReasonInResponse(ResultActions actions, StockCardLineItemReason reason,
+                                      boolean created)
+      throws Exception {
+    if (!created) {
+      actions.andExpect(jsonPath("$.id", is(reason.getId().toString())));
+    }
+
+    actions
+        .andExpect(jsonPath("$.name", is(reason.getName())))
+        .andExpect(jsonPath("$.description", is(reason.getDescription())))
+        .andExpect(jsonPath("$.reasonType", is(reason.getReasonType().toString())))
+        .andExpect(jsonPath("$.reasonCategory", is(reason.getReasonCategory().toString())))
+        .andExpect(jsonPath("$.isFreeTextAllowed", is(reason.getIsFreeTextAllowed())));
   }
 }

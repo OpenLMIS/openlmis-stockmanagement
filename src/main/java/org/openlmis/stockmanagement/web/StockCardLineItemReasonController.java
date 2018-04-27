@@ -33,6 +33,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
 import java.util.UUID;
@@ -76,6 +77,12 @@ public class StockCardLineItemReasonController {
   @RequestMapping(value = "stockCardLineItemReasons", method = GET)
   public ResponseEntity<List<StockCardLineItemReason>> getAllReasons() {
     return new ResponseEntity<>(reasonRepository.findAll(), OK);
+  }
+
+  @RequestMapping(value = "stockCardLineItemReasons/{id}", method = GET)
+  @ResponseBody
+  public StockCardLineItemReason getReason(@PathVariable("id") UUID reasonId) {
+    return reasonRepository.findOne(reasonId);
   }
 
   /**
