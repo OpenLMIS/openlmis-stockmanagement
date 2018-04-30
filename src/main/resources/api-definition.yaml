@@ -84,6 +84,13 @@ schemas:
         "type": "string",
         "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
       }
+  - arrayOfStrings: |
+      {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
 
 resourceTypes:
     - collection:
@@ -789,6 +796,18 @@ traits:
               body:
                 application/json:
                   schema: localizedMessage
+
+  /stockCardLineItemReasonTags:
+      get:
+        is: [ secured ]
+        description: |
+          Retrieve all tags that are assosiated with any reason. The result list does no contain
+          duplicates.
+        responses:
+          200:
+            body:
+              application/json:
+                schema: arrayOfStrings
 
   /organizations:
       get:

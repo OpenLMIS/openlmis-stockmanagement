@@ -17,11 +17,15 @@ package org.openlmis.stockmanagement.repository;
 
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,16 +41,16 @@ public class StockCardLineItemReasonRepositoryIntegrationTest
   @Autowired
   private StockCardLineItemReasonRepository reasonRepository;
 
+  private StockCardLineItemReason firstReason;
+  private StockCardLineItemReason secondReason;
+
   @Override
   CrudRepository<StockCardLineItemReason, UUID> getRepository() {
     return reasonRepository;
   }
 
-  private StockCardLineItemReason firstReason;
-  private StockCardLineItemReason secondReason;
-
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     firstReason = generateInstance();
     reasonRepository.save(firstReason);
 
@@ -63,7 +67,7 @@ public class StockCardLineItemReasonRepositoryIntegrationTest
   }
 
   @Test
-  public void shouldFindByReasonTypes() throws Exception {
+  public void shouldFindByReasonTypes() {
     List<StockCardLineItemReason> reasons =
         reasonRepository.findByReasonTypeIn(Arrays.asList(ReasonType.DEBIT, ReasonType.CREDIT));
 
@@ -71,7 +75,7 @@ public class StockCardLineItemReasonRepositoryIntegrationTest
   }
 
   @Test
-  public void shouldFindByIds() throws Exception {
+  public void shouldFindByIds() {
     List<StockCardLineItemReason> reasons =
         reasonRepository.findByIdIn(Arrays.asList(firstReason.getId(), secondReason.getId()));
 
@@ -80,15 +84,34 @@ public class StockCardLineItemReasonRepositoryIntegrationTest
   }
 
   @Test
-  public void shouldFindByName() throws Exception {
+  public void shouldFindByName() {
     StockCardLineItemReason reason =
         reasonRepository.findByName(firstReason.getName());
 
     assertThat(reason, is(firstReason));
   }
 
+  @Test
+  public void shouldFindTags() {
+    reasonRepository.deleteAll();
+
+    Set<String> expected = Sets.newHashSet();
+
+    for (int i = 0; i < 30; ++i) {
+      StockCardLineItemReason entity = generateInstance();
+      expected.addAll(entity.getTags());
+
+      reasonRepository.save(entity);
+    }
+
+    List<String> actual = reasonRepository.findTags();
+
+    assertThat(actual, hasSize(expected.size()));
+    assertThat(actual, containsInAnyOrder(expected.toArray(new String[0])));
+  }
+
   @Override
-  StockCardLineItemReason generateInstance() throws Exception {
+  StockCardLineItemReason generateInstance() {
     int instanceNumber = getNextInstanceNumber();
     return StockCardLineItemReason.builder()
         .name("Name" + instanceNumber)
@@ -96,7 +119,20 @@ public class StockCardLineItemReasonRepositoryIntegrationTest
         .isFreeTextAllowed(instanceNumber % 2 == 0)
         .reasonCategory(ReasonCategory.ADJUSTMENT)
         .reasonType(ReasonType.CREDIT)
+        .tags(createTags(instanceNumber))
         .build();
+  }
+
+  private List<String> createTags(int instanceNumber) {
+    if (instanceNumber % 3 == 0 && instanceNumber % 5 == 0) {
+      return Lists.newArrayList("FizzBuzz");
+    } else if (instanceNumber % 5 == 0) {
+      return Lists.newArrayList("Buzz");
+    } else if (instanceNumber % 3 == 0) {
+      return Lists.newArrayList("Fizz");
+    } else {
+      return Lists.newArrayList();
+    }
   }
 
 }

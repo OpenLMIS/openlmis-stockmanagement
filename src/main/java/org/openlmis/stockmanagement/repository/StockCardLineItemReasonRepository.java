@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.repository;
 
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
@@ -33,4 +34,8 @@ public interface StockCardLineItemReasonRepository extends
   List<StockCardLineItemReason> findByIdIn(Collection<UUID> ids);
 
   List<StockCardLineItemReason> findByReasonTypeIn(Collection<ReasonType> types);
+
+  @Query("SELECT DISTINCT t FROM StockCardLineItemReason r JOIN r.tags AS t")
+  List<String> findTags();
+
 }
