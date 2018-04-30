@@ -112,5 +112,9 @@ public class Message {
     public String toString() {
       return messageKey + ": " + message;
     }
+
+    public String asMessage() {
+      return message;
+    }
   }
 }

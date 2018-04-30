@@ -20,6 +20,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_TYPE_IN
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -53,6 +54,8 @@ public final class StockCardLineItemReasonDto
   private String category;
 
   private Boolean isFreeTextAllowed;
+
+  private List<String> tags;
 
   /**
    * Creates new instance based on data from the domain object.

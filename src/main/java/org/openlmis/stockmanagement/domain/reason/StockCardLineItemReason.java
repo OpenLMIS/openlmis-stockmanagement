@@ -17,16 +17,25 @@ package org.openlmis.stockmanagement.domain.reason;
 
 import com.google.common.base.Strings;
 import java.util.UUID;
+
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.CollectionTable;
+import javax.persistence.ElementCollection;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import org.openlmis.stockmanagement.domain.BaseEntity;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.openlmis.stockmanagement.domain.BaseEntity;
 
 @Entity
 @Data
@@ -53,13 +62,21 @@ public class StockCardLineItemReason extends BaseEntity {
   @Column(nullable = false)
   private Boolean isFreeTextAllowed = false;
 
+  @ElementCollection(fetch = FetchType.LAZY, targetClass = String.class)
+  @CollectionTable(
+      name = "stock_card_line_item_reason_tags",
+      joinColumns = @JoinColumn(name = "reasonId"))
+  @Column(name = "tag")
+  private List<String> tags = new ArrayList<>();
+
   /**
    * Creates new instance from importer.
    */
   public static StockCardLineItemReason newInstance(Importer importer) {
     StockCardLineItemReason reason = new StockCardLineItemReason(
         importer.getName(), importer.getDescription(), importer.getReasonType(),
-        importer.getReasonCategory(), importer.getIsFreeTextAllowed()
+        importer.getReasonCategory(), importer.getIsFreeTextAllowed(),
+        importer.getTags()
     );
     reason.setId(importer.getId());
 
@@ -143,6 +160,7 @@ public class StockCardLineItemReason extends BaseEntity {
     exporter.setReasonType(reasonType);
     exporter.setReasonCategory(reasonCategory);
     exporter.setIsFreeTextAllowed(isFreeTextAllowed);
+    exporter.setTags(tags);
   }
 
   public interface Exporter {
@@ -159,6 +177,7 @@ public class StockCardLineItemReason extends BaseEntity {
 
     void setIsFreeTextAllowed(Boolean isFreeTextAllowed);
 
+    void setTags(List<String> tags);
   }
 
   public interface Importer {
@@ -174,6 +193,8 @@ public class StockCardLineItemReason extends BaseEntity {
     ReasonCategory getReasonCategory();
 
     Boolean getIsFreeTextAllowed();
+
+    List<String> getTags();
 
   }
 }

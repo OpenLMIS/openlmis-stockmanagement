@@ -15,6 +15,8 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_TAGS_INVALID;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
@@ -26,6 +28,10 @@ import guru.nidi.ramltester.junit.RamlMatchers;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import com.google.common.collect.Lists;
+import javax.persistence.PersistenceException;
+import org.apache.commons.lang.RandomStringUtils;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockCardLineItemReasonDto;
@@ -36,10 +42,21 @@ import org.openlmis.stockmanagement.util.Message;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 
+import org.openlmis.stockmanagement.i18n.MessageService;
+import org.postgresql.util.PSQLException;
+import org.postgresql.util.ServerErrorMessage;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.orm.jpa.JpaSystemException;
 
 public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebIntegrationTest {
   private static final String RESOURCE_URL = "/api/stockCardLineItemReasons";
   private static final String ID_URL = RESOURCE_URL + "/{id}";
+  protected static final String RAML_ASSERT_MESSAGE =
+      "HTTP request/response should match RAML definition.";
+
+  @Autowired
+  private MessageService messageService;
 
   @Test
   public void shouldCreateReason() {
@@ -83,6 +100,41 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebInt
         .post(RESOURCE_URL)
         .then()
         .statusCode(HttpStatus.FORBIDDEN.value());
+  }
+
+  @Test
+  public void shouldReturn400WhenReasonTagIsTooLong() throws Exception {
+    StockCardLineItemReason createdReason = new StockCardLineItemReasonDataBuilder()
+        .withoutId()
+        .withTags(Lists.newArrayList(RandomStringUtils.random(256)))
+        .build();
+
+    // specific psql format
+    // C<<numbers>> -> sql state
+    // M<<string>> -> short error message
+    // \u0000 -> use for splitting parts of message
+    // there are more fields but we need only those two for tests
+    PSQLException psqlException = new PSQLException(
+        new ServerErrorMessage(
+            "C22001\u0000MERROR: Invalid stock card line item reason tag length"
+        )
+    );
+
+    doThrow(new JpaSystemException((RuntimeException) new PersistenceException(psqlException)))
+        .when(stockCardLineItemReasonService)
+        .saveOrUpdate(any(StockCardLineItemReason.class));
+
+    restAssured.given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .when()
+        .body(createdReason)
+        .post(RESOURCE_URL)
+        .then()
+        .statusCode(400)
+        .body("message", Matchers.is(getMessage(ERROR_LINE_ITEM_REASON_TAGS_INVALID)));
+
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
   @Test
@@ -201,5 +253,9 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebInt
 
     //then
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
+
+  private String getMessage(String messageKey, Object... messageParams) {
+    return messageService.localize(new Message(messageKey, messageParams)).asMessage();
   }
 }

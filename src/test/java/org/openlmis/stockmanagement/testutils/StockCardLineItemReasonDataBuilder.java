@@ -16,6 +16,8 @@
 package org.openlmis.stockmanagement.testutils;
 
 
+import java.util.ArrayList;
+import java.util.List;
 import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
@@ -32,6 +34,7 @@ public class StockCardLineItemReasonDataBuilder {
   private ReasonType reasonType = ReasonType.CREDIT;
   private ReasonCategory reasonCategory = ReasonCategory.TRANSFER;
   private Boolean isFreeTextAllowed = true;
+  private List<String> tags = new ArrayList<>();
 
   public StockCardLineItemReasonDataBuilder withoutId() {
     id = null;
@@ -68,13 +71,18 @@ public class StockCardLineItemReasonDataBuilder {
     return this;
   }
 
+  public StockCardLineItemReasonDataBuilder withTags(List<String> tags) {
+    tags = tags;
+    return this;
+  }
+
   /**
    * Creates new instance of {@link StockCardLineItemReason} with properties.
    * @return created stock card line item reason.
    */
   public StockCardLineItemReason build() {
     StockCardLineItemReason reason = new StockCardLineItemReason(
-        name, description, reasonType, reasonCategory, isFreeTextAllowed
+        name, description, reasonType, reasonCategory, isFreeTextAllowed, tags
     );
     reason.setId(id);
 

@@ -33,6 +33,12 @@
         "ADJUSTMENT",
         "PHYSICAL_INVENTORY"
       ]
+    },
+    "tags": {
+      "type": ["array", "null"],
+      "items": {
+        "type": ["string", "null"]
+      }
     }
   },
   "required": [

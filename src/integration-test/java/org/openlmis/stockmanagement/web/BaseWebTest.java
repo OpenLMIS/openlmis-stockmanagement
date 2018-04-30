@@ -15,15 +15,25 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static org.openlmis.stockmanagement.web.utils.WireMockResponses.MOCK_TOKEN_REQUEST_RESPONSE;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.jayway.restassured.RestAssured;
+import com.jayway.restassured.config.ObjectMapperConfig;
+import com.jayway.restassured.config.RestAssuredConfig;
+import guru.nidi.ramltester.RamlDefinition;
+import guru.nidi.ramltester.RamlLoaders;
+import guru.nidi.ramltester.restassured.RestAssuredClient;
+import javax.annotation.PostConstruct;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
@@ -32,6 +42,7 @@ import org.mockito.stubbing.Answer;
 import org.openlmis.stockmanagement.BaseIntegrationTest;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -43,6 +54,7 @@ import java.util.UUID;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public abstract class BaseWebTest extends BaseIntegrationTest {
 
+  protected static final String BASE_URL = System.getenv("BASE_URL");
   public static final String ACCESS_TOKEN = "access_token";
   public static final String ACCESS_TOKEN_VALUE = "xxx";
 
@@ -69,9 +81,17 @@ public abstract class BaseWebTest extends BaseIntegrationTest {
   @Rule
   public WireMockRule wireMockRule = new WireMockRule(8888);
 
+  @LocalServerPort
+  private int serverPort;
+
   @Autowired
   private WebApplicationContext context;
   protected MockMvc mvc;
+
+  @Autowired
+  protected ObjectMapper objectMapper;
+
+  protected RestAssuredClient restAssured;
 
   @Before
   public void setup() {
@@ -79,6 +99,25 @@ public abstract class BaseWebTest extends BaseIntegrationTest {
             .webAppContextSetup(context)
             .apply(springSecurity())
             .build();
+  }
+
+  /**
+   * Method called to initialize basic resources after the object is created.
+   */
+  @PostConstruct
+  public void init() {
+    mockExternalAuthorization();
+
+    RestAssured.baseURI = BASE_URL;
+    RestAssured.port = serverPort;
+    RestAssured.config = RestAssuredConfig.config().objectMapperConfig(
+        new ObjectMapperConfig().jackson2ObjectMapperFactory((clazz, charset) -> objectMapper)
+    );
+    RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+
+    RamlDefinition ramlDefinition = RamlLoaders.fromClasspath()
+        .load("api-definition-raml.yaml").ignoringXheaders();
+    restAssured = ramlDefinition.createRestAssured();
   }
 
   /**
@@ -91,10 +130,29 @@ public abstract class BaseWebTest extends BaseIntegrationTest {
                     .withBody(MOCK_CHECK_RESULT)));
   }
 
+  protected String getTokenHeader() {
+    return "Bearer " + UUID.randomUUID().toString();
+  }
+
   protected String objectToJsonString(Object obj) throws JsonProcessingException {
     ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule());
     return mapper.writeValueAsString(obj);
+  }
+
+  protected void mockExternalAuthorization() {
+    // This mocks the auth check to always return valid admin credentials.
+    wireMockRule.stubFor(post(urlEqualTo("/api/oauth/check_token"))
+        .willReturn(aResponse()
+            .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+            .withBody(MOCK_CHECK_RESULT)));
+
+    // This mocks the auth token request response
+    wireMockRule.stubFor(post(urlPathEqualTo("/api/oauth/token?grant_type=client_credentials"))
+        .willReturn(aResponse()
+            .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+            .withBody(MOCK_TOKEN_REQUEST_RESPONSE)));
+
   }
 
   static class SaveAnswer<T extends BaseEntity> implements Answer<T> {

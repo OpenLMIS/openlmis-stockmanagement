@@ -15,6 +15,12 @@
 
 package org.openlmis.stockmanagement.errorhandling;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_TAGS_INVALID;
+
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+import javax.persistence.PersistenceException;
 import org.openlmis.stockmanagement.exception.AuthenticationException;
 import org.openlmis.stockmanagement.exception.JasperReportViewException;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
@@ -24,6 +30,7 @@ import org.openlmis.stockmanagement.service.referencedata.DataRetrievalException
 import org.openlmis.stockmanagement.util.ErrorResponse;
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.http.HttpStatus;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -34,6 +41,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  */
 @ControllerAdvice
 public class GlobalErrorHandling extends AbstractErrorHandling {
+  private static final Map<String, String> SQL_STATES = new HashMap<>();
+
+  static {
+    // https://www.postgresql.org/docs/9.6/static/errcodes-appendix.html
+    SQL_STATES.put("22001", ERROR_LINE_ITEM_REASON_TAGS_INVALID);
+  }
 
   @ExceptionHandler(AuthenticationException.class)
   @ResponseStatus(HttpStatus.UNAUTHORIZED)
@@ -95,5 +108,32 @@ public class GlobalErrorHandling extends AbstractErrorHandling {
   @ResponseBody
   public Message.LocalizedMessage handleMessageException(ValidationMessageException ex) {
     return getLocalizedMessage(ex);
+  }
+
+  /**
+   * Handles Jpa System Exception.
+   * @param ex the Jpa System Exception
+   * @return the user-oriented error message.
+   */
+  @ExceptionHandler(JpaSystemException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public Message.LocalizedMessage handleJpaSystemException(JpaSystemException ex) {
+    logger.info(ex.getMessage());
+
+    if (ex.getCause() instanceof PersistenceException) {
+      PersistenceException persistence = (PersistenceException) ex.getCause();
+
+      if (persistence.getCause() instanceof SQLException) {
+        SQLException sql = (SQLException) persistence.getCause();
+        String message = SQL_STATES.get(sql.getSQLState());
+
+        if (null != message) {
+          return getLocalizedMessage(message);
+        }
+      }
+    }
+
+    return getLocalizedMessage(ex.getMessage());
   }
 }

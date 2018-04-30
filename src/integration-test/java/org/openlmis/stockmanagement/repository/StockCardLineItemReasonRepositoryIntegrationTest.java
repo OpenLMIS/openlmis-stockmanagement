@@ -19,6 +19,7 @@ import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+import com.google.common.collect.Lists;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -56,6 +57,7 @@ public class StockCardLineItemReasonRepositoryIntegrationTest
         .isFreeTextAllowed(true)
         .reasonCategory(ReasonCategory.ADJUSTMENT)
         .reasonType(ReasonType.DEBIT)
+        .tags(Lists.newArrayList("newTag"))
         .build();
     reasonRepository.save(secondReason);
   }
