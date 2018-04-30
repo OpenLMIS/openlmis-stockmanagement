@@ -25,10 +25,12 @@ import static org.mockito.Mockito.when;
 import guru.nidi.ramltester.junit.RamlMatchers;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockCardLineItemReasonDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
+import org.openlmis.stockmanagement.i18n.MessageKeys;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.http.HttpHeaders;
@@ -181,4 +183,23 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebInt
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
+  @Test
+  public void shouldReturnErrorMessageIfReasonDoesNotExist() {
+    //given
+    when(stockCardLineItemReasonRepository.findOne(any(UUID.class))).thenReturn(null);
+
+    //when
+    restAssured
+        .given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .pathParam(ID_FIELD, UUID.randomUUID())
+        .when()
+        .get(ID_URL)
+        .then()
+        .statusCode(HttpStatus.NOT_FOUND.value())
+        .body(MESSAGE_KEY, is(MessageKeys.ERROR_REASON_NOT_FOUND));
+
+    //then
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
 }

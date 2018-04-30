@@ -66,6 +66,8 @@ public abstract class BaseWebIntegrationTest {
 
   static final String ID_FIELD = "id";
 
+  static final String MESSAGE_KEY = "messageKey";
+
   @Rule
   public WireMockRule wireMockRule = new WireMockRule(80);
 

@@ -761,6 +761,10 @@ traits:
               body:
                 application/json:
                   schema: reason
+            404:
+              body:
+                application/json:
+                  schema: localizedMessage
 
         put:
           is: [ secured ]

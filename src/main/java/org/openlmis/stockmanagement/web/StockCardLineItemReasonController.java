@@ -26,11 +26,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockCardLineItemReasonDto;
-import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardLineItemReasonService;
-import org.openlmis.stockmanagement.util.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.profiler.Profiler;
@@ -121,7 +120,7 @@ public class StockCardLineItemReasonController extends BaseController {
 
     if (null == reason) {
       stopProfiler(profiler, null);
-      throw new ValidationMessageException(new Message(ERROR_REASON_NOT_FOUND));
+      throw new ResourceNotFoundException(ERROR_REASON_NOT_FOUND);
     }
 
     StockCardLineItemReasonDto response = StockCardLineItemReasonDto.newInstance(reason);
