@@ -119,7 +119,7 @@ public class GlobalErrorHandling extends AbstractErrorHandling {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ResponseBody
   public Message.LocalizedMessage handleJpaSystemException(JpaSystemException ex) {
-    logger.info(ex.getMessage());
+    logger.info(ex.getMessage(), ex);
 
     if (ex.getCause() instanceof PersistenceException) {
       PersistenceException persistence = (PersistenceException) ex.getCause();

@@ -116,7 +116,8 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebInt
     // there are more fields but we need only those two for tests
     PSQLException psqlException = new PSQLException(
         new ServerErrorMessage(
-            "C22001\u0000MERROR: Invalid stock card line item reason tag length"
+            "C22001\u0000MERROR: Stock card line item reason tag invalid."
+                + "Should contain at least 255 characters."
         )
     );
 
@@ -256,6 +257,6 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebInt
   }
 
   private String getMessage(String messageKey, Object... messageParams) {
-    return messageService.localize(new Message(messageKey, messageParams)).asMessage();
+    return messageService.localize(new Message(messageKey, messageParams)).getMessage();
   }
 }
