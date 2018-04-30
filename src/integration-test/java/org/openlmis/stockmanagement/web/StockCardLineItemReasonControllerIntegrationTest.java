@@ -117,7 +117,7 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebInt
     PSQLException psqlException = new PSQLException(
         new ServerErrorMessage(
             "C22001\u0000MERROR: Stock card line item reason tag invalid."
-                + "Should contain at least 255 characters."
+                + "Should contain no more than 255 characters."
         )
     );
 
