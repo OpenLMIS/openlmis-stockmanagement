@@ -11,6 +11,7 @@ var query = "INSERT INTO %s (SELECT * FROM json_populate_recordset(NULL::%s, '%s
 // Tables not included here are populated in random order
 var filesOrdered = [
   "stockmanagement.stock_card_line_item_reasons",
+  "stockmanagement.stock_card_line_item_reason_tags",
   "stockmanagement.valid_reason_assignments",
   "stockmanagement.organizations",
   "stockmanagement.nodes",
