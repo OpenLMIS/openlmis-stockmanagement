@@ -15,18 +15,17 @@
 
 package org.openlmis.stockmanagement.web;
 
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-
 import java.util.List;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
-@RequestMapping("/api")
+@RequestMapping("/api/stockCardLineItemReasonTags")
 public class StockCardLineItemReasonTagController extends BaseController {
 
   @Autowired
@@ -35,7 +34,7 @@ public class StockCardLineItemReasonTagController extends BaseController {
   /**
    * Retrieve all stock card line item reason tags.
    */
-  @RequestMapping(value = "stockCardLineItemReasonTags", method = GET)
+  @GetMapping
   @ResponseBody
   public List<String> getAllReasonTags() {
     Profiler profiler = getProfiler("GET_REASON_TAGS");
