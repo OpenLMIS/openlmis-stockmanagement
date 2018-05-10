@@ -92,6 +92,10 @@ schemas:
         }
       }
 
+  - stockOutDays: !include schemas/stockOutDays.json
+
+  - stockOutDaysPage: !include schemas/stockOutDaysPage.json
+
 resourceTypes:
     - collection:
         get:
@@ -1051,3 +1055,54 @@ traits:
                 404:
                     body:
                       application/json:
+
+  /stockOutDays:
+      displayName: Stock out Days
+      get:
+          is: [ secured ]
+          description: Get stock out days for Stock Cards with given program, facility, orderables that fulfill given orderable ids and date.
+          queryParameters:
+              facilityId:
+                  displayName: Facility ID
+                  description: Indicates the facility that the used stock cards should belong to.
+                  type: string
+                  required: true
+                  repeat: false
+              programId:
+                  displayName: Program ID
+                  description: Indicates the program that the used stock cards should belong to.
+                  type: string
+                  required: true
+                  repeat: false
+              orderableId:
+                  displayName: Orderable ID
+                  description: Indicates the orderable that the used stock card orderables should fulfill.
+                  type: string
+                  required: false
+                  repeat: true
+              startDate:
+                  displayName: Start date
+                  description: Start date of stockout.
+                  type: string
+                  required: true
+                  repeat: false
+              endDate:
+                  displayName: End date
+                  description: End date of stockout.
+                  type: string
+                  required: true
+                  repeat: false
+          responses:
+              200:
+                  body:
+                    application/json:
+                        schema: stockOutDaysPage
+              400:
+                  body:
+                    application/json:
+                      schema: localizedMessage
+              403:
+                  description: User does not have permission to view stock out days of given facility and program.
+                  body:
+                    application/json:
+                      schema: localizedMessage
