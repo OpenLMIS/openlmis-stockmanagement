@@ -1060,7 +1060,7 @@ traits:
       displayName: Stock out Days
       get:
           is: [ secured ]
-          description: Get stock out days for Stock Cards with given program, facility, orderables that fulfill given orderable ids and date.
+          description: Get stock out days for Stock Cards with given program, facility, orderables that fulfill given orderable ids and date. If orderable is not found in the system, it will be igored.
           queryParameters:
               facilityId:
                   displayName: Facility ID
