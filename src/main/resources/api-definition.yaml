@@ -52,6 +52,7 @@ schemas:
   - stockCardPage: !include schemas/stockCard.json
   - stockCardSummariesPage: !include schemas/stockCardSummaryV2Page.json
   - stockCardSummaries: !include schemas/stockCardSummaries.json
+  - stockCardReasonSummaryPage: !include schemas/stockCardReasonSummaryPage.json
   - validSourceDestination: !include schemas/validSourceDestination.json
   - validSourceDestinations: |
         {
@@ -345,7 +346,7 @@ traits:
           type: string
         asOfDate:
           required: false
-          description: Program id, indicates the program that the queries stock card summaries is under.
+          description: Stock Card data will be calculated as of given date.
           repeat: false
           type: string
 
@@ -363,6 +364,52 @@ traits:
           body:
             application/json:
               schema: localizedMessage
+
+  /stockCardReasonSummaries:
+      get:
+          is: [ secured, paginated ]
+          description: Get summaries of stock cards reasons grouping them using /api/orderableFulfills.
+          queryParameters:
+              facilityId:
+                  required: true
+                  description: Facility id, indicates the facility that the queried stock card summaries should belong to.
+                  repeat: false
+                  type: string
+              programId:
+                  required: true
+                  description: Program id, indicates the program that the queries stock card summaries is under.
+                  repeat: false
+                  type: string
+              orderableId:
+                  required: false
+                  description: Orderable id, indicates the orderable that the queries stock card summaries is under, can specify multiple orderable ids.
+                  repeat: true
+                  type: string
+              startDate:
+                  required: false
+                  description: Date from which Stock Card Line Items will be retrieved.
+                  repeat: false
+                  type: string
+              endDate:
+                  required: false
+                  description: Date to which Stock Card Line Items will be retrieved.
+                  repeat: false
+                  type: string
+          responses:
+              200:
+                  body:
+                      application/json:
+                          schema: stockCardReasonSummaryPage
+              400:
+                  description: Request has paramters that are not recognized by this endpoint.
+                  body:
+                      application/json:
+                          schema: localizedMessage
+              403:
+                  description: User does not have permission to view stock cards of given facility and program.
+                  body:
+                      application/json:
+                          schema: localizedMessage
 
   /stockCardSummaries/noCards:
       get:

@@ -1,0 +1,27 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Stock Card Reason Summary.",
+  "properties": {
+    "orderable": {
+      "type": "object",
+      "title": "Orderable",
+      "$ref": "referenceObjectDto.json"
+    },
+    "stockOnHand": {
+      "type": "integer"
+    },
+    "stockOutDays": {
+      "type": "integer"
+    },
+    "reasons": {
+      "type": "array",
+      "title": "Reason summaries",
+      "items": {
+        "type": "object",
+        "title": "Reason summary",
+        "$ref": "reasonSummary.json"
+      }
+    }
+  }
+}
