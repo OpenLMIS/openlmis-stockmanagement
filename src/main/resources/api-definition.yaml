@@ -365,10 +365,10 @@ traits:
             application/json:
               schema: localizedMessage
 
-  /stockCardReasonSummaries:
+  /stockCardRangeSummaries:
       get:
           is: [ secured, paginated ]
-          description: Get summaries of stock cards reasons grouping them using /api/orderableFulfills.
+          description: Get summaries of stock cards with reason info and amount assigned. Range of line items taken is specified by date params. Results are grouped by commodity types using /api/orderableFulfills.
           queryParameters:
               facilityId:
                   required: true
@@ -382,17 +382,17 @@ traits:
                   type: string
               orderableId:
                   required: false
-                  description: Orderable id, indicates the orderable that the queries stock card summaries is under, can specify multiple orderable ids.
+                  description: Orderable id, indicates the orderable that the queries stock card summaries is under, can specify multiple orderable ids. If none is given all FTAPs will be used.
                   repeat: true
                   type: string
               startDate:
                   required: false
-                  description: Date from which Stock Card Line Items will be retrieved.
+                  description: The date to start including stock data for the summaries. If not provided Stock Card Line Items will be retrieved starting with the eariliest.
                   repeat: false
                   type: string
               endDate:
                   required: false
-                  description: Date to which Stock Card Line Items will be retrieved.
+                  description: The date to stop including stock data for the summaries. If not provided current day will be used.
                   repeat: false
                   type: string
           responses:
