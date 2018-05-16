@@ -15,10 +15,10 @@
 
 package org.openlmis.stockmanagement.web;
 
-import static org.javers.common.collections.Sets.asSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import com.google.common.collect.Sets;
 import java.util.UUID;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
@@ -96,7 +96,7 @@ public class ValidReasonAssignmentSearchParamsTest {
     queryMap.add("reasonType", CREDIT);
     ValidReasonAssignmentSearchParams params = new ValidReasonAssignmentSearchParams(queryMap);
 
-    assertEquals(asSet(ReasonType.fromString(CREDIT), ReasonType.fromString(DEBIT)),
+    assertEquals(Sets.newHashSet(ReasonType.fromString(CREDIT), ReasonType.fromString(DEBIT)),
         params.getReasonType());
   }
 

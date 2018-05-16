@@ -16,7 +16,6 @@
 package org.openlmis.stockmanagement.web;
 
 import static org.hamcrest.core.Is.is;
-import static org.javers.common.collections.Sets.asSet;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
@@ -26,6 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.Sets;
 import guru.nidi.ramltester.junit.RamlMatchers;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -100,7 +100,7 @@ public class ValidReasonAssignmentControllerIntegrationTest extends BaseWebInteg
   @Test
   public void getValidReasonAssignmentsByAllParameters() {
     when(reasonAssignmentRepository.search(programId, facilityTypeId,
-        asSet(ReasonType.CREDIT, ReasonType.DEBIT), reasonId)).thenReturn(
+        Sets.newHashSet(ReasonType.CREDIT, ReasonType.DEBIT), reasonId)).thenReturn(
         Collections.singletonList(reasonAssignment));
 
     List<LinkedHashMap<String, String>> response = restAssured

@@ -43,14 +43,13 @@ public class ValidReasonAssignmentRepositoryImpl implements ValidReasonAssignmen
   private EntityManager entityManager;
 
   /**
-   * This method is supposed to retrieve all Processing Periods with matched parameters.
-   * Method is searching
+   * This method is supposed to retrieve all Valid Reason Assignments with matched parameters.
    *
-   * @param programId  Processing Schedule associated to Processing Period(
-   * @param facilityTypeId Processing Period Start Date
-   * @param reasonTypes   Processing Period End Date
-   * @param reasonId  pagination and sorting parameters
-   * @return List of Processing Periods matching the parameters.
+   * @param programId  Valid Reason Assignment associated to Processing Period(
+   * @param facilityTypeId Valid Reason Assignment facility type id
+   * @param reasonTypes   Valid Reason Assignment stock card line item reason types
+   * @param reasonId  Valid Reason Assignment stock card line item reason id
+   * @return List of Valid Reason Assignments matching the parameters.
    */
   public List<ValidReasonAssignment> search(UUID programId, UUID facilityTypeId,
       Collection<ReasonType> reasonTypes, UUID reasonId) {

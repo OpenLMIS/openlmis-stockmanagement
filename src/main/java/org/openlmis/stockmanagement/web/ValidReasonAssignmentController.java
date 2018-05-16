@@ -36,6 +36,7 @@ import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExi
 import org.openlmis.stockmanagement.util.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -80,15 +81,17 @@ public class ValidReasonAssignmentController {
   @ResponseBody
   public List<ValidReasonAssignmentDto> getValidReasons(
       @RequestParam MultiValueMap<String, Object> queryParams) {
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Try to find stock card line item reason");
-    }
+    Profiler profiler = new Profiler("SEARCH_VALID_REASONS");
+    profiler.setLogger(LOGGER);
+
     ValidReasonAssignmentSearchParams params = new ValidReasonAssignmentSearchParams(queryParams);
 
+    profiler.start("SEARCH_VALID_REASONS_IN_SERVICE");
     List<ValidReasonAssignment> reasons =  reasonAssignmentRepository.search(params.getProgram(),
         params.getFacilityType(),
         params.getReasonType(), params.getReason());
 
+    profiler.stop().log();
     return reasonAssignmentDtoBuilder.build(reasons);
   }
 
