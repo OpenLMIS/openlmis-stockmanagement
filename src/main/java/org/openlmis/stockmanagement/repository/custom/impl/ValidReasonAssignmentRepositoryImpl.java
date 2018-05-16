@@ -45,7 +45,7 @@ public class ValidReasonAssignmentRepositoryImpl implements ValidReasonAssignmen
   /**
    * This method is supposed to retrieve all Valid Reason Assignments with matched parameters.
    *
-   * @param programId  Valid Reason Assignment associated to Processing Period(
+   * @param programId  Valid Reason Assignment program id
    * @param facilityTypeId Valid Reason Assignment facility type id
    * @param reasonTypes   Valid Reason Assignment stock card line item reason types
    * @param reasonId  Valid Reason Assignment stock card line item reason id
