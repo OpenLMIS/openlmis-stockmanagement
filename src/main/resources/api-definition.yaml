@@ -368,7 +368,7 @@ traits:
   /stockCardRangeSummaries:
       get:
           is: [ secured, paginated ]
-          description: Get summaries of stock cards with reason info and amount assigned. Range of line items taken is specified by date params. Results are grouped by commodity types using /api/orderableFulfills.
+          description: Get summaries of stock cards with reason info and amount assigned. Range of line items taken is specified by date params. Results are grouped by using /api/orderableFulfills.
           queryParameters:
               facilityId:
                   required: true
@@ -382,12 +382,17 @@ traits:
                   type: string
               orderableId:
                   required: false
-                  description: Orderable id, indicates the orderable that the queries stock card summaries is under, can specify multiple orderable ids. If none is given all FTAPs will be used.
+                  description: Filters summaries matching the orderable id, can specify multiple orderable ids. If none is given all stock cards will be used.
                   repeat: true
+                  type: string
+              tag:
+                  required: false
+                  description: Used for filtering reasons by their tags for summary info.
+                  repeat: false
                   type: string
               startDate:
                   required: false
-                  description: The date to start including stock data for the summaries. If not provided Stock Card Line Items will be retrieved starting with the eariliest.
+                  description: The date to start including stock data for the summaries. If not provided summaries will be retrieved starting with the earliest.
                   repeat: false
                   type: string
               endDate:

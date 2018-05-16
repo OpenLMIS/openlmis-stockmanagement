@@ -8,9 +8,6 @@
       "title": "Orderable",
       "$ref": "referenceObjectDto.json"
     },
-    "stockOnHand": {
-      "type": "integer"
-    },
     "stockOutDays": {
       "type": "integer"
     },
