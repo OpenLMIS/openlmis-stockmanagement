@@ -26,7 +26,7 @@ services:
     command:
       - 'sonarqube'
     environment:
-      GRADLE_OPTS: '-Dorg.gradle.daemon=false $SONAR_LOGIN $SONAR_PASSWORD'
+      GRADLE_OPTS: '-Dorg.gradle.daemon=false'
     env_file: .env
   image:
     build: .

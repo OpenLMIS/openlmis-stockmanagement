@@ -7,7 +7,7 @@ buildscript {
 plugins {
     id 'org.springframework.boot' version '1.5.1.RELEASE'
     id "org.flywaydb.flyway" version "4.0"
-    id "org.sonarqube" version "2.5"
+    id "org.sonarqube" version "2.6.2"
     id "com.moowork.node" version "0.12"
 }
 
@@ -178,6 +178,8 @@ sonarqube {
         property "sonar.projectKey", "org.sonarqube:$rootProject.name"
         property "sonar.projectVersion", version
         property "sonar.host.url", "http://sonar.openlmis.org"
+        property "sonar.login", System.getenv("SONAR_LOGIN")
+        property "sonar.password", System.getenv("SONAR_PASSWORD")
         property "sonar.java.coveragePlugin", "jacoco"
         //Tells SonarQube where the unit tests execution reports are
         property "sonar.junit.reportsPath", "build/test-results/test"
