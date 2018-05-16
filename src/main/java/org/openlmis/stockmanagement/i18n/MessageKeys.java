@@ -23,6 +23,9 @@ public abstract class MessageKeys {
   private static final String PHYSICAL_INVENTORY_ERROR_PREFIX = ERROR_PREFIX + ".physicalInventory";
   public static final String ERROR_USER_NOT_FOUND = ERROR_PREFIX + ".user.notFound";
 
+  public static final String ERROR_INVALID_PARAMS =
+      ERROR_PREFIX + ".invalid.params";
+
   //stock card templates
   public static final String ERROR_STOCK_CARD_FIELD_INVALID =
       ERROR_PREFIX + ".field.invalid";

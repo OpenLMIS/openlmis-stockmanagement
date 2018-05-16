@@ -5,6 +5,7 @@ New functionality added in a backwards-compatible manner:
 * [OLMIS-4599](https://openlmis.atlassian.net/browse/OLMIS-4599): Add ability to retrieve a stock card reason by id
 * [OLMIS-4598](https://openlmis.atlassian.net/browse/OLMIS-4598): Add tags to StockCardLineItemReason
 * [OLMIS-4597](https://openlmis.atlassian.net/browse/OLMIS-4597): Add an endpoint to retrieve all tags associated with reasons.
+* [OLMIS-4622](https://openlmis.atlassian.net/browse/OLMIS-4622): Updated valid reason search endpoint to not require program and facility type and accept reason parameter.
 
 3.0.0 / 2018-04-24
 ==================

@@ -15,50 +15,46 @@
 
 package org.openlmis.stockmanagement.web;
 
-import static java.util.UUID.randomUUID;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
+import static org.javers.common.collections.Sets.asSet;
 import static org.junit.Assert.assertNotEquals;
-import static org.mockito.ArgumentCaptor.forClass;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Arrays;
+import guru.nidi.ramltester.junit.RamlMatchers;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
 import org.openlmis.stockmanagement.dto.ValidReasonAssignmentDto;
-import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
-import org.openlmis.stockmanagement.service.PermissionService;
-import org.openlmis.stockmanagement.service.ValidReasonAssignmentService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
+import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonDataBuilder;
+import org.openlmis.stockmanagement.testutils.ValidReasonAssignmentDataBuilder;
+import org.openlmis.stockmanagement.web.BaseWebTest.SaveAnswer;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.ResultActions;
 
 @SuppressWarnings("PMD.TooManyMethods")
-public class ValidReasonAssignmentControllerIntegrationTest extends BaseWebTest {
+public class ValidReasonAssignmentControllerIntegrationTest extends BaseWebIntegrationTest {
   private static final String VALID_REASON_API = "/api/validReasons";
+  private static final String ID_URL = VALID_REASON_API + "/{id}";
   private static final String PROGRAM = "program";
   private static final String FACILITY_TYPE = "facilityType";
   private static final String REASON_TYPE = "reasonType";
+  private static final String REASON = "reason";
 
   @MockBean
   private ValidReasonAssignmentRepository reasonAssignmentRepository;
@@ -66,175 +62,183 @@ public class ValidReasonAssignmentControllerIntegrationTest extends BaseWebTest 
   @MockBean
   private ProgramFacilityTypeExistenceService programFacilityTypeExistenceService;
 
-  @MockBean
-  private PermissionService permissionService;
-
-  @MockBean
-  private StockCardLineItemReasonRepository reasonRepository;
-
-  @MockBean
-  private ValidReasonAssignmentService validReasonAssignmentService;
+  private ValidReasonAssignment reasonAssignment;
+  private UUID programId = UUID.randomUUID();
+  private UUID facilityTypeId = UUID.randomUUID();
+  private UUID reasonId = UUID.randomUUID();
 
   @Before
   public void setUp() {
+    reasonAssignment = new ValidReasonAssignmentDataBuilder().build();
+
     when(reasonAssignmentRepository.save(any(ValidReasonAssignment.class)))
         .thenAnswer(new SaveAnswer<ValidReasonAssignment>());
   }
 
   @Test
-  public void getValidReasonAssignmentByProgramAndFacilityType() throws Exception {
-    //given
-    UUID programId = UUID.randomUUID();
-    UUID facilityTypeId = UUID.randomUUID();
+  public void getValidReasonAssignments() {
+    when(reasonAssignmentRepository.search(null, null, null, null)).thenReturn(
+        Collections.singletonList(reasonAssignment));
 
-    when(validReasonAssignmentService.search(programId, facilityTypeId, null)).thenReturn(
-        Collections.singletonList(new ValidReasonAssignment()));
+    List<LinkedHashMap<String, String>> response = restAssured
+        .given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .when()
+        .get(VALID_REASON_API)
+        .then()
+        .statusCode(HttpStatus.OK.value())
+        .extract()
+        .as(List.class);
 
-    //when
-    ResultActions resultActions = mvc.perform(
-        get(VALID_REASON_API)
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param(PROGRAM, programId.toString())
-            .param(FACILITY_TYPE, facilityTypeId.toString()));
-
-    //then
     verifyZeroInteractions(permissionService);
-    resultActions
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(1)));
+
+    assertThat(response.get(0).get("id"), is(reasonAssignment.getId().toString()));
+    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(),
+        RamlMatchers.hasNoViolations());
   }
 
   @Test
-  public void getValidReasonAssignmentByProgramAndFacilityTypeAndReasonType() throws Exception {
-    //given
-    UUID programId = UUID.randomUUID();
-    UUID facilityTypeId = UUID.randomUUID();
+  public void getValidReasonAssignmentsByAllParameters() {
+    when(reasonAssignmentRepository.search(programId, facilityTypeId,
+        asSet(ReasonType.CREDIT, ReasonType.DEBIT), reasonId)).thenReturn(
+        Collections.singletonList(reasonAssignment));
 
-    ValidReasonAssignmentDto firstAssignment =
-        mockedValidReasonAssignment(UUID.randomUUID(), ReasonType.DEBIT);
-    ValidReasonAssignmentDto secondAssignment =
-        mockedValidReasonAssignment(UUID.randomUUID(), ReasonType.CREDIT);
-
-    when(validReasonAssignmentService.search(programId, facilityTypeId,
-        Arrays.asList("CREDIT","DEBIT"))).thenReturn(
-            Arrays.asList(ValidReasonAssignment.newInstance(firstAssignment),
-                ValidReasonAssignment.newInstance(secondAssignment)));
-
-    //when
-    ResultActions resultActions = mvc.perform(
-        get(VALID_REASON_API)
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param(PROGRAM, programId.toString())
-            .param(FACILITY_TYPE, facilityTypeId.toString())
-            .param(REASON_TYPE, "CREDIT")
-            .param(REASON_TYPE, "DEBIT"));
+    List<LinkedHashMap<String, String>> response = restAssured
+        .given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .queryParam(PROGRAM, programId)
+        .queryParam(FACILITY_TYPE, facilityTypeId)
+        .queryParam(REASON_TYPE, ReasonType.CREDIT)
+        .queryParam(REASON_TYPE, ReasonType.DEBIT)
+        .queryParam(REASON, reasonId)
+        .when()
+        .get(VALID_REASON_API)
+        .then()
+        .statusCode(HttpStatus.OK.value())
+        .extract()
+        .as(List.class);
 
     //then
     verifyZeroInteractions(permissionService);
-    resultActions
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(2)));
+
+    assertThat(response.get(0).get("id"), is(reasonAssignment.getId().toString()));
+    assertThat(RAML_ASSERT_MESSAGE,
+        restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
   @Test
-  public void shouldAssignReasonToProgramFacilityTypeAndSetAsShownByDefault() throws Exception {
-    //given
-    UUID reasonId = UUID.randomUUID();
-    ValidReasonAssignmentDto assignment = mockedValidReasonAssignment(reasonId, ReasonType.DEBIT);
+  public void getValidReasonAssignmentByReason() {
+    when(reasonAssignmentRepository.search(null, null, null, reasonId)).thenReturn(
+        Collections.singletonList(reasonAssignment));
 
-    //when
-    ResultActions resultActions = mvc.perform(
-        post(VALID_REASON_API)
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectToJsonString(assignment)));
+    List<LinkedHashMap<String, String>> response = restAssured
+        .given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .queryParam(REASON, reasonId)
+        .when()
+        .get(VALID_REASON_API)
+        .then()
+        .statusCode(HttpStatus.OK.value())
+        .extract()
+        .as(List.class);
 
-    //then
-    ArgumentCaptor<ValidReasonAssignment> assignmentCaptor = forClass(ValidReasonAssignment.class);
+    verifyZeroInteractions(permissionService);
 
-    resultActions
-        .andDo(print())
-        .andExpect(status().isCreated());
-    verify(reasonAssignmentRepository, times(1)).save(assignmentCaptor.capture());
-    assertThat(assignmentCaptor.getValue().getReason().getId(), is(reasonId));
-    assertThat(assignmentCaptor.getValue().getHidden(), is(false));
+    assertThat(response.get(0).get("id"), is(reasonAssignment.getId().toString()));
+    assertThat(RAML_ASSERT_MESSAGE,
+        restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
+
+  @Test
+  public void shouldAssignReasonToProgramFacilityType() {
+    ValidReasonAssignmentDto assignment = mockedValidReasonAssignment(false);
+
+    ValidReasonAssignmentDto response = restAssured
+        .given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .body(assignment)
+        .when()
+        .post(VALID_REASON_API)
+        .then()
+        .statusCode(201)
+        .extract()
+        .as(ValidReasonAssignmentDto.class);
+
+    assertThat(response.getReason().getId(), is(assignment.getReason().getId()));
+    assertThat(response.getHidden(), is(false));
     verify(programFacilityTypeExistenceService, times(1)).checkProgramAndFacilityTypeExist(
         assignment.getProgramId(), assignment.getFacilityTypeId());
     verify(permissionService, times(1)).canManageReasons();
+    assertThat(RAML_ASSERT_MESSAGE,
+        restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
   @Test
-  public void shouldSetValidReasonAsShownWhenHiddenIsFalse() throws Exception {
-    //given1
-    ValidReasonAssignmentDto assignment = mockedValidReasonAssignment(UUID.randomUUID(),
-        ReasonType.DEBIT);
-    assignment.setHidden(false);
+  public void shouldSetValidReasonAsShownWhenHiddenIsFalse() {
+    ValidReasonAssignmentDto assignment = mockedValidReasonAssignment(false);
 
-    //when
-    ResultActions resultActions = mvc.perform(
-        post(VALID_REASON_API)
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectToJsonString(assignment)));
+    ValidReasonAssignmentDto response = restAssured
+        .given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .body(assignment)
+        .when()
+        .post(VALID_REASON_API)
+        .then()
+        .statusCode(201)
+        .extract()
+        .as(ValidReasonAssignmentDto.class);
 
-    //then
-    ArgumentCaptor<ValidReasonAssignment> assignmentCaptor = forClass(ValidReasonAssignment.class);
-
-    resultActions
-        .andDo(print())
-        .andExpect(status().isCreated());
-    verify(reasonAssignmentRepository, times(1)).save(assignmentCaptor.capture());
-    assertThat(assignmentCaptor.getValue().getHidden(), is(false));
+    assertThat(response.getHidden(), is(false));
+    assertThat(RAML_ASSERT_MESSAGE,
+        restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
   @Test
-  public void shouldSetValidReasonAsHiddenWhenHiddenIsTrue() throws Exception {
-    //given1
-    ValidReasonAssignmentDto assignment = mockedValidReasonAssignment(UUID.randomUUID(),
-        ReasonType.DEBIT);
-    assignment.setHidden(true);
+  public void shouldSetValidReasonAsHiddenWhenHiddenIsTrue() {
+    ValidReasonAssignmentDto assignment = mockedValidReasonAssignment(true);
 
-    //when
-    ResultActions resultActions = mvc.perform(
-        post(VALID_REASON_API)
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectToJsonString(assignment)));
+    ValidReasonAssignmentDto response = restAssured
+        .given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .body(assignment)
+        .when()
+        .post(VALID_REASON_API)
+        .then()
+        .statusCode(201)
+        .extract()
+        .as(ValidReasonAssignmentDto.class);
 
-    //then
-    ArgumentCaptor<ValidReasonAssignment> assignmentCaptor = forClass(ValidReasonAssignment.class);
-
-    resultActions
-        .andDo(print())
-        .andExpect(status().isCreated());
-    verify(reasonAssignmentRepository, times(1)).save(assignmentCaptor.capture());
-    assertThat(assignmentCaptor.getValue().getHidden(), is(true));
+    assertThat(response.getHidden(), is(true));
+    assertThat(RAML_ASSERT_MESSAGE,
+        restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
   @Test
-  public void shouldIgnoreAssignmentIdWhenRequestBodySpecifiedIt() throws Exception {
-    //given
-    ValidReasonAssignmentDto assignment = mockedValidReasonAssignment(UUID.randomUUID(),
-        ReasonType.DEBIT);
-    assignment.setId(UUID.randomUUID());
+  public void shouldIgnoreAssignmentIdWhenRequestBodySpecifiedIt() {
+    ValidReasonAssignmentDto assignment = mockedValidReasonAssignment(false);
 
-    //when
-    mvc.perform(post(VALID_REASON_API)
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectToJsonString(assignment)));
+    ValidReasonAssignmentDto response = restAssured
+        .given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .body(assignment)
+        .when()
+        .post(VALID_REASON_API)
+        .then()
+        .statusCode(201)
+        .extract()
+        .as(ValidReasonAssignmentDto.class);
 
-    //then
-    ArgumentCaptor<ValidReasonAssignment> assignmentCaptor = forClass(ValidReasonAssignment.class);
-    verify(reasonAssignmentRepository, times(1)).save(assignmentCaptor.capture());
-
-    assertNotEquals(assignment.getId(), assignmentCaptor.getValue().getId());
+    assertNotEquals(response.getId(), is(assignment.getId()));
+    assertThat(RAML_ASSERT_MESSAGE,
+        restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
   @Test
-  public void shouldNotAssignSameReasonTwice() throws Exception {
-    //given
-    UUID reasonId = UUID.randomUUID();
+  public void shouldNotAssignSameReasonTwice() {
     StockCardLineItemReason reason = new StockCardLineItemReason();
     reason.setId(reasonId);
 
@@ -243,98 +247,100 @@ public class ValidReasonAssignmentControllerIntegrationTest extends BaseWebTest 
     assignment.setProgramId(UUID.randomUUID());
     assignment.setFacilityTypeId(UUID.randomUUID());
 
-    when(reasonRepository.exists(reasonId)).thenReturn(true);
+    when(stockCardLineItemReasonRepository.exists(reasonId)).thenReturn(true);
     when(reasonAssignmentRepository.findByProgramIdAndFacilityTypeIdAndReasonId(
         assignment.getProgramId(), assignment.getFacilityTypeId(), reasonId))
         .thenReturn(new ValidReasonAssignment());
 
-    //when
-    ResultActions resultActions = mvc.perform(
-        post(VALID_REASON_API)
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectToJsonString(assignment)));
+    restAssured.given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .body(assignment)
+        .when()
+        .post(VALID_REASON_API)
+        .then()
+        .statusCode(200)
+        .extract()
+        .as(ValidReasonAssignmentDto.class);
 
-    //then
-    resultActions.andExpect(status().isOk());
     verify(reasonAssignmentRepository, never()).save(any(ValidReasonAssignment.class));
   }
 
   @Test
   public void shouldReturn400IfReasonIdIsNull() throws Exception {
-    //when
-    ResultActions resultActions = mvc.perform(
-        post(VALID_REASON_API)
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectToJsonString(new ValidReasonAssignment())));
+    restAssured.given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .body(new ValidReasonAssignment())
+        .when()
+        .post(VALID_REASON_API)
+        .then()
+        .statusCode(400)
+        .extract()
+        .as(ValidReasonAssignmentDto.class);
 
-    //then
-    resultActions.andExpect(status().isBadRequest());
     verify(reasonAssignmentRepository, never()).save(any(ValidReasonAssignment.class));
   }
 
   @Test
-  public void shouldReturn400IfReasonNotExist() throws Exception {
-    //given
-    UUID reasonId = UUID.randomUUID();
-    StockCardLineItemReason reason = new StockCardLineItemReason();
-    reason.setId(reasonId);
+  public void shouldReturn400IfReasonNotExist() {
+    when(stockCardLineItemReasonRepository.findOne(any(UUID.class))).thenReturn(null);
 
-    when(reasonRepository.findOne(reasonId)).thenReturn(null);
-    ValidReasonAssignment assignment = new ValidReasonAssignment();
-    assignment.setReason(reason);
+    restAssured.given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .body(reasonAssignment)
+        .when()
+        .post(VALID_REASON_API)
+        .then()
+        .statusCode(400)
+        .extract()
+        .as(ValidReasonAssignmentDto.class);
 
-    //when
-    ResultActions resultActions = mvc.perform(
-        post(VALID_REASON_API)
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectToJsonString(assignment)));
-
-    //then
-    resultActions.andExpect(status().isBadRequest());
     verify(reasonAssignmentRepository, never()).save(any(ValidReasonAssignment.class));
   }
 
   @Test
-  public void return204WhenRemoveReasonSuccess() throws Exception {
-    UUID assignmentId = randomUUID();
-    when(reasonAssignmentRepository.exists(assignmentId)).thenReturn(true);
+  public void return204WhenRemoveReasonSuccess() {
+    when(reasonAssignmentRepository.exists(any(UUID.class))).thenReturn(true);
 
-    ResultActions resultActions = mvc.perform(
-        delete(VALID_REASON_API + "/" + assignmentId.toString())
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
+    restAssured.given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .pathParam("id", reasonAssignment.getId().toString())
+        .when()
+        .delete(ID_URL)
+        .then()
+        .statusCode(204);
 
-    resultActions.andExpect(status().isNoContent());
     verify(permissionService, times(1)).canManageReasons();
-    verify(reasonAssignmentRepository, times(1)).delete(assignmentId);
+    verify(reasonAssignmentRepository, times(1)).delete(reasonAssignment.getId());
   }
 
   @Test
-  public void return400WhenReasonIsNotFound() throws Exception {
-    UUID assignmentId = randomUUID();
-    when(reasonAssignmentRepository.exists(assignmentId)).thenReturn(false);
+  public void return400WhenReasonIsNotFound() {
+    when(reasonAssignmentRepository.exists(any(UUID.class))).thenReturn(false);
 
-    ResultActions resultActions = mvc.perform(
-        delete(VALID_REASON_API + "/" + assignmentId.toString())
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
-
-    resultActions.andExpect(status().isBadRequest());
+    restAssured.given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .pathParam("id", reasonAssignment.getId().toString())
+        .when()
+        .delete(ID_URL)
+        .then()
+        .statusCode(400);
   }
 
-  private ValidReasonAssignmentDto mockedValidReasonAssignment(UUID reasonId,
-      ReasonType reasonType) {
-    StockCardLineItemReason reason = new StockCardLineItemReason();
-    reason.setId(reasonId);
-    reason.setReasonType(reasonType);
+  private ValidReasonAssignmentDto mockedValidReasonAssignment(boolean isHidden) {
+    StockCardLineItemReason reason = new StockCardLineItemReasonDataBuilder().build();
 
     ValidReasonAssignmentDto assignment = new ValidReasonAssignmentDto();
     assignment.setReason(reason);
     assignment.setProgramId(reasonId);
     assignment.setFacilityTypeId(reasonId);
+    assignment.setHidden(isHidden);
 
-    when(reasonRepository.exists(assignment.getReason().getId())).thenReturn(true);
+    when(stockCardLineItemReasonRepository.exists(assignment.getReason().getId())).thenReturn(true);
     return assignment;
   }
 }

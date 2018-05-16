@@ -35,6 +35,7 @@ dependencies {
     compile "org.springframework.boot:spring-boot-starter-web"
     compile "org.springframework.boot:spring-boot-starter-data-rest"
     compile "org.springframework.boot:spring-boot-starter-data-jpa"
+    compile 'org.javers:javers-spring-boot-starter-sql:2.8.1'
     compile "org.springframework.boot:spring-boot-starter-security"
     compile "org.springframework.security.oauth:spring-security-oauth2"
     compile 'org.springframework:spring-context-support'

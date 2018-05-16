@@ -15,7 +15,6 @@
 
 package org.openlmis.stockmanagement.web;
 
-import static java.lang.String.format;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_ASSIGNMENT_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_ID_EMPTY;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_NOT_FOUND;
@@ -33,7 +32,6 @@ import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
 import org.openlmis.stockmanagement.service.PermissionService;
-import org.openlmis.stockmanagement.service.ValidReasonAssignmentService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
 import org.openlmis.stockmanagement.util.Message;
 import org.slf4j.Logger;
@@ -41,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -67,9 +66,6 @@ public class ValidReasonAssignmentController {
   private PermissionService permissionService;
 
   @Autowired
-  private ValidReasonAssignmentService validReasonAssignmentService;
-
-  @Autowired
   private ValidReasonAssignmentDtoBuilder reasonAssignmentDtoBuilder;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCardsController.class);
@@ -77,24 +73,23 @@ public class ValidReasonAssignmentController {
   /**
    * Get a list of valid reasons.
    *
-   * @param program       program id.
-   * @param facilityType  facility type id.
-   * @param reasonTypes   reason types' list.
+   * @param queryParams request parameters
    * @return A list of valid reason dto.
    */
   @RequestMapping(value = "/validReasons", method = GET)
   @ResponseBody
   public List<ValidReasonAssignmentDto> getValidReasons(
-      @RequestParam("program") UUID program, @RequestParam("facilityType") UUID facilityType,
-      @RequestParam(value = "reasonType", required = false) List<String> reasonTypes) {
+      @RequestParam MultiValueMap<String, Object> queryParams) {
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug(format(
-          "Try to find stock card line item reason with program %s and facility type %s",
-          program.toString(), facilityType.toString()));
+      LOGGER.debug("Try to find stock card line item reason");
     }
+    ValidReasonAssignmentSearchParams params = new ValidReasonAssignmentSearchParams(queryParams);
 
-    return reasonAssignmentDtoBuilder.build(
-        validReasonAssignmentService.search(program, facilityType, reasonTypes));
+    List<ValidReasonAssignment> reasons =  reasonAssignmentRepository.search(params.getProgram(),
+        params.getFacilityType(),
+        params.getReasonType(), params.getReason());
+
+    return reasonAssignmentDtoBuilder.build(reasons);
   }
 
   /**

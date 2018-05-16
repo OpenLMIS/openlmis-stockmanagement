@@ -691,11 +691,11 @@ traits:
           program:
             description: Program id
             type: string
-            required: true
+            required: false
           facilityType:
             description: Facility type id
             type: string
-            required: true
+            required: false
           reasonType:
             description: Reason type
             type: string
@@ -705,6 +705,10 @@ traits:
               - CREDIT
               - DEBIT
               - BALANCE_ADJUSTMENT
+          reason:
+            description: Stock card line item reason id
+            type: string
+            required: false
 
         responses:
           200:

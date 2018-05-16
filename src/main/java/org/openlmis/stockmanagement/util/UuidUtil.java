@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.util;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import org.springframework.util.MultiValueMap;
@@ -30,6 +31,26 @@ public class UuidUtil {
   static final String ID = "id";
 
   private UuidUtil() {}
+
+  /**
+   * Parses a String into a UUID safely.  Unlike {@link UUID#fromString(String)} however, this
+   * method will either return an Optional with the UUID, or it will return an empty Optional
+   * in case the String can't be parsed into a UUID.
+   *
+   * @param uuid see {@link UUID#fromString(String)}.
+   * @return An {@link Optional} with either the UUID as parsed from the paramater, or an empty
+   *     Optional should it be un-parseable.
+   */
+  public static Optional<UUID> fromString(String uuid) {
+    if (uuid == null) {
+      return Optional.empty();
+    }
+    try {
+      return Optional.of(UUID.fromString(uuid));
+    } catch (IllegalArgumentException iae) {
+      return Optional.empty();
+    }
+  }
 
   /**
    * Gets a set of UUID from the query multi value map. It looks up the map key "id" and returns
