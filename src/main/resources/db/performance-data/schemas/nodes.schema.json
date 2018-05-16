@@ -1,0 +1,30 @@
+{
+  "id": 115163,
+  "num_rows": 1000,
+  "file_format": "csv",
+  "name": "1k refdata nodes",
+  "include_header": true,
+  "columns": [
+    {
+      "name": "id",
+      "null_percentage": 0,
+      "type": "GUID",
+      "formula": ""
+    },
+    {
+      "name": "isRefDataFacility",
+      "null_percentage": 0,
+      "type": "Boolean",
+      "formula": "true"
+    },
+    {
+      "name": "referenceId",
+      "null_percentage": 0,
+      "type": "Dataset Column",
+      "dataset": "Facilities",
+      "column": "id",
+      "selectionStyle": "sequential",
+      "formula": ""
+    }
+  ]
+}

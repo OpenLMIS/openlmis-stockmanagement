@@ -22,19 +22,21 @@ import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
 
-// temporary disabled because there are no performance data in the service.
-//@Component
-//@Profile("demo-data")
-//@Order(5)
+@Component
+@Profile("performance-data")
+@Order(5)
 public class TestDataInitializer implements CommandLineRunner {
   private static final XLogger XLOGGER = XLoggerFactory.getXLogger(TestDataInitializer.class);
   private static final String PERF_DATA_PATH = "classpath:db/performance-data/";
 
-  @Value(value = PERF_DATA_PATH + "stock_card_line_items.csv")
-  private Resource stockCardLineItemsResource;
+  @Value(value = PERF_DATA_PATH + "nodes.csv")
+  private Resource nodesResource;
 
   @Autowired
   private JdbcTemplate template;
@@ -48,7 +50,7 @@ public class TestDataInitializer implements CommandLineRunner {
 
     Resource2Db r2db = new Resource2Db(template);
 
-    r2db.insertToDbFromCsv("stockmanagement.stock_card_line_items", stockCardLineItemsResource);
+    r2db.insertToDbFromCsv("stockmanagement.nodes", nodesResource);
 
     XLOGGER.exit();
   }
