@@ -24,6 +24,9 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,10 +56,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -102,8 +101,7 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  public void shouldSaveStockCardLineItemsAndCreateStockCardForFirstMovement()
-      throws Exception {
+  public void shouldSaveStockCardLineItemsAndCreateStockCardForFirstMovement() {
     //given
     UUID userId = randomUUID();
     StockEventDto stockEventDto = createStockEventDto();
@@ -118,7 +116,7 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
     assertThat(firstLineItem.getUserId(), is(userId));
     assertThat(firstLineItem.getSource().isRefDataFacility(), is(true));
-    assertThat(firstLineItem.getDestination().isRefDataFacility(), is(false));
+    assertThat(firstLineItem.getDestination().isRefDataFacility(), is(true));
 
     assertThat(firstLineItem.getStockCard().getOriginEvent().getId(), is(savedEvent.getId()));
     assertThat(firstLineItem.getStockCard().getFacilityId(), is(savedEvent.getFacilityId()));
@@ -161,8 +159,7 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  public void shouldGetRefdataAndConvertOrganizationsWhenFindStockCard()
-      throws Exception {
+  public void shouldGetRefdataAndConvertOrganizationsWhenFindStockCard() {
     //given
     UUID userId = randomUUID();
     StockEventDto stockEventDto = createStockEventDto();
@@ -171,14 +168,17 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     //1. mock ref data service
     FacilityDto cardFacility = new FacilityDto();
     FacilityDto sourceFacility = new FacilityDto();
+    FacilityDto destinationFacility = new FacilityDto();
     ProgramDto programDto = new ProgramDto();
     OrderableDto orderableDto = new OrderableDto();
     LotDto lotDto = new LotDto();
 
     when(facilityReferenceDataService.findOne(stockEventDto.getFacilityId()))
         .thenReturn(cardFacility);
-    when(facilityReferenceDataService.findOne(fromString("e6799d64-d10d-4011-b8c2-0e4d4a3f65ce")))
+    when(facilityReferenceDataService.findOne(fromString("19121381-9f3d-4e77-b9e5-d3f59fc1639e")))
         .thenReturn(sourceFacility);
+    when(facilityReferenceDataService.findOne(fromString("e6799d64-d10d-4011-b8c2-0e4d4a3f65ce")))
+        .thenReturn(destinationFacility);
 
     when(programReferenceDataService.findOne(stockEventDto.getProgramId()))
         .thenReturn(programDto);
@@ -204,11 +204,11 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
     StockCardLineItemDto lineItemDto = foundCardDto.getLineItems().get(0);
     assertThat(lineItemDto.getSource(), is(sourceFacility));
-    assertThat(lineItemDto.getDestination().getName(), is("NGO"));
+    assertThat(lineItemDto.getDestination(), is(destinationFacility));
   }
 
   @Test
-  public void shouldGetStockCardWithCalculatedSohWhenFindStockCard() throws Exception {
+  public void shouldGetStockCardWithCalculatedSohWhenFindStockCard() {
     //given
     StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
     stockEventDto.getLineItems().get(0).setSourceId(null);

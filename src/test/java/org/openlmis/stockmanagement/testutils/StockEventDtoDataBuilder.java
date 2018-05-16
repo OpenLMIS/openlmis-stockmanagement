@@ -112,8 +112,8 @@ public class StockEventDtoDataBuilder {
     eventLineItemDto.setQuantity(1);
     eventLineItemDto.setOrderableId(UUID.randomUUID());
     eventLineItemDto.setOccurredDate(LocalDate.now());
-    eventLineItemDto.setSourceId(UUID.fromString("0bd28568-43f1-4836-934d-ec5fb11398e8"));
-    eventLineItemDto.setDestinationId(UUID.fromString("087e81f6-a74d-4bba-9d01-16e0d64e9609"));
+    eventLineItemDto.setSourceId(UUID.fromString("cefcde83-7ee0-4a5a-9580-f32e3eec10ed"));
+    eventLineItemDto.setDestinationId(UUID.fromString("0bd28568-43f1-4836-934d-ec5fb11398e8"));
     eventLineItemDto.setSourceFreeText("a");
     eventLineItemDto.setDestinationFreeText("b");
     return eventLineItemDto;

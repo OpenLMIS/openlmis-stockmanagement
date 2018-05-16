@@ -23,59 +23,59 @@ var filesOrdered = [
   "stockmanagement.stock_card_line_items",
   "stockmanagement.physical_inventories",
   "stockmanagement.physical_inventory_line_items"
-]
+];
 
 // Detects if the given key/value pair represents a foreign key.
-var isForeign = function (obj, key) {
-  var val = obj[key];
-  return val !== null && typeof val === 'object' && val.hasOwnProperty("id");
-}
+var isForeign = function(obj, key) {
+    var val = obj[key];
+    return val !== null && typeof val === 'object' && val.hasOwnProperty("id");
+};
 
 // Refractors the key/value pair to match database format.
-var adjustForeign = function (obj, key) {
-  var newKey = key.endsWith(dbIdSuffix) ? key : key + dbIdSuffix;
-  var newVal = obj[key]["id"];
+var adjustForeign = function(obj, key) {
+    var newKey = key.endsWith(dbIdSuffix) ? key : key + dbIdSuffix;
+    var newVal = obj[key]["id"];
 
-  obj[newKey] = newVal;
-  if (newKey !== key) {
-    delete obj[key];
-  }
-}
+    obj[newKey] = newVal;
+    if (newKey !== key) {
+        delete obj[key];
+    }
+};
 
 // Transforms object's key to lowercase
-var keyToLower = function (obj, key) {
-  if (key.toLowerCase() !== key) {
-    var val = obj[key];
-    delete obj[key];
+var keyToLower = function(obj, key) {
+    if (key.toLowerCase() !== key) {
+        var val = obj[key];
+        delete obj[key];
 
-    key = key.toLowerCase();
-    obj[key] = val;
-  }
+        key = key.toLowerCase();
+        obj[key] = val;
+    }
 
-  return key;
-}
+    return key;
+};
 
 // Takes the input file and transforms it into sql query, inserted into output file
-var parseInput = function (input, output) {
-  // Insert into pending files and start processing
-  var filename = path.parse(input).name;
-  var array = JSON.parse(fs.readFileSync(input));
+var parseInput = function(input, output) {
+    // Insert into pending files and start processing
+    var filename = path.parse(input).name;
+    var array = JSON.parse(fs.readFileSync(input));
 
-  // Transform JSON to match database format
-  array.forEach(function (obj) {
-    Object.keys(obj).forEach(function (key) {
-      key = keyToLower(obj, key);
+    // Transform JSON to match database format
+    array.forEach(function(obj) {
+        Object.keys(obj).forEach(function(key) {
+            key = keyToLower(obj, key);
 
-      if (isForeign(obj, key)) {
-        adjustForeign(obj, key);
-      }
+            if (isForeign(obj, key)) {
+                adjustForeign(obj, key);
+            }
+        });
     });
-  });
 
-  // Filename should match schema and table name
-  var insert = util.format(query, filename, filename, JSON.stringify(array));
-  fs.writeSync(output, insert + "\n");
-}
+    // Filename should match schema and table name
+    var insert = util.format(query, filename, filename, JSON.stringify(array));
+    fs.writeSync(output, insert + "\n");
+};
 
 // Start processing
 var fd = fs.openSync('input.sql', 'w');
@@ -83,29 +83,30 @@ var filesPending = {};
 var filesQueue = [];
 
 // Group the files into dictionary
-process.argv.slice(2).forEach(function (file) {
-  var filename = path.parse(file).name;
-  filesPending[filename] = file;
+process.argv.slice(2).forEach(function(file) {
+    var filename = path.parse(file).name;
+    filesPending[filename] = file;
 });
 
 // First enqueue ordered files
-filesOrdered.forEach(function (key) {
-  if (filesPending[key]) {
-    filesQueue.push(filesPending[key]);
-    delete filesPending[key];
-  }
+filesOrdered.forEach(function(key) {
+    if (filesPending[key]) {
+        filesQueue.push(filesPending[key]);
+        delete filesPending[key];
+    }
 });
 
 // Enqueue remaining files
-for (key in filesPending) {
-  filesQueue.push(filesPending[key]);
-}
-;
+for (var key in filesPending) {
+    if (filesPending.hasOwnProperty(key)) {
+        filesQueue.push(filesPending[key]);
+    }
+};
 
 // Process the files
-filesQueue.forEach(function (file) {
-  console.log("Processing: " + path.parse(file).name);
-  parseInput(file, fd);
+filesQueue.forEach(function(file) {
+    console.log("Processing: " + path.parse(file).name);
+    parseInput(file, fd);
 });
 
 fs.closeSync(fd);
