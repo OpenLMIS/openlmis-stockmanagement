@@ -16,9 +16,13 @@
 package org.openlmis.stockmanagement;
 
 import java.io.IOException;
+import lombok.AccessLevel;
+import lombok.Setter;
+import org.apache.commons.lang3.Validate;
 import org.openlmis.stockmanagement.util.Resource2Db;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -31,15 +35,43 @@ import org.springframework.stereotype.Component;
 @Component
 @Profile("performance-data")
 @Order(5)
-public class TestDataInitializer implements CommandLineRunner {
+public class TestDataInitializer implements CommandLineRunner, InitializingBean {
   private static final XLogger XLOGGER = XLoggerFactory.getXLogger(TestDataInitializer.class);
-  private static final String PERF_DATA_PATH = "classpath:db/performance-data/";
 
-  @Value(value = PERF_DATA_PATH + "nodes.csv")
+  private static final String PERF_DATA_PATH = "classpath:db/performance-data/";
+  private static final String FILE_EXTENSION = ".csv";
+
+  // table names
+  private static final String NODES = "nodes";
+  private static final String VALID_SOURCE_ASSIGNMENTS = "valid_source_assignments";
+  private static final String VALID_DESTINATION_ASSIGNMENTS = "valid_destination_assignments";
+
+  // resource path
+  private static final String NODES_FILE = PERF_DATA_PATH + NODES + FILE_EXTENSION;
+  private static final String VALID_SOURCE_ASSIGNMENTS_FILE =
+      PERF_DATA_PATH + VALID_SOURCE_ASSIGNMENTS + FILE_EXTENSION;
+  private static final String VALID_DESTINATION_ASSIGNMENTS_FILE =
+      PERF_DATA_PATH + VALID_DESTINATION_ASSIGNMENTS + FILE_EXTENSION;
+
+  // database path
+  private static final String DB_SCHEMA = "stockmanagement.";
+  static final String NODES_TABLE = DB_SCHEMA + NODES;
+  static final String VALID_SOURCE_ASSIGNMENTS_TABLE = DB_SCHEMA + VALID_SOURCE_ASSIGNMENTS;
+  static final String VALID_DESTINATION_ASSIGNMENTS_TABLE =
+      DB_SCHEMA + VALID_DESTINATION_ASSIGNMENTS;
+
+
+  @Value(value = NODES_FILE)
   private Resource nodesResource;
 
-  @Autowired
-  private JdbcTemplate template;
+  @Value(value = VALID_SOURCE_ASSIGNMENTS_FILE)
+  private Resource validSourceAssignmentsResource;
+
+  @Value(value = VALID_DESTINATION_ASSIGNMENTS_FILE)
+  private Resource validDestinationAssignmentsResource;
+
+  @Setter(AccessLevel.PACKAGE)
+  private Resource2Db loader;
 
   /**
    * Initializes test data.
@@ -48,10 +80,23 @@ public class TestDataInitializer implements CommandLineRunner {
   public void run(String... args) throws IOException {
     XLOGGER.entry();
 
-    Resource2Db r2db = new Resource2Db(template);
+    loader.insertToDbFromCsv(NODES_TABLE, nodesResource);
 
-    r2db.insertToDbFromCsv("stockmanagement.nodes", nodesResource);
+    loader.insertToDbFromCsv(VALID_SOURCE_ASSIGNMENTS_TABLE, validSourceAssignmentsResource);
+    loader.insertToDbFromCsv(
+        VALID_DESTINATION_ASSIGNMENTS_TABLE, validDestinationAssignmentsResource);
 
     XLOGGER.exit();
   }
+
+  @Override
+  public void afterPropertiesSet() {
+    Validate.notNull(loader);
+  }
+
+  @Autowired
+  public void setTemplate(JdbcTemplate template) {
+    loader = new Resource2Db(template);
+  }
+
 }

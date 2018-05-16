@@ -1,0 +1,42 @@
+{
+  "id": 115200,
+  "num_rows": 5000,
+  "file_format": "csv",
+  "name": "5k valid_destination_assignments",
+  "include_header": true,
+  "columns": [
+    {
+      "name": "id",
+      "null_percentage": 0,
+      "type": "GUID",
+      "formula": ""
+    },
+    {
+      "name": "facilityTypeId",
+      "null_percentage": 0,
+      "type": "Dataset Column",
+      "dataset": "FacilityTypesAll",
+      "column": "id",
+      "selectionStyle": "sequential",
+      "formula": ""
+    },
+    {
+      "name": "programId",
+      "null_percentage": 0,
+      "type": "Dataset Column",
+      "dataset": "Programs2",
+      "column": "id",
+      "selectionStyle": "sequential",
+      "formula": ""
+    },
+    {
+      "name": "nodeId",
+      "null_percentage": 0,
+      "type": "Dataset Column",
+      "dataset": "1k refdata nodes",
+      "column": "id",
+      "selectionStyle": "sequential",
+      "formula": ""
+    }
+  ]
+}
