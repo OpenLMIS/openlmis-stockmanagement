@@ -7,6 +7,9 @@ New functionality added in a backwards-compatible manner:
 * [OLMIS-4597](https://openlmis.atlassian.net/browse/OLMIS-4597): Add an endpoint to retrieve all tags associated with reasons.
 * [OLMIS-4622](https://openlmis.atlassian.net/browse/OLMIS-4622): Updated valid reason search endpoint to not require program and facility type and accept reason parameter.
 
+Improvements:
+* [OLMIS-4648](https://openlmis.atlassian.net/browse/OLMIS-4648): Added Jenkinsfile
+
 3.0.0 / 2018-04-24
 ==================
 
