@@ -21,7 +21,9 @@ import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.Sets;
 import java.util.List;
+import org.junit.Before;
 import org.junit.Test;
+import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonDataBuilder;
@@ -45,14 +47,35 @@ public class ValidReasonAssignmentRepositoryIntegrationTest
   @Autowired
   private StockCardLineItemReasonRepository reasonRepository;
 
+  private ValidReasonAssignment validReasonAssignment;
+  private ValidReasonAssignment secondAssignment;
+  private StockCardLineItemReason stockCardLineItemReason;
+
   private static final UUID PROGRAM_ID = UUID.randomUUID();
   private static final UUID FACILITY_TYPE_ID = UUID.randomUUID();
 
-  @Test(expected = PersistenceException.class)
-  public void shouldThrowExceptionWhenSaveDuplicatedValidReason() throws Exception {
-    ValidReasonAssignment validReasonAssignment = generateInstance();
+  @Before
+  public void setUp() {
+    validReasonAssignment = generateInstance();
     repository.save(validReasonAssignment);
 
+    stockCardLineItemReason = new StockCardLineItemReasonDataBuilder()
+        .withoutId()
+        .withName("Damage")
+        .withDebitType()
+        .build();
+    reasonRepository.save(stockCardLineItemReason);
+
+    secondAssignment = new ValidReasonAssignmentDataBuilder()
+        .withProgram(UUID.randomUUID())
+        .withFacilityType(UUID.randomUUID())
+        .withReason(stockCardLineItemReason)
+        .build();
+    repository.save(secondAssignment);
+  }
+
+  @Test(expected = PersistenceException.class)
+  public void shouldThrowExceptionWhenSaveDuplicatedValidReason() {
     ValidReasonAssignment duplicateValidReason = new ValidReasonAssignment(
         PROGRAM_ID, FACILITY_TYPE_ID, false, validReasonAssignment.getReason());
     repository.save(duplicateValidReason);
@@ -61,52 +84,44 @@ public class ValidReasonAssignmentRepositoryIntegrationTest
   }
 
   @Test
-  public void shouldReturnValidReasonWithProgramAndFacilityTypeAndReasonAndReasonTypes()
-      throws Exception {
-    ValidReasonAssignment validReasonAssignment = generateInstance();
-    repository.save(validReasonAssignment);
-
-    StockCardLineItemReason newReason = new StockCardLineItemReasonDataBuilder()
-        .withoutId()
-        .withName("Damage")
-        .withDebitType()
-        .build();
-    reasonRepository.save(newReason);
-
+  public void shouldReturnValidReasonWithProgramAndFacilityTypeAndReasonAndReasonTypes() {
     ValidReasonAssignment newAssignment = new ValidReasonAssignmentDataBuilder()
-        .withProgram(PROGRAM_ID).withFacilityType(FACILITY_TYPE_ID).withReason(newReason).build();
+        .withProgram(PROGRAM_ID)
+        .withFacilityType(FACILITY_TYPE_ID)
+        .withReason(stockCardLineItemReason)
+        .build();
     repository.save(newAssignment);
 
     List<ValidReasonAssignment> validReasonAssignments = repository.search(
         PROGRAM_ID, FACILITY_TYPE_ID, Sets.newHashSet(
-            validReasonAssignment.getReason().getReasonType(), newReason.getReasonType()),
-        newReason.getId());
+            validReasonAssignment.getReason().getReasonType(),
+            stockCardLineItemReason.getReasonType()),
+        stockCardLineItemReason.getId());
 
     assertThat(validReasonAssignments.size(), is(1));
     assertThat(validReasonAssignments.get(0), is(newAssignment));
   }
 
   @Test
-  public void shouldReturnValidReasonsIfNoneOfTheParamsIsSpecified() throws Exception {
-    ValidReasonAssignment validReasonAssignment = generateInstance();
-    repository.save(validReasonAssignment);
+  public void shouldReturnValidReasonAssignmentsIfStockCardLineItemsListIsEmpty() {
+    List<ValidReasonAssignment> assignmentList = repository.search(
+        null, null, Sets.newHashSet(ReasonType.BALANCE_ADJUSTMENT), null);
 
-    StockCardLineItemReason newReason = new StockCardLineItemReasonDataBuilder()
-        .withoutId()
-        .withName("Damage")
-        .withDebitType()
-        .build();
-    reasonRepository.save(newReason);
+    assertThat(assignmentList.size(), is(0));
+  }
 
+  @Test
+  public void shouldReturnValidReasonsIfNoneOfTheParamsIsSpecified() {
     ValidReasonAssignment newAssignment = new ValidReasonAssignment(
-        PROGRAM_ID, FACILITY_TYPE_ID, false, newReason);
+        PROGRAM_ID, FACILITY_TYPE_ID, false, stockCardLineItemReason);
     repository.save(newAssignment);
 
     List<ValidReasonAssignment> validReasonAssignments = repository
         .search(null, null, null, null);
 
-    assertThat(validReasonAssignments.size(), is(2));
-    assertThat(validReasonAssignments, hasItems(validReasonAssignment, newAssignment));
+    assertThat(validReasonAssignments.size(), is(3));
+    assertThat(validReasonAssignments, hasItems(
+        validReasonAssignment, newAssignment, secondAssignment));
   }
 
   @Override
@@ -115,7 +130,7 @@ public class ValidReasonAssignmentRepositoryIntegrationTest
   }
 
   @Override
-  ValidReasonAssignment generateInstance() throws Exception {
+  ValidReasonAssignment generateInstance() {
     int instanceNumber = getNextInstanceNumber();
     StockCardLineItemReason reason = new StockCardLineItemReasonDataBuilder()
         .withoutId()

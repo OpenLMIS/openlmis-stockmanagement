@@ -46,6 +46,13 @@ public class SearchParamsTest {
   }
 
   @Test
+  public void isEmptyShouldReturnTrueIfValueMapIsNull() {
+    SearchParams searchParams = new SearchParams();
+
+    assertTrue(searchParams.isEmpty());
+  }
+
+  @Test
   public void shouldRemoveAccessTokenParamWhenCreateObject() {
     String accessToken = "access_token";
     map.add(accessToken, UUID.randomUUID().toString());

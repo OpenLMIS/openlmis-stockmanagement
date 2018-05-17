@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.openlmis.stockmanagement.util.UuidUtil.ID;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.Test;
 import org.springframework.util.LinkedMultiValueMap;
@@ -49,5 +50,21 @@ public class UuidUtilTest {
   @Test
   public void shouldReturnEmptyListForNullMap() {
     assertEquals(Collections.emptySet(), UuidUtil.getIds(null));
+  }
+
+  @Test
+  public void shouldReturnEmptyOptionalForInvalidUuidString() {
+    assertEquals(Optional.empty(), UuidUtil.fromString("invalid-uuid-string"));
+  }
+
+  @Test
+  public void shouldReturnEmptyOptionalForNullUuidString() {
+    assertEquals(Optional.empty(), UuidUtil.fromString(null));
+  }
+
+  @Test
+  public void shouldReturnOptionalForUuidString() {
+    UUID id = randomUUID();
+    assertEquals(Optional.of(id), UuidUtil.fromString(id.toString()));
   }
 }

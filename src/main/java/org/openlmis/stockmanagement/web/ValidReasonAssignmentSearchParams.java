@@ -36,10 +36,10 @@ import org.springframework.util.MultiValueMap;
 @ToString
 public class ValidReasonAssignmentSearchParams {
 
-  private static final String PROGRAM = "program";
-  private static final String FACILITY_TYPE = "facilityType";
-  private static final String REASON_TYPE = "reasonType";
-  private static final String REASON = "reason";
+  public static final String PROGRAM = "program";
+  public static final String FACILITY_TYPE = "facilityType";
+  public static final String REASON_TYPE = "reasonType";
+  public static final String REASON = "reason";
 
   private SearchParams queryParams;
 

@@ -17,6 +17,10 @@ package org.openlmis.stockmanagement.web;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.openlmis.stockmanagement.web.ValidReasonAssignmentSearchParams.FACILITY_TYPE;
+import static org.openlmis.stockmanagement.web.ValidReasonAssignmentSearchParams.PROGRAM;
+import static org.openlmis.stockmanagement.web.ValidReasonAssignmentSearchParams.REASON;
+import static org.openlmis.stockmanagement.web.ValidReasonAssignmentSearchParams.REASON_TYPE;
 
 import com.google.common.collect.Sets;
 import java.util.UUID;
@@ -34,7 +38,7 @@ public class ValidReasonAssignmentSearchParamsTest {
   @Test
   public void shouldGetProgramIdValueFromParameters() {
     LinkedMultiValueMap<String, Object> queryMap = new LinkedMultiValueMap<>();
-    queryMap.add("program", VALUE.toString());
+    queryMap.add(PROGRAM, VALUE.toString());
     ValidReasonAssignmentSearchParams params = new ValidReasonAssignmentSearchParams(queryMap);
 
     assertEquals(VALUE, params.getProgram());
@@ -51,7 +55,7 @@ public class ValidReasonAssignmentSearchParamsTest {
   @Test
   public void shouldGetFacilityTypeValueFromParameters() {
     LinkedMultiValueMap<String, Object> queryMap = new LinkedMultiValueMap<>();
-    queryMap.add("facilityType", VALUE.toString());
+    queryMap.add(FACILITY_TYPE, VALUE.toString());
     ValidReasonAssignmentSearchParams params = new ValidReasonAssignmentSearchParams(queryMap);
 
     assertEquals(VALUE, params.getFacilityType());
@@ -68,7 +72,7 @@ public class ValidReasonAssignmentSearchParamsTest {
   @Test
   public void shouldGetReasonIdValueFromParameters() {
     LinkedMultiValueMap<String, Object> queryMap = new LinkedMultiValueMap<>();
-    queryMap.add("reason", VALUE.toString());
+    queryMap.add(REASON, VALUE.toString());
     ValidReasonAssignmentSearchParams params = new ValidReasonAssignmentSearchParams(queryMap);
 
     assertEquals(VALUE, params.getReason());
@@ -77,7 +81,7 @@ public class ValidReasonAssignmentSearchParamsTest {
   @Test(expected = ValidationMessageException.class)
   public void shouldThrowExceptionIfThereIsUnknownReasonIdParameterInParameters() {
     LinkedMultiValueMap<String, Object> queryMap = new LinkedMultiValueMap<>();
-    queryMap.add("reasonType", "some-value");
+    queryMap.add(REASON_TYPE, "some-value");
     new ValidReasonAssignmentSearchParams(queryMap);
   }
 
@@ -92,8 +96,8 @@ public class ValidReasonAssignmentSearchParamsTest {
   @Test
   public void shouldGetReasonTypesFromParameters() {
     LinkedMultiValueMap<String, Object> queryMap = new LinkedMultiValueMap<>();
-    queryMap.add("reasonType", DEBIT);
-    queryMap.add("reasonType", CREDIT);
+    queryMap.add(REASON_TYPE, DEBIT);
+    queryMap.add(REASON_TYPE, CREDIT);
     ValidReasonAssignmentSearchParams params = new ValidReasonAssignmentSearchParams(queryMap);
 
     assertEquals(Sets.newHashSet(ReasonType.fromString(CREDIT), ReasonType.fromString(DEBIT)),

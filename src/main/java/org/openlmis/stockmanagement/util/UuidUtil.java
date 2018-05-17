@@ -21,12 +21,16 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.MultiValueMap;
 
 /**
  * Generic utility functions for {@link UUID}.
  */
 public class UuidUtil {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(UuidUtil.class);
 
   static final String ID = "id";
 
@@ -48,6 +52,7 @@ public class UuidUtil {
     try {
       return Optional.of(UUID.fromString(uuid));
     } catch (IllegalArgumentException iae) {
+      LOGGER.debug("Cannot convert provided string to the UUID");
       return Optional.empty();
     }
   }
