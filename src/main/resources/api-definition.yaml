@@ -52,7 +52,7 @@ schemas:
   - stockCardPage: !include schemas/stockCard.json
   - stockCardSummariesPage: !include schemas/stockCardSummaryV2Page.json
   - stockCardSummaries: !include schemas/stockCardSummaries.json
-  - stockCardReasonSummaryPage: !include schemas/stockCardReasonSummaryPage.json
+  - stockCardReasonSummaryPage: !include schemas/stockCardRangeSummaryPage.json
   - validSourceDestination: !include schemas/validSourceDestination.json
   - validSourceDestinations: |
         {

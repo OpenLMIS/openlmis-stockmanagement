@@ -1,7 +1,7 @@
 {
   "type": "object",
   "$schema": "http://json-schema.org/draft-04/schema",
-  "description": "Stock Card Reason Summary.",
+  "description": "Stock Card Range Summary.",
   "properties": {
     "orderable": {
       "type": "object",

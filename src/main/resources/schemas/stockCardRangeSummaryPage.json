@@ -6,7 +6,7 @@
   "properties": {
     "content": {
       "type": "array",
-      "items": { "type": "object", "$ref": "stockCardReasonSummary.json" }
+      "items": { "type": "object", "$ref": "stockCardRangeSummary.json" }
     },
     "totalPages": { "type": "integer", "title": "totalPages" },
     "totalElements": { "type": "integer", "title": "totalElements" },
