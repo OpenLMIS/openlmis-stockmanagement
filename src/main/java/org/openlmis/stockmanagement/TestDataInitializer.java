@@ -16,26 +16,21 @@
 package org.openlmis.stockmanagement;
 
 import java.io.IOException;
-import lombok.AccessLevel;
-import lombok.Setter;
-import org.apache.commons.lang3.Validate;
 import org.openlmis.stockmanagement.util.Resource2Db;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.Resource;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
 @Profile("performance-data")
 @Order(5)
-public class TestDataInitializer implements CommandLineRunner, InitializingBean {
+public class TestDataInitializer implements CommandLineRunner {
   private static final XLogger XLOGGER = XLoggerFactory.getXLogger(TestDataInitializer.class);
 
   private static final String PERF_DATA_PATH = "classpath:db/performance-data/";
@@ -70,7 +65,7 @@ public class TestDataInitializer implements CommandLineRunner, InitializingBean 
   @Value(value = VALID_DESTINATION_ASSIGNMENTS_FILE)
   private Resource validDestinationAssignmentsResource;
 
-  @Setter(AccessLevel.PACKAGE)
+  @Autowired
   private Resource2Db loader;
 
   /**
@@ -87,16 +82,6 @@ public class TestDataInitializer implements CommandLineRunner, InitializingBean 
         VALID_DESTINATION_ASSIGNMENTS_TABLE, validDestinationAssignmentsResource);
 
     XLOGGER.exit();
-  }
-
-  @Override
-  public void afterPropertiesSet() {
-    Validate.notNull(loader);
-  }
-
-  @Autowired
-  public void setTemplate(JdbcTemplate template) {
-    loader = new Resource2Db(template);
   }
 
 }

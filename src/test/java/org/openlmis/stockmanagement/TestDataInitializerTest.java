@@ -21,6 +21,7 @@ import static org.openlmis.stockmanagement.TestDataInitializer.VALID_DESTINATION
 import static org.openlmis.stockmanagement.TestDataInitializer.VALID_SOURCE_ASSIGNMENTS_TABLE;
 
 import java.io.IOException;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -28,7 +29,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.util.Resource2Db;
 import org.springframework.core.io.Resource;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TestDataInitializerTest {
@@ -48,24 +49,9 @@ public class TestDataInitializerTest {
   @Mock
   private Resource2Db loader;
 
-  @Mock
-  private JdbcTemplate template;
-
-  @Test(expected = NullPointerException.class)
-  public void shouldThrowExceptionIfFieldsAreNotSet() {
-    TestDataInitializer initializer = new TestDataInitializer();
-    initializer.afterPropertiesSet();
-  }
-
-  @Test
-  public void shouldNotThrowExceptionIfFieldsAreSet() {
-    TestDataInitializer initializer = new TestDataInitializer();
-
-    initializer.setTemplate(template);
-    initializer.afterPropertiesSet();
-
-    initializer.setLoader(loader);
-    initializer.afterPropertiesSet();
+  @Before
+  public void setUp() {
+    ReflectionTestUtils.setField(initializer, "loader", loader);
   }
 
   @Test
