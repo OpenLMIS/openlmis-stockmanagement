@@ -46,8 +46,15 @@ public class SearchParamsTest {
   }
 
   @Test
-  public void isEmptyShouldReturnTrueIfValueMapIsNull() {
+  public void isEmptyShouldReturnTrueIfNoValueMapIsProvided() {
     SearchParams searchParams = new SearchParams();
+
+    assertTrue(searchParams.isEmpty());
+  }
+
+  @Test
+  public void isEmptyShouldReturnTrueIfValueMapIsNull() {
+    SearchParams searchParams = new SearchParams(null);
 
     assertTrue(searchParams.isEmpty());
   }

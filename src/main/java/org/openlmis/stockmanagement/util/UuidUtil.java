@@ -52,7 +52,7 @@ public class UuidUtil {
     try {
       return Optional.of(UUID.fromString(uuid));
     } catch (IllegalArgumentException iae) {
-      LOGGER.debug("Cannot convert provided string to the UUID");
+      LOGGER.info(iae.getMessage(), iae);
       return Optional.empty();
     }
   }

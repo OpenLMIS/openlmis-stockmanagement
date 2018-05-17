@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import lombok.ToString;
 import org.apache.commons.lang3.EnumUtils;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
@@ -33,7 +32,6 @@ import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.util.UuidUtil;
 import org.springframework.util.MultiValueMap;
 
-@ToString
 public class ValidReasonAssignmentSearchParams {
 
   public static final String PROGRAM = "program";
