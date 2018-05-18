@@ -13,11 +13,11 @@
     },
     "reasons": {
       "type": "array",
-      "title": "Reason summaries",
+      "title": "Tag summaries",
       "items": {
         "type": "object",
-        "title": "Reason summary",
-        "$ref": "reasonSummary.json"
+        "title": "Tag summary",
+        "$ref": "tagSummary.json"
       }
     }
   }
