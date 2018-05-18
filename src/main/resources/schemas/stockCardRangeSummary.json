@@ -11,7 +11,7 @@
     "stockOutDays": {
       "type": "integer"
     },
-    "reasons": {
+    "tags": {
       "type": "array",
       "title": "Tag summaries",
       "items": {
