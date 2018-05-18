@@ -104,6 +104,12 @@ sourceSets {
         }
         resources.srcDir file('src/integration-test/resources')
     }
+
+    main {
+        resources {
+            srcDirs "src/main/resources", "build/data"
+        }
+    }
 }
 
 configurations {
@@ -147,7 +153,7 @@ task checkApiIsRaml(type: Exec) {
 
 task demoDataSeed(type:Exec) {
     executable "./demo-data/demo_seed.sh"
-    args "demo-data", "build/demo-data", "demo-data/generator.js"
+    args "demo-data", "build/data/demo-data", "demo-data/generator.js"
 }
 
 configure(checkApiIsRaml) {
@@ -228,8 +234,11 @@ integrationTest {
 }
 
 processResources {
-    // we want the generated swagger spec file included in the output jar
+    dependsOn demoDataSeed
+
+    // we want the generated HTML spec file included in the output jar
     finalizedBy ramlToHtml
+
     // update version information in build
     filesMatching('**/version.properties') {
         expand(project.properties)
@@ -248,6 +257,5 @@ build {
     dependsOn check
     dependsOn ramlToHtml
     dependsOn copyRamlHtmlToBuild
-    dependsOn demoDataSeed
     dependsOn copyConsulRegistrationToBuild
 }

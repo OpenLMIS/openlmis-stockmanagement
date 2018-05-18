@@ -42,5 +42,5 @@ rm input.sql
 echo "=============================="
 echo "Generated ${OUTPUT_FILE}"
 echo "To insert the data into database, you should copy this file to Flyway's migration directory, by default:"
-echo "cp ${OUTPUT_FILE} /app/build/resources/main/db/starter"
+echo "cp ${OUTPUT_FILE} /app/build/resources/main/demo-data/"
 echo "The demo data will be inserted automatically while the application starts."

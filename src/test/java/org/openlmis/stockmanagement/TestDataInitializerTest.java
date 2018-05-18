@@ -21,7 +21,6 @@ import static org.openlmis.stockmanagement.TestDataInitializer.VALID_DESTINATION
 import static org.openlmis.stockmanagement.TestDataInitializer.VALID_SOURCE_ASSIGNMENTS_TABLE;
 
 import java.io.IOException;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -29,7 +28,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.util.Resource2Db;
 import org.springframework.core.io.Resource;
-import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TestDataInitializerTest {
@@ -43,16 +41,11 @@ public class TestDataInitializerTest {
   @Mock
   private Resource validDestinationAssignmentsResource;
 
-  @InjectMocks
-  private TestDataInitializer initializer;
-
   @Mock
   private Resource2Db loader;
 
-  @Before
-  public void setUp() {
-    ReflectionTestUtils.setField(initializer, "loader", loader);
-  }
+  @InjectMocks
+  private TestDataInitializer initializer = new TestDataInitializer(loader);
 
   @Test
   public void shouldLoadData() throws IOException {
