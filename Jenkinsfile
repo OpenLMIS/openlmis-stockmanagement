@@ -15,6 +15,9 @@ pipeline {
     environment {
         PATH = "/usr/local/bin/:$PATH"
     }
+    parameters {
+        string(name: 'contractTestsBranch', defaultValue: 'master', description: 'The branch of contract tests to checkout')
+    }
     stages {
         stage('Preparation') {
             steps {
@@ -55,6 +58,7 @@ pipeline {
                     sh 'docker-compose -f docker-compose.builder.yml build image'
                     sh 'docker-compose -f docker-compose.builder.yml down --volumes'
                     sh "docker tag openlmis/stockmanagement:latest openlmis/stockmanagement:${STAGING_VERSION}"
+                    sh "docker push openlmis/stockmanagement:${STAGING_VERSION}"
                 }
             }
             post {
@@ -118,9 +122,21 @@ pipeline {
                 }
                 stage('Contract tests') {
                     steps {
-                        build job: 'OpenLMIS-stockmanagement-contract-test', propagate: true, wait: true
-                        build job: 'OpenLMIS-requisition-contract-test', propagate: true, wait: true
-                        build job: 'OpenLMIS-fulfillment-contract-test', propagate: true, wait: true
+                        build job: "OpenLMIS-contract-tests-pipeline/${params.contractTestsBranch}", propagate: true, wait: true,
+                        parameters: [
+                            string(name: 'serviceName', value: 'stockmanagement'),
+                            text(name: 'customEnv', value: "OL_STOCKMANAGEMENT_VERSION=${STAGING_VERSION}")
+                        ]
+                        build job: "OpenLMIS-contract-tests-pipeline/${params.contractTestsBranch}", propagate: true, wait: true,
+                        parameters: [
+                            string(name: 'serviceName', value: 'requisition'),
+                            text(name: 'customEnv', value: "OL_STOCKMANAGEMENT_VERSION=${STAGING_VERSION}")
+                        ]
+                        build job: "OpenLMIS-contract-tests-pipeline/${params.contractTestsBranch}", propagate: true, wait: true,
+                        parameters: [
+                            string(name: 'serviceName', value: 'fulfillment'),
+                            text(name: 'customEnv', value: "OL_STOCKMANAGEMENT_VERSION=${STAGING_VERSION}")
+                        ]
                     }
                     post {
                         failure {
