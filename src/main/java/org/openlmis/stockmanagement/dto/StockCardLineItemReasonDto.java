@@ -91,8 +91,7 @@ public final class StockCardLineItemReasonDto
     ReasonCategory reasonCategory = ReasonCategory.fromString(category);
 
     if (null == reasonCategory) {
-      throw new ValidationMessageException(new Message(ERROR_REASON_CATEGORY_INVALID,
-          ReasonCategory.TRANSFER, ReasonCategory.ADJUSTMENT));
+      throw new ValidationMessageException(new Message(ERROR_REASON_CATEGORY_INVALID));
     }
 
     return reasonCategory;
