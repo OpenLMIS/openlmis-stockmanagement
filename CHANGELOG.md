@@ -10,6 +10,7 @@ New functionality added in a backwards-compatible manner:
 Improvements:
 * [OLMIS-4648](https://openlmis.atlassian.net/browse/OLMIS-4648): Added Jenkinsfile
 * [OLMIS-2923](https://openlmis.atlassian.net/browse/OLMIS-2923): Updated demo data loading approach
+* [OLMIS-4717](https://openlmis.atlassian.net/browse/OLMIS-4717): Added migration with consumed and received tags.
 
 3.0.0 / 2018-04-24
 ==================
