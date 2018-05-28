@@ -16,25 +16,28 @@
 package org.openlmis.stockmanagement.web;
 
 import java.util.Collection;
+import java.util.UUID;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.MapUtils;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.util.UuidUtil;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 @NoArgsConstructor
 public class SearchParams {
 
-  public static final String PAGE = "page";
-  public static final String SIZE = "size";
-  public static final String SORT = "sort";
-  public static final String ACCESS_TOKEN = "access_token";
+  private static final String PAGE = "page";
+  private static final String SIZE = "size";
+  private static final String SORT = "sort";
+  private static final String ACCESS_TOKEN = "access_token";
 
-  private MultiValueMap<String, Object> params;
+  private MultiValueMap<String, String> params;
 
   /**
    * Constructs new SearchParams object from {@code MultiValueMap}.
    */
-  public SearchParams(MultiValueMap<String, Object> queryMap) {
+  public SearchParams(MultiValueMap<String, String> queryMap) {
     if (queryMap != null) {
       params = new LinkedMultiValueMap<>(queryMap);
       params.remove(PAGE);
@@ -50,11 +53,15 @@ public class SearchParams {
     return params.containsKey(key);
   }
 
-  public Object getFirst(String key) {
+  public String getFirst(String key) {
     return params.getFirst(key);
   }
 
-  public LinkedMultiValueMap<String, Object> asMultiValueMap() {
+  public Collection<String> get(String key) {
+    return params.get(key);
+  }
+
+  public LinkedMultiValueMap<String, String> asMultiValueMap() {
     return new LinkedMultiValueMap<>(params);
   }
 
@@ -64,5 +71,10 @@ public class SearchParams {
 
   public boolean isEmpty() {
     return MapUtils.isEmpty(params);
+  }
+
+  public UUID getUuid(String value) {
+    return UuidUtil.fromString(value)
+        .orElseThrow(() -> new ValidationMessageException(""));
   }
 }

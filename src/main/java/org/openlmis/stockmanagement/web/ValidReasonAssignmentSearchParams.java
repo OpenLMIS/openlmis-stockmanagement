@@ -34,17 +34,17 @@ import org.springframework.util.MultiValueMap;
 
 public class ValidReasonAssignmentSearchParams {
 
-  public static final String PROGRAM = "program";
-  public static final String FACILITY_TYPE = "facilityType";
-  public static final String REASON_TYPE = "reasonType";
-  public static final String REASON = "reason";
+  static final String PROGRAM = "program";
+  static final String FACILITY_TYPE = "facilityType";
+  static final String REASON_TYPE = "reasonType";
+  static final String REASON = "reason";
 
   private SearchParams queryParams;
 
   /**
    * Wraps map of query params into an object.
    */
-  public ValidReasonAssignmentSearchParams(MultiValueMap<String, Object> queryMap) {
+  public ValidReasonAssignmentSearchParams(MultiValueMap<String, String> queryMap) {
     queryParams = new SearchParams(queryMap);
     validate();
   }
@@ -59,8 +59,8 @@ public class ValidReasonAssignmentSearchParams {
     if (!queryParams.containsKey(PROGRAM)) {
       return null;
     }
-    Object program = queryParams.getFirst(PROGRAM);
-    return UuidUtil.fromString((String)program).orElse(null);
+    String program = queryParams.getFirst(PROGRAM);
+    return UuidUtil.fromString(program).orElse(null);
   }
 
   /**
@@ -101,7 +101,7 @@ public class ValidReasonAssignmentSearchParams {
     Set<ReasonType> reasonTypes = new HashSet<>();
     queryParams.asMultiValueMap().forEach((key, value) -> {
       if (Objects.equals(key, REASON_TYPE)) {
-        value.forEach(reasonType -> reasonTypes.add(ReasonType.fromString(reasonType.toString())));
+        value.forEach(reasonType -> reasonTypes.add(ReasonType.fromString(reasonType)));
       }
     });
 
@@ -119,8 +119,8 @@ public class ValidReasonAssignmentSearchParams {
     } else {
       queryParams.asMultiValueMap().forEach((key, value) -> {
         if (Objects.equals(key, REASON_TYPE)
-            && value.stream().anyMatch(reasonType -> !EnumUtils.isValidEnum(ReasonType.class,
-              reasonType.toString()))) {
+            && value.stream()
+            .anyMatch(reasonType -> !EnumUtils.isValidEnum(ReasonType.class, reasonType))) {
           throw new ValidationMessageException(new Message(ERROR_REASON_TYPE_INVALID, queryParams));
         }
       });

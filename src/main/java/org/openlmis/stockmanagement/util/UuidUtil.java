@@ -68,14 +68,14 @@ public class UuidUtil {
    * @throws ClassCastException when value for key {@code id} is not {@code String}
    * @throws IllegalArgumentException when value for key {@code id} is not parsable to {@link UUID}
    */
-  public static Set<UUID> getIds(MultiValueMap<String, Object> queryMap) {
+  public static Set<UUID> getIds(MultiValueMap<String, String> queryMap) {
     if (queryMap == null) {
       return Collections.emptySet();
     }
     Set<UUID> ids = new HashSet<>();
     queryMap.forEach((key, value) -> {
       if (Objects.equals(key, ID)) {
-        value.forEach(id -> ids.add(UUID.fromString((String)id)));
+        value.forEach(id -> ids.add(UUID.fromString(id)));
       }
     });
 

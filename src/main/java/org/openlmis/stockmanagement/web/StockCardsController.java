@@ -80,7 +80,7 @@ public class StockCardsController {
    * @return found stock card.
    */
   @RequestMapping(value = "/stockCards")
-  public Page<StockCardDto> search(@RequestParam MultiValueMap<String, Object> params,
+  public Page<StockCardDto> search(@RequestParam MultiValueMap<String, String> params,
       Pageable pageable) {
     return stockCardService.search(UuidUtil.getIds(params), pageable);
   }

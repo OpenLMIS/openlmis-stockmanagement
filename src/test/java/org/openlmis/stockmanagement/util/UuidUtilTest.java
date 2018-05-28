@@ -36,13 +36,13 @@ public class UuidUtilTest {
     UUID id2 = randomUUID();
     UUID id3 = randomUUID();
 
-    MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
+    MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 
     params.add(ID, id1.toString());
     params.add(ID, id2.toString());
     params.add(ID, id3.toString());
-    params.add("ids", randomUUID());
-    params.add("someParameter", randomUUID());
+    params.add("ids", randomUUID().toString());
+    params.add("someParameter", randomUUID().toString());
 
     assertThat(UuidUtil.getIds(params), hasItems(id1, id2, id3));
   }

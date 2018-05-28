@@ -26,7 +26,7 @@ import org.springframework.util.MultiValueMap;
 
 public class SearchParamsTest {
 
-  private MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+  private MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
 
   @Test
   public void containsKeyShouldReturnTrueIfKeyWasAdded() {

@@ -80,7 +80,7 @@ public class ValidReasonAssignmentController {
   @RequestMapping(value = "/validReasons", method = GET)
   @ResponseBody
   public List<ValidReasonAssignmentDto> getValidReasons(
-      @RequestParam MultiValueMap<String, Object> queryParams) {
+      @RequestParam MultiValueMap<String, String> queryParams) {
     Profiler profiler = new Profiler("SEARCH_VALID_REASONS");
     profiler.setLogger(LOGGER);
 

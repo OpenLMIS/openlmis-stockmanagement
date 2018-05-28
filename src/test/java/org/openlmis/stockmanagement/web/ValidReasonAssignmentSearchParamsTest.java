@@ -37,7 +37,7 @@ public class ValidReasonAssignmentSearchParamsTest {
 
   @Test
   public void shouldGetProgramIdValueFromParameters() {
-    LinkedMultiValueMap<String, Object> queryMap = new LinkedMultiValueMap<>();
+    LinkedMultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>();
     queryMap.add(PROGRAM, VALUE.toString());
     ValidReasonAssignmentSearchParams params = new ValidReasonAssignmentSearchParams(queryMap);
 
@@ -54,7 +54,7 @@ public class ValidReasonAssignmentSearchParamsTest {
 
   @Test
   public void shouldGetFacilityTypeValueFromParameters() {
-    LinkedMultiValueMap<String, Object> queryMap = new LinkedMultiValueMap<>();
+    LinkedMultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>();
     queryMap.add(FACILITY_TYPE, VALUE.toString());
     ValidReasonAssignmentSearchParams params = new ValidReasonAssignmentSearchParams(queryMap);
 
@@ -71,7 +71,7 @@ public class ValidReasonAssignmentSearchParamsTest {
 
   @Test
   public void shouldGetReasonIdValueFromParameters() {
-    LinkedMultiValueMap<String, Object> queryMap = new LinkedMultiValueMap<>();
+    LinkedMultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>();
     queryMap.add(REASON, VALUE.toString());
     ValidReasonAssignmentSearchParams params = new ValidReasonAssignmentSearchParams(queryMap);
 
@@ -80,7 +80,7 @@ public class ValidReasonAssignmentSearchParamsTest {
 
   @Test(expected = ValidationMessageException.class)
   public void shouldThrowExceptionIfThereIsUnknownReasonIdParameterInParameters() {
-    LinkedMultiValueMap<String, Object> queryMap = new LinkedMultiValueMap<>();
+    LinkedMultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>();
     queryMap.add(REASON_TYPE, "some-value");
     new ValidReasonAssignmentSearchParams(queryMap);
   }
@@ -95,7 +95,7 @@ public class ValidReasonAssignmentSearchParamsTest {
 
   @Test
   public void shouldGetReasonTypesFromParameters() {
-    LinkedMultiValueMap<String, Object> queryMap = new LinkedMultiValueMap<>();
+    LinkedMultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>();
     queryMap.add(REASON_TYPE, DEBIT);
     queryMap.add(REASON_TYPE, CREDIT);
     ValidReasonAssignmentSearchParams params = new ValidReasonAssignmentSearchParams(queryMap);
@@ -114,7 +114,7 @@ public class ValidReasonAssignmentSearchParamsTest {
 
   @Test(expected = ValidationMessageException.class)
   public void shouldThrowExceptionIfThereIsUnknownParameterInParameters() {
-    LinkedMultiValueMap<String, Object> queryMap = new LinkedMultiValueMap<>();
+    LinkedMultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>();
     queryMap.add("someParameter", "some-value");
     new ValidReasonAssignmentSearchParams(queryMap);
   }
