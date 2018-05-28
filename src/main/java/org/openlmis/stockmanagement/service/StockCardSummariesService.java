@@ -18,10 +18,21 @@ package org.openlmis.stockmanagement.service;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.empty;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity.identityOf;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Stream;
+import lombok.Getter;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
@@ -42,14 +53,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import lombok.Getter;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Stream;
-
 /**
  * This class is in charge of retrieving stock card summaries(stock cards with soh but not line
  * items).
@@ -57,6 +60,7 @@ import java.util.stream.Stream;
  * approved products and their lots. See SearchOptions for details.
  */
 @Service
+@SuppressWarnings("PMD.TooManyMethods")
 public class StockCardSummariesService extends StockCardBaseService {
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCardSummariesService.class);
 
@@ -77,6 +81,36 @@ public class StockCardSummariesService extends StockCardBaseService {
 
   @Autowired
   private PermissionService permissionService;
+
+  /**
+   * Get a map of stock cards.
+   *
+   * @param programId    UUID of the program
+   * @param facilityId   UUID of the facility
+   * @param orderableIds collection of unique orderable UUIDs
+   * @return page of stock cards.
+   */
+  public Map<UUID, StockCardAggregate> getGroupedStockCards(
+      UUID programId, UUID facilityId, Set<UUID> orderableIds) {
+
+    List<StockCard> stockCards = cardRepository.findByProgramIdAndFacilityId(programId, facilityId);
+
+    Map<UUID, OrderableFulfillDto> orderableFulfillMap =
+        orderableFulfillService.findByIds(stockCards.stream()
+            .map(StockCard::getOrderableId)
+            .collect(toSet()));
+
+    return stockCards.stream()
+        .map(stockCard -> assignOrderableToStockCard(stockCard, orderableFulfillMap, orderableIds))
+        .filter(pair -> null != pair.getLeft())
+        .collect(toMap(
+            ImmutablePair::getLeft,
+            ImmutablePair::getRight,
+            (StockCardAggregate aggregate1, StockCardAggregate aggregate2) -> {
+              aggregate1.getStockCards().addAll(aggregate2.getStockCards());
+              return aggregate1;
+            }));
+  }
 
   /**
    * Get a page of stock cards.
@@ -215,6 +249,27 @@ public class StockCardSummariesService extends StockCardBaseService {
     } else {
       return empty();
     }
+  }
+
+  private ImmutablePair<UUID, StockCardAggregate> assignOrderableToStockCard(
+      StockCard stockCard,
+      Map<UUID, OrderableFulfillDto> orderableFulfillMap,
+      Set<UUID> orderableIds) {
+
+    OrderableFulfillDto fulfills = orderableFulfillMap.get(stockCard.getOrderableId());
+
+    UUID orderableId = null == fulfills || isEmpty(fulfills.getCanBeFulfilledByMe())
+        ? stockCard.getOrderableId()
+        : fulfills.getCanBeFulfilledByMe().get(0);
+
+    List<StockCard> stockCards = new ArrayList<>();
+    stockCards.add(stockCard);
+
+    return new ImmutablePair<>(
+        !isEmpty(orderableIds) && !orderableIds.contains(orderableId)
+            ? null
+            : orderableId,
+        new StockCardAggregate(stockCards));
   }
 
   @Getter

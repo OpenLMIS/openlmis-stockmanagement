@@ -22,6 +22,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
@@ -35,6 +36,12 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableSet;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -65,11 +72,6 @@ import org.openlmis.stockmanagement.util.Message;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StockCardSummariesServiceTest {
@@ -331,6 +333,61 @@ public class StockCardSummariesServiceTest {
         .canViewStockCard(params.getProgramId(), params.getFacilityId());
 
     stockCardSummariesService.findStockCards(params);
+  }
+
+  @Test
+  public void shouldAggregateStockCardsByCommodityTypes() {
+    final UUID facilityId = randomUUID();
+    final UUID programId = randomUUID();
+
+    final UUID orderableId1 = randomUUID();
+    final UUID orderableId2 = randomUUID();
+    final UUID orderableId3 = randomUUID();
+    final UUID orderableId4 = randomUUID();
+    final UUID orderableId5 = randomUUID();
+
+    Map<UUID, OrderableFulfillDto> fulfillMap = new HashMap<>();
+    fulfillMap.put(orderableId2, new OrderableFulfillDtoDataBuilder()
+        .withCanBeFulfilledByMe(singletonList(orderableId1)).build());
+    fulfillMap.put(orderableId3, new OrderableFulfillDtoDataBuilder()
+        .withCanBeFulfilledByMe(singletonList(orderableId1)).build());
+    fulfillMap.put(orderableId5, new OrderableFulfillDtoDataBuilder()
+        .withCanBeFulfilledByMe(singletonList(orderableId4)).build());
+
+    when(orderableFulfillReferenceDataService
+        .findByIds(ImmutableSet.of(orderableId2, orderableId3, orderableId5)))
+        .thenReturn(fulfillMap);
+
+    StockEvent event = new StockEventDataBuilder()
+        .withFacility(facilityId)
+        .withProgram(programId)
+        .build();
+
+    StockCard stockCard1 = new StockCardDataBuilder(event)
+        .withOrderable(orderableId2)
+        .withStockOnHand(12)
+        .build();
+
+    StockCard stockCard2 = new StockCardDataBuilder(event)
+        .withOrderable(orderableId3)
+        .withStockOnHand(26)
+        .build();
+
+    StockCard stockCard3 = new StockCardDataBuilder(event)
+        .withOrderable(orderableId5)
+        .withStockOnHand(36)
+        .build();
+
+    when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId))
+        .thenReturn(asList(stockCard1, stockCard2, stockCard3));
+
+    Map<UUID, StockCardAggregate> cardMap =
+        stockCardSummariesService.getGroupedStockCards(
+            programId, facilityId, null);
+
+    assertThat(cardMap.keySet(), hasItems(orderableId1, orderableId4));
+    assertThat(cardMap.get(orderableId1).getStockCards(), hasItems(stockCard1, stockCard2));
+    assertThat(cardMap.get(orderableId4).getStockCards(), hasItems(stockCard3));
   }
 
   private StockCard createStockCard(UUID orderableId, UUID cardId) {

@@ -17,7 +17,7 @@ package org.openlmis.stockmanagement.domain.card;
 
 import java.util.Comparator;
 
-final class StockCardLineItemComparators {
+public final class StockCardLineItemComparators {
   private static final Comparator<StockCardLineItem> BY_OCCURRED_DATE = new ByOccurredDate();
   private static final Comparator<StockCardLineItem> BY_PROCESSED_DATE = new ByProcessedDate();
   private static final Comparator<StockCardLineItem> BY_REASON_PRIORITY = new ByReasonPriority();
@@ -26,15 +26,15 @@ final class StockCardLineItemComparators {
     throw new UnsupportedOperationException();
   }
 
-  static Comparator<StockCardLineItem> byOccurredDate() {
+  public static Comparator<StockCardLineItem> byOccurredDate() {
     return BY_OCCURRED_DATE;
   }
 
-  static Comparator<StockCardLineItem> byProcessedDate() {
+  public static Comparator<StockCardLineItem> byProcessedDate() {
     return BY_PROCESSED_DATE;
   }
 
-  static Comparator<StockCardLineItem> byReasonPriority() {
+  public static Comparator<StockCardLineItem> byReasonPriority() {
     return BY_REASON_PRIORITY;
   }
 
