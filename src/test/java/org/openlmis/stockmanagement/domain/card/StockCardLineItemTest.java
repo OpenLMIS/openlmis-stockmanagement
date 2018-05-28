@@ -22,6 +22,7 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemFrom;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
@@ -43,6 +44,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
 
+@SuppressWarnings("PMD.TooManyMethods")
 public class StockCardLineItemTest {
 
   @Rule
@@ -220,6 +222,36 @@ public class StockCardLineItemTest {
     assertThat(lineItem.getStockOnHand(), is(15));
     assertThat(lineItem.getReason().getReasonType(), is(ReasonType.BALANCE_ADJUSTMENT));
     assertThat(lineItem.getReason().getReasonCategory(), is(ReasonCategory.PHYSICAL_INVENTORY));
+  }
+
+  @Test
+  public void shouldReturnNegativeValueForDebitReason() {
+    StockCardLineItem lineItem = StockCardLineItem.builder()
+        .quantity(15)
+        .reason(StockCardLineItemReason.physicalDebit())
+        .build();
+
+    assertThat(lineItem.getValue(), is(-15));
+  }
+
+  @Test
+  public void shouldReturnPositiveValueForCreditReason() {
+    StockCardLineItem lineItem = StockCardLineItem.builder()
+        .quantity(15)
+        .reason(StockCardLineItemReason.physicalCredit())
+        .build();
+
+    assertThat(lineItem.getValue(), is(15));
+  }
+
+  @Test
+  public void shouldReturnNullForEmptyQuantity() {
+    StockCardLineItem lineItem = StockCardLineItem.builder()
+        .quantity(null)
+        .reason(StockCardLineItemReason.physicalCredit())
+        .build();
+
+    assertNull(lineItem.getValue());
   }
 
   private static StockEventAdjustmentDto createStockAdjustment() {

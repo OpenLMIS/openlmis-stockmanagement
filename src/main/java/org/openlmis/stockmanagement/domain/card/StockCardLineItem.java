@@ -212,6 +212,20 @@ public class StockCardLineItem extends BaseEntity {
     }
   }
 
+  /**
+   * Returns quantity value with correct sign depending on reason type.
+   *
+   * @return quantity value, is negative for Debit reason
+   */
+  public Integer getValue() {
+    if (null == this.getQuantity()) {
+      return null;
+    }
+    return this.getReason().getReasonType().isNegative()
+        ? this.getQuantity() * -1
+        : this.getQuantity();
+  }
+
   private void tryDecrease(int previousStockOnHand) {
     if (previousStockOnHand - quantity < 0) {
       throw new ValidationMessageException(

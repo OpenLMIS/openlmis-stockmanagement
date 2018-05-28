@@ -53,4 +53,8 @@ public enum ReasonType {
 
     return null;
   }
+
+  public boolean isNegative() {
+    return this.equals(DEBIT);
+  }
 }
