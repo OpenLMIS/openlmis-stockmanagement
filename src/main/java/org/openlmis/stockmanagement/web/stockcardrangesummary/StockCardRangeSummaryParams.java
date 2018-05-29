@@ -21,7 +21,6 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_INVALID_PARAMS
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_ID_MISSING;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -135,8 +134,7 @@ public class StockCardRangeSummaryParams {
    * list.
    */
   public void validate() {
-    if (!Collections.unmodifiableList(ALL_PARAMETERS)
-        .containsAll(queryParams.keySet())) {
+    if (!ALL_PARAMETERS.containsAll(queryParams.keySet())) {
       throw new ValidationMessageException(new Message(ERROR_INVALID_PARAMS));
     }
     if (!queryParams.containsKey(PROGRAM_ID)) {
