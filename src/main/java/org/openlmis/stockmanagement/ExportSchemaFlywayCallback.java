@@ -55,7 +55,7 @@ public class ExportSchemaFlywayCallback extends BaseFlywayCallback {
 
       exitCode = proc.waitFor();
     } catch (Exception ex) {
-      XLOGGER.warn("Exporting db schema failed with message: " + ex.getMessage());
+      XLOGGER.warn("Exporting db schema failed with message: " + ex);
     }
 
     XLOGGER.exit(exitCode);
