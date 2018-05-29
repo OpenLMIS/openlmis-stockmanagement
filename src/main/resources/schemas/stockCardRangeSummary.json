@@ -12,12 +12,10 @@
       "type": "integer"
     },
     "tags": {
-      "type": "array",
       "title": "Tag summaries",
-      "items": {
-        "type": "object",
-        "title": "Tag summary",
-        "$ref": "tagSummary.json"
+      "type": "object",
+      "patternProperties": {
+        ".{1,}": { "type": "number" }
       }
     }
   }
