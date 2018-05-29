@@ -65,6 +65,7 @@ public class StockCardRangeSummaryController {
     profiler.start("VALIDATE_PARAMS");
     StockCardRangeSummaryParams params = new StockCardRangeSummaryParams(parameters);
 
+    profiler.start("PERMISSION_CHECK");
     permissionService.canViewStockCard(params.getProgramId(), params.getFacilityId());
 
     profiler.start("GET_STOCK_CARDS_SUMMARIES_SERVICE");
