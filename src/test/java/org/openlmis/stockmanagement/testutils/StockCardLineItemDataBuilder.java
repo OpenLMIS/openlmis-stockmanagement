@@ -27,6 +27,7 @@ import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
+import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import java.time.LocalDate;
@@ -57,12 +58,15 @@ public class StockCardLineItemDataBuilder {
   private List<PhysicalInventoryLineItemAdjustment> stockAdjustments = Lists.newArrayList();
 
   public StockCardLineItemDataBuilder withCreditReason() {
-    reason = new StockCardLineItemReasonDataBuilder().withCreditType().build();
-    return this;
+    return this.withReason(new StockCardLineItemReasonDataBuilder().withCreditType().build());
   }
 
   public StockCardLineItemDataBuilder withDebitReason() {
-    reason = new StockCardLineItemReasonDataBuilder().withDebitType().build();
+    return this.withReason(new StockCardLineItemReasonDataBuilder().withDebitType().build());
+  }
+
+  public StockCardLineItemDataBuilder withReason(StockCardLineItemReason reason) {
+    this.reason = reason;
     return this;
   }
 
@@ -77,12 +81,15 @@ public class StockCardLineItemDataBuilder {
   }
 
   public StockCardLineItemDataBuilder withOccurredDatePreviousDay() {
-    occurredDate = occurredDate.minusDays(1);
-    return this;
+    return this.withOccurredDate(occurredDate.minusDays(1));
   }
 
   public StockCardLineItemDataBuilder withOccurredDateNextDay() {
-    occurredDate = occurredDate.plusDays(1);
+    return this.withOccurredDate(occurredDate.plusDays(1));
+  }
+
+  public StockCardLineItemDataBuilder withOccurredDate(LocalDate occurredDate) {
+    this.occurredDate = occurredDate;
     return this;
   }
 
@@ -104,6 +111,27 @@ public class StockCardLineItemDataBuilder {
   public StockCardLineItemDataBuilder withOriginEvent(StockEvent event) {
     originEvent = event;
     return this;
+  }
+
+  /**
+   * Creates new instance of {@link StockCardLineItem} with properties.
+   *
+   * @param reasonType   reason type that will be assigned to stock card line item reason
+   * @param tags         list of tags assigned to stock reason
+   * @param quantity     quantity stored in stock card line item
+   * @param occurredDate date that stock change occurred
+   * @return created line item.
+   */
+  public StockCardLineItem buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
+      ReasonType reasonType, List<String> tags, Integer quantity, LocalDate occurredDate) {
+    return this
+        .withReason(new StockCardLineItemReasonDataBuilder()
+            .withReasonType(reasonType)
+            .withTags(tags)
+            .build())
+        .withQuantity(quantity)
+        .withOccurredDate(occurredDate)
+        .build();
   }
 
   /**

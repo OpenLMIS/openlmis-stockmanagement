@@ -52,12 +52,15 @@ public class StockCardLineItemReasonDataBuilder {
   }
 
   public StockCardLineItemReasonDataBuilder withCreditType() {
-    reasonType = ReasonType.CREDIT;
-    return this;
+    return this.withReasonType(ReasonType.CREDIT);
   }
 
   public StockCardLineItemReasonDataBuilder withDebitType() {
-    reasonType = ReasonType.DEBIT;
+    return this.withReasonType(ReasonType.DEBIT);
+  }
+
+  public StockCardLineItemReasonDataBuilder withReasonType(ReasonType type) {
+    reasonType = type;
     return this;
   }
 
@@ -72,7 +75,7 @@ public class StockCardLineItemReasonDataBuilder {
   }
 
   public StockCardLineItemReasonDataBuilder withTags(List<String> tags) {
-    tags = tags;
+    this.tags = tags;
     return this;
   }
 

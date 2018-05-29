@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.service;
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparators.byOccurredDate;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparators.byProcessedDate;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparators.byReasonPriority;
@@ -38,6 +39,11 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 
+/**
+ * Class that aggregates stock cards that can fulfill single Orderable.
+ * This class provides a set of methods to calculate stock out days
+ * and values assigned to reason tags using all Stock Cards from list.
+ */
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
@@ -58,7 +64,9 @@ public class StockCardAggregate {
    * @return quantity value, is negative for Debit reason
    */
   public Integer getAmount(String tag, LocalDate startDate, LocalDate endDate) {
-    return getFilteredLineItems(startDate, endDate, tag).stream()
+    List<StockCardLineItem> filteredLineItems = filterLineItems(startDate, endDate, tag);
+
+    return isEmpty(filteredLineItems) ? null : filterLineItems(startDate, endDate, tag).stream()
         .mapToInt(StockCardLineItem::getQuantityWithSign)
         .sum();
   }
@@ -72,7 +80,9 @@ public class StockCardAggregate {
    * @return map of tags and amounts from connected line items
    */
   public Map<String, Integer> getAmounts(LocalDate startDate, LocalDate endDate) {
-    return getFilteredLineItems(startDate, endDate, null).stream()
+    List<StockCardLineItem> filteredLineItems = filterLineItems(startDate, endDate, null);
+
+    return isEmpty(filteredLineItems) ? null : filteredLineItems.stream()
         .map(lineItem -> {
           int value = lineItem.getQuantityWithSign();
           return lineItem.getReason().getTags().stream()
@@ -108,14 +118,14 @@ public class StockCardAggregate {
         .thenComparing(byReasonPriority());
   }
 
-  private List<StockCardLineItem> getFilteredLineItems(LocalDate startDate,
+  private List<StockCardLineItem> filterLineItems(LocalDate startDate,
       LocalDate endDate, String tag) {
 
     return stockCards.stream()
         .flatMap(stockCard -> stockCard.getLineItems().stream())
         .filter(lineItem ->
-            (null == startDate || lineItem.getOccurredDate().isAfter(startDate))
-                && (null == endDate || lineItem.getOccurredDate().isBefore(endDate))
+            (null == startDate || !lineItem.getOccurredDate().isBefore(startDate))
+                && (null == endDate || !lineItem.getOccurredDate().isAfter(endDate))
                 && (null == tag || lineItem.getReason().getTags().contains(tag)))
         .collect(toList());
   }
@@ -143,12 +153,16 @@ public class StockCardAggregate {
   private Long calculateStockoutDays(Map<LocalDate, LocalDate> stockOutDaysMap,
       LocalDate startDate, LocalDate endDate) {
 
-    return stockOutDaysMap.keySet().stream()
+    return stockOutDaysMap.isEmpty() ? null : stockOutDaysMap.keySet().stream()
         .filter(key -> null == endDate || !key.isAfter(endDate))
         .filter(key -> null == startDate || !stockOutDaysMap.get(key).isBefore(startDate))
         .mapToLong(key -> DAYS.between(
-            startDate.isAfter(key) ? startDate : key,
-            endDate.isBefore(stockOutDaysMap.get(key)) ? endDate : stockOutDaysMap.get(key)))
+            startDate != null && startDate.isAfter(key)
+                ? startDate
+                : key,
+            endDate != null && endDate.isBefore(stockOutDaysMap.get(key))
+                ? endDate.plusDays(1)
+                : stockOutDaysMap.get(key)))
         .sum();
   }
 }
