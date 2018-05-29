@@ -1,7 +1,7 @@
 version: "2"
 services:
   builder:
-    image: openlmis/dev:3
+    image: openlmis/dev:4
     links:
       - db
       - log
@@ -15,7 +15,7 @@ services:
       JAVA_OPTS: '-Dlogging.config=/logback.xml'
     env_file: .env
   sonar:
-    image: openlmis/dev:3
+    image: openlmis/dev:4
     links:
       - db
       - log

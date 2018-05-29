@@ -16,7 +16,7 @@
 package org.openlmis.stockmanagement;
 
 import java.util.Locale;
-
+import org.flywaydb.core.api.callback.FlywayCallback;
 import org.openlmis.stockmanagement.i18n.ExposedMessageSourceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,8 +83,14 @@ public class Application {
   public FlywayMigrationStrategy cleanMigrationStrategy() {
     return flyway -> {
       LOGGER.info("Using clean-migrate flyway strategy -- production profile not active");
+      flyway.setCallbacks(flywayCallback());
       flyway.clean();
       flyway.migrate();
     };
+  }
+
+  @Bean
+  public FlywayCallback flywayCallback() {
+    return new ExportSchemaFlywayCallback();
   }
 }
