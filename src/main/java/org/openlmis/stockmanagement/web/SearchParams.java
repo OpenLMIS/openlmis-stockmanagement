@@ -15,11 +15,14 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_INVALID_UUID_FORMAT;
+
 import java.util.Collection;
 import java.util.UUID;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.MapUtils;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.util.UuidUtil;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -73,8 +76,16 @@ public class SearchParams {
     return MapUtils.isEmpty(params);
   }
 
+  /**
+   * Parses String value into {@link UUID}.
+   * If format is wrong {@link ValidationMessageException} will be thrown.
+   *
+   * @param value string to be parsed into UUID
+   * @return parsed UUID
+   */
   public UUID getUuid(String value) {
     return UuidUtil.fromString(value)
-        .orElseThrow(() -> new ValidationMessageException(""));
+        .orElseThrow(() ->
+            new ValidationMessageException(new Message(ERROR_INVALID_UUID_FORMAT, value)));
   }
 }

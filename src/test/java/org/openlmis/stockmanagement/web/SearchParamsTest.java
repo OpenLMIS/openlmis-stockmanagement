@@ -15,16 +15,24 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_INVALID_UUID_FORMAT;
 
 import java.util.UUID;
 import org.apache.commons.lang.RandomStringUtils;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 public class SearchParamsTest {
+
+  @Rule
+  public ExpectedException exception = ExpectedException.none();
 
   private MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
 
@@ -99,4 +107,26 @@ public class SearchParamsTest {
     assertFalse(searchParams.containsKey(sort));
   }
 
+  @Test
+  public void shouldGetUuidFromString() {
+    String key = "id";
+    UUID id = UUID.randomUUID();
+    map.add(key, id.toString());
+
+    SearchParams searchParams = new SearchParams(map);
+
+    assertEquals(id, searchParams.getUuid(searchParams.getFirst(key)));
+  }
+
+  @Test
+  public void shouldThrowExceptionIfIdHasWrongFormat() {
+    exception.expect(ValidationMessageException.class);
+    exception.expectMessage(ERROR_INVALID_UUID_FORMAT);
+
+    String key = "id";
+    map.add(key, "wrong-format");
+
+    SearchParams searchParams = new SearchParams(map);
+    searchParams.getUuid(searchParams.getFirst(key));
+  }
 }
