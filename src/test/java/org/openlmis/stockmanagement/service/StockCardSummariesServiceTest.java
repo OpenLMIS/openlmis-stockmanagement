@@ -345,6 +345,8 @@ public class StockCardSummariesServiceTest {
     final UUID orderableId3 = randomUUID();
     final UUID orderableId4 = randomUUID();
     final UUID orderableId5 = randomUUID();
+    final UUID orderableId6 = randomUUID();
+    final UUID orderableId7 = randomUUID();
 
     Map<UUID, OrderableFulfillDto> fulfillMap = new HashMap<>();
     fulfillMap.put(orderableId2, new OrderableFulfillDtoDataBuilder()
@@ -353,9 +355,11 @@ public class StockCardSummariesServiceTest {
         .withCanBeFulfilledByMe(singletonList(orderableId1)).build());
     fulfillMap.put(orderableId5, new OrderableFulfillDtoDataBuilder()
         .withCanBeFulfilledByMe(singletonList(orderableId4)).build());
+    fulfillMap.put(orderableId7, new OrderableFulfillDtoDataBuilder().build());
 
     when(orderableFulfillReferenceDataService
-        .findByIds(ImmutableSet.of(orderableId2, orderableId3, orderableId5)))
+        .findByIds(
+            ImmutableSet.of(orderableId2, orderableId3, orderableId5, orderableId6, orderableId7)))
         .thenReturn(fulfillMap);
 
     StockEvent event = new StockEventDataBuilder()
@@ -378,16 +382,28 @@ public class StockCardSummariesServiceTest {
         .withStockOnHand(36)
         .build();
 
+    StockCard stockCard4 = new StockCardDataBuilder(event)
+        .withOrderable(orderableId6)
+        .withStockOnHand(46)
+        .build();
+
+    StockCard stockCard5 = new StockCardDataBuilder(event)
+        .withOrderable(orderableId7)
+        .withStockOnHand(56)
+        .build();
+
     when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId))
-        .thenReturn(asList(stockCard1, stockCard2, stockCard3));
+        .thenReturn(asList(stockCard1, stockCard2, stockCard3, stockCard4, stockCard5));
 
     Map<UUID, StockCardAggregate> cardMap =
         stockCardSummariesService.getGroupedStockCards(
             programId, facilityId, null);
 
-    assertThat(cardMap.keySet(), hasItems(orderableId1, orderableId4));
+    assertThat(cardMap.keySet(), hasItems(orderableId1, orderableId4, orderableId6, orderableId7));
     assertThat(cardMap.get(orderableId1).getStockCards(), hasItems(stockCard1, stockCard2));
     assertThat(cardMap.get(orderableId4).getStockCards(), hasItems(stockCard3));
+    assertThat(cardMap.get(orderableId6).getStockCards(), hasItems(stockCard4));
+    assertThat(cardMap.get(orderableId7).getStockCards(), hasItems(stockCard5));
   }
 
   private StockCard createStockCard(UUID orderableId, UUID cardId) {
