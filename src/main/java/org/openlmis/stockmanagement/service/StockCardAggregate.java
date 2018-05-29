@@ -59,7 +59,7 @@ public class StockCardAggregate {
    */
   public Integer getAmount(String tag, LocalDate startDate, LocalDate endDate) {
     return getFilteredLineItems(startDate, endDate, tag).stream()
-        .mapToInt(StockCardLineItem::getValue)
+        .mapToInt(StockCardLineItem::getQuantityWithSign)
         .sum();
   }
 
@@ -74,7 +74,7 @@ public class StockCardAggregate {
   public Map<String, Integer> getAmounts(LocalDate startDate, LocalDate endDate) {
     return getFilteredLineItems(startDate, endDate, null).stream()
         .map(lineItem -> {
-          int value = lineItem.getValue();
+          int value = lineItem.getQuantityWithSign();
           return lineItem.getReason().getTags().stream()
               .map(tag -> new ImmutablePair<>(tag, value))
               .collect(toList());

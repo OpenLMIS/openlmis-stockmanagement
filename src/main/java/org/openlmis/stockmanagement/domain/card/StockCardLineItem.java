@@ -217,7 +217,7 @@ public class StockCardLineItem extends BaseEntity {
    *
    * @return quantity value, is negative for Debit reason
    */
-  public Integer getValue() {
+  public Integer getQuantityWithSign() {
     if (null == this.getQuantity()) {
       return null;
     }

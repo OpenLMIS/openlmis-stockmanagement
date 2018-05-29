@@ -231,7 +231,7 @@ public class StockCardLineItemTest {
         .reason(StockCardLineItemReason.physicalDebit())
         .build();
 
-    assertThat(lineItem.getValue(), is(-15));
+    assertThat(lineItem.getQuantityWithSign(), is(-15));
   }
 
   @Test
@@ -241,7 +241,7 @@ public class StockCardLineItemTest {
         .reason(StockCardLineItemReason.physicalCredit())
         .build();
 
-    assertThat(lineItem.getValue(), is(15));
+    assertThat(lineItem.getQuantityWithSign(), is(15));
   }
 
   @Test
@@ -251,7 +251,7 @@ public class StockCardLineItemTest {
         .reason(StockCardLineItemReason.physicalCredit())
         .build();
 
-    assertNull(lineItem.getValue());
+    assertNull(lineItem.getQuantityWithSign());
   }
 
   private static StockEventAdjustmentDto createStockAdjustment() {
