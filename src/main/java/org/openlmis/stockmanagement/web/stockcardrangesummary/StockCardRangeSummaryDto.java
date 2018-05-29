@@ -28,7 +28,7 @@ import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
 @NoArgsConstructor
 @ToString
 @EqualsAndHashCode
-public class StockCardRangeSummaryDto {
+public final class StockCardRangeSummaryDto {
 
   @Getter
   @Setter
