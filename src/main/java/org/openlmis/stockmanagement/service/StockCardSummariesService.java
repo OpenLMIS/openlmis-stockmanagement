@@ -83,12 +83,14 @@ public class StockCardSummariesService extends StockCardBaseService {
   private PermissionService permissionService;
 
   /**
-   * Get a map of stock cards.
+   * Get a map of stock cards assigned to orderable ids.
+   * Stock cards are grouped using orderable fulfills endpoint.
+   * If there is no orderable that can be fulfilled by stock card its orderable id will be used.
    *
    * @param programId    UUID of the program
    * @param facilityId   UUID of the facility
    * @param orderableIds collection of unique orderable UUIDs
-   * @return page of stock cards.
+   * @return map of stock cards assigned to orderable ids
    */
   public Map<UUID, StockCardAggregate> getGroupedStockCards(
       UUID programId, UUID facilityId, Set<UUID> orderableIds) {
