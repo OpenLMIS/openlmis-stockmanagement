@@ -15,7 +15,7 @@
 
 package org.openlmis.stockmanagement.web;
 
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_INVALID_UUID_FORMAT;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_UUID_WRONG_FORMAT;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -86,6 +86,6 @@ public class SearchParams {
   public UUID getUuid(String value) {
     return UuidUtil.fromString(value)
         .orElseThrow(() ->
-            new ValidationMessageException(new Message(ERROR_INVALID_UUID_FORMAT, value)));
+            new ValidationMessageException(new Message(ERROR_UUID_WRONG_FORMAT, value)));
   }
 }

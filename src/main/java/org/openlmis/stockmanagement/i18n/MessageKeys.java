@@ -25,9 +25,6 @@ public abstract class MessageKeys {
 
   public static final String ERROR_INVALID_PARAMS = ERROR_PREFIX + ".invalid.params";
 
-  public static final String ERROR_INVALID_UUID_FORMAT =
-      ERROR_PREFIX + ".invalid.uuid.format";
-
   //stock card templates
   public static final String ERROR_STOCK_CARD_FIELD_INVALID =
       ERROR_PREFIX + ".field.invalid";

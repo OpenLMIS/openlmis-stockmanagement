@@ -18,7 +18,7 @@ package org.openlmis.stockmanagement.web;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_INVALID_UUID_FORMAT;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_UUID_WRONG_FORMAT;
 
 import java.util.UUID;
 import org.apache.commons.lang.RandomStringUtils;
@@ -121,7 +121,7 @@ public class SearchParamsTest {
   @Test
   public void shouldThrowExceptionIfIdHasWrongFormat() {
     exception.expect(ValidationMessageException.class);
-    exception.expectMessage(ERROR_INVALID_UUID_FORMAT);
+    exception.expectMessage(ERROR_UUID_WRONG_FORMAT);
 
     String key = "id";
     map.add(key, "wrong-format");
