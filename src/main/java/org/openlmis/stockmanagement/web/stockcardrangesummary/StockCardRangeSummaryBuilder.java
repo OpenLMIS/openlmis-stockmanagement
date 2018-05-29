@@ -22,13 +22,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
-import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
-import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
 import org.openlmis.stockmanagement.service.StockCardAggregate;
 import org.openlmis.stockmanagement.web.Pagination;
-import org.openlmis.stockmanagement.web.stockcardsummariesv2.StockCardSummaryV2Dto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -44,14 +40,14 @@ public class StockCardRangeSummaryBuilder {
   private String serviceUrl;
 
   /**
-   * Builds Stock Card Summary dtos from stock cards and orderables.
+   * Builds Stock Card Range Summary dtos from stock card aggregates.
    *
-   * @param groupedStockCards list of {@link OrderableDto} that summaries will be based on
-   * @param tag       list of {@link StockCard} found for orderables
-   * @param startDate       map of orderable ids as keys and {@link OrderableFulfillDto}
-   * @param endDate         date on which stock on hand will be retrieved
-   * @param pageable         date on which stock on hand will be retrieved
-   * @return list of {@link StockCardSummaryV2Dto}
+   * @param groupedStockCards map of orderable id and associated stock cards
+   * @param tag               tag for filtering stock card line items
+   * @param startDate         start date for filtering line items
+   * @param endDate           end date for filtering line items
+   * @param pageable          pagination parameters
+   * @return page of {@link StockCardRangeSummaryDto}
    */
   public Page<StockCardRangeSummaryDto> build(
       Map<UUID, StockCardAggregate> groupedStockCards,
@@ -61,10 +57,11 @@ public class StockCardRangeSummaryBuilder {
       Pageable pageable) {
 
     Page<UUID> orderableIdPage = Pagination.getPage(
-        groupedStockCards.keySet().stream().sorted().collect(toList()), pageable);
+        groupedStockCards.keySet().stream()
+            .sorted()
+            .collect(toList()), pageable);
 
     List<StockCardRangeSummaryDto> pagedSummaries = orderableIdPage.getContent().stream()
-        .sorted()
         .map(orderableId -> createDto(
             groupedStockCards.get(orderableId), orderableId,
             startDate, endDate, tag))
