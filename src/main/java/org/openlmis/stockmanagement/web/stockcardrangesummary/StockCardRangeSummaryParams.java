@@ -15,11 +15,14 @@
 
 package org.openlmis.stockmanagement.web.stockcardrangesummary;
 
+import static java.util.Arrays.asList;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_ID_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_INVALID_PARAMS;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_ID_MISSING;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -36,6 +39,9 @@ public class StockCardRangeSummaryParams {
   private static final String TAG = "tag";
   private static final String START_DATE = "startDate";
   private static final String END_DATE = "endDate";
+
+  private static final List<String> ALL_PARAMETERS =
+      asList(PROGRAM_ID, FACILITY_ID, ORDERABLE_ID, TAG, START_DATE, END_DATE);
 
   private SearchParams queryParams;
 
@@ -113,7 +119,7 @@ public class StockCardRangeSummaryParams {
   }
 
   /**
-   * Gets {@link LocalDate} for "tag" key from params.
+   * Gets {@link LocalDate} for "endDate" key from params.
    *
    * @return value of end date or null if params doesn't contain "endDate" param.
    */
@@ -129,10 +135,15 @@ public class StockCardRangeSummaryParams {
    * list.
    */
   public void validate() {
-    if (!Collections.unmodifiableList(
-        Arrays.asList(PROGRAM_ID, FACILITY_ID, ORDERABLE_ID, TAG, START_DATE, END_DATE))
+    if (!Collections.unmodifiableList(ALL_PARAMETERS)
         .containsAll(queryParams.keySet())) {
       throw new ValidationMessageException(new Message(ERROR_INVALID_PARAMS));
+    }
+    if (!queryParams.containsKey(PROGRAM_ID)) {
+      throw new ValidationMessageException(new Message(ERROR_PROGRAM_ID_MISSING));
+    }
+    if (!queryParams.containsKey(FACILITY_ID)) {
+      throw new ValidationMessageException(new Message(ERROR_FACILITY_ID_MISSING));
     }
   }
 }
