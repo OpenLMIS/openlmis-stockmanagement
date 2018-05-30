@@ -124,8 +124,8 @@ public class StockCardAggregate {
     return stockCards.stream()
         .flatMap(stockCard -> stockCard.getLineItems().stream())
         .filter(lineItem ->
-            (null == startDate || !lineItem.getOccurredDate().isBefore(startDate))
-                && (null == endDate || !lineItem.getOccurredDate().isAfter(endDate))
+            isBeforeOrEqual(lineItem.getOccurredDate(), startDate)
+                && isAfterOrEqual(lineItem.getOccurredDate(), endDate)
                 && (null == tag || lineItem.getReason().getTags().contains(tag)))
         .collect(toList());
   }
@@ -154,15 +154,23 @@ public class StockCardAggregate {
       LocalDate startDate, LocalDate endDate) {
 
     return stockOutDaysMap.isEmpty() ? null : stockOutDaysMap.keySet().stream()
-        .filter(key -> null == endDate || !key.isAfter(endDate))
-        .filter(key -> null == startDate || !stockOutDaysMap.get(key).isBefore(startDate))
+        .filter(key -> isAfterOrEqual(key, endDate))
+        .filter(key -> isBeforeOrEqual(stockOutDaysMap.get(key), startDate))
         .mapToLong(key -> DAYS.between(
-            startDate != null && startDate.isAfter(key)
+            !isBeforeOrEqual(key, startDate)
                 ? startDate
                 : key,
-            endDate != null && endDate.isBefore(stockOutDaysMap.get(key))
+            !isAfterOrEqual(stockOutDaysMap.get(key), endDate)
                 ? endDate.plusDays(1)
                 : stockOutDaysMap.get(key)))
         .sum();
+  }
+
+  private boolean isBeforeOrEqual(LocalDate date, LocalDate dateToCompare) {
+    return null == dateToCompare || !dateToCompare.isAfter(date);
+  }
+
+  private boolean isAfterOrEqual(LocalDate date, LocalDate dateToCompare) {
+    return null == dateToCompare || !dateToCompare.isBefore(date);
   }
 }
