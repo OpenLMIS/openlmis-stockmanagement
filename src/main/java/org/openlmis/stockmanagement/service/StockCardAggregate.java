@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.time.temporal.ChronoUnit.DAYS;
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
@@ -85,7 +86,11 @@ public class StockCardAggregate {
     return isEmpty(filteredLineItems) ? null : filteredLineItems.stream()
         .map(lineItem -> {
           int value = lineItem.getQuantityWithSign();
-          return lineItem.getReason().getTags().stream()
+          List<String> tags = null == lineItem.getReason()
+              ? emptyList()
+              : lineItem.getReason().getTags();
+
+          return tags.stream()
               .map(tag -> new ImmutablePair<>(tag, value))
               .collect(toList());
         })
@@ -126,7 +131,7 @@ public class StockCardAggregate {
         .filter(lineItem ->
             isBeforeOrEqual(lineItem.getOccurredDate(), startDate)
                 && isAfterOrEqual(lineItem.getOccurredDate(), endDate)
-                && (null == tag || lineItem.getReason().getTags().contains(tag)))
+                && (null == tag || lineItem.containsTag(tag)))
         .collect(toList());
   }
 

@@ -22,11 +22,16 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemFrom;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.UUID;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -37,12 +42,9 @@ import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.dto.StockEventAdjustmentDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
+import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonDataBuilder;
 import org.openlmis.stockmanagement.util.LazyResource;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
-
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.UUID;
 
 @SuppressWarnings("PMD.TooManyMethods")
 public class StockCardLineItemTest {
@@ -252,6 +254,37 @@ public class StockCardLineItemTest {
         .build();
 
     assertNull(lineItem.getQuantityWithSign());
+  }
+
+  @Test
+  public void shouldReturnFalseIfThereIsNoReason() {
+    StockCardLineItem lineItem = StockCardLineItem.builder()
+        .reason(null)
+        .build();
+
+    assertFalse(lineItem.containsTag("some-tag"));
+  }
+
+  @Test
+  public void shouldReturnFalseIfListDoesNotContainTag() {
+    StockCardLineItem lineItem = StockCardLineItem.builder()
+        .reason(new StockCardLineItemReasonDataBuilder()
+            .withTags(singletonList("tag"))
+            .build())
+        .build();
+
+    assertFalse(lineItem.containsTag("some-tag"));
+  }
+
+  @Test
+  public void shouldReturnTrueIfListDoesContainTag() {
+    StockCardLineItem lineItem = StockCardLineItem.builder()
+        .reason(new StockCardLineItemReasonDataBuilder()
+            .withTags(singletonList("tag"))
+            .build())
+        .build();
+
+    assertTrue(lineItem.containsTag("tag"));
   }
 
   private static StockEventAdjustmentDto createStockAdjustment() {

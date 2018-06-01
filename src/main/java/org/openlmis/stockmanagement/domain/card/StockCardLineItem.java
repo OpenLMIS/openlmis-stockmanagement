@@ -225,6 +225,16 @@ public class StockCardLineItem extends BaseEntity {
         : this.getQuantity() * -1;
   }
 
+  /**
+   * Checks if assigned reason has tag assigned.
+   *
+   * @param tag string with tag value
+   * @return true if there is reason assigned and has given tag
+   */
+  public boolean containsTag(String tag) {
+    return null != this.getReason() && this.getReason().getTags().contains(tag);
+  }
+
   private void tryDecrease(int previousStockOnHand) {
     if (previousStockOnHand - quantity < 0) {
       throw new ValidationMessageException(
