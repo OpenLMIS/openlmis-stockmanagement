@@ -12,3 +12,23 @@ reporting:
   - module: passfail
     criteria:
     - failures>0%, stop as failed
+# the following scenarios are common for all performance tests
+# scenarios related with one of available resources should be
+# put in separate file in `tests` directory
+scenarios:
+  get-user-token:
+    requests:
+      - if: '${__javaScript(vars.get("access_token") == null)}'
+        then:
+          - url: ${__P(base-uri)}/api/oauth/token
+            method: POST
+            label: GetUserToken
+            headers:
+              Authorization: Basic ${__base64Encode(${__P(user-auth)})}
+            body:
+              grant_type: password
+              username: ${__P(username)}
+              password: ${__P(password)}
+            extract-jsonpath:
+              access_token:
+                jsonpath: $.access_token
