@@ -137,8 +137,8 @@ public class StockCardAggregate {
     Map<LocalDate, LocalDate> stockOutDaysMap = new TreeMap<>();
 
     for (StockCardLineItem lineItem : lineItems) {
-      lineItem.calculateStockOnHand(recentSoh);
-      recentSoh = lineItem.getStockOnHand();
+      recentSoh = recentSoh + lineItem.getQuantityWithSign();
+      lineItem.setStockOnHand(recentSoh);
       if (recentSoh <= 0) {
         stockOutDateStart = lineItem.getOccurredDate();
       } else if (null != stockOutDateStart) {
