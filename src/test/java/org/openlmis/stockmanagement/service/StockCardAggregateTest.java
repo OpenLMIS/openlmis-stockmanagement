@@ -135,6 +135,10 @@ public class StockCardAggregateTest {
   public void shouldGetStockOutDaysInRange() {
     assertEquals(new Long(1), stockCardAggregate.getStockoutDays(
         LocalDate.of(2018, 5, 10), LocalDate.of(2018, 5, 11)));
+    assertEquals(new Long(1), stockCardAggregate.getStockoutDays(
+        LocalDate.of(2018, 5, 11), LocalDate.of(2018, 5, 11)));
+    assertEquals(new Long(1), stockCardAggregate.getStockoutDays(
+        LocalDate.of(2018, 5, 11), LocalDate.of(2018, 5, 12)));
     assertEquals(new Long(0), stockCardAggregate.getStockoutDays(
         LocalDate.of(2018, 5, 12), LocalDate.of(2018, 5, 13)));
   }

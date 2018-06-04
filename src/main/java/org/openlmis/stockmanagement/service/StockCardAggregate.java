@@ -139,17 +139,17 @@ public class StockCardAggregate {
   private Map<LocalDate, LocalDate> getStockoutPeriods(List<StockCardLineItem> lineItems) {
 
     int recentSoh = 0;
-    LocalDate stockOutDateStart = null;
+    LocalDate stockOutStartDate = null;
     Map<LocalDate, LocalDate> stockOutDaysMap = new TreeMap<>();
 
     for (StockCardLineItem lineItem : lineItems) {
       recentSoh = recentSoh + lineItem.getQuantityWithSign();
       lineItem.setStockOnHand(recentSoh);
       if (recentSoh <= 0) {
-        stockOutDateStart = lineItem.getOccurredDate();
-      } else if (null != stockOutDateStart) {
-        stockOutDaysMap.put(stockOutDateStart, lineItem.getOccurredDate());
-        stockOutDateStart = null;
+        stockOutStartDate = lineItem.getOccurredDate();
+      } else if (null != stockOutStartDate) {
+        stockOutDaysMap.put(stockOutStartDate, lineItem.getOccurredDate());
+        stockOutStartDate = null;
       }
     }
 

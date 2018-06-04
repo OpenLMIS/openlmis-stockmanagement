@@ -12,7 +12,7 @@ scenarios:
       program_id: 418bdc1d-c303-4bd0-b2d3-d8901150a983
     requests:
       - include-scenario: get-user-token
-      - url: ${__P(base-uri)}/api/stockCardRangeSummaries?facilityId={facility_id}&programId=${program_id}
+      - url: ${__P(base-uri)}/api/stockCardRangeSummaries?facilityId=${facility_id}&programId=${program_id}
         method: GET
         label: GetStockCardRangeSummaries
         headers:
