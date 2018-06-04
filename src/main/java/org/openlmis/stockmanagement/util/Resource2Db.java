@@ -29,6 +29,8 @@ import org.apache.commons.collections4.IteratorUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.io.ByteOrderMark;
+import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -114,7 +116,8 @@ public class Resource2Db {
     XLOGGER.entry(resource.getDescription());
 
     // parse CSV
-    try (InputStreamReader isReader = new InputStreamReader(resource.getInputStream())) {
+    try (InputStreamReader isReader = new InputStreamReader(
+        new BOMInputStream(resource.getInputStream(), ByteOrderMark.UTF_8))) {
       CSVParser parser = CSVFormat.DEFAULT.withHeader().withNullString("").parse(isReader);
 
       // read header row
