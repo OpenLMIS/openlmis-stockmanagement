@@ -27,6 +27,7 @@ import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparat
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -83,7 +84,7 @@ public class StockCardAggregate {
   public Map<String, Integer> getAmounts(LocalDate startDate, LocalDate endDate) {
     List<StockCardLineItem> filteredLineItems = filterLineItems(startDate, endDate, null);
 
-    return isEmpty(filteredLineItems) ? null : filteredLineItems.stream()
+    return isEmpty(filteredLineItems) ? new HashMap<>() : filteredLineItems.stream()
         .map(lineItem -> {
           int value = lineItem.getQuantityWithSign();
           List<String> tags = null == lineItem.getReason()
