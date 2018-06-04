@@ -29,12 +29,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile("performance-data")
+@Profile("demo-data")
 @Order(5)
 public class TestDataInitializer implements CommandLineRunner {
   private static final XLogger XLOGGER = XLoggerFactory.getXLogger(TestDataInitializer.class);
 
-  private static final String PERF_DATA_PATH = "classpath:db/performance-data/";
+  private static final String DEMO_DATA_PATH = "classpath:db/demo-data/";
   private static final String FILE_EXTENSION = ".csv";
 
   // table names
@@ -72,46 +72,46 @@ public class TestDataInitializer implements CommandLineRunner {
       DB_SCHEMA + VALID_DESTINATION_ASSIGNMENTS;
 
 
-  @Value(value = PERF_DATA_PATH + DB_SCHEMA + JASPER_TEMPLATES + FILE_EXTENSION)
+  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + JASPER_TEMPLATES + FILE_EXTENSION)
   private Resource jasperTemplatesResource;
 
-  @Value(value = PERF_DATA_PATH + DB_SCHEMA + NODES + FILE_EXTENSION)
+  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + NODES + FILE_EXTENSION)
   private Resource nodesResource;
 
-  @Value(value = PERF_DATA_PATH + DB_SCHEMA + ORGANIZATIONS + FILE_EXTENSION)
+  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + ORGANIZATIONS + FILE_EXTENSION)
   private Resource organizationsResource;
 
-  @Value(value = PERF_DATA_PATH + DB_SCHEMA + PHYSICAL_INVENTORIES + FILE_EXTENSION)
+  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + PHYSICAL_INVENTORIES + FILE_EXTENSION)
   private Resource physicalInventoriesResource;
 
-  @Value(value = PERF_DATA_PATH + DB_SCHEMA + PHYSICAL_INVENTORY_LINE_ITEMS + FILE_EXTENSION)
+  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + PHYSICAL_INVENTORY_LINE_ITEMS + FILE_EXTENSION)
   private Resource physicalInventoryLineItemsResource;
 
-  @Value(value = PERF_DATA_PATH + DB_SCHEMA + STOCK_CARD_LINE_ITEM_REASON_TAGS + FILE_EXTENSION)
+  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + STOCK_CARD_LINE_ITEM_REASON_TAGS + FILE_EXTENSION)
   private Resource stockCardLineItemReasonTagsResource;
 
-  @Value(value = PERF_DATA_PATH + DB_SCHEMA + STOCK_CARD_LINE_ITEM_REASONS + FILE_EXTENSION)
+  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + STOCK_CARD_LINE_ITEM_REASONS + FILE_EXTENSION)
   private Resource stockCardLineItemReasonsResource;
 
-  @Value(value = PERF_DATA_PATH + DB_SCHEMA + STOCK_CARD_LINE_ITEMS + FILE_EXTENSION)
+  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + STOCK_CARD_LINE_ITEMS + FILE_EXTENSION)
   private Resource stockCardLineItemsResource;
 
-  @Value(value = PERF_DATA_PATH + DB_SCHEMA + STOCK_CARDS + FILE_EXTENSION)
+  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + STOCK_CARDS + FILE_EXTENSION)
   private Resource stockCardsResource;
 
-  @Value(value = PERF_DATA_PATH + DB_SCHEMA + STOCK_EVENT_LINE_ITEMS + FILE_EXTENSION)
+  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + STOCK_EVENT_LINE_ITEMS + FILE_EXTENSION)
   private Resource stockEventLineItemsResource;
 
-  @Value(value = PERF_DATA_PATH + DB_SCHEMA + STOCK_EVENTS + FILE_EXTENSION)
+  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + STOCK_EVENTS + FILE_EXTENSION)
   private Resource stockEventsResource;
 
-  @Value(value = PERF_DATA_PATH + DB_SCHEMA + VALID_SOURCE_ASSIGNMENTS + FILE_EXTENSION)
+  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + VALID_SOURCE_ASSIGNMENTS + FILE_EXTENSION)
   private Resource validSourceAssignmentsResource;
 
-  @Value(value = PERF_DATA_PATH + DB_SCHEMA + VALID_REASON_ASSIGNMENTS + FILE_EXTENSION)
+  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + VALID_REASON_ASSIGNMENTS + FILE_EXTENSION)
   private Resource validReasonAssignmentsResource;
 
-  @Value(value = PERF_DATA_PATH + DB_SCHEMA + VALID_DESTINATION_ASSIGNMENTS + FILE_EXTENSION)
+  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + VALID_DESTINATION_ASSIGNMENTS + FILE_EXTENSION)
   private Resource validDestinationAssignmentsResource;
 
   private Resource2Db loader;
