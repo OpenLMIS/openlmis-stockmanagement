@@ -15,7 +15,6 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -24,6 +23,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -35,6 +35,11 @@ import org.openlmis.stockmanagement.BaseIntegrationTest;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
+import org.openlmis.stockmanagement.domain.reason.ReasonType;
+import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
+import org.openlmis.stockmanagement.domain.sourcedestination.Node;
+import org.openlmis.stockmanagement.domain.sourcedestination.Organization;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockCardLineItemDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
@@ -43,7 +48,10 @@ import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
+import org.openlmis.stockmanagement.repository.NodeRepository;
+import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
+import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
@@ -72,6 +80,15 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
   @Autowired
   private PhysicalInventoriesRepository physicalInventoriesRepository;
+  
+  @Autowired
+  private OrganizationRepository organizationRepository;
+  
+  @Autowired
+  private NodeRepository nodeRepository;
+  
+  @Autowired
+  private StockCardLineItemReasonRepository stockCardLineItemReasonRepository;
 
   @MockBean
   private FacilityReferenceDataService facilityReferenceDataService;
@@ -87,10 +104,27 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
   @MockBean
   private PermissionService permissionService;
+  
+  private Node node;
+  
+  private StockCardLineItemReason reason;
 
   @Before
   public void setUp() throws Exception {
     mockAuthentication();
+
+    Organization organization = new Organization();
+    organization.setName("org");
+    organizationRepository.save(organization);
+    
+    node = new Node();
+    node.setReferenceId(organization.getId());
+    node.setRefDataFacility(false);
+    nodeRepository.save(node);
+
+    reason = new StockCardLineItemReason("reason", null, ReasonType.CREDIT,
+        ReasonCategory.ADJUSTMENT, false, Collections.emptyList());
+    stockCardLineItemReasonRepository.save(reason);
   }
 
   @After
@@ -98,6 +132,8 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     physicalInventoriesRepository.deleteAll();
     stockCardRepository.deleteAll();
     stockEventsRepository.deleteAll();
+    nodeRepository.deleteAll();
+    stockCardLineItemReasonRepository.deleteAll();
   }
 
   @Test
@@ -105,6 +141,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     //given
     UUID userId = randomUUID();
     StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
+    stockEventDto.getLineItems().get(0).setSourceId(node.getId());
+    stockEventDto.getLineItems().get(0).setDestinationId(node.getId());
     StockEvent savedEvent = save(stockEventDto, userId);
 
     //when
@@ -115,8 +154,8 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     StockCardLineItem firstLineItem = savedCard.getLineItems().get(0);
 
     assertThat(firstLineItem.getUserId(), is(userId));
-    assertThat(firstLineItem.getSource().isRefDataFacility(), is(true));
-    assertThat(firstLineItem.getDestination().isRefDataFacility(), is(true));
+    assertThat(firstLineItem.getSource().isRefDataFacility(), is(false));
+    assertThat(firstLineItem.getDestination().isRefDataFacility(), is(false));
 
     assertThat(firstLineItem.getStockCard().getOriginEvent().getId(), is(savedEvent.getId()));
     assertThat(firstLineItem.getStockCard().getFacilityId(), is(savedEvent.getFacilityId()));
@@ -131,6 +170,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     //given
     //1. there is an existing event that caused a stock card to exist
     StockEventDto existingEventDto = createStockEventDto();
+    existingEventDto.getLineItems().get(0).setReasonId(reason.getId());
+    existingEventDto.getLineItems().get(0).setSourceId(node.getId());
+    existingEventDto.getLineItems().get(0).setDestinationId(node.getId());
     final StockEvent existingEvent = save(existingEventDto, randomUUID());
     UUID orderableId = existingEventDto.getLineItems().get(0).getOrderableId();
 
@@ -139,6 +181,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     newEventDto.setProgramId(existingEventDto.getProgramId());
     newEventDto.setFacilityId(existingEventDto.getFacilityId());
     newEventDto.getLineItems().get(0).setOrderableId(orderableId);
+    newEventDto.getLineItems().get(0).setReasonId(reason.getId());
+    newEventDto.getLineItems().get(0).setSourceId(node.getId());
+    newEventDto.getLineItems().get(0).setDestinationId(node.getId());
 
     //when
     long cardAmountBeforeSave = stockCardRepository.count();
@@ -161,25 +206,22 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
   @Test
   public void shouldGetRefdataAndConvertOrganizationsWhenFindStockCard() {
     //given
-    UUID userId = randomUUID();
     StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.getLineItems().get(0).setLotId(randomUUID());
+    stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
+    stockEventDto.getLineItems().get(0).setSourceId(node.getId());
+    stockEventDto.getLineItems().get(0).setDestinationId(node.getId());
 
     //1. mock ref data service
     FacilityDto cardFacility = new FacilityDto();
-    FacilityDto sourceFacility = new FacilityDto();
-    FacilityDto destinationFacility = new FacilityDto();
+    Organization org = new Organization();
+    org.setName("org");
     ProgramDto programDto = new ProgramDto();
     OrderableDto orderableDto = new OrderableDto();
     LotDto lotDto = new LotDto();
 
     when(facilityReferenceDataService.findOne(stockEventDto.getFacilityId()))
         .thenReturn(cardFacility);
-    when(facilityReferenceDataService.findOne(fromString("19121381-9f3d-4e77-b9e5-d3f59fc1639e")))
-        .thenReturn(sourceFacility);
-    when(facilityReferenceDataService.findOne(fromString("e6799d64-d10d-4011-b8c2-0e4d4a3f65ce")))
-        .thenReturn(destinationFacility);
-
     when(programReferenceDataService.findOne(stockEventDto.getProgramId()))
         .thenReturn(programDto);
     when(orderableReferenceDataService
@@ -190,6 +232,7 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
         .thenReturn(lotDto);
 
     //2. there is an existing stock card with line items
+    UUID userId = randomUUID();
     StockEvent savedEvent = save(stockEventDto, userId);
 
     //when
@@ -203,8 +246,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     assertThat(foundCardDto.getLot(), is(lotDto));
 
     StockCardLineItemDto lineItemDto = foundCardDto.getLineItems().get(0);
-    assertThat(lineItemDto.getSource(), is(sourceFacility));
-    assertThat(lineItemDto.getDestination(), is(destinationFacility));
+    FacilityDto orgFacility = FacilityDto.createFrom(org);
+    assertThat(lineItemDto.getSource(), is(orgFacility));
+    assertThat(lineItemDto.getDestination(), is(orgFacility));
   }
 
   @Test
@@ -213,6 +257,7 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
     stockEventDto.getLineItems().get(0).setSourceId(null);
     stockEventDto.getLineItems().get(0).setDestinationId(null);
+    stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
     StockEvent savedEvent = save(stockEventDto, randomUUID());
 
     //when
@@ -255,7 +300,11 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
   public void shouldThrowPermissionExceptionIfUserHasNoPermissionToViewCard()
       throws Exception {
     //given
-    StockEvent savedEvent = save(createStockEventDto(), randomUUID());
+    StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
+    stockEventDto.getLineItems().get(0).setSourceId(node.getId());
+    stockEventDto.getLineItems().get(0).setDestinationId(node.getId());
+    StockEvent savedEvent = save(stockEventDto, randomUUID());
     doThrow(new PermissionMessageException(new Message("some error")))
         .when(permissionService)
         .canViewStockCard(savedEvent.getProgramId(), savedEvent.getFacilityId());

@@ -95,7 +95,8 @@ public class TestDataInitializerTest {
   public void shouldLoadData() throws IOException {
     initializer.run();
 
-    verify(loader).insertToDbFromCsv(STOCK_CARD_LINE_ITEM_REASONS_TABLE, stockCardLineItemReasonsResource);
+    verify(loader).insertToDbFromCsv(STOCK_CARD_LINE_ITEM_REASONS_TABLE,
+        stockCardLineItemReasonsResource);
     verify(loader).insertToDbFromCsv(
         STOCK_CARD_LINE_ITEM_REASON_TAGS_TABLE, stockCardLineItemReasonTagsResource);
     verify(loader).insertToDbFromCsv(

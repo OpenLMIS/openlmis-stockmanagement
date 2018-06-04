@@ -22,6 +22,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 
+import java.util.Collections;
+import java.util.UUID;
 import javax.transaction.Transactional;
 import org.junit.After;
 import org.junit.Assert;
@@ -31,9 +33,17 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.openlmis.stockmanagement.BaseIntegrationTest;
+import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
+import org.openlmis.stockmanagement.domain.reason.ReasonType;
+import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
+import org.openlmis.stockmanagement.domain.sourcedestination.Node;
+import org.openlmis.stockmanagement.domain.sourcedestination.Organization;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.repository.NodeRepository;
+import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
+import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockCardLineItemRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
@@ -44,8 +54,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -75,6 +83,15 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
   @Autowired
   private PhysicalInventoriesRepository physicalInventoriesRepository;
 
+  @Autowired
+  private OrganizationRepository organizationRepository;
+
+  @Autowired
+  private NodeRepository nodeRepository;
+
+  @Autowired
+  private StockCardLineItemReasonRepository stockCardLineItemReasonRepository;
+
   @Mock
   private SecurityContext securityContext;
 
@@ -87,11 +104,28 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
   private long eventSize;
   private long lineItemSize;
 
+  private Node node;
+
+  private StockCardLineItemReason reason;
+
   @Before
   public void setUp() throws Exception {
     cardSize = stockCardRepository.count();
     eventSize = stockEventsRepository.count();
     lineItemSize = lineItemRepository.count();
+
+    Organization organization = new Organization();
+    organization.setName("org");
+    organizationRepository.save(organization);
+
+    node = new Node();
+    node.setReferenceId(UUID.randomUUID());
+    node.setRefDataFacility(false);
+    nodeRepository.save(node);
+
+    reason = new StockCardLineItemReason("reason", null, ReasonType.CREDIT,
+        ReasonCategory.ADJUSTMENT, false, Collections.emptyList());
+    stockCardLineItemReasonRepository.save(reason);
 
     SecurityContextHolder.setContext(securityContext);
     when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -103,6 +137,8 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
     physicalInventoriesRepository.deleteAll();
     stockCardRepository.deleteAll();
     stockEventsRepository.deleteAll();
+    nodeRepository.deleteAll();
+    stockCardLineItemReasonRepository.deleteAll();
   }
 
   @Test
@@ -110,6 +146,9 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
       throws Exception {
     //given
     StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
+    stockEventDto.getLineItems().get(0).setSourceId(node.getId());
+    stockEventDto.getLineItems().get(0).setDestinationId(node.getId());
     stockEventDto.setUserId(userId);
     setContext(stockEventDto);
 
@@ -133,6 +172,9 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
   public void shouldSaveEventAndLineItemsAndCallNotificationsWhenValidationServicePasses() 
       throws Exception {
     StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
+    stockEventDto.getLineItems().get(0).setSourceId(node.getId());
+    stockEventDto.getLineItems().get(0).setDestinationId(node.getId());
     stockEventDto.setUserId(userId);
     setContext(stockEventDto);
 
