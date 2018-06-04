@@ -159,7 +159,7 @@ public class StockCardAggregate {
   private Long calculateStockoutDays(Map<LocalDate, LocalDate> stockOutDaysMap,
       LocalDate startDate, LocalDate endDate) {
 
-    return stockOutDaysMap.isEmpty() ? null : stockOutDaysMap.keySet().stream()
+    return stockOutDaysMap.isEmpty() ? 0 : stockOutDaysMap.keySet().stream()
         .filter(key -> isAfterOrEqual(key, endDate))
         .filter(key -> isBeforeOrEqual(stockOutDaysMap.get(key), startDate))
         .mapToLong(key -> DAYS.between(

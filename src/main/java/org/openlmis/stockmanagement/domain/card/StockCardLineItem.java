@@ -218,7 +218,7 @@ public class StockCardLineItem extends BaseEntity {
    */
   public Integer getQuantityWithSign() {
     if (null == this.getQuantity()) {
-      return null;
+      return 0;
     }
     return this.shouldIncrease()
         ? this.getQuantity()

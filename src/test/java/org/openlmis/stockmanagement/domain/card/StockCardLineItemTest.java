@@ -23,7 +23,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemFrom;
@@ -247,13 +246,13 @@ public class StockCardLineItemTest {
   }
 
   @Test
-  public void shouldReturnNullForEmptyQuantity() {
+  public void shouldReturnZeroForEmptyQuantity() {
     StockCardLineItem lineItem = StockCardLineItem.builder()
         .quantity(null)
         .reason(StockCardLineItemReason.physicalCredit())
         .build();
 
-    assertNull(lineItem.getQuantityWithSign());
+    assertEquals(new Integer(0), lineItem.getQuantityWithSign());
   }
 
   @Test
