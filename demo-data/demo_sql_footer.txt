@@ -1,4 +1,0 @@
-
-CREATE TABLE data_loaded ();
-
-END $do$

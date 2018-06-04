@@ -37,14 +37,14 @@ services:
     image: openlmis/auth
     env_file: .manual-api-test-env
     environment:
-      JAVA_OPTS: '-Dflyway.locations=classpath:db/migration,filesystem:/demo-data'
+      JAVA_OPTS: '-Dflyway.locations=classpath:db/migration'
     depends_on: [consul,log,db]
 
   referencedata:
     image: openlmis/referencedata
     env_file: .manual-api-test-env
     environment:
-      JAVA_OPTS: '-Dflyway.locations=classpath:db/migration,filesystem:/demo-data'
+      JAVA_OPTS: '-Dflyway.locations=classpath:db/migration'
     depends_on: [consul,log,db]
 
   db:

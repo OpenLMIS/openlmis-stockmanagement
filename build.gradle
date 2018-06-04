@@ -104,12 +104,6 @@ sourceSets {
         }
         resources.srcDir file('src/integration-test/resources')
     }
-
-    main {
-        resources {
-            srcDirs "src/main/resources", "build/data"
-        }
-    }
 }
 
 configurations {
@@ -149,11 +143,6 @@ task generateMigration << {
 task checkApiIsRaml(type: Exec) {
     executable "raml-cop"
     args "src/main/resources/api-definition.yaml"
-}
-
-task demoDataSeed(type:Exec) {
-    executable "./demo-data/demo_seed.sh"
-    args "demo-data", "build/data/demo-data", "demo-data/generator.js"
 }
 
 configure(checkApiIsRaml) {
@@ -215,8 +204,6 @@ tasks.withType(Pmd) {
 }
 
 test {
-    dependsOn demoDataSeed
-
     testLogging {
         events 'started', 'passed'
         exceptionFormat = 'full'
@@ -234,8 +221,6 @@ integrationTest {
 }
 
 processResources {
-    dependsOn demoDataSeed
-
     // we want the generated HTML spec file included in the output jar
     finalizedBy ramlToHtml
 
