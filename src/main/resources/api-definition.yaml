@@ -165,7 +165,7 @@ traits:
     - paginated:
         queryParameters:
             page:
-                description: The page number which should be displayed. Note that the first page is numbered zero rather than one. Additionally, negative and undefined valued are interpreted as zero.
+                description: The page number which should be displayed. Note that the first page is numbered zero rather than one. Additionally, negative and undefined values are interpreted as zero.
                 type: integer
                 required: false
                 repeat: false
