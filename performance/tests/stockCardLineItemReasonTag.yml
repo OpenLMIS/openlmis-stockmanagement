@@ -4,22 +4,6 @@ execution:
     scenario: get-tags
 
 scenarios:
-  get-user-token:
-    requests:
-    - if: '${__javaScript(vars.get("access_token") == null)}'
-      then:
-        - url: ${__P(base-uri)}/api/oauth/token
-          method: POST
-          label: GetUserToken
-          headers:
-            Authorization: Basic ${__base64Encode(${__P(user-auth)})}
-          body:
-            grant_type: password
-            username: ${__P(username)}
-            password: ${__P(password)}
-          extract-jsonpath:
-            access_token:
-              jsonpath: $.access_token
   get-tags:
     requests:
       - include-scenario: get-user-token
