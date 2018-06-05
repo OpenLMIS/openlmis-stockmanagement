@@ -1,3 +1,6 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:1cc41b6ced20144162061afcf45be8c87da9687501276732ec653df438cb0e75
-size 1028
+"id","documentNumber","facilityId","isDraft","occurredDate","programId","signature","stockEventId"
+"93f01dc3-daf8-4bde-a7cf-8f8a47d11cf6","null","e6799d64-d10d-4011-b8c2-0e4d4a3f65ce","False","2017-05-01","10845cb9-d365-4aaa-badd-b4fa39c6a26a","","5eda2982-678a-4b7b-b5d2-cd58d8b18075"
+"1c25bfa2-47d6-4185-a2b7-5b83572b2727","null","e6799d64-d10d-4011-b8c2-0e4d4a3f65ce","False","2017-05-26","dce17f2e-af3e-40ad-8e00-3496adef44c3","","ad837d5d-e703-41ab-9a37-dbffc9209f0d"
+"cefd305c-dfa7-411d-8b3d-74847713440c","","7fc9bda8-ad8a-468d-8244-38e1918527d5","False","2017-01-31","418bdc1d-c303-4bd0-b2d3-d8901150a983","","1eb9ba25-92e6-447f-a25e-8856bd340f22"
+"92365625-4c96-4033-bc44-95de24eeaa16","","97546f93-ac93-435f-a437-cd629deb7d6d","False","2017-01-31","418bdc1d-c303-4bd0-b2d3-d8901150a983","","bb7fa1ca-f123-49c7-a315-8251b530c2f4"
+"b82b2b1b-bca4-40f8-baba-a172713881b3","","4774fc63-a0c8-4a29-a01d-5b6b48632175","False","2017-01-31","418bdc1d-c303-4bd0-b2d3-d8901150a983","","a5e75d94-c0a0-4c22-8e0a-ec06cf2dea19"
