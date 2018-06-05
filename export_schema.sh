@@ -32,8 +32,8 @@ export PGDATABASE=$DB
 export PGUSER=$POSTGRES_USER
 
 mkdir -p build/schema
-pg_dump -n $1 -T jv_* -T data_loaded > build/schema/schema.$1.sql
-pg_dump -n $1 -T jv_* -T data_loaded --section=pre-data --section=data > build/schema/pre.schema.$1.sql
-pg_dump -n $1 -T jv_* -T data_loaded --section=post-data > build/schema/post.schema.$1.sql
+pg_dump -n $1 -T jv_* -T data_loaded -O > build/schema/schema.$1.sql
+pg_dump -n $1 -T jv_* -T data_loaded -O --section=pre-data --section=data > build/schema/pre.schema.$1.sql
+pg_dump -n $1 -T jv_* -T data_loaded -O --section=post-data > build/schema/post.schema.$1.sql
 
 rm pgpassfile
