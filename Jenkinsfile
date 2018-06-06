@@ -14,7 +14,7 @@ pipeline {
     }
     environment {
         PATH = "/usr/local/bin/:$PATH"
-        COMPOSE_PROJECT_NAME = "${env.JOB_BASE_NAME}-${BRANCH_NAME}"
+        COMPOSE_PROJECT_NAME = "stockmanagement-${BRANCH_NAME}"
     }
     parameters {
         string(name: 'contractTestsBranch', defaultValue: 'master', description: 'The branch of contract tests to checkout')
