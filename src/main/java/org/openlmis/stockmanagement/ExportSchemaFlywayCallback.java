@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.sql.Connection;
+import java.util.Optional;
 import org.flywaydb.core.api.callback.BaseFlywayCallback;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
@@ -35,10 +36,11 @@ public class ExportSchemaFlywayCallback extends BaseFlywayCallback {
   public void afterMigrate(Connection connection) {
     XLOGGER.entry(connection);
 
-    XLOGGER.info("After migrations, exporting db schema");
-    
     int exitCode = 0;
     try {
+      schemaName = Optional.ofNullable(schemaName).orElse("stockmanagement");
+      
+      XLOGGER.info("After migrations, exporting db schema with schema name = " + schemaName);
       Process proc = Runtime.getRuntime().exec("/app/export_schema.sh " + schemaName);
 
       BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -46,11 +48,11 @@ public class ExportSchemaFlywayCallback extends BaseFlywayCallback {
 
       String line;
       while ((line = reader.readLine()) != null) {
-        XLOGGER.debug("STDOUT> " + line);
+        XLOGGER.info("STDOUT> " + line);
       }
 
       while ((line = errorReader.readLine()) != null) {
-        XLOGGER.debug("STDERR> " + line);
+        XLOGGER.warn("STDERR> " + line);
       }
 
       exitCode = proc.waitFor();
