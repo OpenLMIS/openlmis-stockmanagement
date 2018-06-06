@@ -98,12 +98,12 @@ public class StockCardAggregateTest {
 
   @Test
   public void shouldReturnNullIfThereIsNoLineItemsAvailableForTag() {
-    assertEquals(null, stockCardAggregate.getAmount("some-tag", null, null));
+    assertEquals(new Integer(0), stockCardAggregate.getAmount("some-tag", null, null));
   }
 
   @Test
   public void shouldReturnZeroIfThereIsNoLineItemsAvailableInRange() {
-    assertEquals(null, stockCardAggregate.getAmount("tag1",
+    assertEquals(new Integer(0), stockCardAggregate.getAmount("tag1",
         LocalDate.of(2018, 1, 1), LocalDate.of(2018, 1, 2)));
   }
 

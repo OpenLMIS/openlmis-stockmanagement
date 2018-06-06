@@ -68,7 +68,7 @@ public class StockCardAggregate {
   public Integer getAmount(String tag, LocalDate startDate, LocalDate endDate) {
     List<StockCardLineItem> filteredLineItems = filterLineItems(startDate, endDate, tag);
 
-    return isEmpty(filteredLineItems) ? null : filterLineItems(startDate, endDate, tag).stream()
+    return isEmpty(filteredLineItems) ? 0 : filterLineItems(startDate, endDate, tag).stream()
         .mapToInt(StockCardLineItem::getQuantityWithSign)
         .sum();
   }
