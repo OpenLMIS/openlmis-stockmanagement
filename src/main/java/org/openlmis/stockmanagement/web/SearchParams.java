@@ -15,9 +15,11 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static java.util.stream.Collectors.toSet;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_UUID_WRONG_FORMAT;
 
 import java.util.Collection;
+import java.util.Set;
 import java.util.UUID;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.MapUtils;
@@ -80,12 +82,30 @@ public class SearchParams {
    * Parses String value into {@link UUID}.
    * If format is wrong {@link ValidationMessageException} will be thrown.
    *
-   * @param value string to be parsed into UUID
+   * @param key key for value be parsed into UUID
    * @return parsed UUID
    */
-  public UUID getUuid(String value) {
+  public UUID getUuid(String key) {
+    String value = getFirst(key);
     return UuidUtil.fromString(value)
         .orElseThrow(() ->
-            new ValidationMessageException(new Message(ERROR_UUID_WRONG_FORMAT, value)));
+            new ValidationMessageException(new Message(ERROR_UUID_WRONG_FORMAT, value, key)));
+  }
+
+  /**
+   * Parses String value into {@link UUID} based on given key.
+   * If format is wrong {@link ValidationMessageException} will be thrown.
+   *
+   * @param key key for value be parsed into UUID
+   * @return parsed UUID
+   */
+  public Set<UUID> getUuids(String key) {
+    Collection<String> values = get(key);
+
+    return values.stream()
+        .map(value -> UuidUtil.fromString(value)
+            .orElseThrow(() ->
+                new ValidationMessageException(new Message(ERROR_UUID_WRONG_FORMAT, value, key))))
+        .collect(toSet());
   }
 }

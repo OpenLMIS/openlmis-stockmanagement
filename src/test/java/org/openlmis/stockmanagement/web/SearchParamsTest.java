@@ -15,10 +15,11 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_UUID_WRONG_FORMAT;
 
 import java.util.UUID;
 import org.apache.commons.lang.RandomStringUtils;
@@ -115,13 +116,28 @@ public class SearchParamsTest {
 
     SearchParams searchParams = new SearchParams(map);
 
-    assertEquals(id, searchParams.getUuid(searchParams.getFirst(key)));
+    assertEquals(id, searchParams.getUuid(key));
+  }
+
+  @Test
+  public void shouldGetUuidsFromStrings() {
+    String key = "id";
+    UUID id1 = UUID.randomUUID();
+    UUID id2 = UUID.randomUUID();
+    UUID id3 = UUID.randomUUID();
+    map.add(key, id1.toString());
+    map.add(key, id2.toString());
+    map.add(key, id3.toString());
+
+
+    SearchParams searchParams = new SearchParams(map);
+
+    assertThat(searchParams.getUuids(key), hasItems(id1, id2, id3));
   }
 
   @Test
   public void shouldThrowExceptionIfIdHasWrongFormat() {
     exception.expect(ValidationMessageException.class);
-    exception.expectMessage(ERROR_UUID_WRONG_FORMAT);
 
     String key = "id";
     map.add(key, "wrong-format");

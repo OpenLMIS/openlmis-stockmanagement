@@ -24,7 +24,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.web.SearchParams;
@@ -62,7 +61,7 @@ public class StockCardRangeSummaryParams {
     if (!queryParams.containsKey(PROGRAM_ID)) {
       return null;
     }
-    return queryParams.getUuid(queryParams.getFirst(PROGRAM_ID));
+    return queryParams.getUuid(PROGRAM_ID);
   }
 
   /**
@@ -75,7 +74,7 @@ public class StockCardRangeSummaryParams {
     if (!queryParams.containsKey(FACILITY_ID)) {
       return null;
     }
-    return queryParams.getUuid(queryParams.getFirst(FACILITY_ID));
+    return queryParams.getUuid(FACILITY_ID);
   }
 
   /**
@@ -88,9 +87,7 @@ public class StockCardRangeSummaryParams {
     if (!queryParams.containsKey(ORDERABLE_ID)) {
       return null;
     }
-    return queryParams.get(ORDERABLE_ID).stream()
-        .map(orderableId -> queryParams.getUuid(orderableId))
-        .collect(Collectors.toSet());
+    return queryParams.getUuids(ORDERABLE_ID);
   }
 
   /**
