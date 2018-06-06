@@ -36,11 +36,12 @@ public class ExportSchemaFlywayCallback extends BaseFlywayCallback {
   public void afterMigrate(Connection connection) {
     XLOGGER.entry(connection);
 
+    XLOGGER.info("After migrations, exporting db schema");
+
     int exitCode = 0;
     try {
       schemaName = Optional.ofNullable(schemaName).orElse("stockmanagement");
       
-      XLOGGER.info("After migrations, exporting db schema with schema name = " + schemaName);
       Process proc = Runtime.getRuntime().exec("/app/export_schema.sh " + schemaName);
 
       BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -48,11 +49,11 @@ public class ExportSchemaFlywayCallback extends BaseFlywayCallback {
 
       String line;
       while ((line = reader.readLine()) != null) {
-        XLOGGER.info("STDOUT> " + line);
+        XLOGGER.debug("STDOUT> " + line);
       }
 
       while ((line = errorReader.readLine()) != null) {
-        XLOGGER.warn("STDERR> " + line);
+        XLOGGER.debug("STDERR> " + line);
       }
 
       exitCode = proc.waitFor();
