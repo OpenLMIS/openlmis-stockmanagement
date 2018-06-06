@@ -14,7 +14,7 @@ pipeline {
     }
     environment {
         PATH = "/usr/local/bin/:$PATH"
-        COMPOSE_PROJECT_NAME = "${env.JOB_NAME}-${BRANCH_NAME}"
+        COMPOSE_PROJECT_NAME = "${env.JOB_BASE_NAME}-${BRANCH_NAME}"
     }
     parameters {
         string(name: 'contractTestsBranch', defaultValue: 'master', description: 'The branch of contract tests to checkout')
@@ -180,7 +180,7 @@ pipeline {
                         && sudo rm -rf output \
                         && mkdir output \
                         && chmod 777 output \
-                        && (docker run --rm --network erd_default -v $WORKSPACE/erd/output:/output schemaspy/schemaspy:snapshot -t pgsql -host db -port 5432 -db open_lmis -s stockmanagement -u postgres -p p@ssw0rd -I "(data_loaded)|(schema_version)|(jv_.*)" -norows -hq &) \
+                        && (docker run --rm --network ${COMPOSE_PROJECT_NAME}_default -v $WORKSPACE/erd/output:/output schemaspy/schemaspy:snapshot -t pgsql -host db -port 5432 -db open_lmis -s stockmanagement -u postgres -p p@ssw0rd -I "(data_loaded)|(schema_version)|(jv_.*)" -norows -hq &) \
                         && sleep 30 \
                         && /usr/local/bin/docker-compose down --volumes \
                         && sudo chown -R $USER:$USER output \
