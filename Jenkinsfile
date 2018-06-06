@@ -14,6 +14,7 @@ pipeline {
     }
     environment {
         PATH = "/usr/local/bin/:$PATH"
+        COMPOSE_PROJECT_NAME = "${env.JOB_NAME}-${BRANCH_NAME}"
     }
     parameters {
         string(name: 'contractTestsBranch', defaultValue: 'master', description: 'The branch of contract tests to checkout')
@@ -53,6 +54,11 @@ pipeline {
                     sh 'set +x'
                     sh 'sudo rm -f .env'
                     sh 'cp $ENV_FILE .env'
+                    sh '''
+                        if [ "$GIT_BRANCH" != "master" ]; then
+                            sed -i '' -e "s#^TRANSIFEX_PUSH=.*#TRANSIFEX_PUSH=false#" .env  2>/dev/null || true
+                        fi
+                    '''
 
                     sh 'docker-compose -f docker-compose.builder.yml run -e BUILD_NUMBER=$BUILD_NUMBER -e GIT_BRANCH=$GIT_BRANCH builder'
                     sh 'docker-compose -f docker-compose.builder.yml build image'
