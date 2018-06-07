@@ -16,9 +16,12 @@
 package org.openlmis.stockmanagement;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 import org.flywaydb.core.api.callback.BaseFlywayCallback;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
@@ -44,12 +47,9 @@ public class ExportSchemaFlywayCallback extends BaseFlywayCallback {
       
       Process proc = Runtime.getRuntime().exec("/app/export_schema.sh " + schemaName);
 
-      BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-
-      String line;
-      while ((line = reader.readLine()) != null) {
-        XLOGGER.debug("STDOUT> " + line);
-      }
+      StreamGobbler streamGobbler =
+          new StreamGobbler(proc.getInputStream(), XLOGGER::info);
+      Executors.newSingleThreadExecutor().submit(streamGobbler);
 
       exitCode = proc.waitFor();
     } catch (Exception ex) {
@@ -57,5 +57,21 @@ public class ExportSchemaFlywayCallback extends BaseFlywayCallback {
     }
 
     XLOGGER.exit(exitCode);
+  }
+
+  private static class StreamGobbler implements Runnable {
+    private InputStream inputStream;
+    private Consumer<String> consumer;
+
+    StreamGobbler(InputStream inputStream, Consumer<String> consumer) {
+      this.inputStream = inputStream;
+      this.consumer = consumer;
+    }
+
+    @Override
+    public void run() {
+      new BufferedReader(new InputStreamReader(inputStream)).lines()
+          .forEach(consumer);
+    }
   }
 }
