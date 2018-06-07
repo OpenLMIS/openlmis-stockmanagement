@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNull;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_ID_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_INVALID_PARAMS;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_ID_MISSING;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_START_DATE_AFTER_END_DATE;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -128,10 +129,18 @@ public class StockCardRangeSummaryParamsTest {
   }
 
   @Test
+  public void shouldReturnCurrentDateIfEndDateIsAfter() {
+    queryMap.add(END_DATE, LocalDate.now().plusDays(1).toString());
+    StockCardRangeSummaryParams params = new StockCardRangeSummaryParams(queryMap);
+
+    assertEquals(LocalDate.now(), params.getEndDate());
+  }
+
+  @Test
   public void shouldAssignNullIfEndDateIsAbsentInParameters() {
     StockCardRangeSummaryParams params = new StockCardRangeSummaryParams(queryMap);
 
-    assertNull(params.getEndDate());
+    assertEquals(LocalDate.now(), params.getEndDate());
   }
 
   @Test
@@ -160,6 +169,17 @@ public class StockCardRangeSummaryParamsTest {
 
     LinkedMultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>();
     queryMap.add(PROGRAM_ID, "some-value");
+    new StockCardRangeSummaryParams(queryMap);
+  }
+
+  @Test
+  public void shouldThrowExceptionIfStartDateIsAfterEndDate() {
+    exception.expect(ValidationMessageException.class);
+    exception.expectMessage(ERROR_START_DATE_AFTER_END_DATE);
+
+    queryMap.add(START_DATE, "2018-06-07");
+    queryMap.add(END_DATE, "2018-06-06");
+
     new StockCardRangeSummaryParams(queryMap);
   }
 }

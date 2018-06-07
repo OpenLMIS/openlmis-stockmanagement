@@ -19,6 +19,7 @@ import static java.util.Arrays.asList;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_ID_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_INVALID_PARAMS;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_ID_MISSING;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_START_DATE_AFTER_END_DATE;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -111,7 +112,7 @@ public class StockCardRangeSummaryParams {
     if (!queryParams.containsKey(START_DATE)) {
       return null;
     }
-    return LocalDate.parse(queryParams.getFirst(START_DATE));
+    return queryParams.getLocalDate(START_DATE);
   }
 
   /**
@@ -120,10 +121,12 @@ public class StockCardRangeSummaryParams {
    * @return value of end date or null if params doesn't contain "endDate" param.
    */
   public LocalDate getEndDate() {
+    LocalDate now = LocalDate.now();
     if (!queryParams.containsKey(END_DATE)) {
-      return null;
+      return now;
     }
-    return LocalDate.parse(queryParams.getFirst(END_DATE));
+    LocalDate endDate = queryParams.getLocalDate(END_DATE);
+    return endDate.isAfter(now) ? now : endDate;
   }
 
   /**
@@ -139,6 +142,11 @@ public class StockCardRangeSummaryParams {
     }
     if (!queryParams.containsKey(FACILITY_ID)) {
       throw new ValidationMessageException(new Message(ERROR_FACILITY_ID_MISSING));
+    }
+    if (queryParams.containsKey(START_DATE)
+        && queryParams.containsKey(END_DATE)
+        && queryParams.getLocalDate(START_DATE).isAfter(queryParams.getLocalDate(END_DATE))) {
+      throw new ValidationMessageException(new Message(ERROR_START_DATE_AFTER_END_DATE));
     }
   }
 }

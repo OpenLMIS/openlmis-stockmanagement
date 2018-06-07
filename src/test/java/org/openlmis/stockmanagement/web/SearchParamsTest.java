@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import java.time.LocalDate;
 import java.util.UUID;
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Rule;
@@ -30,6 +31,7 @@ import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+@SuppressWarnings("PMD.TooManyMethods")
 public class SearchParamsTest {
 
   @Rule
@@ -143,6 +145,28 @@ public class SearchParamsTest {
     map.add(key, "wrong-format");
 
     SearchParams searchParams = new SearchParams(map);
-    searchParams.getUuid(searchParams.getFirst(key));
+    searchParams.getUuid(key);
+  }
+
+  @Test
+  public void shouldGetLocalFromString() {
+    String key = "date";
+    LocalDate date = LocalDate.now();
+    map.add(key, date.toString());
+
+    SearchParams searchParams = new SearchParams(map);
+
+    assertEquals(date, searchParams.getLocalDate(key));
+  }
+
+  @Test
+  public void shouldThrowExceptionIfDateHasWrongFormat() {
+    exception.expect(ValidationMessageException.class);
+
+    String key = "date";
+    map.add(key, "wrong-format");
+
+    SearchParams searchParams = new SearchParams(map);
+    searchParams.getLocalDate(key);
   }
 }

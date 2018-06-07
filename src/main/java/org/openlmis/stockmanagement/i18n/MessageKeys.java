@@ -40,6 +40,8 @@ public abstract class MessageKeys {
       ERROR_PREFIX + ".uuid.wrongFormat";
   public static final String ERROR_DATE_WRONG_FORMAT =
       ERROR_PREFIX + ".date.wrongFormat";
+  public static final String ERROR_START_DATE_AFTER_END_DATE =
+      ERROR_PREFIX + ".startDate.afterEndDate";
   public static final String ERROR_FACILITY_TYPE_ID_MISSING =
       ERROR_PREFIX + ".facilityType.id.missing";
 

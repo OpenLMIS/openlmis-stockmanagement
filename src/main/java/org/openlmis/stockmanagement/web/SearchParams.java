@@ -16,8 +16,11 @@
 package org.openlmis.stockmanagement.web;
 
 import static java.util.stream.Collectors.toSet;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DATE_WRONG_FORMAT;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_UUID_WRONG_FORMAT;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
@@ -79,7 +82,24 @@ public class SearchParams {
   }
 
   /**
-   * Parses String value into {@link UUID}.
+   * Parses String value into {@link LocalDate}.
+   * If format is wrong {@link ValidationMessageException} will be thrown.
+   *
+   * @param key key for value be parsed into LocalDate
+   * @return parsed local date
+   */
+  public LocalDate getLocalDate(String key) {
+    String value = getFirst(key);
+
+    try {
+      return LocalDate.parse(value);
+    } catch (DateTimeParseException cause) {
+      throw new ValidationMessageException(cause, new Message(ERROR_DATE_WRONG_FORMAT, value, key));
+    }
+  }
+
+  /**
+   * Parses String value into {@link UUID} based on given key.
    * If format is wrong {@link ValidationMessageException} will be thrown.
    *
    * @param key key for value be parsed into UUID
@@ -97,7 +117,7 @@ public class SearchParams {
    * If format is wrong {@link ValidationMessageException} will be thrown.
    *
    * @param key key for value be parsed into UUID
-   * @return parsed UUID
+   * @return parsed list of UUIDs
    */
   public Set<UUID> getUuids(String key) {
     Collection<String> values = get(key);
