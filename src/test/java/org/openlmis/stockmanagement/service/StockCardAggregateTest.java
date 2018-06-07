@@ -34,6 +34,7 @@ import org.openlmis.stockmanagement.testutils.StockCardLineItemDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
 import org.openlmis.stockmanagement.testutils.ToStringTestUtils;
 
+@SuppressWarnings("PMD.TooManyMethods")
 public class StockCardAggregateTest {
 
   private StockCard stockCard1;
