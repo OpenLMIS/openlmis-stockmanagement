@@ -50,9 +50,7 @@ public class ExportSchemaFlywayCallbackTest {
     when(Runtime.getRuntime()).thenReturn(mockRuntime);
     when(mockRuntime.exec(anyString())).thenReturn(proc);
     InputStream stubStdOut = IOUtils.toInputStream("Out test line", "UTF-8");
-    InputStream stubStdErr = IOUtils.toInputStream("Err test line", "UTF-8");
     when(proc.getInputStream()).thenReturn(stubStdOut);
-    when(proc.getErrorStream()).thenReturn(stubStdErr);
     when(proc.waitFor()).thenReturn(0);
   }
   

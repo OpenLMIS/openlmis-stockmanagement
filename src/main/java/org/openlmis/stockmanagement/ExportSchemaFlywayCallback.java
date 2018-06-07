@@ -45,15 +45,10 @@ public class ExportSchemaFlywayCallback extends BaseFlywayCallback {
       Process proc = Runtime.getRuntime().exec("/app/export_schema.sh " + schemaName);
 
       BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-      BufferedReader errorReader = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
 
       String line;
       while ((line = reader.readLine()) != null) {
         XLOGGER.debug("STDOUT> " + line);
-      }
-
-      while ((line = errorReader.readLine()) != null) {
-        XLOGGER.debug("STDERR> " + line);
       }
 
       exitCode = proc.waitFor();
