@@ -19,12 +19,15 @@ import static java.util.stream.Collectors.toList;
 
 import com.google.common.collect.ImmutableMap;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
+import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.service.StockCardAggregate;
 import org.openlmis.stockmanagement.web.Pagination;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -33,6 +36,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class StockCardRangeSummaryBuilder {
+
+  @Autowired
+  private StockCardLineItemReasonRepository reasonRepository;
 
   static final String ORDERABLES = "orderables";
 
@@ -75,8 +81,9 @@ public class StockCardRangeSummaryBuilder {
     return new StockCardRangeSummaryDto(
         new ObjectReferenceDto(serviceUrl, ORDERABLES, orderableId),
         aggregate.getStockoutDays(startDate, endDate),
-        null != tag
+        null != tag ? (reasonRepository.findTags().contains(tag)
             ? ImmutableMap.of(tag, aggregate.getAmount(tag, startDate, endDate))
+            : new HashMap<>())
             : aggregate.getAmounts(startDate, endDate));
   }
 }

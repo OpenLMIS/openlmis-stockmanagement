@@ -15,10 +15,13 @@
 
 package org.openlmis.stockmanagement.web.stockcardrangesummaries;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
@@ -31,6 +34,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.service.StockCardAggregate;
 import org.openlmis.stockmanagement.testutils.ObjectReferenceDtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardRangeSummaryDtoDataBuilder;
@@ -46,6 +50,9 @@ public class StockCardRangeSummaryBuilderTest {
 
   private static final String ORDERABLES = "orderables";
 
+  @Mock
+  private StockCardLineItemReasonRepository reasonRepository;
+
   @InjectMocks
   private StockCardRangeSummaryBuilder builder;
 
@@ -55,6 +62,8 @@ public class StockCardRangeSummaryBuilderTest {
   private LocalDate endDate;
   private LocalDate startDate;
   private Map<UUID, StockCardAggregate> groupedStockCards;
+  private String tag1 = "tag1";
+  private String tag2 = "tag2";
 
   @Mock
   private StockCardAggregate aggregate1;
@@ -80,20 +89,21 @@ public class StockCardRangeSummaryBuilderTest {
     groupedStockCards = ImmutableMap.of(orderableId1, aggregate1, orderableId2, aggregate2);
 
     pageable = new PageRequest(0, 10);
+
+    when(reasonRepository.findTags())
+        .thenReturn(asList(tag1, tag2));
   }
 
   @Test
   public void shouldBuildStockCardRangeSummariesWithTag() {
-    String tag = "tag";
-
-    when(aggregate1.getAmount(tag, startDate, endDate))
+    when(aggregate1.getAmount(tag1, startDate, endDate))
         .thenReturn(10);
-    when(aggregate2.getAmount(tag, startDate, endDate))
+    when(aggregate2.getAmount(tag1, startDate, endDate))
         .thenReturn(20);
 
     Page<StockCardRangeSummaryDto> result = builder.build(
         groupedStockCards,
-        tag,
+        tag1,
         startDate,
         endDate,
         pageable);
@@ -104,7 +114,7 @@ public class StockCardRangeSummaryBuilderTest {
             .withId(orderableId1)
             .build())
         .withStockOutDays(1L)
-        .withTags(ImmutableMap.of(tag, 10))
+        .withTags(ImmutableMap.of(tag1, 10))
         .build();
 
     StockCardRangeSummaryDto rangeSummary2 = new StockCardRangeSummaryDtoDataBuilder()
@@ -113,7 +123,7 @@ public class StockCardRangeSummaryBuilderTest {
             .withId(orderableId2)
             .build())
         .withStockOutDays(2L)
-        .withTags(ImmutableMap.of(tag, 20))
+        .withTags(ImmutableMap.of(tag1, 20))
         .build();
 
     assertEquals(2, result.getContent().size());
@@ -122,9 +132,6 @@ public class StockCardRangeSummaryBuilderTest {
 
   @Test
   public void shouldBuildStockCardRangeSummariesWithoutTag() {
-    String tag1 = "tag1";
-    String tag2 = "tag2";
-
     when(aggregate1.getAmounts(startDate, endDate))
         .thenReturn(ImmutableMap.of(tag1, 10, tag2, 11));
     when(aggregate2.getAmounts(startDate, endDate))
@@ -190,5 +197,40 @@ public class StockCardRangeSummaryBuilderTest {
         pageable);
 
     assertEquals(1, result.getContent().size());
+  }
+
+  @Test
+  public void shouldNotIncludeNotExistingTag() {
+    final UUID orderableId3 = randomUUID();
+
+    when(reasonRepository.findTags())
+        .thenReturn(singletonList(tag1));
+
+    when(aggregate1.getAmount(tag2, startDate, endDate))
+        .thenReturn(10);
+    when(aggregate2.getAmount(tag2, startDate, endDate))
+        .thenReturn(20);
+    when(aggregate3.getAmount(tag2, startDate, endDate))
+        .thenReturn(30);
+
+    when(aggregate3.getStockoutDays(startDate, endDate))
+        .thenReturn(3L);
+
+    groupedStockCards = ImmutableMap.of(
+        orderableId1, aggregate1,
+        orderableId2, aggregate2,
+        orderableId3, aggregate3);
+
+    pageable = new PageRequest(1, 1);
+
+    Page<StockCardRangeSummaryDto> result = builder.build(
+        groupedStockCards,
+        tag2,
+        startDate,
+        endDate,
+        pageable);
+
+    assertEquals(1, result.getContent().size());
+    assertNull(result.getContent().get(0).getTags().get(tag2));
   }
 }
