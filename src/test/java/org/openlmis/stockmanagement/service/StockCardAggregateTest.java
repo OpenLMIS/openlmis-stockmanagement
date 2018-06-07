@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
@@ -141,6 +142,20 @@ public class StockCardAggregateTest {
         LocalDate.of(2018, 5, 11), LocalDate.of(2018, 5, 12)));
     assertEquals(new Long(0), stockCardAggregate.getStockoutDays(
         LocalDate.of(2018, 5, 12), LocalDate.of(2018, 5, 13)));
+  }
+
+  @Test
+  public void shouldIncludeStockoutToCurrentDay() {
+    LocalDate date = LocalDate.of(2018, 5, 15);
+    stockCard1.getLineItems().add(new StockCardLineItemDataBuilder()
+        .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
+            ReasonType.DEBIT,
+            asList(tag3),
+            80,
+            LocalDate.of(2018, 5, 15)));
+    assertEquals(
+        new Long(1 + DAYS.between(date, LocalDate.now())),
+        stockCardAggregate.getStockoutDays(null, null));
   }
 
   @Test

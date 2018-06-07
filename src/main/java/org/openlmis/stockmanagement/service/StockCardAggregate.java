@@ -115,7 +115,7 @@ public class StockCardAggregate {
         .sorted(getComparator())
         .collect(toList());
 
-    return calculateStockoutDays(getStockoutPeriods(lineItems), startDate, endDate);
+    return calculateStockoutDays(getStockoutPeriods(lineItems, endDate), startDate, endDate);
   }
 
   private Comparator<StockCardLineItem> getComparator() {
@@ -136,7 +136,8 @@ public class StockCardAggregate {
         .collect(toList());
   }
 
-  private Map<LocalDate, LocalDate> getStockoutPeriods(List<StockCardLineItem> lineItems) {
+  private Map<LocalDate, LocalDate> getStockoutPeriods(
+      List<StockCardLineItem> lineItems, LocalDate endDate) {
 
     int recentSoh = 0;
     LocalDate stockOutStartDate = null;
@@ -151,6 +152,10 @@ public class StockCardAggregate {
         stockOutDaysMap.put(stockOutStartDate, lineItem.getOccurredDate());
         stockOutStartDate = null;
       }
+    }
+
+    if (null != stockOutStartDate) {
+      stockOutDaysMap.put(stockOutStartDate, null == endDate ? LocalDate.now() : endDate);
     }
 
     return stockOutDaysMap;
