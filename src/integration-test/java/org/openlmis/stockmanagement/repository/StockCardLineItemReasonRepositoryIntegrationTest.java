@@ -19,6 +19,8 @@ import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.Lists;
@@ -95,19 +97,21 @@ public class StockCardLineItemReasonRepositoryIntegrationTest
   public void shouldFindTags() {
     reasonRepository.deleteAll();
 
-    Set<String> expected = Sets.newHashSet();
-
-    for (int i = 0; i < 30; ++i) {
-      StockCardLineItemReason entity = generateInstance();
-      expected.addAll(entity.getTags());
-
-      reasonRepository.save(entity);
-    }
+    Set<String> expected = generateReasonsWithTags();
 
     List<String> actual = reasonRepository.findTags();
 
     assertThat(actual, hasSize(expected.size()));
     assertThat(actual, containsInAnyOrder(expected.toArray(new String[0])));
+  }
+
+  @Test
+  public void shouldCheckIfTagExists() {
+    reasonRepository.deleteAll();
+
+    generateReasonsWithTags().stream()
+        .forEach(tag -> assertEquals(new Integer(1), reasonRepository.existsByTag(tag)));
+    assertNull(reasonRepository.existsByTag("some-not-existing-tag"));
   }
 
   @Override
@@ -135,4 +139,16 @@ public class StockCardLineItemReasonRepositoryIntegrationTest
     }
   }
 
+  private Set<String> generateReasonsWithTags() {
+    Set<String> expected = Sets.newHashSet();
+
+    for (int i = 0; i < 30; ++i) {
+      StockCardLineItemReason entity = generateInstance();
+      expected.addAll(entity.getTags());
+
+      reasonRepository.save(entity);
+    }
+
+    return expected;
+  }
 }

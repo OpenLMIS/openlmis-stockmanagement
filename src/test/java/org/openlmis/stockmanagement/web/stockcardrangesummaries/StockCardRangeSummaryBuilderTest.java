@@ -15,13 +15,12 @@
 
 package org.openlmis.stockmanagement.web.stockcardrangesummaries;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
@@ -90,8 +89,7 @@ public class StockCardRangeSummaryBuilderTest {
 
     pageable = new PageRequest(0, 10);
 
-    when(reasonRepository.findTags())
-        .thenReturn(asList(tag1, tag2));
+    when(reasonRepository.existsByTag(any())).thenReturn(1);
   }
 
   @Test
@@ -203,8 +201,7 @@ public class StockCardRangeSummaryBuilderTest {
   public void shouldNotIncludeNotExistingTag() {
     final UUID orderableId3 = randomUUID();
 
-    when(reasonRepository.findTags())
-        .thenReturn(singletonList(tag1));
+    when(reasonRepository.existsByTag(tag2)).thenReturn(null);
 
     when(aggregate1.getAmount(tag2, startDate, endDate))
         .thenReturn(10);

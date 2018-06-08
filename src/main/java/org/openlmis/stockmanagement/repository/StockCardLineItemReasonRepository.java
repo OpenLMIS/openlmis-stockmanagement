@@ -38,4 +38,6 @@ public interface StockCardLineItemReasonRepository extends
   @Query("SELECT DISTINCT t FROM StockCardLineItemReason r JOIN r.tags AS t")
   List<String> findTags();
 
+  @Query("SELECT 1 FROM StockCardLineItemReason r JOIN r.tags AS t WHERE t = :tag")
+  Integer existsByTag(@Param("tag") String tag);
 }

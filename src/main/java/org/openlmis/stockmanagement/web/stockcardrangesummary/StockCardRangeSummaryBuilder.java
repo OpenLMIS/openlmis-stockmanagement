@@ -81,7 +81,7 @@ public class StockCardRangeSummaryBuilder {
     return new StockCardRangeSummaryDto(
         new ObjectReferenceDto(serviceUrl, ORDERABLES, orderableId),
         aggregate.getStockoutDays(startDate, endDate),
-        null != tag ? (reasonRepository.findTags().contains(tag)
+        null != tag ? (null != reasonRepository.existsByTag(tag)
             ? ImmutableMap.of(tag, aggregate.getAmount(tag, startDate, endDate))
             : new HashMap<>())
             : aggregate.getAmounts(startDate, endDate));
