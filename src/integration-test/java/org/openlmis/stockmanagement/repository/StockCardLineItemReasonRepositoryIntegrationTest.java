@@ -19,9 +19,9 @@ import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -110,8 +110,8 @@ public class StockCardLineItemReasonRepositoryIntegrationTest
     reasonRepository.deleteAll();
 
     generateReasonsWithTags().stream()
-        .forEach(tag -> assertEquals(new Integer(1), reasonRepository.existsByTag(tag)));
-    assertNull(reasonRepository.existsByTag("some-not-existing-tag"));
+        .forEach(tag -> assertTrue(reasonRepository.existsByTag(tag)));
+    assertFalse(reasonRepository.existsByTag("some-not-existing-tag"));
   }
 
   @Override

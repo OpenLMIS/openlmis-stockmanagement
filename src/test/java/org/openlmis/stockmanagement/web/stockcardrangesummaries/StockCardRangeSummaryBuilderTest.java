@@ -89,7 +89,7 @@ public class StockCardRangeSummaryBuilderTest {
 
     pageable = new PageRequest(0, 10);
 
-    when(reasonRepository.existsByTag(any())).thenReturn(1);
+    when(reasonRepository.existsByTag(any())).thenReturn(true);
   }
 
   @Test
@@ -201,7 +201,7 @@ public class StockCardRangeSummaryBuilderTest {
   public void shouldNotIncludeNotExistingTag() {
     final UUID orderableId3 = randomUUID();
 
-    when(reasonRepository.existsByTag(tag2)).thenReturn(null);
+    when(reasonRepository.existsByTag(tag2)).thenReturn(false);
 
     when(aggregate1.getAmount(tag2, startDate, endDate))
         .thenReturn(10);

@@ -38,6 +38,9 @@ public interface StockCardLineItemReasonRepository extends
   @Query("SELECT DISTINCT t FROM StockCardLineItemReason r JOIN r.tags AS t")
   List<String> findTags();
 
-  @Query("SELECT 1 FROM StockCardLineItemReason r JOIN r.tags AS t WHERE t = :tag")
-  Integer existsByTag(@Param("tag") String tag);
+  @Query("SELECT CASE WHEN COUNT(1) > 0 THEN true ELSE false END"
+      + " FROM StockCardLineItemReason r"
+      + " JOIN r.tags AS t"
+      + " WHERE t = :tag")
+  Boolean existsByTag(@Param("tag") String tag);
 }
