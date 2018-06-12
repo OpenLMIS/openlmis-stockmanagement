@@ -2,6 +2,11 @@
 
 set -e
 
+function finish {
+  rm pgpassfile
+}
+trap finish EXIT
+
 # ensure some environment variables are set
 : "${DATABASE_URL:?DATABASE_URL not set in environment}"
 : "${POSTGRES_USER:?POSTGRES_USER not set in environment}"
@@ -35,5 +40,3 @@ mkdir -p build/schema
 pg_dump -n $1 -T jv_* -T data_loaded -O > build/schema/schema.$1.sql
 pg_dump -n $1 -T jv_* -T data_loaded -O --section=pre-data --section=data > build/schema/pre.schema.$1.sql
 pg_dump -n $1 -T jv_* -T data_loaded -O --section=post-data > build/schema/post.schema.$1.sql
-
-rm pgpassfile
