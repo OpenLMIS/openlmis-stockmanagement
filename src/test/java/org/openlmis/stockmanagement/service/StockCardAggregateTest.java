@@ -173,6 +173,6 @@ public class StockCardAggregateTest {
   public void shouldImplementToString() {
     StockCardAggregate stockCardAggregate = new StockCardAggregate(
         singletonList(new StockCardDataBuilder(new StockEvent()).build()));
-    ToStringTestUtils.verify(StockCardAggregate.class, stockCardAggregate);
+    ToStringTestUtils.verify(StockCardAggregate.class, stockCardAggregate, "LOGGER");
   }
 }

@@ -40,6 +40,8 @@ import lombok.ToString;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class that aggregates stock cards that can fulfill single Orderable.
@@ -51,6 +53,8 @@ import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 @ToString
 @EqualsAndHashCode
 public class StockCardAggregate {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(StockCardAggregate.class);
 
   @Getter
   @Setter
@@ -149,12 +153,14 @@ public class StockCardAggregate {
       if (recentSoh <= 0) {
         stockOutStartDate = lineItem.getOccurredDate();
       } else if (null != stockOutStartDate) {
+        LOGGER.debug("stock out days from {} to {}", stockOutStartDate, lineItem.getOccurredDate());
         stockOutDaysMap.put(stockOutStartDate, lineItem.getOccurredDate());
         stockOutStartDate = null;
       }
     }
 
     if (null != stockOutStartDate) {
+      LOGGER.debug("stock out days from {} to {}", null == endDate ? LocalDate.now() : endDate);
       stockOutDaysMap.put(stockOutStartDate, null == endDate ? LocalDate.now() : endDate);
     }
 
@@ -167,6 +173,8 @@ public class StockCardAggregate {
     return stockOutDaysMap.isEmpty() ? 0 : stockOutDaysMap.keySet().stream()
         .filter(key -> isAfterOrEqual(key, endDate))
         .filter(key -> isBeforeOrEqual(stockOutDaysMap.get(key), startDate))
+        .peek(key ->
+            LOGGER.debug("filtered stock out days from {} to {}", key, stockOutDaysMap.get(key)))
         .mapToLong(key -> DAYS.between(
             !isBeforeOrEqual(key, startDate)
                 ? startDate

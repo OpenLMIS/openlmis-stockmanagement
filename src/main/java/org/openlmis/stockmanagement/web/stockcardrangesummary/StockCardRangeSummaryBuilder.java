@@ -27,6 +27,8 @@ import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.service.StockCardAggregate;
 import org.openlmis.stockmanagement.web.Pagination;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -36,6 +38,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class StockCardRangeSummaryBuilder {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(StockCardRangeSummaryBuilder.class);
 
   @Autowired
   private StockCardLineItemReasonRepository reasonRepository;
@@ -78,6 +82,7 @@ public class StockCardRangeSummaryBuilder {
 
   private StockCardRangeSummaryDto createDto(StockCardAggregate aggregate, UUID orderableId,
       LocalDate startDate, LocalDate endDate, String tag) {
+    LOGGER.debug("Building stock card range summary for {}", orderableId);
     return new StockCardRangeSummaryDto(
         new ObjectReferenceDto(serviceUrl, ORDERABLES, orderableId),
         aggregate.getStockoutDays(startDate, endDate),
