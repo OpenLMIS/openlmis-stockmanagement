@@ -50,6 +50,7 @@ import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.ExtraDataConverter;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
+import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.dto.StockEventDto;
@@ -272,7 +273,7 @@ public class StockCardLineItem extends BaseEntity {
 
   private boolean shouldIncrease() {
     boolean hasSource = source != null;
-    boolean isCredit = reason != null && !reason.getReasonType().isNegative();
+    boolean isCredit = reason != null && reason.getReasonType() == ReasonType.CREDIT;
     return hasSource || isCredit;
   }
 }

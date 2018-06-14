@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -48,7 +47,6 @@ import org.slf4j.LoggerFactory;
  * This class provides a set of methods to calculate stock out days
  * and values assigned to reason tags using all Stock Cards from list.
  */
-@AllArgsConstructor
 @NoArgsConstructor
 @ToString
 @EqualsAndHashCode
@@ -59,6 +57,17 @@ public class StockCardAggregate {
   @Getter
   @Setter
   private List<StockCard> stockCards;
+
+  /**
+   * Creates instance of {@link StockCardAggregate} with list of given stock cards.
+   *
+   * @param stockCards list of grouped stock cards
+   */
+  public StockCardAggregate(List<StockCard> stockCards) {
+    this.stockCards = stockCards;
+    stockCards.stream()
+        .forEach(StockCard::calculateStockOnHand);
+  }
 
   /**
    * Returns amount of products assigned to reasons that have given tag.

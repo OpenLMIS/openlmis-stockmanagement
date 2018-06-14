@@ -20,9 +20,7 @@ import static java.util.Locale.ENGLISH;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 import java.util.stream.Stream;
 import org.apache.commons.lang.RandomStringUtils;
@@ -50,15 +48,5 @@ public class ReasonTypeTest {
         .forEach(val -> assertThat(
             ReasonType.fromString(val.toString().toUpperCase(ENGLISH)), is(equalTo(val))
         ));
-  }
-
-  @Test
-  public void shouldCheckIfCreditIsNegative() {
-    assertFalse(ReasonType.CREDIT.isNegative());
-  }
-
-  @Test
-  public void shouldCheckIfDebitIsNegative() {
-    assertTrue(ReasonType.DEBIT.isNegative());
   }
 }
