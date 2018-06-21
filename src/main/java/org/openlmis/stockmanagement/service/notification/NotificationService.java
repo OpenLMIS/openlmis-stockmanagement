@@ -37,9 +37,6 @@ public class NotificationService {
   @Value("${notification.url}")
   private String notificationUrl;
 
-  @Value("${email.noreply}")
-  private String from;
-
   private RestOperations restTemplate = new RestTemplate();
 
   /**
@@ -51,9 +48,7 @@ public class NotificationService {
    * @return true if success, false if failed.
    */
   public boolean notify(UserDto user, String subject, String content) {
-    NotificationDto request = new NotificationDto(
-        from, user.getId(), subject, content
-    );
+    NotificationDto request = new NotificationDto(user.getId(), subject, content);
 
     try {
       restTemplate.postForObject(

@@ -34,4 +34,8 @@ public final class NotificationDto {
   private UUID userId;
   private String subject;
   private String content;
+
+  NotificationDto(UUID userId, String subject, String content) {
+    this(null, userId, subject, content);
+  }
 }

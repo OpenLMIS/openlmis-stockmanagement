@@ -63,7 +63,6 @@ public class NotificationServiceTest {
 
     ReflectionTestUtils.setField(notificationService, "restTemplate", restTemplate);
     ReflectionTestUtils.setField(notificationService, "notificationUrl", NOTIFICATION_URL);
-    ReflectionTestUtils.setField(notificationService, "from", FROM);
   }
 
   @Test
@@ -89,8 +88,6 @@ public class NotificationServiceTest {
   }
 
   private NotificationDto getNotificationRequest(UserDto user) {
-    return new NotificationDto(
-          FROM, user.getId(), MAIL_SUBJECT, MAIL_CONTENT
-      );
+    return new NotificationDto(user.getId(), MAIL_SUBJECT, MAIL_CONTENT);
   }
 }
