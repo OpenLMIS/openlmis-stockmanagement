@@ -13,9 +13,10 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.stockmanagement.service;
+package org.openlmis.stockmanagement.service.notification;
 
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
+import org.openlmis.stockmanagement.service.AuthService;
 import org.openlmis.stockmanagement.util.RequestHelper;
 import org.openlmis.util.NotificationRequest;
 import org.slf4j.Logger;
@@ -54,7 +55,7 @@ public class NotificationService {
     NotificationRequest request = new NotificationRequest(
         from, user.getEmail(), subject, content
     );
-    
+
     try {
       restTemplate.postForObject(
           RequestHelper.createUri(notificationUrl),
