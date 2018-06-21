@@ -18,7 +18,6 @@ package org.openlmis.stockmanagement.service.notification;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.service.AuthService;
 import org.openlmis.stockmanagement.util.RequestHelper;
-import org.openlmis.util.NotificationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,8 +51,8 @@ public class NotificationService {
    * @return true if success, false if failed.
    */
   public boolean notify(UserDto user, String subject, String content) {
-    NotificationRequest request = new NotificationRequest(
-        from, user.getEmail(), subject, content
+    NotificationDto request = new NotificationDto(
+        from, user.getId(), subject, content
     );
 
     try {

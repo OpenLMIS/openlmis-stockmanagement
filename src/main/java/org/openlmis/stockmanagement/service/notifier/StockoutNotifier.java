@@ -94,8 +94,7 @@ public class StockoutNotifier extends BaseNotifier {
     Map<String, String> valuesMap = getValuesMap(stockCard);
     StrSubstitutor sub = new StrSubstitutor(valuesMap);
     for (UserDto recipient : recipients) {
-      if (recipient.getHomeFacilityId().equals(stockCard.getFacilityId())
-          && canBeNotified(recipient)) {
+      if (recipient.getHomeFacilityId().equals(stockCard.getFacilityId())) {
         valuesMap.put("username", recipient.getUsername());
         notificationService.notify(recipient, sub.replace(subject), sub.replace(content));
       }

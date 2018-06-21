@@ -163,33 +163,6 @@ public class StockoutNotifierTest {
   }
 
   @Test
-  public void notifyStockEditorsShouldNotNotifyWhenEditorHaveNoEmail() {
-    when(editor.getEmail()).thenReturn(null);
-
-    stockoutNotifier.notifyStockEditors(stockCard);
-
-    verify(notificationService, times(0)).notify(any(), any(), any());
-  }
-
-  @Test
-  public void notifyStockEditorsShouldNotNotifyWhenEditorIsNoActiveOrVerified() {
-    when(editor.activeAndVerified()).thenReturn(false);
-
-    stockoutNotifier.notifyStockEditors(stockCard);
-
-    verify(notificationService, times(0)).notify(any(), any(), any());
-  }
-
-  @Test
-  public void notifyStockEditorsShouldNotNotifyWhenEditorDoesNotAllowNotify() {
-    when(editor.allowNotify()).thenReturn(false);
-
-    stockoutNotifier.notifyStockEditors(stockCard);
-
-    verify(notificationService, times(0)).notify(any(), any(), any());
-  }
-
-  @Test
   public void notifyStockEditorsShouldNotifyWithCorrectSubject() {
     stockoutNotifier.notifyStockEditors(stockCard);
 

@@ -34,7 +34,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.service.AuthService;
-import org.openlmis.util.NotificationRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -47,7 +46,7 @@ public class NotificationServiceTest {
   private static final String FROM = "noreply@test.te";
   private static final String MAIL_SUBJECT = "subject";
   private static final String MAIL_CONTENT = "content";
-  private static final String NOTIFICATION_URL = "http://localhost/notifiation";
+  private static final String NOTIFICATION_URL = "http://localhost/v2/notifiation";
 
   @Mock
   private AuthService authService;
@@ -89,9 +88,9 @@ public class NotificationServiceTest {
             captor.getValue().getBody()));
   }
 
-  private NotificationRequest getNotificationRequest(UserDto user) {
-    return new NotificationRequest(
-          FROM, user.getEmail(), MAIL_SUBJECT, MAIL_CONTENT
+  private NotificationDto getNotificationRequest(UserDto user) {
+    return new NotificationDto(
+          FROM, user.getId(), MAIL_SUBJECT, MAIL_CONTENT
       );
   }
 }

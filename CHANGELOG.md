@@ -12,6 +12,7 @@ Improvements:
 * [OLMIS-4648](https://openlmis.atlassian.net/browse/OLMIS-4648): Added Jenkinsfile
 * [OLMIS-2923](https://openlmis.atlassian.net/browse/OLMIS-2923): Updated demo data loading approach
 * [OLMIS-4717](https://openlmis.atlassian.net/browse/OLMIS-4717): Added default tags for bootstrap reasons.
+* [OLMIS-4905](https://openlmis.atlassian.net/browse/OLMIS-4905): Updated notification service to use v2 endpoint.
 
 3.0.0 / 2018-04-24
 ==================

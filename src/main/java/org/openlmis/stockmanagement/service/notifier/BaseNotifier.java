@@ -15,29 +15,20 @@
 
 package org.openlmis.stockmanagement.service.notifier;
 
-import org.openlmis.stockmanagement.dto.referencedata.UserDto;
-import org.openlmis.stockmanagement.i18n.MessageService;
-import org.openlmis.stockmanagement.util.Message;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
 import java.time.chrono.Chronology;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.FormatStyle;
 import java.util.Locale;
+import org.openlmis.stockmanagement.i18n.MessageService;
+import org.openlmis.stockmanagement.util.Message;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 public class BaseNotifier {
 
   @Autowired
   protected MessageService messageService;
-
-  /**
-   * Check if user want notifications: (enabled, verified, allowNotify all true).
-   */
-  protected static boolean canBeNotified(UserDto user) {
-    return user != null && user.allowNotify()
-        && user.activeAndVerified() && user.getEmail() != null;
-  }
 
   protected String getMessage(String key) {
     return messageService
