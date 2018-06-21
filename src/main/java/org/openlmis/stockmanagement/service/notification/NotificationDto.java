@@ -30,12 +30,7 @@ import lombok.ToString;
 @EqualsAndHashCode
 @ToString
 public final class NotificationDto {
-  private String from;
   private UUID userId;
   private String subject;
   private String content;
-
-  NotificationDto(UUID userId, String subject, String content) {
-    this(null, userId, subject, content);
-  }
 }

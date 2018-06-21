@@ -49,10 +49,11 @@ public class NotificationService {
    */
   public boolean notify(UserDto user, String subject, String content) {
     NotificationDto request = new NotificationDto(user.getId(), subject, content);
+    String url = notificationUrl + "/api/v2/notification";
 
     try {
       restTemplate.postForObject(
-          RequestHelper.createUri(notificationUrl),
+          RequestHelper.createUri(url),
           RequestHelper.createEntity(request, authService.obtainAccessToken()),
           Object.class);
     } catch (HttpStatusCodeException ex) {
