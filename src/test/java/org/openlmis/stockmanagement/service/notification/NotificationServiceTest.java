@@ -43,7 +43,6 @@ import org.springframework.web.client.RestTemplate;
 public class NotificationServiceTest {
   private static final String ACCESS_TOKEN = "token";
   private static final String USER_EMAIL = "test@test.te";
-  private static final String FROM = "noreply@test.te";
   private static final String MAIL_SUBJECT = "subject";
   private static final String MAIL_CONTENT = "content";
   private static final String NOTIFICATION_URL = "http://localhost/v2/notifiation";
