@@ -45,7 +45,8 @@ public class NotificationServiceTest {
   private static final String USER_EMAIL = "test@test.te";
   private static final String MAIL_SUBJECT = "subject";
   private static final String MAIL_CONTENT = "content";
-  private static final String NOTIFICATION_URL = "http://localhost/v2/notifiation";
+  private static final String BASE_URL = "http://localhost";
+  private static final String NOTIFICATION_URL = BASE_URL + "/api/v2/notification";
 
   @Mock
   private AuthService authService;
@@ -61,7 +62,7 @@ public class NotificationServiceTest {
     when(authService.obtainAccessToken()).thenReturn(ACCESS_TOKEN);
 
     ReflectionTestUtils.setField(notificationService, "restTemplate", restTemplate);
-    ReflectionTestUtils.setField(notificationService, "notificationUrl", NOTIFICATION_URL);
+    ReflectionTestUtils.setField(notificationService, "notificationUrl", BASE_URL);
   }
 
   @Test
