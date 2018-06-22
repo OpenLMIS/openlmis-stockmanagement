@@ -16,4 +16,4 @@ scenarios:
 reporting:
     - module: passfail
       criteria:
-        Get reason too slow: p90 of GetTags>500ms
+        Get Tags too slow: p90 of GetTags>200ms

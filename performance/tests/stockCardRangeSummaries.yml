@@ -21,4 +21,4 @@ scenarios:
 reporting:
     - module: passfail
       criteria:
-        Get reason too slow: p90 of GetStockCardRangeSummaries>500ms
+        Get reason too slow: p90 of GetStockCardRangeSummaries>1700ms

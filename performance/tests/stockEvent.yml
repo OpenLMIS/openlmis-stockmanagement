@@ -75,4 +75,4 @@ scenarios:
 reporting:
     - module: passfail
       criteria:
-        Send stock event too slow: p90 of SendStockEvent>500ms
+        Send stock event too slow: p90 of SendStockEvent>50000ms
