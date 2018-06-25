@@ -15,22 +15,6 @@
 
 package org.openlmis.stockmanagement.service.notification;
 
-import java.util.Map;
-import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
-@ToString
-public final class NotificationDto {
-  private UUID userId;
-  private Map<String, MessageDto> messages;
+public enum NotificationChannelDto {
+  EMAIL
 }

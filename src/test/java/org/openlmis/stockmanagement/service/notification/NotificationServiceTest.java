@@ -22,8 +22,11 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.service.notification.NotificationChannelDto.EMAIL;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +49,7 @@ public class NotificationServiceTest {
   private static final String MAIL_SUBJECT = "subject";
   private static final String MAIL_CONTENT = "content";
   private static final String BASE_URL = "http://localhost";
-  private static final String NOTIFICATION_URL = BASE_URL + "/api/v2/notification";
+  private static final String NOTIFICATION_URL = BASE_URL + "/api/notifications";
 
   @Mock
   private AuthService authService;
@@ -88,6 +91,9 @@ public class NotificationServiceTest {
   }
 
   private NotificationDto getNotificationRequest(UserDto user) {
-    return new NotificationDto(user.getId(), MAIL_SUBJECT, MAIL_CONTENT);
+    Map<String, MessageDto> messages = new HashMap<>();
+    messages.put(EMAIL.toString(), new MessageDto(MAIL_SUBJECT, MAIL_CONTENT));
+
+    return new NotificationDto(user.getId(), messages);
   }
 }

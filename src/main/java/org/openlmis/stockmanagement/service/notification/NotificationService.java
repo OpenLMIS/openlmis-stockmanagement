@@ -15,6 +15,10 @@
 
 package org.openlmis.stockmanagement.service.notification;
 
+import static org.openlmis.stockmanagement.service.notification.NotificationChannelDto.EMAIL;
+
+import java.util.HashMap;
+import java.util.Map;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.service.AuthService;
 import org.openlmis.stockmanagement.util.RequestHelper;
@@ -48,8 +52,8 @@ public class NotificationService {
    * @return true if success, false if failed.
    */
   public boolean notify(UserDto user, String subject, String content) {
-    NotificationDto request = new NotificationDto(user.getId(), subject, content);
-    String url = notificationUrl + "/api/v2/notification";
+    NotificationDto request = buildNotification(user, subject, content);
+    String url = notificationUrl + "/api/notifications";
 
     try {
       restTemplate.postForObject(
@@ -64,5 +68,12 @@ public class NotificationService {
       return false;
     }
     return true;
+  }
+
+  private NotificationDto buildNotification(UserDto user, String subject, String content) {
+    Map<String, MessageDto> messages = new HashMap<>();
+    messages.put(EMAIL.toString(), new MessageDto(subject, content));
+
+    return new NotificationDto(user.getId(), messages);
   }
 }

@@ -15,22 +15,24 @@
 
 package org.openlmis.stockmanagement.service.notification;
 
-import java.util.Map;
-import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
+import org.junit.Test;
+import org.openlmis.stockmanagement.testutils.ToStringTestUtils;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
-@ToString
-public final class NotificationDto {
-  private UUID userId;
-  private Map<String, MessageDto> messages;
+public class MessageDtoTest {
+
+  @Test
+  public void equalsContract() {
+    EqualsVerifier
+        .forClass(MessageDto.class)
+        .suppress(Warning.NONFINAL_FIELDS)
+        .verify();
+  }
+
+  @Test
+  public void shouldImplementToString() {
+    ToStringTestUtils.verify(MessageDto.class, new MessageDto());
+  }
+
 }
