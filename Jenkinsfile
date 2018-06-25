@@ -119,6 +119,7 @@ pipeline {
                                     SONAR_PASSWORD_TEMP=$(echo $SONAR_PASSWORD | cut -f2 -d=)
                                     echo "SONAR_LOGIN=$SONAR_LOGIN_TEMP" >> .env
                                     echo "SONAR_PASSWORD=$SONAR_PASSWORD_TEMP" >> .env
+                                    echo "SONAR_BRANCH=$GIT_BRANCH" >> .env
 
                                     docker-compose -f docker-compose.builder.yml run sonar
                                     docker-compose -f docker-compose.builder.yml down --volumes
