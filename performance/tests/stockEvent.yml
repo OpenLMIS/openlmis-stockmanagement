@@ -1,78 +1,78 @@
-execution:
-  - concurrency: 1
-    hold-for: 2m
-    scenario: send-stock-event
-
-scenarios:
-  get-full-supply-approved-products:
-    requests:
-    - if: '${__javaScript(vars.get("full_products") == null)}'
-      then:
-        - url: ${__P(base-uri)}/api/facilities/${facility_id}/approvedProducts?programId=${program_id}&fullSupply=true
-          method: GET
-          label: GetFullSupplyApprovedProducts
-          headers:
-            Authorization: Bearer ${access_token}
-            Content-Type: application/json
-          extract-jsonpath:
-            full_products:
-              jsonpath: $.content
-  send-stock-event:
-    variables:
-      # Balaka District Hospital
-      facility_id: 13037147-1769-4735-90a7-b9b310d128b8
-      # Essential Meds
-      program_id: 10845cb9-d365-4aaa-badd-b4fa39c6a26a
-      # Administrator
-      user_id: a337ec45-31a0-4f2b-9b2e-a105c4b669bb
-      # Consumed reason
-      consumed_reason_id: b5c27da7-bdda-4790-925a-9484c5dfb594
-      # Receipts reason
-      receipts_reason_id: 313f2f5f-0c22-4626-8c49-3554ef763de3
-    requests:
-      - include-scenario: get-user-token
-      - include-scenario: get-full-supply-approved-products
-      - url: ${__P(base-uri)}/api/stockEvents
-        method: POST
-        label: SendStockEvent
-        headers:
-          Authorization: Bearer ${access_token}
-          Content-Type: application/json
-        jsr223:
-          execute: before
-          script-text: |
-            import groovy.json.JsonOutput
-            import groovy.json.JsonSlurper
-
-            def parser = new JsonSlurper()
-            def products = parser.parseText(vars.get("full_products"))
-            products = products.sort { it -> it.orderable.id }
-
-            def eventLineItems = new ArrayList()
-
-            products.eachWithIndex { it, index ->
-              eventLineItems.add([
-                orderableId: it.orderable.id,
-                quantity: (index + 1) * 10,
-                occurredDate: new Date().format('yyyy-MM-dd'),
-                stockAdjustments: [
-                  [quantity: (index + 1) * 5, reasonId: vars.get("receipts_reason_id")],
-                  [quantity: (index + 1) * 5, reasonId: vars.get("consumed_reason_id")]
-                ]
-              ])
-            }
-
-            def stockEvent = [
-              facilityId: vars.get("facility_id"),
-              programId: vars.get("program_id"),
-              userId: vars.get("user_id"),
-              lineItems: eventLineItems
-            ]
-
-            vars.put("stock_event", JsonOutput.toJson(stockEvent))
-        body: ${stock_event}
-
-reporting:
-    - module: passfail
-      criteria:
-        Send stock event too slow: p90 of SendStockEvent>60000ms
+#execution:
+#  - concurrency: 1
+#    hold-for: 2m
+#    scenario: send-stock-event
+#
+#scenarios:
+#  get-full-supply-approved-products:
+#    requests:
+#    - if: '${__javaScript(vars.get("full_products") == null)}'
+#      then:
+#        - url: ${__P(base-uri)}/api/facilities/${facility_id}/approvedProducts?programId=${program_id}&fullSupply=true
+#          method: GET
+#          label: GetFullSupplyApprovedProducts
+#          headers:
+#            Authorization: Bearer ${access_token}
+#            Content-Type: application/json
+#          extract-jsonpath:
+#            full_products:
+#              jsonpath: $.content
+#  send-stock-event:
+#    variables:
+#      # Balaka District Hospital
+#      facility_id: 13037147-1769-4735-90a7-b9b310d128b8
+#      # Essential Meds
+#      program_id: 10845cb9-d365-4aaa-badd-b4fa39c6a26a
+#      # Administrator
+#      user_id: a337ec45-31a0-4f2b-9b2e-a105c4b669bb
+#      # Consumed reason
+#      consumed_reason_id: b5c27da7-bdda-4790-925a-9484c5dfb594
+#      # Receipts reason
+#      receipts_reason_id: 313f2f5f-0c22-4626-8c49-3554ef763de3
+#    requests:
+#      - include-scenario: get-user-token
+#      - include-scenario: get-full-supply-approved-products
+#      - url: ${__P(base-uri)}/api/stockEvents
+#        method: POST
+#        label: SendStockEvent
+#        headers:
+#          Authorization: Bearer ${access_token}
+#          Content-Type: application/json
+#        jsr223:
+#          execute: before
+#          script-text: |
+#            import groovy.json.JsonOutput
+#            import groovy.json.JsonSlurper
+#
+#            def parser = new JsonSlurper()
+#            def products = parser.parseText(vars.get("full_products"))
+#            products = products.sort { it -> it.orderable.id }
+#
+#            def eventLineItems = new ArrayList()
+#
+#            products.eachWithIndex { it, index ->
+#              eventLineItems.add([
+#                orderableId: it.orderable.id,
+#                quantity: (index + 1) * 10,
+#                occurredDate: new Date().format('yyyy-MM-dd'),
+#                stockAdjustments: [
+#                  [quantity: (index + 1) * 5, reasonId: vars.get("receipts_reason_id")],
+#                  [quantity: (index + 1) * 5, reasonId: vars.get("consumed_reason_id")]
+#                ]
+#              ])
+#            }
+#
+#            def stockEvent = [
+#              facilityId: vars.get("facility_id"),
+#              programId: vars.get("program_id"),
+#              userId: vars.get("user_id"),
+#              lineItems: eventLineItems
+#            ]
+#
+#            vars.put("stock_event", JsonOutput.toJson(stockEvent))
+#        body: ${stock_event}
+#
+#reporting:
+#    - module: passfail
+#      criteria:
+#        Send stock event too slow: p90 of SendStockEvent>60000ms
