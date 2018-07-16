@@ -34,7 +34,8 @@ public abstract class BaseEntity {
 
   @Id
   @GeneratedValue(generator = "uuid-gen")
-  @GenericGenerator(name = "uuid-gen", strategy = "uuid2")
+  @GenericGenerator(name = "uuid-gen",
+      strategy = "org.openlmis.stockmanagement.util.ConditionalUuidGenerator")
   @Type(type = PG_UUID)
   @Getter
   @Setter
