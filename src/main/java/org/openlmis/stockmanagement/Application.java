@@ -15,14 +15,11 @@
 
 package org.openlmis.stockmanagement;
 
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
-import org.apache.commons.collections4.MultiValuedMap;
 import org.flywaydb.core.api.callback.FlywayCallback;
+import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.i18n.ExposedMessageSourceImpl;
-import org.openlmis.stockmanagement.web.stockcardrangesummary.StockCardRangeSummaryController;
-import org.openlmis.stockmanagement.web.stockcardrangesummary.StockCardRangeSummaryDto;
+import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,9 +33,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 
@@ -110,16 +106,29 @@ public class Application {
    * as the default unless the Spring Profile "production" is active.
    */
   @Bean
-  public CommandLineRunner commandLineRunner(StockCardRangeSummaryController controller) {
+  public CommandLineRunner commandLineRunner(StockCardRepository repository) {
     return args -> {
-      MultiValueMap<String,String> map = new LinkedMultiValueMap<>();
-      map.add("programId", "418bdc1d-c303-4bd0-b2d3-d8901150a983");
-      map.add("facilityId", "c62dea9b-6974-4101-ba39-b09914165967");
-      map.add("orderableId", "b61c652d-2259-41d7-8bb6-fc5fcdd95626");
-      Pageable pageable = new PageRequest(0, 30);
-      Page<StockCardRangeSummaryDto> dto = controller.getStockCardRangeSummaries(map, pageable);
+      System.out.println("\n\n\n\nSTART");
+      Pageable pageable = new PageRequest(0, 1, Direction.ASC, "id");
 
-      System.out.println(dto);
+      while (true) {
+        Page<StockCard> page = repository.findAll(pageable);
+
+        if (null == page || !page.hasContent()) {
+          break;
+        }
+
+        try {
+          page.forEach(StockCard::calculateStockOnHand);
+        } catch (Exception e) {
+          System.out.println(" + ERROR: " + e.getMessage());
+        }
+
+        pageable = pageable.next();
+      }
+
+      System.out.println("COMPLETE\n\n\n\n");
+      System.exit(0);
     };
   }
 }
