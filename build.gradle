@@ -119,6 +119,20 @@ task integrationTest(type: Test) {
         exceptionFormat = 'full'
     }
     mustRunAfter test
+    environment 'BASE_URL', "http://localhost"
+    exclude '**/demodata/**'
+}
+
+task demoDataTest(type: Test) {
+    testClassesDir = sourceSets.integrationTest.output.classesDir
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat = 'full'
+    }
+    mustRunAfter integrationTest
+    environment 'BASE_URL', "http://localhost"
+    include '**/demodata/**'
 }
 
 tasks.withType(Test) {

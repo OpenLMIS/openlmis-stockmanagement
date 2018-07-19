@@ -17,29 +17,20 @@ package org.openlmis.stockmanagement;
 
 import java.util.Locale;
 import org.flywaydb.core.api.callback.FlywayCallback;
-import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.i18n.ExposedMessageSourceImpl;
-import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Profile;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 
 @SpringBootApplication
-@ImportResource("applicationContext.xml")
 @EnableAsync
 public class Application {
   private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);

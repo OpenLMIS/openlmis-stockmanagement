@@ -13,36 +13,36 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.stockmanagement;
+package org.openlmis.stockmanagement.demodata;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
-import org.openlmis.stockmanagement.util.Resource2Db;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 
+@RunWith(SpringRunner.class)
+@ActiveProfiles("test,demo-data")
+@SpringBootTest
+@DirtiesContext
 public class StockCardDemoDataIntegrationTest {
 
   @Autowired
   private StockCardRepository stockCardRepository;
 
-  @Autowired
-  private JdbcTemplate template;
-
-  @Autowired
-  private AutowireCapableBeanFactory autowireCapableBeanFactory;
-
   @Test
-  public void demoDataTest() throws Exception {
-    TestDataInitializer initializer = autowireCapableBeanFactory.createBean(
-        TestDataInitializer.class);
-    initializer.run();
+  public void demoDataTest() {
+    assertThat(stockCardRepository.count()).isGreaterThan(0);
 
     Pageable pageable = new PageRequest(0, 1, Direction.ASC, "id");
 
@@ -53,11 +53,10 @@ public class StockCardDemoDataIntegrationTest {
         break;
       }
 
+      // we verify that stock card line items contain valid data and the stock on hand will be
+      // calculated correctly.
       page.forEach(StockCard::calculateStockOnHand);
-
       pageable = pageable.next();
     }
-
-    stockCardRepository.findAll();
   }
 }
