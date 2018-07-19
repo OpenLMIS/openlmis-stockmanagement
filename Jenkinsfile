@@ -84,6 +84,21 @@ pipeline {
                 }
             }
         }
+        stage('Build demo-data') {
+            when {
+                expression {
+                    return env.GIT_BRANCH == 'master'
+                }
+            }
+            steps {
+                build job: "OpenLMIS-3.x-build-demo-data"
+            }
+            post {
+                failure {
+                    slackSend color: 'danger', message: "${env.JOB_NAME} - #${env.BUILD_NUMBER} ${env.STAGE_NAME} FAILED (<${env.BUILD_URL}|Open>)"
+                }
+            }
+        }
         stage('Deploy to test') {
             when {
                 expression {
