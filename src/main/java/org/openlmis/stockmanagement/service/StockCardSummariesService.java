@@ -16,7 +16,6 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
@@ -26,9 +25,7 @@ import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity.identityOf;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -100,25 +97,11 @@ public class StockCardSummariesService extends StockCardBaseService {
 
     List<StockCard> stockCards = cardRepository.findByProgramIdAndFacilityId(programId, facilityId);
 
-    /*Map<UUID, OrderableFulfillDto> orderableFulfillMap =
-        orderableFulfillService.findByIds(stockCards.stream()
-            .map(StockCard::getOrderableId).collect(toSet()));
-*/
-
     Map<UUID, OrderableFulfillDto> orderableFulfillMap =
-        new HashMap<>();
-    orderableFulfillMap.put(UUID.fromString("b61c652d-2259-41d7-8bb6-fc5fcdd95626"),
-        new OrderableFulfillDto(Arrays.asList(
-            UUID.fromString("45db7822-cc9a-4f6e-b04d-ea55cff9775e"),
-            UUID.fromString("05780441-4528-41e4-96f2-63d73f3665f8"),
-            UUID.fromString("e8c099b1-ef1c-4b70-982c-b4df04db5570"),
-            UUID.fromString("356e1bf6-05a7-4223-9989-368477801182")), emptyList()));
-    orderableFulfillMap.put(UUID.fromString("45db7822-cc9a-4f6e-b04d-ea55cff9775e"),
-        new OrderableFulfillDto(emptyList(), Arrays.asList(
-            UUID.fromString("45db7822-cc9a-4f6e-b04d-ea55cff9775e"),
-            UUID.fromString("05780441-4528-41e4-96f2-63d73f3665f8"),
-            UUID.fromString("e8c099b1-ef1c-4b70-982c-b4df04db5570"),
-            UUID.fromString("356e1bf6-05a7-4223-9989-368477801182"))));
+        orderableFulfillService.findByIds(stockCards.stream()
+            .map(StockCard::getOrderableId)
+            .collect(toSet()));
+
     return stockCards.stream()
         .map(stockCard -> assignOrderableToStockCard(stockCard, orderableFulfillMap, orderableIds))
         .filter(pair -> null != pair.getLeft())

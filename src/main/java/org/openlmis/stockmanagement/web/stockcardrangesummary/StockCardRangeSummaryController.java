@@ -66,7 +66,7 @@ public class StockCardRangeSummaryController {
     StockCardRangeSummaryParams params = new StockCardRangeSummaryParams(parameters);
 
     profiler.start("PERMISSION_CHECK");
-    //permissionService.canViewStockCard(params.getProgramId(), params.getFacilityId());
+    permissionService.canViewStockCard(params.getProgramId(), params.getFacilityId());
 
     profiler.start("GET_STOCK_CARDS_SUMMARIES_SERVICE");
     Map<UUID, StockCardAggregate> groupedStockCards =

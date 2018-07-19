@@ -100,35 +100,4 @@ public class Application {
   public FlywayCallback flywayCallback() {
     return new ExportSchemaFlywayCallback();
   }
-
-  /**
-   * Configures the Flyway migration strategy to clean the DB before migration first.  This is used
-   * as the default unless the Spring Profile "production" is active.
-   */
-  @Bean
-  public CommandLineRunner commandLineRunner(StockCardRepository repository) {
-    return args -> {
-      System.out.println("\n\n\n\nSTART");
-      Pageable pageable = new PageRequest(0, 1, Direction.ASC, "id");
-
-      while (true) {
-        Page<StockCard> page = repository.findAll(pageable);
-
-        if (null == page || !page.hasContent()) {
-          break;
-        }
-
-        try {
-          page.forEach(StockCard::calculateStockOnHand);
-        } catch (Exception e) {
-          System.out.println(" + ERROR: " + e.getMessage());
-        }
-
-        pageable = pageable.next();
-      }
-
-      System.out.println("COMPLETE\n\n\n\n");
-      System.exit(0);
-    };
-  }
 }
