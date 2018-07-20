@@ -91,7 +91,7 @@ pipeline {
                 }
             }
             steps {
-                build job: "OpenLMIS-3.x-build-demo-data"
+                build job: "OpenLMIS-3.x-build-demo-data-pipeline"
             }
             post {
                 failure {
