@@ -59,6 +59,7 @@ public class StockCardSummariesV2DtoBuilderTest {
   private OrderableDto orderable1;
   private OrderableDto orderable2;
   private OrderableDto orderable3;
+  private OrderableDto orderable4;
   private StockCard stockCard;
   private StockCard stockCard1;
   private StockCard stockCard2;
@@ -71,6 +72,7 @@ public class StockCardSummariesV2DtoBuilderTest {
     orderable1 = new OrderableDtoDataBuilder().build();
     orderable2 = new OrderableDtoDataBuilder().build();
     orderable3 = new OrderableDtoDataBuilder().build();
+    orderable4 = new OrderableDtoDataBuilder().build();
 
     StockEvent event = new StockEventDataBuilder()
         .withFacility(facilityId)
@@ -104,7 +106,7 @@ public class StockCardSummariesV2DtoBuilderTest {
     LocalDate asOfDate = LocalDate.now();
 
     List<StockCardSummaryV2Dto> result = builder.build(asList(orderable1, orderable2, orderable3),
-        stockCards, fulfillMap, asOfDate);
+        stockCards, fulfillMap, asOfDate, false);
 
     StockCardSummaryV2Dto summary1 = new StockCardSummaryV2Dto(
         new ObjectReferenceDtoDataBuilder()
@@ -148,7 +150,7 @@ public class StockCardSummariesV2DtoBuilderTest {
     LocalDate asOfDate = LocalDate.now();
 
     List<StockCardSummaryV2Dto> result = builder.build(asList(orderable1, orderable2, orderable3),
-        stockCards, fulfillMap, asOfDate);
+        stockCards, fulfillMap, asOfDate, false);
 
     StockCardSummaryV2Dto summary1 = new StockCardSummaryV2Dto(
         new ObjectReferenceDtoDataBuilder()
@@ -200,7 +202,7 @@ public class StockCardSummariesV2DtoBuilderTest {
     LocalDate asOfDate = LocalDate.now();
 
     List<StockCardSummaryV2Dto> result = builder.build(asList(orderable2, orderable3),
-        stockCards, fulfillMap, asOfDate);
+        stockCards, fulfillMap, asOfDate, false);
 
     StockCardSummaryV2Dto summary2 = new StockCardSummaryV2Dto(
         new ObjectReferenceDtoDataBuilder()
@@ -237,7 +239,7 @@ public class StockCardSummariesV2DtoBuilderTest {
     LocalDate asOfDate = getBaseDate().minusDays(10);
 
     List<StockCardSummaryV2Dto> result = builder.build(Collections.singletonList(orderable1),
-        stockCards, fulfillMap, asOfDate);
+        stockCards, fulfillMap, asOfDate, false);
 
     StockCardSummaryV2Dto summary1 = new StockCardSummaryV2Dto(
         new ObjectReferenceDtoDataBuilder()
@@ -262,7 +264,7 @@ public class StockCardSummariesV2DtoBuilderTest {
     LocalDate asOfDate = LocalDate.now();
 
     List<StockCardSummaryV2Dto> result = builder.build(Collections.singletonList(orderable1),
-        stockCards, fulfillMap, null);
+        stockCards, fulfillMap, null, false);
 
     StockCardSummaryV2Dto summary1 = new StockCardSummaryV2Dto(
         new ObjectReferenceDtoDataBuilder()
@@ -278,5 +280,57 @@ public class StockCardSummariesV2DtoBuilderTest {
 
     assertEquals(1, result.size());
     assertThat(result, hasItems(summary1));
+  }
+
+  @Test
+  public void shouldOmitEmptySummariesIfFlagIsSet() throws Exception {
+    List<StockCard> stockCards = asList(stockCard, stockCard1);
+
+    LocalDate asOfDate = LocalDate.now();
+
+    List<StockCardSummaryV2Dto> result = builder.build(asList(orderable3, orderable4),
+        stockCards, fulfillMap, asOfDate, true);
+
+    StockCardSummaryV2Dto summary3 = new StockCardSummaryV2Dto(
+        new ObjectReferenceDtoDataBuilder()
+            .withPath(ORDERABLES)
+            .withId(orderable3.getId())
+            .build(),
+        asSet(new CanFulfillForMeEntryDtoDataBuilder()
+            .buildWithStockCardAndOrderable(stockCard1, orderable3, asOfDate))
+    );
+
+    assertEquals(1, result.size());
+    assertThat(result, hasItems(summary3));
+  }
+
+  @Test
+  public void shouldNotOmitEmptySummariesIfFlagIsNotSet() throws Exception {
+    List<StockCard> stockCards = asList(stockCard, stockCard1);
+
+    LocalDate asOfDate = LocalDate.now();
+
+    List<StockCardSummaryV2Dto> result = builder.build(asList(orderable3, orderable4),
+        stockCards, fulfillMap, asOfDate, false);
+
+    StockCardSummaryV2Dto summary3 = new StockCardSummaryV2Dto(
+        new ObjectReferenceDtoDataBuilder()
+            .withPath(ORDERABLES)
+            .withId(orderable3.getId())
+            .build(),
+        asSet(new CanFulfillForMeEntryDtoDataBuilder()
+            .buildWithStockCardAndOrderable(stockCard1, orderable3, asOfDate))
+    );
+
+    StockCardSummaryV2Dto summary4 = new StockCardSummaryV2Dto(
+        new ObjectReferenceDtoDataBuilder()
+            .withPath(ORDERABLES)
+            .withId(orderable4.getId())
+            .build(),
+        asSet()
+    );
+
+    assertEquals(2, result.size());
+    assertThat(result, hasItems(summary3, summary4));
   }
 }

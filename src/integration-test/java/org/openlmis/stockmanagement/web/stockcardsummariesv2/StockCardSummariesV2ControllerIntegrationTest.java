@@ -50,6 +50,7 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
   private static final String FACILITY_ID = "facilityId";
   private static final String AS_OF_DATE = "asOfDate";
   private static final String ORDERABLE_ID = "orderableId";
+  private static final String NON_EMPTY_ONLY = "nonEmptyOnly";
 
   @MockBean
   private StockCardSummariesService stockCardSummariesService;
@@ -73,7 +74,7 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
     when(stockCardSummariesV2DtoBuilder
         .build(summaries.getPageOfApprovedProducts(),
             summaries.getStockCardsForFulfillOrderables(), summaries.getOrderableFulfillMap(),
-            summaries.getAsOfDate()))
+            summaries.getAsOfDate(), params.isNonEmptyOnly()))
         .thenReturn(asList(stockCardSummary, stockCardSummary2));
   }
 
@@ -174,5 +175,41 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
             .param(FACILITY_ID, params.getFacilityId().toString()));
 
     resultActions.andExpect(status().isForbidden());
+  }
+
+  @Test
+  public void shouldReturnNonEmptySummariesIfFlagIsSet() throws Exception {
+    params.setNonEmptyOnly(true);
+
+    when(stockCardSummariesService
+        .findStockCards(params))
+        .thenReturn(summaries);
+
+    when(stockCardSummariesV2DtoBuilder
+        .build(summaries.getPageOfApprovedProducts(),
+            summaries.getStockCardsForFulfillOrderables(), summaries.getOrderableFulfillMap(),
+            summaries.getAsOfDate(), params.isNonEmptyOnly()))
+        .thenReturn(asList(stockCardSummary));
+
+    ResultActions resultActions = mvc.perform(
+        get(API_STOCK_CARD_SUMMARIES)
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+            .param(PAGE, String.valueOf(pageable.getPageNumber()))
+            .param(SIZE, String.valueOf(pageable.getPageSize()))
+            .param(PROGRAM_ID, params.getProgramId().toString())
+            .param(FACILITY_ID, params.getFacilityId().toString())
+            .param(AS_OF_DATE, params.getAsOfDate().toString())
+            .param(ORDERABLE_ID, params.getOrderableIds().get(0).toString())
+            .param(ORDERABLE_ID, params.getOrderableIds().get(1).toString())
+            .param(NON_EMPTY_ONLY, Boolean.toString(params.isNonEmptyOnly())));
+
+    resultActions
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content", hasSize(1)))
+        .andExpect(jsonPath("$.numberOfElements", is(1)))
+        .andExpect(jsonPath("$.number", is(pageable.getPageNumber())))
+        .andExpect(jsonPath("$.size", is(pageable.getPageSize())))
+        .andExpect(jsonPath("$.content[0].orderable.id",
+            is(stockCardSummary.getOrderable().getId().toString())));
   }
 }

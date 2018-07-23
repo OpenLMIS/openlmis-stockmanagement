@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.service;
 import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DATE_WRONG_FORMAT;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_ID_MISSING;
@@ -25,6 +26,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_ID_MIS
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_UUID_WRONG_FORMAT;
 import static org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams.AS_OF_DATE;
 import static org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams.FACILITY_ID;
+import static org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams.NON_EMPTY_ONLY;
 import static org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams.ORDERABLE_ID;
 import static org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams.PROGRAM_ID;
 
@@ -97,6 +99,7 @@ public class StockCardSummariesV2SearchParamsTest {
     LocalDate asOfDate = LocalDate.now();
     UUID orderableId1 = UUID.randomUUID();
     UUID orderableId2 = UUID.randomUUID();
+    boolean nonEmptyOnly = true;
 
     MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
     parameters.add(PROGRAM_ID, programId.toString());
@@ -104,6 +107,7 @@ public class StockCardSummariesV2SearchParamsTest {
     parameters.add(AS_OF_DATE, asOfDate.format(DateTimeFormatter.ISO_DATE));
     parameters.add(ORDERABLE_ID, orderableId1.toString());
     parameters.add(ORDERABLE_ID, orderableId2.toString());
+    parameters.add(NON_EMPTY_ONLY, Boolean.toString(nonEmptyOnly));
 
     StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParams(parameters);
 
@@ -111,6 +115,7 @@ public class StockCardSummariesV2SearchParamsTest {
     assertEquals(facilityId, params.getFacilityId());
     assertEquals(asOfDate, params.getAsOfDate());
     assertEquals(asList(orderableId1, orderableId2), params.getOrderableIds());
+    assertEquals(nonEmptyOnly, params.isNonEmptyOnly());
   }
 
   @Test
@@ -123,6 +128,7 @@ public class StockCardSummariesV2SearchParamsTest {
     assertEquals(params.getFacilityId(), null);
     assertEquals(params.getAsOfDate(), null);
     assertTrue(isEmpty(params.getOrderableIds()));
+    assertFalse(params.isNonEmptyOnly());
   }
 
   @Test

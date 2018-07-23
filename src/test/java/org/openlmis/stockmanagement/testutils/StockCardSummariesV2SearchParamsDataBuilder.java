@@ -28,6 +28,7 @@ public class StockCardSummariesV2SearchParamsDataBuilder {
   private UUID facilityId;
   private List<UUID> orderableId;
   private LocalDate asOfDate;
+  private boolean nonEmptyOnly;
 
   /**
    * Creates builder for creating new instance of {@link StockCardSummariesV2SearchParams}.
@@ -37,6 +38,7 @@ public class StockCardSummariesV2SearchParamsDataBuilder {
     facilityId = UUID.randomUUID();
     orderableId = asList(UUID.randomUUID(), UUID.randomUUID());
     asOfDate = LocalDate.now();
+    nonEmptyOnly = false;
   }
 
   /**
@@ -45,7 +47,7 @@ public class StockCardSummariesV2SearchParamsDataBuilder {
    */
   public StockCardSummariesV2SearchParams build() {
     return new StockCardSummariesV2SearchParams(programId, facilityId,
-        orderableId, asOfDate);
+        orderableId, asOfDate, nonEmptyOnly);
   }
 
   public StockCardSummariesV2SearchParamsDataBuilder withoutFacilityId() {

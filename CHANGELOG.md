@@ -7,6 +7,7 @@ New functionality added in a backwards-compatible manner:
 * [OLMIS-4597](https://openlmis.atlassian.net/browse/OLMIS-4597): Add an endpoint to retrieve all tags associated with reasons.
 * [OLMIS-4622](https://openlmis.atlassian.net/browse/OLMIS-4622): Updated valid reason search endpoint to not require program and facility type and accept reason parameter.
 * [OLMIS-4746](https://openlmis.atlassian.net/browse/OLMIS-4746): Added Stock Card Range Summaries endpoint.
+* [OLMIS-4404](https://openlmis.atlassian.net/browse/OLMIS-4404): Added nonEmptyOnly flag to the v2 stockCardSummaries endpoint.
 
 Improvements:
 * [OLMIS-4648](https://openlmis.atlassian.net/browse/OLMIS-4648): Added Jenkinsfile

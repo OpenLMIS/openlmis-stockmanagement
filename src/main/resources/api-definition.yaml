@@ -345,7 +345,11 @@ traits:
           description: Stock Card data will be calculated as of given date.
           repeat: false
           type: string
-
+        nonEmptyOnly:
+          required: false
+          description: Flag defining whether only summaries with non empty set of canFulfillForMe should be returned.
+          repeat: false
+          type: boolean
       responses:
         200:
           body:

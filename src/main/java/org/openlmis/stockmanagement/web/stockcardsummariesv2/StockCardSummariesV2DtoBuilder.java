@@ -19,14 +19,6 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
-import org.apache.commons.collections4.MapUtils;
-import org.openlmis.stockmanagement.domain.card.StockCard;
-import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
-import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
-import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
-import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,6 +28,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.apache.commons.collections4.MapUtils;
+import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
+import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 @Component
 public class StockCardSummariesV2DtoBuilder {
@@ -54,18 +55,25 @@ public class StockCardSummariesV2DtoBuilder {
    * @param stockCards       list of {@link StockCard} found for orderables
    * @param orderables       map of orderable ids as keys and {@link OrderableFulfillDto}
    * @param asOfDate         date on which stock on hand will be retrieved
+   * @param nonEmptyOnly     flag defining whether only non empty summaries should be included
    * @return list of {@link StockCardSummaryV2Dto}
    */
   public List<StockCardSummaryV2Dto> build(List<OrderableDto> approvedProducts,
                                            List<StockCard> stockCards,
                                            Map<UUID, OrderableFulfillDto> orderables,
-                                           LocalDate asOfDate) {
-    return approvedProducts.stream()
+                                           LocalDate asOfDate,
+                                           boolean nonEmptyOnly) {
+    Stream<StockCardSummaryV2Dto> summariesStream = approvedProducts.stream()
         .map(p -> build(stockCards, p.getId(),
             MapUtils.isEmpty(orderables) ? null : orderables.get(p.getId()),
             asOfDate))
-        .sorted()
-        .collect(toList());
+        .sorted();
+
+    if (nonEmptyOnly) {
+      summariesStream = summariesStream.filter(summary -> !summary.getCanFulfillForMe().isEmpty());
+    }
+
+    return summariesStream.collect(toList());
   }
 
   private StockCardSummaryV2Dto build(List<StockCard> stockCards, UUID orderableId,
