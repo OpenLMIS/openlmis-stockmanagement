@@ -15,7 +15,7 @@ pipeline {
         disableConcurrentBuilds()
     }
     environment {
-        COMPOSE_PROJECT_NAME = "stockmanagement-${BRANCH_NAME}"
+        COMPOSE_PROJECT_NAME = "stockmanagement${BRANCH_NAME}"
     }
     parameters {
         string(name: 'contractTestsBranch', defaultValue: 'master', description: 'The branch of contract tests to checkout')
