@@ -347,7 +347,7 @@ traits:
           type: string
         nonEmptyOnly:
           required: false
-          description: Flag defining whether only summaries with non empty set of canFulfillForMe should be returned.
+          description: Flag defining whether only summaries with non empty set of canFulfillForMe should be returned. Defaults to false.
           repeat: false
           type: boolean
       responses:
