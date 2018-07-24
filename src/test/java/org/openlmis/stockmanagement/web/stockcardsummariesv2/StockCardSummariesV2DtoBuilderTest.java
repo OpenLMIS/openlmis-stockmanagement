@@ -106,7 +106,7 @@ public class StockCardSummariesV2DtoBuilderTest {
     LocalDate asOfDate = LocalDate.now();
 
     List<StockCardSummaryV2Dto> result = builder.build(asList(orderable1, orderable2, orderable3),
-        stockCards, fulfillMap, asOfDate, false);
+        stockCards, fulfillMap, asOfDate);
 
     StockCardSummaryV2Dto summary1 = new StockCardSummaryV2Dto(
         new ObjectReferenceDtoDataBuilder()
@@ -150,7 +150,7 @@ public class StockCardSummariesV2DtoBuilderTest {
     LocalDate asOfDate = LocalDate.now();
 
     List<StockCardSummaryV2Dto> result = builder.build(asList(orderable1, orderable2, orderable3),
-        stockCards, fulfillMap, asOfDate, false);
+        stockCards, fulfillMap, asOfDate);
 
     StockCardSummaryV2Dto summary1 = new StockCardSummaryV2Dto(
         new ObjectReferenceDtoDataBuilder()
@@ -202,7 +202,7 @@ public class StockCardSummariesV2DtoBuilderTest {
     LocalDate asOfDate = LocalDate.now();
 
     List<StockCardSummaryV2Dto> result = builder.build(asList(orderable2, orderable3),
-        stockCards, fulfillMap, asOfDate, false);
+        stockCards, fulfillMap, asOfDate);
 
     StockCardSummaryV2Dto summary2 = new StockCardSummaryV2Dto(
         new ObjectReferenceDtoDataBuilder()
@@ -238,8 +238,9 @@ public class StockCardSummariesV2DtoBuilderTest {
 
     LocalDate asOfDate = getBaseDate().minusDays(10);
 
-    List<StockCardSummaryV2Dto> result = builder.build(Collections.singletonList(orderable1),
-        stockCards, fulfillMap, asOfDate, false);
+    List<StockCardSummaryV2Dto> result = builder
+        .nonEmptySummariesOnly()
+        .build(Collections.singletonList(orderable1), stockCards, fulfillMap, asOfDate);
 
     StockCardSummaryV2Dto summary1 = new StockCardSummaryV2Dto(
         new ObjectReferenceDtoDataBuilder()
@@ -264,7 +265,7 @@ public class StockCardSummariesV2DtoBuilderTest {
     LocalDate asOfDate = LocalDate.now();
 
     List<StockCardSummaryV2Dto> result = builder.build(Collections.singletonList(orderable1),
-        stockCards, fulfillMap, null, false);
+        stockCards, fulfillMap, null);
 
     StockCardSummaryV2Dto summary1 = new StockCardSummaryV2Dto(
         new ObjectReferenceDtoDataBuilder()
@@ -288,8 +289,9 @@ public class StockCardSummariesV2DtoBuilderTest {
 
     LocalDate asOfDate = LocalDate.now();
 
-    List<StockCardSummaryV2Dto> result = builder.build(asList(orderable3, orderable4),
-        stockCards, fulfillMap, asOfDate, true);
+    List<StockCardSummaryV2Dto> result = builder
+        .nonEmptySummariesOnly()
+        .build(asList(orderable3, orderable4), stockCards, fulfillMap, asOfDate);
 
     StockCardSummaryV2Dto summary3 = new StockCardSummaryV2Dto(
         new ObjectReferenceDtoDataBuilder()
@@ -311,7 +313,7 @@ public class StockCardSummariesV2DtoBuilderTest {
     LocalDate asOfDate = LocalDate.now();
 
     List<StockCardSummaryV2Dto> result = builder.build(asList(orderable3, orderable4),
-        stockCards, fulfillMap, asOfDate, false);
+        stockCards, fulfillMap, asOfDate);
 
     StockCardSummaryV2Dto summary3 = new StockCardSummaryV2Dto(
         new ObjectReferenceDtoDataBuilder()

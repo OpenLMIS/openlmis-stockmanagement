@@ -66,12 +66,15 @@ public class StockCardSummariesV2Controller {
     StockCardSummaries summaries = stockCardSummariesService.findStockCards(params);
 
     profiler.start("TO_DTO");
+    if (params.isNonEmptyOnly()) {
+      stockCardSummariesV2DtoBuilder.nonEmptySummariesOnly();
+    }
+
     List<StockCardSummaryV2Dto> dtos = stockCardSummariesV2DtoBuilder.build(
         summaries.getPageOfApprovedProducts(),
         summaries.getStockCardsForFulfillOrderables(),
         summaries.getOrderableFulfillMap(),
-        summaries.getAsOfDate(),
-        params.isNonEmptyOnly());
+        summaries.getAsOfDate());
 
     profiler.start("GET_PAGE");
     Page<StockCardSummaryV2Dto> page = Pagination.getPage(dtos, pageable);
