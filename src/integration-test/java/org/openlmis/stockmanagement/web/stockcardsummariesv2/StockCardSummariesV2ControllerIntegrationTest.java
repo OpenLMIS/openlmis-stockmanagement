@@ -51,7 +51,7 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
   private static final String FACILITY_ID = "facilityId";
   private static final String AS_OF_DATE = "asOfDate";
   private static final String ORDERABLE_ID = "orderableId";
-  private static final String NON_EMPTY_ONLY = "nonEmptySummariesOnly";
+  private static final String NON_EMPTY_ONLY = "nonEmptyOnly";
 
   @MockBean
   private StockCardSummariesService stockCardSummariesService;
