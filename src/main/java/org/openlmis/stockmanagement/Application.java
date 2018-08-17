@@ -15,6 +15,8 @@
 
 package org.openlmis.stockmanagement;
 
+import java.time.Clock;
+import java.time.ZoneId;
 import java.util.Locale;
 import org.flywaydb.core.api.callback.FlywayCallback;
 import org.openlmis.stockmanagement.i18n.ExposedMessageSourceImpl;
@@ -38,6 +40,9 @@ public class Application {
   @Value("${defaultLocale}")
   private Locale locale;
 
+  @Value("${time.zoneId}")
+  private String timeZoneId;
+
   public static void main(String[] args) {
     SpringApplication.run(Application.class, args);
   }
@@ -56,6 +61,16 @@ public class Application {
   }
 
   /**
+   * Creates new Clock.
+   *
+   * @return Created clock.
+   */
+  @Bean
+  public Clock clock() {
+    return Clock.system(ZoneId.of(timeZoneId));
+  }
+
+  /**
    * Creates new MessageSource.
    *
    * @return Created MessageSource.
@@ -68,7 +83,6 @@ public class Application {
     messageSource.setUseCodeAsDefaultMessage(true);
     return messageSource;
   }
-
 
   /**
    * Configures the Flyway migration strategy to clean the DB before migration first.  This is used
