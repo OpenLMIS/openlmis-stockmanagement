@@ -177,7 +177,11 @@ pipeline {
             }
         }
         stage('ERD generation') {
-            agent any
+            agent {
+                node {
+                    label 'master'
+                }
+            }
             environment {
                 PATH = "/usr/local/bin/:$PATH"
             }
