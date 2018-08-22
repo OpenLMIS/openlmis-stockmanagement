@@ -1,3 +1,9 @@
+3.1.1 / WIP
+==================
+
+Improvements:
+* [OLMIS-4940](https://openlmis.atlassian.net/browse/OLMIS-4940): Ensured that the microservice gets system time zone from configuration settings on startup.
+
 3.1.0 / 2018-08-16
 ==================
 
