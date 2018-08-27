@@ -177,7 +177,7 @@ jacocoTestReport {
 }
 
 checkstyle {
-    toolVersion = "6.19"
+    toolVersion = "8.12"
 }
 
 //Usage: gradle sonarqube

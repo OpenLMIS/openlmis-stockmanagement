@@ -5,12 +5,12 @@
  * This program is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation, either
  * version 3 of the License, or (at your option) any later version.
- *  
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details. You should have received a copy of
  * the GNU Affero General Public License along with this program. If not, see
- * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
+ * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
 package org.openlmis.stockmanagement.service;
@@ -21,6 +21,11 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_TYPE_
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_ID_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_STOCK_CARD_FIELD_DUPLICATED;
 
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Stream;
+import javax.transaction.Transactional;
 import org.openlmis.stockmanagement.domain.template.AvailableStockCardFields;
 import org.openlmis.stockmanagement.domain.template.AvailableStockCardLineItemFields;
 import org.openlmis.stockmanagement.domain.template.StockCardTemplate;
@@ -36,12 +41,6 @@ import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 /**
  * A service that wraps around repository to provide ability
