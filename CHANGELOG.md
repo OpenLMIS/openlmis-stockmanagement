@@ -1,13 +1,11 @@
 3.1.1 / WIP
 ==================
 
-New functionality added in a backwards-compatible manner:
-* [OLMIS-4942](https://openlmis.atlassian.net/browse/OLMIS-4942): Added currency, number and date settings to application properties.
-
 Improvements:
 * [OLMIS-4940](https://openlmis.atlassian.net/browse/OLMIS-4940): Ensured that the microservice gets system time zone from configuration settings on startup.
 * [OLMIS-4295](https://openlmis.atlassian.net/browse/OLMIS-4295): Updated checkstyle to use newest google style.
 * [OLMIS-5083](https://openlmis.atlassian.net/browse/OLMIS-5083): Added the correct date format in the message when date format error occurred.
+* [OLMIS-4942](https://openlmis.atlassian.net/browse/OLMIS-4942): Added currency, number and date settings to application properties.
 
 3.1.0 / 2018-08-16
 ==================
