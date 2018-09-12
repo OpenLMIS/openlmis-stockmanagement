@@ -2,14 +2,9 @@
 <!-- Created with Jaspersoft Studio version 6.4.0.final using JasperReports Library version 6.4.1  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="physicaInventory" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="BlankPage" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="20" bottomMargin="0" isFloatColumnFooter="true" whenResourceMissingType="Empty" uuid="a0a4e861-0726-422f-b3d5-54b1aefe96ce">
 	<import value="java.util.*"/>
-	<import value="java.time.LocalDate"/>
-	<import value="java.time.format.DateTimeFormatter"/>
-	<import value="java.time.ZonedDateTime"/>
 	<import value="java.text.*"/>
 	<parameter name="subreport" class="net.sf.jasperreports.engine.design.JasperDesign" isForPrompting="false"/>
 	<parameter name="pi_id" class="java.lang.String" isForPrompting="false"/>
-	<parameter name="dateFormat" class="java.lang.String" isForPrompting="false"/>
-	<parameter name="dateTimeFormat" class="java.lang.String" isForPrompting="false"/>
 	<queryString>
 		<![CDATA[select f.name as facility, p.name as program, u.username as username, sel.occurreddate, se.processeddate, se.id as event_id
 			from stockmanagement.physical_inventories pi
@@ -20,13 +15,14 @@
 			INNER JOIN stockmanagement.stock_event_line_items sel on se.id = sel.stockeventid
 			WHERE pi.id = $P!{pi_id}
 			ORDER BY sel.occurreddate DESC
-			FETCH FIRST 1 ROWS ONLY]]>
+			FETCH FIRST 1 ROWS ONLY
+		]]>
 	</queryString>
 	<field name="event_id" class="java.lang.String"/>
 	<field name="facility" class="java.lang.String"/>
 	<field name="program" class="java.lang.String"/>
-	<field name="occurreddate" class="java.lang.String"/>
-	<field name="processeddate" class="java.lang.String"/>
+	<field name="occurreddate" class="java.sql.Date"/>
+	<field name="processeddate" class="java.sql.Timestamp"/>
 	<field name="username" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
@@ -36,17 +32,16 @@
 			<staticText>
 				<reportElement x="20" y="10" width="800" height="20" uuid="8b895ad8-e565-41e4-87f4-fe70fea7b9f1"/>
 				<textElement verticalAlignment="Middle">
-					<font size="16" isBold="true" pdfFontName="Helvetica-Bold"/>
+					<font size="16" pdfFontName="Helvetica-Bold" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Submitted Physical Inventory]]></text>
 			</staticText>
 			<textField>
 				<reportElement x="20" y="40" width="800" height="20" uuid="ec47a93b-983c-447f-85cf-4775e800330a"/>
 				<textElement>
-					<font size="13" isBold="true" pdfFontName="Helvetica-Bold"/>
+					<font size="13" pdfFontName="Helvetica-Bold" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[MessageFormat.format("Physical inventory for date: {0}",
-					DateTimeFormatter.ofPattern($P{dateFormat}).format(LocalDate.parse($F{occurreddate})))]]></textFieldExpression>
+				<textFieldExpression><![CDATA[MessageFormat.format("Physical inventory for date: {0}", new SimpleDateFormat("dd/MM/yyyy").format($F{occurreddate}))]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="20" y="65" width="800" height="15" uuid="a035b2b6-8c32-4db2-89fd-6444a109b1d7"/>
@@ -60,9 +55,11 @@
 				<textElement>
 					<font size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[MessageFormat.format("Submitted into system on {0} by {1}",
-					DateTimeFormatter.ofPattern($P{dateTimeFormat}).format(ZonedDateTime.parse($F{processeddate},
-					DateTimeFormatter.ISO_DATE_TIME)),$F{username})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[MessageFormat.format("Submitted into system on {0} at {1} by {2}",
+				 new SimpleDateFormat("dd/MM/yyyy").format(new Date($F{processeddate}.getTime())),
+				 new SimpleDateFormat("kk:mm").format(new Date($F{processeddate}.getTime())),
+				 $F{username})]]>
+				</textFieldExpression>
 			</textField>
 		</band>
 	</title>
@@ -100,13 +97,13 @@
 				</textElement>
 				<textFieldExpression><![CDATA["of " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField pattern="dd/MM/yyyy">
 				<reportElement positionType="Float" x="10" y="10" width="80" height="10" uuid="2dd094dc-e4b5-43c0-89ab-02f2dda79bb5"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="SansSerif" size="8"/>
 					<paragraph lineSpacing="Single"/>
 				</textElement>
-				<textFieldExpression><![CDATA[DateTimeFormatter.ofPattern($P{dateFormat}).format(LocalDate.now())]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new Date()]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageFooter>

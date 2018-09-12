@@ -42,7 +42,6 @@ import org.openlmis.stockmanagement.service.PhysicalInventoryService;
 import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.util.ReportUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,12 +82,6 @@ public class PhysicalInventoryController {
 
   @Autowired
   private PhysicalInventoriesRepository physicalInventoryRepository;
-
-  @Value("${dateTimeFormat}")
-  private String dateTimeFormat;
-
-  @Value("${dateFormat}")
-  private String dateFormat;
 
   /**
    * Get a draft physical inventory.
@@ -220,8 +213,6 @@ public class PhysicalInventoryController {
     Map<String, Object> params = ReportUtils.createParametersMap();
     String formatId = "'" + eventId + "'";
     params.put("pi_id", formatId);
-    params.put("dateTimeFormat", dateTimeFormat);
-    params.put("dateFormat", dateFormat);
     params.put("format", format);
     params.put("subreport",
         jasperReportService.createCustomizedPhysicalInventoryLineSubreport());
