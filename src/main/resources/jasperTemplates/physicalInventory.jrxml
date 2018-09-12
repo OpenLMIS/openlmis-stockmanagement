@@ -61,7 +61,8 @@
 					<font size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[MessageFormat.format("Submitted into system on {0} by {1}",
-					DateTimeFormatter.ofPattern($P{dateTimeFormat}).format(ZonedDateTime.parse($F{processeddate})),$F{username})]]></textFieldExpression>
+					DateTimeFormatter.ofPattern($P{dateTimeFormat}).format(ZonedDateTime.parse($F{processeddate},
+					DateTimeFormatter.ISO_DATE_TIME)),$F{username})]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>
