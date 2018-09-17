@@ -28,7 +28,8 @@ wget https://raw.githubusercontent.com/OpenLMIS/openlmis-ref-distro/master/setti
 && sudo rm -rf output \
 && mkdir output \
 && chmod 777 output \
-&& (docker run --rm --network ${COMPOSE_PROJECT_NAME//.}_default -v $WORKSPACE/erd/output:/output schemaspy/schemaspy:snapshot -t pgsql -host db -port 5432 -db open_lmis -s stockmanagement -u postgres -p p@ssw0rd -I "(data_loaded)|(schema_version)|(jv_.*)" -norows -hq &) \
+&& export COMPOSE_PROJECT_NAME_LOWER_CASE=`echo "$COMPOSE_PROJECT_NAME" | tr '[:upper:]' '[:lower:]'` \
+&& (docker run --rm --network ${COMPOSE_PROJECT_NAME_LOWER_CASE//.}_default -v $WORKSPACE/erd/output:/output schemaspy/schemaspy:snapshot -t pgsql -host db -port 5432 -db open_lmis -s stockmanagement -u postgres -p p@ssw0rd -I "(data_loaded)|(schema_version)|(jv_.*)" -norows -hq &) \
 && sleep 30 \
 && /usr/local/bin/docker-compose down --volumes \
 && sudo chown -R $USER:$USER output \
