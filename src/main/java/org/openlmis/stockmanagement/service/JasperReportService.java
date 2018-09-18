@@ -49,6 +49,7 @@ import org.openlmis.stockmanagement.exception.JasperReportViewException;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.ModelAndView;
@@ -74,6 +75,12 @@ public class JasperReportService {
   @Autowired
   private DataSource replicationDataSource;
 
+  @Value("${dateFormat}")
+  private String dateFormat;
+
+  @Value("${dateTimeFormat}")
+  private String dateTimeFormat;
+
   /**
    * Generate stock card report in PDF format.
    *
@@ -90,6 +97,7 @@ public class JasperReportService {
     Map<String, Object> params = new HashMap<>();
     params.put("datasource", singletonList(stockCardDto));
     params.put("hasLot", stockCardDto.hasLot());
+    params.put("dateFormat", dateFormat);
 
     return generateReport(CARD_REPORT_URL, params);
   }
@@ -115,6 +123,8 @@ public class JasperReportService {
     params.put("showProgram", getCount(cards, card -> card.getProgram().getId().toString()) > 1);
     params.put("showFacility", getCount(cards, card -> card.getFacility().getId().toString()) > 1);
     params.put("showLot", cards.stream().anyMatch(card -> card.getLotId() != null));
+    params.put("dateFormat", dateFormat);
+    params.put("dateTimeFormat", dateTimeFormat);
 
     return generateReport(CARD_SUMMARY_REPORT_URL, params);
   }

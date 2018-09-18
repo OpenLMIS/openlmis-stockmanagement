@@ -15,6 +15,8 @@
 	<import value="org.openlmis.stockmanagement.domain.card.*"/>
 	<import value="org.openlmis.stockmanagement.dto.*"/>
 	<import value="net.sf.jasperreports.engine.data.*"/>
+	<import value="java.time.LocalDate"/>
+	<import value="java.time.format.DateTimeFormatter"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
@@ -43,6 +45,7 @@
 		</box>
 	</style>
 	<subDataset name="LineItemDataset" uuid="d30e7c80-bc48-40f0-98c4-960e82d19e87">
+		<parameter name="dateFormat" class="java.lang.String" isForPrompting="false"/>
 		<queryString>
 			<![CDATA[]]>
 		</queryString>
@@ -59,6 +62,7 @@
 	<parameter name="hasLot" class="java.lang.Boolean" isForPrompting="false">
 		<parameterDescription><![CDATA[]]></parameterDescription>
 	</parameter>
+	<parameter name="dateFormat" class="java.lang.String" isForPrompting="false"/>
 	<queryString>
 		<![CDATA[]]>
 	</queryString>
@@ -270,15 +274,17 @@
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{lot}.getExpirationDate()]]></textFieldExpression>
+				<textFieldExpression>
+					<![CDATA[DateTimeFormatter.ofPattern($P{dateFormat}).format(LocalDate.parse($F{lot}.getExpirationDate().toString()))]]>
+				</textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>
 	<pageFooter>
 		<band height="54" splitType="Stretch">
-			<textField pattern="MMMMM dd, yyyy">
+			<textField>
 				<reportElement x="10" y="24" width="100" height="20" uuid="93290a78-3c39-4e2b-8f2f-638d0fb3267c"/>
-				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[DateTimeFormatter.ofPattern($P{dateFormat}).format(LocalDate.now())]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="500" y="24" width="40" height="20" uuid="ee62efa8-b6f7-4de5-8ede-1ac3db0020cd"/>
@@ -328,7 +334,9 @@
 							<textField isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="80" height="30" uuid="3442e65e-4567-4aa5-9baf-75de733717ed"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{lineItem}.getOccurredDate().toString()]]></textFieldExpression>
+								<textFieldExpression>
+									<![CDATA[DateTimeFormatter.ofPattern($P{dateFormat}).format(LocalDate.parse($F{lineItem}.getOccurredDate().toString()))]]>
+								</textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>

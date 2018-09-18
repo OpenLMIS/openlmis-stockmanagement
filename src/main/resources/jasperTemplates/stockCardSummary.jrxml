@@ -15,6 +15,9 @@
 	<import value="org.openlmis.stockmanagement.domain.card.*"/>
 	<import value="org.openlmis.stockmanagement.dto.*"/>
 	<import value="net.sf.jasperreports.engine.data.*"/>
+	<import value="java.time.LocalDate"/>
+	<import value="java.time.format.DateTimeFormatter"/>
+	<import value="java.time.ZonedDateTime"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
@@ -78,6 +81,7 @@
 			<parameterDescription><![CDATA[]]></parameterDescription>
 			<defaultValueExpression><![CDATA[true]]></defaultValueExpression>
 		</parameter>
+		<parameter name="dateFormat" class="java.lang.String" isForPrompting="false"/>
 		<queryString>
 			<![CDATA[]]>
 		</queryString>
@@ -94,6 +98,7 @@
 	<parameter name="showProgram" class="java.lang.Boolean" isForPrompting="false"/>
 	<parameter name="showFacility" class="java.lang.Boolean" isForPrompting="false"/>
 	<parameter name="showLot" class="java.lang.Boolean" isForPrompting="false"/>
+	<parameter name="dateTimeFormat" class="java.lang.String" isForPrompting="false"/>
 	<queryString>
 		<![CDATA[]]>
 	</queryString>
@@ -205,9 +210,9 @@
 	</columnHeader>
 	<pageFooter>
 		<band height="54" splitType="Stretch">
-			<textField pattern="yyyy-MM-dd HH:mm:ss">
+			<textField>
 				<reportElement x="10" y="30" width="120" height="15" uuid="93290a78-3c39-4e2b-8f2f-638d0fb3267c"/>
-				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[DateTimeFormatter.ofPattern($P{dateTimeFormat}).format(ZonedDateTime.now())]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="510" y="30" width="40" height="15" uuid="ee62efa8-b6f7-4de5-8ede-1ac3db0020cd">
@@ -364,7 +369,9 @@
 							<textField isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="73" height="30" uuid="32fea3a9-1db4-4e09-90d0-49c214525ec5"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{lot}.getExpirationDate()]]></textFieldExpression>
+								<textFieldExpression>
+									<![CDATA[DateTimeFormatter.ofPattern($P{dateFormat}).format(LocalDate.parse($F{lot}.getExpirationDate().toString()))]]>
+								</textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -383,7 +390,9 @@
 							<textField isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="102" height="30" uuid="e8a313ec-9db5-4892-9671-fc221c5e6abd"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{lastUpdate}.toString()]]></textFieldExpression>
+								<textFieldExpression>
+									<![CDATA[DateTimeFormatter.ofPattern($P{dateFormat}).format(LocalDate.parse($F{lastUpdate}.toString()))]]>
+								</textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
