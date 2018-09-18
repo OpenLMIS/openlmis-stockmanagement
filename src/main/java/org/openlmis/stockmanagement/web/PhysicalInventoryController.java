@@ -63,7 +63,7 @@ import org.springframework.web.servlet.view.jasperreports.JasperReportsMultiForm
 @RequestMapping("/api/physicalInventories")
 public class PhysicalInventoryController {
 
-  private static final String PRINT_PI = "Print PI";
+  public static final String PRINT_PI = "Print PI";
   public static final String ID_PATH_VARIABLE = "/{id}";
 
   @Autowired

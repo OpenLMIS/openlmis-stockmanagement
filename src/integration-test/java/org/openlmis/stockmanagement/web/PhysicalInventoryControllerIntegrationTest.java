@@ -20,11 +20,13 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_IS_SUBMITTED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_ID_MISSING;
+import static org.openlmis.stockmanagement.web.PhysicalInventoryController.PRINT_PI;
 
 import guru.nidi.ramltester.junit.RamlMatchers;
 import java.time.LocalDate;
@@ -35,14 +37,20 @@ import java.util.List;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
+import org.openlmis.stockmanagement.domain.JasperTemplate;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
+import org.openlmis.stockmanagement.service.JasperReportService;
+import org.openlmis.stockmanagement.service.JasperTemplateService;
 import org.openlmis.stockmanagement.service.PhysicalInventoryService;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.servlet.view.jasperreports.JasperReportsMultiFormatView;
 
 @SuppressWarnings("PMD.TooManyMethods")
 public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrationTest {
@@ -58,6 +66,12 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
 
   @MockBean
   private PhysicalInventoriesRepository physicalInventoriesRepository;
+
+  @MockBean
+  private JasperTemplateService jasperTemplateService;
+
+  @MockBean
+  private JasperReportService jasperReportService;
 
   @Before
   public void setUp() {
@@ -317,6 +331,30 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
 
     // then
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
+
+  @Test
+  public void shouldPrintInventoryItem() {
+    PhysicalInventory physicalInventory = generatePhysicalInventory()
+        .toPhysicalInventoryForSubmit();
+    JasperTemplate template = new JasperTemplate();
+
+    when(jasperTemplateService.getByName(PRINT_PI)).thenReturn(template);
+    when(physicalInventoriesRepository.findOne(physicalInventory.getId()))
+        .thenReturn(physicalInventory);
+
+    JasperReportsMultiFormatView view = mock(JasperReportsMultiFormatView.class);
+    when(view.getContentType()).thenReturn(MediaType.APPLICATION_PDF_VALUE);
+    when(jasperReportService.getJasperReportsView(template)).thenReturn(view);
+
+    restAssured.given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .pathParam("id", physicalInventory.getId())
+        .queryParam("format", "pdf")
+        .when()
+        .get(ID_URL)
+        .then()
+        .statusCode(200);
   }
 
   private PhysicalInventoryDto generatePhysicalInventory() {

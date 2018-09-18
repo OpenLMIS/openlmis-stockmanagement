@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.testutils;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.UUID;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
@@ -56,8 +57,8 @@ public class StockCardDtoDataBuilder {
 
     return StockCardDto.builder()
         .stockOnHand(1)
-        .facility(FacilityDto.builder().name("HC01").build())
-        .program(ProgramDto.builder().name("HIV").build())
+        .facility(FacilityDto.builder().name("HC01").id(UUID.randomUUID()).build())
+        .program(ProgramDto.builder().name("HIV").id(UUID.randomUUID()).build())
         .orderable(OrderableDto.builder().productCode("ABC01").build())
         .lineItems(Arrays.asList(lineItemDto))
         .build();

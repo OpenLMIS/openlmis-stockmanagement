@@ -15,31 +15,93 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertEquals;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
+import static org.powermock.api.mockito.PowerMockito.whenNew;
+
+import java.util.Map;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
+import org.openlmis.stockmanagement.testutils.StockCardDtoDataBuilder;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.jasperreports.JasperReportsPdfView;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(JasperReportService.class)
 public class JasperReportServiceTest {
+
   @InjectMocks
   private JasperReportService jasperReportService;
 
   @Mock
   private StockCardService stockCardService;
 
-  @Test(expected = ResourceNotFoundException.class)
-  public void shouldThrowResourceNotFoundExceptionWhenStockCardNotExists()
-      throws Exception {
-    //given
-    UUID stockCardId = UUID.randomUUID();
-    Mockito.when(stockCardService.findStockCardById(stockCardId)).thenReturn(null);
+  @Mock
+  private StockCardSummariesService stockCardSummariesService;
 
-    //then
+  @Value("${dateFormat}")
+  private String dateFormat;
+
+  @Value("${dateTimeFormat}")
+  private String dateTimeFormat;
+
+  @Test(expected = ResourceNotFoundException.class)
+  public void shouldThrowResourceNotFoundExceptionWhenStockCardNotExists() {
+    UUID stockCardId = UUID.randomUUID();
+    when(stockCardService.findStockCardById(stockCardId)).thenReturn(null);
+
     jasperReportService.getStockCardReportView(stockCardId);
+  }
+
+  @Test
+  public void shouldGenerateReportWithProperParamsIfStockCardExists() throws Exception {
+    StockCardDto stockCard = StockCardDtoDataBuilder.createStockCardDto();
+    when(stockCardService.findStockCardById(stockCard.getId())).thenReturn(stockCard);
+
+    JasperReportsPdfView view = mock(JasperReportsPdfView.class);
+    whenNew(JasperReportsPdfView.class).withNoArguments().thenReturn(view);
+
+    ModelAndView report = jasperReportService.getStockCardReportView(stockCard.getId());
+    Map<String, Object> outputParams = report.getModel();
+
+    assertEquals(singletonList(stockCard), outputParams.get("datasource"));
+    assertEquals(stockCard.hasLot(), outputParams.get("hasLot"));
+    assertEquals(dateFormat, outputParams.get("dateFormat"));
+  }
+
+  @Test
+  public void shouldGenerateReportWithProperParamsIfStockCardSummaryExists() throws Exception {
+    StockCardDto stockCard = StockCardDtoDataBuilder.createStockCardDto();
+    UUID programId = UUID.randomUUID();
+    UUID facilityId = UUID.randomUUID();
+
+    when(stockCardSummariesService.findStockCards(programId, facilityId))
+        .thenReturn(singletonList(stockCard));
+
+    JasperReportsPdfView view = mock(JasperReportsPdfView.class);
+    whenNew(JasperReportsPdfView.class).withNoArguments().thenReturn(view);
+
+    ModelAndView report = jasperReportService
+        .getStockCardSummariesReportView(programId, facilityId);
+    Map<String, Object> outputParams = report.getModel();
+
+    assertEquals(singletonList(stockCard), outputParams.get("stockCardSummaries"));
+    assertEquals(stockCard.getProgram(), outputParams.get("program"));
+    assertEquals(stockCard.getFacility(), outputParams.get("facility"));
+    assertEquals(dateTimeFormat, outputParams.get("dateTimeFormat"));
+    assertEquals(dateFormat, outputParams.get("dateFormat"));
+    assertEquals(false, outputParams.get("showProgram"));
+    assertEquals(false, outputParams.get("showFacility"));
+    assertEquals(false, outputParams.get("showLot"));
   }
 }

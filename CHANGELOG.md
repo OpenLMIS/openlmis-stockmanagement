@@ -6,6 +6,7 @@ Improvements:
 * [OLMIS-4295](https://openlmis.atlassian.net/browse/OLMIS-4295): Updated checkstyle to use newest google style.
 * [OLMIS-5083](https://openlmis.atlassian.net/browse/OLMIS-5083): Added the correct date format in the message when date format error occurred.
 * [OLMIS-4942](https://openlmis.atlassian.net/browse/OLMIS-4942): Added currency, number and date settings to application properties.
+* [OLMIS-4943](https://openlmis.atlassian.net/browse/OLMIS-4943): Fixed Jasper reports to use service locale settings.
 
 3.1.0 / 2018-08-16
 ==================
