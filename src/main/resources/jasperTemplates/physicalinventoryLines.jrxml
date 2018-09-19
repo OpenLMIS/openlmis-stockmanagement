@@ -6,6 +6,7 @@
 	<import value="java.time.format.DateTimeFormatter"/>
 	<parameter name="pi_id" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="dateFormat" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="decimalFormat" class="java.text.DecimalFormat" isForPrompting="false"/>
 	<queryString>
 		<![CDATA[with temp as (
 				select row_number() over () as rownum
@@ -74,7 +75,7 @@
 					<textElement textAlignment="Right">
 						<font size="8" isBold="true" pdfFontName="Helvetica-Bold"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$V{quantitySumValue}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$P{decimalFormat}.format($V{quantitySumValue}).toString()]]></textFieldExpression>
 				</textField>
 				<textField evaluationTime="Group" evaluationGroup="productGroup">
 					<reportElement mode="Opaque" x="520" y="0" width="72" height="25" forecolor="#848484" uuid="d2a96208-ada5-4412-bdc6-3ab766acbf7e"/>
@@ -87,7 +88,7 @@
 					<textElement textAlignment="Right">
 						<font size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$V{sohSumValue}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$P{decimalFormat}.format($V{sohSumValue}).toString()]]></textFieldExpression>
 				</textField>
 				<staticText>
 					<reportElement mode="Opaque" x="418" y="0" width="102" height="25" uuid="d07d08b5-df52-43b1-b3d0-d571623c8b02"/>
@@ -347,7 +348,7 @@
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{reasonquantity} != null ? ($F{reasonquantity} + " " + $F{reasonname}) : ""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{reasonquantity} != null ? ($P{decimalFormat}.format($F{reasonquantity}).toString() + " " + $F{reasonname}) : ""]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="10" y="0" width="822" height="25" uuid="2d28b427-6b18-4024-b05d-2e5c03c6b5fb"/>

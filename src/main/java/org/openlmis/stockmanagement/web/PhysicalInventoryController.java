@@ -24,6 +24,8 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -91,6 +93,12 @@ public class PhysicalInventoryController {
 
   @Value("${time.zoneId}")
   private String timeZoneId;
+
+  @Value("${groupingSeparator}")
+  private String groupingSeparator;
+
+  @Value("${groupingSize}")
+  private String groupingSize;
 
   /**
    * Get a draft physical inventory.
@@ -220,11 +228,16 @@ public class PhysicalInventoryController {
   private Map<String, Object> getParams(UUID eventId, String format) {
     Map<String, Object> params = ReportUtils.createParametersMap();
     String formatId = "'" + eventId + "'";
+    DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols();
+    decimalFormatSymbols.setGroupingSeparator(groupingSeparator.charAt(0));
+    DecimalFormat decimalFormat = new DecimalFormat("", decimalFormatSymbols);
+    decimalFormat.setGroupingSize(Integer.parseInt(groupingSize));
     params.put("pi_id", formatId);
     params.put("dateTimeFormat", dateTimeFormat);
     params.put("dateFormat", dateFormat);
     params.put("timeZoneId", timeZoneId);
     params.put("format", format);
+    params.put("decimalFormat", decimalFormat);
     params.put("subreport",
         jasperReportService.createCustomizedPhysicalInventoryLineSubreport());
 

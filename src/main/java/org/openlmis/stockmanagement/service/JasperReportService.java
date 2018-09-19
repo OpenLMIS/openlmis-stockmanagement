@@ -31,6 +31,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -81,6 +83,12 @@ public class JasperReportService {
   @Value("${dateTimeFormat}")
   private String dateTimeFormat;
 
+  @Value("${groupingSeparator}")
+  private String groupingSeparator;
+
+  @Value("${groupingSize}")
+  private String groupingSize;
+
   /**
    * Generate stock card report in PDF format.
    *
@@ -98,6 +106,7 @@ public class JasperReportService {
     params.put("datasource", singletonList(stockCardDto));
     params.put("hasLot", stockCardDto.hasLot());
     params.put("dateFormat", dateFormat);
+    params.put("decimalFormat", createDecimalFormat());
 
     return generateReport(CARD_REPORT_URL, params);
   }
@@ -125,6 +134,7 @@ public class JasperReportService {
     params.put("showLot", cards.stream().anyMatch(card -> card.getLotId() != null));
     params.put("dateFormat", dateFormat);
     params.put("dateTimeFormat", dateTimeFormat);
+    params.put("decimalFormat", createDecimalFormat());
 
     return generateReport(CARD_SUMMARY_REPORT_URL, params);
   }
@@ -218,6 +228,15 @@ public class JasperReportService {
 
       return reportTempFile.toURI().toURL().toString();
     }
+  }
+
+
+  private DecimalFormat createDecimalFormat() {
+    DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols();
+    decimalFormatSymbols.setGroupingSeparator(groupingSeparator.charAt(0));
+    DecimalFormat decimalFormat = new DecimalFormat("", decimalFormatSymbols);
+    decimalFormat.setGroupingSize(Integer.valueOf(groupingSize));
+    return decimalFormat;
   }
 
   protected JasperReportsPdfView createJasperReportsPdfView() {

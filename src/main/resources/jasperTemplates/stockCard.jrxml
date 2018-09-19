@@ -17,6 +17,7 @@
 	<import value="net.sf.jasperreports.engine.data.*"/>
 	<import value="java.time.LocalDate"/>
 	<import value="java.time.format.DateTimeFormatter"/>
+	<import value="java.text.DecimalFormat"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
@@ -46,6 +47,7 @@
 	</style>
 	<subDataset name="LineItemDataset" uuid="d30e7c80-bc48-40f0-98c4-960e82d19e87">
 		<parameter name="dateFormat" class="java.lang.String" isForPrompting="false"/>
+		<parameter name="decimalFormat" class="java.text.DecimalFormat" isForPrompting="false"/>
 		<queryString>
 			<![CDATA[]]>
 		</queryString>
@@ -63,6 +65,7 @@
 		<parameterDescription><![CDATA[]]></parameterDescription>
 	</parameter>
 	<parameter name="dateFormat" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="decimalFormat" class="java.text.DecimalFormat" isForPrompting="false"/>
 	<queryString>
 		<![CDATA[]]>
 	</queryString>
@@ -169,7 +172,7 @@
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{stockOnHand}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{decimalFormat}.format($F{stockOnHand}).toString()]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="160" y="20" width="70" height="10" uuid="dbb8c60d-f18c-4662-82a9-1469ba5ee29b">
@@ -434,7 +437,7 @@
 							<textField isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="80" height="30" uuid="2b8cc7f3-6461-4122-b530-cdacfa242a8c"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{lineItem}.getStockOnHand()]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$P{decimalFormat}.format($F{lineItem}.getStockOnHand()).toString()]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>

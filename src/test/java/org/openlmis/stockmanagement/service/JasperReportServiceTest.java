@@ -21,6 +21,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.Before;
@@ -33,12 +35,17 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.testutils.StockCardDtoDataBuilder;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.jasperreports.JasperReportsPdfView;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JasperReportServiceTest {
+
+  private static final String DATE_FORMAT = "dd/MM/yyyy";
+  private static final String DATE_TIME_FORMAT = "dd/MM/yyyy HH:mm:ss";
+  private static final String GROUPING_SEPARATOR = ",";
+  private static final String GROUPING_SIZE = "3";
 
   @InjectMocks
   private JasperReportService jasperReportService;
@@ -52,15 +59,13 @@ public class JasperReportServiceTest {
   @Mock
   private JasperReportsPdfView jasperReportsPdfView;
 
-  @Value("${dateFormat}")
-  private String dateFormat;
-
-  @Value("${dateTimeFormat}")
-  private String dateTimeFormat;
-
   @Before
   public void setUp() {
     jasperReportService = spy(new JasperReportService());
+    ReflectionTestUtils.setField(jasperReportService, "dateFormat", DATE_FORMAT);
+    ReflectionTestUtils.setField(jasperReportService, "dateTimeFormat", DATE_TIME_FORMAT);
+    ReflectionTestUtils.setField(jasperReportService, "groupingSeparator", GROUPING_SEPARATOR);
+    ReflectionTestUtils.setField(jasperReportService, "groupingSize", GROUPING_SIZE);
     MockitoAnnotations.initMocks(this);
   }
 
@@ -73,7 +78,7 @@ public class JasperReportServiceTest {
   }
 
   @Test
-  public void shouldGenerateReportWithProperParamsIfStockCardExists() throws Exception {
+  public void shouldGenerateReportWithProperParamsIfStockCardExists() {
     StockCardDto stockCard = StockCardDtoDataBuilder.createStockCardDto();
     when(stockCardService.findStockCardById(stockCard.getId())).thenReturn(stockCard);
 
@@ -84,11 +89,12 @@ public class JasperReportServiceTest {
 
     assertEquals(singletonList(stockCard), outputParams.get("datasource"));
     assertEquals(stockCard.hasLot(), outputParams.get("hasLot"));
-    assertEquals(dateFormat, outputParams.get("dateFormat"));
+    assertEquals(DATE_FORMAT, outputParams.get("dateFormat"));
+    assertEquals(createDecimalFormat(), outputParams.get("decimalFormat"));
   }
 
   @Test
-  public void shouldGenerateReportWithProperParamsIfStockCardSummaryExists() throws Exception {
+  public void shouldGenerateReportWithProperParamsIfStockCardSummaryExists() {
     StockCardDto stockCard = StockCardDtoDataBuilder.createStockCardDto();
     UUID programId = UUID.randomUUID();
     UUID facilityId = UUID.randomUUID();
@@ -105,10 +111,19 @@ public class JasperReportServiceTest {
     assertEquals(singletonList(stockCard), outputParams.get("stockCardSummaries"));
     assertEquals(stockCard.getProgram(), outputParams.get("program"));
     assertEquals(stockCard.getFacility(), outputParams.get("facility"));
-    assertEquals(dateTimeFormat, outputParams.get("dateTimeFormat"));
-    assertEquals(dateFormat, outputParams.get("dateFormat"));
+    assertEquals(DATE_TIME_FORMAT, outputParams.get("dateTimeFormat"));
+    assertEquals(DATE_FORMAT, outputParams.get("dateFormat"));
     assertEquals(false, outputParams.get("showProgram"));
     assertEquals(false, outputParams.get("showFacility"));
     assertEquals(false, outputParams.get("showLot"));
+    assertEquals(createDecimalFormat(), outputParams.get("decimalFormat"));
+  }
+
+  private DecimalFormat createDecimalFormat() {
+    DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols();
+    decimalFormatSymbols.setGroupingSeparator(GROUPING_SEPARATOR.charAt(0));
+    DecimalFormat decimalFormat = new DecimalFormat("", decimalFormatSymbols);
+    decimalFormat.setGroupingSize(Integer.valueOf(GROUPING_SIZE));
+    return decimalFormat;
   }
 }
