@@ -31,7 +31,6 @@ import java.util.UUID;
 import org.openlmis.stockmanagement.domain.JasperTemplate;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
-import org.openlmis.stockmanagement.exception.JasperReportViewException;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
@@ -183,8 +182,7 @@ public class PhysicalInventoryController {
    */
   @GetMapping(value = ID_PATH_VARIABLE, params = "format")
   @ResponseBody
-  public ModelAndView print(@PathVariable("id") UUID id, @RequestParam String format)
-      throws JasperReportViewException {
+  public ModelAndView print(@PathVariable("id") UUID id, @RequestParam String format) {
     checkPermission(id);
     checkFormat(format.toLowerCase());
 

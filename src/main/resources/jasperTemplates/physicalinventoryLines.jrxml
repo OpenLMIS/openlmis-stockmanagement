@@ -23,7 +23,6 @@
 					pil.previousstockonhandwhensubmitted as soh,
 					pil.extradata,
 					adj.quantity as reasonquantity,
-					adj.quantity as reasonquantity,
 					r.name as reasonname
 				from temp, stockmanagement.physical_inventory_line_items pil
 				INNER JOIN stockmanagement.physical_inventories pi on pi.id = pil.physicalinventoryid

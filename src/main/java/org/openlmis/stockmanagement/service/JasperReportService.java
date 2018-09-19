@@ -138,8 +138,7 @@ public class JasperReportService {
    * @return created jasper view.
    * @throws JasperReportViewException if there will be any problem with creating the view.
    */
-  public JasperReportsMultiFormatView getJasperReportsView(JasperTemplate jasperTemplate)
-      throws JasperReportViewException {
+  public JasperReportsMultiFormatView getJasperReportsView(JasperTemplate jasperTemplate) {
     JasperReportsMultiFormatView jasperView = new JasperReportsMultiFormatView();
     jasperView.setJdbcDataSource(replicationDataSource);
     jasperView.setUrl(getReportUrlForReportData(jasperTemplate));
@@ -160,13 +159,12 @@ public class JasperReportService {
     }
   }
 
-
   private long getCount(List<StockCardDto> stockCards, Function<StockCardDto, String> mapper) {
     return stockCards.stream().map(mapper).distinct().count();
   }
 
   private ModelAndView generateReport(String templateUrl, Map<String, Object> params) {
-    JasperReportsPdfView view = new JasperReportsPdfView();
+    JasperReportsPdfView view = createJasperReportsPdfView();
     view.setUrl(compileReportAndGetUrl(templateUrl));
     view.setApplicationContext(appContext);
     return new ModelAndView(view, params);
@@ -189,8 +187,7 @@ public class JasperReportService {
    *
    * @return Url to ".jasper" file.
    */
-  private String getReportUrlForReportData(JasperTemplate jasperTemplate)
-      throws JasperReportViewException {
+  private String getReportUrlForReportData(JasperTemplate jasperTemplate) {
 
     try (ObjectInputStream inputStream =
              new ObjectInputStream(new ByteArrayInputStream(jasperTemplate.getData()))) {
@@ -221,5 +218,9 @@ public class JasperReportService {
 
       return reportTempFile.toURI().toURL().toString();
     }
+  }
+
+  protected JasperReportsPdfView createJasperReportsPdfView() {
+    return new JasperReportsPdfView();
   }
 }

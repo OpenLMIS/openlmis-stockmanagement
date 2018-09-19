@@ -17,27 +17,27 @@ package org.openlmis.stockmanagement.service;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import java.util.Map;
 import java.util.UUID;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.testutils.StockCardDtoDataBuilder;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.jasperreports.JasperReportsPdfView;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(JasperReportService.class)
+@RunWith(MockitoJUnitRunner.class)
 public class JasperReportServiceTest {
 
   @InjectMocks
@@ -49,11 +49,20 @@ public class JasperReportServiceTest {
   @Mock
   private StockCardSummariesService stockCardSummariesService;
 
+  @Mock
+  private JasperReportsPdfView jasperReportsPdfView;
+
   @Value("${dateFormat}")
   private String dateFormat;
 
   @Value("${dateTimeFormat}")
   private String dateTimeFormat;
+
+  @Before
+  public void setUp() {
+    jasperReportService = spy(new JasperReportService());
+    MockitoAnnotations.initMocks(this);
+  }
 
   @Test(expected = ResourceNotFoundException.class)
   public void shouldThrowResourceNotFoundExceptionWhenStockCardNotExists() {
@@ -68,8 +77,7 @@ public class JasperReportServiceTest {
     StockCardDto stockCard = StockCardDtoDataBuilder.createStockCardDto();
     when(stockCardService.findStockCardById(stockCard.getId())).thenReturn(stockCard);
 
-    JasperReportsPdfView view = mock(JasperReportsPdfView.class);
-    whenNew(JasperReportsPdfView.class).withNoArguments().thenReturn(view);
+    doReturn(jasperReportsPdfView).when(jasperReportService).createJasperReportsPdfView();
 
     ModelAndView report = jasperReportService.getStockCardReportView(stockCard.getId());
     Map<String, Object> outputParams = report.getModel();
@@ -85,11 +93,10 @@ public class JasperReportServiceTest {
     UUID programId = UUID.randomUUID();
     UUID facilityId = UUID.randomUUID();
 
+    doReturn(jasperReportsPdfView).when(jasperReportService).createJasperReportsPdfView();
+
     when(stockCardSummariesService.findStockCards(programId, facilityId))
         .thenReturn(singletonList(stockCard));
-
-    JasperReportsPdfView view = mock(JasperReportsPdfView.class);
-    whenNew(JasperReportsPdfView.class).withNoArguments().thenReturn(view);
 
     ModelAndView report = jasperReportService
         .getStockCardSummariesReportView(programId, facilityId);
