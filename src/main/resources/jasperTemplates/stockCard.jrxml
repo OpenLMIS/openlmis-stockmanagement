@@ -322,6 +322,12 @@
 				</reportElement>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" whenNoDataType="Blank">
 					<datasetRun subDataset="LineItemDataset" uuid="f0f9122a-6671-4108-a3c4-f35d2629002b">
+            <datasetParameter name="dateFormat">
+              <datasetParameterExpression><![CDATA[$P{dateFormat}]]></datasetParameterExpression>
+            </datasetParameter>
+            <datasetParameter name="decimalFormat">
+              <datasetParameterExpression><![CDATA[$P{decimalFormat}]]></datasetParameterExpression>
+            </datasetParameter>
 						<dataSourceExpression><![CDATA[new JRBeanCollectionDataSource($F{lineItems})]]></dataSourceExpression>
 					</datasetRun>
 					<jr:column width="80" uuid="7a732a0d-a24a-4968-adbd-c89871de6e04">
@@ -417,7 +423,7 @@
 							<textField isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="80" height="30" uuid="109c656e-5a92-4ab3-9578-cf1e39ee1e3d"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{lineItem}.getQuantity()]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$P{decimalFormat}.format($F{lineItem}.getQuantity()).toString()]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>

@@ -101,6 +101,8 @@
 	<parameter name="showFacility" class="java.lang.Boolean" isForPrompting="false"/>
 	<parameter name="showLot" class="java.lang.Boolean" isForPrompting="false"/>
 	<parameter name="dateTimeFormat" class="java.lang.String" isForPrompting="false"/>
+  <parameter name="dateFormat" class="java.lang.String" isForPrompting="false"/>
+  <parameter name="decimalFormat" class="java.text.DecimalFormat" isForPrompting="false"/>
 	<queryString>
 		<![CDATA[]]>
 	</queryString>
@@ -247,7 +249,13 @@
 						<datasetParameter name="showProgram">
 							<datasetParameterExpression><![CDATA[$P{showProgram}]]></datasetParameterExpression>
 						</datasetParameter>
-						<dataSourceExpression><![CDATA[new JRBeanCollectionDataSource($P{stockCardSummaries})]]></dataSourceExpression>
+            <datasetParameter name="dateFormat">
+              <datasetParameterExpression><![CDATA[$P{dateFormat}]]></datasetParameterExpression>
+            </datasetParameter>
+            <datasetParameter name="decimalFormat">
+              <datasetParameterExpression><![CDATA[$P{decimalFormat}]]></datasetParameterExpression>
+            </datasetParameter>
+            <dataSourceExpression><![CDATA[new JRBeanCollectionDataSource($P{stockCardSummaries})]]></dataSourceExpression>
 					</datasetRun>
 					<jr:column width="93" uuid="72fd2aee-eded-4f91-b865-2eed6c1f45c2">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
