@@ -7,7 +7,7 @@
 	<parameter name="pi_id" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="dateFormat" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="decimalFormat" class="java.text.DecimalFormat" isForPrompting="false"/>
-	<queryString  language="plsql">
+	<queryString language="plsql">
 		<![CDATA[with temp as (
 				select row_number() over () as rownum
 				from stockmanagement.physical_inventory_line_items pil
@@ -75,7 +75,7 @@
 					<textElement textAlignment="Right">
 						<font size="8" isBold="true" pdfFontName="Helvetica-Bold"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$V{quantitySumValue} == null ? 0 : $P{decimalFormat}.format($V{quantitySumValue}).toString()]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$P{decimalFormat}.format($V{quantitySumValue}).toString()]]></textFieldExpression>
 				</textField>
 				<textField evaluationTime="Group" evaluationGroup="productGroup">
 					<reportElement mode="Opaque" x="520" y="0" width="72" height="25" forecolor="#848484" uuid="d2a96208-ada5-4412-bdc6-3ab766acbf7e"/>
@@ -88,7 +88,7 @@
 					<textElement textAlignment="Right">
 						<font size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$V{sohSumValue} == null ? 0 : $P{decimalFormat}.format($V{sohSumValue}).toString()]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$P{decimalFormat}.format($V{sohSumValue}).toString()]]></textFieldExpression>
 				</textField>
 				<staticText>
 					<reportElement mode="Opaque" x="418" y="0" width="102" height="25" uuid="d07d08b5-df52-43b1-b3d0-d571623c8b02"/>
@@ -320,7 +320,7 @@
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{soh} != null ? $F{soh} : ""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{soh} != null ? $P{decimalFormat}.format($F{soh}).toString() : ""]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Group" evaluationGroup="lineItemGroup" isBlankWhenNull="true">
 				<reportElement x="592" y="0" width="72" height="25" printWhenGroupChanges="lineItemGroup" uuid="a2c8fc54-7cdc-442a-9ced-608a01ef270b">
@@ -335,7 +335,7 @@
 				<textElement textAlignment="Right">
 					<font size="8" isBold="true" pdfFontName="Helvetica-Bold"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{quantity}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{decimalFormat}.format($F{quantity}).toString()]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement x="664" y="0" width="168" height="25" uuid="86886d4d-e188-4bbf-bfc7-113325f40773"/>
