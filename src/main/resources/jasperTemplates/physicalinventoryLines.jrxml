@@ -320,7 +320,7 @@
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{soh} != null ? $P{decimalFormat}.format($F{soh}).toString() : ""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{decimalFormat}.format($F{soh}).toString()]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Group" evaluationGroup="lineItemGroup" isBlankWhenNull="true">
 				<reportElement x="592" y="0" width="72" height="25" printWhenGroupChanges="lineItemGroup" uuid="a2c8fc54-7cdc-442a-9ced-608a01ef270b">

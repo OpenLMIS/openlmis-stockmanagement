@@ -12,6 +12,7 @@
 	<parameter name="dateFormat" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="dateTimeFormat" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="timeZoneId" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="decimalFormat" class="java.text.DecimalFormat" isForPrompting="false"/>
 	<queryString>
 		<![CDATA[select f.name as facility, p.name as program, u.username as username, sel.occurreddate, se.processeddate, se.id as event_id
 			from stockmanagement.physical_inventories pi
@@ -79,6 +80,9 @@
 				</subreportParameter>
 				<subreportParameter name="dateFormat">
 					<subreportParameterExpression><![CDATA[$P{dateFormat}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="decimalFormat">
+					<subreportParameterExpression><![CDATA[$P{decimalFormat}]]></subreportParameterExpression>
 				</subreportParameter>
 				<subreportParameter name="REPORT_LOCALE">
 					<subreportParameterExpression><![CDATA[$P{REPORT_LOCALE}]]></subreportParameterExpression>
