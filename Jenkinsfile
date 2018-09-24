@@ -229,7 +229,12 @@ pipeline {
     }
     post {
         fixed {
-            slackSend color: 'good', message: "${env.JOB_NAME} - #${env.BUILD_NUMBER} Back to normal"
+            script {
+                BRANCH = "${BRANCH_NAME}"
+                if (BRANCH.equals("master") || BRANCH.startsWith("rel-")) {
+                    slackSend color: 'good', message: "${env.JOB_NAME} - #${env.BUILD_NUMBER} Back to normal"
+                }
+            }
         }
     }
 }
