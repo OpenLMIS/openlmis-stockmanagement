@@ -235,8 +235,8 @@ pipeline {
 }
 
 def notifyAfterFailure() {
-    JOB_NAME = "${env.JOB_NAME}"
-    if (JOB_NAME.endsWith("/master")) {
+    BRANCH = "${BRANCH_NAME}"
+    if (BRANCH.equals("master") || BRANCH.startsWith("rel-")) {
         slackSend color: 'danger', message: "${env.JOB_NAME} - #${env.BUILD_NUMBER} ${env.STAGE_NAME} FAILED (<${env.BUILD_URL}|Open>)"
     }
     emailext subject: "${env.JOB_NAME} - #${env.BUILD_NUMBER} ${env.STAGE_NAME} FAILED",
