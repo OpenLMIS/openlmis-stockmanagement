@@ -84,6 +84,6 @@ reporting:
     - module: passfail
       criteria:
         Get Reason too slow: p90 of GetReason>200ms
-        Get Reasons too slow: p90 of GetReasons>2500ms
+        Get Reasons too slow: p90 of GetReasons>15000ms
         Create Reason too slow: p90 of CreateReason>500ms
         Update Reason too slow: p90 of UpdateReason>500ms
