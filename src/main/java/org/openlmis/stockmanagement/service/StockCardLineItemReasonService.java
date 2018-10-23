@@ -99,11 +99,8 @@ public class StockCardLineItemReasonService {
    */
   private void validateReasonNameDuplicate(StockCardLineItemReason reason) {
     StockCardLineItemReason foundReason = reasonRepository.findByName(reason.getName());
-    if (foundReason != null) {
-      boolean isUpdatingItself = foundReason.getId() == reason.getId();
-      if (isUpdatingItself) {
-        return;
-      }
+
+    if (foundReason != null && !foundReason.getId().equals(reason.getId())) {
       throwException(ERROR_LINE_ITEM_REASON_NAME_DUPLICATE);
     }
   }
