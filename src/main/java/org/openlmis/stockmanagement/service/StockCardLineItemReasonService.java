@@ -15,13 +15,16 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_CATEGORY_CHANGED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_CATEGORY_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_ID_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_ISFREETEXTALLOWED_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_NAME_DUPLICATE;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_NAME_MISSING;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_TYPE_CHANGED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_TYPE_MISSING;
 
+import java.util.Objects;
 import java.util.UUID;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
@@ -50,6 +53,7 @@ public class StockCardLineItemReasonService {
   public StockCardLineItemReason saveOrUpdate(StockCardLineItemReason reason) {
     validateRequiredValueNotNull(reason);
     validateReasonNameDuplicate(reason);
+    verifyInvariants(reason);
     LOGGER.debug("Is going to save reason");
     return reasonRepository.save(reason);
   }
@@ -62,6 +66,28 @@ public class StockCardLineItemReasonService {
   public void checkUpdateReasonIdExists(UUID reasonId) {
     if (reasonRepository.findOne(reasonId) == null) {
       throw new ValidationMessageException(new Message(ERROR_LINE_ITEM_REASON_ID_NOT_FOUND));
+    }
+  }
+
+  private void verifyInvariants(StockCardLineItemReason reason) {
+    if (null == reason.getId()) {
+      // a new reason does not have invariants
+      return;
+    }
+
+    StockCardLineItemReason foundReason = reasonRepository.findOne(reason.getId());
+
+    if (null == foundReason) {
+      // a new reason but with the given id
+      return;
+    }
+
+    if (!Objects.equals(reason.getReasonType(), foundReason.getReasonType())) {
+      throwException(ERROR_LINE_ITEM_REASON_TYPE_CHANGED);
+    }
+
+    if (!Objects.equals(reason.getReasonCategory(), foundReason.getReasonCategory())) {
+      throwException(ERROR_LINE_ITEM_REASON_CATEGORY_CHANGED);
     }
   }
 
@@ -78,7 +104,7 @@ public class StockCardLineItemReasonService {
       if (isUpdatingItself) {
         return;
       }
-      throw new ValidationMessageException(new Message(ERROR_LINE_ITEM_REASON_NAME_DUPLICATE));
+      throwException(ERROR_LINE_ITEM_REASON_NAME_DUPLICATE);
     }
   }
 

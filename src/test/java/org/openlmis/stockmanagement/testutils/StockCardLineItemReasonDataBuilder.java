@@ -24,6 +24,7 @@ import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 
 @NoArgsConstructor
+@SuppressWarnings("PMD.TooManyMethods")
 public class StockCardLineItemReasonDataBuilder {
   private UUID id = UUID.randomUUID();
   private String name = "Donation";
@@ -34,7 +35,11 @@ public class StockCardLineItemReasonDataBuilder {
   private List<String> tags = new ArrayList<>();
 
   public StockCardLineItemReasonDataBuilder withoutId() {
-    id = null;
+    return withId(null);
+  }
+
+  public StockCardLineItemReasonDataBuilder withId(UUID id) {
+    this.id = id;
     return this;
   }
 
@@ -61,6 +66,11 @@ public class StockCardLineItemReasonDataBuilder {
     return this;
   }
 
+  public StockCardLineItemReasonDataBuilder withoutCategory() {
+    reasonCategory = null;
+    return this;
+  }
+
   public StockCardLineItemReasonDataBuilder withPhysicalInventoryCategory() {
     reasonCategory = ReasonCategory.PHYSICAL_INVENTORY;
     return this;
@@ -73,6 +83,11 @@ public class StockCardLineItemReasonDataBuilder {
 
   public StockCardLineItemReasonDataBuilder withTags(List<String> tags) {
     this.tags = tags;
+    return this;
+  }
+
+  public StockCardLineItemReasonDataBuilder withoutIsFreeTextAllowed() {
+    isFreeTextAllowed = null;
     return this;
   }
 

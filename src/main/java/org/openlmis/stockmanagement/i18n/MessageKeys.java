@@ -193,6 +193,12 @@ public abstract class MessageKeys {
   public static final String ERROR_LINE_ITEM_REASON_NAME_DUPLICATE = ERROR_PREFIX
       + ".lineItem.reason.name.duplicate";
 
+  public static final String ERROR_LINE_ITEM_REASON_TYPE_CHANGED = ERROR_PREFIX
+      + ".lineItem.reason.type.invariant";
+
+  public static final String ERROR_LINE_ITEM_REASON_CATEGORY_CHANGED = ERROR_PREFIX
+      + ".lineItem.reason.category.invariant";
+
   public static final String ERROR_LINE_ITEM_REASON_ID_NOT_FOUND = ERROR_PREFIX
       + ".lineItem.reason.id.notFound";
 

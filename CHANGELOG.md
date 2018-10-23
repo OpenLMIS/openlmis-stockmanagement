@@ -1,5 +1,8 @@
-3.1.1 / WIP
+4.0.0 / WIP
 ==================
+
+Contract breaking changes:
+* [OLMIS-4756](https://openlmis.atlassian.net/browse/OLMIS-4756): Can't change `type` or `category` for stock card line item reason on update. 
 
 Improvements:
 * [OLMIS-4940](https://openlmis.atlassian.net/browse/OLMIS-4940): Ensured that the microservice gets system time zone from configuration settings on startup.
