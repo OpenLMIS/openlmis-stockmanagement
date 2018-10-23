@@ -110,6 +110,8 @@ public class StockCardLineItemReasonServiceTest {
     //given
     UUID reasonId = UUID.randomUUID();
 
+    willThrowValidationMessageException(ERROR_LINE_ITEM_REASON_ID_NOT_FOUND);
+
     when(reasonRepository.exists(reasonId)).thenReturn(false);
     reasonService.checkUpdateReasonIdExists(reasonId);
   }
@@ -118,8 +120,6 @@ public class StockCardLineItemReasonServiceTest {
   public void shouldNotThrowValidationExceptionWhenReasonFoundInDb() {
     //given
     UUID reasonId = UUID.randomUUID();
-
-    willThrowValidationMessageException(ERROR_LINE_ITEM_REASON_ID_NOT_FOUND);
 
     when(reasonRepository.exists(reasonId)).thenReturn(true);
 
