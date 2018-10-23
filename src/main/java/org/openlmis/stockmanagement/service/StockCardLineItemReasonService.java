@@ -64,7 +64,7 @@ public class StockCardLineItemReasonService {
    * @param reasonId would be updated reason's ID
    */
   public void checkUpdateReasonIdExists(UUID reasonId) {
-    if (reasonRepository.findOne(reasonId) == null) {
+    if (reasonRepository.exists(reasonId)) {
       throw new ValidationMessageException(new Message(ERROR_LINE_ITEM_REASON_ID_NOT_FOUND));
     }
   }

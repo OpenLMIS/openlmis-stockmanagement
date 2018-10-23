@@ -110,9 +110,19 @@ public class StockCardLineItemReasonServiceTest {
     //given
     UUID reasonId = UUID.randomUUID();
 
+    when(reasonRepository.exists(reasonId)).thenReturn(false);
+    reasonService.checkUpdateReasonIdExists(reasonId);
+  }
+
+  @Test
+  public void shouldNotThrowValidationExceptionWhenReasonFoundInDb() {
+    //given
+    UUID reasonId = UUID.randomUUID();
+
     willThrowValidationMessageException(ERROR_LINE_ITEM_REASON_ID_NOT_FOUND);
 
-    when(reasonRepository.findOne(reasonId)).thenReturn(null);
+    when(reasonRepository.exists(reasonId)).thenReturn(true);
+
     reasonService.checkUpdateReasonIdExists(reasonId);
   }
 
@@ -147,6 +157,25 @@ public class StockCardLineItemReasonServiceTest {
   }
 
   @Test
+  public void shouldNotThrowExceptionWhenUpdatingReasonNameIsNotDuplicate() {
+    //given
+    StockCardLineItemReason existingReason = new StockCardLineItemReasonDataBuilder()
+        .build();
+    StockCardLineItemReason updatingReason = new StockCardLineItemReasonDataBuilder()
+        .withId(existingReason.getId())
+        .withName(existingReason.getName())
+        .build();
+
+    when(reasonRepository.findByName(updatingReason.getName())).thenReturn(existingReason);
+
+    //when
+    reasonService.saveOrUpdate(updatingReason);
+
+    //then
+    verify(reasonRepository, times(1)).save(updatingReason);
+  }
+
+  @Test
   public void shouldSaveReasonWhenPassNullValueValidation() {
     //when
     StockCardLineItemReason reason = new StockCardLineItemReasonDataBuilder().withoutId().build();
@@ -168,6 +197,28 @@ public class StockCardLineItemReasonServiceTest {
 
     //then
     verify(reasonRepository, times(1)).save(reason);
+  }
+
+  @Test
+  public void shouldNotThrowExceptionIfReasonIsUpdatedAndInvariantsWhereNotChanged() {
+    //given
+    StockCardLineItemReason updatingReason = new StockCardLineItemReasonDataBuilder()
+        .withDebitType()
+        .withName("abc")
+        .build();
+    StockCardLineItemReason existingReason = new StockCardLineItemReasonDataBuilder()
+        .withId(updatingReason.getId())
+        .withDebitType()
+        .withName("def")
+        .build();
+
+    when(reasonRepository.findOne(updatingReason.getId())).thenReturn(existingReason);
+
+    //when
+    reasonService.saveOrUpdate(updatingReason);
+
+    //then
+    verify(reasonRepository, times(1)).save(updatingReason);
   }
 
   @Test
