@@ -52,6 +52,8 @@ public class TestDataInitializer implements CommandLineRunner {
   private static final String VALID_SOURCE_ASSIGNMENTS = "valid_source_assignments";
   private static final String VALID_REASON_ASSIGNMENTS = "valid_reason_assignments";
   private static final String VALID_DESTINATION_ASSIGNMENTS = "valid_destination_assignments";
+  private static final String PHYSICAL_INVENTORY_LINE_ITEM_ADJUSTMENTS =
+      "physical_inventory_line_item_adjustments";
 
   // database path
   private static final String DB_SCHEMA = "stockmanagement.";
@@ -72,6 +74,8 @@ public class TestDataInitializer implements CommandLineRunner {
   static final String VALID_REASON_ASSIGNMENTS_TABLE = DB_SCHEMA + VALID_REASON_ASSIGNMENTS;
   static final String VALID_DESTINATION_ASSIGNMENTS_TABLE =
       DB_SCHEMA + VALID_DESTINATION_ASSIGNMENTS;
+  static final String PHYSICAL_INVENTORY_LINE_ITEM_ADJUSTMENTS_TABLE =
+      DB_SCHEMA + PHYSICAL_INVENTORY_LINE_ITEM_ADJUSTMENTS;
 
 
   @Value(value = DEMO_DATA_PATH + DB_SCHEMA + JASPER_TEMPLATES + FILE_EXTENSION)
@@ -116,6 +120,10 @@ public class TestDataInitializer implements CommandLineRunner {
   @Value(value = DEMO_DATA_PATH + DB_SCHEMA + VALID_DESTINATION_ASSIGNMENTS + FILE_EXTENSION)
   private Resource validDestinationAssignmentsResource;
 
+  @Value(value = DEMO_DATA_PATH + DB_SCHEMA
+      + PHYSICAL_INVENTORY_LINE_ITEM_ADJUSTMENTS + FILE_EXTENSION)
+  private Resource physicalInventoryLineItemAdjustments;
+
   private Resource2Db loader;
 
   @Autowired
@@ -151,6 +159,8 @@ public class TestDataInitializer implements CommandLineRunner {
     loader.insertToDbFromCsv(
         PHYSICAL_INVENTORY_LINE_ITEMS_TABLE, physicalInventoryLineItemsResource);
     loader.insertToDbFromCsv(JASPER_TEMPLATES_TABLE, jasperTemplatesResource);
+    loader.insertToDbFromCsv(
+        PHYSICAL_INVENTORY_LINE_ITEM_ADJUSTMENTS_TABLE, physicalInventoryLineItemAdjustments);
 
     XLOGGER.exit();
   }

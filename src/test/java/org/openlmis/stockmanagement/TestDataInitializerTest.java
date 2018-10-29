@@ -21,6 +21,7 @@ import static org.openlmis.stockmanagement.TestDataInitializer.NODES_TABLE;
 import static org.openlmis.stockmanagement.TestDataInitializer.ORGANIZATIONS_TABLE;
 import static org.openlmis.stockmanagement.TestDataInitializer.PHYSICAL_INVENTORIES_TABLE;
 import static org.openlmis.stockmanagement.TestDataInitializer.PHYSICAL_INVENTORY_LINE_ITEMS_TABLE;
+import static org.openlmis.stockmanagement.TestDataInitializer.PHYSICAL_INVENTORY_LINE_ITEM_ADJUSTMENTS_TABLE;
 import static org.openlmis.stockmanagement.TestDataInitializer.STOCK_CARDS_TABLE;
 import static org.openlmis.stockmanagement.TestDataInitializer.STOCK_CARD_LINE_ITEMS_TABLE;
 import static org.openlmis.stockmanagement.TestDataInitializer.STOCK_CARD_LINE_ITEM_REASONS_TABLE;
@@ -86,6 +87,9 @@ public class TestDataInitializerTest {
   private Resource validDestinationAssignmentsResource;
 
   @Mock
+  private Resource physicalInventoryLineItemAdjustments;
+
+  @Mock
   private Resource2Db loader;
 
   @InjectMocks
@@ -115,5 +119,7 @@ public class TestDataInitializerTest {
     verify(loader).insertToDbFromCsv(
         PHYSICAL_INVENTORY_LINE_ITEMS_TABLE, physicalInventoryLineItemsResource);
     verify(loader).insertToDbFromCsv(JASPER_TEMPLATES_TABLE, jasperTemplatesResource);
+    verify(loader).insertToDbFromCsv(
+        PHYSICAL_INVENTORY_LINE_ITEM_ADJUSTMENTS_TABLE, physicalInventoryLineItemAdjustments);
   }
 }
