@@ -127,10 +127,10 @@ public class StockoutNotifierTest {
   private OrderableDto orderable = mock(OrderableDto.class);
   private LotDto lot = mock(LotDto.class);
   private RightDto right = mock(RightDto.class);
-  private SupervisoryNodeDto supervisoryNode = mock(SupervisoryNodeDto.class);
   private UserDto editor = mock(UserDto.class);
   private StockCard stockCard = mock(StockCard.class);
   private StockCardLineItem stockCardLineItem = mock(StockCardLineItem.class);
+  private SupervisoryNodeDto supervisoryNode = new SupervisoryNodeDto();
 
   private LocalDate stockoutDate = LocalDate.now().minusDays(5);
 
@@ -142,7 +142,8 @@ public class StockoutNotifierTest {
     when(orderable.getFullProductName()).thenReturn(ORDERABLE_NAME);
     when(right.getId()).thenReturn(rightId);
     when(lot.getLotCode()).thenReturn("LOT 111");
-    when(supervisoryNode.getId()).thenReturn(supervisoryNodeId);
+
+    supervisoryNode.setId(supervisoryNodeId);
 
     ReflectionTestUtils.setField(stockoutNotifier, "urlToViewBinCard",
         URL_TO_VIEW_BIN_CARD);

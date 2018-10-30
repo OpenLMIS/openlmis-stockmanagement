@@ -15,32 +15,32 @@
 
 package org.openlmis.stockmanagement.dto.referencedata;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import java.util.Map;
-import java.util.Set;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-import org.openlmis.stockmanagement.dto.BaseDto;
+import java.util.List;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
+import org.junit.Test;
 import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
+import org.openlmis.stockmanagement.testutils.ObjectGenerator;
+import org.openlmis.stockmanagement.testutils.ToStringTestUtils;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public final class SupervisoryNodeDto extends BaseDto {
-  private String code;
-  private ObjectReferenceDto facility;
-  private String name;
-  private String description;
-  private Map<String, Object> extraData;
-  private ObjectReferenceDto parentNode;
-  private ObjectReferenceDto requisitionGroup;
-  private Set<ObjectReferenceDto> childNodes;
+public class SupervisoryNodeDtoTest {
+
+  @Test
+  public void equalsContract() {
+    List<ObjectReferenceDto> list = ObjectGenerator.of(ObjectReferenceDto.class, 2);
+
+    EqualsVerifier
+        .forClass(SupervisoryNodeDto.class)
+        .withRedefinedSuperclass()
+        .withPrefabValues(ObjectReferenceDto.class, list.get(0), list.get(1))
+        .suppress(Warning.NONFINAL_FIELDS)
+        .verify();
+  }
+
+  @Test
+  public void shouldImplementToString() {
+    SupervisoryNodeDto dto = new SupervisoryNodeDto();
+    ToStringTestUtils.verify(SupervisoryNodeDto.class, dto);
+  }
+
 }

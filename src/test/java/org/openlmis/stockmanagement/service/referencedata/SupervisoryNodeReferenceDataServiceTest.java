@@ -19,7 +19,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.openlmis.stockmanagement.service.referencedata.SupervisoryNodeReferenceDataService.FACILITY_ID;
 import static org.openlmis.stockmanagement.service.referencedata.SupervisoryNodeReferenceDataService.PROGRAM_ID;
@@ -38,11 +37,12 @@ public class SupervisoryNodeReferenceDataServiceTest {
 
   private UUID facility = UUID.randomUUID();
   private UUID program = UUID.randomUUID();
-  private SupervisoryNodeDto supervisoryNode = mock(SupervisoryNodeDto.class);
+  private SupervisoryNodeDto supervisoryNode = new SupervisoryNodeDto();
   private SupervisoryNodeReferenceDataService spy;
 
   @Before
   public void setUp() {
+    supervisoryNode.setId(UUID.randomUUID());
     spy = spy(new SupervisoryNodeReferenceDataService());
   }
 

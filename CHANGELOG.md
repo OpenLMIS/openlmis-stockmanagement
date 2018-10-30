@@ -10,6 +10,7 @@ Improvements:
 * [OLMIS-5083](https://openlmis.atlassian.net/browse/OLMIS-5083): Added the correct date format in the message when date format error occurred.
 * [OLMIS-4942](https://openlmis.atlassian.net/browse/OLMIS-4942): Added currency, number and date settings to application properties.
 * [OLMIS-4943](https://openlmis.atlassian.net/browse/OLMIS-4943): Fixed Jasper reports to use service locale settings.
+* [OLMIS-5635](https://openlmis.atlassian.net/browse/OLMIS-5635): Adjusted supervisory node structure
 
 3.1.0 / 2018-08-16
 ==================
