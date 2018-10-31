@@ -11,6 +11,7 @@ Improvements:
 * [OLMIS-4942](https://openlmis.atlassian.net/browse/OLMIS-4942): Added currency, number and date settings to application properties.
 * [OLMIS-4943](https://openlmis.atlassian.net/browse/OLMIS-4943): Fixed Jasper reports to use service locale settings.
 * [OLMIS-5635](https://openlmis.atlassian.net/browse/OLMIS-5635): Adjusted supervisory node structure
+* [OLMIS-5601](https://openlmis.atlassian.net/browse/OLMIS-5601): Categorise physical inventory line item under program product category for PDF export
 
 3.1.0 / 2018-08-16
 ==================

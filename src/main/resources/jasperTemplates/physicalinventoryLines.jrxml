@@ -24,16 +24,19 @@
 					pil.previousstockonhandwhensubmitted as soh,
 					pil.extradata,
 					adj.quantity as reasonquantity,
-					r.name as reasonname
+					r.name as reasonname,
+					odc.displayname
 				from temp, stockmanagement.physical_inventory_line_items pil
 				INNER JOIN stockmanagement.physical_inventories pi on pi.id = pil.physicalinventoryid
-				INNER JOIN referencedata.orderables o on o.id = pil.orderableid
+				INNER JOIN referencedata.orderables o on o.id = pil.orderableid				
+				INNER JOIN referencedata.program_orderables po ON po.orderableid = o.id 
+				INNER JOIN referencedata.orderable_display_categories odc ON po.orderabledisplaycategoryid = odc.id				
 				LEFT JOIN referencedata.lots l on l.id = pil.lotId
 				LEFT JOIN stockmanagement.physical_inventory_line_item_adjustments adj on adj.physicalinventorylineitemid = pil.id
 				LEFT JOIN stockmanagement.stock_card_line_item_reasons r on r.id = adj.reasonid
 				WHERE pi.id = $P!{pi_id} AND pil.quantity IS NOT NULL
-				GROUP BY o.code, o.fullproductname, l.lotcode, l.expirationdate, pil.quantity, pil.previousstockonhandwhensubmitted, pil.extradata, adj.quantity, adj.id, r.name
-				ORDER BY o.code, l.lotcode NULLS FIRST]]>
+				GROUP BY o.code, o.fullproductname, l.lotcode, l.expirationdate, pil.quantity, pil.previousstockonhandwhensubmitted, pil.extradata, adj.quantity, adj.id, r.name, odc.displayname, odc.displayorder
+				ORDER BY odc.displayorder, o.code, l.lotcode NULLS FIRST]]>
 	</queryString>
 	<field name="productcode" class="java.lang.String"/>
 	<field name="productname" class="java.lang.String"/>
@@ -45,12 +48,37 @@
 	<field name="reasonname" class="java.lang.String"/>
 	<field name="extradata" class="java.lang.String"/>
 	<field name="max_row_num" class="java.lang.Integer"/>
+	<field name="displayname" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
 	<variable name="quantitySumValue" class="java.lang.Integer" resetType="Group" resetGroup="productGroup" calculation="Sum">
 		<variableExpression><![CDATA[($V{lineItemGroup_COUNT} == 1) ? $F{quantity} : 0]]></variableExpression>
 	</variable>
 	<variable name="sohSumValue" class="java.lang.Integer" resetType="Group" resetGroup="productGroup" calculation="Sum">
 		<variableExpression><![CDATA[($V{lineItemGroup_COUNT} == 1) ? $F{soh} : 0]]></variableExpression>
 	</variable>
+	<group name="product_program_group">
+		<groupExpression><![CDATA[$F{displayname}]]></groupExpression>
+		<groupHeader>
+			<band height="25">
+				<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				<textField>
+					<reportElement positionType="Float" mode="Opaque" x="10" y="0" width="822" height="25" backcolor="#F2F2F2" uuid="a16a312f-b50a-445b-9742-b7328be0b332">
+						<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+						<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					</reportElement>
+					<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0">
+						<pen lineWidth="1.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph lineSpacingSize="23.0" leftIndent="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{displayname}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
 	<group name="productGroup">
 		<groupExpression><![CDATA[$F{productcode} + $F{productname}]]></groupExpression>
 		<groupHeader>
