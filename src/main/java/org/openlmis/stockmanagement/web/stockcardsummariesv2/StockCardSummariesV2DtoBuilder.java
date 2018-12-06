@@ -35,15 +35,11 @@ import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class StockCardSummariesV2DtoBuilder {
-  private static final Logger LOGGER =
-      LoggerFactory.getLogger(StockCardSummariesV2Controller.class);
 
   static final String ORDERABLES = "orderables";
   static final String STOCK_CARDS = "stockCards";
@@ -72,10 +68,6 @@ public class StockCardSummariesV2DtoBuilder {
                                            List<StockCard> stockCards,
                                            Map<UUID, OrderableFulfillDto> orderables,
                                            LocalDate asOfDate) {
-    LOGGER.error("build.approvedProducts: {}", approvedProducts);
-    LOGGER.error("build.stockCards: {}", stockCards);
-    LOGGER.error("build.orderables: {}", orderables);
-    LOGGER.error("build.asOfDate: {}", asOfDate);
     Stream<StockCardSummaryV2Dto> summariesStream = approvedProducts.stream()
         .map(p -> build(stockCards, p.getId(),
             MapUtils.isEmpty(orderables) ? null : orderables.get(p.getId()),
@@ -83,18 +75,14 @@ public class StockCardSummariesV2DtoBuilder {
         .sorted();
 
     if (nonEmptySummariesOnly) {
-      LOGGER.error("Remove empty summaries");
       summariesStream = summariesStream.filter(summary -> !summary.getCanFulfillForMe().isEmpty());
     }
 
-    LOGGER.error("return a list");
     return summariesStream.collect(toList());
   }
 
   private StockCardSummaryV2Dto build(List<StockCard> stockCards, UUID orderableId,
                                       OrderableFulfillDto fulfills, LocalDate asOfDate) {
-    LOGGER.error("build.build.orderableId: {}", orderableId);
-    LOGGER.error("build.build.fulfills: {}", fulfills);
 
     Set<CanFulfillForMeEntryDto> canFulfillSet = null == fulfills ? new HashSet<>()
         : fulfills.getCanFulfillForMe()
@@ -105,22 +93,13 @@ public class StockCardSummariesV2DtoBuilder {
         .flatMap(List::stream)
         .collect(toSet());
 
-    LOGGER.error("build.build.canFulfillSet: {}", canFulfillSet);
-
     canFulfillSet.addAll(
         buildFulfillsEntries(
             orderableId,
             findStockCardByOrderableId(orderableId, stockCards),
             asOfDate));
 
-    LOGGER.error("build.build.canFulfillSet: {}", canFulfillSet);
-
-    StockCardSummaryV2Dto stockCardSummaryV2Dto = new StockCardSummaryV2Dto(
-        createOrderableReference(orderableId), canFulfillSet);
-
-    LOGGER.error("build.build.response: {}", stockCardSummaryV2Dto);
-
-    return stockCardSummaryV2Dto;
+    return new StockCardSummaryV2Dto(createOrderableReference(orderableId), canFulfillSet);
   }
 
   private List<CanFulfillForMeEntryDto> buildFulfillsEntries(UUID orderableId,
