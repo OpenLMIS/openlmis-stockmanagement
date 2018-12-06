@@ -121,21 +121,41 @@ public class StockCardSummariesService extends StockCardBaseService {
    * @return page of stock cards.
    */
   public StockCardSummaries findStockCards(StockCardSummariesV2SearchParams params) {
+    LOGGER.error("check user rights");
     permissionService.canViewStockCard(params.getProgramId(), params.getFacilityId());
 
+    LOGGER.error(
+        "Retrieve approved products for facility {}, program {} and orderables {}",
+        params.getFacilityId(), params.getProgramId(), params.getOrderableIds()
+    );
     Page<OrderableDto> approvedProducts = approvedProductReferenceDataService
         .getApprovedProducts(params.getFacilityId(), params.getProgramId(),
             params.getOrderableIds());
+    LOGGER.error("Retrieved {} approved products", approvedProducts.getContent().size());
 
-    Map<UUID, OrderableFulfillDto> orderableFulfillMap = orderableFulfillService.findByIds(
-        approvedProducts.getContent().stream().map(OrderableDto::getId).collect(toList()));
+    List<UUID> ids = approvedProducts
+        .getContent()
+        .stream()
+        .map(OrderableDto::getId)
+        .collect(toList());
+    LOGGER.error("Retrieve orderable fulfill map for products {}", ids);
+    Map<UUID, OrderableFulfillDto> orderableFulfillMap = orderableFulfillService
+        .findByIds(ids);
+    LOGGER.error("Retrieved {} entries", orderableFulfillMap.size());
 
+    LOGGER.error("Retrieve stock cards for facility {}, program {}",
+        params.getFacilityId(), params.getProgramId()
+    );
     List<StockCard> stockCards = cardRepository
         .findByProgramIdAndFacilityId(params.getProgramId(),
             params.getFacilityId());
+    LOGGER.error("Retrieved {} stock cards", stockCards.size());
 
+    LOGGER.error("Calculate stock on hand for {} stock cards", stockCards.size());
     stockCards.stream().forEach(StockCard::calculateStockOnHand);
+    LOGGER.error("Calculated stock on hand for {} stock cards", stockCards.size());
 
+    LOGGER.error("return summaries");
     return new StockCardSummaries(approvedProducts.getContent(), stockCards,
         orderableFulfillMap, params.getAsOfDate(), approvedProducts.getTotalElements());
   }
