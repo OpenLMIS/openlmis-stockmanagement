@@ -78,7 +78,6 @@ public class StockCardSummariesV2Controller {
 
     profiler.start("GET_PAGE");
     Page<StockCardSummaryV2Dto> page = Pagination.getPage(dtos, pageable);
-    LOGGER.error("The following page will be returned: {}", page);
 
     profiler.stop().log();
     return page;
