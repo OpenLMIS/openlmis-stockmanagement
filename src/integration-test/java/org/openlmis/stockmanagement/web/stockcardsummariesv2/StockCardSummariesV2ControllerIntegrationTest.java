@@ -52,6 +52,12 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
   private static final String AS_OF_DATE = "asOfDate";
   private static final String ORDERABLE_ID = "orderableId";
   private static final String NON_EMPTY_ONLY = "nonEmptyOnly";
+  private static final String PREFIX = "$.";
+  private static final String CONTENT_REFERENCE = PREFIX + "content";
+  private static final String NUMBER_OF_ELEMENTS_REFERENCE = PREFIX + "numberOfElements";
+  private static final String NUMBER_REFERENCE = PREFIX + "number";
+  private static final String SIZE_REFERENCE = PREFIX + "size";
+  private static final String ORDERABLE_ID_REFERENCE = PREFIX + "content[0].orderable.id";
 
   @MockBean
   private StockCardSummariesService stockCardSummariesService;
@@ -94,11 +100,11 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
 
     resultActions
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.content", hasSize(2)))
-        .andExpect(jsonPath("$.numberOfElements", is(2)))
-        .andExpect(jsonPath("$.number", is(pageable.getPageNumber())))
-        .andExpect(jsonPath("$.size", is(pageable.getPageSize())))
-        .andExpect(jsonPath("$.content[0].orderable.id",
+        .andExpect(jsonPath(CONTENT_REFERENCE, hasSize(2)))
+        .andExpect(jsonPath(NUMBER_OF_ELEMENTS_REFERENCE, is(2)))
+        .andExpect(jsonPath(NUMBER_REFERENCE, is(pageable.getPageNumber())))
+        .andExpect(jsonPath(SIZE_REFERENCE, is(pageable.getPageSize())))
+        .andExpect(jsonPath(ORDERABLE_ID_REFERENCE,
             is(stockCardSummary.getOrderable().getId().toString())))
         .andExpect(jsonPath("$.content[1].orderable.id",
             is(stockCardSummary2.getOrderable().getId().toString())));
@@ -119,11 +125,11 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
 
     resultActions
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.content", hasSize(2)))
-        .andExpect(jsonPath("$.numberOfElements", is(2)))
-        .andExpect(jsonPath("$.number", is(pageable.getPageNumber())))
-        .andExpect(jsonPath("$.size", is(pageable.getPageSize())))
-        .andExpect(jsonPath("$.content[0].orderable.id",
+        .andExpect(jsonPath(CONTENT_REFERENCE, hasSize(2)))
+        .andExpect(jsonPath(NUMBER_OF_ELEMENTS_REFERENCE, is(2)))
+        .andExpect(jsonPath(NUMBER_REFERENCE, is(pageable.getPageNumber())))
+        .andExpect(jsonPath(SIZE_REFERENCE, is(pageable.getPageSize())))
+        .andExpect(jsonPath(ORDERABLE_ID_REFERENCE,
             is(stockCardSummary.getOrderable().getId().toString())))
         .andExpect(jsonPath("$.content[1].orderable.id",
             is(stockCardSummary2.getOrderable().getId().toString())));
@@ -206,11 +212,11 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
 
     resultActions
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.content", hasSize(1)))
-        .andExpect(jsonPath("$.numberOfElements", is(1)))
-        .andExpect(jsonPath("$.number", is(pageable.getPageNumber())))
-        .andExpect(jsonPath("$.size", is(pageable.getPageSize())))
-        .andExpect(jsonPath("$.content[0].orderable.id",
+        .andExpect(jsonPath(CONTENT_REFERENCE, hasSize(1)))
+        .andExpect(jsonPath(NUMBER_OF_ELEMENTS_REFERENCE, is(1)))
+        .andExpect(jsonPath(NUMBER_REFERENCE, is(pageable.getPageNumber())))
+        .andExpect(jsonPath(SIZE_REFERENCE, is(pageable.getPageSize())))
+        .andExpect(jsonPath(ORDERABLE_ID_REFERENCE,
             is(stockCardSummary.getOrderable().getId().toString())));
   }
 
@@ -242,11 +248,11 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
 
     resultActions
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.content", hasSize(1)))
-        .andExpect(jsonPath("$.numberOfElements", is(1)))
-        .andExpect(jsonPath("$.number", is(pageable.getPageNumber())))
-        .andExpect(jsonPath("$.size", is(pageable.getPageSize())))
-        .andExpect(jsonPath("$.content[0].orderable.id",
+        .andExpect(jsonPath(CONTENT_REFERENCE, hasSize(1)))
+        .andExpect(jsonPath(NUMBER_OF_ELEMENTS_REFERENCE, is(1)))
+        .andExpect(jsonPath(NUMBER_REFERENCE, is(pageable.getPageNumber())))
+        .andExpect(jsonPath(SIZE_REFERENCE, is(pageable.getPageSize())))
+        .andExpect(jsonPath(ORDERABLE_ID_REFERENCE,
             is(stockCardSummary.getOrderable().getId().toString())));
 
     params.setNonEmptyOnly(false);
@@ -271,11 +277,11 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
 
     resultActions
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.content", hasSize(2)))
-        .andExpect(jsonPath("$.numberOfElements", is(2)))
-        .andExpect(jsonPath("$.number", is(pageable.getPageNumber())))
-        .andExpect(jsonPath("$.size", is(pageable.getPageSize())))
-        .andExpect(jsonPath("$.content[0].orderable.id",
+        .andExpect(jsonPath(CONTENT_REFERENCE, hasSize(2)))
+        .andExpect(jsonPath(NUMBER_OF_ELEMENTS_REFERENCE, is(2)))
+        .andExpect(jsonPath(NUMBER_REFERENCE, is(pageable.getPageNumber())))
+        .andExpect(jsonPath(SIZE_REFERENCE, is(pageable.getPageSize())))
+        .andExpect(jsonPath(ORDERABLE_ID_REFERENCE,
             is(stockCardSummary.getOrderable().getId().toString())))
         .andExpect(jsonPath("$.content[1].orderable.id",
             is(stockCardSummary2.getOrderable().getId().toString())));
