@@ -48,13 +48,6 @@ public class StockCardSummariesV2DtoBuilder {
   @Value("${service.url}")
   private String serviceUrl;
 
-  private boolean nonEmptySummariesOnly;
-
-  public StockCardSummariesV2DtoBuilder nonEmptySummariesOnly() {
-    nonEmptySummariesOnly = true;
-    return this;
-  }
-
   /**
    * Builds Stock Card Summary dtos from stock cards and orderables.
    *
@@ -65,9 +58,8 @@ public class StockCardSummariesV2DtoBuilder {
    * @return list of {@link StockCardSummaryV2Dto}
    */
   public List<StockCardSummaryV2Dto> build(List<OrderableDto> approvedProducts,
-                                           List<StockCard> stockCards,
-                                           Map<UUID, OrderableFulfillDto> orderables,
-                                           LocalDate asOfDate) {
+      List<StockCard> stockCards, Map<UUID, OrderableFulfillDto> orderables, LocalDate asOfDate,
+      boolean nonEmptySummariesOnly) {
     Stream<StockCardSummaryV2Dto> summariesStream = approvedProducts.stream()
         .map(p -> build(stockCards, p.getId(),
             MapUtils.isEmpty(orderables) ? null : orderables.get(p.getId()),

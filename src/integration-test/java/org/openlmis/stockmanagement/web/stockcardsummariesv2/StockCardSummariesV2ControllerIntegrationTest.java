@@ -20,7 +20,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -75,7 +74,7 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
     when(stockCardSummariesV2DtoBuilder
         .build(summaries.getPageOfApprovedProducts(),
             summaries.getStockCardsForFulfillOrderables(), summaries.getOrderableFulfillMap(),
-            summaries.getAsOfDate()))
+            summaries.getAsOfDate(), false))
         .thenReturn(asList(stockCardSummary, stockCardSummary2));
   }
 
@@ -189,7 +188,7 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
     when(stockCardSummariesV2DtoBuilder
         .build(summaries.getPageOfApprovedProducts(),
             summaries.getStockCardsForFulfillOrderables(), summaries.getOrderableFulfillMap(),
-            summaries.getAsOfDate()))
+            summaries.getAsOfDate(), true))
         .thenReturn(asList(stockCardSummary));
 
     ResultActions resultActions = mvc.perform(
@@ -212,7 +211,5 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
         .andExpect(jsonPath("$.size", is(pageable.getPageSize())))
         .andExpect(jsonPath("$.content[0].orderable.id",
             is(stockCardSummary.getOrderable().getId().toString())));
-
-    verify(stockCardSummariesV2DtoBuilder).nonEmptySummariesOnly();
   }
 }
