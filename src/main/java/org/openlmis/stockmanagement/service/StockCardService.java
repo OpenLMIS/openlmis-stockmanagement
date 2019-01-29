@@ -114,6 +114,7 @@ public class StockCardService extends StockCardBaseService {
     }
 
     cardRepository.save(cardsToUpdate);
+    cardRepository.flush();
     stockEventDto.getContext().refreshCards();
 
     LOGGER.debug("Stock cards and line items saved");
