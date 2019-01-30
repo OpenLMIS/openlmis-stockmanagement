@@ -15,7 +15,6 @@
 
 package org.openlmis.stockmanagement.service;
 
-import java.util.concurrent.Future;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
@@ -27,8 +26,6 @@ import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
 /**
@@ -45,19 +42,14 @@ public class StockEventNotificationProcessor {
 
   /**
    * From the stock event, check each line item's stock card and see if stock on hand has gone to
-   * zero. If so, send a notification to all of that stock card's editors. This is done 
-   * asynchronously.
+   * zero. If so, send a notification to all of that stock card's editors.
    * 
    * @param eventDto the stock event to process
-   * @return a null future
    */
-  @Async
-  public Future<Void> callAllNotifications(StockEventDto eventDto) {
+  public void callAllNotifications(StockEventDto eventDto) {
     eventDto
         .getLineItems()
         .forEach(line -> callNotifications(eventDto, line));
-
-    return new AsyncResult<>(null);
   }
 
   private void callNotifications(StockEventDto event, StockEventLineItemDto eventLine) {

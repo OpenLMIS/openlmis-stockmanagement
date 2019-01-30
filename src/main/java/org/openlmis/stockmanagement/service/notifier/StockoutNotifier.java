@@ -42,12 +42,18 @@ import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataSe
 import org.openlmis.stockmanagement.service.referencedata.RightReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.SupervisingUsersReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.SupervisoryNodeReferenceDataService;
+import org.slf4j.ext.XLogger;
+import org.slf4j.ext.XLoggerFactory;
+import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Component
 public class StockoutNotifier extends BaseNotifier {
+
+  private static final XLogger XLOGGER = XLoggerFactory.getXLogger(StockoutNotifier.class);
 
   @Autowired
   private RightReferenceDataService rightReferenceDataService;
@@ -80,12 +86,17 @@ public class StockoutNotifier extends BaseNotifier {
   private String urlToInitiateRequisition;
 
   /**
-   * Notify user with "Edit stock inventories" right for the facility/program that
-   * facility has stocked out of a product.
+   * Notify user with "Edit stock inventories" right for the facility/program that facility has
+   * stocked out of a product.
    *
    * @param stockCard StockCard for a product
    */
+  @Async
   public void notifyStockEditors(StockCard stockCard) {
+    Profiler profiler = new Profiler("NOTIFY_STOCK_EDITORS");
+    profiler.setLogger(XLOGGER);
+
+    profiler.start("GET_EDITORS");
     Collection<UserDto> recipients = getEditors(stockCard);
 
     String subject = getMessage(EMAIL_ACTION_REQUIRED_SUBJECT);
@@ -93,12 +104,16 @@ public class StockoutNotifier extends BaseNotifier {
 
     Map<String, String> valuesMap = getValuesMap(stockCard);
     StrSubstitutor sub = new StrSubstitutor(valuesMap);
+
+    profiler.start("NOTIFY_RECIPIENTS");
     for (UserDto recipient : recipients) {
       if (recipient.getHomeFacilityId().equals(stockCard.getFacilityId())) {
         valuesMap.put("username", recipient.getUsername());
         notificationService.notify(recipient, sub.replace(subject), sub.replace(content));
       }
     }
+
+    profiler.stop().log();
   }
 
   private Collection<UserDto> getEditors(StockCard stockCard) {

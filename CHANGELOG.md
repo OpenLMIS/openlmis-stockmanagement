@@ -1,3 +1,9 @@
+4.0.1 / Work in Progress
+========================
+
+Bug fixes, security and performance improvements, also backwards-compatible:
+* [OLMIS-5544](https://openlmis.atlassian.net/browse/OLMIS-5544): Fixed issue with stockout notification being sent for some stock events incorrectly.
+
 4.0.0 / 2018-12-12
 ==================
 
