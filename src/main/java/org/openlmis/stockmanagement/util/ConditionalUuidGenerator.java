@@ -13,28 +13,21 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.stockmanagement.domain;
+package org.openlmis.stockmanagement.util;
 
-import java.util.UUID;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Type;
+import java.io.Serializable;
+import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.id.UUIDGenerator;
+import org.openlmis.stockmanagement.domain.BaseEntity;
 
-@MappedSuperclass
-public abstract class BaseEntity {
-  protected static final String TEXT_COLUMN_DEFINITION = "text";
-  protected static final String PG_UUID = "pg-uuid";
+public class ConditionalUuidGenerator extends UUIDGenerator {
 
-  @Id
-  @GeneratedValue(generator = "uuid-gen")
-  @GenericGenerator(name = "uuid-gen",
-      strategy = "org.openlmis.stockmanagement.util.ConditionalUuidGenerator")
-  @Type(type = PG_UUID)
-  @Getter
-  @Setter
-  private UUID id;
+  @Override
+  public Serializable generate(SessionImplementor session, Object object) {
+    if ((((BaseEntity) object).getId()) == null) {
+      return super.generate(session, object);
+    } else {
+      return ((BaseEntity) object).getId();
+    }
+  }
 }
