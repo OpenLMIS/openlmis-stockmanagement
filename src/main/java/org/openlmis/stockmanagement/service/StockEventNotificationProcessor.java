@@ -15,13 +15,18 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static org.openlmis.stockmanagement.service.PermissionService.STOCK_INVENTORIES_EDIT;
+
+import java.util.UUID;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
+import org.openlmis.stockmanagement.dto.referencedata.RightDto;
 import org.openlmis.stockmanagement.service.notifier.StockoutNotifier;
+import org.openlmis.stockmanagement.service.referencedata.RightReferenceDataService;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.slf4j.profiler.Profiler;
@@ -40,6 +45,9 @@ public class StockEventNotificationProcessor {
   @Autowired
   private StockoutNotifier stockoutNotifier;
 
+  @Autowired
+  private RightReferenceDataService rightReferenceDataService;
+
   /**
    * From the stock event, check each line item's stock card and see if stock on hand has gone to
    * zero. If so, send a notification to all of that stock card's editors.
@@ -47,12 +55,14 @@ public class StockEventNotificationProcessor {
    * @param eventDto the stock event to process
    */
   public void callAllNotifications(StockEventDto eventDto) {
+    RightDto right = rightReferenceDataService.findRight(STOCK_INVENTORIES_EDIT);
     eventDto
         .getLineItems()
-        .forEach(line -> callNotifications(eventDto, line));
+        .forEach(line -> callNotifications(eventDto, line, right.getId()));
   }
 
-  private void callNotifications(StockEventDto event, StockEventLineItemDto eventLine) {
+  private void callNotifications(StockEventDto event, StockEventLineItemDto eventLine,
+      UUID rightId) {
     XLOGGER.entry(event, eventLine);
     Profiler profiler = new Profiler("CALL_NOTIFICATION_FOR_LINE_ITEM");
     profiler.setLogger(XLOGGER);
@@ -75,7 +85,7 @@ public class StockEventNotificationProcessor {
 
     profiler.start("NOTIFY_STOCK_CARD_EDITORS");
     if (copy.getStockOnHand() == 0) {
-      stockoutNotifier.notifyStockEditors(copy);
+      stockoutNotifier.notifyStockEditors(copy, rightId);
     }
 
     profiler.stop().log();

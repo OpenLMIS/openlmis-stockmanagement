@@ -23,7 +23,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.EMAIL_ACTION_REQUIRED_CONTENT;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.EMAIL_ACTION_REQUIRED_SUBJECT;
-import static org.openlmis.stockmanagement.service.PermissionService.STOCK_INVENTORIES_EDIT;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
@@ -46,7 +45,6 @@ import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
-import org.openlmis.stockmanagement.dto.referencedata.RightDto;
 import org.openlmis.stockmanagement.dto.referencedata.SupervisoryNodeDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.i18n.MessageService;
@@ -56,7 +54,6 @@ import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataS
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
-import org.openlmis.stockmanagement.service.referencedata.RightReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.SupervisingUsersReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.SupervisoryNodeReferenceDataService;
 import org.openlmis.stockmanagement.util.Message;
@@ -98,9 +95,6 @@ public class StockoutNotifierTest {
   private MessageService messageService;
 
   @Mock
-  private RightReferenceDataService rightReferenceDataService;
-
-  @Mock
   private SupervisingUsersReferenceDataService supervisingUsersReferenceDataService;
 
   @Mock
@@ -126,7 +120,6 @@ public class StockoutNotifierTest {
   private ProgramDto program = mock(ProgramDto.class);
   private OrderableDto orderable = mock(OrderableDto.class);
   private LotDto lot = mock(LotDto.class);
-  private RightDto right = mock(RightDto.class);
   private UserDto editor = mock(UserDto.class);
   private StockCard stockCard = mock(StockCard.class);
   private StockCardLineItem stockCardLineItem = mock(StockCardLineItem.class);
@@ -140,7 +133,6 @@ public class StockoutNotifierTest {
     when(facility.getId()).thenReturn(facilityId);
     when(program.getName()).thenReturn("Mock Program");
     when(orderable.getFullProductName()).thenReturn(ORDERABLE_NAME);
-    when(right.getId()).thenReturn(rightId);
     when(lot.getLotCode()).thenReturn("LOT 111");
 
     supervisoryNode.setId(supervisoryNodeId);
@@ -158,14 +150,14 @@ public class StockoutNotifierTest {
   public void notifyStockEditorsShouldNotNotifyWhenFoundFacilityIsNotHomeFacility() {
     when(editor.getHomeFacilityId()).thenReturn(UUID.randomUUID());
 
-    stockoutNotifier.notifyStockEditors(stockCard);
+    stockoutNotifier.notifyStockEditors(stockCard, rightId);
 
     verify(notificationService, times(0)).notify(any(), any(), any());
   }
 
   @Test
   public void notifyStockEditorsShouldNotifyWithCorrectSubject() {
-    stockoutNotifier.notifyStockEditors(stockCard);
+    stockoutNotifier.notifyStockEditors(stockCard, rightId);
 
     verify(notificationService).notify(
         eq(editor),
@@ -187,7 +179,6 @@ public class StockoutNotifierTest {
   }
 
   private void mockServices() {
-    when(rightReferenceDataService.findRight(STOCK_INVENTORIES_EDIT)).thenReturn(right);
     when(supervisoryNodeReferenceDataService.findSupervisoryNode(programId, facilityId))
         .thenReturn(supervisoryNode);
     when(supervisingUsersReferenceDataService.findAll(supervisoryNodeId, rightId, programId))
@@ -215,7 +206,7 @@ public class StockoutNotifierTest {
         + "\nInitiate emergency requisition for this product: " + urlToInitiateRequisition
         + "\nThank you.";
 
-    stockoutNotifier.notifyStockEditors(stockCard);
+    stockoutNotifier.notifyStockEditors(stockCard, rightId);
 
     verify(notificationService).notify(eq(editor), any(), eq(expected));
   }

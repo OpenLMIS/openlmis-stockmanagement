@@ -17,7 +17,6 @@ package org.openlmis.stockmanagement.service.notifier;
 
 import static org.openlmis.stockmanagement.i18n.MessageKeys.EMAIL_ACTION_REQUIRED_CONTENT;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.EMAIL_ACTION_REQUIRED_SUBJECT;
-import static org.openlmis.stockmanagement.service.PermissionService.STOCK_INVENTORIES_EDIT;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
@@ -31,7 +30,6 @@ import org.apache.commons.lang.text.StrSubstitutor;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
-import org.openlmis.stockmanagement.dto.referencedata.RightDto;
 import org.openlmis.stockmanagement.dto.referencedata.SupervisoryNodeDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.service.notification.NotificationService;
@@ -39,7 +37,6 @@ import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataS
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
-import org.openlmis.stockmanagement.service.referencedata.RightReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.SupervisingUsersReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.SupervisoryNodeReferenceDataService;
 import org.slf4j.ext.XLogger;
@@ -54,9 +51,6 @@ import org.springframework.stereotype.Component;
 public class StockoutNotifier extends BaseNotifier {
 
   private static final XLogger XLOGGER = XLoggerFactory.getXLogger(StockoutNotifier.class);
-
-  @Autowired
-  private RightReferenceDataService rightReferenceDataService;
 
   @Autowired
   private SupervisingUsersReferenceDataService supervisingUsersReferenceDataService;
@@ -92,12 +86,12 @@ public class StockoutNotifier extends BaseNotifier {
    * @param stockCard StockCard for a product
    */
   @Async
-  public void notifyStockEditors(StockCard stockCard) {
+  public void notifyStockEditors(StockCard stockCard, UUID rightId) {
     Profiler profiler = new Profiler("NOTIFY_STOCK_EDITORS");
     profiler.setLogger(XLOGGER);
 
     profiler.start("GET_EDITORS");
-    Collection<UserDto> recipients = getEditors(stockCard);
+    Collection<UserDto> recipients = getEditors(stockCard, rightId);
 
     String subject = getMessage(EMAIL_ACTION_REQUIRED_SUBJECT);
     String content = getMessage(EMAIL_ACTION_REQUIRED_CONTENT);
@@ -116,8 +110,7 @@ public class StockoutNotifier extends BaseNotifier {
     profiler.stop().log();
   }
 
-  private Collection<UserDto> getEditors(StockCard stockCard) {
-    RightDto right = rightReferenceDataService.findRight(STOCK_INVENTORIES_EDIT);
+  private Collection<UserDto> getEditors(StockCard stockCard, UUID rightId) {
     SupervisoryNodeDto supervisoryNode = supervisoryNodeReferenceDataService
         .findSupervisoryNode(stockCard.getProgramId(), stockCard.getFacilityId());
 
@@ -128,7 +121,7 @@ public class StockoutNotifier extends BaseNotifier {
     }
 
     return supervisingUsersReferenceDataService
-        .findAll(supervisoryNode.getId(), right.getId(), stockCard.getProgramId());
+        .findAll(supervisoryNode.getId(), rightId, stockCard.getProgramId());
   }
 
   private Map<String, String> getValuesMap(StockCard stockCard) {

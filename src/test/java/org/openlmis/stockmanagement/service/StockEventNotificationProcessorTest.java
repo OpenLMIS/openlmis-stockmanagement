@@ -17,10 +17,12 @@ package org.openlmis.stockmanagement.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.service.PermissionService.STOCK_INVENTORIES_EDIT;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventLineItem;
 
@@ -37,7 +39,9 @@ import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
+import org.openlmis.stockmanagement.dto.referencedata.RightDto;
 import org.openlmis.stockmanagement.service.notifier.StockoutNotifier;
+import org.openlmis.stockmanagement.service.referencedata.RightReferenceDataService;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -45,6 +49,9 @@ public class StockEventNotificationProcessorTest {
 
   @Mock
   private StockoutNotifier stockoutNotifier;
+
+  @Mock
+  private RightReferenceDataService rightReferenceDataService;
   
   @InjectMocks
   private StockEventNotificationProcessor stockEventNotificationProcessor;
@@ -55,7 +62,9 @@ public class StockEventNotificationProcessorTest {
   private UUID facilityId = UUID.randomUUID();
   private UUID orderableId = UUID.randomUUID();
   private UUID lotId = UUID.randomUUID();
-  
+  private UUID rightId = UUID.randomUUID();
+
+  private RightDto right = mock(RightDto.class);
   private StockCard stockCard;
   private StockEventProcessContext context;
   private StockEventDto stockEventDto;
@@ -78,6 +87,9 @@ public class StockEventNotificationProcessorTest {
     firstLineItem.setQuantity(0);
 
     stockEventDto.setContext(context);
+
+    when(right.getId()).thenReturn(rightId);
+    when(rightReferenceDataService.findRight(STOCK_INVENTORIES_EDIT)).thenReturn(right);
   }
   
   @Test
@@ -90,7 +102,7 @@ public class StockEventNotificationProcessorTest {
 
     //then
     ArgumentCaptor<StockCard> captor = ArgumentCaptor.forClass(StockCard.class);
-    verify(stockoutNotifier).notifyStockEditors(captor.capture());
+    verify(stockoutNotifier).notifyStockEditors(captor.capture(), eq(rightId));
 
     assertEquals(stockCardId, captor.getValue().getId());
     assertEquals(programId, captor.getValue().getProgramId());
@@ -124,6 +136,6 @@ public class StockEventNotificationProcessorTest {
     stockEventNotificationProcessor.callAllNotifications(stockEventDto);
 
     //then
-    verify(stockoutNotifier, times(2)).notifyStockEditors(any(StockCard.class));
+    verify(stockoutNotifier, times(2)).notifyStockEditors(any(StockCard.class), eq((rightId)));
   }
 }
