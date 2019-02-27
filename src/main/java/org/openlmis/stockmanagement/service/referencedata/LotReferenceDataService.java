@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,16 +45,39 @@ public class LotReferenceDataService extends BaseReferenceDataService<LotDto> {
    * Search for lots under a specific trade item.
    *
    * @param tradeItemId trade item id.
-   * @return found page of lots.
+   * @return found list of lots.
    */
   public List<LotDto> getAllLotsOf(UUID tradeItemId) {
+    return getAllLotsMatching(tradeItemId, null);
+  }
+
+  /**
+   * Search for lots expiring on a certain date.
+   *
+   * @param expirationDate expiration date.
+   * @return found list of lots.
+   */
+  public List<LotDto> getAllLotsExpiringOn(LocalDate expirationDate) {
+    return getAllLotsMatching(null, expirationDate);
+  }
+  
+  private List<LotDto> getAllLotsMatching(UUID tradeItemId, LocalDate expirationDate) {
     List<LotDto> allLots = new ArrayList<>();
 
     int pageNumber = 0;
     boolean isLastPage = false;
 
+    HashMap<String, Object> params = new HashMap<>();
+    if (null != tradeItemId) {
+      params.put("tradeItemId", tradeItemId);
+    }
+    if (null != expirationDate) {
+      params.put("expirationDate", expirationDate);
+    }
+
     while (!isLastPage) {
-      Page<LotDto> onePage = getOnePage(tradeItemId, pageNumber);
+      params.put("page", pageNumber);
+      Page<LotDto> onePage = getPage(params);
       allLots.addAll(onePage.getContent());
 
       pageNumber++;
@@ -61,12 +85,5 @@ public class LotReferenceDataService extends BaseReferenceDataService<LotDto> {
     }
 
     return allLots;
-  }
-
-  private Page<LotDto> getOnePage(UUID tradeItemId, int pageNumber) {
-    HashMap<String, Object> params = new HashMap<>();
-    params.put("tradeItemId", tradeItemId);
-    params.put("page", pageNumber);
-    return getPage(params);
   }
 }

@@ -13,16 +13,17 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.stockmanagement.notifier.service;
+package org.openlmis.stockmanagement.service.notifier;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.EMAIL_ACTION_REQUIRED_CONTENT;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.EMAIL_ACTION_REQUIRED_SUBJECT;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.NOTIFICATION_STOCKOUT_CONTENT;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.NOTIFICATION_STOCKOUT_SUBJECT;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
@@ -49,7 +50,6 @@ import org.openlmis.stockmanagement.dto.referencedata.SupervisoryNodeDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.i18n.MessageService;
 import org.openlmis.stockmanagement.service.notification.NotificationService;
-import org.openlmis.stockmanagement.service.notifier.StockoutNotifier;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
@@ -75,8 +75,9 @@ public class StockoutNotifierTest {
       + "Initiate emergency requisition for this product: ${urlToInitiateRequisition}\n"
       + "Thank you.";
   private static final String TEST_KEY = "testKey";
-  private static final String FACILITY_NAME = "Mock Facility";
-  private static final String ORDERABLE_NAME = "Mock Orderable";
+  static final String FACILITY_NAME = "Mock Facility";
+  static final String PROGRAM_NAME = "Mock Program";
+  static final String ORDERABLE_NAME = "Mock Orderable";
   private static final String URL_TO_VIEW_BIN_CARD =
       "/stockCardSummaries/{0}";
   private static final String URL_TO_INITIATE_REQUISITION =
@@ -131,7 +132,7 @@ public class StockoutNotifierTest {
   public void setUp() {
     when(facility.getName()).thenReturn(FACILITY_NAME);
     when(facility.getId()).thenReturn(facilityId);
-    when(program.getName()).thenReturn("Mock Program");
+    when(program.getName()).thenReturn(PROGRAM_NAME);
     when(orderable.getFullProductName()).thenReturn(ORDERABLE_NAME);
     when(lot.getLotCode()).thenReturn("LOT 111");
 
@@ -178,6 +179,34 @@ public class StockoutNotifierTest {
     testNotificationBody(stockoutDate, "1 day");
   }
 
+  @Test
+  public void getFacilityNameShouldGetNameFromId() {
+    when(facilityReferenceDataService.findOne(facilityId)).thenReturn(facility);
+
+    assertEquals(FACILITY_NAME, stockoutNotifier.getFacilityName(facilityId));
+  }
+
+  @Test
+  public void getProgramNameShouldGetNameFromId() {
+    when(programReferenceDataService.findOne(programId)).thenReturn(program);
+
+    assertEquals(PROGRAM_NAME, stockoutNotifier.getProgramName(programId));
+  }
+
+  @Test
+  public void getOrderableNameShouldGetNameFromId() {
+    when(orderableReferenceDataService.findOne(orderableId)).thenReturn(orderable);
+
+    assertEquals(ORDERABLE_NAME, stockoutNotifier.getOrderableName(orderableId));
+  }
+
+  @Test
+  public void getUrlToViewBinCardShouldGetUrlFromCard() {
+    String urlToViewBinCard = MessageFormat.format(URL_TO_VIEW_BIN_CARD, stockCard.getId());
+
+    assertEquals(urlToViewBinCard, stockoutNotifier.getUrlToViewBinCard(stockCard));
+  }
+
   private void mockServices() {
     when(supervisoryNodeReferenceDataService.findSupervisoryNode(programId, facilityId))
         .thenReturn(supervisoryNode);
@@ -221,10 +250,10 @@ public class StockoutNotifierTest {
 
   private void mockMessages() {
     Message.LocalizedMessage localizedMessage = new Message(TEST_KEY).new LocalizedMessage(SUBJECT);
-    when(messageService.localize(new Message(EMAIL_ACTION_REQUIRED_SUBJECT)))
+    when(messageService.localize(new Message(NOTIFICATION_STOCKOUT_SUBJECT)))
         .thenReturn(localizedMessage);
     localizedMessage = new Message(TEST_KEY).new LocalizedMessage(CONTENT);
-    when(messageService.localize(new Message(EMAIL_ACTION_REQUIRED_CONTENT)))
+    when(messageService.localize(new Message(NOTIFICATION_STOCKOUT_CONTENT)))
         .thenReturn(localizedMessage);
   }
 

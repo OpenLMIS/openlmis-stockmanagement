@@ -22,6 +22,8 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertEquals;
 
 import com.google.common.collect.Maps;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -39,6 +41,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
 
+@SuppressWarnings("PMD.TooManyMethods")
 public class StockCardRepositoryIntegrationTest
     extends BaseCrudRepositoryIntegrationTest<StockCard> {
 
@@ -192,7 +195,24 @@ public class StockCardRepositoryIntegrationTest
     assertEquals(0, result.getNumber());
     assertThat(result.getContent(), hasItems(stockCard1, stockCard2));
   }
+  
+  @Test
+  public void findByLotIdInShouldOnlyFindMatchingStockCards() throws Exception {
+    UUID matchingLotId = UUID.randomUUID();
+    stockCard1 = stockCardRepository.save(generateInstance(randomUUID(), randomUUID(), randomUUID(),
+        matchingLotId));
+    stockCard2 = stockCardRepository.save(generateInstance(randomUUID(), randomUUID(), randomUUID(),
+        matchingLotId));
+    stockCard3 = stockCardRepository.save(generateInstance());
+    stockCard4 = stockCardRepository.save(generateInstance());
 
+    List<StockCard> matchingStockCards = stockCardRepository.findByLotIdIn(
+        Collections.singleton(matchingLotId));
+    
+    assertEquals(2, matchingStockCards.size());
+    assertThat(matchingStockCards, hasItems(stockCard1, stockCard2));
+  }
+  
   private void initializeStockCardsForMultipleFacilitiesAndPrograms() {
     stockCard1 = stockCardRepository
         .save(generateInstance(facilityId1, programId1, randomUUID(), randomUUID()));

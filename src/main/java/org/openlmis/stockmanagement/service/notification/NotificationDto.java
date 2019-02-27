@@ -33,4 +33,18 @@ import lombok.ToString;
 public final class NotificationDto {
   private UUID userId;
   private Map<String, MessageDto> messages;
+  private Boolean important;
+
+  /**
+   * Standard constructor with important set to false.
+   * 
+   * @param userId user id
+   * @param messages messages map
+   */
+  public NotificationDto(UUID userId,
+      Map<String, MessageDto> messages) {
+    this.userId = userId;
+    this.messages = messages;
+    this.important = false;
+  }
 }

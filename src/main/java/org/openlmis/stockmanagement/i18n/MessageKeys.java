@@ -286,10 +286,14 @@ public abstract class MessageKeys {
   public static final String ERROR_REPORTING_FILE_EMPTY = ERROR_PREFIX + ".reporting.file.empty";
 
   //notifications
-  public static final String EMAIL_ACTION_REQUIRED_SUBJECT =
+  public static final String NOTIFICATION_STOCKOUT_SUBJECT =
       SERVICE_PREFIX + ".email.stockout.subject";
-  public static final String EMAIL_ACTION_REQUIRED_CONTENT =
+  public static final String NOTIFICATION_STOCKOUT_CONTENT =
       SERVICE_PREFIX + ".email.stockout.content";
+  public static final String NOTIFICATION_NEAR_EXPIRY_SUBJECT =
+      SERVICE_PREFIX + ".email.nearExpiry.subject";
+  public static final String NOTIFICATION_NEAR_EXPIRY_CONTENT =
+      SERVICE_PREFIX + ".email.nearExpiry.content";
 
   //server errors
   public static final String SERVER_ERROR_SHALLOW_COPY

@@ -57,4 +57,6 @@ public interface StockCardRepository extends JpaRepository<StockCard, UUID> {
       Collection<UUID> programIds, Pageable pageable);
 
   Page<StockCard> findByIdIn(Collection<UUID> ids, Pageable pageable);
+  
+  List<StockCard> findByLotIdIn(Collection<UUID> lotIds);
 }
