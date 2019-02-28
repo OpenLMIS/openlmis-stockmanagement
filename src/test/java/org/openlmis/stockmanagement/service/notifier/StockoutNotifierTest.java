@@ -78,7 +78,8 @@ public class StockoutNotifierTest {
   static final String FACILITY_NAME = "Mock Facility";
   static final String PROGRAM_NAME = "Mock Program";
   static final String ORDERABLE_NAME = "Mock Orderable";
-  private static final String URL_TO_VIEW_BIN_CARD =
+  static final String LOT_CODE = "LOT 111";
+  static final String URL_TO_VIEW_BIN_CARD =
       "/stockCardSummaries/{0}";
   private static final String URL_TO_INITIATE_REQUISITION =
       "/requisitions/initiate?facility={1}&program={0}&emergency={2}&supervised={3}";
@@ -134,7 +135,7 @@ public class StockoutNotifierTest {
     when(facility.getId()).thenReturn(facilityId);
     when(program.getName()).thenReturn(PROGRAM_NAME);
     when(orderable.getFullProductName()).thenReturn(ORDERABLE_NAME);
-    when(lot.getLotCode()).thenReturn("LOT 111");
+    when(lot.getLotCode()).thenReturn(LOT_CODE);
 
     supervisoryNode.setId(supervisoryNodeId);
 
