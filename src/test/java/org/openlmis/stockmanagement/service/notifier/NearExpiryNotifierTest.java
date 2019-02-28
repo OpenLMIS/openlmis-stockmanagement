@@ -118,6 +118,30 @@ public class NearExpiryNotifierTest {
   
   @Test
   public void getValuesMapShouldPopulateValuesMap() {
+    prepareForGetValuesMap();
+
+    Map<String, String> valuesMap = nearExpiryNotifier.getValuesMap(testStockCard);
+    
+    assertEquals(FACILITY_NAME, valuesMap.get("facilityName"));
+    assertEquals(PROGRAM_NAME, valuesMap.get("programName"));
+    assertEquals(ORDERABLE_NAME, valuesMap.get("orderableName"));
+    assertEquals(LOT_CODE, valuesMap.get("lotCode"));
+    assertEquals(TEST_DATE, valuesMap.get("expirationDate"));
+    assertEquals(URL_TO_VIEW_BIN_CARD, valuesMap.get("urlToViewBinCard"));
+  }
+  
+  @Test
+  public void getValuesMapShouldReturnEmptyLotCodeForNoLot() {
+    prepareForGetValuesMap();
+    ReflectionTestUtils.setField(nearExpiryNotifier, "expiringLotMap",
+        Collections.singletonMap(expiringLotId, null));
+    
+    Map<String, String> valuesMap = nearExpiryNotifier.getValuesMap(testStockCard);
+
+    assertEquals("", valuesMap.get("lotCode"));
+  }
+  
+  private void prepareForGetValuesMap() {
     doReturn(FACILITY_NAME).when(nearExpiryNotifier).getFacilityName(any(UUID.class));
     doReturn(PROGRAM_NAME).when(nearExpiryNotifier).getProgramName(any(UUID.class));
     doReturn(ORDERABLE_NAME).when(nearExpiryNotifier).getOrderableName(any(UUID.class));
@@ -127,15 +151,6 @@ public class NearExpiryNotifierTest {
     ReflectionTestUtils.setField(nearExpiryNotifier, "expiringLotMap",
         Collections.singletonMap(expiringLotId, expiringLot));
     ReflectionTestUtils.setField(nearExpiryNotifier, "expirationDate", LocalDate.parse(TEST_DATE));
-    
-    Map<String, String> valuesMap = nearExpiryNotifier.getValuesMap(testStockCard);
-    
-    assertEquals(FACILITY_NAME, valuesMap.get("facilityName"));
-    assertEquals(PROGRAM_NAME, valuesMap.get("programName"));
-    assertEquals(ORDERABLE_NAME, valuesMap.get("orderableName"));
-    assertEquals(LOT_CODE, valuesMap.get("lotCode"));
-    assertEquals(TEST_DATE, valuesMap.get("expirationDate"));
-    assertEquals(URL_TO_VIEW_BIN_CARD, valuesMap.get("urlToViewBinCard"));
   }
   
   @Test
