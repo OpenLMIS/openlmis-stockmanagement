@@ -25,6 +25,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.NOTIFICATION_NEAR_EXPIRY_CONTENT;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.NOTIFICATION_NEAR_EXPIRY_SUBJECT;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_INVENTORIES_EDIT;
 import static org.openlmis.stockmanagement.service.notifier.StockoutNotifierTest.FACILITY_NAME;
 import static org.openlmis.stockmanagement.service.notifier.StockoutNotifierTest.LOT_CODE;
@@ -134,5 +136,15 @@ public class NearExpiryNotifierTest {
     assertEquals(LOT_CODE, valuesMap.get("lotCode"));
     assertEquals(TEST_DATE, valuesMap.get("expirationDate"));
     assertEquals(URL_TO_VIEW_BIN_CARD, valuesMap.get("urlToViewBinCard"));
+  }
+  
+  @Test
+  public void getMessageSubjectShouldGetSubject() {
+    assertEquals(NOTIFICATION_NEAR_EXPIRY_SUBJECT, nearExpiryNotifier.getMessageSubject());
+  }
+  
+  @Test
+  public void getMessageContentShouldGetContent() {
+    assertEquals(NOTIFICATION_NEAR_EXPIRY_CONTENT, nearExpiryNotifier.getMessageContent());
   }
 }
