@@ -1,5 +1,8 @@
-4.0.1 / Work in Progress
+4.1.0 / Work in Progress
 ========================
+
+New functionality added in a backwards-compatible manner:
+* [OLMIS-3186](https://openlmis.atlassian.net/browse/OLMIS-3186): Add check for lots that are near expiry (6 months) and send notification.
 
 Bug fixes, security and performance improvements, also backwards-compatible:
 * [OLMIS-5544](https://openlmis.atlassian.net/browse/OLMIS-5544): Fixed issue with stockout notification being sent for some stock events incorrectly.
