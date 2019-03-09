@@ -15,20 +15,38 @@
 
 package org.openlmis.stockmanagement.service.notifier;
 
+import java.text.MessageFormat;
 import java.time.chrono.Chronology;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.FormatStyle;
 import java.util.Locale;
+import java.util.UUID;
 import org.openlmis.stockmanagement.i18n.MessageService;
+import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.i18n.LocaleContextHolder;
 
 public class BaseNotifier {
 
   @Autowired
   protected MessageService messageService;
+
+  @Autowired
+  private FacilityReferenceDataService facilityReferenceDataService;
+
+  @Autowired
+  private ProgramReferenceDataService programReferenceDataService;
+
+  @Autowired
+  private OrderableReferenceDataService orderableReferenceDataService;
+
+  @Value("${email.urlToViewBinCard}")
+  private String urlToViewBinCard;
 
   protected String getMessage(String key) {
     return messageService
@@ -42,5 +60,22 @@ public class BaseNotifier {
     String datePattern = DateTimeFormatterBuilder.getLocalizedDateTimePattern(
         FormatStyle.MEDIUM, null, Chronology.ofLocale(locale), locale);
     return DateTimeFormatter.ofPattern(datePattern);
+  }
+
+
+  String getFacilityName(UUID facilityId) {
+    return facilityReferenceDataService.findOne(facilityId).getName();
+  }
+
+  String getProgramName(UUID programId) {
+    return programReferenceDataService.findOne(programId).getName();
+  }
+
+  String getOrderableName(UUID orderableId) {
+    return orderableReferenceDataService.findOne(orderableId).getFullProductName();
+  }
+
+  String getUrlToViewBinCard(UUID stockCardId) {
+    return MessageFormat.format(urlToViewBinCard, stockCardId);
   }
 }

@@ -18,21 +18,15 @@ package org.openlmis.stockmanagement.service.notifier;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.NOTIFICATION_NEAR_EXPIRY_CONTENT;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.NOTIFICATION_NEAR_EXPIRY_SUBJECT;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_INVENTORIES_EDIT;
-import static org.openlmis.stockmanagement.service.notifier.StockoutNotifierTest.FACILITY_NAME;
-import static org.openlmis.stockmanagement.service.notifier.StockoutNotifierTest.LOT_CODE;
-import static org.openlmis.stockmanagement.service.notifier.StockoutNotifierTest.ORDERABLE_NAME;
-import static org.openlmis.stockmanagement.service.notifier.StockoutNotifierTest.PROGRAM_NAME;
-import static org.openlmis.stockmanagement.service.notifier.StockoutNotifierTest.URL_TO_VIEW_BIN_CARD;
+import static org.openlmis.stockmanagement.service.notifier.BaseNotifierTest.FACILITY_NAME;
+import static org.openlmis.stockmanagement.service.notifier.BaseNotifierTest.LOT_CODE;
+import static org.openlmis.stockmanagement.service.notifier.BaseNotifierTest.ORDERABLE_NAME;
+import static org.openlmis.stockmanagement.service.notifier.BaseNotifierTest.PROGRAM_NAME;
+import static org.openlmis.stockmanagement.service.notifier.BaseNotifierTest.URL_TO_VIEW_BIN_CARD;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -41,6 +35,10 @@ import java.util.Map;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.RightDto;
@@ -49,79 +47,93 @@ import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataServic
 import org.openlmis.stockmanagement.service.referencedata.RightReferenceDataService;
 import org.springframework.test.util.ReflectionTestUtils;
 
+@RunWith(MockitoJUnitRunner.class)
 public class NearExpiryNotifierTest {
 
   private static final String TEST_DATE = "2019-01-01";
   
+  @Mock
   private LotReferenceDataService lotReferenceDataService;
 
+  @Mock
   private RightReferenceDataService rightReferenceDataService;
 
+  @Mock
   private StockCardRepository stockCardRepository;
 
+  @Mock
+  private StockCardNotifier stockCardNotifier;
+
+  @Mock
+  private RightDto mockRight;
+
+  @Mock
+  private StockCard testStockCard;
+
+  @Mock
+  private LotDto expiringLot;
+
+  @InjectMocks
   private NearExpiryNotifier nearExpiryNotifier;
   
-  private UUID expiringLotId;
-  private LotDto expiringLot;
-  private UUID rightId;
-  private UUID facilityId;
-  private UUID programId;
-  private UUID orderableId;
-  private StockCard testStockCard;
+  private UUID expiringLotId = UUID.randomUUID();
+  private UUID rightId = UUID.randomUUID();
   
   @Before
   public void setUp() {
-    expiringLotId = UUID.randomUUID();
-    expiringLot = LotDto.builder().id(expiringLotId).lotCode(LOT_CODE).build();
-    lotReferenceDataService = mock(LotReferenceDataService.class);
     when(lotReferenceDataService.getAllLotsExpiringOn(any(LocalDate.class)))
         .thenReturn(Collections.singletonList(expiringLot));
-    rightReferenceDataService = mock(RightReferenceDataService.class);
-    rightId = UUID.randomUUID();
-    RightDto mockRight = mock(RightDto.class);
     when(rightReferenceDataService.findRight(STOCK_INVENTORIES_EDIT))
         .thenReturn(mockRight);
     when(mockRight.getId()).thenReturn(rightId);
-    testStockCard = StockCard.builder()
-        .facilityId(facilityId)
-        .programId(programId)
-        .orderableId(orderableId)
-        .lotId(expiringLotId)
-        .build();
-    testStockCard.setId(UUID.randomUUID());
-    stockCardRepository = mock(StockCardRepository.class);
     when(stockCardRepository.findByLotIdIn(Collections.singleton(expiringLotId)))
         .thenReturn(Collections.singletonList(testStockCard));
-    nearExpiryNotifier = spy(new NearExpiryNotifier(lotReferenceDataService,
-        rightReferenceDataService, stockCardRepository));
-    doNothing().when(nearExpiryNotifier).notifyEditors(any(StockCard.class), any(UUID.class));
+    when(testStockCard.getLotId()).thenReturn(expiringLotId);
+
+    when(stockCardNotifier.getFacilityName(any(UUID.class))).thenReturn(FACILITY_NAME);
+    when(stockCardNotifier.getProgramName(any(UUID.class))).thenReturn(PROGRAM_NAME);
+    when(stockCardNotifier.getOrderableName(any(UUID.class))).thenReturn(ORDERABLE_NAME);
+    when(stockCardNotifier.getDateFormatter()).thenReturn(DateTimeFormatter.ISO_LOCAL_DATE);
+    when(stockCardNotifier.getUrlToViewBinCard(any(UUID.class))).thenReturn(URL_TO_VIEW_BIN_CARD);
+
     ReflectionTestUtils.setField(nearExpiryNotifier, "timeZoneId", "UTC");
+    ReflectionTestUtils.setField(nearExpiryNotifier, "expiringLotMap",
+        Collections.singletonMap(expiringLotId, expiringLot));
+    when(expiringLot.getId()).thenReturn(expiringLotId);
+    when(expiringLot.getLotCode()).thenReturn(LOT_CODE);
+    ReflectionTestUtils.setField(nearExpiryNotifier, "expirationDate", LocalDate.parse(TEST_DATE));
   }
   
   @Test
   public void checkNearExpiryAndNotifyShouldNotifyIfExpiringStockFound() {
+    // when
     nearExpiryNotifier.checkNearExpiryAndNotify();
     
-    verify(nearExpiryNotifier).notifyEditors(any(StockCard.class), eq(rightId));
+    // then
+    verify(stockCardNotifier).notifyStockEditors(any(StockCard.class), eq(rightId),
+        any(NotificationMessageParams.class));
   }
   
   @Test
   public void checkNearExpiryAndNotifyShouldNotNotifyIfExpiringStockNotFound() {
+    // given
     when(stockCardRepository.findByLotIdIn(Collections.singleton(expiringLotId)))
         .thenReturn(Collections.emptyList());
 
+    // when
     nearExpiryNotifier.checkNearExpiryAndNotify();
     
-    verify(nearExpiryNotifier, times(0))
-        .notifyEditors(any(StockCard.class), eq(rightId));
+    // then
+    verify(stockCardNotifier, times(0)).notifyStockEditors(
+        any(StockCard.class), eq(rightId), any(NotificationMessageParams.class));
   }
   
   @Test
-  public void getValuesMapShouldPopulateValuesMap() {
-    prepareForGetValuesMap();
+  public void constructSubstitutionMapShouldConstructSubstitutionMap() {
+    // when
+    Map<String, String> valuesMap = nearExpiryNotifier.constructSubstitutionMap(testStockCard);
 
-    Map<String, String> valuesMap = nearExpiryNotifier.getValuesMap(testStockCard);
-    
+    // then
     assertEquals(FACILITY_NAME, valuesMap.get("facilityName"));
     assertEquals(PROGRAM_NAME, valuesMap.get("programName"));
     assertEquals(ORDERABLE_NAME, valuesMap.get("orderableName"));
@@ -131,35 +143,15 @@ public class NearExpiryNotifierTest {
   }
   
   @Test
-  public void getValuesMapShouldReturnEmptyLotCodeForNoLot() {
-    prepareForGetValuesMap();
+  public void constructSubstitutionMapShouldReturnEmptyLotCodeForNoLot() {
+    // given
     ReflectionTestUtils.setField(nearExpiryNotifier, "expiringLotMap",
         Collections.singletonMap(expiringLotId, null));
     
-    Map<String, String> valuesMap = nearExpiryNotifier.getValuesMap(testStockCard);
+    // when
+    Map<String, String> valuesMap = nearExpiryNotifier.constructSubstitutionMap(testStockCard);
 
+    // then
     assertEquals("", valuesMap.get("lotCode"));
-  }
-  
-  private void prepareForGetValuesMap() {
-    doReturn(FACILITY_NAME).when(nearExpiryNotifier).getFacilityName(any(UUID.class));
-    doReturn(PROGRAM_NAME).when(nearExpiryNotifier).getProgramName(any(UUID.class));
-    doReturn(ORDERABLE_NAME).when(nearExpiryNotifier).getOrderableName(any(UUID.class));
-    doReturn(DateTimeFormatter.ISO_LOCAL_DATE).when(nearExpiryNotifier).getDateFormatter();
-    doReturn(URL_TO_VIEW_BIN_CARD).when(nearExpiryNotifier)
-        .getUrlToViewBinCard(any(StockCard.class));
-    ReflectionTestUtils.setField(nearExpiryNotifier, "expiringLotMap",
-        Collections.singletonMap(expiringLotId, expiringLot));
-    ReflectionTestUtils.setField(nearExpiryNotifier, "expirationDate", LocalDate.parse(TEST_DATE));
-  }
-  
-  @Test
-  public void getMessageSubjectShouldGetSubject() {
-    assertEquals(NOTIFICATION_NEAR_EXPIRY_SUBJECT, nearExpiryNotifier.getMessageSubject());
-  }
-  
-  @Test
-  public void getMessageContentShouldGetContent() {
-    assertEquals(NOTIFICATION_NEAR_EXPIRY_CONTENT, nearExpiryNotifier.getMessageContent());
   }
 }
