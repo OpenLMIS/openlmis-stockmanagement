@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.service.notifier;
 
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
@@ -23,17 +24,21 @@ import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.dto.referencedata.SupervisoryNodeDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.service.notification.NotificationService;
+import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.SupervisingUsersReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.SupervisoryNodeReferenceDataService;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Component
-public class StockCardNotifier extends BaseNotifier {
+public abstract class StockCardNotifier extends BaseNotifier {
 
   private static final XLogger XLOGGER = XLoggerFactory.getXLogger(StockCardNotifier.class);
 
@@ -46,27 +51,37 @@ public class StockCardNotifier extends BaseNotifier {
   @Autowired
   private NotificationService notificationService;
 
+  @Autowired
+  private FacilityReferenceDataService facilityReferenceDataService;
+
+  @Autowired
+  private ProgramReferenceDataService programReferenceDataService;
+
+  @Autowired
+  private OrderableReferenceDataService orderableReferenceDataService;
+
+  @Value("${email.urlToViewBinCard}")
+  private String urlToViewBinCard;
+
   /**
-   * Notify users with a certain right for the facility/program that facility has stocked out of a
-   * product.
+   * Notify user with "Edit stock inventories" right for the facility/program that facility has
+   * stocked out of a product.
    *
    * @param stockCard StockCard for a product
    * @param rightId right UUID
-   * @param params message params to construct message
    */
   @Async
-  public void notifyStockEditors(StockCard stockCard, UUID rightId,
-      NotificationMessageParams params) {
+  public void notifyStockEditors(StockCard stockCard, UUID rightId) {
     Profiler profiler = new Profiler("NOTIFY_STOCK_EDITORS");
     profiler.setLogger(XLOGGER);
 
     profiler.start("GET_EDITORS");
     Collection<UserDto> recipients = getEditors(stockCard, rightId);
 
-    String subject = getMessage(params.getMessageSubject());
-    String content = getMessage(params.getMessageContent());
+    String subject = getMessage(getMessageSubject());
+    String content = getMessage(getMessageContent());
 
-    Map<String, String> valuesMap = params.getSubstitutionMap();
+    Map<String, String> valuesMap = getValuesMap(stockCard);
     StrSubstitutor sub = new StrSubstitutor(valuesMap);
 
     profiler.start("NOTIFY_RECIPIENTS");
@@ -95,5 +110,27 @@ public class StockCardNotifier extends BaseNotifier {
 
     return supervisingUsersReferenceDataService
         .findAll(supervisoryNode.getId(), rightId, stockCard.getProgramId());
+  }
+
+  abstract String getMessageSubject();
+  
+  abstract String getMessageContent();
+  
+  abstract Map<String, String> getValuesMap(StockCard stockCard);
+
+  String getFacilityName(UUID facilityId) {
+    return facilityReferenceDataService.findOne(facilityId).getName();
+  }
+
+  String getProgramName(UUID programId) {
+    return programReferenceDataService.findOne(programId).getName();
+  }
+
+  String getOrderableName(UUID orderableId) {
+    return orderableReferenceDataService.findOne(orderableId).getFullProductName();
+  }
+
+  String getUrlToViewBinCard(StockCard stockCard) {
+    return MessageFormat.format(urlToViewBinCard, stockCard.getId());
   }
 }

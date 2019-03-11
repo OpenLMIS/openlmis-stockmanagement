@@ -34,47 +34,41 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class StockoutNotifier {
+public class StockoutNotifier extends StockCardNotifier {
 
   @Autowired
   private LotReferenceDataService lotReferenceDataService;
-  
-  @Autowired
-  private StockCardNotifier stockCardNotifier;
 
   @Value("${email.urlToInitiateRequisition}")
   private String urlToInitiateRequisition;
 
-  /**
-   * Notify users with a certain right for the facility/program that facility has stocked out of a
-   * product.
-   *
-   * @param stockCard StockCard for a product
-   * @param rightId right UUID
-   */
-  public void notifyStockEditors(StockCard stockCard, UUID rightId) {
-    NotificationMessageParams params = new NotificationMessageParams(
-        NOTIFICATION_STOCKOUT_SUBJECT, NOTIFICATION_STOCKOUT_CONTENT,
-        constructSubstitutionMap(stockCard));
-    stockCardNotifier.notifyStockEditors(stockCard, rightId, params);
+  @Override
+  String getMessageSubject() {
+    return NOTIFICATION_STOCKOUT_SUBJECT;
   }
 
-  Map<String, String> constructSubstitutionMap(StockCard stockCard) {
+  @Override
+  String getMessageContent() {
+    return NOTIFICATION_STOCKOUT_CONTENT;
+  }
+
+  @Override
+  Map<String, String> getValuesMap(StockCard stockCard) {
     Map<String, String> valuesMap = new HashMap<>();
-    valuesMap.put("facilityName", stockCardNotifier.getFacilityName(stockCard.getFacilityId()));
-    valuesMap.put("orderableName", stockCardNotifier.getOrderableName(stockCard.getOrderableId()));
+    valuesMap.put("facilityName", getFacilityName(stockCard.getFacilityId()));
+    valuesMap.put("orderableName", getOrderableName(stockCard.getOrderableId()));
     valuesMap.put("orderableNameLotInformation",
         getOrderableNameLotInformation(valuesMap.get("orderableName"), stockCard.getLotId()));
-    valuesMap.put("programName", stockCardNotifier.getProgramName(stockCard.getProgramId()));
+    valuesMap.put("programName", getProgramName(stockCard.getProgramId()));
 
     List<StockCardLineItem> lineItems = stockCard.getLineItems();
     LocalDate stockoutDate = lineItems.get(lineItems.size() - 1).getOccurredDate();
-    valuesMap.put("stockoutDate", stockCardNotifier.getDateFormatter().format(stockoutDate));
+    valuesMap.put("stockoutDate", getDateFormatter().format(stockoutDate));
     long numberOfDaysOfStockout = getNumberOfDaysOfStockout(stockoutDate);
     valuesMap.put("numberOfDaysOfStockout", numberOfDaysOfStockout
         + (numberOfDaysOfStockout == 1 ? " day" : " days"));
 
-    valuesMap.put("urlToViewBinCard", stockCardNotifier.getUrlToViewBinCard(stockCard.getId()));
+    valuesMap.put("urlToViewBinCard", getUrlToViewBinCard(stockCard));
     valuesMap.put("urlToInitiateRequisition", getUrlToInitiateRequisition(stockCard));
     return valuesMap;
   }
