@@ -42,7 +42,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-public class NearExpiryNotifier extends StockCardNotifier {
+public class NearExpiryNotifier {
 
   private static final XLogger XLOGGER = XLoggerFactory.getXLogger(NearExpiryNotifier.class);
 
@@ -54,6 +54,9 @@ public class NearExpiryNotifier extends StockCardNotifier {
 
   @Autowired
   StockCardRepository stockCardRepository;
+  
+  @Autowired
+  StockCardNotifier stockCardNotifier;
 
   @Value("${time.zoneId}")
   private String timeZoneId;
@@ -62,20 +65,6 @@ public class NearExpiryNotifier extends StockCardNotifier {
   
   private LocalDate expirationDate;
 
-  /**
-   * Constructor for test cases.
-   * 
-   * @param lotReferenceDataService lot ref data service
-   * @param stockCardRepository stock card repository
-   */
-  NearExpiryNotifier(LotReferenceDataService lotReferenceDataService,
-      RightReferenceDataService rightReferenceDataService,
-      StockCardRepository stockCardRepository) {
-    this.lotReferenceDataService = lotReferenceDataService;
-    this.rightReferenceDataService = rightReferenceDataService;
-    this.stockCardRepository = stockCardRepository;
-  }
-  
   /**
    * Check stock cards with lots that have a certain expiration date. If any are found, notify stock
    * card owners.
@@ -98,33 +87,23 @@ public class NearExpiryNotifier extends StockCardNotifier {
 
     RightDto right = rightReferenceDataService.findRight(STOCK_INVENTORIES_EDIT);
     UUID rightId = right.getId();
-    expiringStockCards.forEach(card -> notifyEditors(card, rightId));
+    expiringStockCards.forEach(card -> {
+      NotificationMessageParams params = new NotificationMessageParams(
+          NOTIFICATION_NEAR_EXPIRY_SUBJECT, NOTIFICATION_NEAR_EXPIRY_CONTENT,
+          constructSubstitutionMap(card));
+      stockCardNotifier.notifyStockEditors(card, rightId, params);
+    });
   }
 
-  @Override
-  String getMessageSubject() {
-    return NOTIFICATION_NEAR_EXPIRY_SUBJECT;
-  }
-
-  @Override
-  String getMessageContent() {
-    return NOTIFICATION_NEAR_EXPIRY_CONTENT;
-  }
-
-  @Override
-  Map<String, String> getValuesMap(StockCard stockCard) {
+  Map<String, String> constructSubstitutionMap(StockCard stockCard) {
     Map<String, String> valuesMap = new HashMap<>();
-    valuesMap.put("facilityName", getFacilityName(stockCard.getFacilityId()));
-    valuesMap.put("programName", getProgramName(stockCard.getProgramId()));
-    valuesMap.put("orderableName", getOrderableName(stockCard.getOrderableId()));
+    valuesMap.put("facilityName", stockCardNotifier.getFacilityName(stockCard.getFacilityId()));
+    valuesMap.put("programName", stockCardNotifier.getProgramName(stockCard.getProgramId()));
+    valuesMap.put("orderableName", stockCardNotifier.getOrderableName(stockCard.getOrderableId()));
     LotDto lot = expiringLotMap.get(stockCard.getLotId());
     valuesMap.put("lotCode", null != lot ? lot.getLotCode() : "");
-    valuesMap.put("expirationDate", getDateFormatter().format(expirationDate));
-    valuesMap.put("urlToViewBinCard", getUrlToViewBinCard(stockCard));
+    valuesMap.put("expirationDate", stockCardNotifier.getDateFormatter().format(expirationDate));
+    valuesMap.put("urlToViewBinCard", stockCardNotifier.getUrlToViewBinCard(stockCard.getId()));
     return valuesMap;
-  }
-  
-  void notifyEditors(StockCard stockCard, UUID rightId) {
-    super.notifyStockEditors(stockCard, rightId);
   }
 }
