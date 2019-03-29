@@ -47,6 +47,8 @@ import org.springframework.util.MultiValueMap;
 @SuppressWarnings("PMD.TooManyMethods")
 public class StockCardSummariesV2SearchParamsTest {
 
+  private static final String INCORRECTLY_FORMATTED_ID = "123-456";
+
   @Rule
   public ExpectedException exception = ExpectedException.none();
 
@@ -137,7 +139,7 @@ public class StockCardSummariesV2SearchParamsTest {
     exception.expectMessage(ERROR_UUID_WRONG_FORMAT);
 
     MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
-    parameters.add(PROGRAM_ID, "qwer");
+    parameters.add(PROGRAM_ID, INCORRECTLY_FORMATTED_ID);
 
     new StockCardSummariesV2SearchParams(parameters);
   }
@@ -148,7 +150,7 @@ public class StockCardSummariesV2SearchParamsTest {
     exception.expectMessage(ERROR_UUID_WRONG_FORMAT);
 
     MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
-    parameters.add(FACILITY_ID, "abcd");
+    parameters.add(FACILITY_ID, INCORRECTLY_FORMATTED_ID);
 
     new StockCardSummariesV2SearchParams(parameters);
   }
@@ -161,7 +163,7 @@ public class StockCardSummariesV2SearchParamsTest {
     MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
     parameters.add(PROGRAM_ID, UUID.randomUUID().toString());
     parameters.add(FACILITY_ID, UUID.randomUUID().toString());
-    parameters.add(ORDERABLE_ID, "asdf");
+    parameters.add(ORDERABLE_ID, INCORRECTLY_FORMATTED_ID);
 
     new StockCardSummariesV2SearchParams(parameters);
   }
@@ -174,7 +176,7 @@ public class StockCardSummariesV2SearchParamsTest {
     MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
     parameters.add(PROGRAM_ID, UUID.randomUUID().toString());
     parameters.add(FACILITY_ID, UUID.randomUUID().toString());
-    parameters.add(AS_OF_DATE, "abcd");
+    parameters.add(AS_OF_DATE, INCORRECTLY_FORMATTED_ID);
 
     new StockCardSummariesV2SearchParams(parameters);
   }

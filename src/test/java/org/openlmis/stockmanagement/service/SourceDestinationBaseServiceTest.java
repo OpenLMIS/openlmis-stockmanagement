@@ -60,6 +60,9 @@ public class SourceDestinationBaseServiceTest {
   private static final String FACILITY_NAME = "Facility Name";
   private static final String ORGANIZATION_NAME = "NGO No 1";
 
+  private static final String ORGANIZATION_NODE_NAME = "NGO";
+  private static final String FACILITY_NODE_NAME = "Health Center";
+
   @InjectMocks
   private ValidSourceService validSourceService;
 
@@ -123,7 +126,7 @@ public class SourceDestinationBaseServiceTest {
   }
 
   @Test
-  public void shouldReturnSourceAssignmentWhenSourceIsA_facilityWithoutNode()
+  public void shouldReturnSourceAssignmentWhenSourceIsAFacilityWithoutNode()
       throws Exception {
     //given
     UUID programId = randomUUID();
@@ -304,8 +307,8 @@ public class SourceDestinationBaseServiceTest {
         .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
     List<ValidDestinationAssignment> validDestinationAssignments = asList(
-        createOrganizationDestination(mockedOrganizationNode("CHW")),
-        createFacilityDestination(mockedFacilityNode("Balaka District Hospital")));
+        createOrganizationDestination(mockedOrganizationNode(ORGANIZATION_NODE_NAME)),
+        createFacilityDestination(mockedFacilityNode(FACILITY_NODE_NAME)));
 
     when(destinationRepository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
         .thenReturn(validDestinationAssignments);
@@ -318,16 +321,16 @@ public class SourceDestinationBaseServiceTest {
     assertThat(validDestinations.size(), is(2));
 
     ValidSourceDestinationDto organization = validDestinations.get(0);
-    assertThat(organization.getName(), is("CHW"));
+    assertThat(organization.getName(), is(ORGANIZATION_NODE_NAME));
     assertThat(organization.getIsFreeTextAllowed(), is(true));
 
     ValidSourceDestinationDto facility = validDestinations.get(1);
-    assertThat(facility.getName(), is("Balaka District Hospital"));
+    assertThat(facility.getName(), is(FACILITY_NODE_NAME));
     assertThat(facility.getIsFreeTextAllowed(), is(false));
   }
 
   @Test
-  public void shouldReturnListOfSourceDtosWhenFindValidSourceAssignment()
+  public void shouldReturnListOfSourceDtosWhenFindingValidSourceAssignment()
       throws Exception {
     //given
     UUID programId = randomUUID();
@@ -336,8 +339,8 @@ public class SourceDestinationBaseServiceTest {
         .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
     List<ValidSourceAssignment> validSourceAssignments = asList(
-        createOrganizationSourceAssignment(mockedOrganizationNode("NGO")),
-        createFacilitySourceAssignment(mockedFacilityNode("Health Center")));
+        createOrganizationSourceAssignment(mockedOrganizationNode(ORGANIZATION_NODE_NAME)),
+        createFacilitySourceAssignment(mockedFacilityNode(FACILITY_NODE_NAME)));
 
     when(sourceRepository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
         .thenReturn(validSourceAssignments);
@@ -350,11 +353,11 @@ public class SourceDestinationBaseServiceTest {
     assertThat(validSources.size(), is(2));
 
     ValidSourceDestinationDto organization = validSources.get(0);
-    assertThat(organization.getName(), is("NGO"));
+    assertThat(organization.getName(), is(ORGANIZATION_NODE_NAME));
     assertThat(organization.getIsFreeTextAllowed(), is(true));
 
     ValidSourceDestinationDto facility = validSources.get(1);
-    assertThat(facility.getName(), is("Health Center"));
+    assertThat(facility.getName(), is(FACILITY_NODE_NAME));
     assertThat(facility.getIsFreeTextAllowed(), is(false));
   }
 
