@@ -42,6 +42,7 @@ import org.openlmis.stockmanagement.validators.ReceiveIssueReasonValidator;
 import org.openlmis.stockmanagement.validators.SourceDestinationAssignmentValidator;
 import org.openlmis.stockmanagement.validators.StockEventValidator;
 import org.openlmis.stockmanagement.validators.StockEventVvmValidator;
+import org.openlmis.stockmanagement.validators.UnpackKitValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -96,6 +97,9 @@ public class StockEventValidationsServiceTest {
   @MockBean
   private PhysicalInventoryAdjustmentReasonsValidator physicalInventoryReasonsValidator;
 
+  @MockBean
+  private UnpackKitValidator unpackKitValidator;
+
   @Before
   public void setUp() throws Exception {
     //make real validators do nothing because
@@ -112,6 +116,7 @@ public class StockEventValidationsServiceTest {
     doNothing().when(orderableLotDuplicationValidator).validate(any(StockEventDto.class));
     doNothing().when(reasonExistenceValidator).validate(any(StockEventDto.class));
     doNothing().when(physicalInventoryReasonsValidator).validate(any(StockEventDto.class));
+    doNothing().when(unpackKitValidator).validate(any(StockEventDto.class));
   }
 
   @Test

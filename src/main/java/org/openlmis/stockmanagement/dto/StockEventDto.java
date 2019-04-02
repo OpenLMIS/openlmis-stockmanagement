@@ -156,4 +156,15 @@ public class StockEventDto {
     return nodeIds;
   }
 
+  /**
+   * Checks if a stock event is a kit unpacking event or not. Returns true if this is a kit unpacking
+   * event.
+   */
+  @JsonIgnore
+  public boolean isKitUnpacking() {
+    return hasLineItems()
+        && lineItems
+        .stream()
+        .anyMatch(l -> context.getUnpackReasonId().equals(l.getReasonId()));
+  }
 }

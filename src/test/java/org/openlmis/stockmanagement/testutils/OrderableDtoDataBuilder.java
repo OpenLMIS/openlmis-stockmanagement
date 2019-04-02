@@ -15,10 +15,13 @@
 
 package org.openlmis.stockmanagement.testutils;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.openlmis.stockmanagement.dto.referencedata.DispensableDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableChildDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 
 public class OrderableDtoDataBuilder {
@@ -30,6 +33,7 @@ public class OrderableDtoDataBuilder {
   private String fullProductName;
   private Long netContent;
   private DispensableDto dispensable;
+  private Set<OrderableChildDto> children;
   private Map<String, String> identifiers;
   private Map<String, String> extraData;
 
@@ -43,6 +47,7 @@ public class OrderableDtoDataBuilder {
     productCode = "P" + instanceNumber;
     fullProductName = "Product " + instanceNumber;
     netContent = 10L;
+    children = Collections.emptySet();
     dispensable = new DispensableDto("pack", "Pack");
     identifiers = new HashMap<>();
     extraData = null;
@@ -50,11 +55,12 @@ public class OrderableDtoDataBuilder {
 
   /**
    * Creates new instance of {@link OrderableDto} with properties.
+   *
    * @return created orderable.
    */
   public OrderableDto build() {
     return new OrderableDto(
-        id, productCode, fullProductName, netContent, dispensable, identifiers, extraData
+        id, productCode, fullProductName, netContent, dispensable, children, identifiers, extraData
     );
   }
 

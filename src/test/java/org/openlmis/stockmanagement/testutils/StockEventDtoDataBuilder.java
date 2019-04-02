@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.apache.commons.lang.RandomStringUtils;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
@@ -38,16 +39,6 @@ public class StockEventDtoDataBuilder {
   private UUID userId = UUID.randomUUID();
   private List<StockEventLineItemDto> lineItems = new ArrayList<>();
   private StockEventProcessContext context;
-
-  public StockEventDto build() {
-    return new StockEventDto(resourceId, facilityId, programId, signature, documentNumber, userId,
-        lineItems, context);
-  }
-
-  public StockEventDtoDataBuilder addLineItem(StockEventLineItemDto lineItemDto) {
-    this.lineItems.add(lineItemDto);
-    return this;
-  }
 
   /**
    * Create stock event dto object for testing with two line items.
@@ -82,7 +73,7 @@ public class StockEventDtoDataBuilder {
 
   /**
    * Create stock event dto object for testing.
-   *
+   *createStockEventDto
    * @return created dto object.
    */
   public static StockEventDto createStockEventDto() {
@@ -132,5 +123,15 @@ public class StockEventDtoDataBuilder {
     stockEventLineItem.setSourceFreeText(null);
     stockEventLineItem.setDestinationFreeText(null);
     return stockEventDto;
+  }
+
+  public StockEventDto build() {
+    return new StockEventDto(resourceId, facilityId, programId, signature, documentNumber, userId,
+        lineItems, context);
+  }
+
+  public StockEventDtoDataBuilder addLineItem(StockEventLineItemDto... lineItemDtos) {
+    this.lineItems.addAll(Arrays.stream(lineItemDtos).collect(Collectors.toSet()));
+    return this;
   }
 }

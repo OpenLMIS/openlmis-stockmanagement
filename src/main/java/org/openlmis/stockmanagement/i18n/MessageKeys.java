@@ -148,6 +148,11 @@ public abstract class MessageKeys {
   public static final String ERROR_EVENT_LOT_ORDERABLE_NOT_MATCH = EVENT_ERROR_PREFIX
       + ".lot.not.match.orderable";
 
+  public static final String ERROR_EVENT_CANNOT_UNPACK_REGULAR_ORDERABLE = EVENT_ERROR_PREFIX +
+      "cannot.unpack.orderable.not.kit";
+  public static final String ERROR_EVENT_CANNOT_UNPACK_CONSTITUENT_NOT_ACCOUNTED_FOR =
+      EVENT_ERROR_PREFIX + "cannot.unpack.when.all.constituents.not.accounted.for";
+
   //reason configuration
   public static final String ERROR_REASON_ID_EMPTY = ERROR_PREFIX
       + ".reason.id.isEmpty";

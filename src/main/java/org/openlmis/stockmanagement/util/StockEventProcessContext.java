@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.util;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import lombok.Getter;
 import lombok.Setter;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
@@ -29,6 +30,7 @@ import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * Before processing a stock event, one instance of this class will be created to hold all things
@@ -51,6 +53,10 @@ public class StockEventProcessContext {
   private LazyGrouping<UUID, StockCardLineItemReason> eventReasons;
   private LazyGrouping<UUID, Node> nodes;
   private LazyGrouping<OrderableLotIdentity, StockCard> cards;
+
+  @Value("${stockmanagement.kit.unpack.reasonId}")
+  @Getter
+  private UUID unpackReasonId;
 
   public UUID getCurrentUserId() {
     return currentUserId.get();

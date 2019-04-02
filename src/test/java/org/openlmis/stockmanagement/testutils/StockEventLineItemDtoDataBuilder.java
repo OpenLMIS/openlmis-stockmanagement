@@ -96,6 +96,11 @@ public class StockEventLineItemDtoDataBuilder {
     return this;
   }
 
+  public StockEventLineItemDtoDataBuilder withOrderableId(UUID orderableId) {
+    this.orderableId = orderableId;
+    return this;
+  }
+
   private void noSourceAndDestination() {
     sourceId = null;
     sourceFreeText = null;

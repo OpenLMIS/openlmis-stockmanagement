@@ -19,17 +19,21 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
+import org.openlmis.stockmanagement.testutils.StockEventLineItemDtoDataBuilder;
 import org.openlmis.stockmanagement.util.LazyResource;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
 public class StockEventDtoTest {
+
   @Test
   public void shouldConvertFromDtoToJpaModel() throws Exception {
     //given
@@ -61,4 +65,37 @@ public class StockEventDtoTest {
     assertThat(between, lessThan(2L));
   }
 
+  @Test
+  public void isUnpackingShouldReturnFalseWhenNotUnpacking() {
+    StockEventProcessContext context = new StockEventProcessContext();
+    context.setUnpackReasonId(UUID.randomUUID());
+
+    StockEventLineItemDto lineItemDto = new StockEventLineItemDtoDataBuilder().build();
+    StockEventDto stockEventDto = new StockEventDtoDataBuilder()
+        .addLineItem(lineItemDto).build();
+    stockEventDto.setContext(context);
+
+    boolean response = stockEventDto.isKitUnpacking();
+
+    assertFalse(response);
+  }
+
+  @Test
+  public void isUnpackingShouldReturnTrueWhenUnpackingLineItemExists() {
+    UUID unpackingReasonId = UUID.randomUUID();
+    StockEventProcessContext context = new StockEventProcessContext();
+    context.setUnpackReasonId(unpackingReasonId);
+
+    StockEventLineItemDto lineItemDto = new StockEventLineItemDtoDataBuilder()
+        .withReasonId(unpackingReasonId)
+        .build();
+    StockEventDto stockEventDto = new StockEventDtoDataBuilder()
+        .addLineItem(lineItemDto).build();
+
+    stockEventDto.setContext(context);
+
+    boolean response = stockEventDto.isKitUnpacking();
+
+    assertTrue(response);
+  }
 }

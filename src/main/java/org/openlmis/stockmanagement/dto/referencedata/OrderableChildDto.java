@@ -15,31 +15,21 @@
 
 package org.openlmis.stockmanagement.dto.referencedata;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
+import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
 
-@Getter
-@Setter
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
-public class OrderableDto {
-  private UUID id;
-  private String productCode;
-  private String fullProductName;
-  private Long netContent;
-  private DispensableDto dispensable;
-  private Set<OrderableChildDto> children;
-  private Map<String, String> identifiers;
-  private Map<String, String> extraData;
+@NoArgsConstructor
+public class OrderableChildDto {
+
+  @Getter
+  @Setter
+  private Integer quantity;
+
+  @Getter
+  @Setter
+  private ObjectReferenceDto orderable;
 }

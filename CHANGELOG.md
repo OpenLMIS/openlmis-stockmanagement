@@ -3,6 +3,7 @@
 
 New functionality added in a backwards-compatible manner:
 * [OLMIS-3186](https://openlmis.atlassian.net/browse/OLMIS-3186): Add check for lots that are near expiry (6 months) and send notification.
+* [OLMIS-682](https://openlmis.atlassian.net/browse/OLMIS-682): Unpack kits into stock.
 
 Bug fixes, security and performance improvements, also backwards-compatible:
 * [OLMIS-5544](https://openlmis.atlassian.net/browse/OLMIS-5544): Fixed issue with stockout notification being sent for some stock events incorrectly.
