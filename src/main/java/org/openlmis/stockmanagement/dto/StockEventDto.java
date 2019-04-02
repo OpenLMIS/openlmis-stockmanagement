@@ -157,8 +157,8 @@ public class StockEventDto {
   }
 
   /**
-   * Checks if a stock event is a kit unpacking event or not. Returns true if this is a kit unpacking
-   * event.
+   * Checks if a stock event is a kit unpacking event or not. Returns true if this is a kit
+   * unpacking event.
    */
   @JsonIgnore
   public boolean isKitUnpacking() {
