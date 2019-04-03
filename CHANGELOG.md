@@ -10,6 +10,7 @@ Bug fixes, security and performance improvements, also backwards-compatible:
 * [OLMIS-3210](https://openlmis.atlassian.net/browse/OLMIS-3210): Physical inventory PUT endpoint should create draft with given id from path.
 * [OLMIS-6005](https://openlmis.atlassian.net/browse/OLMIS-6005): Moved searching for rights to avoild multiple requests for the same data.
 * [OLMIS-4531](https://openlmis.atlassian.net/browse/OLMIS-4531): Added compressing HTTP POST responses.
+* [OLMIS-6176](https://openlmis.atlassian.net/browse/OLMIS-6176): Added missing migration with Physical Inventory report.
 
 4.0.0 / 2018-12-12
 ==================
