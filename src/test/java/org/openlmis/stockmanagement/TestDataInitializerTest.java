@@ -16,7 +16,6 @@
 package org.openlmis.stockmanagement;
 
 import static org.mockito.Mockito.verify;
-import static org.openlmis.stockmanagement.TestDataInitializer.JASPER_TEMPLATES_TABLE;
 import static org.openlmis.stockmanagement.TestDataInitializer.NODES_TABLE;
 import static org.openlmis.stockmanagement.TestDataInitializer.ORGANIZATIONS_TABLE;
 import static org.openlmis.stockmanagement.TestDataInitializer.PHYSICAL_INVENTORIES_TABLE;
@@ -43,9 +42,6 @@ import org.springframework.core.io.Resource;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TestDataInitializerTest {
-
-  @Mock
-  private Resource jasperTemplatesResource;
 
   @Mock
   private Resource nodesResource;
@@ -118,7 +114,6 @@ public class TestDataInitializerTest {
     verify(loader).insertToDbFromCsv(PHYSICAL_INVENTORIES_TABLE, physicalInventoriesResource);
     verify(loader).insertToDbFromCsv(
         PHYSICAL_INVENTORY_LINE_ITEMS_TABLE, physicalInventoryLineItemsResource);
-    verify(loader).insertToDbFromCsv(JASPER_TEMPLATES_TABLE, jasperTemplatesResource);
     verify(loader).insertToDbFromCsv(
         PHYSICAL_INVENTORY_LINE_ITEM_ADJUSTMENTS_TABLE, physicalInventoryLineItemAdjustments);
   }
