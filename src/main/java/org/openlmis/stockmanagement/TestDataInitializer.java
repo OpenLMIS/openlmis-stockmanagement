@@ -38,7 +38,6 @@ public class TestDataInitializer implements CommandLineRunner {
   private static final String FILE_EXTENSION = ".csv";
 
   // table names
-  private static final String JASPER_TEMPLATES = "jasper_templates";
   private static final String NODES = "nodes";
   private static final String ORGANIZATIONS = "organizations";
   private static final String PHYSICAL_INVENTORIES = "physical_inventories";
@@ -57,7 +56,6 @@ public class TestDataInitializer implements CommandLineRunner {
 
   // database path
   private static final String DB_SCHEMA = "stockmanagement.";
-  static final String JASPER_TEMPLATES_TABLE = DB_SCHEMA + JASPER_TEMPLATES;
   static final String NODES_TABLE = DB_SCHEMA + NODES;
   static final String ORGANIZATIONS_TABLE = DB_SCHEMA + ORGANIZATIONS;
   static final String PHYSICAL_INVENTORIES_TABLE = DB_SCHEMA + PHYSICAL_INVENTORIES;
@@ -76,10 +74,6 @@ public class TestDataInitializer implements CommandLineRunner {
       DB_SCHEMA + VALID_DESTINATION_ASSIGNMENTS;
   static final String PHYSICAL_INVENTORY_LINE_ITEM_ADJUSTMENTS_TABLE =
       DB_SCHEMA + PHYSICAL_INVENTORY_LINE_ITEM_ADJUSTMENTS;
-
-
-  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + JASPER_TEMPLATES + FILE_EXTENSION)
-  private Resource jasperTemplatesResource;
 
   @Value(value = DEMO_DATA_PATH + DB_SCHEMA + NODES + FILE_EXTENSION)
   private Resource nodesResource;
@@ -158,7 +152,6 @@ public class TestDataInitializer implements CommandLineRunner {
     loader.insertToDbFromCsv(PHYSICAL_INVENTORIES_TABLE, physicalInventoriesResource);
     loader.insertToDbFromCsv(
         PHYSICAL_INVENTORY_LINE_ITEMS_TABLE, physicalInventoryLineItemsResource);
-    loader.insertToDbFromCsv(JASPER_TEMPLATES_TABLE, jasperTemplatesResource);
     loader.insertToDbFromCsv(
         PHYSICAL_INVENTORY_LINE_ITEM_ADJUSTMENTS_TABLE, physicalInventoryLineItemAdjustments);
 

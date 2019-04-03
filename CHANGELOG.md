@@ -1,3 +1,10 @@
+4.0.1 / 2019-04-08
+==================
+
+Bug fixes:
+* [OLMIS-6128](https://openlmis.atlassian.net/browse/OLMIS-6128): Changed dev image version to 5.2 with fix for syncing with transifex.
+* [OLMIS-6176](https://openlmis.atlassian.net/browse/OLMIS-6176): Added missing migration with Physical Inventory report.
+
 4.0.0 / 2018-12-12
 ==================
 
