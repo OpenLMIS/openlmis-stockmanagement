@@ -30,7 +30,6 @@ import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
-import org.springframework.beans.factory.annotation.Value;
 
 /**
  * Before processing a stock event, one instance of this class will be created to hold all things
@@ -40,6 +39,7 @@ import org.springframework.beans.factory.annotation.Value;
  */
 @Setter
 public class StockEventProcessContext {
+
   private LazyResource<UUID> currentUserId;
   private LazyResource<ProgramDto> program;
   private LazyResource<FacilityDto> facility;
@@ -54,7 +54,6 @@ public class StockEventProcessContext {
   private LazyGrouping<UUID, Node> nodes;
   private LazyGrouping<OrderableLotIdentity, StockCard> cards;
 
-  @Value("${stockmanagement.kit.unpack.reasonId}")
   @Getter
   private UUID unpackReasonId;
 

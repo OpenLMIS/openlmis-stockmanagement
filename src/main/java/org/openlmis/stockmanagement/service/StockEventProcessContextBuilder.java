@@ -59,6 +59,7 @@ import org.slf4j.Logger;
 import org.slf4j.ext.XLogger;
 import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
@@ -105,6 +106,9 @@ public class StockEventProcessContextBuilder {
   @Autowired
   private ValidDestinationAssignmentRepository validDestinationAssignmentRepository;
 
+  @Value("${stockmanagement.kit.unpack.reasonId}")
+  private UUID unpackReasonId;
+
   /**
    * Before processing events, put all needed ref data into context so we don't have to do frequent
    * network requests.
@@ -126,6 +130,8 @@ public class StockEventProcessContextBuilder {
         .getAuthentication();
 
     Supplier<UUID> userIdSupplier;
+
+    context.setUnpackReasonId(unpackReasonId);
 
     if (authentication.isClientOnly()) {
       userIdSupplier = eventDto::getUserId;
