@@ -122,7 +122,7 @@ public class UnpackKitValidatorTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void shouldThrowExceptionWhenUnpackingWithWrongAmounts() {
+  public void shouldThrowExceptionWhenUnpackingWithLessQuantityThanUnpackList() {
     StockEventLineItemDto kitLineItem = createStockEventLineItem(UNPACK_REASON_ID,
         kitDto.getId(), 2);
     StockEventLineItemDto lineItem1 = createStockEventLineItem(UUID.randomUUID(),
@@ -130,6 +130,21 @@ public class UnpackKitValidatorTest {
 
     StockEventLineItemDto lineItem2 = createStockEventLineItem(UUID.randomUUID(),
         constituentDto2.getId(), 2);
+
+    StockEventDto stockEventDto = createStockEvent(kitLineItem, lineItem1, lineItem2);
+
+    validator.validate(stockEventDto);
+  }
+
+  @Test(expected = ValidationMessageException.class)
+  public void shouldThrowExceptionWhenUnpackingWithMoreQuantityThanUnpackList() {
+    StockEventLineItemDto kitLineItem = createStockEventLineItem(UNPACK_REASON_ID,
+        kitDto.getId(), 2);
+    StockEventLineItemDto lineItem1 = createStockEventLineItem(UUID.randomUUID(),
+        constituentDto1.getId(), 50);
+
+    StockEventLineItemDto lineItem2 = createStockEventLineItem(UUID.randomUUID(),
+        constituentDto2.getId(), 20);
 
     StockEventDto stockEventDto = createStockEvent(kitLineItem, lineItem1, lineItem2);
 

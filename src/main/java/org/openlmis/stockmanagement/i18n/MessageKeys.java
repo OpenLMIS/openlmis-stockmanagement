@@ -200,9 +200,11 @@ public abstract class MessageKeys {
   public static final String ERROR_EVENT_LOT_ORDERABLE_NOT_MATCH = EVENT_ERROR_PREFIX
       + ".lot.not.match.orderable";
   public static final String ERROR_EVENT_CANNOT_UNPACK_REGULAR_ORDERABLE = EVENT_ERROR_PREFIX
-      + "cannot.unpack.orderable.not.kit";
+      + ".cannot.unpack.orderable.not.kit";
   public static final String ERROR_EVENT_CANNOT_UNPACK_CONSTITUENT_NOT_ACCOUNTED_FOR =
-      EVENT_ERROR_PREFIX + "cannot.unpack.when.all.constituents.not.accounted.for";
+      EVENT_ERROR_PREFIX + ".cannot.unpack.when.all.constituents.not.accounted.for";
+  public static final String ERROR_EVENT_CANNOT_UNPACK_WHEN_EXTRA_CONSTITUENTS_CREDITED =
+      EVENT_ERROR_PREFIX + ".cannot.unpack.when.extra.constituents.credited";
   private static final String PHYSICAL_INVENTORY_ERROR_PREFIX = ERROR_PREFIX + ".physicalInventory";
   //physical inventory
   public static final String ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING =
