@@ -192,6 +192,21 @@ debugger has connected.
 
 Environment variables common to all services are listed here: https://github.com/OpenLMIS/openlmis-template-service/blob/master/README.md#environment-variables
 
+This service uses the following environment variables that are not common to other services.
+
+```
+# The ID of the reason in Stock Management that should be used to create consumption inventory entries. Used by requisitions.
+CONSUMED_REASON_ID=b5c27da7-bdda-4790-925a-9484c5dfb594
+
+# The ID of the reason in Stock Management that should be used to create reeceipts inventory entries. Used by requisitions.
+RECEIPTS_REASON_ID=313f2f5f-0c22-4626-8c49-3554ef763de3
+
+# The ID of the reason in Stock Management that should be used for unpacking a kit.
+KIT_UNPACK_REASON_ID=9b4b653a-f319-4a1b-bb80-8d6b4dd6cc12
+
+# The ID of the reason in Stock Management that should be used to increment stock of constituents of an unpacked kit.
+UNPACKED_FROM_KIT_REASON_ID=0676fdea-9ba8-4e6d-ae26-bb14f0dcfecd
+```
 ## Steps to create test data for performance testing
 
 1. Log on to the server(ssh)
