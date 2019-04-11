@@ -28,7 +28,9 @@ import java.util.UUID;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
+import org.openlmis.stockmanagement.i18n.MessageService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
+import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -38,6 +40,9 @@ public class StockoutNotifier {
 
   @Autowired
   private LotReferenceDataService lotReferenceDataService;
+
+  @Autowired
+  private MessageService messageService;
   
   @Autowired
   private StockCardNotifier stockCardNotifier;
@@ -54,7 +59,8 @@ public class StockoutNotifier {
    */
   public void notifyStockEditors(StockCard stockCard, UUID rightId) {
     NotificationMessageParams params = new NotificationMessageParams(
-        NOTIFICATION_STOCKOUT_SUBJECT, NOTIFICATION_STOCKOUT_CONTENT,
+        getMessage(NOTIFICATION_STOCKOUT_SUBJECT),
+        getMessage(NOTIFICATION_STOCKOUT_CONTENT),
         constructSubstitutionMap(stockCard));
     stockCardNotifier.notifyStockEditors(stockCard, rightId, params);
   }
@@ -94,5 +100,11 @@ public class StockoutNotifier {
   private String getUrlToInitiateRequisition(StockCard stockCard) {
     return MessageFormat.format(urlToInitiateRequisition,
         stockCard.getFacilityId(), stockCard.getProgramId(), "true", "false");
+  }
+
+  private String getMessage(String key) {
+    return messageService
+        .localize(new Message(key))
+        .getMessage();
   }
 }

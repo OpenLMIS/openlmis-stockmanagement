@@ -22,19 +22,14 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.FormatStyle;
 import java.util.Locale;
 import java.util.UUID;
-import org.openlmis.stockmanagement.i18n.MessageService;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
-import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.i18n.LocaleContextHolder;
 
 public class BaseNotifier {
-
-  @Autowired
-  protected MessageService messageService;
 
   @Autowired
   private FacilityReferenceDataService facilityReferenceDataService;
@@ -47,12 +42,6 @@ public class BaseNotifier {
 
   @Value("${email.urlToViewBinCard}")
   private String urlToViewBinCard;
-
-  protected String getMessage(String key) {
-    return messageService
-        .localize(new Message(key))
-        .getMessage();
-  }
 
   protected DateTimeFormatter getDateFormatter() {
     Locale locale = LocaleContextHolder.getLocale();

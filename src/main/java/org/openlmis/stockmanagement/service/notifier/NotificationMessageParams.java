@@ -22,7 +22,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 class NotificationMessageParams {
-
   private String messageSubject;
   private String messageContent;
   private Map<String, String> substitutionMap;

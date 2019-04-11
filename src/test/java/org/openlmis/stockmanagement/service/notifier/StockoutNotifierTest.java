@@ -21,6 +21,8 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.NOTIFICATION_STOCKOUT_CONTENT;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.NOTIFICATION_STOCKOUT_SUBJECT;
 import static org.openlmis.stockmanagement.service.notifier.BaseNotifierTest.FACILITY_NAME;
 import static org.openlmis.stockmanagement.service.notifier.BaseNotifierTest.LOT_CODE;
 import static org.openlmis.stockmanagement.service.notifier.BaseNotifierTest.ORDERABLE_NAME;
@@ -42,7 +44,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
+import org.openlmis.stockmanagement.i18n.MessageService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
+import org.openlmis.stockmanagement.util.Message;
+import org.openlmis.stockmanagement.util.Message.LocalizedMessage;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -58,6 +63,9 @@ public class StockoutNotifierTest {
 
   @Mock
   private StockCardNotifier stockCardNotifier;
+
+  @Mock
+  private MessageService messageService;
 
   @InjectMocks
   private StockoutNotifier stockoutNotifier;
@@ -91,6 +99,18 @@ public class StockoutNotifierTest {
     when(lotReferenceDataService.findOne(lotId)).thenReturn(lot);
     when(stockCardNotifier.getDateFormatter()).thenReturn(DateTimeFormatter.ISO_LOCAL_DATE);
     when(stockCardNotifier.getUrlToViewBinCard(stockCardId)).thenReturn(URL_TO_VIEW_BIN_CARD);
+
+    Message stockoutSubjectMessage = new Message(NOTIFICATION_STOCKOUT_SUBJECT);
+    LocalizedMessage stockoutSubjectLocalizedMessage =
+        stockoutSubjectMessage.new LocalizedMessage("stockout subject");
+    when(messageService.localize(stockoutSubjectMessage))
+        .thenReturn(stockoutSubjectLocalizedMessage);
+
+    Message stockoutContentMessage = new Message(NOTIFICATION_STOCKOUT_CONTENT);
+    LocalizedMessage stockoutContentLocalizedMessage =
+        stockoutSubjectMessage.new LocalizedMessage("stockout content");
+    when(messageService.localize(stockoutContentMessage))
+        .thenReturn(stockoutContentLocalizedMessage);
 
     when(lot.getLotCode()).thenReturn(LOT_CODE);
     

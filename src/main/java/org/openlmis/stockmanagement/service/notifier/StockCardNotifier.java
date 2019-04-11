@@ -63,9 +63,6 @@ public class StockCardNotifier extends BaseNotifier {
     profiler.start("GET_EDITORS");
     Collection<UserDto> recipients = getEditors(stockCard, rightId);
 
-    String subject = getMessage(params.getMessageSubject());
-    String content = getMessage(params.getMessageContent());
-
     Map<String, String> valuesMap = params.getSubstitutionMap();
     StrSubstitutor sub = new StrSubstitutor(valuesMap);
 
@@ -74,7 +71,8 @@ public class StockCardNotifier extends BaseNotifier {
       if (recipient.getHomeFacilityId().equals(stockCard.getFacilityId())) {
         valuesMap.put("username", recipient.getUsername());
         XLOGGER.debug("Recipient username = {}", recipient.getUsername());
-        notificationService.notify(recipient, sub.replace(subject), sub.replace(content));
+        notificationService.notify(recipient,
+            sub.replace(params.getMessageSubject()), sub.replace(params.getMessageContent()));
       }
     }
 
