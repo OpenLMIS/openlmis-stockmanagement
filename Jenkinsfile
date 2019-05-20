@@ -13,6 +13,7 @@ pipeline {
     options {
         buildDiscarder(logRotator(numToKeepStr: '15'))
         disableConcurrentBuilds()
+        skipStagesAfterUnstable()
     }
     environment {
         COMPOSE_PROJECT_NAME = "stockmanagement${BRANCH_NAME}"
@@ -62,12 +63,24 @@ pipeline {
             }
             steps {
                 withCredentials([file(credentialsId: '8da5ba56-8ebb-4a6a-bdb5-43c9d0efb120', variable: 'ENV_FILE')]) {
-                    sh( script: "./ci-buildImage.sh" )
+                    script {
+                        try {
+                            sh(script: "./ci-buildImage.sh")
+                        }
+                        catch (exc) {
+                            currentBuild.result = 'UNSTABLE'
+                        }
+                    }
                 }
             }
             post {
                 success {
                     archive 'build/libs/*.jar,build/resources/main/api-definition.html, build/resources/main/  version.properties'
+                }
+                unstable {
+                    script {
+                        notifyAfterFailure()
+                    }
                 }
                 failure {
                     script {
@@ -125,10 +138,17 @@ pipeline {
                     steps {
                         withSonarQubeEnv('Sonar OpenLMIS') {
                             withCredentials([string(credentialsId: 'SONAR_LOGIN', variable: 'SONAR_LOGIN'), string(credentialsId: 'SONAR_PASSWORD', variable: 'SONAR_PASSWORD')]) {
-                                sh(script: "./ci-sonarAnalysis.sh")
+                                script {
+                                    try {
+                                        sh(script: "./ci-sonarAnalysis.sh")
 
-                                // workaround: Sonar plugin retrieves the path directly from the output
-                                sh 'echo "Working dir: ${WORKSPACE}/build/sonar"'
+                                        // workaround: Sonar plugin retrieves the path directly from the output
+                                        sh 'echo "Working dir: ${WORKSPACE}/build/sonar"'
+                                    }
+                                    catch (exc) {
+                                        currentBuild.result = 'UNSTABLE'
+                                    }
+                                }
                             }
                         }
                         timeout(time: 1, unit: 'HOURS') {
@@ -141,6 +161,11 @@ pipeline {
                         }
                     }
                     post {
+                        unstable {
+                            script {
+                                notifyAfterFailure()
+                            }
+                        }
                         failure {
                             script {
                                 notifyAfterFailure()
@@ -242,9 +267,9 @@ pipeline {
 def notifyAfterFailure() {
     BRANCH = "${BRANCH_NAME}"
     if (BRANCH.equals("master") || BRANCH.startsWith("rel-")) {
-        slackSend color: 'danger', message: "${env.JOB_NAME} - #${env.BUILD_NUMBER} ${env.STAGE_NAME} FAILED (<${env.BUILD_URL}|Open>)"
+        slackSend color: 'danger', message: "${env.JOB_NAME} - #${env.BUILD_NUMBER} ${env.STAGE_NAME} ${currentBuild.result} (<${env.BUILD_URL}|Open>)"
     }
-    emailext subject: "${env.JOB_NAME} - #${env.BUILD_NUMBER} ${env.STAGE_NAME} FAILED",
-        body: """<p>${env.JOB_NAME} - #${env.BUILD_NUMBER} ${env.STAGE_NAME} FAILED</p><p>Check console <a href="${env.BUILD_URL}">output</a> to view the results.</p>""",
+    emailext subject: "${env.JOB_NAME} - #${env.BUILD_NUMBER} ${env.STAGE_NAME} ${currentBuild.result}",
+        body: """<p>${env.JOB_NAME} - #${env.BUILD_NUMBER} ${env.STAGE_NAME} ${currentBuild.result}</p><p>Check console <a href="${env.BUILD_URL}">output</a> to view the results.</p>""",
         recipientProviders: [[$class: 'CulpritsRecipientProvider'], [$class: 'DevelopersRecipientProvider']]
 }
