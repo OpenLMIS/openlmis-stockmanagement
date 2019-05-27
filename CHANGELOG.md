@@ -1,5 +1,5 @@
-4.1.0 / Work in Progress
-========================
+4.1.0 / 2019-05-27
+==================
 
 New functionality added in a backwards-compatible manner:
 * [OLMIS-3186](https://openlmis.atlassian.net/browse/OLMIS-3186): Add check for lots that are near expiry (6 months) and send notification.
