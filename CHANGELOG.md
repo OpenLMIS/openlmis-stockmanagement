@@ -1,6 +1,9 @@
 4.1.1 / 2019-05-27
 ==================
 
+Improvements:
+* [OLMIS-6335](https://openlmis.atlassian.net/browse/OLMIS-6335): Improved profiling for /api/v2/stockCardSummaries endpoint.
+
 Bug fixes, security and performance improvements, also backwards-compatible:
 * [OLMIS-6304](https://openlmis.atlassian.net/browse/OLMIS-6304): Fixed displaying product names in reports.
 
