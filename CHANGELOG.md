@@ -1,3 +1,9 @@
+4.1.1 / 2019-05-27
+==================
+
+Bug fixes, security and performance improvements, also backwards-compatible:
+* [OLMIS-6304](https://openlmis.atlassian.net/browse/OLMIS-6304): Fixed displaying product names in reports.
+
 4.1.0 / 2019-05-27
 ==================
 
