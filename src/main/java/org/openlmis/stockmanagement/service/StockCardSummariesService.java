@@ -47,6 +47,7 @@ import org.openlmis.stockmanagement.service.referencedata.OrderableFulfillRefere
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -121,23 +122,32 @@ public class StockCardSummariesService extends StockCardBaseService {
    * @return page of stock cards.
    */
   public StockCardSummaries findStockCards(StockCardSummariesV2SearchParams params) {
+    Profiler profiler = new Profiler("FIND_STOCK_CARD_SUMMARIES_FOR_PARAMS");
+    profiler.setLogger(LOGGER);
+
+    profiler.start("VALIDATE_VIEW_RIGHTS");
     permissionService.canViewStockCard(params.getProgramId(), params.getFacilityId());
 
+    profiler.start("GET_APPROVED_PRODUCTS");
     Page<OrderableDto> approvedProducts = approvedProductReferenceDataService
         .getApprovedProducts(params.getFacilityId(), params.getProgramId(),
             params.getOrderableIds());
 
+    profiler.start("FIND_ORDERABLE_FULFILL_BY_ID");
     Map<UUID, OrderableFulfillDto> orderableFulfillMap = orderableFulfillService.findByIds(
         approvedProducts.getContent().stream().map(OrderableDto::getId).collect(toList()));
 
+    profiler.start("FIND_STOCK_CARD_BY_PROGRAM_AND_FACILITY");
     List<StockCard> stockCards = cardRepository
         .findByProgramIdAndFacilityId(params.getProgramId(),
             params.getFacilityId());
 
     stockCards.stream().forEach(StockCard::calculateStockOnHand);
 
-    return new StockCardSummaries(approvedProducts.getContent(), stockCards,
+    StockCardSummaries result = new StockCardSummaries(approvedProducts.getContent(), stockCards,
         orderableFulfillMap, params.getAsOfDate(), approvedProducts.getTotalElements());
+    profiler.stop().log();
+    return result;
   }
 
   /**
