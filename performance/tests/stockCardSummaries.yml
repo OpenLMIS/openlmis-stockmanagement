@@ -1,10 +1,10 @@
 execution:
   - concurrency: 1
-    hold-for: 3m
-    scenario: get-stock-card-summaries
+    hold-for: 2m
+    scenario: get-stock-card-summaries-v2
 
 scenarios:
-  get-stock-card-summaries:
+  get-stock-card-summaries-v2:
     variables:
       # Comfort Health Clinic
       facility_id: e6799d64-d10d-4011-b8c2-0e4d4a3f65ce
@@ -14,11 +14,11 @@ scenarios:
       - include-scenario: get-user-token
       - url: ${__P(base-uri)}/api/v2/stockCardSummaries?facilityId=${facility_id}&programId=${program_id}
         method: GET
-        label: GetStockCardSummaries
+        label: GetStockCardSummariesV2
         headers:
           Authorization: Bearer ${access_token}
 
 reporting:
     - module: passfail
       criteria:
-        Get Stock Card Summaries too slow: p90 of GetStockCardSummaries>90000ms
+        Get Stock Card Summaries V2 too slow: p90 of GetStockCardSummariesV2>90000ms
