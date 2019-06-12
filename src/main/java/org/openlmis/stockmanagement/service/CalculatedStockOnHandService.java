@@ -13,40 +13,19 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.stockmanagement.dto;
+package org.openlmis.stockmanagement.service;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
+import org.springframework.stereotype.Service;
 
-@Getter
-@Setter
-@ToString
-@EqualsAndHashCode(callSuper = true)
-@AllArgsConstructor
-@NoArgsConstructor
-public final class CalculatedStockOnHandDto extends BaseDto
-        implements CalculatedStockOnHand.Exporter {
+@Service
+public class CalculatedStockOnHandService extends StockCardBaseService {
 
-  private Integer stockOnHand;
-
-  private UUID stockCardId;
-
-  private LocalDate date;
-
-  /**
-   * Creates new instance based on data from the domain object.
-   */
-  public static CalculatedStockOnHandDto newInstance(CalculatedStockOnHand domain) {
-    CalculatedStockOnHandDto dto = new CalculatedStockOnHandDto();
-    domain.export(dto);
-    return dto;
+  CalculatedStockOnHand saveFromStockCard(StockCard stockCard) {
+    stockCard.calculateStockOnHand();
+    return new CalculatedStockOnHand(stockCard.getStockOnHand(), stockCard, LocalDate.now());
   }
 }

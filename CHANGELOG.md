@@ -1,3 +1,9 @@
+4.1.2 / 2019-06-12
+==================
+
+New functionality:
+* [OLMIS-6368](https://openlmis.atlassian.net/browse/OLMIS-6368): Create SoH fact table.
+
 4.1.1 / 2019-05-27
 ==================
 
