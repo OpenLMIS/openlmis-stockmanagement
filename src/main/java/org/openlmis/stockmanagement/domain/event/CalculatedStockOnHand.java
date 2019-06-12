@@ -15,36 +15,60 @@
 
 package org.openlmis.stockmanagement.domain.event;
 
-import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
+import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 
 @Entity
-@Data
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "calculated_stocks_on_hand", schema = "stockmanagement")
 public class CalculatedStockOnHand extends BaseEntity {
 
-  @Column(nullable = false)
+  @Column(name = "stockonhand", nullable = false)
   private Integer stockOnHand;
 
-  @ManyToOne()
+  @ManyToOne
   @JoinColumn(nullable = false)
   private StockCard stockCard;
 
   @Column(nullable = false)
-  @JsonFormat(shape = STRING, pattern = "yyyy-MM-dd")
   private LocalDate date;
+
+  /**
+   * Exports data into exporter.
+   */
+  public void export(Exporter exporter) {
+    exporter.setId(getId());
+    exporter.setStockOnHand(getStockOnHand());
+    exporter.setStockCardId(getStockCard() == null ? null : getStockCard().getId());
+    exporter.setDate(getDate());
+  }
+
+  public interface Exporter {
+
+    void setId(UUID id);
+
+    void setStockOnHand(Integer stockOnHand);
+
+    void setStockCardId(UUID stockCardId);
+
+    void setDate(LocalDate date);
+  }
 }
