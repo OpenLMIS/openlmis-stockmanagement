@@ -1,4 +1,4 @@
-4.1.2 / 2019-06-12
+4.1.2 / Work in progress
 ==================
 
 New functionality:
