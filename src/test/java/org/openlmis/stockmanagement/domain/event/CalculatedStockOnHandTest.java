@@ -19,6 +19,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import java.time.LocalDate;
+
 import org.junit.Test;
 import org.openlmis.stockmanagement.testutils.CalculatedStockOnHandDataBuilder;
 
@@ -69,5 +70,20 @@ public class CalculatedStockOnHandTest {
 
     //then
     assertThat(result, is(false));
+  }
+
+  @Test
+  public void shouldProperlyConvertObjectToString() {
+    //given
+    CalculatedStockOnHand calculatedStockOnHand = new CalculatedStockOnHandDataBuilder().build();
+    calculatedStockOnHand.setDate(LocalDate.of(2012, 12, 12));
+
+    //when
+    String actual = calculatedStockOnHand.toString();
+    String expected = "CalculatedStockOnHand"
+            + "(stockOnHand=15, stockCard=null, date=2012-12-12)";
+
+    //then
+    assertThat(actual, is(expected));
   }
 }
