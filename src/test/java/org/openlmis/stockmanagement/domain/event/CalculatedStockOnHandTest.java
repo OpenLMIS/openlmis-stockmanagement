@@ -15,75 +15,29 @@
 
 package org.openlmis.stockmanagement.domain.event;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-
-import java.time.LocalDate;
-
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.Test;
-import org.openlmis.stockmanagement.testutils.CalculatedStockOnHandDataBuilder;
+import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.testutils.StockCardDataBuilder;
+import org.openlmis.stockmanagement.testutils.ToStringTestUtils;
 
 public class CalculatedStockOnHandTest {
 
   @Test
-  public void shouldReturnTrueWhenComparingTheSameRecords() {
-    //given
-    LocalDate date = LocalDate.now();
-    CalculatedStockOnHand calculatedStockOnHand1 = new CalculatedStockOnHandDataBuilder().build();
-    CalculatedStockOnHand calculatedStockOnHand2 = new CalculatedStockOnHandDataBuilder().build();
-    calculatedStockOnHand1.setDate(date);
-    calculatedStockOnHand2.setDate(date);
-
-    //when
-    boolean result = calculatedStockOnHand1.equals(calculatedStockOnHand2);
-
-    //then
-    assertThat(result, is(true));
+  public void equalsContract() {
+    EqualsVerifier.forClass(CalculatedStockOnHand.class)
+            .withIgnoredFields("id")
+            .withPrefabValues(StockCard.class,
+                    new StockCardDataBuilder(new StockEvent()).withStockOnHand(1).build(),
+                    new StockCardDataBuilder(new StockEvent()).withStockOnHand(2).build())
+            .suppress(Warning.NONFINAL_FIELDS) // fields cannot be final
+            .verify();
   }
 
   @Test
-  public void shouldReturnFalseWhenComparingRecordsWithDifferentDate() {
-    //given
-    LocalDate date = LocalDate.now();
-    CalculatedStockOnHand calculatedStockOnHand1 = new CalculatedStockOnHandDataBuilder().build();
-    CalculatedStockOnHand calculatedStockOnHand2 = new CalculatedStockOnHandDataBuilder().build();
-    calculatedStockOnHand1.setDate(date);
-    calculatedStockOnHand2.setDate(date.minusDays(1));
-
-    //when
-    boolean result = calculatedStockOnHand1.equals(calculatedStockOnHand2);
-
-    //then
-    assertThat(result, is(false));
-  }
-
-  @Test
-  public void shouldReturnFalseWhenComparingRecordsWithDifferentStockOnHand() {
-    //given
-    CalculatedStockOnHand calculatedStockOnHand1 = new CalculatedStockOnHandDataBuilder().build();
-    CalculatedStockOnHand calculatedStockOnHand2 = new CalculatedStockOnHandDataBuilder().build();
-    calculatedStockOnHand1.setStockOnHand(1);
-    calculatedStockOnHand2.setStockOnHand(2);
-
-    //when
-    boolean result = calculatedStockOnHand1.equals(calculatedStockOnHand2);
-
-    //then
-    assertThat(result, is(false));
-  }
-
-  @Test
-  public void shouldProperlyConvertObjectToString() {
-    //given
-    CalculatedStockOnHand calculatedStockOnHand = new CalculatedStockOnHandDataBuilder().build();
-    calculatedStockOnHand.setDate(LocalDate.of(2012, 12, 12));
-
-    //when
-    String actual = calculatedStockOnHand.toString();
-    String expected = "CalculatedStockOnHand"
-            + "(stockOnHand=15, stockCard=null, date=2012-12-12)";
-
-    //then
-    assertThat(actual, is(expected));
+  public void shouldImplementToString() {
+    CalculatedStockOnHand calculatedStockOnHand = new CalculatedStockOnHand();
+    ToStringTestUtils.verify(CalculatedStockOnHand.class, calculatedStockOnHand);
   }
 }
