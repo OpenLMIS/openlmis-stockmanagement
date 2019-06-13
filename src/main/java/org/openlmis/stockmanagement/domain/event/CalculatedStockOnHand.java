@@ -41,11 +41,11 @@ import org.openlmis.stockmanagement.domain.card.StockCard;
 @Table(name = "calculated_stocks_on_hand", schema = "stockmanagement")
 public class CalculatedStockOnHand extends BaseEntity {
 
-  @Column(name = "stockonhand", nullable = false)
+  @Column(nullable = false)
   private Integer stockOnHand;
 
   @ManyToOne
-  @JoinColumn(nullable = false)
+  @JoinColumn(name = "stockcardid", nullable = false)
   private StockCard stockCard;
 
   @Column(nullable = false)
@@ -57,7 +57,6 @@ public class CalculatedStockOnHand extends BaseEntity {
   public void export(Exporter exporter) {
     exporter.setId(getId());
     exporter.setStockOnHand(getStockOnHand());
-    exporter.setStockCardId(getStockCard() == null ? null : getStockCard().getId());
     exporter.setDate(getDate());
   }
 
@@ -66,8 +65,6 @@ public class CalculatedStockOnHand extends BaseEntity {
     void setId(UUID id);
 
     void setStockOnHand(Integer stockOnHand);
-
-    void setStockCardId(UUID stockCardId);
 
     void setDate(LocalDate date);
   }

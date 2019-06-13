@@ -16,7 +16,6 @@
 package org.openlmis.stockmanagement.dto;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -36,8 +35,6 @@ public final class CalculatedStockOnHandDto extends BaseDto
         implements CalculatedStockOnHand.Exporter {
 
   private Integer stockOnHand;
-
-  private UUID stockCardId;
 
   private LocalDate date;
 
