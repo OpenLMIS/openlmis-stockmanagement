@@ -45,6 +45,7 @@ public class TestDataInitializer implements CommandLineRunner {
   private static final String STOCK_CARD_LINE_ITEM_REASON_TAGS = "stock_card_line_item_reason_tags";
   private static final String STOCK_CARD_LINE_ITEM_REASONS = "stock_card_line_item_reasons";
   private static final String STOCK_CARD_LINE_ITEMS = "stock_card_line_items";
+  private static final String CALCULATED_STOCKS_ON_HAND = "calculated_stocks_on_hand";
   private static final String STOCK_CARDS = "stock_cards";
   private static final String STOCK_EVENT_LINE_ITEMS = "stock_event_line_items";
   private static final String STOCK_EVENTS = "stock_events";
@@ -65,6 +66,7 @@ public class TestDataInitializer implements CommandLineRunner {
       DB_SCHEMA + STOCK_CARD_LINE_ITEM_REASON_TAGS;
   static final String STOCK_CARD_LINE_ITEM_REASONS_TABLE = DB_SCHEMA + STOCK_CARD_LINE_ITEM_REASONS;
   static final String STOCK_CARD_LINE_ITEMS_TABLE = DB_SCHEMA + STOCK_CARD_LINE_ITEMS;
+  static final String CALCULATED_STOCKS_ON_HAND_TABLE = DB_SCHEMA + CALCULATED_STOCKS_ON_HAND;
   static final String STOCK_CARDS_TABLE = DB_SCHEMA + STOCK_CARDS;
   static final String STOCK_EVENT_LINE_ITEMS_TABLE = DB_SCHEMA + STOCK_EVENT_LINE_ITEMS;
   static final String STOCK_EVENTS_TABLE = DB_SCHEMA + STOCK_EVENTS;
@@ -95,6 +97,9 @@ public class TestDataInitializer implements CommandLineRunner {
 
   @Value(value = DEMO_DATA_PATH + DB_SCHEMA + STOCK_CARD_LINE_ITEMS + FILE_EXTENSION)
   private Resource stockCardLineItemsResource;
+
+  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + CALCULATED_STOCKS_ON_HAND + FILE_EXTENSION)
+  private Resource calculatedStocksOnHandResource;
 
   @Value(value = DEMO_DATA_PATH + DB_SCHEMA + STOCK_CARDS + FILE_EXTENSION)
   private Resource stockCardsResource;
@@ -149,6 +154,7 @@ public class TestDataInitializer implements CommandLineRunner {
     loader.insertToDbFromCsv(STOCK_EVENT_LINE_ITEMS_TABLE, stockEventLineItemsResource);
     loader.insertToDbFromCsv(STOCK_CARDS_TABLE, stockCardsResource);
     loader.insertToDbFromCsv(STOCK_CARD_LINE_ITEMS_TABLE, stockCardLineItemsResource);
+    loader.insertToDbFromCsv(CALCULATED_STOCKS_ON_HAND_TABLE, calculatedStocksOnHandResource);
     loader.insertToDbFromCsv(PHYSICAL_INVENTORIES_TABLE, physicalInventoriesResource);
     loader.insertToDbFromCsv(
         PHYSICAL_INVENTORY_LINE_ITEMS_TABLE, physicalInventoryLineItemsResource);
