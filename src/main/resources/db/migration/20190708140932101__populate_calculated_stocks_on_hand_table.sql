@@ -24,9 +24,9 @@ FOR r IN
 		    soh := r.quantity;
 	    ELSIF r.sourceid IS NOT NULL OR r.reasontype = 'CREDIT' THEN
 		    soh := soh + r.quantity;
-      ELSE
+	    ELSE
 		    soh := soh - r.quantity;
-      END IF;
+	    END IF;
 
       -- Insert new entry or update if there's one for the given stock card and date
 	    IF NOT EXISTS (SELECT 1 FROM stockmanagement.calculated_stocks_on_hand WHERE stockcardid = r.stockcardid AND date = r.occurreddate) THEN
@@ -42,3 +42,5 @@ $$ LANGUAGE 'plpgsql';
 
 
 SELECT populateFactTable();
+
+DROP FUNCTION populateFactTable();
