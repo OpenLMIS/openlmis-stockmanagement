@@ -21,4 +21,4 @@ scenarios:
 reporting:
     - module: passfail
       criteria:
-        Get Stock Card Summaries V2 too slow: p90 of GetStockCardSummariesV2>90000ms
+        Get Stock Card Summaries V2 too slow: p90 of GetStockCardSummariesV2>125000ms
