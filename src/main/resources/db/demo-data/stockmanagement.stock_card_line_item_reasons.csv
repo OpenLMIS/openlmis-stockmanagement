@@ -1,5 +1,4 @@
 ﻿id,name,description,reasoncategory,reasontype,isfreetextallowed
-e3fc3cf3-da18-44b0-a220-77c985202e06,Transfer In,Transfer In,TRANSFER,CREDIT,false
 c1fc3cf3-da18-44b0-a220-77c985202e06,Transfer Out,Transfer Out,TRANSFER,DEBIT,true
 279d55bd-42e3-438c-a63d-9c021b185dae,Facility return,Facility return,ADJUSTMENT,CREDIT,false
 5b09202e-b8a7-4f77-9e0e-8156f8efc613,Damage,Damage,ADJUSTMENT,DEBIT,false
