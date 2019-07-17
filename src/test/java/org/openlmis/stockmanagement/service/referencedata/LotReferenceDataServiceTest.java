@@ -71,8 +71,7 @@ public class LotReferenceDataServiceTest extends BaseReferenceDataServiceTest<Lo
         refEq(new DynamicPageTypeReference<>(LotDto.class)));
 
     URI uri = uriCaptor.getValue();
-    assertEquals(serviceUrl + service.getUrl() + "?tradeItemId=" + tradeItemId.toString()
-        + "&page=0",
+    assertEquals(serviceUrl + service.getUrl() + "?tradeItemId=" + tradeItemId.toString(),
         uri.toString());
 
     assertAuthHeader(entityCaptor.getValue());
@@ -94,8 +93,8 @@ public class LotReferenceDataServiceTest extends BaseReferenceDataServiceTest<Lo
         refEq(new DynamicPageTypeReference<>(LotDto.class)));
 
     URI uri = uriCaptor.getValue();
-    assertEquals(serviceUrl + service.getUrl() + "?page=0&" 
-            + "expirationDate=" + expirationDate.toString(),
+    assertEquals(serviceUrl + service.getUrl()
+            + "?expirationDate=" + expirationDate.toString(),
         uri.toString());
 
     assertAuthHeader(entityCaptor.getValue());

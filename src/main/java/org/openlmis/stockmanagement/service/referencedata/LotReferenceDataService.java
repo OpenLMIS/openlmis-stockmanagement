@@ -16,12 +16,10 @@
 package org.openlmis.stockmanagement.service.referencedata;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -62,12 +60,8 @@ public class LotReferenceDataService extends BaseReferenceDataService<LotDto> {
   }
   
   private List<LotDto> getAllLotsMatching(UUID tradeItemId, LocalDate expirationDate) {
-    List<LotDto> allLots = new ArrayList<>();
-
-    int pageNumber = 0;
-    boolean isLastPage = false;
-
     HashMap<String, Object> params = new HashMap<>();
+
     if (null != tradeItemId) {
       params.put("tradeItemId", tradeItemId);
     }
@@ -75,15 +69,6 @@ public class LotReferenceDataService extends BaseReferenceDataService<LotDto> {
       params.put("expirationDate", expirationDate);
     }
 
-    while (!isLastPage) {
-      params.put("page", pageNumber);
-      Page<LotDto> onePage = getPage(params);
-      allLots.addAll(onePage.getContent());
-
-      pageNumber++;
-      isLastPage = onePage.isLast();
-    }
-
-    return allLots;
+    return getPage(params).getContent();
   }
 }
