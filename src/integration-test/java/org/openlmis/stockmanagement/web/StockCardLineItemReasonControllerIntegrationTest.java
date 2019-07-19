@@ -42,6 +42,8 @@ import org.openlmis.stockmanagement.util.Message;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -207,6 +209,39 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebInt
     //then
     assertThat(response, hasSize(2));
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldNotAllowPaginationWithZeroSize() {
+    //given
+    Pageable page = new PageRequest(0, 0);
+
+    restAssured
+            .given()
+            .queryParam("page", page.getPageNumber())
+            .queryParam("size", page.getPageSize())
+            .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+            .when()
+            .get(RESOURCE_URL)
+            .then()
+            .statusCode(HttpStatus.BAD_REQUEST.value());
+
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldNotAllowPaginationWithoutSize() {
+    //given
+    Pageable page = new PageRequest(0, 0);
+
+    restAssured
+            .given()
+            .queryParam("page", page.getPageNumber())
+            .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+            .when()
+            .get(RESOURCE_URL)
+            .then()
+            .statusCode(HttpStatus.BAD_REQUEST.value());
+
   }
 
   @Test
