@@ -43,7 +43,7 @@ public class MvcInterceptor extends HandlerInterceptorAdapter {
                 extractIntegerParam(params, PAGE_PARAM));
 
     Errors errors = new BeanPropertyBindingResult(context, PAGEABLE_CONTEXT);
-    validate(context, errors);
+    validatePageable(context, errors);
 
     if (errors.getErrorCount() > 0) {
       throw new ValidationMessageException(new Message(errors.getFieldError().getCode(),
@@ -57,7 +57,7 @@ public class MvcInterceptor extends HandlerInterceptorAdapter {
     return params.get(name) == null ? null : Integer.valueOf(params.get(name)[0]);
   }
 
-  private void validate(Object target, Errors errors) {
+  private void validatePageable(Object target, Errors errors) {
 
     PageableRequestContext ctx = (PageableRequestContext) target;
 
