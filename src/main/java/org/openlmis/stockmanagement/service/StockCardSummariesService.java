@@ -40,6 +40,7 @@ import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
+import org.openlmis.stockmanagement.dto.referencedata.WrappedOrderablesDto;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
@@ -129,13 +130,13 @@ public class StockCardSummariesService extends StockCardBaseService {
     permissionService.canViewStockCard(params.getProgramId(), params.getFacilityId());
 
     profiler.start("GET_APPROVED_PRODUCTS");
-    Page<OrderableDto> approvedProducts = approvedProductReferenceDataService
+    WrappedOrderablesDto approvedProducts = approvedProductReferenceDataService
         .getApprovedProducts(params.getFacilityId(), params.getProgramId(),
             params.getOrderableIds());
 
     profiler.start("FIND_ORDERABLE_FULFILL_BY_ID");
     Map<UUID, OrderableFulfillDto> orderableFulfillMap = orderableFulfillService.findByIds(
-        approvedProducts.getContent().stream().map(OrderableDto::getId).collect(toList()));
+        approvedProducts.getIdentifiersPage().getContent());
 
     profiler.start("FIND_STOCK_CARD_BY_PROGRAM_AND_FACILITY");
     List<StockCard> stockCards = cardRepository
@@ -144,8 +145,9 @@ public class StockCardSummariesService extends StockCardBaseService {
 
     stockCards.stream().forEach(StockCard::calculateStockOnHand);
 
-    StockCardSummaries result = new StockCardSummaries(approvedProducts.getContent(), stockCards,
-        orderableFulfillMap, params.getAsOfDate(), approvedProducts.getTotalElements());
+    StockCardSummaries result = new StockCardSummaries(
+            approvedProducts.getOrderablesPage().getContent(), stockCards, orderableFulfillMap,
+            params.getAsOfDate(), approvedProducts.getOrderablesPage().getTotalElements());
     profiler.stop().log();
     return result;
   }
