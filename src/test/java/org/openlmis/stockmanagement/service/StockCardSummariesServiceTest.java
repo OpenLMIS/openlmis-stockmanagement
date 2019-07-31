@@ -56,7 +56,7 @@ import org.openlmis.stockmanagement.dto.referencedata.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
-import org.openlmis.stockmanagement.dto.referencedata.WrappedOrderablesDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderablesAggregator;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
@@ -275,10 +275,11 @@ public class StockCardSummariesServiceTest {
     OrderableDto orderable2 = new OrderableDtoDataBuilder().build();
     OrderableDto orderable3 = new OrderableDtoDataBuilder().build();
 
-    WrappedOrderablesDto wrappedOrderablesDto = new WrappedOrderablesDto();
-    wrappedOrderablesDto.addEntry(new ApprovedProductDto(orderable));
-    wrappedOrderablesDto.addEntry(new ApprovedProductDto(orderable2));
-    wrappedOrderablesDto.addEntry(new ApprovedProductDto(orderable3));
+    OrderablesAggregator orderablesAggregator = new OrderablesAggregator(asList(
+            new ApprovedProductDto(orderable),
+            new ApprovedProductDto(orderable2),
+            new ApprovedProductDto(orderable3)
+    ));
 
     StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParamsDataBuilder()
         .withOrderableIds(asList(orderable.getId(), orderable2.getId()))
@@ -287,7 +288,7 @@ public class StockCardSummariesServiceTest {
     when(approvedProductReferenceDataService
         .getApprovedProducts(eq(params.getFacilityId()), eq(params.getProgramId()),
             eq(params.getOrderableIds())))
-        .thenReturn(wrappedOrderablesDto);
+        .thenReturn(orderablesAggregator);
 
     Map<UUID, OrderableFulfillDto> fulfillMap = new HashMap<>();
     fulfillMap.put(orderable.getId(), new OrderableFulfillDtoDataBuilder()

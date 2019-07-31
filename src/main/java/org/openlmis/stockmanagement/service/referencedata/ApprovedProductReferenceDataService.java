@@ -17,11 +17,12 @@ package org.openlmis.stockmanagement.service.referencedata;
 
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 
 import org.openlmis.stockmanagement.dto.referencedata.ApprovedProductDto;
-import org.openlmis.stockmanagement.dto.referencedata.WrappedOrderablesDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderablesAggregator;
 import org.openlmis.stockmanagement.util.RequestParameters;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -53,8 +54,8 @@ public class ApprovedProductReferenceDataService extends
    * @param programId  id of the program
    * @return wrapped collection of approved products matching the search criteria
    */
-  public WrappedOrderablesDto getApprovedProducts(UUID facilityId, UUID programId,
-                                                Collection<UUID> orderableIds) {
+  public OrderablesAggregator getApprovedProducts(UUID facilityId, UUID programId,
+                                                  Collection<UUID> orderableIds) {
     RequestParameters params = RequestParameters.init();
 
     params.set("programId", programId);
@@ -66,10 +67,6 @@ public class ApprovedProductReferenceDataService extends
     Page<ApprovedProductDto> approvedProductPage =
         getPage(facilityId + "/approvedProducts", params);
 
-    WrappedOrderablesDto wrappedOrderablesDto = new WrappedOrderablesDto();
-    approvedProductPage
-        .getContent().forEach(wrappedOrderablesDto::addEntry);
-
-    return wrappedOrderablesDto;
+    return new OrderablesAggregator(new ArrayList<>(approvedProductPage.getContent()));
   }
 }

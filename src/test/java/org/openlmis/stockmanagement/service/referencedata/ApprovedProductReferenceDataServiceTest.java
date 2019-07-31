@@ -32,7 +32,7 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.stockmanagement.dto.referencedata.ApprovedProductDto;
-import org.openlmis.stockmanagement.dto.referencedata.WrappedOrderablesDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderablesAggregator;
 import org.openlmis.stockmanagement.service.BaseCommunicationService;
 import org.openlmis.stockmanagement.testutils.ApprovedProductDtoDataBuilder;
 import org.openlmis.stockmanagement.util.DynamicPageTypeReference;
@@ -72,7 +72,7 @@ public class ApprovedProductReferenceDataServiceTest
 
     mockPageResponseEntity(approvedProduct);
 
-    WrappedOrderablesDto result = service
+    OrderablesAggregator result = service
         .getApprovedProducts(facilityId, programId, null);
 
     assertEquals(1, result.getOrderablesPage().getTotalElements());
@@ -103,7 +103,7 @@ public class ApprovedProductReferenceDataServiceTest
 
     mockPageResponseEntity(approvedProduct);
 
-    WrappedOrderablesDto result = service
+    OrderablesAggregator result = service
         .getApprovedProducts(facilityId, programId, orderableIds);
 
     assertEquals(1, result.getOrderablesPage().getTotalElements());

@@ -22,26 +22,25 @@ import java.util.UUID;
 import org.openlmis.stockmanagement.web.Pagination;
 import org.springframework.data.domain.Page;
 
-public class WrappedOrderablesDto {
+public class OrderablesAggregator {
 
-  private List<OrderableDto> orderables;
-  private List<UUID> identifiers;
+  private List<OrderableDto> orderables = new ArrayList<>();
+  private List<UUID> identifiers = new ArrayList<>();
 
-  public WrappedOrderablesDto() {
-    this.orderables = new ArrayList<>();
-    this.identifiers = new ArrayList<>();
-  }
-
-  public void addEntry(ApprovedProductDto entry) {
-    orderables.add(entry.getOrderable());
-    identifiers.add(entry.getOrderable().getId());
+  public OrderablesAggregator(List<ApprovedProductDto> approvedProducts) {
+    approvedProducts.forEach(this::addEntry);
   }
 
   public Page<OrderableDto> getOrderablesPage() {
     return Pagination.getPage(orderables);
   }
 
-  public Page<UUID> getIdentifiersPage() {
-    return Pagination.getPage(identifiers);
+  public List<UUID> getIdentifiers() {
+    return identifiers;
+  }
+
+  private void addEntry(ApprovedProductDto entry) {
+    orderables.add(entry.getOrderable());
+    identifiers.add(entry.getOrderable().getId());
   }
 }
