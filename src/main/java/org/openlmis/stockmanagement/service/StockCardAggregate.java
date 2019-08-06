@@ -65,8 +65,6 @@ public class StockCardAggregate {
    */
   public StockCardAggregate(List<StockCard> stockCards) {
     this.stockCards = stockCards;
-    stockCards.stream()
-        .forEach(StockCard::calculateStockOnHand);
   }
 
   /**

@@ -24,6 +24,7 @@ import static java.util.stream.Stream.empty;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity.identityOf;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -82,6 +83,7 @@ public class StockCardSummariesService extends StockCardBaseService {
 
   @Autowired
   private PermissionService permissionService;
+  
 
   /**
    * Get a map of stock cards assigned to orderable ids.
@@ -96,7 +98,8 @@ public class StockCardSummariesService extends StockCardBaseService {
   public Map<UUID, StockCardAggregate> getGroupedStockCards(
       UUID programId, UUID facilityId, Set<UUID> orderableIds) {
 
-    List<StockCard> stockCards = cardRepository.findByProgramIdAndFacilityId(programId, facilityId);
+    List<StockCard> stockCards = calculatedStockOnHandService
+        .getStockCardsWithStockOnHand(programId, facilityId, LocalDate.now());
 
     Map<UUID, OrderableFulfillDto> orderableFulfillMap =
         orderableFulfillService.findByIds(stockCards.stream()
@@ -138,11 +141,10 @@ public class StockCardSummariesService extends StockCardBaseService {
         approvedProducts.getContent().stream().map(OrderableDto::getId).collect(toList()));
 
     profiler.start("FIND_STOCK_CARD_BY_PROGRAM_AND_FACILITY");
-    List<StockCard> stockCards = cardRepository
-        .findByProgramIdAndFacilityId(params.getProgramId(),
-            params.getFacilityId());
-
-    stockCards.stream().forEach(StockCard::calculateStockOnHand);
+    
+    List<StockCard> stockCards = calculatedStockOnHandService
+        .getStockCardsWithStockOnHand(params.getProgramId(), params.getFacilityId(),
+                                        params.getAsOfDate());
 
     StockCardSummaries result = new StockCardSummaries(approvedProducts.getContent(), stockCards,
         orderableFulfillMap, params.getAsOfDate(), approvedProducts.getTotalElements());

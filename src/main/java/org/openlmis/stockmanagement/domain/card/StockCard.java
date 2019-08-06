@@ -37,6 +37,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.AllArgsConstructor;
@@ -96,6 +97,9 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
 
   @Transient
   private Integer stockOnHand = null;
+  
+  @Transient
+  private LocalDate occurredDate = null;
 
   /**
    * Create stock card from stock event dto and its line item.
@@ -194,6 +198,7 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
         .orElse(null);
   }
 
+  @PostLoad
   private void reorderLineItems() {
     Comparator<StockCardLineItem> comparator = byOccurredDate()
         .thenComparing(byProcessedDate())

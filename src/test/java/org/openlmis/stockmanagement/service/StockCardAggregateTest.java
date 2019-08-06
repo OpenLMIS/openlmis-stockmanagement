@@ -19,9 +19,6 @@ import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -177,16 +174,5 @@ public class StockCardAggregateTest {
     StockCardAggregate stockCardAggregate = new StockCardAggregate(
         singletonList(new StockCardDataBuilder(new StockEvent()).build()));
     ToStringTestUtils.verify(StockCardAggregate.class, stockCardAggregate, "LOGGER");
-  }
-
-  @Test
-  public void shouldCalculateStockOnHandForAllLineItemsInConstructor() {
-    StockCard stockCard1 = mock(StockCard.class);
-    StockCard stockCard2 = mock(StockCard.class);
-
-    new StockCardAggregate(asList(stockCard1, stockCard2));
-
-    verify(stockCard1, times(1)).calculateStockOnHand();
-    verify(stockCard2, times(1)).calculateStockOnHand();
   }
 }

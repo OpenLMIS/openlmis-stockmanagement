@@ -19,6 +19,7 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.dto.StockCardDto;
@@ -52,6 +53,9 @@ public abstract class StockCardBaseService {
 
   @Autowired
   private ProgramReferenceDataService programRefDataService;
+  
+  @Autowired
+  protected CalculatedStockOnHandService calculatedStockOnHandService;
 
   protected List<StockCardDto> createDtos(List<StockCard> stockCards) {
     if (stockCards.isEmpty()) {
@@ -72,9 +76,10 @@ public abstract class StockCardBaseService {
 
   private StockCardDto cardToDto(FacilityDto facility, ProgramDto program,
                                  StockCard card) {
-    card.calculateStockOnHand();
+    
+    calculatedStockOnHandService.fetchStockOnHandForSpecificDate(card, LocalDate.now());
     StockCardDto cardDto = StockCardDto.createFrom(card);
-
+    
     cardDto.setFacility(facility);
     cardDto.setProgram(program);
     cardDto.setOrderable(OrderableDto.builder().id(card.getOrderableId()).build());
@@ -83,7 +88,7 @@ public abstract class StockCardBaseService {
     }
     List<StockCardLineItemDto> lineItems = cardDto.getLineItems();
     if (!isEmpty(lineItems)) {
-      cardDto.setLastUpdate(lineItems.get(lineItems.size() - 1).getLineItem().getOccurredDate());
+      cardDto.setLastUpdate(card.getOccurredDate());
       cardDto.setExtraData(lineItems.get(lineItems.size() - 1).getLineItem().getExtraData());
     }
 

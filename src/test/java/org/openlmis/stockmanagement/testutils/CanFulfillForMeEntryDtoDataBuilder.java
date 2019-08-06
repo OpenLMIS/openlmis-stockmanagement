@@ -16,7 +16,6 @@
 package org.openlmis.stockmanagement.testutils;
 
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
@@ -28,7 +27,6 @@ public class CanFulfillForMeEntryDtoDataBuilder {
   private ObjectReferenceDto orderable;
   private ObjectReferenceDto lot;
   private Integer stockOnHand;
-  private ZonedDateTime processedDate;
   private LocalDate occurredDate;
 
   /**
@@ -39,7 +37,6 @@ public class CanFulfillForMeEntryDtoDataBuilder {
     orderable = new ObjectReferenceDtoDataBuilder().withPath("api/orderables").build();
     lot = new ObjectReferenceDtoDataBuilder().withPath("api/lots").build();
     stockOnHand = 10;
-    processedDate = ZonedDateTime.now();
     occurredDate = LocalDate.now();
   }
 
@@ -49,7 +46,7 @@ public class CanFulfillForMeEntryDtoDataBuilder {
    */
   public CanFulfillForMeEntryDto build() {
     return new CanFulfillForMeEntryDto(stockCard, orderable, lot, stockOnHand,
-        processedDate, occurredDate);
+        occurredDate);
   }
 
   /**
@@ -79,9 +76,6 @@ public class CanFulfillForMeEntryDtoDataBuilder {
             .withId(stockCard.getLotId())
             .build()
             : null)
-        .withProcessedDate(stockCard != null && stockCard.getLineItemAsOfDate(asOfDate) != null
-            ? stockCard.getLineItemAsOfDate(asOfDate).getProcessedDate()
-            : null)
         .withOccuredDate(stockCard != null && stockCard.getLineItemAsOfDate(asOfDate) != null
             ? stockCard.getLineItemAsOfDate(asOfDate).getOccurredDate()
             : null)
@@ -105,11 +99,6 @@ public class CanFulfillForMeEntryDtoDataBuilder {
 
   public CanFulfillForMeEntryDtoDataBuilder withLot(ObjectReferenceDto lot) {
     this.lot = lot;
-    return this;
-  }
-
-  public CanFulfillForMeEntryDtoDataBuilder withProcessedDate(ZonedDateTime processedDate) {
-    this.processedDate = processedDate;
     return this;
   }
 

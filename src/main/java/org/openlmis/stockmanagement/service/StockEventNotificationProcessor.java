@@ -79,7 +79,6 @@ public class StockEventNotificationProcessor {
         line.setReason(event.getContext().findCardReason(reason.getId()));
       }
     }
-
     profiler.start("CALCULATE_STOCK_ON_HAND");
     copy.calculateStockOnHand();
 

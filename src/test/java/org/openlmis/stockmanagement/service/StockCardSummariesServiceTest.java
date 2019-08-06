@@ -18,7 +18,6 @@ package org.openlmis.stockmanagement.service;
 import static java.time.ZoneOffset.UTC;
 import static java.time.ZonedDateTime.of;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
@@ -26,12 +25,10 @@ import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -69,7 +66,6 @@ import org.openlmis.stockmanagement.testutils.StockCardDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardSummariesV2SearchParamsDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
@@ -95,6 +91,9 @@ public class StockCardSummariesServiceTest {
 
   @Mock
   private LotReferenceDataService lotReferenceDataService;
+
+  @Mock
+  private CalculatedStockOnHandService calculatedStockOnHandService;
 
   @Mock
   private StockCardRepository cardRepository;
@@ -183,91 +182,6 @@ public class StockCardSummariesServiceTest {
   }
 
   @Test
-  public void shouldFindExistingStockCards()
-      throws Exception {
-    //given
-    UUID orderable1Id = randomUUID();
-    UUID orderable2Id = randomUUID();
-    UUID orderable3Id = randomUUID();
-    UUID orderable4Id = randomUUID();
-
-    OrderableDto orderable1 = createOrderableDto(orderable1Id, "");
-    OrderableDto orderable2 = createOrderableDto(orderable2Id, "");
-    OrderableDto orderable3 = createOrderableDto(orderable3Id, "");
-    OrderableDto orderable4 = createOrderableDto(orderable4Id, "");
-
-    UUID programId = randomUUID();
-    UUID facilityId = randomUUID();
-    when(orderableReferenceDataService
-        .findAll())
-        .thenReturn(asList(orderable1, orderable2, orderable3, orderable4));
-
-    when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId))
-        .thenReturn(asList(
-            createStockCard(orderable1Id, randomUUID()),
-            createStockCard(orderable3Id, randomUUID())));
-
-    when(lotReferenceDataService.getAllLotsOf(any(UUID.class)))
-        .thenReturn(emptyList());
-
-    //when
-    List<StockCardDto> cardDtos = stockCardSummariesService
-        .findStockCards(programId, facilityId);
-
-    //then
-    assertThat(cardDtos.size(), is(2));
-
-    String orderablePropertyName = "orderable";
-    String idPropertyName = "id";
-    String lineItemsPropertyName = "lineItems";
-    String stockOnHandPropertyName = "stockOnHand";
-    String lastUpdatePropertyName = "lastUpdate";
-
-    assertThat(cardDtos, hasItem(allOf(
-        hasProperty(orderablePropertyName, is(orderable1)),
-        hasProperty(idPropertyName, notNullValue()),
-        hasProperty(stockOnHandPropertyName, notNullValue()),
-        hasProperty(lastUpdatePropertyName, is(LocalDate.of(2017, 3, 18))),
-        hasProperty(lineItemsPropertyName, nullValue()))));
-    assertThat(cardDtos, hasItem(allOf(
-        hasProperty(orderablePropertyName, is(orderable3)),
-        hasProperty(idPropertyName, notNullValue()),
-        hasProperty(stockOnHandPropertyName, notNullValue()),
-        hasProperty(lastUpdatePropertyName, is(LocalDate.of(2017, 3, 18))),
-        hasProperty(lineItemsPropertyName, nullValue()))));
-  }
-
-  @Test
-  public void shouldReturnPageOfStockCards() throws Exception {
-    //given
-    UUID programId = randomUUID();
-    UUID facilityId = randomUUID();
-    PageRequest pageRequest = new PageRequest(0, 1);
-
-    UUID orderableId = randomUUID();
-    OrderableDto orderable = createOrderableDto(orderableId, "");
-
-    StockCard card = createStockCard(orderableId, randomUUID());
-    when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId, pageRequest))
-        .thenReturn(new PageImpl<>(singletonList(card), pageRequest, 10));
-
-    when(orderableReferenceDataService.findAll())
-        .thenReturn(singletonList(orderable));
-
-    when(lotReferenceDataService.getAllLotsOf(any(UUID.class)))
-        .thenReturn(emptyList());
-
-    //when
-    Page<StockCardDto> stockCards = stockCardSummariesService
-        .findStockCards(programId, facilityId, pageRequest);
-
-    //then
-    assertThat(stockCards.getContent().size(), is(1));
-    assertThat(stockCards.getTotalElements(), is(10L));
-    assertThat(stockCards.getContent().get(0).getExtraData().get("vvmStatus"), is("STAGE_2"));
-  }
-
-  @Test
   public void shouldFindStockCards() throws Exception {
     OrderableDto orderable = new OrderableDtoDataBuilder().build();
     OrderableDto orderable2 = new OrderableDtoDataBuilder().build();
@@ -312,6 +226,11 @@ public class StockCardSummariesServiceTest {
 
     List<StockCard> stockCards = asList(stockCard, stockCard1);
 
+    when(calculatedStockOnHandService
+        .getStockCardsWithStockOnHand(params.getProgramId(), params.getFacilityId(),
+            params.getAsOfDate()))
+        .thenReturn(stockCards);
+        
     when(cardRepository.findByProgramIdAndFacilityId(
         params.getProgramId(),
         params.getFacilityId()))
@@ -393,6 +312,10 @@ public class StockCardSummariesServiceTest {
         .build();
 
     when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId))
+        .thenReturn(asList(stockCard1, stockCard2, stockCard3, stockCard4, stockCard5));
+
+    when(calculatedStockOnHandService
+        .getStockCardsWithStockOnHand(programId, facilityId, LocalDate.now()))
         .thenReturn(asList(stockCard1, stockCard2, stockCard3, stockCard4, stockCard5));
 
     Map<UUID, StockCardAggregate> cardMap =
