@@ -26,6 +26,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.SERVER_ERROR_SHALLOW
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -100,6 +101,9 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
   
   @Transient
   private LocalDate occurredDate = null;
+  
+  @Transient
+  private ZonedDateTime processedDate = null;
 
   /**
    * Create stock card from stock event dto and its line item.

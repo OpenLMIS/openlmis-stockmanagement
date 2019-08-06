@@ -20,10 +20,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -101,7 +101,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
   public void shouldGetLatestStockCardsWithStockOnHandWhenDateIsNotSet() {
     //given
     CalculatedStockOnHand calculatedStockOnHand = new CalculatedStockOnHand(quantity,
-        stockCard, LocalDate.now());
+        stockCard, LocalDate.now(), ZonedDateTime.now());
 
     calculatedStockOnHandRepository.save(calculatedStockOnHand);
 
@@ -122,9 +122,9 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     LocalDate oldDate = LocalDate.of(2015, 5, 10);
     
     CalculatedStockOnHand calculatedStockOnHand = new CalculatedStockOnHand(quantity,
-        stockCard, oldDate);
+        stockCard, oldDate, ZonedDateTime.now());
     CalculatedStockOnHand calculatedStockOnHand2 = new CalculatedStockOnHand(quantity2,
-        stockCard, newDate);
+        stockCard, newDate, ZonedDateTime.now());
 
     calculatedStockOnHandRepository.save(calculatedStockOnHand);
     calculatedStockOnHandRepository.save(calculatedStockOnHand2);
@@ -146,9 +146,9 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     LocalDate oldDate = LocalDate.of(2015, 5, 10);
     
     CalculatedStockOnHand calculatedStockOnHand = new CalculatedStockOnHand(quantity,
-        stockCard, newDate);
+        stockCard, newDate, ZonedDateTime.now());
     CalculatedStockOnHand calculatedStockOnHand2 = new CalculatedStockOnHand(quantity2,
-        stockCard, oldDate);
+        stockCard, oldDate, ZonedDateTime.now());
 
     calculatedStockOnHandRepository.save(calculatedStockOnHand);
     calculatedStockOnHandRepository.save(calculatedStockOnHand2);
@@ -186,7 +186,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
   public void shouldSetStockOnHandForStockCard() {
     //given
     CalculatedStockOnHand calculatedStockOnHand2 = new CalculatedStockOnHand(quantity,
-        stockCard, LocalDate.now());
+        stockCard, LocalDate.now(), ZonedDateTime.now());
     
     calculatedStockOnHandRepository.save(calculatedStockOnHand2);
     

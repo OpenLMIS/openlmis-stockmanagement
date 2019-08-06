@@ -28,8 +28,8 @@ public interface CalculatedStockOnHandRepository
 
   
   @Query(value = "SELECT * FROM calculated_stocks_on_hand cson " 
-      + "WHERE cson.stockcardid = :stockCardId AND cson.date <= :asOfDate " 
-      + "ORDER BY date DESC LIMIT 1", nativeQuery = true)
+      + "WHERE cson.stockcardid = :stockCardId AND cson.occurredDate <= :asOfDate " 
+      + "ORDER BY occurredDate DESC LIMIT 1", nativeQuery = true)
   CalculatedStockOnHand findFirstByStockCardIdAndDateBeforeOrderByDateDesc(
       @Param("stockCardId") UUID stockCardId,
       @Param("asOfDate") LocalDate asOfDate);

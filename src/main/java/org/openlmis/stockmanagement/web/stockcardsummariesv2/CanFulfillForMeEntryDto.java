@@ -19,6 +19,7 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -53,4 +54,9 @@ public final class CanFulfillForMeEntryDto {
   @Setter
   @JsonFormat(shape = STRING)
   private LocalDate occurredDate;
+
+  @Getter
+  @Setter
+  @JsonFormat(shape = STRING)
+  private ZonedDateTime processedDate;
 }

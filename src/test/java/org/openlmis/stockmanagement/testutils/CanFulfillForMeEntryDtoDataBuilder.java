@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.testutils;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
@@ -28,6 +29,7 @@ public class CanFulfillForMeEntryDtoDataBuilder {
   private ObjectReferenceDto lot;
   private Integer stockOnHand;
   private LocalDate occurredDate;
+  private ZonedDateTime processedDate;
 
   /**
    * Creates builder for creating new instance of {@link CanFulfillForMeEntryDto}.
@@ -46,7 +48,7 @@ public class CanFulfillForMeEntryDtoDataBuilder {
    */
   public CanFulfillForMeEntryDto build() {
     return new CanFulfillForMeEntryDto(stockCard, orderable, lot, stockOnHand,
-        occurredDate);
+        occurredDate, processedDate);
   }
 
   /**
@@ -76,8 +78,11 @@ public class CanFulfillForMeEntryDtoDataBuilder {
             .withId(stockCard.getLotId())
             .build()
             : null)
-        .withOccuredDate(stockCard != null && stockCard.getLineItemAsOfDate(asOfDate) != null
+        .withOccurredDate(stockCard != null && stockCard.getLineItemAsOfDate(asOfDate) != null
             ? stockCard.getLineItemAsOfDate(asOfDate).getOccurredDate()
+            : null)
+        .withProcessedDate(stockCard != null && stockCard.getLineItemAsOfDate(asOfDate) != null
+            ? stockCard.getLineItemAsOfDate(asOfDate).getProcessedDate()
             : null)
         .build();
   }
@@ -102,8 +107,14 @@ public class CanFulfillForMeEntryDtoDataBuilder {
     return this;
   }
 
-  public CanFulfillForMeEntryDtoDataBuilder withOccuredDate(LocalDate occurredDate) {
+  public CanFulfillForMeEntryDtoDataBuilder withOccurredDate(LocalDate occurredDate) {
     this.occurredDate = occurredDate;
     return this;
   }
+  
+  public CanFulfillForMeEntryDtoDataBuilder withProcessedDate(ZonedDateTime processedDate) {
+    this.processedDate = processedDate;
+    return this;
+  }
+  
 }

@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.testutils;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
@@ -23,7 +24,8 @@ import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
 public class CalculatedStockOnHandDataBuilder {
   private UUID id;
   private StockCard stockCard;
-  private LocalDate date;
+  private LocalDate occuredDate;
+  private ZonedDateTime processedDate;
   private Integer stockOnHand;
 
   /**
@@ -31,7 +33,8 @@ public class CalculatedStockOnHandDataBuilder {
    */
   public CalculatedStockOnHandDataBuilder() {
     this.id = UUID.randomUUID();
-    this.date = LocalDate.now();
+    this.occuredDate = LocalDate.now();
+    this.processedDate = ZonedDateTime.now();
     this.stockOnHand = 15;
   }
 
@@ -50,7 +53,7 @@ public class CalculatedStockOnHandDataBuilder {
    */
   public CalculatedStockOnHand build() {
     CalculatedStockOnHand result = new CalculatedStockOnHand(
-            stockOnHand, stockCard, date
+            stockOnHand, stockCard, occuredDate, processedDate
     );
     result.setId(id);
 

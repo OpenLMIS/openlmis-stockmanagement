@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_INVENTORIES_EDIT;
 import static org.openlmis.stockmanagement.testutils.DatesUtil.getBaseDate;
+import static org.openlmis.stockmanagement.testutils.DatesUtil.getBaseDateTime;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventLineItem;
 
@@ -74,7 +75,7 @@ public class StockEventNotificationProcessorTest {
   @Before
   public void setUp() {
     stockCard = new StockCard(null, facilityId, programId, orderableId, lotId, null, 0,
-        getBaseDate());
+        getBaseDate(), getBaseDateTime());
     stockCard.setId(stockCardId);
 
     context = mock(StockEventProcessContext.class);
@@ -121,7 +122,7 @@ public class StockEventNotificationProcessorTest {
     UUID anotherLotId = UUID.randomUUID();
 
     StockCard anotherStockCard = new StockCard(null, facilityId, programId, orderableId, lotId,
-        null, 0, getBaseDate());
+        null, 0, getBaseDate(), getBaseDateTime());
     anotherStockCard.setId(anotherStockCardId);
 
     StockEventLineItemDto secondLineItem = createStockEventLineItem();

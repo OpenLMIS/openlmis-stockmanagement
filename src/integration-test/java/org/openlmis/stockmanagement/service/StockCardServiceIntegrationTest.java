@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -333,7 +334,8 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
         .findByProgramIdAndFacilityId(savedEvent.getProgramId(), savedEvent.getFacilityId());
     
     calculatedStockOnHandRepository.save(new CalculatedStockOnHand(
-        savedEvent.getLineItems().get(0).getQuantity(), stockCards.get(0), LocalDate.now()));
+        savedEvent.getLineItems().get(0).getQuantity(), stockCards.get(0), 
+        LocalDate.now(), ZonedDateTime.now()));
     return savedEvent;
   }
 }

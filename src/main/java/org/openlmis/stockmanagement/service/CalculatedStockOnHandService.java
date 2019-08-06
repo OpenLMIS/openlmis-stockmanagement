@@ -16,7 +16,7 @@
 package org.openlmis.stockmanagement.service;
 
 import java.time.LocalDate;
-
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -38,7 +38,8 @@ public class CalculatedStockOnHandService {
 
   CalculatedStockOnHand saveFromStockCard(StockCard stockCard) {
     stockCard.calculateStockOnHand();
-    return new CalculatedStockOnHand(stockCard.getStockOnHand(), stockCard, LocalDate.now());
+    return new CalculatedStockOnHand(stockCard.getStockOnHand(), stockCard, LocalDate.now(), 
+        ZonedDateTime.now());
   }
 
   /**
@@ -85,7 +86,8 @@ public class CalculatedStockOnHandService {
 
     if (null != calculatedStockOnHand) {
       stockCard.setStockOnHand(calculatedStockOnHand.getStockOnHand());
-      stockCard.setOccurredDate(calculatedStockOnHand.getDate());
+      stockCard.setOccurredDate(calculatedStockOnHand.getOccurredDate());
+      stockCard.setProcessedDate(calculatedStockOnHand.getProcessedDate());
     }
   }
 

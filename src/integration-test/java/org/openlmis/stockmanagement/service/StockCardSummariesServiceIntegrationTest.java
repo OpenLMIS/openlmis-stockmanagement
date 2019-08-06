@@ -223,10 +223,12 @@ public class StockCardSummariesServiceIntegrationTest extends BaseIntegrationTes
     cardRepository.save(stockCard);
     calculatedStockOnHandRepository
         .save(new CalculatedStockOnHand(1, stockCard, 
-            LocalDate.of(2017, 3, 17)));
+            LocalDate.of(2017, 3, 17), 
+            of(2017, 3, 17, 15, 10, 31, 100, UTC)));
     calculatedStockOnHandRepository
         .save(new CalculatedStockOnHand(1, stockCard, 
-            LocalDate.of(2017, 3, 18)));
+            LocalDate.of(2017, 3, 18),
+            of(2017, 3, 18, 15, 10, 31, 100, UTC)));
     return stockCard;
   }
 }
