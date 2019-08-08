@@ -32,12 +32,11 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.stockmanagement.dto.referencedata.ApprovedProductDto;
-import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderablesAggregator;
 import org.openlmis.stockmanagement.service.BaseCommunicationService;
 import org.openlmis.stockmanagement.testutils.ApprovedProductDtoDataBuilder;
 import org.openlmis.stockmanagement.util.DynamicPageTypeReference;
 import org.openlmis.stockmanagement.util.RequestParameters;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
 
 public class ApprovedProductReferenceDataServiceTest
@@ -73,11 +72,11 @@ public class ApprovedProductReferenceDataServiceTest
 
     mockPageResponseEntity(approvedProduct);
 
-    Page<OrderableDto> result = service
+    OrderablesAggregator result = service
         .getApprovedProducts(facilityId, programId, null);
 
-    assertEquals(1, result.getTotalElements());
-    assertEquals(approvedProduct.getOrderable(), result.getContent().get(0));
+    assertEquals(1, result.getOrderablesPage().getTotalElements());
+    assertEquals(approvedProduct.getOrderable(), result.getOrderablesPage().getContent().get(0));
 
     verify(restTemplate).exchange(
         uriCaptor.capture(), eq(HttpMethod.GET), entityCaptor.capture(),
@@ -104,11 +103,11 @@ public class ApprovedProductReferenceDataServiceTest
 
     mockPageResponseEntity(approvedProduct);
 
-    Page<OrderableDto> result = service
+    OrderablesAggregator result = service
         .getApprovedProducts(facilityId, programId, orderableIds);
 
-    assertEquals(1, result.getTotalElements());
-    assertEquals(approvedProduct.getOrderable(), result.getContent().get(0));
+    assertEquals(1, result.getOrderablesPage().getTotalElements());
+    assertEquals(approvedProduct.getOrderable(), result.getOrderablesPage().getContent().get(0));
 
     verify(restTemplate).exchange(
         uriCaptor.capture(), eq(HttpMethod.GET), entityCaptor.capture(),

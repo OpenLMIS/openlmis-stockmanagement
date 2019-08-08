@@ -17,14 +17,13 @@ package org.openlmis.stockmanagement.service.referencedata;
 
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
+
 import org.openlmis.stockmanagement.dto.referencedata.ApprovedProductDto;
-import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderablesAggregator;
 import org.openlmis.stockmanagement.util.RequestParameters;
-import org.openlmis.stockmanagement.web.Pagination;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -49,13 +48,14 @@ public class ApprovedProductReferenceDataService extends
   /**
    * Retrieves all facility approved products from the reference data service, based on the
    * provided facility and full supply flag. It can be optionally filtered by the program ID.
+   * The result is wrapped to a separate class to improve the performance
    *
    * @param facilityId id of the facility
    * @param programId  id of the program
-   * @return a collection of approved products matching the search criteria
+   * @return wrapped collection of approved products matching the search criteria
    */
-  public Page<OrderableDto> getApprovedProducts(UUID facilityId, UUID programId,
-                                                Collection<UUID> orderableIds) {
+  public OrderablesAggregator getApprovedProducts(UUID facilityId, UUID programId,
+                                                  Collection<UUID> orderableIds) {
     RequestParameters params = RequestParameters.init();
 
     params.set("programId", programId);
@@ -67,12 +67,6 @@ public class ApprovedProductReferenceDataService extends
     Page<ApprovedProductDto> approvedProductPage =
         getPage(facilityId + "/approvedProducts", params);
 
-    List<OrderableDto> content = approvedProductPage
-        .getContent()
-        .stream()
-        .map(ApprovedProductDto::getOrderable)
-        .collect(Collectors.toList());
-
-    return Pagination.getPage(content);
+    return new OrderablesAggregator(new ArrayList<>(approvedProductPage.getContent()));
   }
 }
