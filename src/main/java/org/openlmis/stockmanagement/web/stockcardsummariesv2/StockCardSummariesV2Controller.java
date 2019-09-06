@@ -70,7 +70,6 @@ public class StockCardSummariesV2Controller {
         summaries.getPageOfApprovedProducts(),
         summaries.getStockCardsForFulfillOrderables(),
         summaries.getOrderableFulfillMap(),
-        summaries.getAsOfDate(),
         params.isNonEmptyOnly());
 
     profiler.start("GET_PAGE");

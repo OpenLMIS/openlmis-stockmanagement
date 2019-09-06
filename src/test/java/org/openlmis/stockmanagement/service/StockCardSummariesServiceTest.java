@@ -15,8 +15,6 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static java.time.ZoneOffset.UTC;
-import static java.time.ZonedDateTime.of;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.fromString;
@@ -29,15 +27,18 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableSet;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,7 +46,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
-import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
+import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.dto.StockCardDto;
@@ -53,6 +54,7 @@ import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
+import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
@@ -60,6 +62,7 @@ import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataServic
 import org.openlmis.stockmanagement.service.referencedata.OrderableFulfillReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
+import org.openlmis.stockmanagement.testutils.CalculatedStockOnHandDataBuilder;
 import org.openlmis.stockmanagement.testutils.OrderableDtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.OrderableFulfillDtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardDataBuilder;
@@ -100,6 +103,9 @@ public class StockCardSummariesServiceTest {
 
   @Mock
   private PermissionService permissionService;
+
+  @Mock
+  private CalculatedStockOnHandRepository calculatedStockOnHandRepository;
 
   @InjectMocks
   private StockCardSummariesService stockCardSummariesService;
@@ -318,39 +324,45 @@ public class StockCardSummariesServiceTest {
         .getStockCardsWithStockOnHand(programId, facilityId, LocalDate.now()))
         .thenReturn(asList(stockCard1, stockCard2, stockCard3, stockCard4, stockCard5));
 
+    List<CalculatedStockOnHand> calculatedStockOnHands = new ArrayList<>();
+    CalculatedStockOnHand calculatedStockOnHand = new CalculatedStockOnHandDataBuilder().build();
+    calculatedStockOnHands.add(calculatedStockOnHand);
+    when(calculatedStockOnHandRepository
+        .findByStockCardIdAndOccurredDateBetween(any(), any(), any()))
+        .thenReturn(calculatedStockOnHands);
+
+    final CalculatedStockOnHand calculatedStockOnHand1 =
+        generateAndMockCalculatedStockOnHand(stockCard1);
+    final CalculatedStockOnHand calculatedStockOnHand2 =
+        generateAndMockCalculatedStockOnHand(stockCard2);
+    final CalculatedStockOnHand calculatedStockOnHand3 =
+        generateAndMockCalculatedStockOnHand(stockCard3);
+    final CalculatedStockOnHand calculatedStockOnHand4 =
+        generateAndMockCalculatedStockOnHand(stockCard4);
+    final CalculatedStockOnHand calculatedStockOnHand5 =
+        generateAndMockCalculatedStockOnHand(stockCard5);
+
     Map<UUID, StockCardAggregate> cardMap =
-        stockCardSummariesService.getGroupedStockCards(
-            programId, facilityId, null);
+        stockCardSummariesService.getGroupedStockCards(programId, facilityId, null,
+            LocalDate.of(2017, 3, 16), LocalDate.of(2017, 3, 19));
 
     assertThat(cardMap.keySet(), hasItems(orderableId1, orderableId4, orderableId6, orderableId7));
-    assertThat(cardMap.get(orderableId1).getStockCards(), hasItems(stockCard1, stockCard2));
-    assertThat(cardMap.get(orderableId4).getStockCards(), hasItems(stockCard3));
-    assertThat(cardMap.get(orderableId6).getStockCards(), hasItems(stockCard4));
-    assertThat(cardMap.get(orderableId7).getStockCards(), hasItems(stockCard5));
-  }
 
-  private StockCard createStockCard(UUID orderableId, UUID cardId) {
-    StockCard stockCard = new StockCard();
-    stockCard.setOrderableId(orderableId);
-    stockCard.setId(cardId);
-    Map<String, String> oldExtraData = new HashMap<>();
-    oldExtraData.put("vvmStatus", "STAGE_1");
-    Map<String, String> newExtraData = new HashMap<>();
-    newExtraData.put("vvmStatus", "STAGE_2");
-    StockCardLineItem lineItem1 = StockCardLineItem.builder()
-        .occurredDate(LocalDate.of(2017, 3, 17))
-        .processedDate(of(2017, 3, 17, 15, 10, 31, 100, UTC))
-        .quantity(1)
-        .extraData(oldExtraData)
-        .build();
-    StockCardLineItem lineItem2 = StockCardLineItem.builder()
-        .occurredDate(LocalDate.of(2017, 3, 18))
-        .processedDate(of(2017, 3, 18, 15, 10, 31, 100, UTC))
-        .quantity(1)
-        .extraData(newExtraData)
-        .build();
-    stockCard.setLineItems(asList(lineItem1, lineItem2, lineItem1));
-    return stockCard;
+    assertThat(cardMap.get(orderableId1).getStockCards(), hasItems(stockCard1, stockCard2));
+    assertThat(cardMap.get(orderableId1).getCalculatedStockOnHands(),
+        hasItems(calculatedStockOnHand, calculatedStockOnHand1, calculatedStockOnHand2));
+
+    assertThat(cardMap.get(orderableId4).getStockCards(), hasItems(stockCard3));
+    assertThat(cardMap.get(orderableId1).getCalculatedStockOnHands(),
+        hasItems(calculatedStockOnHand, calculatedStockOnHand3));
+
+    assertThat(cardMap.get(orderableId6).getStockCards(), hasItems(stockCard4));
+    assertThat(cardMap.get(orderableId1).getCalculatedStockOnHands(),
+        hasItems(calculatedStockOnHand, calculatedStockOnHand4));
+
+    assertThat(cardMap.get(orderableId7).getStockCards(), hasItems(stockCard5));
+    assertThat(cardMap.get(orderableId1).getCalculatedStockOnHands(),
+        hasItems(calculatedStockOnHand, calculatedStockOnHand5));
   }
 
   private OrderableDto createOrderableDto(UUID orderableId, String productName) {
@@ -359,5 +371,14 @@ public class StockCardSummariesServiceTest {
         .fullProductName(productName)
         .identifiers(new HashMap<>())
         .build();
+  }
+
+  private CalculatedStockOnHand generateAndMockCalculatedStockOnHand(StockCard stockCard) {
+    CalculatedStockOnHand calculatedStockOnHand = new CalculatedStockOnHandDataBuilder().build();
+    when(calculatedStockOnHandRepository
+        .findFirstByStockCardIdAndOccurredDateBeforeOrderByOccurredDateDesc(
+            stockCard.getId(), LocalDate.of(2017, 3, 16)))
+        .thenReturn(Optional.ofNullable(calculatedStockOnHand));
+    return calculatedStockOnHand;
   }
 }

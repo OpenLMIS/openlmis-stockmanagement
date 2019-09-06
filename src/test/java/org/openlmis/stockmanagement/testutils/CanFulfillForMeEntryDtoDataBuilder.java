@@ -56,12 +56,9 @@ public class CanFulfillForMeEntryDtoDataBuilder {
    * @return created can fulfill for me entry
    */
   public CanFulfillForMeEntryDto buildWithStockCardAndOrderable(StockCard stockCard,
-                                                                OrderableDto orderable,
-                                                                LocalDate asOfDate) {
+                                                                OrderableDto orderable) {
     return this
-        .withStockOnHand(stockCard != null && stockCard.getLineItemAsOfDate(asOfDate) != null
-            ? stockCard.getLineItemAsOfDate(asOfDate).getStockOnHand()
-            : null)
+        .withStockOnHand(stockCard != null ? stockCard.getStockOnHand() : 0)
         .withOrderable(new ObjectReferenceDtoDataBuilder()
             .withPath("orderables")
             .withId(orderable.getId())
@@ -78,12 +75,8 @@ public class CanFulfillForMeEntryDtoDataBuilder {
             .withId(stockCard.getLotId())
             .build()
             : null)
-        .withOccurredDate(stockCard != null && stockCard.getLineItemAsOfDate(asOfDate) != null
-            ? stockCard.getLineItemAsOfDate(asOfDate).getOccurredDate()
-            : null)
-        .withProcessedDate(stockCard != null && stockCard.getLineItemAsOfDate(asOfDate) != null
-            ? stockCard.getLineItemAsOfDate(asOfDate).getProcessedDate()
-            : null)
+        .withOccurredDate(stockCard != null ? stockCard.getOccurredDate() : null)
+        .withProcessedDate(stockCard != null ? stockCard.getProcessedDate() : null)
         .build();
   }
 

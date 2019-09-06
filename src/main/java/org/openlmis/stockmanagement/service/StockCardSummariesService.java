@@ -29,18 +29,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
 import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
+import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
@@ -79,7 +82,10 @@ public class StockCardSummariesService extends StockCardBaseService {
   private ApprovedProductReferenceDataService approvedProductReferenceDataService;
 
   @Autowired
-  private StockCardRepository cardRepository;
+  private StockCardRepository stockCardRepository;
+
+  @Autowired
+  private CalculatedStockOnHandRepository calculatedStockOnHandRepository;
 
   @Autowired
   private PermissionService permissionService;
@@ -95,9 +101,8 @@ public class StockCardSummariesService extends StockCardBaseService {
    * @param orderableIds collection of unique orderable UUIDs
    * @return map of stock cards assigned to orderable ids
    */
-  public Map<UUID, StockCardAggregate> getGroupedStockCards(
-      UUID programId, UUID facilityId, Set<UUID> orderableIds) {
-
+  public Map<UUID, StockCardAggregate> getGroupedStockCards(UUID programId, UUID facilityId,
+      Set<UUID> orderableIds, LocalDate startDate, LocalDate endDate) {
     List<StockCard> stockCards = calculatedStockOnHandService
         .getStockCardsWithStockOnHand(programId, facilityId, LocalDate.now());
 
@@ -107,7 +112,8 @@ public class StockCardSummariesService extends StockCardBaseService {
             .collect(toSet()));
 
     return stockCards.stream()
-        .map(stockCard -> assignOrderableToStockCard(stockCard, orderableFulfillMap, orderableIds))
+        .map(stockCard -> assignOrderableToStockCard(
+            stockCard, orderableFulfillMap, orderableIds, startDate, endDate))
         .filter(pair -> null != pair.getLeft())
         .collect(toMap(
             ImmutablePair::getLeft,
@@ -161,7 +167,7 @@ public class StockCardSummariesService extends StockCardBaseService {
    * @return found stock cards.
    */
   public List<StockCardDto> findStockCards(UUID programId, UUID facilityId) {
-    return cardsToDtos(cardRepository.findByProgramIdAndFacilityId(programId, facilityId));
+    return cardsToDtos(stockCardRepository.findByProgramIdAndFacilityId(programId, facilityId));
   }
 
   /**
@@ -173,7 +179,7 @@ public class StockCardSummariesService extends StockCardBaseService {
    * @return page of stock cards.
    */
   public Page<StockCardDto> findStockCards(UUID programId, UUID facilityId, Pageable pageable) {
-    Page<StockCard> pageOfCards = cardRepository
+    Page<StockCard> pageOfCards = stockCardRepository
         .findByProgramIdAndFacilityId(programId, facilityId, pageable);
 
     List<StockCardDto> cardDtos = cardsToDtos(pageOfCards.getContent());
@@ -190,7 +196,7 @@ public class StockCardSummariesService extends StockCardBaseService {
   public List<StockCardDto> createDummyStockCards(UUID programId, UUID facilityId) {
     //this will not read the whole table, only the orderable id and lot id
     List<OrderableLotIdentity> existingCardIdentities =
-        cardRepository.getIdentitiesBy(programId, facilityId);
+        stockCardRepository.getIdentitiesBy(programId, facilityId);
 
     LOGGER.info("Calling ref data to get all approved orderables");
     Map<OrderableLotIdentity, OrderableLot> orderableLotsMap = createOrderableLots(
@@ -268,7 +274,9 @@ public class StockCardSummariesService extends StockCardBaseService {
   private ImmutablePair<UUID, StockCardAggregate> assignOrderableToStockCard(
       StockCard stockCard,
       Map<UUID, OrderableFulfillDto> orderableFulfillMap,
-      Set<UUID> orderableIds) {
+      Set<UUID> orderableIds,
+      LocalDate startDate,
+      LocalDate endDate) {
 
     OrderableFulfillDto fulfills = orderableFulfillMap.get(stockCard.getOrderableId());
 
@@ -279,11 +287,22 @@ public class StockCardSummariesService extends StockCardBaseService {
     List<StockCard> stockCards = new ArrayList<>();
     stockCards.add(stockCard);
 
+    Set<UUID> stockCardIds = stockCards.stream()
+        .map(StockCard::getId)
+        .collect(toSet());
+    List<CalculatedStockOnHand> calculatedStockOnHands = calculatedStockOnHandRepository
+        .findByStockCardIdAndOccurredDateBetween(stockCardIds, startDate, endDate);
+    stockCardIds.forEach(stockCardId -> {
+      Optional<CalculatedStockOnHand> calculatedStockOnHand = calculatedStockOnHandRepository
+          .findFirstByStockCardIdAndOccurredDateBeforeOrderByOccurredDateDesc(
+              stockCardId, startDate);
+      calculatedStockOnHand.ifPresent(calculatedStockOnHands::add);
+    });
     return new ImmutablePair<>(
         !isEmpty(orderableIds) && !orderableIds.contains(orderableId)
             ? null
             : orderableId,
-        new StockCardAggregate(stockCards));
+        new StockCardAggregate(stockCards, calculatedStockOnHands));
   }
 
   @Getter

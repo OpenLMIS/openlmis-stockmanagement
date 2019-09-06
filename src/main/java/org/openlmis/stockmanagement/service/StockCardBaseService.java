@@ -76,7 +76,6 @@ public abstract class StockCardBaseService {
 
   private StockCardDto cardToDto(FacilityDto facility, ProgramDto program,
                                  StockCard card) {
-    
     calculatedStockOnHandService.fetchStockOnHandForSpecificDate(card, LocalDate.now());
     StockCardDto cardDto = StockCardDto.createFrom(card);
     

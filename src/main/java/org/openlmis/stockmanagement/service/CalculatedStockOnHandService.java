@@ -16,11 +16,12 @@
 package org.openlmis.stockmanagement.service;
 
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
 import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
@@ -36,36 +37,37 @@ public class CalculatedStockOnHandService {
   @Autowired
   private CalculatedStockOnHandRepository calculatedStockOnHandRepository;
 
-  CalculatedStockOnHand saveFromStockCard(StockCard stockCard) {
-    stockCard.calculateStockOnHand();
-    return new CalculatedStockOnHand(stockCard.getStockOnHand(), stockCard, LocalDate.now(), 
-        ZonedDateTime.now());
+  /**
+   * Returns list of stock cards with fetched Stock on Hand values.
+   *
+   * @param programId program id to find stock cards
+   * @param facilityId facility id to find stock cards
+   * @param asOfDate date used to get latest stock on hand before or equal specific date
+   * @return List of stock cards with SOH values, empty list if no stock cards were found.
+   */
+  public List<StockCard> getStockCardsWithStockOnHand(
+          UUID programId, UUID facilityId, LocalDate asOfDate) {
+    List<StockCard> stockCards =
+            stockCardRepository.findByProgramIdAndFacilityId(programId, facilityId);
+
+    if (null == stockCards) {
+      return Collections.emptyList();
+    }
+
+    stockCards.forEach(stockCard -> fetchStockOnHand(stockCard, asOfDate));
+
+    return stockCards;
   }
 
   /**
    * Returns list of stock cards with fetched Stock on Hand values.
    *
    * @param programId program id to find stock cards
-   * @param facilityId faciliy id to find stock cards
-   * @param asOfDate date used to get latest stock on hand before or equal specific date If date
-   *     is not specified, current date will be used.
+   * @param facilityId facility id to find stock cards
    * @return List of stock cards with SOH values, empty list if no stock cards were found.
    */
-  public List<StockCard> getStockCardsWithStockOnHand(UUID programId,
-      UUID facilityId, LocalDate asOfDate) {
-
-    LocalDate queryDate = null == asOfDate ? LocalDate.now() : asOfDate;
-
-    List<StockCard> stockCards = stockCardRepository
-        .findByProgramIdAndFacilityId(programId, facilityId);
-
-    if (null == stockCards) {
-      return Collections.emptyList();
-    }
-
-    stockCards.forEach(stockCard -> fetchStockOnHand(stockCard, queryDate));
-
-    return stockCards;
+  public List<StockCard> getStockCardsWithStockOnHand(UUID programId, UUID facilityId) {
+    return getStockCardsWithStockOnHand(programId, facilityId, LocalDate.now());
   }
 
   /**
@@ -80,15 +82,51 @@ public class CalculatedStockOnHandService {
     fetchStockOnHand(stockCard, queryDate);
   }
 
-  private void fetchStockOnHand(StockCard stockCard, LocalDate asOfDate) {
-    CalculatedStockOnHand calculatedStockOnHand = calculatedStockOnHandRepository
-        .findFirstByStockCardIdAndDateBeforeOrderByDateDesc(stockCard.getId(), asOfDate);
+  /**
+   * Recalculates values of stock on hand
+   * in all line items that happened after one given in parameter.
+   *
+   * @param stockCard stock card for which
+   * @param lineItem  date used to get latest stock on hand before or equal specific date. If date
+   *     is not specified, current date will be used.
+   */
+  public void recalculateStockOnHand(StockCard stockCard, StockCardLineItem lineItem) {
+    List<CalculatedStockOnHand> stockOnHands = calculatedStockOnHandRepository
+            .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
+                    stockCard.getId(), lineItem.getOccurredDate());
 
-    if (null != calculatedStockOnHand) {
+    if (stockOnHands.size() == 0
+        || !stockOnHands.get(0).getOccurredDate().equals(lineItem.getOccurredDate())) {
+      Integer previousStockOnHand = calculatedStockOnHandRepository
+          .findFirstByStockCardIdAndOccurredDateBeforeOrderByOccurredDateDesc(
+              stockCard.getId(), lineItem.getOccurredDate().minusDays(1)).orElseGet(() -> {
+                CalculatedStockOnHand calculatedStockOnHand = new CalculatedStockOnHand();
+                calculatedStockOnHand.setStockOnHand(0);
+                return calculatedStockOnHand;
+              }).getStockOnHand();
+
+      calculatedStockOnHandRepository.save(new CalculatedStockOnHand(
+          lineItem.getQuantity() + previousStockOnHand,
+          stockCard, lineItem.getOccurredDate(),
+          lineItem.getProcessedDate()));
+    }
+
+    stockOnHands.forEach(stockOnHand ->
+        stockOnHand.setStockOnHand(stockOnHand.getStockOnHand() + lineItem.getQuantity()));
+
+    calculatedStockOnHandRepository.save(stockOnHands);
+  }
+
+  private void fetchStockOnHand(StockCard stockCard, LocalDate asOfDate) {
+    Optional<CalculatedStockOnHand> calculatedStockOnHandOptional = calculatedStockOnHandRepository
+            .findFirstByStockCardIdAndOccurredDateBeforeOrderByOccurredDateDesc(
+                stockCard.getId(), asOfDate);
+
+    if (calculatedStockOnHandOptional.isPresent()) {
+      CalculatedStockOnHand calculatedStockOnHand = calculatedStockOnHandOptional.get();
       stockCard.setStockOnHand(calculatedStockOnHand.getStockOnHand());
       stockCard.setOccurredDate(calculatedStockOnHand.getOccurredDate());
       stockCard.setProcessedDate(calculatedStockOnHand.getProcessedDate());
     }
   }
-
 }

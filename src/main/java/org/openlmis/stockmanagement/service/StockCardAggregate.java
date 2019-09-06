@@ -30,7 +30,11 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.UUID;
+import javax.persistence.criteria.CriteriaBuilder.In;
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -39,6 +43,7 @@ import lombok.ToString;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
+import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +53,7 @@ import org.slf4j.LoggerFactory;
  * and values assigned to reason tags using all Stock Cards from list.
  */
 @NoArgsConstructor
+@AllArgsConstructor
 @ToString
 @EqualsAndHashCode
 public class StockCardAggregate {
@@ -58,14 +64,9 @@ public class StockCardAggregate {
   @Setter
   private List<StockCard> stockCards;
 
-  /**
-   * Creates instance of {@link StockCardAggregate} with list of given stock cards.
-   *
-   * @param stockCards list of grouped stock cards
-   */
-  public StockCardAggregate(List<StockCard> stockCards) {
-    this.stockCards = stockCards;
-  }
+  @Getter
+  @Setter
+  private List<CalculatedStockOnHand> calculatedStockOnHands;
 
   /**
    * Returns amount of products assigned to reasons that have given tag.
@@ -121,18 +122,14 @@ public class StockCardAggregate {
    * @return number of days without stock available
    */
   public Long getStockoutDays(LocalDate startDate, LocalDate endDate) {
-    List<StockCardLineItem> lineItems = stockCards.stream()
-        .flatMap(stockCard -> stockCard.getLineItems().stream())
-        .sorted(getComparator())
-        .collect(toList());
+    Map<LocalDate, Integer> stockOnHands = calculatedStockOnHands.stream()
+        .collect(toMap(
+            CalculatedStockOnHand::getOccurredDate,
+            CalculatedStockOnHand::getStockOnHand,
+            Integer::sum,
+            TreeMap::new));
 
-    return calculateStockoutDays(getStockoutPeriods(lineItems, endDate), startDate, endDate);
-  }
-
-  private Comparator<StockCardLineItem> getComparator() {
-    return byOccurredDate()
-        .thenComparing(byProcessedDate())
-        .thenComparing(byReasonPriority());
+    return calculateStockoutDays(getStockoutPeriods(stockOnHands, endDate), startDate, endDate);
   }
 
   private List<StockCardLineItem> filterLineItems(LocalDate startDate,
@@ -148,20 +145,16 @@ public class StockCardAggregate {
   }
 
   private Map<LocalDate, LocalDate> getStockoutPeriods(
-      List<StockCardLineItem> lineItems, LocalDate endDate) {
-
-    int recentSoh = 0;
+      Map<LocalDate, Integer> stockOnHands, LocalDate endDate) {
     LocalDate stockOutStartDate = null;
     Map<LocalDate, LocalDate> stockOutDaysMap = new TreeMap<>();
 
-    for (StockCardLineItem lineItem : lineItems) {
-      recentSoh = recentSoh + lineItem.getQuantityWithSign();
-      lineItem.setStockOnHand(recentSoh);
-      if (recentSoh <= 0) {
-        stockOutStartDate = lineItem.getOccurredDate();
+    for (Entry<LocalDate, Integer> stockOnHandEntry : stockOnHands.entrySet()) {
+      if (stockOnHandEntry.getValue() <= 0) {
+        stockOutStartDate = stockOnHandEntry.getKey();
       } else if (null != stockOutStartDate) {
-        LOGGER.debug("stock out days from {} to {}", stockOutStartDate, lineItem.getOccurredDate());
-        stockOutDaysMap.put(stockOutStartDate, lineItem.getOccurredDate());
+        LOGGER.debug("stock out days from {} to {}", stockOutStartDate, stockOnHandEntry.getKey());
+        stockOutDaysMap.put(stockOutStartDate, stockOnHandEntry.getKey());
         stockOutStartDate = null;
       }
     }

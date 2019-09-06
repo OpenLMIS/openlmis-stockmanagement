@@ -16,21 +16,26 @@
 package org.openlmis.stockmanagement.repository;
 
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
 
 public interface CalculatedStockOnHandRepository
     extends JpaRepository<CalculatedStockOnHand, UUID> {
 
-  
-  @Query(value = "SELECT * FROM calculated_stocks_on_hand cson " 
-      + "WHERE cson.stockcardid = :stockCardId AND cson.occurredDate <= :asOfDate " 
-      + "ORDER BY occurredDate DESC LIMIT 1", nativeQuery = true)
-  CalculatedStockOnHand findFirstByStockCardIdAndDateBeforeOrderByDateDesc(
-      @Param("stockCardId") UUID stockCardId,
-      @Param("asOfDate") LocalDate asOfDate);
+  Optional<CalculatedStockOnHand>
+      findFirstByStockCardIdAndOccurredDateBeforeOrderByOccurredDateDesc(
+          @Param("stockCardId") UUID stockCardId,
+          @Param("asOfDate") LocalDate asOfDate);
+
+  List<CalculatedStockOnHand>
+      findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
+          UUID stockCardId, LocalDate asOfDate);
+
+  List<CalculatedStockOnHand> findByStockCardIdAndOccurredDateBetween(
+      Collection<UUID> stockCardId, LocalDate startDate, LocalDate endDate);
 }

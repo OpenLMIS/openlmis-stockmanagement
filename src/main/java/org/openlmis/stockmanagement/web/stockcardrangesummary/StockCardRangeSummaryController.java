@@ -73,7 +73,9 @@ public class StockCardRangeSummaryController {
         stockCardSummariesService.getGroupedStockCards(
             params.getProgramId(),
             params.getFacilityId(),
-            params.getOrderableIds());
+            params.getOrderableIds(),
+            params.getStartDate(),
+            params.getEndDate());
 
     profiler.start("TO_DTO");
     Page<StockCardRangeSummaryDto> page = builder.build(

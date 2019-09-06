@@ -44,7 +44,6 @@ public class StockCardDtoDataBuilder {
 
     StockCardLineItem lineItem = StockCardLineItem
         .builder()
-        .stockOnHand(1)
         .quantity(1)
         .occurredDate(LocalDate.of(2017, 2, 13))
         .reason(reason).build();

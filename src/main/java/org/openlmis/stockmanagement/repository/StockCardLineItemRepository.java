@@ -19,6 +19,6 @@ import java.util.UUID;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-public interface StockCardLineItemRepository extends
-    PagingAndSortingRepository<StockCardLineItem, UUID> {
+public interface StockCardLineItemRepository
+    extends PagingAndSortingRepository<StockCardLineItem, UUID> {
 }

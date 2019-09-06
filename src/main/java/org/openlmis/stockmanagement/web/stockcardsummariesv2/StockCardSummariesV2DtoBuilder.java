@@ -53,11 +53,10 @@ public class StockCardSummariesV2DtoBuilder {
    * @param approvedProducts list of {@link OrderableDto} that summaries will be based on
    * @param stockCards       list of {@link StockCard} found for orderables
    * @param orderables       map of orderable ids as keys and {@link OrderableFulfillDto}
-   * @param asOfDate         date on which stock on hand will be retrieved
    * @return list of {@link StockCardSummaryV2Dto}
    */
   public List<StockCardSummaryV2Dto> build(List<OrderableDto> approvedProducts,
-      List<StockCard> stockCards, Map<UUID, OrderableFulfillDto> orderables, LocalDate asOfDate,
+      List<StockCard> stockCards, Map<UUID, OrderableFulfillDto> orderables,
       boolean nonEmptySummariesOnly) {
     Stream<StockCardSummaryV2Dto> summariesStream = approvedProducts.stream()
         .map(p -> build(stockCards, p.getId(),

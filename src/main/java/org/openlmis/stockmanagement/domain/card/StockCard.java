@@ -85,8 +85,10 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
 
   @Column(nullable = false)
   private UUID facilityId;
+
   @Column(nullable = false)
   private UUID programId;
+
   @Column(nullable = false)
   private UUID orderableId;
   @Column
@@ -147,10 +149,8 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
     reorderLineItems();
     int previousSoh = 0;
     for (StockCardLineItem lineItem : getLineItems()) {
-      lineItem.calculateStockOnHand(previousSoh);
-      previousSoh = lineItem.getStockOnHand();
+      previousSoh = lineItem.calculateStockOnHand(previousSoh);
     }
-    setStockOnHand(previousSoh);
     LOGGER.debug("Calculated stock on hand: {}", previousSoh);
   }
 
@@ -182,24 +182,6 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
     }
 
     return clone;
-  }
-
-  /**
-   * Returns latest line item  before given date.
-   *
-   */
-  public StockCardLineItem getLineItemAsOfDate(LocalDate date) {
-    if (isEmpty(lineItems)) {
-      return null;
-    }
-
-    reorderLineItems();
-
-    return
-      lineItems.stream()
-        .filter(a -> !a.getOccurredDate().isAfter(date))
-        .reduce((left, right) -> right)
-        .orElse(null);
   }
 
   @PostLoad

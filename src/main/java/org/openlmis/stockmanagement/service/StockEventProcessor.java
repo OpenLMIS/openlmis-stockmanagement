@@ -37,19 +37,25 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class StockEventProcessor {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(StockEventProcessor.class);
   private static final XLogger XLOGGER = XLoggerFactory.getXLogger(StockEventProcessor.class);
 
   @Autowired
   private StockEventProcessContextBuilder contextBuilder;
+
   @Autowired
   private StockEventValidationsService stockEventValidationsService;
+
   @Autowired
   private PhysicalInventoryService physicalInventoryService;
+
   @Autowired
   private StockCardService stockCardService;
+
   @Autowired
   private StockEventsRepository stockEventsRepository;
+
   @Autowired
   private StockEventNotificationProcessor stockEventNotificationProcessor;
 
