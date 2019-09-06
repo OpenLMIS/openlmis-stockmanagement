@@ -376,7 +376,7 @@ public class StockCardSummariesServiceTest {
   private CalculatedStockOnHand generateAndMockCalculatedStockOnHand(StockCard stockCard) {
     CalculatedStockOnHand calculatedStockOnHand = new CalculatedStockOnHandDataBuilder().build();
     when(calculatedStockOnHandRepository
-        .findFirstByStockCardIdAndOccurredDateBeforeOrderByOccurredDateDesc(
+        .findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(
             stockCard.getId(), LocalDate.of(2017, 3, 16)))
         .thenReturn(Optional.ofNullable(calculatedStockOnHand));
     return calculatedStockOnHand;

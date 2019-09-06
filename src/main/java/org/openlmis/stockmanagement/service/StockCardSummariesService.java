@@ -294,7 +294,7 @@ public class StockCardSummariesService extends StockCardBaseService {
         .findByStockCardIdAndOccurredDateBetween(stockCardIds, startDate, endDate);
     stockCardIds.forEach(stockCardId -> {
       Optional<CalculatedStockOnHand> calculatedStockOnHand = calculatedStockOnHandRepository
-          .findFirstByStockCardIdAndOccurredDateBeforeOrderByOccurredDateDesc(
+          .findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(
               stockCardId, startDate);
       calculatedStockOnHand.ifPresent(calculatedStockOnHands::add);
     });

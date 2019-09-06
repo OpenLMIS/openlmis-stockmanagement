@@ -122,7 +122,8 @@ public class StockCardRangeSummaryControllerIntegrationTest extends BaseWebInteg
     assertEquals("10",
         ((LinkedHashMap) response.getContent().get(0)).get("stockOutDays").toString());
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-    verify(stockCardSummariesService).getGroupedStockCards(programId, facilityId, null, null, null);
+    verify(stockCardSummariesService)
+        .getGroupedStockCards(programId, facilityId, null, null, LocalDate.now());
     verify(builder).build(
         groupedStockCards, null, null, LocalDate.now(), new PageRequest(0, Integer.MAX_VALUE));
   }

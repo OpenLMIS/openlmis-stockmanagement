@@ -23,7 +23,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.openlmis.stockmanagement.web.stockcardsummariesv2.StockCardSummariesV2DtoBuilder.ORDERABLES;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -194,8 +193,6 @@ public class StockCardSummariesV2DtoBuilderTest {
 
     fulfillMap.remove(orderable1.getId());
 
-    LocalDate asOfDate = LocalDate.now();
-
     List<StockCardSummaryV2Dto> result = builder.build(asList(orderable2, orderable3),
         stockCards, fulfillMap, false);
 
@@ -257,8 +254,6 @@ public class StockCardSummariesV2DtoBuilderTest {
   public void shouldOmitEmptySummariesIfFlagIsSet() {
     List<StockCard> stockCards = asList(stockCard, stockCard1);
 
-    LocalDate asOfDate = LocalDate.now();
-
     List<StockCardSummaryV2Dto> result = builder.build(asList(orderable3, orderable4),
         stockCards, fulfillMap, true);
 
@@ -278,8 +273,6 @@ public class StockCardSummariesV2DtoBuilderTest {
   @Test
   public void shouldNotOmitEmptySummariesIfFlagIsNotSet() {
     List<StockCard> stockCards = asList(stockCard, stockCard1);
-
-    LocalDate asOfDate = LocalDate.now();
 
     List<StockCardSummaryV2Dto> result = builder.build(asList(orderable3, orderable4),
         stockCards, fulfillMap, false);

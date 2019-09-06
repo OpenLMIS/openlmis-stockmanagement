@@ -142,6 +142,8 @@ public class StockCardService extends StockCardBaseService {
     LOGGER.debug("Stock card found");
     permissionService.canViewStockCard(foundCard.getProgramId(), foundCard.getFacilityId());
 
+    foundCard.calculateStockOnHand();
+
     StockCardDto cardDto = createDtos(singletonList(foundCard)).get(0);
     cardDto.setOrderable(orderableRefDataService.findOne(foundCard.getOrderableId()));
     if (cardDto.hasLot()) {
@@ -217,6 +219,10 @@ public class StockCardService extends StockCardBaseService {
 
     if (null == card) {
       card = createStockCardFrom(eventDto, eventLineItem, savedEventId);
+    }
+
+    if (cardsToUpdate.stream().noneMatch(elem -> identityOf(elem).equals(identity))) {
+      cardsToUpdate.add(card);
     }
 
     return card;

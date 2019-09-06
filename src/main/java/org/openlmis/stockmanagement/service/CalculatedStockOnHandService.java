@@ -98,7 +98,7 @@ public class CalculatedStockOnHandService {
     if (stockOnHands.size() == 0
         || !stockOnHands.get(0).getOccurredDate().equals(lineItem.getOccurredDate())) {
       Integer previousStockOnHand = calculatedStockOnHandRepository
-          .findFirstByStockCardIdAndOccurredDateBeforeOrderByOccurredDateDesc(
+          .findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(
               stockCard.getId(), lineItem.getOccurredDate().minusDays(1)).orElseGet(() -> {
                 CalculatedStockOnHand calculatedStockOnHand = new CalculatedStockOnHand();
                 calculatedStockOnHand.setStockOnHand(0);
@@ -119,7 +119,7 @@ public class CalculatedStockOnHandService {
 
   private void fetchStockOnHand(StockCard stockCard, LocalDate asOfDate) {
     Optional<CalculatedStockOnHand> calculatedStockOnHandOptional = calculatedStockOnHandRepository
-            .findFirstByStockCardIdAndOccurredDateBeforeOrderByOccurredDateDesc(
+            .findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(
                 stockCard.getId(), asOfDate);
 
     if (calculatedStockOnHandOptional.isPresent()) {

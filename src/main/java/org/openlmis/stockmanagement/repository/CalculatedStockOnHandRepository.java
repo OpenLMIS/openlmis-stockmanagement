@@ -28,7 +28,7 @@ public interface CalculatedStockOnHandRepository
     extends JpaRepository<CalculatedStockOnHand, UUID> {
 
   Optional<CalculatedStockOnHand>
-      findFirstByStockCardIdAndOccurredDateBeforeOrderByOccurredDateDesc(
+      findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(
           @Param("stockCardId") UUID stockCardId,
           @Param("asOfDate") LocalDate asOfDate);
 
