@@ -32,7 +32,6 @@ import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.validators.AdjustmentReasonValidator;
 import org.openlmis.stockmanagement.validators.ApprovedOrderableValidator;
 import org.openlmis.stockmanagement.validators.FreeTextValidator;
-import org.openlmis.stockmanagement.validators.GeoLevelAffinityValidator;
 import org.openlmis.stockmanagement.validators.LotValidator;
 import org.openlmis.stockmanagement.validators.MandatoryFieldsValidator;
 import org.openlmis.stockmanagement.validators.OrderableLotDuplicationValidator;
@@ -41,6 +40,7 @@ import org.openlmis.stockmanagement.validators.QuantityValidator;
 import org.openlmis.stockmanagement.validators.ReasonExistenceValidator;
 import org.openlmis.stockmanagement.validators.ReceiveIssueReasonValidator;
 import org.openlmis.stockmanagement.validators.SourceDestinationAssignmentValidator;
+import org.openlmis.stockmanagement.validators.SourceDestinationGeoLevelAffinityValidator;
 import org.openlmis.stockmanagement.validators.StockEventValidator;
 import org.openlmis.stockmanagement.validators.StockEventVvmValidator;
 import org.openlmis.stockmanagement.validators.UnpackKitValidator;
@@ -102,7 +102,7 @@ public class StockEventValidationsServiceTest {
   private UnpackKitValidator unpackKitValidator;
 
   @MockBean
-  private GeoLevelAffinityValidator geoLevelAffinityValidator;
+  private SourceDestinationGeoLevelAffinityValidator sourceDestinationGeoLeveLAffinityValidator;
 
   @Before
   public void setUp() throws Exception {
@@ -111,7 +111,7 @@ public class StockEventValidationsServiceTest {
     doNothing().when(stockEventVvmValidator).validate(any(StockEventDto.class));
     doNothing().when(approvedOrderableValidator).validate(any(StockEventDto.class));
     doNothing().when(sourceDestinationAssignmentValidator).validate(any(StockEventDto.class));
-    doNothing().when(geoLevelAffinityValidator).validate(any(StockEventDto.class));
+    doNothing().when(sourceDestinationGeoLeveLAffinityValidator).validate(any(StockEventDto.class));
     doNothing().when(mandatoryFieldsValidator).validate(any(StockEventDto.class));
     doNothing().when(freeTextValidator).validate(any(StockEventDto.class));
     doNothing().when(receiveIssueReasonValidator).validate(any(StockEventDto.class));

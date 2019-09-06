@@ -15,9 +15,9 @@
 
 package org.openlmis.stockmanagement.validators;
 
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_NOT_IN_VALID_LIST;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_BOTH_PRESENT;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_IN_VALID_LIST;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_FOUND;
 
 import java.util.List;
 import java.util.UUID;
@@ -30,9 +30,9 @@ import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import org.springframework.stereotype.Component;
 
 /**
- * This validator makes sure the sources/destinations in a stock event are in the valid lists.
- * Meaning that users can not just issue to or receive from anywhere they want. Users have to pick
- * that from a valid list that has been set up by admin or implementer.
+ * This validator checks if the both source and destination are not present at the same time
+ * It also checks if given source or destination already exists.
+ * Validation if chosen source or destination is covered by another validator
  */
 @Component(value = "SourceDestinationAssignmentValidator")
 public class SourceDestinationAssignmentValidator implements StockEventValidator {
@@ -56,11 +56,12 @@ public class SourceDestinationAssignmentValidator implements StockEventValidator
 
       eventDto
           .getLineItems()
-          .forEach(eventLineItem -> checkIsValidAssignment(eventDto, eventLineItem));
+          .forEach(eventLineItem -> checkExistingAssignment(eventDto, eventLineItem));
     }
   }
 
-  private void checkIsValidAssignment(StockEventDto eventDto, StockEventLineItemDto eventLineItem) {
+  private void checkExistingAssignment(StockEventDto eventDto,
+      StockEventLineItemDto eventLineItem) {
     if (eventLineItem.hasSourceId()) {
       checkSourceAssignment(eventDto.getContext(), eventLineItem);
     }
@@ -79,21 +80,21 @@ public class SourceDestinationAssignmentValidator implements StockEventValidator
 
   private void checkSourceAssignment(StockEventProcessContext context,
                                      StockEventLineItemDto eventLineItem) {
-    boolean isInValidList = checkAssignment(context.getSources(), eventLineItem.getSourceId());
+    boolean exists = checkAssignment(context.getSources(), eventLineItem.getSourceId());
 
-    if (!isInValidList) {
-      throwError(ERROR_SOURCE_NOT_IN_VALID_LIST, eventLineItem.getSourceId());
+    if (!exists) {
+      throwError(ERROR_SOURCE_NOT_FOUND, eventLineItem.getSourceId());
     }
   }
 
   private void checkDestinationAssignment(StockEventProcessContext context,
                                           StockEventLineItemDto eventLineItem) {
-    boolean isInValidList = checkAssignment(
+    boolean exists = checkAssignment(
         context.getDestinations(), eventLineItem.getDestinationId()
     );
 
-    if (!isInValidList) {
-      throwError(ERROR_DESTINATION_NOT_IN_VALID_LIST, eventLineItem.getDestinationId());
+    if (!exists) {
+      throwError(ERROR_DESTINATION_NOT_FOUND, eventLineItem.getDestinationId());
     }
   }
 

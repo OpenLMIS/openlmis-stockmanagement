@@ -1,6 +1,11 @@
 4.1.2 / Work in progress
 ==================
 
+Contract breaking changes:
+
+* [OLMIS-6556](https://openlmis.atlassian.net/browse/OLMIS-6556): Add support for limiting sources and destinations
+  * During work on this ticket parameters for /api/validSources and /api/validDestinations changed.
+
 New functionality:
 * [OLMIS-6368](https://openlmis.atlassian.net/browse/OLMIS-6368): Create SoH fact table.
 * [OLMIS-6434](https://openlmis.atlassian.net/browse/OLMIS-6434): Calculated and populated Stock on Hand values to a new table.

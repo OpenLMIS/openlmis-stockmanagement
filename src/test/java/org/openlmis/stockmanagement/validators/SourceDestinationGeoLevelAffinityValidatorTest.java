@@ -42,7 +42,7 @@ import org.openlmis.stockmanagement.service.ValidSourceService;
 import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GeoLevelAffinityValidatorTest extends BaseValidatorTest {
+public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidatorTest {
 
   private static final String ORGANIZATION_NODE_NAME = "ORGANIZATION_NODE_NAME";
   private static final String FACILITY_NODE_NAME = "FACILITY_NODE_NAME";
@@ -57,7 +57,7 @@ public class GeoLevelAffinityValidatorTest extends BaseValidatorTest {
   private ValidSourceService validSourceService;
 
   @InjectMocks
-  private GeoLevelAffinityValidator geoLevelAffinityValidator;
+  private SourceDestinationGeoLevelAffinityValidator sourceDestinationGeoLeveLAffinityValidator;
   
   @Rule
   public ExpectedException expectedEx = ExpectedException.none();
@@ -81,7 +81,7 @@ public class GeoLevelAffinityValidatorTest extends BaseValidatorTest {
         validSourceService.findSources(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
         .thenReturn(validDestinationAssignments);
 
-    geoLevelAffinityValidator.validate(stockEventDto);
+    sourceDestinationGeoLeveLAffinityValidator.validate(stockEventDto);
   }
   
   @Test
@@ -99,7 +99,7 @@ public class GeoLevelAffinityValidatorTest extends BaseValidatorTest {
             .findDestinations(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
         .thenReturn(validDestinationAssignments);
 
-    geoLevelAffinityValidator.validate(stockEventDto);
+    sourceDestinationGeoLeveLAffinityValidator.validate(stockEventDto);
   }
 
   @Test
@@ -126,7 +126,7 @@ public class GeoLevelAffinityValidatorTest extends BaseValidatorTest {
     expectedEx.expect(ValidationMessageException.class);
     expectedEx.expectMessage(MessageKeys.ERROR_SOURCE_ASSIGNMENT_NO_MATCH_GEO_LEVEL_AFFINITY);
     
-    geoLevelAffinityValidator.validate(stockEventDto);
+    sourceDestinationGeoLeveLAffinityValidator.validate(stockEventDto);
   }
 
   @Test
@@ -149,7 +149,7 @@ public class GeoLevelAffinityValidatorTest extends BaseValidatorTest {
     expectedEx.expect(ValidationMessageException.class);
     expectedEx.expectMessage(MessageKeys.ERROR_SOURCE_ASSIGNMENT_NO_MATCH_GEO_LEVEL_AFFINITY);
     
-    geoLevelAffinityValidator.validate(stockEventDto);
+    sourceDestinationGeoLeveLAffinityValidator.validate(stockEventDto);
   }
   
   @Test
@@ -176,7 +176,7 @@ public class GeoLevelAffinityValidatorTest extends BaseValidatorTest {
     expectedEx.expect(ValidationMessageException.class);
     expectedEx.expectMessage(MessageKeys.ERROR_SOURCE_ASSIGNMENT_NO_MATCH_GEO_LEVEL_AFFINITY);
     
-    geoLevelAffinityValidator.validate(stockEventDto);
+    sourceDestinationGeoLeveLAffinityValidator.validate(stockEventDto);
   }
   
   @Test
@@ -202,6 +202,6 @@ public class GeoLevelAffinityValidatorTest extends BaseValidatorTest {
     expectedEx.expect(ValidationMessageException.class);
     expectedEx.expectMessage(MessageKeys.ERROR_DESTINATION_ASSIGNMENT_NO_MATCH_GEO_LEVEL_AFFINITY);
     
-    geoLevelAffinityValidator.validate(stockEventDto);
+    sourceDestinationGeoLeveLAffinityValidator.validate(stockEventDto);
   }
 }

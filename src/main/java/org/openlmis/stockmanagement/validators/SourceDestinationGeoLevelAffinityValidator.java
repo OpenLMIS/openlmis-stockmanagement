@@ -33,8 +33,13 @@ import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component(value = "GeoLevelAffinityValidator")
-public class GeoLevelAffinityValidator implements StockEventValidator {
+/**
+ * This validator check geo level affinity to make sure that chosen destination/source is correct.
+ * Meaning that chosen source or destination must be from/to valid node which match the
+ * the geography zone (of the affinity level) with provided facility.
+ */
+@Component(value = "SourceDestinationGeoLevelAffinityValidator")
+public class SourceDestinationGeoLevelAffinityValidator implements StockEventValidator {
 
   @Autowired
   private ValidDestinationService validDestinationService;
@@ -45,6 +50,7 @@ public class GeoLevelAffinityValidator implements StockEventValidator {
   @Override
   public void validate(StockEventDto stockEventDto) {
     LOGGER.debug("Validate geo level affinity");
+    
     if (!stockEventDto.hasLineItems()) {
       return;
     }
@@ -53,10 +59,11 @@ public class GeoLevelAffinityValidator implements StockEventValidator {
     
     if (stockEventLineItems.get(0).getSourceId() != null) {
       validateSources(stockEventDto);
-    } else {
+    }
+    if (stockEventLineItems.get(0).getDestinationId() != null) {
       validateDestinations(stockEventDto);
     }
-    
+
   }
 
   private void  validateDestinations(StockEventDto stockEventDto) {
