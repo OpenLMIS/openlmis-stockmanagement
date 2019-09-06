@@ -38,4 +38,7 @@ public class SourceDestinationAssignment extends BaseEntity {
   @ManyToOne()
   @JoinColumn(nullable = false)
   Node node;
+  
+  @Type(type = PG_UUID)
+  UUID geoLevelAffinity;
 }

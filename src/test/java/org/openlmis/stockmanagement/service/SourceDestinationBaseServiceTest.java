@@ -20,6 +20,7 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -28,10 +29,12 @@ import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.ValidDestinationAssignmentDataBuilder.createDestination;
 import static org.openlmis.stockmanagement.testutils.ValidSourceAssignmentDataBuilder.createSource;
 import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationDataBuilder.createFacilityDestination;
+import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationDataBuilder.createFacilityDestinationWithGeoLevelAffinity;
 import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationDataBuilder.createFacilitySourceAssignment;
 import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationDataBuilder.createOrganizationDestination;
 import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationDataBuilder.createOrganizationSourceAssignment;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import org.junit.Test;
@@ -45,6 +48,9 @@ import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAss
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
+import org.openlmis.stockmanagement.dto.referencedata.FacilityTypeDto;
+import org.openlmis.stockmanagement.dto.referencedata.GeographicLevelDto;
+import org.openlmis.stockmanagement.dto.referencedata.GeographicZoneDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.NodeRepository;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
@@ -92,12 +98,15 @@ public class SourceDestinationBaseServiceTest {
       throws Exception {
     //given
     UUID programId = randomUUID();
+    UUID facilityId = randomUUID();
     UUID facilityTypeId = randomUUID();
+    FacilityDto facilityDto = createFacilityDtoWithFacilityType(facilityId, facilityTypeId);
+    when(facilityReferenceDataService.findOne(facilityId)).thenReturn(facilityDto);
     doThrow(new ValidationMessageException("errorKey")).when(programFacilityTypeExistenceService)
         .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
     //when
-    validSourceService.findSources(programId, facilityTypeId);
+    validSourceService.findSources(programId, facilityId);
   }
 
   @Test
@@ -303,19 +312,28 @@ public class SourceDestinationBaseServiceTest {
     //given
     UUID programId = randomUUID();
     UUID facilityTypeId = randomUUID();
+    UUID facilityId = randomUUID();
+    FacilityDto facilityDto = createFacilityDtoWithFacilityType(facilityId, facilityTypeId);
+    facilityDto.setName(FACILITY_NODE_NAME);
+
+    when(facilityReferenceDataService.findOne(facilityId)).thenReturn(facilityDto);
+
     doNothing().when(programFacilityTypeExistenceService)
         .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
     List<ValidDestinationAssignment> validDestinationAssignments = asList(
         createOrganizationDestination(mockedOrganizationNode(ORGANIZATION_NODE_NAME)),
-        createFacilityDestination(mockedFacilityNode(FACILITY_NODE_NAME)));
+        createFacilityDestination(mockedFacilityNode(facilityId, FACILITY_NODE_NAME)));
 
     when(destinationRepository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
         .thenReturn(validDestinationAssignments);
 
+    when(facilityReferenceDataService.findByIds(anyListOf(UUID.class))).thenReturn(
+        Collections.singletonMap(facilityId, facilityDto));
+
     //when
     List<ValidSourceDestinationDto> validDestinations =
-        validDestinationService.findDestinations(programId, facilityTypeId);
+        validDestinationService.findDestinations(programId, facilityId);
 
     //then
     assertThat(validDestinations.size(), is(2));
@@ -335,19 +353,27 @@ public class SourceDestinationBaseServiceTest {
     //given
     UUID programId = randomUUID();
     UUID facilityTypeId = randomUUID();
+    UUID facilityId = randomUUID();
+    FacilityDto facilityDto = createFacilityDtoWithFacilityType(facilityId, facilityTypeId);
+    facilityDto.setName(FACILITY_NODE_NAME);
+
+    when(facilityReferenceDataService.findOne(facilityId)).thenReturn(facilityDto);
     doNothing().when(programFacilityTypeExistenceService)
         .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
     List<ValidSourceAssignment> validSourceAssignments = asList(
         createOrganizationSourceAssignment(mockedOrganizationNode(ORGANIZATION_NODE_NAME)),
-        createFacilitySourceAssignment(mockedFacilityNode(FACILITY_NODE_NAME)));
+        createFacilitySourceAssignment(mockedFacilityNode(facilityId, FACILITY_NODE_NAME)));
 
     when(sourceRepository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
         .thenReturn(validSourceAssignments);
 
+    when(facilityReferenceDataService.findByIds(anyListOf(UUID.class))).thenReturn(
+        Collections.singletonMap(facilityId, facilityDto));
+
     //when
     List<ValidSourceDestinationDto> validSources =
-        validSourceService.findSources(programId, facilityTypeId);
+        validSourceService.findSources(programId, facilityId);
 
     //then
     assertThat(validSources.size(), is(2));
@@ -360,6 +386,119 @@ public class SourceDestinationBaseServiceTest {
     assertThat(facility.getName(), is(FACILITY_NODE_NAME));
     assertThat(facility.getIsFreeTextAllowed(), is(false));
   }
+
+  @Test
+  public void shouldReturnListOfDestinationDtosWhenGeoLevelAffinityMatch()
+      throws Exception {
+    //given
+    UUID programId = randomUUID();
+    UUID facilityTypeId = randomUUID();
+    UUID facilityId = randomUUID();
+    UUID regionGeoLevelId = randomUUID();
+    UUID regionGeoZoneId = randomUUID();
+    UUID geoLevelAffinity = regionGeoLevelId;
+    mockValidDestinationsAndFacilitiesWithGeoZonesAndLevel(programId, facilityTypeId, facilityId, 
+        regionGeoLevelId, regionGeoZoneId, geoLevelAffinity);
+
+    //when
+    List<ValidSourceDestinationDto> validDestinations =
+        validDestinationService.findDestinations(programId, facilityId);
+
+    //then
+    assertThat(validDestinations.size(), is(2));
+
+    ValidSourceDestinationDto organization = validDestinations.get(0);
+    assertThat(organization.getName(), is(ORGANIZATION_NODE_NAME));
+    assertThat(organization.getIsFreeTextAllowed(), is(true));
+
+    ValidSourceDestinationDto facility = validDestinations.get(1);
+    assertThat(facility.getName(), is(FACILITY_NODE_NAME));
+    assertThat(facility.getIsFreeTextAllowed(), is(false));
+  }
+  
+  @Test
+  public void shouldReturnListOfDestinationDtosWhenGeoLevelAffinitIsNull()
+      throws Exception {
+    //given
+    UUID programId = randomUUID();
+    UUID facilityTypeId = randomUUID();
+    UUID facilityId = randomUUID();
+    UUID regionGeoLevelId = randomUUID();
+    UUID regionGeoZoneId = randomUUID();
+    UUID geoLevelAffinity = null;
+    mockValidDestinationsAndFacilitiesWithGeoZonesAndLevel(programId, facilityTypeId, facilityId, 
+        regionGeoLevelId, regionGeoZoneId, geoLevelAffinity);
+
+    //when
+    List<ValidSourceDestinationDto> validDestinations =
+        validDestinationService.findDestinations(programId, facilityId);
+
+    //then
+    assertThat(validDestinations.size(), is(2));
+
+    ValidSourceDestinationDto organization = validDestinations.get(0);
+    assertThat(organization.getName(), is(ORGANIZATION_NODE_NAME));
+    assertThat(organization.getIsFreeTextAllowed(), is(true));
+
+    ValidSourceDestinationDto facility = validDestinations.get(1);
+    assertThat(facility.getName(), is(FACILITY_NODE_NAME));
+    assertThat(facility.getIsFreeTextAllowed(), is(false));
+  }
+
+  @Test
+  public void shouldReturnListOfDestinationDtosWithOnlyOrganizationWhenGeoLevelAffinityNotMatch()
+      throws Exception {
+    //given
+    UUID programId = randomUUID();
+    UUID facilityTypeId = randomUUID();
+    UUID facilityId = randomUUID();
+    UUID regionGeoLevelId = randomUUID();
+    UUID regionGeoZoneId = randomUUID();
+    UUID geoLevelAffinity = randomUUID();
+    mockValidDestinationsAndFacilitiesWithGeoZonesAndLevel(programId, facilityTypeId, facilityId, 
+        regionGeoLevelId, regionGeoZoneId, geoLevelAffinity);
+
+    //when
+    List<ValidSourceDestinationDto> validDestinations =
+        validDestinationService.findDestinations(programId, facilityId);
+
+    //then
+    assertThat(validDestinations.size(), is(1));
+  }
+  
+  
+  private void mockValidDestinationsAndFacilitiesWithGeoZonesAndLevel(UUID programId, 
+      UUID facilityTypeId, UUID facilityId, UUID regionGeoLevelId, UUID regionGeoZoneId, 
+      UUID geoLevelAffinity) {
+    FacilityDto facilityDto = createFacilityDtoWithFacilityType(facilityId, facilityTypeId);
+
+    facilityDto.setGeographicZone(generateGeographicZone(randomUUID(), regionGeoLevelId,
+        randomUUID(), randomUUID(), regionGeoZoneId, randomUUID()));
+    
+    when(facilityReferenceDataService.findOne(facilityId)).thenReturn(facilityDto);
+
+    doNothing().when(programFacilityTypeExistenceService)
+        .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
+
+    UUID refDataFacilityId = randomUUID();
+    List<ValidDestinationAssignment> validDestinationAssignments = asList(
+        createOrganizationDestination(mockedOrganizationNode(ORGANIZATION_NODE_NAME)),
+        createFacilityDestinationWithGeoLevelAffinity(mockedFacilityNode(refDataFacilityId,
+            FACILITY_NODE_NAME), geoLevelAffinity));
+
+    when(destinationRepository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId))
+        .thenReturn(validDestinationAssignments);
+
+    FacilityDto refDataFacilityDto = createFacilityDtoWithFacilityType(refDataFacilityId,
+        facilityTypeId);
+    refDataFacilityDto.setName(FACILITY_NODE_NAME);
+    refDataFacilityDto.setGeographicZone(generateGeographicZone(randomUUID(), regionGeoLevelId,
+        randomUUID(), randomUUID(), regionGeoZoneId, randomUUID()));
+
+    when(facilityReferenceDataService.findByIds(anyListOf(UUID.class))).thenReturn(
+        Collections.singletonMap(refDataFacilityId, refDataFacilityDto));
+  }
+
 
   @Test(expected = ValidationMessageException.class)
   public void shouldThrowExceptionWhenDeleteSourceAssignmentNotExists()
@@ -375,6 +514,13 @@ public class SourceDestinationBaseServiceTest {
     UUID assignmentId = randomUUID();
     when(destinationRepository.exists(assignmentId)).thenReturn(false);
     validDestinationService.deleteDestinationAssignmentById(assignmentId);
+  }
+  
+  @Test(expected = ValidationMessageException.class)
+  public void shouldThrowExceptionWhenFacilityNotExists()
+      throws Exception {
+    when(facilityReferenceDataService.findOne(any(UUID.class))).thenReturn(null);
+    validDestinationService.findDestinations(randomUUID(), randomUUID());
   }
 
   @Test
@@ -429,11 +575,40 @@ public class SourceDestinationBaseServiceTest {
     return assignment;
   }
 
-  private Node mockedFacilityNode(String name) {
+  private GeographicZoneDto generateGeographicZone(UUID districtLevelId, UUID regionLevelId,
+      UUID countryLevelId, UUID districtId, UUID regionId, UUID countryId) {
+
+    GeographicLevelDto districtLevel = GeographicLevelDto.builder().id(districtLevelId).build();
+    GeographicLevelDto regionLevel = GeographicLevelDto.builder().id(regionLevelId).build();
+    GeographicLevelDto countryLevel = GeographicLevelDto.builder().id(countryLevelId).build();
+
+    GeographicZoneDto districtZone = GeographicZoneDto.builder().id(districtId).level(districtLevel)
+        .build();
+    GeographicZoneDto regionZone = GeographicZoneDto.builder().id(regionId).level(regionLevel)
+        .build();
+    GeographicZoneDto countryZone = GeographicZoneDto.builder().id(countryId).level(countryLevel)
+        .build();
+
+    regionZone.setParent(countryZone);
+    districtZone.setParent(regionZone);
+
+    return districtZone;
+  }
+
+  private FacilityDto createFacilityDtoWithFacilityType(UUID facilityId, UUID facilityTypeId) {
+    return FacilityDto.builder()
+        .id(facilityId)
+        .type(FacilityTypeDto.builder()
+            .id(facilityTypeId)
+            .build())
+        .build();
+  }
+
+  private Node mockedFacilityNode(UUID facilityId, String name) {
     FacilityDto facilityDto = new FacilityDto();
+    facilityDto.setId(facilityId);
     facilityDto.setName(name);
-    facilityDto.setId(randomUUID());
-    when(facilityReferenceDataService.findOne(facilityDto.getId())).thenReturn(facilityDto);
+    facilityDto.setId(facilityId);
 
     Node node = new Node();
     node.setRefDataFacility(true);

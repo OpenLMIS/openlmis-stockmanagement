@@ -15,23 +15,23 @@
 
 package org.openlmis.stockmanagement.dto.referencedata;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.openlmis.stockmanagement.domain.sourcedestination.Organization;
 
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(of = "id")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonInclude(NON_NULL)
 public class FacilityDto {
   private UUID id;
   private String code;
@@ -44,8 +44,7 @@ public class FacilityDto {
   private Boolean enabled;
   private Boolean openLmisAccessible;
   private List<SupportedProgramDto> supportedPrograms;
-  //  private GeographicZoneDto geographicZone;
-  //geographicZone is not used anywhere by stock management, we can take it back when needed
+  private GeographicZoneDto geographicZone;
   private FacilityTypeDto type;
 
   /**

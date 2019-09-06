@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.testutils;
 
+import java.util.UUID;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidSourceAssignment;
@@ -31,6 +32,17 @@ public class ValidSourceDestinationDataBuilder {
 
   public static ValidDestinationAssignment createFacilityDestination(Node facilityNode) {
     return getValidDestinationAssignment(facilityNode);
+  }
+
+  /**
+   * Creates new instance of {@link ValidDestinationAssignment} based on given parameters.
+   * @return created valid destination assignment
+   */
+  public static ValidDestinationAssignment createFacilityDestinationWithGeoLevelAffinity(
+      Node facilityNode, UUID geoLevelAffinity) {
+    ValidDestinationAssignment destinationAssignment = getValidDestinationAssignment(facilityNode);
+    destinationAssignment.setGeoLevelAffinity(geoLevelAffinity);
+    return destinationAssignment;
   }
 
   public static ValidDestinationAssignment createOrganizationDestination(Node organizationNode) {

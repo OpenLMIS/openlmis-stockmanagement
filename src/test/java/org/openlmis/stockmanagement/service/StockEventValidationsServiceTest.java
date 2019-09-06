@@ -32,6 +32,7 @@ import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.validators.AdjustmentReasonValidator;
 import org.openlmis.stockmanagement.validators.ApprovedOrderableValidator;
 import org.openlmis.stockmanagement.validators.FreeTextValidator;
+import org.openlmis.stockmanagement.validators.GeoLevelAffinityValidator;
 import org.openlmis.stockmanagement.validators.LotValidator;
 import org.openlmis.stockmanagement.validators.MandatoryFieldsValidator;
 import org.openlmis.stockmanagement.validators.OrderableLotDuplicationValidator;
@@ -100,6 +101,9 @@ public class StockEventValidationsServiceTest {
   @MockBean
   private UnpackKitValidator unpackKitValidator;
 
+  @MockBean
+  private GeoLevelAffinityValidator geoLevelAffinityValidator;
+
   @Before
   public void setUp() throws Exception {
     //make real validators do nothing because
@@ -107,6 +111,7 @@ public class StockEventValidationsServiceTest {
     doNothing().when(stockEventVvmValidator).validate(any(StockEventDto.class));
     doNothing().when(approvedOrderableValidator).validate(any(StockEventDto.class));
     doNothing().when(sourceDestinationAssignmentValidator).validate(any(StockEventDto.class));
+    doNothing().when(geoLevelAffinityValidator).validate(any(StockEventDto.class));
     doNothing().when(mandatoryFieldsValidator).validate(any(StockEventDto.class));
     doNothing().when(freeTextValidator).validate(any(StockEventDto.class));
     doNothing().when(receiveIssueReasonValidator).validate(any(StockEventDto.class));

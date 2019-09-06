@@ -17,9 +17,11 @@ package org.openlmis.stockmanagement.dto;
 
 import static org.openlmis.stockmanagement.dto.StockCardLineItemDto.createFrom;
 
+import java.util.UUID;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.junit.Test;
+import org.openlmis.stockmanagement.dto.referencedata.GeographicZoneDto;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemDataBuilder;
 import org.openlmis.stockmanagement.testutils.ToStringTestUtils;
 
@@ -31,6 +33,9 @@ public class StockCardDtoTest {
         .withPrefabValues(StockCardLineItemDto.class,
             createFrom(new StockCardLineItemDataBuilder().build()),
             createFrom(new StockCardLineItemDataBuilder().build()))
+        .withPrefabValues(GeographicZoneDto.class,
+            GeographicZoneDto.builder().id(UUID.randomUUID()).build(),
+            GeographicZoneDto.builder().id(UUID.randomUUID()).build())
         .suppress(Warning.NONFINAL_FIELDS) // fields cannot be final
         .verify();
   }

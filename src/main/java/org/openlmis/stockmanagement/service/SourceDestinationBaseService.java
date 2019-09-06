@@ -16,14 +16,19 @@
 package org.openlmis.stockmanagement.service;
 
 import static org.openlmis.stockmanagement.dto.ValidSourceDestinationDto.createFrom;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_ASSIGNMENT_ID_MISSING;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.domain.sourcedestination.SourceDestinationAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
+import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
+import org.openlmis.stockmanagement.dto.referencedata.GeographicZoneDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.NodeRepository;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
@@ -53,9 +58,9 @@ public abstract class SourceDestinationBaseService {
    * Delete an assignment.
    *
    * @param assignmentId assignment id
-   * @param repository   assignment repository
-   * @param errorKey     error message key
-   * @param <T>          assignment type
+   * @param repository assignment repository
+   * @param errorKey error message key
+   * @param <T> assignment type
    */
   protected <T extends SourceDestinationAssignment> void doDelete(
       UUID assignmentId, SourceDestinationAssignmentRepository<T> repository, String errorKey) {
@@ -66,11 +71,30 @@ public abstract class SourceDestinationBaseService {
   }
 
   /**
+   * Try to find an existing assignment by id.
+   * 
+   * @param assignmentId assignment id
+   * @param repository assignment repository
+   * @param errorKey error message key
+   * @param <T> assignment type
+   * @return assigmnet dto 
+   * @throws ValidationMessageException when assignment was not found
+   */
+  protected <T extends SourceDestinationAssignment> ValidSourceDestinationDto findById(
+      UUID assignmentId, SourceDestinationAssignmentRepository<T> repository, String errorKey) {
+    SourceDestinationAssignment assignment = repository.findOne(assignmentId);
+    if (assignment == null) {
+      throw new ValidationMessageException(new Message(errorKey));
+    }
+    return createAssignmentDto(assignment, null);
+  }
+
+  /**
    * Try to find an existing assignment.
    *
    * @param assignment source or destination assignment
    * @param repository assignment repository
-   * @param <T>        assignment type
+   * @param <T> assignment type
    * @return assignment dto or null if not found.
    */
   protected <T extends SourceDestinationAssignment> ValidSourceDestinationDto findAssignment(
@@ -79,11 +103,12 @@ public abstract class SourceDestinationBaseService {
     UUID facilityTypeId = assignment.getFacilityTypeId();
     Node foundNode = findExistingNode(assignment, programId, facilityTypeId);
     if (foundNode != null) {
-      T foundAssignment = repository.findByProgramIdAndFacilityTypeIdAndNodeId(
-          programId, facilityTypeId, foundNode.getId());
+      SourceDestinationAssignment foundAssignment = repository
+          .findByProgramIdAndFacilityTypeIdAndNodeId(
+              programId, facilityTypeId, foundNode.getId());
 
       if (foundAssignment != null) {
-        return createAssignmentDto(foundAssignment);
+        return createAssignmentDto(foundAssignment, null);
       }
     }
     return null;
@@ -91,30 +116,54 @@ public abstract class SourceDestinationBaseService {
 
   /**
    * Get a list of assignments.
-   *
-   * @param programId      program id
-   * @param facilityTypeId facility type id
-   * @param repository     assignment repository
-   * @param <T>            assignment type
+   * This method will return only those assignments that match the geo level affinity.
+   * 
+   * @param programId program id
+   * @param facilityId facility id
+   * @param repository assignment repository
+   * @param <T> assignment type
    * @return a list of assignment dto or empty list if not found.
    */
   protected <T extends SourceDestinationAssignment> List<ValidSourceDestinationDto> findAssignments(
-      UUID programId, UUID facilityTypeId,
-      SourceDestinationAssignmentRepository<T> repository) {
+      UUID programId, UUID facilityId, SourceDestinationAssignmentRepository<T> repository) {
 
+    FacilityDto facility = facilityRefDataService.findOne(facilityId);
+    
+    if (facility == null) {
+      throw new ValidationMessageException(
+          new Message(ERROR_FACILITY_NOT_FOUND, facilityId.toString()));
+    }
+    
+    UUID facilityTypeId = facility.getType().getId();
     programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
-    List<T> assignments = repository.findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
-    return assignments.stream().map(this::createAssignmentDto).collect(Collectors.toList());
+    List<T> assignments = repository
+        .findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
+
+    List<UUID> facilitiesIds = assignments.stream()
+        .filter(assignment -> assignment.getNode().isRefDataFacility())
+        .map(assignment -> assignment.getNode().getReferenceId())
+        .collect(Collectors.toList());
+
+    Map<UUID, FacilityDto> facilitiesById = facilityRefDataService.findByIds(facilitiesIds);
+
+    List<SourceDestinationAssignment> geoAssigment = assignments.stream()
+        .filter(assignment -> !assignment.getNode().isRefDataFacility() 
+            || hasGeoAffinity(assignment, facility, facilitiesById))
+        .collect(Collectors.toList());
+
+    return geoAssigment.stream()
+        .map(assignment -> createAssignmentDto(assignment, facilitiesById))
+        .collect(Collectors.toList());
   }
 
   /**
    * Create a new assignment.
    *
    * @param assignment assignment
-   * @param errorKey   error message key
+   * @param errorKey error message key
    * @param repository assignment repository
-   * @param <T>        assignment type
+   * @param <T> assignment type
    * @return created assignment.
    */
   protected <T extends SourceDestinationAssignment> ValidSourceDestinationDto doAssign(
@@ -124,7 +173,7 @@ public abstract class SourceDestinationBaseService {
     boolean isOrganization = organizationRepository.exists(referenceId);
     if (isRefFacility || isOrganization) {
       assignment.setNode(findOrCreateNode(referenceId, isRefFacility));
-      return createAssignmentDto(repository.save(assignment));
+      return createAssignmentDto(repository.save(assignment), null);
     }
     throw new ValidationMessageException(new Message(errorKey));
   }
@@ -152,9 +201,49 @@ public abstract class SourceDestinationBaseService {
     return node;
   }
 
-  private ValidSourceDestinationDto createAssignmentDto(SourceDestinationAssignment assignment) {
+
+  private boolean hasGeoAffinity(SourceDestinationAssignment assignment, FacilityDto facility,
+      Map<UUID, FacilityDto> facilitiesById) {
+
+    //A null geoLevelAffinity would cause the system to work as-is. 
+    if (assignment.getGeoLevelAffinity() == null) {
+      return true;
+    }
+
+    FacilityDto facilityDto = facilitiesById.get(assignment.getNode().getReferenceId());
+    UUID geoLevelAffinity = assignment.getGeoLevelAffinity();
+
+    Map<UUID, UUID> facilityGeoLevelMap = getFacilityGeoLevelZoneMap(facility);
+    Map<UUID, UUID> assignmentFacilityGeoLevelZoneMap = getFacilityGeoLevelZoneMap(facilityDto);
+
+    if (!facilityGeoLevelMap.containsKey(geoLevelAffinity) 
+        || !assignmentFacilityGeoLevelZoneMap.containsKey(geoLevelAffinity)) {
+      return false;
+    }
+
+    return facilityGeoLevelMap.get(geoLevelAffinity)
+        .equals(assignmentFacilityGeoLevelZoneMap.get(geoLevelAffinity));
+  }
+
+  private Map<UUID, UUID> getFacilityGeoLevelZoneMap(FacilityDto homeFacility) {
+    Map<UUID, UUID> facilityGeoLevelZoneMap = new HashMap<>();
+    GeographicZoneDto geographicZoneDto = homeFacility.getGeographicZone();
+
+    while (geographicZoneDto != null) {
+      facilityGeoLevelZoneMap.put(geographicZoneDto.getLevel().getId(), geographicZoneDto.getId());
+      geographicZoneDto = geographicZoneDto.getParent();
+    }
+    return facilityGeoLevelZoneMap;
+  }
+
+  private ValidSourceDestinationDto createAssignmentDto(SourceDestinationAssignment assignment,
+      Map<UUID, FacilityDto> facilitiesById) {
     UUID referenceId = assignment.getNode().getReferenceId();
+
     if (assignment.getNode().isRefDataFacility()) {
+      if (facilitiesById != null) {
+        return createFrom(assignment, facilitiesById.get(referenceId).getName());
+      }
       return createFrom(assignment, facilityRefDataService.findOne(referenceId).getName());
     }
     return createFrom(assignment, organizationRepository.findOne(referenceId).getName());
