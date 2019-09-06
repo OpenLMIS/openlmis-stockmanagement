@@ -18,6 +18,7 @@ Improvements:
 
 Bug fixes, security and performance improvements, also backwards-compatible:
 * [OLMIS-6304](https://openlmis.atlassian.net/browse/OLMIS-6304): Fixed displaying product names in reports.
+* [OLMIS-6531](https://openlmis.atlassian.net/browse/OLMIS-6531): Fix: only the newest version of a product is visible in the Physical Inventory printout.
 
 4.1.0 / 2019-05-27
 ==================
