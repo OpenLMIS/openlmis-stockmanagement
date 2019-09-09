@@ -1,4 +1,4 @@
-4.2.2 / Work in progress
+4.2.0 / Work in progress
 ==================
 
 New functionality:
