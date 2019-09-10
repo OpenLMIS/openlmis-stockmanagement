@@ -1,10 +1,11 @@
-4.1.2 / WIP
+4.2.0 / Work in progress
 ==================
 
 New functionality:
 * [OLMIS-6368](https://openlmis.atlassian.net/browse/OLMIS-6368): Create SoH fact table.
-* [OLMIS-6434](https://openlmis.atlassian.net/browse/OLMIS-6434): Calculated and populated Stock on Hand values to a new table form existing data.
+* [OLMIS-6434](https://openlmis.atlassian.net/browse/OLMIS-6434): Calculated and populated Stock on Hand values to a new table.
 * [OLMIS-6483](https://openlmis.atlassian.net/browse/OLMIS-6483): Added saving calculated SoH value while sensing stock event and using it during getting stock card info.
+* [OLMIS-6558](https://openlmis.atlassian.net/browse/OLMIS-6558): Add new environment variable - PUBLIC_URL and use to for email generated links
 
 Improvements:
 * [OLMIS-5569](https://openlmis.atlassian.net/browse/OLMIS-5569): Moved reason TRANSFER_IN from demo data to bootstrap data.
