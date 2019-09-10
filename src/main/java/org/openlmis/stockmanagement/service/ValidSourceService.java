@@ -64,7 +64,6 @@ public class ValidSourceService extends SourceDestinationBaseService {
   public ValidSourceDestinationDto findById(UUID assignmentId) {
     return findById(assignmentId, validSourceRepository,
         ERROR_SOURCE_ASSIGNMENT_NOT_FOUND);
-      
   }
 
   /**

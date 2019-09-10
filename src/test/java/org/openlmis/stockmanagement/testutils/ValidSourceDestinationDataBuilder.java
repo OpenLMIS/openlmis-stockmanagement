@@ -41,7 +41,7 @@ public class ValidSourceDestinationDataBuilder {
   public static ValidDestinationAssignment createFacilityDestinationWithGeoLevelAffinity(
       Node facilityNode, UUID geoLevelAffinity) {
     ValidDestinationAssignment destinationAssignment = getValidDestinationAssignment(facilityNode);
-    destinationAssignment.setGeoLevelAffinity(geoLevelAffinity);
+    destinationAssignment.setGeoLevelAffinityId(geoLevelAffinity);
     return destinationAssignment;
   }
 

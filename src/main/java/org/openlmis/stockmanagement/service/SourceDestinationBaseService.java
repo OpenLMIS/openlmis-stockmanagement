@@ -206,12 +206,12 @@ public abstract class SourceDestinationBaseService {
       Map<UUID, FacilityDto> facilitiesById) {
 
     //A null geoLevelAffinity would cause the system to work as-is. 
-    if (assignment.getGeoLevelAffinity() == null) {
+    if (assignment.getGeoLevelAffinityId() == null) {
       return true;
     }
 
     FacilityDto facilityDto = facilitiesById.get(assignment.getNode().getReferenceId());
-    UUID geoLevelAffinity = assignment.getGeoLevelAffinity();
+    UUID geoLevelAffinity = assignment.getGeoLevelAffinityId();
 
     Map<UUID, UUID> facilityGeoLevelMap = getFacilityGeoLevelZoneMap(facility);
     Map<UUID, UUID> assignmentFacilityGeoLevelZoneMap = getFacilityGeoLevelZoneMap(facilityDto);

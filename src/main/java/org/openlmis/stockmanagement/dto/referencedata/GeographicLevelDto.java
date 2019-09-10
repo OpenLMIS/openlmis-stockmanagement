@@ -15,21 +15,20 @@
 
 package org.openlmis.stockmanagement.dto.referencedata;
 
-import java.util.UUID;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.openlmis.stockmanagement.dto.BaseDto;
 
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @Getter
 @Setter
-@Builder
-public class GeographicLevelDto {
-
-  private UUID id;
+public class GeographicLevelDto extends BaseDto {
+  
   private String code;
   private String name;
   private Integer levelNumber;

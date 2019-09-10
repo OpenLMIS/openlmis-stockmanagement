@@ -13,22 +13,17 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.stockmanagement.dto.referencedata;
+package org.openlmis.stockmanagement.testutils;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import java.util.UUID;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.openlmis.stockmanagement.dto.BaseDto;
+import org.openlmis.stockmanagement.dto.referencedata.GeographicLevelDto;
+import org.openlmis.stockmanagement.dto.referencedata.GeographicZoneDto;
 
-@Getter
-@Setter
-@EqualsAndHashCode(callSuper = true)
-@AllArgsConstructor
 @NoArgsConstructor
-public class GeographicZoneDto extends BaseDto {
+public class GeographicZoneDtoDataBuilder {
+
+  private UUID id;
   private String code;
   private String name;
   private GeographicLevelDto level;
@@ -36,6 +31,32 @@ public class GeographicZoneDto extends BaseDto {
   private Double latitude;
   private Double longitude;
 
-  @JsonSerialize(as = GeographicZoneDto.class)
   private GeographicZoneDto parent;
+
+  public GeographicZoneDtoDataBuilder withId(UUID id) {
+    this.id = id;
+    return this;
+  }
+
+  public GeographicZoneDtoDataBuilder withLevel(GeographicLevelDto level) {
+    this.level = level;
+    return this;
+  }
+
+  public GeographicZoneDtoDataBuilder withParent(GeographicZoneDto parent) {
+    this.parent = parent;
+    return this;
+  }
+
+  /**
+   * Creates new instance of {@link GeographicZoneDto} with properties.
+   *
+   * @return created geographic zone dto.
+   */
+  public GeographicZoneDto build() {
+    GeographicZoneDto geographicZoneDto = new GeographicZoneDto(code, name, level,
+        catchmentPopulation, latitude, longitude, parent);
+    geographicZoneDto.setId(id);
+    return geographicZoneDto;
+  }
 }

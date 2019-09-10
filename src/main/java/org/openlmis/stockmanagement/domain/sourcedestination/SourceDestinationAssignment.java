@@ -40,5 +40,5 @@ public class SourceDestinationAssignment extends BaseEntity {
   Node node;
   
   @Type(type = PG_UUID)
-  UUID geoLevelAffinity;
+  UUID geoLevelAffinityId;
 }

@@ -15,18 +15,19 @@
 
 package org.openlmis.stockmanagement.dto.referencedata;
 
-import java.util.UUID;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.openlmis.stockmanagement.dto.BaseDto;
 
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class FacilityTypeDto {
-  private UUID id;
+public class FacilityTypeDto extends BaseDto {
   private String code;
   private String name;
   private String description;
