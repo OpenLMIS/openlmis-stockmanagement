@@ -50,9 +50,11 @@ import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.dto.StockCardDto;
+import org.openlmis.stockmanagement.dto.referencedata.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderablesAggregator;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
@@ -193,6 +195,12 @@ public class StockCardSummariesServiceTest {
     OrderableDto orderable2 = new OrderableDtoDataBuilder().build();
     OrderableDto orderable3 = new OrderableDtoDataBuilder().build();
 
+    OrderablesAggregator orderablesAggregator = new OrderablesAggregator(asList(
+            new ApprovedProductDto(orderable),
+            new ApprovedProductDto(orderable2),
+            new ApprovedProductDto(orderable3)
+    ));
+
     StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParamsDataBuilder()
         .withOrderableIds(asList(orderable.getId(), orderable2.getId()))
         .build();
@@ -200,10 +208,7 @@ public class StockCardSummariesServiceTest {
     when(approvedProductReferenceDataService
         .getApprovedProducts(eq(params.getFacilityId()), eq(params.getProgramId()),
             eq(params.getOrderableIds())))
-        .thenReturn(new PageImpl<>(
-            asList(orderable, orderable2, orderable3),
-            new PageRequest(0, Integer.MAX_VALUE),
-            3));
+        .thenReturn(orderablesAggregator);
 
     Map<UUID, OrderableFulfillDto> fulfillMap = new HashMap<>();
     fulfillMap.put(orderable.getId(), new OrderableFulfillDtoDataBuilder()
