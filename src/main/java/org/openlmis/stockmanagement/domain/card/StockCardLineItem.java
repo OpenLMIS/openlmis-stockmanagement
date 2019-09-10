@@ -241,7 +241,8 @@ public class StockCardLineItem extends BaseEntity {
           new Message(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH, previousStockOnHand, quantity));
     }
 
-    LOGGER.debug(previousStockOnHand + " - " + quantity + " = " + (previousStockOnHand - quantity));
+    LOGGER.debug("try decrease soh: " + previousStockOnHand + " - " + quantity + " = "
+        + (previousStockOnHand - quantity));
 
     this.stockOnHand = previousStockOnHand - quantity;
     return this.stockOnHand;
@@ -249,7 +250,7 @@ public class StockCardLineItem extends BaseEntity {
 
   private Integer tryIncrease(int previousStockOnHand) {
     try {
-      LOGGER.debug(previousStockOnHand + " + " + quantity + " = "
+      LOGGER.debug("try increase soh: " + previousStockOnHand + " + " + quantity + " = "
           + Math.addExact(previousStockOnHand, quantity));
     } catch (ArithmeticException ex) {
       throw new ValidationMessageException(

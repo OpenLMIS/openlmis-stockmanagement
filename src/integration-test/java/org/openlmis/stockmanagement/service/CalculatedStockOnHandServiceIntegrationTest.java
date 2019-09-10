@@ -85,8 +85,9 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
 
   @Test
   public void shouldGetLatestStockCardsWithStockOnHandWhenDateIsNotSet() {
+    LocalDate today = LocalDate.now();
     CalculatedStockOnHand calculatedStockOnHand = new CalculatedStockOnHand(
-        quantity, stockCard, LocalDate.now(), ZonedDateTime.now());
+        quantity, stockCard, today, ZonedDateTime.now());
 
     calculatedStockOnHandRepository.save(calculatedStockOnHand);
 
@@ -95,7 +96,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
 
     assertThat(foundStockCards.size(), is(1));
     assertThat(foundStockCards.get(0).getStockOnHand(), is(quantity));
-    assertThat(foundStockCards.get(0).getOccurredDate(), is(LocalDate.now()));
+    assertThat(foundStockCards.get(0).getOccurredDate(), is(today));
   }
 
   @Test

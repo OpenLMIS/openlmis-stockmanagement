@@ -224,32 +224,6 @@ public class StockCardSummariesV2DtoBuilderTest {
     assertEquals(result.get(1), summary2);
   }
 
-  // We comment this test for now becouse filtering via date is done in Summary service  
-  //  @Test
-  //  public void shouldBuildStockCardSummariesWithDateBeforeThereWereCards() throws Exception {
-  //    List<StockCard> stockCards = asList(stockCard, stockCard1);
-  //
-  //    LocalDate asOfDate = getBaseDate().minusDays(10);
-  //
-  //    List<StockCardSummaryV2Dto> result = builder.build(Collections.singletonList(orderable1),
-  //        stockCards, fulfillMap, asOfDate, true);
-  //
-  //    StockCardSummaryV2Dto summary1 = new StockCardSummaryV2Dto(
-  //        new ObjectReferenceDtoDataBuilder()
-  //            .withPath(ORDERABLES)
-  //            .withId(orderable1.getId())
-  //            .build(),
-  //        asSet(
-  //            new CanFulfillForMeEntryDtoDataBuilder()
-  //                .buildWithStockCardAndOrderable(stockCard1, orderable3, asOfDate),
-  //            new CanFulfillForMeEntryDtoDataBuilder()
-  //                .buildWithStockCardAndOrderable(stockCard, orderable1, asOfDate))
-  //    );
-  //
-  //    assertEquals(1, result.size());
-  //    assertThat(result, hasItems(summary1));
-  //  }
-
   @Test
   public void shouldOmitEmptySummariesIfFlagIsSet() {
     List<StockCard> stockCards = asList(stockCard, stockCard1);

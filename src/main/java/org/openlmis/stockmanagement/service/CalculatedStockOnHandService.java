@@ -95,7 +95,7 @@ public class CalculatedStockOnHandService {
             .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
                     stockCard.getId(), lineItem.getOccurredDate());
 
-    if (stockOnHands.size() == 0
+    if (stockOnHands.isEmpty()
         || !stockOnHands.get(0).getOccurredDate().equals(lineItem.getOccurredDate())) {
       Integer previousStockOnHand = calculatedStockOnHandRepository
           .findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(

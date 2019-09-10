@@ -62,6 +62,7 @@ import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataS
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
+import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -247,24 +248,21 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     assertThat(lineItemDto.getSource(), is(orgFacility));
     assertThat(lineItemDto.getDestination(), is(orgFacility));
   }
-  
-  // Should be fixed as a part of updating and creating calcSohTable
-  //  @Test
-  //  public void shouldReassignPhysicalInventoryReasonNames() throws Exception {
-  //    //given
-  //    StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
-  //    stockEventDto.getLineItems().get(0).setSourceId(null);
-  //    stockEventDto.getLineItems().get(0).setDestinationId(null);
-  //    stockEventDto.getLineItems().get(0).setReasonId(null);
-  //    StockEvent savedEvent = save(stockEventDto, randomUUID());
-  //    //when
-  //    UUID cardId = stockCardRepository.findByOriginEvent(savedEvent).getId();
-  //    StockCardDto card = stockCardService.findStockCardById(cardId);
-  //
-  //    //then
-  //    String reasonName = card.getLineItems().get(0).getLineItem().getReason().getName();
-  //    assertThat(reasonName, is("Overstock"));
-  //  }
+
+  @Test
+  public void shouldReassignPhysicalInventoryReasonNames() {
+    StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
+    stockEventDto.getLineItems().get(0).setSourceId(null);
+    stockEventDto.getLineItems().get(0).setDestinationId(null);
+    stockEventDto.getLineItems().get(0).setReasonId(null);
+    StockEvent savedEvent = save(stockEventDto, randomUUID());
+
+    UUID cardId = stockCardRepository.findByOriginEvent(savedEvent).getId();
+    StockCardDto card = stockCardService.findStockCardById(cardId);
+
+    String reasonName = card.getLineItems().get(0).getLineItem().getReason().getName();
+    assertThat(reasonName, is("Overstock"));
+  }
 
   @Test
   public void shouldReturnNullWhenCanNotFindStockCardById() {
