@@ -33,7 +33,6 @@ import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
-import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.validators.PhysicalInventoryValidator;
 import org.slf4j.Logger;
@@ -59,7 +58,7 @@ public class PhysicalInventoryService {
   private HomeFacilityPermissionService homeFacilityPermissionService;
 
   @Autowired
-  private StockCardRepository stockCardRepository;
+  private CalculatedStockOnHandService calculatedStockOnHandService;
 
   /**
    * Find draft by program and facility.
@@ -167,18 +166,14 @@ public class PhysicalInventoryService {
       inventory.setStockEvent(event);
     }
 
-    Map<OrderableLotIdentity, StockCard> cards = stockCardRepository
-        .findByProgramIdAndFacilityId(inventory.getProgramId(), inventory.getFacilityId())
+    Map<OrderableLotIdentity, StockCard> cards = calculatedStockOnHandService
+        .getStockCardsWithStockOnHand(inventory.getProgramId(), inventory.getFacilityId())
         .stream()
         .collect(toMap(OrderableLotIdentity::identityOf, card -> card));
 
     for (PhysicalInventoryLineItem line : inventory.getLineItems()) {
-      StockCard foundCard = cards.get(OrderableLotIdentity.identityOf(line));
-      //use a shallow copy of stock card to do recalculation, because some domain model will be
-      //modified during recalculation, this will avoid persistence of those modified models
-      if (foundCard != null) {
-        StockCard stockCard = foundCard.shallowCopy();
-        stockCard.calculateStockOnHand();
+      StockCard stockCard = cards.get(OrderableLotIdentity.identityOf(line));
+      if (stockCard != null) {
         line.setPreviousStockOnHandWhenSubmitted(stockCard.getStockOnHand());
       }
     }

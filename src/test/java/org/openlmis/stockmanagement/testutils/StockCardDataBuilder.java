@@ -15,6 +15,11 @@
 
 package org.openlmis.stockmanagement.testutils;
 
+import static org.openlmis.stockmanagement.testutils.DatesUtil.getBaseDate;
+import static org.openlmis.stockmanagement.testutils.DatesUtil.getBaseDateTime;
+
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.assertj.core.util.Lists;
@@ -28,6 +33,8 @@ public class StockCardDataBuilder {
   private UUID lotId = UUID.randomUUID();
   private List<StockCardLineItem> lineItems = Lists.newArrayList();
   private Integer stockOnHand = 0;
+  private LocalDate occurredDate = getBaseDate();
+  private ZonedDateTime processedDate = getBaseDateTime();
   private StockEvent originalEvent;
 
   public StockCardDataBuilder(StockEvent originalEvent) {
@@ -61,6 +68,16 @@ public class StockCardDataBuilder {
     this.stockOnHand = stockOnHand;
     return this;
   }
+  
+  public StockCardDataBuilder withOccurredDate(LocalDate date) {
+    this.occurredDate = date;
+    return this;
+  }
+  
+  public StockCardDataBuilder withProcessedDate(ZonedDateTime date) {
+    this.processedDate = date;
+    return this;
+  }
 
   /**
    * Creates stock card based on parameters from the builder.
@@ -81,7 +98,7 @@ public class StockCardDataBuilder {
   public StockCard build() {
     StockCard card = new StockCard(
         originalEvent, originalEvent.getFacilityId(), originalEvent.getProgramId(), orderableId,
-        lotId, lineItems, stockOnHand
+        lotId, lineItems, stockOnHand, occurredDate, processedDate
     );
     card.setId(id);
 

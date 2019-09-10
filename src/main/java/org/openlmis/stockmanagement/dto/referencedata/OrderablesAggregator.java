@@ -13,12 +13,34 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.stockmanagement.repository;
+package org.openlmis.stockmanagement.dto.referencedata;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
-import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
-import org.springframework.data.repository.PagingAndSortingRepository;
 
-public interface StockCardLineItemRepository
-    extends PagingAndSortingRepository<StockCardLineItem, UUID> {
+import org.openlmis.stockmanagement.web.Pagination;
+import org.springframework.data.domain.Page;
+
+public class OrderablesAggregator {
+
+  private List<OrderableDto> orderables = new ArrayList<>();
+  private List<UUID> identifiers = new ArrayList<>();
+
+  public OrderablesAggregator(List<ApprovedProductDto> approvedProducts) {
+    approvedProducts.forEach(this::addEntry);
+  }
+
+  public Page<OrderableDto> getOrderablesPage() {
+    return Pagination.getPage(orderables);
+  }
+
+  public List<UUID> getIdentifiers() {
+    return identifiers;
+  }
+
+  private void addEntry(ApprovedProductDto entry) {
+    orderables.add(entry.getOrderable());
+    identifiers.add(entry.getOrderable().getId());
+  }
 }

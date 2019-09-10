@@ -23,6 +23,8 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -34,6 +36,7 @@ import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.BaseIntegrationTest;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
+import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
@@ -48,6 +51,7 @@ import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
+import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.NodeRepository;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
@@ -80,15 +84,18 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
   @Autowired
   private PhysicalInventoriesRepository physicalInventoriesRepository;
-  
+
   @Autowired
   private OrganizationRepository organizationRepository;
-  
+
   @Autowired
   private NodeRepository nodeRepository;
-  
+
   @Autowired
   private StockCardLineItemReasonRepository stockCardLineItemReasonRepository;
+
+  @Autowired
+  private CalculatedStockOnHandRepository calculatedStockOnHandRepository;
 
   @MockBean
   private FacilityReferenceDataService facilityReferenceDataService;
@@ -104,9 +111,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
   @MockBean
   private PermissionService permissionService;
-  
+
   private Node node;
-  
+
   private StockCardLineItemReason reason;
 
   @Before
@@ -116,7 +123,7 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     Organization organization = new Organization();
     organization.setName("org");
     organizationRepository.save(organization);
-    
+
     node = new Node();
     node.setReferenceId(organization.getId());
     node.setRefDataFacility(false);
@@ -128,8 +135,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
   }
 
   @After
-  public void tearDown() throws Exception {
+  public void tearDown() {
     physicalInventoriesRepository.deleteAll();
+    calculatedStockOnHandRepository.deleteAll();
     stockCardRepository.deleteAll();
     stockEventsRepository.deleteAll();
     nodeRepository.deleteAll();
@@ -138,7 +146,6 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
   @Test
   public void shouldSaveStockCardLineItemsAndCreateStockCardForFirstMovement() {
-    //given
     UUID userId = randomUUID();
     StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
@@ -146,10 +153,8 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     stockEventDto.getLineItems().get(0).setDestinationId(node.getId());
     StockEvent savedEvent = save(stockEventDto, userId);
 
-    //when
     stockCardService.saveFromEvent(stockEventDto, savedEvent.getId());
 
-    //then
     StockCard savedCard = stockCardRepository.findByOriginEvent(savedEvent);
     StockCardLineItem firstLineItem = savedCard.getLineItems().get(0);
 
@@ -165,9 +170,7 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  public void shouldSaveLineItemsWithProgramFacilityOrderableForNonFirstMovement()
-      throws Exception {
-    //given
+  public void shouldSaveLineItemsWithProgramFacilityOrderableForNonFirstMovement() {
     //1. there is an existing event that caused a stock card to exist
     StockEventDto existingEventDto = createStockEventDto();
     existingEventDto.getLineItems().get(0).setReasonId(reason.getId());
@@ -185,13 +188,11 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     newEventDto.getLineItems().get(0).setSourceId(node.getId());
     newEventDto.getLineItems().get(0).setDestinationId(node.getId());
 
-    //when
     long cardAmountBeforeSave = stockCardRepository.count();
     UUID userId = randomUUID();
     StockEvent savedNewEvent = save(newEventDto, userId);
     long cardAmountAfterSave = stockCardRepository.count();
 
-    //then
     StockCard savedCard = stockCardRepository.findByOriginEvent(existingEvent);
     List<StockCardLineItem> lineItems = savedCard.getLineItems();
     lineItems.sort(Comparator.comparing(StockCardLineItem::getProcessedDate));
@@ -205,7 +206,6 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
   @Test
   public void shouldGetRefdataAndConvertOrganizationsWhenFindStockCard() {
-    //given
     StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.getLineItems().get(0).setLotId(randomUUID());
     stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
@@ -235,11 +235,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     UUID userId = randomUUID();
     StockEvent savedEvent = save(stockEventDto, userId);
 
-    //when
     StockCard savedCard = stockCardRepository.findByOriginEvent(savedEvent);
     StockCardDto foundCardDto = stockCardService.findStockCardById(savedCard.getId());
 
-    //then
     assertThat(foundCardDto.getFacility(), is(cardFacility));
     assertThat(foundCardDto.getProgram(), is(programDto));
     assertThat(foundCardDto.getOrderable(), is(orderableDto));
@@ -252,54 +250,30 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  public void shouldGetStockCardWithCalculatedSohWhenFindStockCard() {
-    //given
-    StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
-    stockEventDto.getLineItems().get(0).setSourceId(null);
-    stockEventDto.getLineItems().get(0).setDestinationId(null);
-    stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
-    StockEvent savedEvent = save(stockEventDto, randomUUID());
-
-    //when
-    UUID cardId = stockCardRepository.findByOriginEvent(savedEvent).getId();
-    StockCardDto card = stockCardService.findStockCardById(cardId);
-
-    //then
-    assertThat(card.getStockOnHand(), is(stockEventDto.getLineItems().get(0).getQuantity()));
-  }
-
-  @Test
-  public void shouldReassignPhysicalInventoryReasonNames() throws Exception {
-    //given
+  public void shouldReassignPhysicalInventoryReasonNames() {
     StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
     stockEventDto.getLineItems().get(0).setSourceId(null);
     stockEventDto.getLineItems().get(0).setDestinationId(null);
     stockEventDto.getLineItems().get(0).setReasonId(null);
     StockEvent savedEvent = save(stockEventDto, randomUUID());
 
-    //when
     UUID cardId = stockCardRepository.findByOriginEvent(savedEvent).getId();
     StockCardDto card = stockCardService.findStockCardById(cardId);
 
-    //then
     String reasonName = card.getLineItems().get(0).getLineItem().getReason().getName();
     assertThat(reasonName, is("Overstock"));
   }
 
   @Test
-  public void shouldReturnNullWhenCanNotFindStockCardById() throws Exception {
-    //when
+  public void shouldReturnNullWhenCanNotFindStockCardById() {
     UUID nonExistingCardId = randomUUID();
     StockCardDto cardDto = stockCardService.findStockCardById(nonExistingCardId);
 
-    //then
     assertNull(cardDto);
   }
 
   @Test(expected = PermissionMessageException.class)
-  public void shouldThrowPermissionExceptionIfUserHasNoPermissionToViewCard()
-      throws Exception {
-    //given
+  public void shouldThrowPermissionExceptionIfUserHasNoPermissionToViewCard() {
     StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
     stockEventDto.getLineItems().get(0).setSourceId(node.getId());
@@ -309,7 +283,6 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
         .when(permissionService)
         .canViewStockCard(savedEvent.getProgramId(), savedEvent.getFacilityId());
 
-    //when
     UUID savedCardId = stockCardRepository.findByOriginEvent(savedEvent).getId();
     stockCardService.findStockCardById(savedCardId);
   }
@@ -321,6 +294,13 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     StockEvent event = eventDto.toEvent();
     StockEvent savedEvent = stockEventsRepository.save(event);
     stockCardService.saveFromEvent(eventDto, savedEvent.getId());
+
+    List<StockCard> stockCards = stockCardRepository
+        .findByProgramIdAndFacilityId(savedEvent.getProgramId(), savedEvent.getFacilityId());
+    
+    calculatedStockOnHandRepository.save(new CalculatedStockOnHand(
+        savedEvent.getLineItems().get(0).getQuantity(), stockCards.get(0), 
+        LocalDate.now(), ZonedDateTime.now()));
     return savedEvent;
   }
 }

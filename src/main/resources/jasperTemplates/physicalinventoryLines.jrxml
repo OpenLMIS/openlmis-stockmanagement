@@ -28,7 +28,8 @@
 					odc.displayname
 				from temp, stockmanagement.physical_inventory_line_items pil
 				INNER JOIN stockmanagement.physical_inventories pi on pi.id = pil.physicalinventoryid
-				INNER JOIN referencedata.orderables o on o.id = pil.orderableid				
+				INNER JOIN referencedata.orderables o on o.id = pil.orderableid
+				INNER JOIN (select id, max(versionnumber) as max_version from referencedata.orderables GROUP BY id) vrs ON o.id = vrs.id AND o.versionnumber = vrs.max_version
 				INNER JOIN referencedata.program_orderables po ON po.orderableid = o.id 
 				INNER JOIN referencedata.orderable_display_categories odc ON po.orderabledisplaycategoryid = odc.id				
 				LEFT JOIN referencedata.lots l on l.id = pil.lotId

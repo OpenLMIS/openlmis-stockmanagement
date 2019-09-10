@@ -23,6 +23,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_INVENTORIES_EDIT;
+import static org.openlmis.stockmanagement.testutils.DatesUtil.getBaseDate;
+import static org.openlmis.stockmanagement.testutils.DatesUtil.getBaseDateTime;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventLineItem;
 
@@ -52,7 +54,7 @@ public class StockEventNotificationProcessorTest {
 
   @Mock
   private RightReferenceDataService rightReferenceDataService;
-  
+
   @InjectMocks
   private StockEventNotificationProcessor stockEventNotificationProcessor;
 
@@ -72,7 +74,8 @@ public class StockEventNotificationProcessorTest {
 
   @Before
   public void setUp() {
-    stockCard = new StockCard(null, facilityId, programId, orderableId, lotId, null, 0);
+    stockCard = new StockCard(null, facilityId, programId, orderableId, lotId, null, 0,
+        getBaseDate(), getBaseDateTime());
     stockCard.setId(stockCardId);
 
     context = mock(StockEventProcessContext.class);
@@ -91,12 +94,12 @@ public class StockEventNotificationProcessorTest {
     when(right.getId()).thenReturn(rightId);
     when(rightReferenceDataService.findRight(STOCK_INVENTORIES_EDIT)).thenReturn(right);
   }
-  
+
   @Test
   public void shouldCallStockoutNotifierWhenStockOnHandIsZero() throws Exception {
     //given
     when(context.findCard(any(OrderableLotIdentity.class))).thenReturn(stockCard);
-    
+
     //when
     stockEventNotificationProcessor.callAllNotifications(stockEventDto);
 
@@ -118,8 +121,8 @@ public class StockEventNotificationProcessorTest {
     UUID anotherOrderableId = UUID.randomUUID();
     UUID anotherLotId = UUID.randomUUID();
 
-    StockCard anotherStockCard = new StockCard(null, facilityId, programId, orderableId, lotId, 
-        null, 0);
+    StockCard anotherStockCard = new StockCard(null, facilityId, programId, orderableId, lotId,
+        null, 0, getBaseDate(), getBaseDateTime());
     anotherStockCard.setId(anotherStockCardId);
 
     StockEventLineItemDto secondLineItem = createStockEventLineItem();
