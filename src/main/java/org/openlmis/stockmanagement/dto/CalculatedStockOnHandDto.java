@@ -16,7 +16,7 @@
 package org.openlmis.stockmanagement.dto;
 
 import java.time.LocalDate;
-
+import java.time.ZonedDateTime;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -36,7 +36,9 @@ public final class CalculatedStockOnHandDto extends BaseDto
 
   private Integer stockOnHand;
 
-  private LocalDate date;
+  private LocalDate occurredDate;
+  
+  private ZonedDateTime processedDate;
 
   /**
    * Creates new instance based on data from the domain object.

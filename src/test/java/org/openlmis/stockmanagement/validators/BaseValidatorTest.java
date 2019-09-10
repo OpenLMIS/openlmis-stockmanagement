@@ -31,6 +31,7 @@ import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentRepository;
 import org.openlmis.stockmanagement.repository.ValidSourceAssignmentRepository;
+import org.openlmis.stockmanagement.service.CalculatedStockOnHandService;
 import org.openlmis.stockmanagement.service.StockEventProcessContextBuilder;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
@@ -64,6 +65,9 @@ public abstract class BaseValidatorTest {
 
   @Mock
   StockCardRepository stockCardRepository;
+
+  @Mock
+  CalculatedStockOnHandService calculatedStockOnHandService;
 
   @Mock
   ValidSourceAssignmentRepository validSourceAssignmentRepository;

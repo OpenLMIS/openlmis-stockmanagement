@@ -184,8 +184,6 @@ public class StockCardLineItem extends BaseEntity {
         .signature(eventDto.getSignature())
         .userId(eventDto.getContext().getCurrentUserId())
 
-        .stockOnHand(0)
-
         .extraData(eventLineItem.getExtraData())
         .build();
 
@@ -199,16 +197,17 @@ public class StockCardLineItem extends BaseEntity {
    *
    * @param previousStockOnHand previous stock on hand.
    */
-  public void calculateStockOnHand(int previousStockOnHand) {
+  public Integer calculateStockOnHand(int previousStockOnHand) {
     if (isPhysicalInventory()) {
       setReason(determineReasonByQuantity(previousStockOnHand));
-      setStockOnHand(quantity);
-      setQuantity(Math.abs(getStockOnHand() - previousStockOnHand));
-      LOGGER.debug("Physical inventory: " + getStockOnHand());
+      this.stockOnHand = quantity;
+      setQuantity(Math.abs(this.stockOnHand - previousStockOnHand));
+      LOGGER.debug("Physical inventory: " + this.stockOnHand);
+      return this.stockOnHand;
     } else if (shouldIncrease()) {
-      tryIncrease(previousStockOnHand);
+      return tryIncrease(previousStockOnHand);
     } else {
-      tryDecrease(previousStockOnHand);
+      return tryDecrease(previousStockOnHand);
     }
   }
 
@@ -236,25 +235,29 @@ public class StockCardLineItem extends BaseEntity {
     return null != this.getReason() && this.getReason().getTags().contains(tag);
   }
 
-  private void tryDecrease(int previousStockOnHand) {
+  private Integer tryDecrease(int previousStockOnHand) {
     if (previousStockOnHand - quantity < 0) {
       throw new ValidationMessageException(
           new Message(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH, previousStockOnHand, quantity));
     }
 
-    setStockOnHand(previousStockOnHand - quantity);
-    LOGGER.debug(previousStockOnHand + " - " + quantity + " = " + getStockOnHand());
+    LOGGER.debug("try decrease soh: " + previousStockOnHand + " - " + quantity + " = "
+        + (previousStockOnHand - quantity));
+
+    this.stockOnHand = previousStockOnHand - quantity;
+    return this.stockOnHand;
   }
 
-  private void tryIncrease(int previousStockOnHand) {
+  private Integer tryIncrease(int previousStockOnHand) {
     try {
-      //this may exceed max of integer
-      setStockOnHand(Math.addExact(previousStockOnHand, quantity));
-      LOGGER.debug(previousStockOnHand + " + " + quantity + " = " + getStockOnHand());
+      LOGGER.debug("try increase soh: " + previousStockOnHand + " + " + quantity + " = "
+          + Math.addExact(previousStockOnHand, quantity));
     } catch (ArithmeticException ex) {
       throw new ValidationMessageException(
           new Message(ERRRO_EVENT_SOH_EXCEEDS_LIMIT, previousStockOnHand, quantity, ex));
     }
+    this.stockOnHand = Math.addExact(previousStockOnHand, quantity);
+    return this.stockOnHand;
   }
 
   private StockCardLineItemReason determineReasonByQuantity(int previousStockOnHand) {

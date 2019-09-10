@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.domain.event;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -49,15 +50,19 @@ public class CalculatedStockOnHand extends BaseEntity {
   private StockCard stockCard;
 
   @Column(nullable = false)
-  private LocalDate date;
+  private LocalDate occurredDate;
 
+  @Column(nullable = false, columnDefinition = "timestamp")
+  private ZonedDateTime processedDate;
+  
   /**
    * Exports data into exporter.
    */
   public void export(Exporter exporter) {
     exporter.setId(getId());
     exporter.setStockOnHand(getStockOnHand());
-    exporter.setDate(getDate());
+    exporter.setOccurredDate(getOccurredDate());
+    exporter.setProcessedDate(getProcessedDate());
   }
 
   public interface Exporter {
@@ -66,6 +71,8 @@ public class CalculatedStockOnHand extends BaseEntity {
 
     void setStockOnHand(Integer stockOnHand);
 
-    void setDate(LocalDate date);
+    void setOccurredDate(LocalDate date);
+    
+    void setProcessedDate(ZonedDateTime processedDate);
   }
 }

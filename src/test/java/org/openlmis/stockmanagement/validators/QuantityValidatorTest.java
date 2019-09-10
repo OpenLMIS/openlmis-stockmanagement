@@ -63,6 +63,7 @@ public class QuantityValidatorTest extends BaseValidatorTest {
 
   private StockCardLineItemReason creditAdjustmentReason;
   private StockCardLineItemReason debitAdjustmentReason;
+  private LocalDate firstDate = LocalDate.of(2015, 1, 1);
 
   @Override
   @Before
@@ -81,12 +82,8 @@ public class QuantityValidatorTest extends BaseValidatorTest {
 
   @Test
   public void shouldRejectWhenQuantityMakesStockOnHandBelowZero() {
-    //expect
     expectedException.expect(ValidationMessageException.class);
     expectedException.expectMessage(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH);
-
-    //given
-    LocalDate firstDate = dateFromYear(2015);
 
     StockCard card = new StockCard();
     card.setLineItems(newArrayList(
@@ -98,22 +95,18 @@ public class QuantityValidatorTest extends BaseValidatorTest {
     StockEventDto event = createDebitEventDto(firstDate.plusDays(2), 5);
     mockCardFound(event, card);
 
-    //when
     quantityValidator.validate(event);
   }
 
   @Test
-  public void shouldNotRejectWhenEventHasNoDestinationOrDebitReason() throws Exception {
-    //given
+  public void shouldNotRejectWhenEventHasNoDestinationOrDebitReason() {
     StockEventDto stockEventDto = new StockEventDto();
 
-    //when
     quantityValidator.validate(stockEventDto);
   }
 
   @Test
-  public void shouldNotRejectWhenEventReasonIdIsNotFound() throws Exception {
-    //given
+  public void shouldNotRejectWhenEventReasonIdIsNotFound() {
     StockEventDto event = createStockEventDto();
 
     StockEventLineItemDto invalidItem = event.getLineItems().get(0);
@@ -121,13 +114,11 @@ public class QuantityValidatorTest extends BaseValidatorTest {
 
     setContext(event);
 
-    //when
     quantityValidator.validate(event);
   }
 
   @Test
-  public void shouldNotRejectWhenEventLineItemHasNoReason() throws Exception {
-    //given
+  public void shouldNotRejectWhenEventLineItemHasNoReason() {
     StockEventDto event = createStockEventDto();
     setContext(event);
 
@@ -135,27 +126,19 @@ public class QuantityValidatorTest extends BaseValidatorTest {
     invalidItem.setDestinationId(randomUUID());
     invalidItem.setReasonId(null);
 
-    //when
     quantityValidator.validate(event);
   }
 
   @Test
-  public void shouldNotRejectWhenStockOnHandMatchesQuantityAndNoAdjustments() throws Exception {
-    //given
-    LocalDate firstDate = dateFromYear(2015);
-
+  public void shouldNotRejectWhenStockOnHandMatchesQuantityAndNoAdjustments() {
     StockEventDto event = createPhysicalInventoryEventDto(firstDate.plusDays(1), 0, null);
     setContext(event);
 
-    //when
     quantityValidator.validate(event);
   }
 
   @Test
-  public void shouldNotRejectWhenStockOnHandWithAdjustmentsMatchesQuantity() throws Exception {
-    //given
-    LocalDate firstDate = dateFromYear(2015);
-
+  public void shouldNotRejectWhenStockOnHandWithAdjustmentsMatchesQuantity() {
     StockCardLineItem lineItem = createCreditLineItem(
         firstDate.plusDays(1), 10);
 
@@ -166,18 +149,13 @@ public class QuantityValidatorTest extends BaseValidatorTest {
         singletonList(createDebitAdjustment(5))));
     mockCardFound(event, card);
 
-    //when
     quantityValidator.validate(event);
   }
 
   @Test
-  public void shouldRejectWhenAnyAdjustmentHasNegativeQuantity() throws Exception {
-    //expect
+  public void shouldRejectWhenAnyAdjustmentHasNegativeQuantity() {
     expectedException.expect(ValidationMessageException.class);
     expectedException.expectMessage(ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID);
-
-    //given
-    LocalDate firstDate = dateFromYear(2015);
 
     StockCardLineItem lineItem = createCreditLineItem(
         firstDate.plusDays(1), 15);
@@ -189,15 +167,11 @@ public class QuantityValidatorTest extends BaseValidatorTest {
         singletonList(createCreditAdjustment(-2))));
     mockCardFound(event, card);
 
-    //when
     quantityValidator.validate(event);
   }
 
   @Test
   public void shouldNotRejectWhenStockOnHandDoesNotMatchQuantityAndNoAdjustmentsProvided() {
-    //given
-    LocalDate firstDate = dateFromYear(2015);
-
     StockCardLineItem lineItem = createCreditLineItem(firstDate.plusDays(1), 15);
 
     StockCard card = new StockCard();
@@ -206,15 +180,11 @@ public class QuantityValidatorTest extends BaseValidatorTest {
     StockEventDto event = createPhysicalInventoryEventDto(firstDate.plusDays(2), 5, null);
     mockCardFound(event, card);
 
-    //when
     quantityValidator.validate(event);
   }
 
   @Test
   public void shouldNotRejectWhenStockOnHandWithAdjustmentsDoesNotMatchQuantity() {
-    //given
-    LocalDate firstDate = dateFromYear(2015);
-
     StockCardLineItem lineItem = createCreditLineItem(
         firstDate.plusDays(1), 15);
 
@@ -225,13 +195,11 @@ public class QuantityValidatorTest extends BaseValidatorTest {
         singletonList(createCreditAdjustment(5))));
     mockCardFound(event, card);
 
-    //when
     quantityValidator.validate(event);
   }
 
   @Test
   public void shouldNotRejectWhenStockOnHandFromMiddleIsLessThanStockAdjustment() {
-    //given
     StockCard card = new StockCardDataBuilder(new StockEventDataBuilder().build())
         .withLineItem(buildPhysicalInventoryLineItem(100, Month.JANUARY))
         .withLineItem(buildPhysicalInventoryLineItem(80, Month.MARCH))
@@ -241,7 +209,6 @@ public class QuantityValidatorTest extends BaseValidatorTest {
         createPhysicalInventoryEventDto(LocalDate.of(2017, Month.FEBRUARY, 28), 15, null);
     mockCardFound(event, card);
 
-    //when
     quantityValidator.validate(event);
   }
 
@@ -256,10 +223,6 @@ public class QuantityValidatorTest extends BaseValidatorTest {
 
   private ZonedDateTime getProcessedDateForLocalDate(LocalDate date) {
     return ZonedDateTime.of(date, LocalTime.NOON, ZoneOffset.UTC);
-  }
-
-  private LocalDate dateFromYear(int year) {
-    return LocalDate.of(year, 1, 1);
   }
 
   private StockEventDto createDebitEventDto(LocalDate date, int quantity) {
@@ -318,6 +281,9 @@ public class QuantityValidatorTest extends BaseValidatorTest {
 
     when(stockCardRepository
         .findByProgramIdAndFacilityId(event.getProgramId(), event.getFacilityId()))
+        .thenReturn(singletonList(card));
+    when(calculatedStockOnHandService
+        .getStockCardsWithStockOnHand(event.getProgramId(), event.getFacilityId()))
         .thenReturn(singletonList(card));
 
     setContext(event);
