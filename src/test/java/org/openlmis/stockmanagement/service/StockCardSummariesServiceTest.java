@@ -111,8 +111,7 @@ public class StockCardSummariesServiceTest {
   private StockCardSummariesService stockCardSummariesService;
 
   @Test
-  public void shouldCreateDummyCards()
-      throws Exception {
+  public void shouldCreateDummyCards() {
     //given
     UUID orderable1Id = randomUUID();
     UUID orderable2Id = randomUUID();
@@ -188,7 +187,7 @@ public class StockCardSummariesServiceTest {
   }
 
   @Test
-  public void shouldFindStockCards() throws Exception {
+  public void shouldFindStockCards() {
     OrderableDto orderable = new OrderableDtoDataBuilder().build();
     OrderableDto orderable2 = new OrderableDtoDataBuilder().build();
     OrderableDto orderable3 = new OrderableDtoDataBuilder().build();
@@ -324,7 +323,7 @@ public class StockCardSummariesServiceTest {
         .thenReturn(asList(stockCard1, stockCard2, stockCard3, stockCard4, stockCard5));
 
     when(calculatedStockOnHandService
-        .getStockCardsWithStockOnHand(programId, facilityId, LocalDate.now()))
+        .getStockCardsWithStockOnHand(programId, facilityId))
         .thenReturn(asList(stockCard1, stockCard2, stockCard3, stockCard4, stockCard5));
 
     List<CalculatedStockOnHand> calculatedStockOnHands = new ArrayList<>();

@@ -105,7 +105,7 @@ public class StockCardSummariesService extends StockCardBaseService {
   public Map<UUID, StockCardAggregate> getGroupedStockCards(UUID programId, UUID facilityId,
       Set<UUID> orderableIds, LocalDate startDate, LocalDate endDate) {
     List<StockCard> stockCards = calculatedStockOnHandService
-        .getStockCardsWithStockOnHand(programId, facilityId, LocalDate.now());
+        .getStockCardsWithStockOnHand(programId, facilityId);
 
     Map<UUID, OrderableFulfillDto> orderableFulfillMap =
         orderableFulfillService.findByIds(stockCards.stream()

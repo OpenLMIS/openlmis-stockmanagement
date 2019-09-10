@@ -54,7 +54,8 @@ public class CalculatedStockOnHandService {
       return Collections.emptyList();
     }
 
-    stockCards.forEach(stockCard -> fetchStockOnHand(stockCard, asOfDate));
+    stockCards.forEach(stockCard ->
+        fetchStockOnHand(stockCard, asOfDate != null ? asOfDate : LocalDate.now()));
 
     return stockCards;
   }
@@ -67,7 +68,7 @@ public class CalculatedStockOnHandService {
    * @return List of stock cards with SOH values, empty list if no stock cards were found.
    */
   public List<StockCard> getStockCardsWithStockOnHand(UUID programId, UUID facilityId) {
-    return getStockCardsWithStockOnHand(programId, facilityId, LocalDate.now());
+    return getStockCardsWithStockOnHand(programId, facilityId, null);
   }
 
   /**
