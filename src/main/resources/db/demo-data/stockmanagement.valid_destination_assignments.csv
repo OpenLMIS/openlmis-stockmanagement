@@ -1,4 +1,4 @@
-id,facilityTypeId,programId,nodeId,geoLevelAffinity
+id,facilityTypeId,programId,nodeId,geoLevelAffinityId
 a44fcfa4-edd8-45a7-a578-fcf5ae7791b3,ac1d268b-ce10-455f-bf87-9c667da8f060,dce17f2e-af3e-40ad-8e00-3496adef44c3,e89eaf68-50c1-47f2-b83a-5b51ffa2206e,
 1bd66d1c-0d47-40d9-a443-56539b988d8a,ac1d268b-ce10-455f-bf87-9c667da8f060,dce17f2e-af3e-40ad-8e00-3496adef44c3,bb551f22-66b1-487a-a87d-9083d9eb8d56,
 f87e8ef2-33d0-4d85-bdcc-02f08bebfd30,ac1d268b-ce10-455f-bf87-9c667da8f060,418bdc1d-c303-4bd0-b2d3-d8901150a983,eae0d462-1b54-4626-8560-4e9dd7c1c28f,
