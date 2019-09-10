@@ -20,6 +20,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.openlmis.stockmanagement.dto.BaseDto;
 
 @NoArgsConstructor
@@ -27,7 +28,8 @@ import org.openlmis.stockmanagement.dto.BaseDto;
 @EqualsAndHashCode(callSuper = true)
 @Getter
 @Setter
-public class GeographicLevelDto extends BaseDto {
+@ToString
+public final class GeographicLevelDto extends BaseDto {
   
   private String code;
   private String name;
