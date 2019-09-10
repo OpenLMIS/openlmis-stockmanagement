@@ -19,19 +19,21 @@ import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.assertNull;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
+import org.openlmis.stockmanagement.testutils.CalculatedStockOnHandDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
@@ -81,7 +83,30 @@ public class StockCardAggregateTest {
                 LocalDate.of(2018, 5, 13)))
         .build();
 
-    stockCardAggregate = new StockCardAggregate(asList(stockCard1, stockCard2, stockCard3));
+    List<CalculatedStockOnHand> calculatedStockOnHands = new ArrayList<>(asList(
+        new CalculatedStockOnHandDataBuilder()
+            .withStockCard(stockCard1)
+            .withOccurredDate(LocalDate.of(2018, 5, 10))
+            .withStockOnHand(10)
+            .build(),
+        new CalculatedStockOnHandDataBuilder()
+            .withStockCard(stockCard1)
+            .withOccurredDate(LocalDate.of(2018, 5, 11))
+            .withStockOnHand(0)
+            .build(),
+        new CalculatedStockOnHandDataBuilder()
+            .withStockCard(stockCard2)
+            .withOccurredDate(LocalDate.of(2018, 5, 12))
+            .withStockOnHand(20)
+            .build(),
+        new CalculatedStockOnHandDataBuilder()
+            .withStockCard(stockCard3)
+            .withOccurredDate(LocalDate.of(2018, 5, 13))
+            .withStockOnHand(50)
+            .build()));
+
+    stockCardAggregate = new StockCardAggregate(
+        asList(stockCard1, stockCard2, stockCard3), calculatedStockOnHands);
   }
 
   @Test
@@ -128,7 +153,7 @@ public class StockCardAggregateTest {
 
     assertEquals(new Integer(10), amounts.get(tag1));
     assertEquals(new Integer(-10), amounts.get(tag2));
-    assertEquals(null, amounts.get(tag3));
+    assertNull(amounts.get(tag3));
   }
 
   @Test
@@ -151,12 +176,13 @@ public class StockCardAggregateTest {
   @Test
   public void shouldIncludeStockoutToCurrentDay() {
     LocalDate date = LocalDate.of(2018, 5, 15);
-    stockCard1.getLineItems().add(new StockCardLineItemDataBuilder()
-        .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
-            ReasonType.DEBIT,
-            asList(tag3),
-            80,
-            LocalDate.of(2018, 5, 15)));
+
+    stockCardAggregate.getCalculatedStockOnHands().add(new CalculatedStockOnHandDataBuilder()
+        .withStockCard(stockCard1)
+        .withOccurredDate(date)
+        .withStockOnHand(0)
+        .build());
+
     assertEquals(
         new Long(1 + DAYS.between(date, LocalDate.now())),
         stockCardAggregate.getStockoutDays(null, null));
@@ -174,19 +200,12 @@ public class StockCardAggregateTest {
 
   @Test
   public void shouldImplementToString() {
+    StockCard stockCard = new StockCardDataBuilder(new StockEvent()).build();
     StockCardAggregate stockCardAggregate = new StockCardAggregate(
-        singletonList(new StockCardDataBuilder(new StockEvent()).build()));
+        singletonList(stockCard),
+        singletonList(new CalculatedStockOnHandDataBuilder()
+            .withStockCard(stockCard)
+            .build()));
     ToStringTestUtils.verify(StockCardAggregate.class, stockCardAggregate, "LOGGER");
-  }
-
-  @Test
-  public void shouldCalculateStockOnHandForAllLineItemsInConstructor() {
-    StockCard stockCard1 = mock(StockCard.class);
-    StockCard stockCard2 = mock(StockCard.class);
-
-    new StockCardAggregate(asList(stockCard1, stockCard2));
-
-    verify(stockCard1, times(1)).calculateStockOnHand();
-    verify(stockCard2, times(1)).calculateStockOnHand();
   }
 }

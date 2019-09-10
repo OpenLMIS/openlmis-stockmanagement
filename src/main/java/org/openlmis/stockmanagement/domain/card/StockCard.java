@@ -26,6 +26,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.SERVER_ERROR_SHALLOW
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -37,6 +38,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.AllArgsConstructor;
@@ -83,8 +85,10 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
 
   @Column(nullable = false)
   private UUID facilityId;
+
   @Column(nullable = false)
   private UUID programId;
+
   @Column(nullable = false)
   private UUID orderableId;
   @Column
@@ -96,6 +100,12 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
 
   @Transient
   private Integer stockOnHand = null;
+  
+  @Transient
+  private LocalDate occurredDate = null;
+  
+  @Transient
+  private ZonedDateTime processedDate = null;
 
   /**
    * Create stock card from stock event dto and its line item.
@@ -139,10 +149,8 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
     reorderLineItems();
     int previousSoh = 0;
     for (StockCardLineItem lineItem : getLineItems()) {
-      lineItem.calculateStockOnHand(previousSoh);
-      previousSoh = lineItem.getStockOnHand();
+      previousSoh = lineItem.calculateStockOnHand(previousSoh);
     }
-    setStockOnHand(previousSoh);
     LOGGER.debug("Calculated stock on hand: {}", previousSoh);
   }
 
@@ -176,24 +184,7 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
     return clone;
   }
 
-  /**
-   * Returns latest line item  before given date.
-   *
-   */
-  public StockCardLineItem getLineItemAsOfDate(LocalDate date) {
-    if (isEmpty(lineItems)) {
-      return null;
-    }
-
-    reorderLineItems();
-
-    return
-      lineItems.stream()
-        .filter(a -> !a.getOccurredDate().isAfter(date))
-        .reduce((left, right) -> right)
-        .orElse(null);
-  }
-
+  @PostLoad
   private void reorderLineItems() {
     Comparator<StockCardLineItem> comparator = byOccurredDate()
         .thenComparing(byProcessedDate())

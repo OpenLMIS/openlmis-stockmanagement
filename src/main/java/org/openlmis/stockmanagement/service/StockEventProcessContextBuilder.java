@@ -101,6 +101,9 @@ public class StockEventProcessContextBuilder {
   private StockCardRepository stockCardRepository;
 
   @Autowired
+  private CalculatedStockOnHandService calculatedStockOnHandService;
+
+  @Autowired
   private ValidSourceAssignmentRepository validSourceAssignmentRepository;
 
   @Autowired
@@ -187,8 +190,8 @@ public class StockEventProcessContextBuilder {
     context.setNodes(nodesGroupedById);
 
     profiler.start("CREATE_LAZY_STOCK_CARDS");
-    Supplier<List<StockCard>> cardsSupplier = () -> stockCardRepository
-        .findByProgramIdAndFacilityId(eventDto.getProgramId(), eventDto.getFacilityId());
+    Supplier<List<StockCard>> cardsSupplier = () -> calculatedStockOnHandService
+        .getStockCardsWithStockOnHand(eventDto.getProgramId(), eventDto.getFacilityId());
     LazyList<StockCard> cards = new LazyList<>(cardsSupplier);
     LazyGrouping<OrderableLotIdentity, StockCard> cardsGroupedByIdentity = new LazyGrouping<>(
         cards, OrderableLotIdentity::identityOf

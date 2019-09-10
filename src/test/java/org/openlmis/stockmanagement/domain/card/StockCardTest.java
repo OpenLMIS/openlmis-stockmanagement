@@ -19,19 +19,17 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.openlmis.stockmanagement.testutils.DatesUtil.getBaseDate;
 
 import org.junit.Test;
-import org.openlmis.stockmanagement.testutils.ObjectGenerator;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemDataBuilder;
 
 
 public class StockCardTest {
 
   @Test
-  public void shouldReorderLineItemsWhenCalculateSoh() throws Exception {
+  public void shouldReorderLineItemsWhenCalculateSoh() {
     //given
     StockCardLineItem lineItem1 = new StockCardLineItemDataBuilder()
         .withProcessedDateNextDay()
@@ -72,31 +70,25 @@ public class StockCardTest {
   }
 
   @Test
-  public void shouldGetSohByCalculatingSohOfEachLineItem() throws Exception {
-    //given
-    StockCardLineItem lineItem1 = new StockCardLineItemDataBuilder()
-        .withStockOnHand(123)
-        .buildMock();
-    StockCardLineItem lineItem2 = new StockCardLineItemDataBuilder()
+  public void shouldGetSohByCalculatingSohOfEachLineItem() {
+    StockCardLineItem lineItem1 = spy(new StockCardLineItemDataBuilder()
+        .withQuantity(123)
+        .build());
+    StockCardLineItem lineItem2 = spy(new StockCardLineItemDataBuilder()
         .withOccurredDateNextDay()
-        .withStockOnHand(456)
-        .buildMock();
-
+        .withQuantity(456)
+        .build());
     StockCard card = new StockCard();
     card.setLineItems(asList(lineItem1, lineItem2));
 
-    //when
     card.calculateStockOnHand();
 
-    //then
     verify(lineItem1).calculateStockOnHand(0);
     verify(lineItem2).calculateStockOnHand(123);
-
-    assertThat(card.getStockOnHand(), is(456));
   }
 
   @Test
-  public void shouldShallowCopyLineItems() throws Exception {
+  public void shouldShallowCopyLineItems() {
     //given
     StockCardLineItem lineItem = new StockCardLineItemDataBuilder().withQuantity(5).build();
 
@@ -114,19 +106,5 @@ public class StockCardTest {
 
     //then
     assertThat(stockCard.getLineItems().get(0).getQuantity(), is(5));
-  }
-
-  @Test
-  public void shouldGetLineItemAsOfDate() throws Exception {
-    StockCard stockCard = ObjectGenerator.of(StockCard.class);
-    stockCard.setLineItems(asList(
-        new StockCardLineItemDataBuilder().build(),
-        new StockCardLineItemDataBuilder().withOccurredDatePreviousDay().build(),
-        new StockCardLineItemDataBuilder().withOccurredDateNextDay().build()));
-
-    assertEquals(getBaseDate().plusDays(1),
-        stockCard.getLineItemAsOfDate(getBaseDate().plusDays(1)).getOccurredDate());
-
-    assertEquals(null, stockCard.getLineItemAsOfDate(getBaseDate().minusDays(2)));
   }
 }

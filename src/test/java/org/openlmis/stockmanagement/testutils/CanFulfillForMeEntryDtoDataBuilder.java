@@ -28,8 +28,8 @@ public class CanFulfillForMeEntryDtoDataBuilder {
   private ObjectReferenceDto orderable;
   private ObjectReferenceDto lot;
   private Integer stockOnHand;
-  private ZonedDateTime processedDate;
   private LocalDate occurredDate;
+  private ZonedDateTime processedDate;
 
   /**
    * Creates builder for creating new instance of {@link CanFulfillForMeEntryDto}.
@@ -39,7 +39,6 @@ public class CanFulfillForMeEntryDtoDataBuilder {
     orderable = new ObjectReferenceDtoDataBuilder().withPath("api/orderables").build();
     lot = new ObjectReferenceDtoDataBuilder().withPath("api/lots").build();
     stockOnHand = 10;
-    processedDate = ZonedDateTime.now();
     occurredDate = LocalDate.now();
   }
 
@@ -49,7 +48,7 @@ public class CanFulfillForMeEntryDtoDataBuilder {
    */
   public CanFulfillForMeEntryDto build() {
     return new CanFulfillForMeEntryDto(stockCard, orderable, lot, stockOnHand,
-        processedDate, occurredDate);
+        occurredDate, processedDate);
   }
 
   /**
@@ -57,12 +56,9 @@ public class CanFulfillForMeEntryDtoDataBuilder {
    * @return created can fulfill for me entry
    */
   public CanFulfillForMeEntryDto buildWithStockCardAndOrderable(StockCard stockCard,
-                                                                OrderableDto orderable,
-                                                                LocalDate asOfDate) {
+                                                                OrderableDto orderable) {
     return this
-        .withStockOnHand(stockCard != null && stockCard.getLineItemAsOfDate(asOfDate) != null
-            ? stockCard.getLineItemAsOfDate(asOfDate).getStockOnHand()
-            : null)
+        .withStockOnHand(stockCard != null ? stockCard.getStockOnHand() : 0)
         .withOrderable(new ObjectReferenceDtoDataBuilder()
             .withPath("orderables")
             .withId(orderable.getId())
@@ -79,12 +75,8 @@ public class CanFulfillForMeEntryDtoDataBuilder {
             .withId(stockCard.getLotId())
             .build()
             : null)
-        .withProcessedDate(stockCard != null && stockCard.getLineItemAsOfDate(asOfDate) != null
-            ? stockCard.getLineItemAsOfDate(asOfDate).getProcessedDate()
-            : null)
-        .withOccuredDate(stockCard != null && stockCard.getLineItemAsOfDate(asOfDate) != null
-            ? stockCard.getLineItemAsOfDate(asOfDate).getOccurredDate()
-            : null)
+        .withOccurredDate(stockCard != null ? stockCard.getOccurredDate() : null)
+        .withProcessedDate(stockCard != null ? stockCard.getProcessedDate() : null)
         .build();
   }
 
@@ -108,13 +100,14 @@ public class CanFulfillForMeEntryDtoDataBuilder {
     return this;
   }
 
+  public CanFulfillForMeEntryDtoDataBuilder withOccurredDate(LocalDate occurredDate) {
+    this.occurredDate = occurredDate;
+    return this;
+  }
+  
   public CanFulfillForMeEntryDtoDataBuilder withProcessedDate(ZonedDateTime processedDate) {
     this.processedDate = processedDate;
     return this;
   }
-
-  public CanFulfillForMeEntryDtoDataBuilder withOccuredDate(LocalDate occurredDate) {
-    this.occurredDate = occurredDate;
-    return this;
-  }
+  
 }

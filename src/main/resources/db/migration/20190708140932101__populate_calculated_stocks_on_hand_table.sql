@@ -30,7 +30,7 @@ FOR r IN
 
       -- Insert new entry or update if there's one for the given stock card and date
 	    IF NOT EXISTS (SELECT 1 FROM stockmanagement.calculated_stocks_on_hand WHERE stockcardid = r.stockcardid AND date = r.occurreddate) THEN
-		    INSERT INTO stockmanagement.calculated_stocks_on_hand VALUES (uuid_generate_v4(), soh, r.occurreddate, r.stockcardid);
+		    INSERT INTO stockmanagement.calculated_stocks_on_hand VALUES (uuid_generate_v4(), soh, r.occurreddate, r.stockcardid, r.processeddate);
 	    ELSE
 		    UPDATE stockmanagement.calculated_stocks_on_hand SET stockonhand = soh WHERE stockcardid = r.stockcardid AND date = r.occurreddate;
 	    END IF;

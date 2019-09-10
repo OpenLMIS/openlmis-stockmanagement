@@ -23,7 +23,7 @@ import static org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity.
 import static org.openlmis.stockmanagement.domain.reason.ReasonCategory.PHYSICAL_INVENTORY;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARDS_VIEW;
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -103,17 +103,24 @@ public class StockCardService extends StockCardBaseService {
    * @param savedEventId  saved event id.
    */
   void saveFromEvent(StockEventDto stockEventDto, UUID savedEventId) {
-    List<StockCard> cardsToUpdate = Lists.newArrayList();
+
+    List<StockCard> cardsToUpdate = new ArrayList<>();
+    List<StockCardLineItem> lineItemsToUpdate = new ArrayList<>();
 
     for (StockEventLineItemDto eventLineItem : stockEventDto.getLineItems()) {
       StockCard stockCard = findOrCreateCard(
-          stockEventDto, eventLineItem, savedEventId, cardsToUpdate
-      );
+          stockEventDto, eventLineItem, savedEventId, cardsToUpdate);
 
-      createLineItemFrom(stockEventDto, eventLineItem, stockCard, savedEventId);
+      lineItemsToUpdate.add(createLineItemFrom(
+          stockEventDto, eventLineItem, stockCard, savedEventId));
     }
 
     cardRepository.save(cardsToUpdate);
+    cardRepository.flush();
+
+    lineItemsToUpdate.forEach(lineItem ->
+        calculatedStockOnHandService.recalculateStockOnHand(lineItem.getStockCard(), lineItem));
+
     stockEventDto.getContext().refreshCards();
 
     LOGGER.debug("Stock cards and line items saved");
@@ -134,6 +141,8 @@ public class StockCardService extends StockCardBaseService {
 
     LOGGER.debug("Stock card found");
     permissionService.canViewStockCard(foundCard.getProgramId(), foundCard.getFacilityId());
+
+    foundCard.calculateStockOnHand();
 
     StockCardDto cardDto = createDtos(singletonList(foundCard)).get(0);
     cardDto.setOrderable(orderableRefDataService.findOne(foundCard.getOrderableId()));

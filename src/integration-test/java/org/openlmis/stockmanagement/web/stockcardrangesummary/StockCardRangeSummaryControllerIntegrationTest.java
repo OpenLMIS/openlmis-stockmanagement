@@ -35,10 +35,12 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.service.StockCardAggregate;
 import org.openlmis.stockmanagement.service.StockCardSummariesService;
+import org.openlmis.stockmanagement.testutils.CalculatedStockOnHandDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardRangeSummaryDtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
@@ -81,12 +83,16 @@ public class StockCardRangeSummaryControllerIntegrationTest extends BaseWebInteg
   public void setUp() {
     StockEvent event = new StockEventDataBuilder().build();
     StockCard stockCard = new StockCardDataBuilder(event).build();
+    CalculatedStockOnHand calculatedStockOnHand =  new CalculatedStockOnHandDataBuilder()
+        .withStockCard(stockCard)
+        .build();
 
-    groupedStockCards =
-        ImmutableMap.of(randomUUID(), new StockCardAggregate(singletonList(stockCard)));
+    groupedStockCards = ImmutableMap.of(
+        randomUUID(),
+        new StockCardAggregate(singletonList(stockCard), singletonList(calculatedStockOnHand)));
 
     doReturn(groupedStockCards)
-        .when(stockCardSummariesService).getGroupedStockCards(any(), any(), any());
+        .when(stockCardSummariesService).getGroupedStockCards(any(), any(), any(), any(), any());
 
     pageable = new PageRequest(0, 10);
 
@@ -116,7 +122,8 @@ public class StockCardRangeSummaryControllerIntegrationTest extends BaseWebInteg
     assertEquals("10",
         ((LinkedHashMap) response.getContent().get(0)).get("stockOutDays").toString());
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
-    verify(stockCardSummariesService).getGroupedStockCards(programId, facilityId, null);
+    verify(stockCardSummariesService)
+        .getGroupedStockCards(programId, facilityId, null, null, LocalDate.now());
     verify(builder).build(
         groupedStockCards, null, null, LocalDate.now(), new PageRequest(0, Integer.MAX_VALUE));
   }
@@ -152,7 +159,12 @@ public class StockCardRangeSummaryControllerIntegrationTest extends BaseWebInteg
         ((LinkedHashMap) response.getContent().get(0)).get("stockOutDays").toString());
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
     verify(stockCardSummariesService)
-        .getGroupedStockCards(programId, facilityId, ImmutableSet.of(orderableId1, orderableId2));
+        .getGroupedStockCards(
+            programId,
+            facilityId,
+            ImmutableSet.of(orderableId1, orderableId2),
+            LocalDate.of(2017, 10, 10),
+            LocalDate.of(2017, 10, 20));
     verify(builder)
         .build(groupedStockCards, tag, startDate, endDate, pageable);
   }

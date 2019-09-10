@@ -53,10 +53,10 @@ public final class CanFulfillForMeEntryDto {
   @Getter
   @Setter
   @JsonFormat(shape = STRING)
-  private ZonedDateTime processedDate;
+  private LocalDate occurredDate;
 
   @Getter
   @Setter
   @JsonFormat(shape = STRING)
-  private LocalDate occurredDate;
+  private ZonedDateTime processedDate;
 }

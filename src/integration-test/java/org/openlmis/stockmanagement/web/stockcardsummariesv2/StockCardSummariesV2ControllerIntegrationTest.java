@@ -80,8 +80,9 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
 
     when(stockCardSummariesV2DtoBuilder
         .build(summaries.getPageOfApprovedProducts(),
-            summaries.getStockCardsForFulfillOrderables(), summaries.getOrderableFulfillMap(),
-            summaries.getAsOfDate(), false))
+            summaries.getStockCardsForFulfillOrderables(),
+            summaries.getOrderableFulfillMap(),
+            false))
         .thenReturn(asList(stockCardSummary, stockCardSummary2));
   }
 
@@ -194,8 +195,9 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
 
     when(stockCardSummariesV2DtoBuilder
         .build(summaries.getPageOfApprovedProducts(),
-            summaries.getStockCardsForFulfillOrderables(), summaries.getOrderableFulfillMap(),
-            summaries.getAsOfDate(), true))
+            summaries.getStockCardsForFulfillOrderables(),
+            summaries.getOrderableFulfillMap(),
+            true))
         .thenReturn(singletonList(stockCardSummary));
 
     ResultActions resultActions = mvc.perform(
@@ -230,8 +232,9 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
 
     when(stockCardSummariesV2DtoBuilder
         .build(summaries.getPageOfApprovedProducts(),
-            summaries.getStockCardsForFulfillOrderables(), summaries.getOrderableFulfillMap(),
-            summaries.getAsOfDate(), true))
+            summaries.getStockCardsForFulfillOrderables(),
+            summaries.getOrderableFulfillMap(),
+            true))
         .thenReturn(singletonList(stockCardSummary));
 
     ResultActions resultActions = mvc.perform(
@@ -259,8 +262,9 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
 
     when(stockCardSummariesV2DtoBuilder
         .build(summaries.getPageOfApprovedProducts(),
-            summaries.getStockCardsForFulfillOrderables(), summaries.getOrderableFulfillMap(),
-            summaries.getAsOfDate(), false))
+            summaries.getStockCardsForFulfillOrderables(),
+            summaries.getOrderableFulfillMap(),
+            false))
         .thenReturn(asList(stockCardSummary, stockCardSummary2));
 
     resultActions = mvc.perform(

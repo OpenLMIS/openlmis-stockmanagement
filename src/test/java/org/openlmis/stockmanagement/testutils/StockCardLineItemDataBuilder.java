@@ -16,8 +16,6 @@
 package org.openlmis.stockmanagement.testutils;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.DatesUtil.getBaseDate;
 import static org.openlmis.stockmanagement.testutils.DatesUtil.getBaseDateTime;
 
@@ -155,35 +153,6 @@ public class StockCardLineItemDataBuilder {
         processedDateTime, userId, stockOnHand, stockAdjustments
     );
     lineItem.setId(id);
-
-    return lineItem;
-  }
-
-  /**
-   * Creates new mock instance of {@link StockCardLineItem} with properties.
-   *
-   * @return created mock.
-   */
-  public StockCardLineItem buildMock() {
-    StockCardLineItem lineItem = mock(StockCardLineItem.class);
-    when(lineItem.getId()).thenReturn(id);
-    when(lineItem.getStockCard()).thenReturn(stockCard);
-    when(lineItem.getOriginEvent()).thenReturn(originEvent);
-    when(lineItem.getQuantity()).thenReturn(quantity);
-    when(lineItem.getExtraData()).thenReturn(extraData);
-    when(lineItem.getReason()).thenReturn(reason);
-    when(lineItem.getSourceFreeText()).thenReturn(sourceFreeText);
-    when(lineItem.getDestinationFreeText()).thenReturn(destinationFreeText);
-    when(lineItem.getDocumentNumber()).thenReturn(documentNumber);
-    when(lineItem.getReasonFreeText()).thenReturn(reasonFreeText);
-    when(lineItem.getSignature()).thenReturn(signature);
-    when(lineItem.getSource()).thenReturn(source);
-    when(lineItem.getDestination()).thenReturn(destination);
-    when(lineItem.getOccurredDate()).thenReturn(occurredDate);
-    when(lineItem.getProcessedDate()).thenReturn(processedDateTime);
-    when(lineItem.getUserId()).thenReturn(userId);
-    when(lineItem.getStockOnHand()).thenReturn(stockOnHand);
-    when(lineItem.getStockAdjustments()).thenReturn(stockAdjustments);
 
     return lineItem;
   }

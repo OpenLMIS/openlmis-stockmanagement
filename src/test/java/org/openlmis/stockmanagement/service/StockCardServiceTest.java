@@ -20,11 +20,14 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARDS_VIEW;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -87,6 +90,9 @@ public class StockCardServiceTest {
 
   @Mock
   private PermissionStrings.Handler permissionStringsHandler;
+  
+  @Mock
+  private CalculatedStockOnHandService calculatedStockOnHandService;
 
   @Mock
   private Pageable pageable;
@@ -162,7 +168,6 @@ public class StockCardServiceTest {
 
     assertThat(card.getOrderableId(), equalTo(event.getLineItems().get(1).getOrderableId()));
     assertThat(card.getLotId(), equalTo(event.getLineItems().get(1).getLotId()));
-
     assertThat(card.getLineItems(), hasSize(2));
   }
 
@@ -227,5 +232,7 @@ public class StockCardServiceTest {
     assertEquals(programId, stockCardDto.getProgram().getId());
     assertEquals(stockCard.getOrderableId(), stockCardDto.getOrderableId());
     assertEquals(stockCard.getLotId(), stockCardDto.getLotId());
+    verify(calculatedStockOnHandService, times(1))
+        .fetchStockOnHandForSpecificDate(any(StockCard.class), any(LocalDate.class));
   }
 }

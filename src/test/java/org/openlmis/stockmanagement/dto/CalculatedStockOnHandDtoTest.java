@@ -55,8 +55,13 @@ public class CalculatedStockOnHandDtoTest {
   }
 
   @Test
-  public void shouldReturnCorrectDate() {
-    assertThat(dto.getDate(), is(domain.getDate()));
+  public void shouldReturnCorrectOccuredDate() {
+    assertThat(dto.getOccurredDate(), is(domain.getOccurredDate()));
+  }
+
+  @Test
+  public void shouldReturnCorrectProcessedDate() {
+    assertThat(dto.getProcessedDate(), is(domain.getProcessedDate()));
   }
 
   @Test
