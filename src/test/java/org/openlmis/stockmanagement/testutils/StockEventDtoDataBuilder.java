@@ -125,6 +125,21 @@ public class StockEventDtoDataBuilder {
     return stockEventDto;
   }
 
+  /**
+   * Create stock event dto object with source and destination for testing.
+   *
+   * @return created dto object.
+   */
+  public static StockEventDto createWithSourceAndDestination(UUID sourceId,
+      UUID destinationId) {
+    StockEventDto stockEventDto = createStockEventDto();
+    StockEventLineItemDto stockEventLineItem = stockEventDto.getLineItems().get(0);
+
+    stockEventLineItem.setSourceId(sourceId);
+    stockEventLineItem.setDestinationId(destinationId);
+    return stockEventDto;
+  }
+
   public StockEventDto build() {
     return new StockEventDto(resourceId, facilityId, programId, signature, documentNumber, userId,
         lineItems, context);

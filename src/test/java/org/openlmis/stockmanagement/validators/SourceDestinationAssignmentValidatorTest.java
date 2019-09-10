@@ -19,9 +19,9 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_NOT_IN_VALID_LIST;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_BOTH_PRESENT;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_IN_VALID_LIST;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_FOUND;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 
 import java.util.ArrayList;
@@ -93,7 +93,7 @@ public class SourceDestinationAssignmentValidatorTest extends BaseValidatorTest 
   }
 
   @Test
-  public void shouldNotPassWhenEventHasSourceNotInValidList() throws Exception {
+  public void shouldNotPassWhenEventHasSourceThatNotExist() throws Exception {
     //given
     StockEventDto eventDto = createStockEventDto();
     createContextWithFacility(eventDto);
@@ -106,14 +106,14 @@ public class SourceDestinationAssignmentValidatorTest extends BaseValidatorTest 
         .thenReturn(new ArrayList<>());
 
     expectedEx.expect(ValidationMessageException.class);
-    expectedEx.expectMessage(containsString(ERROR_SOURCE_NOT_IN_VALID_LIST));
+    expectedEx.expectMessage(containsString(ERROR_SOURCE_NOT_FOUND));
 
     //when
     sourceDestinationAssignmentValidator.validate(eventDto);
   }
 
   @Test
-  public void shouldNotPassWhenEventHasDestinationNotInValidList() throws Exception {
+  public void shouldNotPassWhenEventHasDestinationThatNotExist() throws Exception {
     //given
     StockEventDto eventDto = createStockEventDto();
     createContextWithFacility(eventDto);
@@ -126,7 +126,7 @@ public class SourceDestinationAssignmentValidatorTest extends BaseValidatorTest 
         .thenReturn(new ArrayList<>());
 
     expectedEx.expect(ValidationMessageException.class);
-    expectedEx.expectMessage(containsString(ERROR_DESTINATION_NOT_IN_VALID_LIST));
+    expectedEx.expectMessage(containsString(ERROR_DESTINATION_NOT_FOUND));
 
     //when
     sourceDestinationAssignmentValidator.validate(eventDto);

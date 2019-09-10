@@ -43,8 +43,8 @@ import org.springframework.test.web.servlet.ResultActions;
 
 public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest {
 
-  private static final String PROGRAM = "program";
-  private static final String FACILITY_TYPE = "facilityType";
+  private static final String PROGRAM = "programId";
+  private static final String FACILITY_TYPE = "facilityId";
   private static final String API_VALID_DESTINATIONS = "/api/validDestinations";
   private static final String API_VALID_SOURCES = "/api/validSources";
   private static final String PROGRAM_EXP = "$.programId";
@@ -61,7 +61,7 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
   private PermissionService permissionService;
 
   @Test
-  public void shouldGetValidSourcesOrDestinationsByProgramAndFacilityType()
+  public void shouldGetValidSourcesOrDestinationsByProgramAndFacility()
       throws Exception {
     //given
     ValidSourceDestinationDto destinationAssignmentDto = new ValidSourceDestinationDto();
@@ -71,20 +71,20 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
     ValidSourceDestinationDto sourceDestination = destinationAssignmentDto;
 
     UUID program = randomUUID();
-    UUID facilityType = randomUUID();
-    when(validSourceService.findSources(program, facilityType))
+    UUID facility = randomUUID();
+    when(validSourceService.findSources(program, facility))
         .thenReturn(singletonList(sourceDestination));
 
-    when(validDestinationService.findDestinations(program, facilityType))
+    when(validDestinationService.findDestinations(program, facility))
         .thenReturn(singletonList(sourceDestination));
 
     verifyZeroInteractions(permissionService);
 
     //1. perform valid destinations
-    performSourcesOrDestinations(program, facilityType, sourceDestination, API_VALID_DESTINATIONS);
+    performSourcesOrDestinations(program, facility, sourceDestination, API_VALID_DESTINATIONS);
 
     //2. perform valid sources
-    performSourcesOrDestinations(program, facilityType, sourceDestination, API_VALID_SOURCES);
+    performSourcesOrDestinations(program, facility, sourceDestination, API_VALID_SOURCES);
   }
 
   @Test

@@ -60,18 +60,18 @@ public class ValidSourceDestinationController {
   /**
    * Get a list of valid destinations.
    *
-   * @param program      program ID
-   * @param facilityType facility type ID
+   * @param programId      program ID
+   * @param facilityId facility ID
    * @return found valid destinations.
    */
   @RequestMapping(value = "/validDestinations", method = GET)
   public ResponseEntity<List<ValidSourceDestinationDto>> getValidDestinations(
-      @RequestParam UUID program,
-      @RequestParam UUID facilityType) {
+      @RequestParam UUID programId,
+      @RequestParam UUID facilityId) {
     LOGGER.debug(format("Try to find valid destinations with program %s and facility type %s",
-        program.toString(), facilityType.toString()));
+        programId.toString(), facilityId.toString()));
     return new ResponseEntity<>(
-        validDestinationService.findDestinations(program, facilityType), OK);
+        validDestinationService.findDestinations(programId, facilityId), OK);
   }
 
   /**
@@ -99,18 +99,18 @@ public class ValidSourceDestinationController {
   /**
    * Get a list of valid sources.
    *
-   * @param program      program ID
-   * @param facilityType facility type ID
+   * @param programId      program ID
+   * @param facilityId facility ID
    * @return found valid sources.
    */
   @RequestMapping(value = "/validSources", method = GET)
   public ResponseEntity<List<ValidSourceDestinationDto>> getValidSources(
-      @RequestParam UUID program,
-      @RequestParam UUID facilityType) {
+      @RequestParam UUID programId,
+      @RequestParam UUID facilityId) {
     LOGGER.debug(format("Try to find valid sources with program %s and facility type %s",
-        program.toString(), facilityType.toString()));
+        programId.toString(), facilityId.toString()));
     return new ResponseEntity<>(
-        validSourceService.findSources(program, facilityType), OK);
+        validSourceService.findSources(programId, facilityId), OK);
   }
 
   /**

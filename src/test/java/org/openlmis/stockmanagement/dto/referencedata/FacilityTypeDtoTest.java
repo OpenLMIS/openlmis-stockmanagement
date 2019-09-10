@@ -13,37 +13,27 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.stockmanagement.dto;
+package org.openlmis.stockmanagement.dto.referencedata;
 
-import static org.openlmis.stockmanagement.dto.StockCardLineItemDto.createFrom;
-
-import java.util.UUID;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.junit.Test;
-import org.openlmis.stockmanagement.dto.referencedata.GeographicZoneDto;
-import org.openlmis.stockmanagement.testutils.GeographicZoneDtoDataBuilder;
-import org.openlmis.stockmanagement.testutils.StockCardLineItemDataBuilder;
 import org.openlmis.stockmanagement.testutils.ToStringTestUtils;
 
-public class StockCardDtoTest {
+public class FacilityTypeDtoTest {
 
   @Test
   public void equalsContract() {
-    EqualsVerifier.forClass(StockCardDto.class)
-        .withPrefabValues(StockCardLineItemDto.class,
-            createFrom(new StockCardLineItemDataBuilder().build()),
-            createFrom(new StockCardLineItemDataBuilder().build()))
-        .withPrefabValues(GeographicZoneDto.class,
-            new GeographicZoneDtoDataBuilder().withId(UUID.randomUUID()).build(),
-            new GeographicZoneDtoDataBuilder().withId(UUID.randomUUID()).build())
-        .suppress(Warning.NONFINAL_FIELDS) // fields cannot be final
+    EqualsVerifier
+        .forClass(FacilityTypeDto.class)
+        .withRedefinedSuperclass()
+        .suppress(Warning.NONFINAL_FIELDS) // DTO fields cannot be final
         .verify();
   }
 
   @Test
   public void shouldImplementToString() {
-    StockCardDto stockCard = new StockCardDto();
-    ToStringTestUtils.verify(StockCardDto.class, stockCard);
+    FacilityTypeDto facilityTypeDto = new FacilityTypeDto();
+    ToStringTestUtils.verify(FacilityTypeDto.class, facilityTypeDto);
   }
 }

@@ -42,6 +42,8 @@ public abstract class MessageKeys {
       ERROR_PREFIX + ".program.id.missing";
   public static final String ERROR_FACILITY_ID_MISSING =
       ERROR_PREFIX + ".facility.id.missing";
+  public static final String ERROR_FACILITY_NOT_FOUND = 
+      ERROR_PREFIX + ".facility.id.notFound";
   public static final String ERROR_UUID_WRONG_FORMAT =
       ERROR_PREFIX + ".uuid.wrongFormat";
   public static final String ERROR_DATE_WRONG_FORMAT =
@@ -102,6 +104,10 @@ public abstract class MessageKeys {
       + ".organization.update.content.duplicate";
   public static final String ERROR_SOURCE_ASSIGNMENT_NOT_FOUND = ERROR_PREFIX
       + ".source.assignment.notFound";
+  public static final String ERROR_SOURCE_ASSIGNMENT_NO_MATCH_GEO_LEVEL_AFFINITY = ERROR_PREFIX
+      + ".source.assignment.noMatchGeoLevelAffinity";
+  public static final String ERROR_DESTINATION_ASSIGNMENT_NO_MATCH_GEO_LEVEL_AFFINITY = ERROR_PREFIX
+      + ".destination.assignment.noMatchGeoLevelAffinity";
   public static final String ERROR_DESTINATION_ASSIGNMENT_NOT_FOUND = ERROR_PREFIX
       + ".destination.assignment.notFound";
   public static final String ERROR_SOURCE_NOT_FOUND = ERROR_PREFIX

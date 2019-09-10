@@ -13,32 +13,27 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.stockmanagement.domain.sourcedestination;
+package org.openlmis.stockmanagement.testutils;
 
 import java.util.UUID;
-import javax.persistence.Column;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
-import lombok.Data;
-import org.hibernate.annotations.Type;
-import org.openlmis.stockmanagement.domain.BaseEntity;
+import org.openlmis.stockmanagement.domain.sourcedestination.Node;
+import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
 
-@MappedSuperclass
-@Data
-public class SourceDestinationAssignment extends BaseEntity {
-  @Column(nullable = false)
-  @Type(type = PG_UUID)
-  UUID programId;
+public class ValidSourceDestinationDtoDataBuilder {
 
-  @Column(nullable = false)
-  @Type(type = PG_UUID)
-  UUID facilityTypeId;
+  /**
+   * Creates valid source destination dto.
+   * @param id valid source destination id
+   * @param name valid source destination name 
+   * @return created dto object
+   */
+  public static ValidSourceDestinationDto createValidSourceDestinationDto(UUID id, String name) {
+    ValidSourceDestinationDto validSourceDestinationDto = new ValidSourceDestinationDto();
+    validSourceDestinationDto.setName(name);
+    Node node = new Node();
+    node.setId(id);
+    validSourceDestinationDto.setNode(node);
+    return validSourceDestinationDto;
+  }
 
-  @ManyToOne()
-  @JoinColumn(nullable = false)
-  Node node;
-  
-  @Type(type = PG_UUID)
-  UUID geoLevelAffinityId;
 }

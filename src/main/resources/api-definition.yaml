@@ -500,14 +500,14 @@ traits:
   /validDestinations:
       get:
         is: [ secured ]
-        description: Get a list of valid destinations of a program and a facility type.
+        description: Get a list of valid destinations of a program and a facility.
         queryParameters:
-          program:
+          programId:
             required: true
             description: Program ID, indicates the program that the valid destinations are under.
-          facilityType:
+          facilityId:
             required: true
-            description: Facility type ID, indicates the facility type that the valid destinations are under.
+            description: Facility ID, indicates the facility that the valid destinations are under.
         responses:
           200:
             body:
@@ -528,7 +528,7 @@ traits:
 
       post:
         is: [secured]
-        description: Configure a destination to program and facility type.
+        description: Configure a destination to program and facility.
         queryParameters:
         body:
             application/json:
@@ -578,12 +578,12 @@ traits:
           is: [ secured ]
           description: Get a list of valid sources of a program and a facility type.
           queryParameters:
-            program:
+            programId:
               required: true
               description: Program ID, indicates the program that the valid sources are under.
-            facilityType:
+            facilityId:
               required: true
-              description: Facility type ID, indicates the facility type that the valid sources are under.
+              description: Facility ID, indicates the facility that the valid sources are under.
           responses:
             200:
               body:

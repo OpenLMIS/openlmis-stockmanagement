@@ -40,6 +40,7 @@ import org.openlmis.stockmanagement.validators.QuantityValidator;
 import org.openlmis.stockmanagement.validators.ReasonExistenceValidator;
 import org.openlmis.stockmanagement.validators.ReceiveIssueReasonValidator;
 import org.openlmis.stockmanagement.validators.SourceDestinationAssignmentValidator;
+import org.openlmis.stockmanagement.validators.SourceDestinationGeoLevelAffinityValidator;
 import org.openlmis.stockmanagement.validators.StockEventValidator;
 import org.openlmis.stockmanagement.validators.StockEventVvmValidator;
 import org.openlmis.stockmanagement.validators.UnpackKitValidator;
@@ -100,6 +101,9 @@ public class StockEventValidationsServiceTest {
   @MockBean
   private UnpackKitValidator unpackKitValidator;
 
+  @MockBean
+  private SourceDestinationGeoLevelAffinityValidator sourceDestinationGeoLeveLAffinityValidator;
+
   @Before
   public void setUp() throws Exception {
     //make real validators do nothing because
@@ -107,6 +111,7 @@ public class StockEventValidationsServiceTest {
     doNothing().when(stockEventVvmValidator).validate(any(StockEventDto.class));
     doNothing().when(approvedOrderableValidator).validate(any(StockEventDto.class));
     doNothing().when(sourceDestinationAssignmentValidator).validate(any(StockEventDto.class));
+    doNothing().when(sourceDestinationGeoLeveLAffinityValidator).validate(any(StockEventDto.class));
     doNothing().when(mandatoryFieldsValidator).validate(any(StockEventDto.class));
     doNothing().when(freeTextValidator).validate(any(StockEventDto.class));
     doNothing().when(receiveIssueReasonValidator).validate(any(StockEventDto.class));

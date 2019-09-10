@@ -13,32 +13,31 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.stockmanagement.domain.sourcedestination;
+package org.openlmis.stockmanagement.dto.referencedata;
 
-import java.util.UUID;
-import javax.persistence.Column;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
-import lombok.Data;
-import org.hibernate.annotations.Type;
-import org.openlmis.stockmanagement.domain.BaseEntity;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.openlmis.stockmanagement.dto.BaseDto;
 
-@MappedSuperclass
-@Data
-public class SourceDestinationAssignment extends BaseEntity {
-  @Column(nullable = false)
-  @Type(type = PG_UUID)
-  UUID programId;
+@Getter
+@Setter
+@EqualsAndHashCode(callSuper = true)
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+public final class GeographicZoneDto extends BaseDto {
+  private String code;
+  private String name;
+  private GeographicLevelDto level;
+  private Integer catchmentPopulation;
+  private Double latitude;
+  private Double longitude;
 
-  @Column(nullable = false)
-  @Type(type = PG_UUID)
-  UUID facilityTypeId;
-
-  @ManyToOne()
-  @JoinColumn(nullable = false)
-  Node node;
-  
-  @Type(type = PG_UUID)
-  UUID geoLevelAffinityId;
+  @JsonSerialize(as = GeographicZoneDto.class)
+  private GeographicZoneDto parent;
 }

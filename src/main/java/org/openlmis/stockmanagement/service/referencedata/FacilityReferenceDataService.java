@@ -15,8 +15,14 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
+import org.openlmis.stockmanagement.util.RequestParameters;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -35,6 +41,22 @@ public class FacilityReferenceDataService extends BaseReferenceDataService<Facil
   @Override
   protected Class<FacilityDto[]> getArrayResultClass() {
     return FacilityDto[].class;
+  }
+  
+  /**
+   * Finds facilities by their ids.
+   *
+   * @param ids ids to look for.
+   * @return map of ids and facilities
+   */
+  public Map<UUID, FacilityDto> findByIds(Collection<UUID> ids) {
+    RequestParameters parameters = RequestParameters
+        .init()
+        .set("id", ids);
+
+    Page<FacilityDto> facilityDtos =  getPage(parameters);
+    return facilityDtos.getContent().stream()
+            .collect(Collectors.toMap(FacilityDto::getId, Function.identity()));
   }
 
   public boolean exists(UUID id) {

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.UUID;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.ValidSourceAssignmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,14 +34,14 @@ public class ValidSourceService extends SourceDestinationBaseService {
   private ValidSourceAssignmentRepository validSourceRepository;
 
   /**
-   * Find valid destinations by program ID and facility type ID.
+   * Find valid destinations by program ID and facility ID.
    *
    * @param programId      program ID
-   * @param facilityTypeId facility type ID
+   * @param facilityId facility ID
    * @return valid destination assignment DTOs
    */
-  public List<ValidSourceDestinationDto> findSources(UUID programId, UUID facilityTypeId) {
-    return findAssignments(programId, facilityTypeId, validSourceRepository);
+  public List<ValidSourceDestinationDto> findSources(UUID programId, UUID facilityId) {
+    return findAssignments(programId, facilityId, validSourceRepository);
   }
 
   /**
@@ -52,6 +53,17 @@ public class ValidSourceService extends SourceDestinationBaseService {
   public ValidSourceDestinationDto assignSource(ValidSourceAssignment assignment) {
     assignment.setId(null);
     return doAssign(assignment, ERROR_SOURCE_NOT_FOUND, validSourceRepository);
+  }
+  
+  /**
+   * Find existing source.
+   * @param assignmentId source assignment Id
+   * @return assigmnet dto 
+   * @throws ValidationMessageException when assignment was not found
+   */
+  public ValidSourceDestinationDto findById(UUID assignmentId) {
+    return findById(assignmentId, validSourceRepository,
+        ERROR_SOURCE_ASSIGNMENT_NOT_FOUND);
   }
 
   /**
