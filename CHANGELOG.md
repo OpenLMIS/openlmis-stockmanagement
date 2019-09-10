@@ -1,4 +1,4 @@
-4.1.2 / Work in progress
+5.0.0 / Work in progress
 ==================
 
 Contract breaking changes:
