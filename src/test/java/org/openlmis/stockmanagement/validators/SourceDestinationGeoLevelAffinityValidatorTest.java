@@ -18,6 +18,8 @@ package org.openlmis.stockmanagement.validators;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationDtoDataBuilder.createValidSourceDestinationDto;
 
@@ -203,5 +205,18 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
     expectedEx.expectMessage(MessageKeys.ERROR_DESTINATION_ASSIGNMENT_NO_MATCH_GEO_LEVEL_AFFINITY);
     
     sourceDestinationGeoLeveLAffinityValidator.validate(stockEventDto);
+  }
+
+  @Test
+  public void shouldSkipValidationIfPhysicalInventory() {
+    StockEventDto stockEventDto = StockEventDtoDataBuilder
+        .createNoSourceDestinationStockEventDto();
+
+    stockEventDto.getLineItems().forEach(lineItem -> lineItem.setReasonId(null));
+    
+    sourceDestinationGeoLeveLAffinityValidator.validate(stockEventDto);
+    
+    verify(validDestinationService, times(0)).findDestinations(any(), any());
+    verify(validSourceService, times(0)).findSources(any(), any());
   }
 }

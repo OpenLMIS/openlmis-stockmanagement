@@ -54,6 +54,10 @@ public class SourceDestinationGeoLevelAffinityValidator implements StockEventVal
     if (!stockEventDto.hasLineItems()) {
       return;
     }
+    
+    if (stockEventDto.isPhysicalInventory()) {
+      return;
+    }
 
     List<StockEventLineItemDto> stockEventLineItems = stockEventDto.getLineItems();
     
