@@ -107,7 +107,7 @@ public class CalculatedStockOnHandService {
               }).getStockOnHand();
 
       calculatedStockOnHandRepository.save(new CalculatedStockOnHand(
-          lineItem.getQuantityWithSign() + previousStockOnHand,
+          previousStockOnHand + lineItem.getQuantityWithSign(),
           stockCard, lineItem.getOccurredDate(),
           lineItem.getProcessedDate()));
     }

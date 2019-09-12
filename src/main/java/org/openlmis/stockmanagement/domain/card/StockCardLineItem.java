@@ -244,7 +244,7 @@ public class StockCardLineItem extends BaseEntity {
     LOGGER.debug("try decrease soh: " + previousStockOnHand + " - " + quantity + " = "
         + (previousStockOnHand - quantity));
 
-    this.stockOnHand = previousStockOnHand - quantity;
+    setStockOnHand(previousStockOnHand - quantity);
     return this.stockOnHand;
   }
 
@@ -252,11 +252,11 @@ public class StockCardLineItem extends BaseEntity {
     try {
       LOGGER.debug("try increase soh: " + previousStockOnHand + " + " + quantity + " = "
           + Math.addExact(previousStockOnHand, quantity));
+      setStockOnHand(Math.addExact(previousStockOnHand, quantity));
     } catch (ArithmeticException ex) {
       throw new ValidationMessageException(
           new Message(ERRRO_EVENT_SOH_EXCEEDS_LIMIT, previousStockOnHand, quantity, ex));
     }
-    this.stockOnHand = Math.addExact(previousStockOnHand, quantity);
     return this.stockOnHand;
   }
 
