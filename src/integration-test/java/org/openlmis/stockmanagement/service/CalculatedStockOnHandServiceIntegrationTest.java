@@ -20,21 +20,22 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.BaseIntegrationTest;
 import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
+import org.openlmis.stockmanagement.testutils.CalculatedStockOnHandDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardDataBuilder;
+import org.openlmis.stockmanagement.testutils.StockCardLineItemDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -61,10 +62,11 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
   private UUID product = randomUUID();
   private UUID lot = randomUUID();
 
-  private int quantity = new Random().nextInt();
-  private int quantity2 = new Random().nextInt();
+  private int quantity = 100;
+  private int quantity2 = 200;
 
   private StockCard stockCard;
+  private CalculatedStockOnHandDataBuilder calculatedStockOnHandDataBuilder;
 
   @Before
   public void setUp() {
@@ -81,36 +83,37 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
         .withLot(lot)
         .build();
     stockCardRepository.save(stockCard);
+
+    calculatedStockOnHandDataBuilder = new CalculatedStockOnHandDataBuilder()
+        .withoutId()
+        .withStockCard(stockCard)
+        .withStockOnHand(quantity);
   }
 
   @Test
   public void shouldGetLatestStockCardsWithStockOnHandWhenDateIsNotSet() {
-    LocalDate today = LocalDate.now();
-    CalculatedStockOnHand calculatedStockOnHand = new CalculatedStockOnHand(
-        quantity, stockCard, today, ZonedDateTime.now());
-
-    calculatedStockOnHandRepository.save(calculatedStockOnHand);
+    calculatedStockOnHandRepository.save(calculatedStockOnHandDataBuilder.build());
 
     List<StockCard> foundStockCards = calculatedStockOnHandService
         .getStockCardsWithStockOnHand(program, facility);
 
     assertThat(foundStockCards.size(), is(1));
     assertThat(foundStockCards.get(0).getStockOnHand(), is(quantity));
-    assertThat(foundStockCards.get(0).getOccurredDate(), is(today));
+    assertThat(foundStockCards.get(0).getOccurredDate(), is(LocalDate.now()));
   }
 
   @Test
   public void shouldGetStockCardsWithStockOnHandWithSpecificDate() {
     LocalDate newDate = LocalDate.of(2018, 5, 10);
     LocalDate oldDate = LocalDate.of(2015, 5, 10);
-    
-    CalculatedStockOnHand calculatedStockOnHand = new CalculatedStockOnHand(quantity,
-        stockCard, oldDate, ZonedDateTime.now());
-    CalculatedStockOnHand calculatedStockOnHand2 = new CalculatedStockOnHand(quantity2,
-        stockCard, newDate, ZonedDateTime.now());
 
-    calculatedStockOnHandRepository.save(calculatedStockOnHand);
-    calculatedStockOnHandRepository.save(calculatedStockOnHand2);
+    calculatedStockOnHandRepository.save(calculatedStockOnHandDataBuilder
+        .withOccurredDate(oldDate)
+        .build());
+    calculatedStockOnHandRepository.save(calculatedStockOnHandDataBuilder
+        .withOccurredDate(newDate)
+        .withStockOnHand(quantity2)
+        .build());
 
     List<StockCard> foundStockCards = calculatedStockOnHandService
         .getStockCardsWithStockOnHand(program, facility, LocalDate.of(2017,5,10));
@@ -124,14 +127,14 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
   public void shouldGetStockCardsWithMostUpToDateStockOnHand() {
     LocalDate newDate = LocalDate.of(2018, 5, 10);
     LocalDate oldDate = LocalDate.of(2015, 5, 10);
-    
-    CalculatedStockOnHand calculatedStockOnHand = new CalculatedStockOnHand(quantity,
-        stockCard, newDate, ZonedDateTime.now());
-    CalculatedStockOnHand calculatedStockOnHand2 = new CalculatedStockOnHand(quantity2,
-        stockCard, oldDate, ZonedDateTime.now());
 
-    calculatedStockOnHandRepository.save(calculatedStockOnHand);
-    calculatedStockOnHandRepository.save(calculatedStockOnHand2);
+    calculatedStockOnHandRepository.save(calculatedStockOnHandDataBuilder
+        .withOccurredDate(newDate)
+        .build());
+    calculatedStockOnHandRepository.save(calculatedStockOnHandDataBuilder
+        .withOccurredDate(oldDate)
+        .withStockOnHand(quantity2)
+        .build());
 
     List<StockCard> foundStockCards = calculatedStockOnHandService
         .getStockCardsWithStockOnHand(program, facility, LocalDate.now());
@@ -158,13 +161,122 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
 
   @Test
   public void shouldSetStockOnHandForStockCard() {
-    CalculatedStockOnHand calculatedStockOnHand2 = new CalculatedStockOnHand(quantity,
-        stockCard, LocalDate.now(), ZonedDateTime.now());
-    
-    calculatedStockOnHandRepository.save(calculatedStockOnHand2);
+    calculatedStockOnHandRepository.save(calculatedStockOnHandDataBuilder.build());
     
     calculatedStockOnHandService.fetchStockOnHandForSpecificDate(stockCard, LocalDate.now());
 
     assertThat(stockCard.getStockOnHand(), is(quantity));
+  }
+
+  @Test
+  public void shouldRecalculateStockOnHandWithCreditReason() {
+    final StockCardLineItem lineItem = new StockCardLineItemDataBuilder()
+        .withCreditReason()
+        .withQuantity(15)
+        .build();
+
+    calculatedStockOnHandRepository.save(
+        calculatedStockOnHandDataBuilder
+            .withOccurredDate(lineItem.getOccurredDate().minusDays(1))
+            .withStockOnHand(10)
+            .build());
+    calculatedStockOnHandRepository.save(
+        calculatedStockOnHandDataBuilder
+            .withOccurredDate(lineItem.getOccurredDate().plusDays(2))
+            .withStockOnHand(20)
+            .build());
+    calculatedStockOnHandRepository.save(
+        calculatedStockOnHandDataBuilder
+            .withOccurredDate(lineItem.getOccurredDate().plusDays(3))
+            .withStockOnHand(30)
+            .build());
+
+    calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem);
+
+    List<CalculatedStockOnHand> result = calculatedStockOnHandRepository
+        .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
+            stockCard.getId(),
+            lineItem.getOccurredDate().minusDays(2));
+
+    assertThat(result.get(0).getStockOnHand(), is(10));
+    assertThat(result.get(1).getStockOnHand(), is(25));
+    assertThat(result.get(2).getStockOnHand(), is(35));
+    assertThat(result.get(3).getStockOnHand(), is(45));
+  }
+
+  @Test
+  public void shouldRecalculateStockOnHandWithDebitReason() {
+    final StockCardLineItem lineItem = new StockCardLineItemDataBuilder()
+        .withDebitReason()
+        .withQuantity(5)
+        .build();
+
+    calculatedStockOnHandRepository.save(
+        calculatedStockOnHandDataBuilder
+            .withOccurredDate(lineItem.getOccurredDate().minusDays(1))
+            .withStockOnHand(10)
+            .build());
+    calculatedStockOnHandRepository.save(
+        calculatedStockOnHandDataBuilder
+            .withOccurredDate(lineItem.getOccurredDate().plusDays(2))
+            .withStockOnHand(20)
+            .build());
+    calculatedStockOnHandRepository.save(
+        calculatedStockOnHandDataBuilder
+            .withOccurredDate(lineItem.getOccurredDate().plusDays(3))
+            .withStockOnHand(30)
+            .build());
+
+    calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem);
+
+    List<CalculatedStockOnHand> result = calculatedStockOnHandRepository
+        .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
+            stockCard.getId(),
+            lineItem.getOccurredDate().minusDays(2));
+
+    assertThat(result.get(0).getStockOnHand(), is(10));
+    assertThat(result.get(1).getStockOnHand(), is(5));
+    assertThat(result.get(2).getStockOnHand(), is(15));
+    assertThat(result.get(3).getStockOnHand(), is(25));
+  }
+
+  @Test
+  public void shouldCreateNewCalculatedStockOnHandIfNoneExistsForStockCard() {
+    final StockCardLineItem lineItem = new StockCardLineItemDataBuilder()
+        .withCreditReason()
+        .withQuantity(15)
+        .build();
+
+    calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem);
+
+    List<CalculatedStockOnHand> result = calculatedStockOnHandRepository
+        .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
+            stockCard.getId(),
+            lineItem.getOccurredDate().minusDays(2));
+
+    assertThat(result.get(0).getStockOnHand(), is(15));
+  }
+
+  @Test
+  public void shouldNotCreateNewCalculatedStockOnHandIfOneExistsForGivenDay() {
+    final StockCardLineItem lineItem = new StockCardLineItemDataBuilder()
+        .withCreditReason()
+        .withQuantity(15)
+        .build();
+
+    calculatedStockOnHandRepository.save(
+        calculatedStockOnHandDataBuilder
+            .withOccurredDate(lineItem.getOccurredDate())
+            .withStockOnHand(10)
+            .build());
+
+    calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem);
+
+    List<CalculatedStockOnHand> result = calculatedStockOnHandRepository
+        .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
+            stockCard.getId(),
+            lineItem.getOccurredDate());
+
+    assertThat(result.get(0).getStockOnHand(), is(25));
   }
 }

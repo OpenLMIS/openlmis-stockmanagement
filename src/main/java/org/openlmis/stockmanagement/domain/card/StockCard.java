@@ -152,6 +152,8 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
       previousSoh = lineItem.calculateStockOnHand(previousSoh);
     }
     LOGGER.debug("Calculated stock on hand: {}", previousSoh);
+
+    stockOnHand = previousSoh;
   }
 
   /**

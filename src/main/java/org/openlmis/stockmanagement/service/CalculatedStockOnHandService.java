@@ -107,13 +107,13 @@ public class CalculatedStockOnHandService {
               }).getStockOnHand();
 
       calculatedStockOnHandRepository.save(new CalculatedStockOnHand(
-          lineItem.getQuantity() + previousStockOnHand,
+          lineItem.getQuantityWithSign() + previousStockOnHand,
           stockCard, lineItem.getOccurredDate(),
           lineItem.getProcessedDate()));
     }
 
     stockOnHands.forEach(stockOnHand ->
-        stockOnHand.setStockOnHand(stockOnHand.getStockOnHand() + lineItem.getQuantity()));
+        stockOnHand.setStockOnHand(stockOnHand.getStockOnHand() + lineItem.getQuantityWithSign()));
 
     calculatedStockOnHandRepository.save(stockOnHands);
   }
