@@ -235,6 +235,15 @@ public class StockCardLineItem extends BaseEntity {
     return null != this.getReason() && this.getReason().getTags().contains(tag);
   }
 
+  /**
+   * Checks if line item is physical inventory.
+   *
+   * @return true if is physical inventory
+   */
+  public boolean isPhysicalInventory() {
+    return source == null && destination == null && reason == null;
+  }
+
   private Integer tryDecrease(int previousStockOnHand) {
     if (previousStockOnHand - quantity < 0) {
       throw new ValidationMessageException(
@@ -268,10 +277,6 @@ public class StockCardLineItem extends BaseEntity {
     } else {
       return physicalBalance();
     }
-  }
-
-  private boolean isPhysicalInventory() {
-    return source == null && destination == null && reason == null;
   }
 
   private boolean shouldIncrease() {

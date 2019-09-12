@@ -91,31 +91,39 @@ public class CalculatedStockOnHandService {
    * @param lineItem  date used to get latest stock on hand before or equal specific date. If date
    *     is not specified, current date will be used.
    */
-  public void recalculateStockOnHand(StockCard stockCard, StockCardLineItem lineItem) {
-    List<CalculatedStockOnHand> stockOnHands = calculatedStockOnHandRepository
+  public void recalculateStockOnHand(
+      StockCard stockCard, StockCardLineItem lineItem) {
+    List<CalculatedStockOnHand> previousStockOnHands = calculatedStockOnHandRepository
             .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
-                    stockCard.getId(), lineItem.getOccurredDate());
+                stockCard.getId(), lineItem.getOccurredDate());
 
-    if (stockOnHands.isEmpty()
-        || !stockOnHands.get(0).getOccurredDate().equals(lineItem.getOccurredDate())) {
-      Integer previousStockOnHand = calculatedStockOnHandRepository
-          .findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(
-              stockCard.getId(), lineItem.getOccurredDate().minusDays(1)).orElseGet(() -> {
-                CalculatedStockOnHand calculatedStockOnHand = new CalculatedStockOnHand();
-                calculatedStockOnHand.setStockOnHand(0);
-                return calculatedStockOnHand;
-              }).getStockOnHand();
+    Integer previousStockOnHand = calculatedStockOnHandRepository
+        .findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(
+            stockCard.getId(), lineItem.getOccurredDate().minusDays(1)).orElseGet(() -> {
+              CalculatedStockOnHand calculatedStockOnHand = new CalculatedStockOnHand();
+              calculatedStockOnHand.setStockOnHand(0);
+              return calculatedStockOnHand;
+            }).getStockOnHand();
 
+    boolean isPhysicalInventory = lineItem.isPhysicalInventory();
+
+    if (previousStockOnHands.isEmpty()
+        || !previousStockOnHands.get(0).getOccurredDate().equals(lineItem.getOccurredDate())) {
       calculatedStockOnHandRepository.save(new CalculatedStockOnHand(
-          previousStockOnHand + lineItem.getQuantityWithSign(),
+          isPhysicalInventory
+              ? lineItem.getQuantity()
+              : previousStockOnHand + lineItem.getQuantityWithSign(),
           stockCard, lineItem.getOccurredDate(),
           lineItem.getProcessedDate()));
     }
 
-    stockOnHands.forEach(stockOnHand ->
-        stockOnHand.setStockOnHand(stockOnHand.getStockOnHand() + lineItem.getQuantityWithSign()));
+    previousStockOnHands.forEach(stockOnHand ->
+        stockOnHand.setStockOnHand(stockOnHand.getStockOnHand()
+            + (isPhysicalInventory
+            ? lineItem.getQuantity() - previousStockOnHand
+            : lineItem.getQuantityWithSign())));
 
-    calculatedStockOnHandRepository.save(stockOnHands);
+    calculatedStockOnHandRepository.save(previousStockOnHands);
   }
 
   private void fetchStockOnHand(StockCard stockCard, LocalDate asOfDate) {
