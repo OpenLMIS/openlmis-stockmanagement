@@ -42,6 +42,8 @@ import org.openlmis.stockmanagement.dto.StockEventAdjustmentDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonDataBuilder;
+import org.openlmis.stockmanagement.util.LazyGrouping;
+import org.openlmis.stockmanagement.util.LazyList;
 import org.openlmis.stockmanagement.util.LazyResource;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
@@ -68,6 +70,12 @@ public class StockCardLineItemTest {
 
     StockEventLineItemDto eventLineItem = eventDto.getLineItems().get(0);
     eventLineItem.setStockAdjustments(singletonList(createStockAdjustment()));
+
+    StockCardLineItemReason reason = new StockCardLineItemReasonDataBuilder()
+        .withId(eventLineItem.getReasonId())
+        .build();
+    LazyList<StockCardLineItemReason> eventReasons = new LazyList<>(() -> singletonList(reason));
+    context.setCardReasons(new LazyGrouping<>(eventReasons, StockCardLineItemReason::getId));
 
     UUID eventId = randomUUID();
 
