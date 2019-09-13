@@ -87,7 +87,7 @@ public class SourceDestinationGeoLevelAffinityValidator implements StockEventVal
     UUID notValidNodeAssignmentId = stockEventLineItemsNotMatch.get(0).getDestinationId();
     FacilityDto facilityDto = stockEventDto.getContext().getFacility();
     throwError(ERROR_DESTINATION_ASSIGNMENT_NO_MATCH_GEO_LEVEL_AFFINITY, 
-        facilityDto.getName(), notValidNodeAssignmentId);
+        notValidNodeAssignmentId, facilityDto.getName());
 
   }
 
@@ -108,7 +108,7 @@ public class SourceDestinationGeoLevelAffinityValidator implements StockEventVal
     UUID notValidNodeAssignmentId = stockEventLineItemsNotMatch.get(0).getSourceId();
     FacilityDto facilityDto = stockEventDto.getContext().getFacility();
     throwError(ERROR_SOURCE_ASSIGNMENT_NO_MATCH_GEO_LEVEL_AFFINITY, 
-        facilityDto.getName(), notValidNodeAssignmentId);
+        notValidNodeAssignmentId, facilityDto.getName());
     
   }
 
