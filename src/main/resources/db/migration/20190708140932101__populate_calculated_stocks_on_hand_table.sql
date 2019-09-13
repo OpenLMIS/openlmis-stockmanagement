@@ -14,7 +14,7 @@ FOR r IN
 	ORDER BY occurreddate, processeddate, reasons.reasontype
     LOOP
       -- Find out last Stock on Hand for this stockcard
-	    SELECT stockonhand INTO soh FROM stockmanagement.calculated_stocks_on_hand WHERE stockcardid = r.stockcardid ORDER BY date DESC LIMIT 1;
+	    SELECT stockonhand INTO soh FROM stockmanagement.calculated_stocks_on_hand WHERE stockcardid = r.stockcardid ORDER BY occurreddate DESC LIMIT 1;
 	    IF NOT FOUND THEN
 		    SELECT 0 INTO soh;
 	    END IF;
@@ -32,7 +32,7 @@ FOR r IN
 	    IF NOT EXISTS (SELECT 1 FROM stockmanagement.calculated_stocks_on_hand WHERE stockcardid = r.stockcardid AND date = r.occurreddate) THEN
 		    INSERT INTO stockmanagement.calculated_stocks_on_hand VALUES (uuid_generate_v4(), soh, r.occurreddate, r.stockcardid, r.processeddate);
 	    ELSE
-		    UPDATE stockmanagement.calculated_stocks_on_hand SET stockonhand = soh WHERE stockcardid = r.stockcardid AND date = r.occurreddate;
+		    UPDATE stockmanagement.calculated_stocks_on_hand SET stockonhand = soh WHERE stockcardid = r.stockcardid AND occurreddate = r.occurreddate;
 	    END IF;
     END LOOP;
 

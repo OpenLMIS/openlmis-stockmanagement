@@ -30,7 +30,9 @@ import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.cr
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -42,6 +44,8 @@ import org.openlmis.stockmanagement.dto.StockEventAdjustmentDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonDataBuilder;
+import org.openlmis.stockmanagement.util.LazyGrouping;
+import org.openlmis.stockmanagement.util.LazyList;
 import org.openlmis.stockmanagement.util.LazyResource;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
@@ -68,6 +72,16 @@ public class StockCardLineItemTest {
 
     StockEventLineItemDto eventLineItem = eventDto.getLineItems().get(0);
     eventLineItem.setStockAdjustments(singletonList(createStockAdjustment()));
+
+    StockCardLineItemReason reason = new StockCardLineItemReasonDataBuilder()
+        .withId(eventLineItem.getReasonId())
+        .build();
+    Supplier<List<StockCardLineItemReason>> eventReasonsSupplier = () -> singletonList(reason);
+    LazyList<StockCardLineItemReason> eventReasons = new LazyList<>(eventReasonsSupplier);
+    LazyGrouping<UUID, StockCardLineItemReason> eventReasonsGroupedById = new LazyGrouping<>(
+        eventReasons, StockCardLineItemReason::getId
+    );
+    context.setEventReasons(eventReasonsGroupedById);
 
     UUID eventId = randomUUID();
 
