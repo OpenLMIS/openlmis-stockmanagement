@@ -15,16 +15,6 @@
 
 package org.openlmis.stockmanagement.web;
 
-import static java.lang.String.format;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
-import java.util.List;
-import java.util.UUID;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
@@ -36,13 +26,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
+
+import static java.lang.String.format;
+import static org.springframework.http.HttpStatus.*;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @Controller
-@RequestMapping("/api")
+@RequestMapping("/api/validDestinations")
 public class ValidSourceDestinationController {
 
   private static final Logger LOGGER =
@@ -60,18 +54,16 @@ public class ValidSourceDestinationController {
   /**
    * Get a list of valid destinations.
    *
-   * @param programId      program ID
-   * @param facilityId facility ID
-   * @return found valid destinations.
+   * @param params filtering parameters.
+   * @return found valid destinations
    */
-  @RequestMapping(value = "/validDestinations", method = GET)
+  @GetMapping(value = "/validDestinations")
   public ResponseEntity<List<ValidSourceDestinationDto>> getValidDestinations(
-      @RequestParam UUID programId,
-      @RequestParam UUID facilityId) {
-    LOGGER.debug(format("Try to find valid destinations with program %s and facility type %s",
-        programId.toString(), facilityId.toString()));
+      @RequestParam ValidSourceDestinationSearchParams params) {
+    LOGGER.debug(format("Try to find valid destinations with program %s and facility %s",
+        params.getProgramId().toString(), params.getFacilityId().toString()));
     return new ResponseEntity<>(
-        validDestinationService.findDestinations(programId, facilityId), OK);
+        validDestinationService.findDestinations(params.getProgramId(), params.getFacilityId()), OK);
   }
 
   /**
@@ -99,18 +91,16 @@ public class ValidSourceDestinationController {
   /**
    * Get a list of valid sources.
    *
-   * @param programId      program ID
-   * @param facilityId facility ID
-   * @return found valid sources.
+   * @param params filtering parameters.
+   * @return found valid destinations
    */
-  @RequestMapping(value = "/validSources", method = GET)
+  @GetMapping(value = "/validSources")
   public ResponseEntity<List<ValidSourceDestinationDto>> getValidSources(
-      @RequestParam UUID programId,
-      @RequestParam UUID facilityId) {
-    LOGGER.debug(format("Try to find valid sources with program %s and facility type %s",
-        programId.toString(), facilityId.toString()));
+      @RequestParam ValidSourceDestinationSearchParams params) {
+    LOGGER.debug(format("Try to find valid sources with program %s and facility %s",
+        params.getProgramId().toString(), params.getFacilityId().toString()));
     return new ResponseEntity<>(
-        validSourceService.findSources(programId, facilityId), OK);
+        validSourceService.findSources(params.getProgramId(), params.getFacilityId()), OK);
   }
 
   /**

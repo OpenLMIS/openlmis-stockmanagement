@@ -15,15 +15,6 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static org.openlmis.stockmanagement.dto.ValidSourceDestinationDto.createFrom;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_NOT_FOUND;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_ASSIGNMENT_ID_MISSING;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.domain.sourcedestination.SourceDestinationAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
@@ -38,6 +29,16 @@ import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExi
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static org.openlmis.stockmanagement.dto.ValidSourceDestinationDto.createFrom;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_NOT_FOUND;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_ASSIGNMENT_ID_MISSING;
 
 @Service
 public abstract class SourceDestinationBaseService {
@@ -116,8 +117,9 @@ public abstract class SourceDestinationBaseService {
 
   /**
    * Get a list of assignments.
-   * This method will return only those assignments that match the geo level affinity.
-   * 
+   * This method will return only those assignments that match the geo level affinity
+   * or all possible assignments (when filtering params are not provided).
+   *
    * @param programId program id
    * @param facilityId facility id
    * @param repository assignment repository
@@ -125,36 +127,12 @@ public abstract class SourceDestinationBaseService {
    * @return a list of assignment dto or empty list if not found.
    */
   protected <T extends SourceDestinationAssignment> List<ValidSourceDestinationDto> findAssignments(
-      UUID programId, UUID facilityId, SourceDestinationAssignmentRepository<T> repository) {
+          UUID programId, UUID facilityId, SourceDestinationAssignmentRepository<T> repository) {
+    boolean isFiltered = programId == null || facilityId == null;
 
-    FacilityDto facility = facilityRefDataService.findOne(facilityId);
-    
-    if (facility == null) {
-      throw new ValidationMessageException(
-          new Message(ERROR_FACILITY_NOT_FOUND, facilityId.toString()));
-    }
-    
-    UUID facilityTypeId = facility.getType().getId();
-    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(programId, facilityTypeId);
-
-    List<T> assignments = repository
-        .findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
-
-    List<UUID> facilitiesIds = assignments.stream()
-        .filter(assignment -> assignment.getNode().isRefDataFacility())
-        .map(assignment -> assignment.getNode().getReferenceId())
-        .collect(Collectors.toList());
-
-    Map<UUID, FacilityDto> facilitiesById = facilityRefDataService.findByIds(facilitiesIds);
-
-    List<SourceDestinationAssignment> geoAssigment = assignments.stream()
-        .filter(assignment -> !assignment.getNode().isRefDataFacility() 
-            || hasGeoAffinity(assignment, facility, facilitiesById))
-        .collect(Collectors.toList());
-
-    return geoAssigment.stream()
-        .map(assignment -> createAssignmentDto(assignment, facilitiesById))
-        .collect(Collectors.toList());
+    return isFiltered
+        ? findFilteredAssignments(programId, facilityId, repository)
+        : findAllAssignments(repository);
   }
 
   /**
@@ -249,4 +227,42 @@ public abstract class SourceDestinationBaseService {
     return createFrom(assignment, organizationRepository.findOne(referenceId).getName());
   }
 
+  private <T extends SourceDestinationAssignment> List<ValidSourceDestinationDto> findFilteredAssignments(
+          UUID programId, UUID facilityId, SourceDestinationAssignmentRepository<T> repository) {
+    FacilityDto facility = facilityRefDataService.findOne(facilityId);
+
+    if (facility == null) {
+      throw new ValidationMessageException(
+              new Message(ERROR_FACILITY_NOT_FOUND, facilityId.toString()));
+    }
+
+    UUID facilityTypeId = facility.getType().getId();
+    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(programId, facilityTypeId);
+
+    List<T> assignments = repository
+            .findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
+
+    List<UUID> facilitiesIds = assignments.stream()
+            .filter(assignment -> assignment.getNode().isRefDataFacility())
+            .map(assignment -> assignment.getNode().getReferenceId())
+            .collect(Collectors.toList());
+
+    Map<UUID, FacilityDto> facilitiesById = facilityRefDataService.findByIds(facilitiesIds);
+
+    List<SourceDestinationAssignment> geoAssigment = assignments.stream()
+            .filter(assignment -> !assignment.getNode().isRefDataFacility()
+                    || hasGeoAffinity(assignment, facility, facilitiesById))
+            .collect(Collectors.toList());
+
+    return geoAssigment.stream()
+            .map(assignment -> createAssignmentDto(assignment, facilitiesById))
+            .collect(Collectors.toList());
+  }
+
+  private <T extends SourceDestinationAssignment> List<ValidSourceDestinationDto> findAllAssignments(
+          SourceDestinationAssignmentRepository<T> repository) {
+    return repository.findAll().stream()
+            .map(assignment -> createAssignmentDto(assignment, null))
+            .collect(Collectors.toList());
+  }
 }

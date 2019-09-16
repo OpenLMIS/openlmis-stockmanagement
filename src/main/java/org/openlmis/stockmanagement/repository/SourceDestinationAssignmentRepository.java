@@ -15,16 +15,19 @@
 
 package org.openlmis.stockmanagement.repository;
 
-import java.util.List;
-import java.util.UUID;
 import org.openlmis.stockmanagement.domain.sourcedestination.SourceDestinationAssignment;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+import java.util.UUID;
+
 @NoRepositoryBean
-public interface SourceDestinationAssignmentRepository<T extends SourceDestinationAssignment> 
+public interface SourceDestinationAssignmentRepository<T extends SourceDestinationAssignment>
     extends PagingAndSortingRepository<T, UUID> {
+
+  List<T> findAll();
 
   List<T> findByProgramIdAndFacilityTypeId(
       @Param("programId") UUID programId, @Param("facilityTypeId") UUID facilityTypeId);
