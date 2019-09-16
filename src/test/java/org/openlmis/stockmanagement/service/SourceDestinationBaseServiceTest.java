@@ -309,6 +309,40 @@ public class SourceDestinationBaseServiceTest {
   }
 
   @Test
+  public void shouldReturnListOfAllDestinationDtosWhenCallFindingValidDestinationAssignmentWithoutParams()
+          throws Exception {
+    //given
+    UUID facilityTypeId = randomUUID();
+    UUID facilityId = randomUUID();
+    FacilityDto facilityDto = createFacilityDtoWithFacilityType(facilityId, facilityTypeId);
+    facilityDto.setName(FACILITY_NODE_NAME);
+
+    when(facilityReferenceDataService.findOne(facilityId)).thenReturn(facilityDto);
+
+    List<ValidDestinationAssignment> validDestinationAssignments = asList(
+            createOrganizationDestination(mockedOrganizationNode(ORGANIZATION_NODE_NAME)),
+            createFacilityDestination(mockedFacilityNode(facilityId, FACILITY_NODE_NAME)));
+
+    when(destinationRepository.findAll())
+            .thenReturn(validDestinationAssignments);
+
+    //when
+    List<ValidSourceDestinationDto> validDestinations =
+            validDestinationService.findDestinations(null, null);
+
+    //then
+    assertThat(validDestinations.size(), is(2));
+
+    ValidSourceDestinationDto organization = validDestinations.get(0);
+    assertThat(organization.getName(), is(ORGANIZATION_NODE_NAME));
+    assertThat(organization.getIsFreeTextAllowed(), is(true));
+
+    ValidSourceDestinationDto facility = validDestinations.get(1);
+    assertThat(facility.getName(), is(FACILITY_NODE_NAME));
+    assertThat(facility.getIsFreeTextAllowed(), is(false));
+  }
+
+  @Test
   public void shouldReturnListOfDestinationDtosWhenFindValidDestinationAssignment()
       throws Exception {
     //given
@@ -345,6 +379,40 @@ public class SourceDestinationBaseServiceTest {
     assertThat(organization.getIsFreeTextAllowed(), is(true));
 
     ValidSourceDestinationDto facility = validDestinations.get(1);
+    assertThat(facility.getName(), is(FACILITY_NODE_NAME));
+    assertThat(facility.getIsFreeTextAllowed(), is(false));
+  }
+
+  @Test
+  public void shouldReturnListOfAllSourcesDtosWhenFindingValidSourcesAssignmentWithoutParams()
+          throws Exception {
+    //given
+    UUID facilityTypeId = randomUUID();
+    UUID facilityId = randomUUID();
+    FacilityDto facilityDto = createFacilityDtoWithFacilityType(facilityId, facilityTypeId);
+    facilityDto.setName(FACILITY_NODE_NAME);
+
+    when(facilityReferenceDataService.findOne(facilityId)).thenReturn(facilityDto);
+
+    List<ValidSourceAssignment> validSourceAssignments = asList(
+            createOrganizationSourceAssignment(mockedOrganizationNode(ORGANIZATION_NODE_NAME)),
+            createFacilitySourceAssignment(mockedFacilityNode(facilityId, FACILITY_NODE_NAME)));
+
+    when(sourceRepository.findAll())
+            .thenReturn(validSourceAssignments);
+
+    //when
+    List<ValidSourceDestinationDto> validSources =
+            validSourceService.findSources(null, null);
+
+    //then
+    assertThat(validSources.size(), is(2));
+
+    ValidSourceDestinationDto organization = validSources.get(0);
+    assertThat(organization.getName(), is(ORGANIZATION_NODE_NAME));
+    assertThat(organization.getIsFreeTextAllowed(), is(true));
+
+    ValidSourceDestinationDto facility = validSources.get(1);
     assertThat(facility.getName(), is(FACILITY_NODE_NAME));
     assertThat(facility.getIsFreeTextAllowed(), is(false));
   }

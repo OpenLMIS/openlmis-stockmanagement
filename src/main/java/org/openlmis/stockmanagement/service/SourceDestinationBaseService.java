@@ -128,7 +128,7 @@ public abstract class SourceDestinationBaseService {
    */
   protected <T extends SourceDestinationAssignment> List<ValidSourceDestinationDto> findAssignments(
           UUID programId, UUID facilityId, SourceDestinationAssignmentRepository<T> repository) {
-    boolean isFiltered = programId == null || facilityId == null;
+    boolean isFiltered = programId != null && facilityId != null;
 
     return isFiltered
         ? findFilteredAssignments(programId, facilityId, repository)

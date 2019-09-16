@@ -15,8 +15,8 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROVIDED_PROGR
 
 public class ValidSourceDestinationSearchParams {
 
-  private static final String PROGRAM_ID = "programId";
-  private static final String FACILITY_ID = "facilityId";
+  public static final String PROGRAM_ID = "programId";
+  public static final String FACILITY_ID = "facilityId";
 
   private SearchParams queryParams;
 

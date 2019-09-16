@@ -88,6 +88,31 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
   }
 
   @Test
+  public void shouldGeAllValidSourcesOrDestinationsWhenProgramAndFacilityAreNotProvided()
+          throws Exception {
+    //given
+    ValidSourceDestinationDto destinationAssignmentDto = new ValidSourceDestinationDto();
+    destinationAssignmentDto.setId(randomUUID());
+    destinationAssignmentDto.setName("CHW");
+    destinationAssignmentDto.setIsFreeTextAllowed(true);
+    ValidSourceDestinationDto sourceDestinationDto = destinationAssignmentDto;
+
+    when(validSourceService.findSources(null, null))
+            .thenReturn(singletonList(sourceDestinationDto));
+
+    when(validDestinationService.findDestinations(null, null))
+            .thenReturn(singletonList(destinationAssignmentDto));
+
+    verifyZeroInteractions(permissionService);
+
+    //1. perform valid destinations
+    performSourcesOrDestinations(null, null, destinationAssignmentDto, API_VALID_DESTINATIONS);
+
+    //2. perform valid sources
+    performSourcesOrDestinations(null, null, sourceDestinationDto, API_VALID_SOURCES);
+  }
+
+  @Test
   public void return201WhenAssignSourceSuccessfully() throws Exception {
     //given
     UUID programId = randomUUID();
@@ -227,8 +252,8 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
       ValidSourceDestinationDto sourceDestinationDto, String uri) throws Exception {
     ResultActions resultActions = mvc.perform(get(uri)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .param(PROGRAM, programId.toString())
-        .param(FACILITY_TYPE, facilityTypeId.toString()));
+        .param(PROGRAM, programId != null ? programId.toString() : null)
+        .param(FACILITY_TYPE, programId != null ? facilityTypeId.toString() : null));
 
     //then
     resultActions
