@@ -15,13 +15,12 @@
 
 package org.openlmis.stockmanagement.repository;
 
+import java.util.List;
+import java.util.UUID;
 import org.openlmis.stockmanagement.domain.sourcedestination.SourceDestinationAssignment;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-
-import java.util.List;
-import java.util.UUID;
 
 @NoRepositoryBean
 public interface SourceDestinationAssignmentRepository<T extends SourceDestinationAssignment>

@@ -309,8 +309,9 @@ public class SourceDestinationBaseServiceTest {
   }
 
   @Test
-  public void shouldReturnListOfAllDestinationDtosWhenCallFindingValidDestinationAssignmentWithoutParams()
-          throws Exception {
+  public void
+      shouldReturnListOfAllDestinationDtosWhenFindingValidDestinationAssignmentWithoutParams()
+      throws Exception {
     //given
     UUID facilityTypeId = randomUUID();
     UUID facilityId = randomUUID();

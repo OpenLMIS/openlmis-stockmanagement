@@ -15,16 +15,15 @@
 
 package org.openlmis.stockmanagement.web;
 
-import org.junit.Test;
-import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.springframework.util.LinkedMultiValueMap;
-
-import java.util.UUID;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.openlmis.stockmanagement.web.ValidSourceDestinationSearchParams.FACILITY_ID;
 import static org.openlmis.stockmanagement.web.ValidSourceDestinationSearchParams.PROGRAM_ID;
+
+import java.util.UUID;
+import org.junit.Test;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.springframework.util.LinkedMultiValueMap;
 
 public class ValidSourceDestinationSearchParamsTest {
 

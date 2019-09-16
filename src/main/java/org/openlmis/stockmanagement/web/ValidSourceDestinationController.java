@@ -15,6 +15,15 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static java.lang.String.format;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+
+import java.util.List;
+import java.util.UUID;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
@@ -26,14 +35,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.UUID;
-
-import static java.lang.String.format;
-import static org.springframework.http.HttpStatus.*;
-import static org.springframework.web.bind.annotation.RequestMethod.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/api/validDestinations")
@@ -63,7 +69,8 @@ public class ValidSourceDestinationController {
     LOGGER.debug(format("Try to find valid destinations with program %s and facility %s",
         params.getProgramId().toString(), params.getFacilityId().toString()));
     return new ResponseEntity<>(
-        validDestinationService.findDestinations(params.getProgramId(), params.getFacilityId()), OK);
+        validDestinationService.findDestinations(
+            params.getProgramId(), params.getFacilityId()), OK);
   }
 
   /**
