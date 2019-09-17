@@ -43,7 +43,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest {
 
-  private static final String PROGRAM = "programId";
+  private static final String PROGRAM_ID = "programId";
   private static final String FACILITY_ID = "facilityId";
   private static final String API_VALID_DESTINATIONS = "/api/validDestinations";
   private static final String API_VALID_SOURCES = "/api/validSources";
@@ -252,7 +252,7 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
       ValidSourceDestinationDto sourceDestinationDto, String uri) throws Exception {
     ResultActions resultActions = mvc.perform(get(uri)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .param(PROGRAM, programId != null ? programId.toString() : null)
+        .param(PROGRAM_ID, programId != null ? programId.toString() : null)
         .param(FACILITY_ID, facilityId != null ? facilityId.toString() : null));
 
     //then
