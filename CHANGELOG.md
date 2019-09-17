@@ -16,7 +16,7 @@ Improvements:
 * [OLMIS-5569](https://openlmis.atlassian.net/browse/OLMIS-5569): Moved reason TRANSFER_IN from demo data to bootstrap data.
 * [OLMIS-6408](https://openlmis.atlassian.net/browse/OLMIS-6408): Added pageable validator.
 * [OLMIS-6474](https://openlmis.atlassian.net/browse/OLMIS-6474): Performance improvements of `GET /api/orderableFulfills` endpoint.
-* [OLMIS-6573](https://openlmis.atlassian.net/browse/OLMIS-6573): Enable updates of valid sources/destinations via the seed tool.
+* [OLMIS-6573](https://openlmis.atlassian.net/browse/OLMIS-6573): Added possibility to fetch all valid sources/destinations via API.
 
 4.1.1 / 2019-05-27
 ==================
