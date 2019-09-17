@@ -42,7 +42,7 @@ public abstract class MessageKeys {
       ERROR_PREFIX + ".program.id.missing";
   public static final String ERROR_FACILITY_ID_MISSING =
       ERROR_PREFIX + ".facility.id.missing";
-  public static final String ERROR_FACILITY_NOT_FOUND = 
+  public static final String ERROR_FACILITY_NOT_FOUND =
       ERROR_PREFIX + ".facility.id.notFound";
   public static final String ERROR_UUID_WRONG_FORMAT =
       ERROR_PREFIX + ".uuid.wrongFormat";
@@ -116,6 +116,10 @@ public abstract class MessageKeys {
       + ".destination.notFound";
   public static final String ERROR_SOURCE_DESTINATION_ASSIGNMENT_ID_MISSING = ERROR_PREFIX
       + ".source.destination.assignment.id.missing";
+  public static final String ERROR_PROVIDED_PROGRAM_ID_WITHOUT_FACILITY_ID =
+      ERROR_PREFIX + ".provided.programId.without.facilityId";
+  public static final String ERROR_PROVIDED_FACILITY_ID_WITHOUT_PROGRAM_ID =
+      ERROR_PREFIX + ".provided.facilityId.without.programId";
   //report
   public static final String ERROR_GENERATE_REPORT_FAILED = ERROR_PREFIX + ".generateReport.failed";
   public static final String ERROR_REPORT_ID_NOT_FOUND = ERROR_PREFIX + ".report.id.notFound";

@@ -20,7 +20,6 @@ import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.util.List;
@@ -35,13 +34,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 @RequestMapping("/api")
 public class ValidSourceDestinationController {
 
@@ -60,18 +62,17 @@ public class ValidSourceDestinationController {
   /**
    * Get a list of valid destinations.
    *
-   * @param programId      program ID
-   * @param facilityId facility ID
-   * @return found valid destinations.
+   * @param parameters filtering parameters.
+   * @return found valid destinations
    */
-  @RequestMapping(value = "/validDestinations", method = GET)
-  public ResponseEntity<List<ValidSourceDestinationDto>> getValidDestinations(
-      @RequestParam UUID programId,
-      @RequestParam UUID facilityId) {
-    LOGGER.debug(format("Try to find valid destinations with program %s and facility type %s",
-        programId.toString(), facilityId.toString()));
-    return new ResponseEntity<>(
-        validDestinationService.findDestinations(programId, facilityId), OK);
+  @GetMapping(value = "/validDestinations")
+  public List<ValidSourceDestinationDto> getValidDestinations(
+      @RequestParam MultiValueMap<String, String> parameters) {
+    ValidSourceDestinationSearchParams params = new ValidSourceDestinationSearchParams(parameters);
+
+    LOGGER.debug(format("Try to find valid destinations with program %s and facility %s",
+        params.getProgramId(), params.getFacilityId()));
+    return validDestinationService.findDestinations(params.getProgramId(), params.getFacilityId());
   }
 
   /**
@@ -99,18 +100,18 @@ public class ValidSourceDestinationController {
   /**
    * Get a list of valid sources.
    *
-   * @param programId      program ID
-   * @param facilityId facility ID
-   * @return found valid sources.
+   * @param parameters filtering parameters.
+   * @return found valid destinations
    */
-  @RequestMapping(value = "/validSources", method = GET)
-  public ResponseEntity<List<ValidSourceDestinationDto>> getValidSources(
-      @RequestParam UUID programId,
-      @RequestParam UUID facilityId) {
-    LOGGER.debug(format("Try to find valid sources with program %s and facility type %s",
-        programId.toString(), facilityId.toString()));
-    return new ResponseEntity<>(
-        validSourceService.findSources(programId, facilityId), OK);
+  @GetMapping(value = "/validSources")
+  public List<ValidSourceDestinationDto> getValidSources(
+      @RequestParam MultiValueMap<String, String> parameters) {
+    ValidSourceDestinationSearchParams params = new ValidSourceDestinationSearchParams(parameters);
+
+    LOGGER.debug(format("Try to find valid sources with program %s and facility %s",
+        params.getProgramId(), params.getFacilityId()));
+    return validSourceService.findSources(
+        params.getProgramId(), params.getFacilityId());
   }
 
   /**
@@ -138,27 +139,25 @@ public class ValidSourceDestinationController {
    * Remove a valid source assignment of a program and facility type combination.
    *
    * @param assignmentId source assignment ID
-   * @return no content status
    */
   @RequestMapping(value = "/validSources/{id}", method = DELETE)
-  public ResponseEntity removeValidSourceAssignment(@PathVariable("id") UUID assignmentId) {
+  @ResponseStatus(NO_CONTENT)
+  public void removeValidSourceAssignment(@PathVariable("id") UUID assignmentId) {
     LOGGER.debug(format("Try to remove source assignment %s.", assignmentId));
     permissionService.canManageStockSources();
     validSourceService.deleteSourceAssignmentById(assignmentId);
-    return new ResponseEntity(null, NO_CONTENT);
   }
 
   /**
    * Remove a valid destination assignment of a program and facility type combination.
    *
    * @param assignmentId destination assignment ID
-   * @return no content status
    */
   @RequestMapping(value = "/validDestinations/{id}", method = DELETE)
-  public ResponseEntity removeValidDestinationAssignment(@PathVariable("id") UUID assignmentId) {
+  @ResponseStatus(NO_CONTENT)
+  public void removeValidDestinationAssignment(@PathVariable("id") UUID assignmentId) {
     LOGGER.debug(format("Try to remove destination assignment %s.", assignmentId));
     permissionService.canManageStockDestinations();
     validDestinationService.deleteDestinationAssignmentById(assignmentId);
-    return new ResponseEntity(null, NO_CONTENT);
   }
 }

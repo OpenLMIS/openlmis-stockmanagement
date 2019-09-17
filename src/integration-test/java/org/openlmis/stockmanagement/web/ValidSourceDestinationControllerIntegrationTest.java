@@ -43,8 +43,8 @@ import org.springframework.test.web.servlet.ResultActions;
 
 public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest {
 
-  private static final String PROGRAM = "programId";
-  private static final String FACILITY_TYPE = "facilityId";
+  private static final String PROGRAM_ID = "programId";
+  private static final String FACILITY_ID = "facilityId";
   private static final String API_VALID_DESTINATIONS = "/api/validDestinations";
   private static final String API_VALID_SOURCES = "/api/validSources";
   private static final String PROGRAM_EXP = "$.programId";
@@ -85,6 +85,31 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
 
     //2. perform valid sources
     performSourcesOrDestinations(program, facility, sourceDestination, API_VALID_SOURCES);
+  }
+
+  @Test
+  public void shouldGeAllValidSourcesOrDestinationsWhenProgramAndFacilityAreNotProvided()
+          throws Exception {
+    //given
+    ValidSourceDestinationDto destinationAssignmentDto = new ValidSourceDestinationDto();
+    destinationAssignmentDto.setId(randomUUID());
+    destinationAssignmentDto.setName("CHW");
+    destinationAssignmentDto.setIsFreeTextAllowed(true);
+    ValidSourceDestinationDto sourceAssignmentDto = destinationAssignmentDto;
+
+    when(validSourceService.findSources(null, null))
+            .thenReturn(singletonList(sourceAssignmentDto));
+
+    when(validDestinationService.findDestinations(null, null))
+            .thenReturn(singletonList(destinationAssignmentDto));
+
+    verifyZeroInteractions(permissionService);
+
+    //1. perform valid destinations
+    performSourcesOrDestinations(null, null, destinationAssignmentDto, API_VALID_DESTINATIONS);
+
+    //2. perform valid sources
+    performSourcesOrDestinations(null, null, sourceAssignmentDto, API_VALID_SOURCES);
   }
 
   @Test
@@ -223,12 +248,12 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
   }
 
   private void performSourcesOrDestinations(
-      UUID programId, UUID facilityTypeId,
+      UUID programId, UUID facilityId,
       ValidSourceDestinationDto sourceDestinationDto, String uri) throws Exception {
     ResultActions resultActions = mvc.perform(get(uri)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .param(PROGRAM, programId.toString())
-        .param(FACILITY_TYPE, facilityTypeId.toString()));
+        .param(PROGRAM_ID, programId != null ? programId.toString() : null)
+        .param(FACILITY_ID, facilityId != null ? facilityId.toString() : null));
 
     //then
     resultActions
