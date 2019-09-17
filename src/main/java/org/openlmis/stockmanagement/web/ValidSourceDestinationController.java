@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -60,14 +61,16 @@ public class ValidSourceDestinationController {
   /**
    * Get a list of valid destinations.
    *
-   * @param params filtering parameters.
+   * @param parameters filtering parameters.
    * @return found valid destinations
    */
   @GetMapping(value = "/validDestinations")
   public ResponseEntity<List<ValidSourceDestinationDto>> getValidDestinations(
-      @RequestParam ValidSourceDestinationSearchParams params) {
+      @RequestParam MultiValueMap<String, String> parameters) {
+    ValidSourceDestinationSearchParams params = new ValidSourceDestinationSearchParams(parameters);
+
     LOGGER.debug(format("Try to find valid destinations with program %s and facility %s",
-        params.getProgramId().toString(), params.getFacilityId().toString()));
+        params.getProgramId(), params.getFacilityId()));
     return new ResponseEntity<>(
         validDestinationService.findDestinations(
             params.getProgramId(), params.getFacilityId()), OK);
@@ -98,14 +101,16 @@ public class ValidSourceDestinationController {
   /**
    * Get a list of valid sources.
    *
-   * @param params filtering parameters.
+   * @param parameters filtering parameters.
    * @return found valid destinations
    */
   @GetMapping(value = "/validSources")
   public ResponseEntity<List<ValidSourceDestinationDto>> getValidSources(
-      @RequestParam ValidSourceDestinationSearchParams params) {
+      @RequestParam MultiValueMap<String, String> parameters) {
+    ValidSourceDestinationSearchParams params = new ValidSourceDestinationSearchParams(parameters);
+
     LOGGER.debug(format("Try to find valid sources with program %s and facility %s",
-        params.getProgramId().toString(), params.getFacilityId().toString()));
+        params.getProgramId(), params.getFacilityId()));
     return new ResponseEntity<>(
         validSourceService.findSources(params.getProgramId(), params.getFacilityId()), OK);
   }
