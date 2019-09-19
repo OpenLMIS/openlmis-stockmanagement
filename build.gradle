@@ -44,7 +44,7 @@ dependencies {
 
     compile "org.projectlombok:lombok:1.16.8"
     compile "org.postgresql:postgresql:42.0.0"
-    compile "com.github.tomakehurst:wiremock:1.58"
+    compile "com.google.guava:guava:18.0"
     compile 'org.webjars.npm:api-console:3.0.17'
     compile 'org.apache.commons:commons-lang3:3.6'
     compile 'org.apache.commons:commons-csv:1.4'
@@ -62,6 +62,7 @@ dependencies {
     testCompile('org.flywaydb.flyway-test-extensions:flyway-spring-test:4.1.0')
     testCompile 'org.springframework.security:spring-security-test'
     testCompile "org.springframework:spring-test"
+    testCompile "com.github.tomakehurst:wiremock:1.58"
 
     testCompile "com.jayway.restassured:rest-assured:2.7.0"
     testCompile "guru.nidi.raml:raml-tester:0.8.9"
