@@ -19,6 +19,9 @@ Improvements:
 * [OLMIS-6474](https://openlmis.atlassian.net/browse/OLMIS-6474): Performance improvements of `GET /api/orderableFulfills` endpoint.
 * [OLMIS-6564](https://openlmis.atlassian.net/browse/OLMIS-6564): Changed wiremock dependency configuration to avoid issue with HTTP response compression.
 
+Bug fixes:
+* [OLMIS-6582](https://openlmis.atlassian.net/browse/OLMIS-6582): Changed wiremock dependency configuration to fix printing Physical Inventory.
+
 4.1.1 / 2019-05-27
 ==================
 

@@ -53,6 +53,7 @@ dependencies {
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
     compile "net.sf.jasperreports:jasperreports:6.3.0"
     compile "org.slf4j:slf4j-ext:1.7.25"
+    compile "com.github.tomakehurst:wiremock:1.58"
 
     testCompile "junit:junit"
     testCompile "org.mockito:mockito-core:1.+"
@@ -62,7 +63,6 @@ dependencies {
     testCompile('org.flywaydb.flyway-test-extensions:flyway-spring-test:4.1.0')
     testCompile 'org.springframework.security:spring-security-test'
     testCompile "org.springframework:spring-test"
-    testCompile "com.github.tomakehurst:wiremock:1.58"
 
     testCompile "com.jayway.restassured:rest-assured:2.7.0"
     testCompile "guru.nidi.raml:raml-tester:0.8.9"
