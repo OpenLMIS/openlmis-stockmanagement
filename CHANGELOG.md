@@ -21,7 +21,7 @@ Improvements:
 
 Bug fixes:
 * [OLMIS-6582](https://openlmis.atlassian.net/browse/OLMIS-6582): Changed wiremock dependency configuration to fix printing Physical Inventory.
-* [OLMIS-6590](https://openlmis.atlassian.net/browse/OLMIS-6590): Changed wiremock dependency configuration to fix printing Physical Inventory.
+* [OLMIS-6590](https://openlmis.atlassian.net/browse/OLMIS-6590): Fixed recalculating existing calculated stock on hand for physical inventory.
 
 4.1.1 / 2019-05-27
 ==================
