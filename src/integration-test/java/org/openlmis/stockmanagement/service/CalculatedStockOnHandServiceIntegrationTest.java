@@ -305,11 +305,14 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
             stockCard.getId(),
             lineItem.getOccurredDate());
 
-    //Previous SoH = 10, following SoH is 10, and line item quantity is 50, so 10+50-10=50
+    //We are submitting physical inventory for day 1 with quantity 50,
+    // current SoH for day 1 is 10, after recalculation, it should be changed to 50.
+    // From those 2 numbers, we can calculate that the difference between old SoH
+    // and submitted physical inventory is +40.
+    // Then we need to update all following days with the difference calculated,
+    // so previously day 2 had SoH 20, now it is 60, day 3 had SoH 30, now it has 70.
     assertThat(result.get(0).getStockOnHand(), is(50));
-    //Previous SoH = 10, following SoH is 20, and line item quantity is 50, so 20+50-10=60
     assertThat(result.get(1).getStockOnHand(), is(60));
-    //Previous SoH = 10, following SoH is 30, and line item quantity is 50, so 30+50-10=70
     assertThat(result.get(2).getStockOnHand(), is(70));
   }
 
