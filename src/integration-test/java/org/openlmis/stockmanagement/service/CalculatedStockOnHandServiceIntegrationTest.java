@@ -305,8 +305,11 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
             stockCard.getId(),
             lineItem.getOccurredDate());
 
+    //Previous SoH = 10, following SoH is 10, and line item quantity is 50, so 10+50-10=50
     assertThat(result.get(0).getStockOnHand(), is(50));
+    //Previous SoH = 10, following SoH is 20, and line item quantity is 50, so 20+50-10=60
     assertThat(result.get(1).getStockOnHand(), is(60));
+    //Previous SoH = 10, following SoH is 30, and line item quantity is 50, so 30+50-10=70
     assertThat(result.get(2).getStockOnHand(), is(70));
   }
 
