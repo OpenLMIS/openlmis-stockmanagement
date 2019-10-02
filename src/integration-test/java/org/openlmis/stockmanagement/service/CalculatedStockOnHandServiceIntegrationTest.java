@@ -278,24 +278,32 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
 
   @Test
   public void shouldRecalculateExistingCalculatedStockOnHandForPhysicalInventory() {
+    final int physicalInventoryQuantity = 50;
+    final int firstDaySoh = 10;
+    final int calculatedFirstDaySoh = 50;
+    final int secondDaySoh = 20;
+    final int calculatedSecondDaySoh = 60;
+    final int thirdDaySoh = 30;
+    final int calculatedThirdDaySoh = 70;
+
     final StockCardLineItem lineItem = new StockCardLineItemDataBuilder()
-        .withQuantity(50)
+        .withQuantity(physicalInventoryQuantity)
         .build();
 
     calculatedStockOnHandRepository.save(
         calculatedStockOnHandDataBuilder
             .withOccurredDate(lineItem.getOccurredDate())
-            .withStockOnHand(10)
+            .withStockOnHand(firstDaySoh)
             .build());
     calculatedStockOnHandRepository.save(
         calculatedStockOnHandDataBuilder
             .withOccurredDate(lineItem.getOccurredDate().plusDays(2))
-            .withStockOnHand(20)
+            .withStockOnHand(secondDaySoh)
             .build());
     calculatedStockOnHandRepository.save(
         calculatedStockOnHandDataBuilder
             .withOccurredDate(lineItem.getOccurredDate().plusDays(3))
-            .withStockOnHand(30)
+            .withStockOnHand(thirdDaySoh)
             .build());
 
     calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem);
@@ -305,15 +313,19 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
             stockCard.getId(),
             lineItem.getOccurredDate());
 
-    //We are submitting physical inventory for day 1 with quantity 50,
-    // current SoH for day 1 is 10, after recalculation, it should be changed to 50.
-    // From those 2 numbers, we can calculate that the difference between old SoH
-    // and submitted physical inventory is +40.
-    // Then we need to update all following days with the difference calculated,
-    // so previously day 2 had SoH 20, now it is 60, day 3 had SoH 30, now it has 70.
-    assertThat(result.get(0).getStockOnHand(), is(50));
-    assertThat(result.get(1).getStockOnHand(), is(60));
-    assertThat(result.get(2).getStockOnHand(), is(70));
+    /**
+     * We are submitting physical inventory for day 1 with {@link physicalInventoryQuantity},
+     * current SoH for day 1 is {@link firstDaySoh}.
+     * After recalculation, it should be changed to {@link calculatedFirstDaySoh}.
+     * From those 2 numbers, we can calculate that the difference between old SoH
+     * and submitted physical inventory is +40.
+     * Then we need to update all following days with the difference calculated,
+     * so previously day 2 had SoH {@link secondDaySoh}, now it is {@link calculatedSecondDaySoh},
+     * and day 3 had SoH {@link thirdDaySoh}, now it has {@link calculatedThirdDaySoh}.
+     */
+    assertThat(result.get(0).getStockOnHand(), is(calculatedFirstDaySoh));
+    assertThat(result.get(1).getStockOnHand(), is(calculatedSecondDaySoh));
+    assertThat(result.get(2).getStockOnHand(), is(calculatedThirdDaySoh));
   }
 
   @Test
