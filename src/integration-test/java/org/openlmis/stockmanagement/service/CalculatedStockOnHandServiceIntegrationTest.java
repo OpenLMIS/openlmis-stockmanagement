@@ -277,6 +277,40 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
   }
 
   @Test
+  public void shouldRecalculateExistingCalculatedStockOnHandForPhysicalInventory() {
+    final StockCardLineItem lineItem = new StockCardLineItemDataBuilder()
+        .withQuantity(50)
+        .build();
+
+    calculatedStockOnHandRepository.save(
+        calculatedStockOnHandDataBuilder
+            .withOccurredDate(lineItem.getOccurredDate())
+            .withStockOnHand(10)
+            .build());
+    calculatedStockOnHandRepository.save(
+        calculatedStockOnHandDataBuilder
+            .withOccurredDate(lineItem.getOccurredDate().plusDays(2))
+            .withStockOnHand(20)
+            .build());
+    calculatedStockOnHandRepository.save(
+        calculatedStockOnHandDataBuilder
+            .withOccurredDate(lineItem.getOccurredDate().plusDays(3))
+            .withStockOnHand(30)
+            .build());
+
+    calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem);
+
+    List<CalculatedStockOnHand> result = calculatedStockOnHandRepository
+        .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
+            stockCard.getId(),
+            lineItem.getOccurredDate());
+
+    assertThat(result.get(0).getStockOnHand(), is(50));
+    assertThat(result.get(1).getStockOnHand(), is(60));
+    assertThat(result.get(2).getStockOnHand(), is(70));
+  }
+
+  @Test
   public void shouldCreateNewCalculatedStockOnHandIfNoneExistsForStockCard() {
     final StockCardLineItem lineItem = new StockCardLineItemDataBuilder()
         .withCreditReason()
