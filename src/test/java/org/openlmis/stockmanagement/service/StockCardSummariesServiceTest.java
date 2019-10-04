@@ -238,7 +238,7 @@ public class StockCardSummariesServiceTest {
         .getStockCardsWithStockOnHand(params.getProgramId(), params.getFacilityId(),
             params.getAsOfDate()))
         .thenReturn(stockCards);
-        
+
     when(cardRepository.findByProgramIdAndFacilityId(
         params.getProgramId(),
         params.getFacilityId()))

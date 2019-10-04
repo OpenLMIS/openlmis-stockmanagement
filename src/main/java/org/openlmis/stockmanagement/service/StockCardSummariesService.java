@@ -43,10 +43,10 @@ import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
-import org.openlmis.stockmanagement.dto.referencedata.OrderablesAggregator;
 import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableFulfillReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
@@ -90,7 +90,9 @@ public class StockCardSummariesService extends StockCardBaseService {
 
   @Autowired
   private PermissionService permissionService;
-  
+
+  @Autowired
+  private FacilityReferenceDataService facilityService;
 
   /**
    * Get a map of stock cards assigned to orderable ids.
@@ -138,14 +140,9 @@ public class StockCardSummariesService extends StockCardBaseService {
     profiler.start("VALIDATE_VIEW_RIGHTS");
     permissionService.canViewStockCard(params.getProgramId(), params.getFacilityId());
 
-    profiler.start("GET_APPROVED_PRODUCTS");
-    OrderablesAggregator approvedProducts = approvedProductReferenceDataService
-        .getApprovedProducts(params.getFacilityId(), params.getProgramId(),
-            params.getOrderableIds());
-
-    profiler.start("FIND_ORDERABLE_FULFILL_BY_ID");
-    Map<UUID, OrderableFulfillDto> orderableFulfillMap = orderableFulfillService.findByIds(
-        approvedProducts.getIdentifiers());
+    profiler.start("FIND_ORDERABLE_FULFILL_BY_FACILITY_AND_PROGRAM");
+    Map<UUID, OrderableFulfillDto> orderableFulfillMap = orderableFulfillService
+        .findByFacilityIdProgramId(params.getFacilityId(), params.getProgramId());
 
     profiler.start("FIND_STOCK_CARD_BY_PROGRAM_AND_FACILITY");
     
@@ -153,10 +150,9 @@ public class StockCardSummariesService extends StockCardBaseService {
         .getStockCardsWithStockOnHand(params.getProgramId(), params.getFacilityId(),
                                         params.getAsOfDate());
 
-    Page<OrderableDto> orderablesPage = approvedProducts.getOrderablesPage();
     StockCardSummaries result = new StockCardSummaries(
-            orderablesPage.getContent(), stockCards, orderableFulfillMap,
-            params.getAsOfDate(), orderablesPage.getTotalElements());
+            stockCards, orderableFulfillMap,
+            params.getAsOfDate());
     profiler.stop().log();
     return result;
   }
