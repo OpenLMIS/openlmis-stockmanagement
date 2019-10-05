@@ -106,15 +106,21 @@ public class StockCardSummariesService extends StockCardBaseService {
    */
   public Map<UUID, StockCardAggregate> getGroupedStockCards(UUID programId, UUID facilityId,
       Set<UUID> orderableIds, LocalDate startDate, LocalDate endDate) {
+    Profiler profiler = new Profiler("GET_GROUPED_STOCK_CARDS");
+    profiler.setLogger(LOGGER);
+
+    profiler.start("FIND_STOCK_CARD_BY_PROGRAM_AND_FACILITY");
     List<StockCard> stockCards = calculatedStockOnHandService
         .getStockCardsWithStockOnHand(programId, facilityId);
 
+    profiler.start("FIND_ORDERABLE_FULFILL_BY_IDS");
     Map<UUID, OrderableFulfillDto> orderableFulfillMap =
         orderableFulfillService.findByIds(stockCards.stream()
             .map(StockCard::getOrderableId)
             .collect(toSet()));
 
-    return stockCards.stream()
+    profiler.start("ASSIGN_ORDERABLES_TO_STOCK_CARD");
+    Map<UUID, StockCardAggregate> stockCardAggregateMap = stockCards.stream()
         .map(stockCard -> assignOrderableToStockCard(
             stockCard, orderableFulfillMap, orderableIds, startDate, endDate))
         .filter(pair -> null != pair.getLeft())
@@ -125,6 +131,8 @@ public class StockCardSummariesService extends StockCardBaseService {
               aggregate1.getStockCards().addAll(aggregate2.getStockCards());
               return aggregate1;
             }));
+    profiler.stop().log();
+    return stockCardAggregateMap;
   }
 
   /**

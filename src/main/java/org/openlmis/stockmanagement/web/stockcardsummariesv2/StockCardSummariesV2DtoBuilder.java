@@ -48,14 +48,14 @@ public class StockCardSummariesV2DtoBuilder {
   /**
    * Builds Stock Card Summary dtos from stock cards and orderables.
    *
-   * @param stockCards       list of {@link StockCard} found for orderables
-   * @param orderables       map of orderable ids as keys and {@link OrderableFulfillDto}
+   * @param stockCards        list of {@link StockCard} found for orderables
+   * @param orderableFulfills map of orderable ids as keys and {@link OrderableFulfillDto}
    * @return list of {@link StockCardSummaryV2Dto}
    */
   public List<StockCardSummaryV2Dto> build(List<StockCard> stockCards,
-      Map<UUID, OrderableFulfillDto> orderables, boolean nonEmptySummariesOnly) {
-    Stream<StockCardSummaryV2Dto> summariesStream = orderables.keySet().stream()
-        .map(id -> build(stockCards, id, MapUtils.isEmpty(orderables) ? null : orderables.get(id)))
+      Map<UUID, OrderableFulfillDto> orderableFulfills, boolean nonEmptySummariesOnly) {
+    Stream<StockCardSummaryV2Dto> summariesStream = orderableFulfills.keySet().stream()
+        .map(id -> build(stockCards, id, MapUtils.isEmpty(orderableFulfills) ? null : orderableFulfills.get(id)))
         .sorted();
 
     if (nonEmptySummariesOnly) {
@@ -95,7 +95,7 @@ public class StockCardSummariesV2DtoBuilder {
     }
   }
 
-  private CanFulfillForMeEntryDto createCanFulfillForMeEntry(StockCard stockCard, 
+  private CanFulfillForMeEntryDto createCanFulfillForMeEntry(StockCard stockCard,
                                                               UUID orderableId) {
     return new CanFulfillForMeEntryDto(
         createStockCardReference(stockCard.getId()),
