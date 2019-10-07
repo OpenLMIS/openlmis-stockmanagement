@@ -44,7 +44,7 @@ dependencies {
 
     compile "org.projectlombok:lombok:1.16.8"
     compile "org.postgresql:postgresql:42.0.0"
-    compile "com.github.tomakehurst:wiremock:1.58"
+    compile "com.google.guava:guava:18.0"
     compile 'org.webjars.npm:api-console:3.0.17'
     compile 'org.apache.commons:commons-lang3:3.6'
     compile 'org.apache.commons:commons-csv:1.4'
@@ -53,6 +53,7 @@ dependencies {
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
     compile "net.sf.jasperreports:jasperreports:6.3.0"
     compile "org.slf4j:slf4j-ext:1.7.25"
+    compile "com.github.tomakehurst:wiremock:1.58"
 
     testCompile "junit:junit"
     testCompile "org.mockito:mockito-core:1.+"

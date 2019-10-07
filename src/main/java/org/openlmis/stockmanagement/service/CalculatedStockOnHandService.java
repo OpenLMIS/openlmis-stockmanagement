@@ -93,13 +93,13 @@ public class CalculatedStockOnHandService {
    */
   public void recalculateStockOnHand(
       StockCard stockCard, StockCardLineItem lineItem) {
-    List<CalculatedStockOnHand> previousStockOnHands = calculatedStockOnHandRepository
+    List<CalculatedStockOnHand> followingStockOnHands = calculatedStockOnHandRepository
             .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
                 stockCard.getId(), lineItem.getOccurredDate());
 
     Integer previousStockOnHand = calculatedStockOnHandRepository
         .findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(
-            stockCard.getId(), lineItem.getOccurredDate().minusDays(1)).orElseGet(() -> {
+            stockCard.getId(), lineItem.getOccurredDate()).orElseGet(() -> {
               CalculatedStockOnHand calculatedStockOnHand = new CalculatedStockOnHand();
               calculatedStockOnHand.setStockOnHand(0);
               return calculatedStockOnHand;
@@ -107,8 +107,8 @@ public class CalculatedStockOnHandService {
 
     boolean isPhysicalInventory = lineItem.isPhysicalInventory();
 
-    if (previousStockOnHands.isEmpty()
-        || !previousStockOnHands.get(0).getOccurredDate().equals(lineItem.getOccurredDate())) {
+    if (followingStockOnHands.isEmpty()
+        || !followingStockOnHands.get(0).getOccurredDate().equals(lineItem.getOccurredDate())) {
       calculatedStockOnHandRepository.save(new CalculatedStockOnHand(
           isPhysicalInventory
               ? lineItem.getQuantity()
@@ -117,13 +117,13 @@ public class CalculatedStockOnHandService {
           lineItem.getProcessedDate()));
     }
 
-    previousStockOnHands.forEach(stockOnHand ->
+    followingStockOnHands.forEach(stockOnHand ->
         stockOnHand.setStockOnHand(stockOnHand.getStockOnHand()
             + (isPhysicalInventory
             ? lineItem.getQuantity() - previousStockOnHand
             : lineItem.getQuantityWithSign())));
 
-    calculatedStockOnHandRepository.save(previousStockOnHands);
+    calculatedStockOnHandRepository.save(followingStockOnHands);
   }
 
   private void fetchStockOnHand(StockCard stockCard, LocalDate asOfDate) {
