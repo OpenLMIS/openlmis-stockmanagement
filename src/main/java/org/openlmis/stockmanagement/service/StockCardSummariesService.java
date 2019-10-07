@@ -45,8 +45,6 @@ import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
 import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
-import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
-import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableFulfillReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
@@ -80,9 +78,6 @@ public class StockCardSummariesService extends StockCardBaseService {
   private LotReferenceDataService lotReferenceDataService;
 
   @Autowired
-  private ApprovedProductReferenceDataService approvedProductReferenceDataService;
-
-  @Autowired
   private StockCardRepository stockCardRepository;
 
   @Autowired
@@ -90,9 +85,6 @@ public class StockCardSummariesService extends StockCardBaseService {
 
   @Autowired
   private PermissionService permissionService;
-
-  @Autowired
-  private FacilityReferenceDataService facilityService;
 
   /**
    * Get a map of stock cards assigned to orderable ids.

@@ -55,7 +55,6 @@ import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
-import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableFulfillReferenceDataService;
@@ -71,9 +70,6 @@ import org.openlmis.stockmanagement.util.Message;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StockCardSummariesServiceTest {
-
-  @Mock
-  private ApprovedProductReferenceDataService approvedProductReferenceDataService;
 
   @Mock
   private OrderableFulfillReferenceDataService orderableFulfillReferenceDataService;
