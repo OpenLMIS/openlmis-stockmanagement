@@ -24,7 +24,7 @@ import static org.junit.Assert.assertThat;
 import static org.openlmis.stockmanagement.web.stockcardsummariesv2.StockCardSummariesV2DtoBuilder.ORDERABLES;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -96,14 +96,12 @@ public class StockCardSummariesV2DtoBuilderTest {
 
     orderableFulfill1 = new OrderableFulfillDtoDataBuilder()
         .withCanFulfillForMe(asList(orderable2.getId(), orderable3.getId())).build();
-
     orderableFulfill2 = new OrderableFulfillDtoDataBuilder()
         .withCanFulfillForMe(Collections.singletonList(orderable1.getId())).build();
-
     orderableFulfill3 = new OrderableFulfillDtoDataBuilder().build();
     orderableFulfill4 = new OrderableFulfillDtoDataBuilder().build();
 
-    fulfillMap = new HashMap<>();
+    fulfillMap = new LinkedHashMap<>();
   }
 
   @Test

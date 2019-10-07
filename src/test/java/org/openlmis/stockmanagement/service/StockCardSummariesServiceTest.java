@@ -189,16 +189,16 @@ public class StockCardSummariesServiceTest {
     OrderableDto orderable2 = new OrderableDtoDataBuilder().build();
     OrderableDto orderable3 = new OrderableDtoDataBuilder().build();
 
-    StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParamsDataBuilder()
-        .withOrderableIds(asList(orderable.getId(), orderable2.getId()))
-        .build();
-
     Map<UUID, OrderableFulfillDto> fulfillMap = new HashMap<>();
     fulfillMap.put(orderable.getId(), new OrderableFulfillDtoDataBuilder()
         .withCanFulfillForMe(asList(orderable2.getId(), orderable3.getId())).build());
     fulfillMap.put(orderable2.getId(), new OrderableFulfillDtoDataBuilder()
         .withCanFulfillForMe(asList(orderable.getId(), orderable3.getId())).build());
     fulfillMap.put(orderable3.getId(), new OrderableFulfillDtoDataBuilder().build());
+
+    StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParamsDataBuilder()
+        .withOrderableIds(asList(orderable.getId(), orderable2.getId()))
+        .build();
 
     when(orderableFulfillReferenceDataService
         .findByFacilityIdProgramId(params.getFacilityId(), params.getProgramId()))

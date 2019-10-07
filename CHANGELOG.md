@@ -18,6 +18,7 @@ Improvements:
 * [OLMIS-6408](https://openlmis.atlassian.net/browse/OLMIS-6408): Added pageable validator.
 * [OLMIS-6474](https://openlmis.atlassian.net/browse/OLMIS-6474): Performance improvements of `GET /api/orderableFulfills` endpoint.
 * [OLMIS-6564](https://openlmis.atlassian.net/browse/OLMIS-6564): Changed wiremock dependency configuration to avoid issue with HTTP response compression.
+* [OLMIS-6614](https://openlmis.atlassian.net/browse/OLMIS-6614): Replaced multiple calls to reference data by one call to the `GET /api/orderableFulfills` endpoint.
 
 Bug fixes:
 * [OLMIS-6582](https://openlmis.atlassian.net/browse/OLMIS-6582): Changed wiremock dependency configuration to fix printing Physical Inventory.

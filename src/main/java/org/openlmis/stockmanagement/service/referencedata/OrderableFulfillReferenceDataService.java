@@ -54,18 +54,18 @@ public class OrderableFulfillReferenceDataService extends BaseReferenceDataServi
     return getMap(null, parameters, UUID.class, OrderableFulfillDto.class);
   }
 
-    /**
-     * Finds orderables by facilityId and programId.
-     *
-     * @param facilityId id of facility which is used during searching orderables
-     * @param programId id of program which is used during searching orderables
-     * @return a page of orderables
-     */
-    public Map<UUID, OrderableFulfillDto> findByFacilityIdProgramId(UUID facilityId, UUID programId) {
-      RequestParameters parameters = RequestParameters
-          .init()
-          .set("facilityId", facilityId)
-          .set("programId", programId);
+  /**
+   * Finds orderables by facilityId and programId.
+   *
+   * @param facilityId id of facility which is used during searching orderables
+   * @param programId id of program which is used during searching orderables
+   * @return a page of orderables
+   */
+  public Map<UUID, OrderableFulfillDto> findByFacilityIdProgramId(UUID facilityId, UUID programId) {
+    RequestParameters parameters = RequestParameters
+        .init()
+        .set("facilityId", facilityId)
+        .set("programId", programId);
 
     return getMap(null, parameters, UUID.class, OrderableFulfillDto.class);
   }

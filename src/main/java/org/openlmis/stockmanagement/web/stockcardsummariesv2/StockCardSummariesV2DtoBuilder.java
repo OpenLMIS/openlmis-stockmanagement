@@ -55,7 +55,8 @@ public class StockCardSummariesV2DtoBuilder {
   public List<StockCardSummaryV2Dto> build(List<StockCard> stockCards,
       Map<UUID, OrderableFulfillDto> orderableFulfills, boolean nonEmptySummariesOnly) {
     Stream<StockCardSummaryV2Dto> summariesStream = orderableFulfills.keySet().stream()
-        .map(id -> build(stockCards, id, MapUtils.isEmpty(orderableFulfills) ? null : orderableFulfills.get(id)))
+        .map(id -> build(stockCards, id,
+            MapUtils.isEmpty(orderableFulfills) ? null : orderableFulfills.get(id)))
         .sorted();
 
     if (nonEmptySummariesOnly) {
