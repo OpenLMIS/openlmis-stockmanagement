@@ -79,8 +79,7 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
         .thenReturn(summaries);
 
     when(stockCardSummariesV2DtoBuilder
-        .build(summaries.getPageOfApprovedProducts(),
-            summaries.getStockCardsForFulfillOrderables(),
+        .build(summaries.getStockCardsForFulfillOrderables(),
             summaries.getOrderableFulfillMap(),
             false))
         .thenReturn(asList(stockCardSummary, stockCardSummary2));
@@ -194,8 +193,7 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
         .thenReturn(summaries);
 
     when(stockCardSummariesV2DtoBuilder
-        .build(summaries.getPageOfApprovedProducts(),
-            summaries.getStockCardsForFulfillOrderables(),
+        .build(summaries.getStockCardsForFulfillOrderables(),
             summaries.getOrderableFulfillMap(),
             true))
         .thenReturn(singletonList(stockCardSummary));
@@ -231,8 +229,7 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
         .thenReturn(summaries);
 
     when(stockCardSummariesV2DtoBuilder
-        .build(summaries.getPageOfApprovedProducts(),
-            summaries.getStockCardsForFulfillOrderables(),
+        .build(summaries.getStockCardsForFulfillOrderables(),
             summaries.getOrderableFulfillMap(),
             true))
         .thenReturn(singletonList(stockCardSummary));
@@ -261,8 +258,7 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
     params.setNonEmptyOnly(false);
 
     when(stockCardSummariesV2DtoBuilder
-        .build(summaries.getPageOfApprovedProducts(),
-            summaries.getStockCardsForFulfillOrderables(),
+        .build(summaries.getStockCardsForFulfillOrderables(),
             summaries.getOrderableFulfillMap(),
             false))
         .thenReturn(asList(stockCardSummary, stockCardSummary2));
