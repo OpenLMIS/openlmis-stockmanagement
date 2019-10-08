@@ -48,8 +48,10 @@ public class StockCardSummariesV2DtoBuilder {
   /**
    * Builds Stock Card Summary dtos from stock cards and orderables.
    *
-   * @param stockCards        list of {@link StockCard} found for orderables
-   * @param orderableFulfills map of orderable ids as keys and {@link OrderableFulfillDto}
+   * @param stockCards            list of {@link StockCard} found for orderables
+   * @param orderableFulfills     map of orderable ids as keys and {@link OrderableFulfillDto}
+   * @param nonEmptySummariesOnly flag which allows filtering summaries with an empty
+   *                              getCanFulfillForMe collection
    * @return list of {@link StockCardSummaryV2Dto}
    */
   public List<StockCardSummaryV2Dto> build(List<StockCard> stockCards,
