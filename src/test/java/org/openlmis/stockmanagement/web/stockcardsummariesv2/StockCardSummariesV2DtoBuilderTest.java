@@ -24,7 +24,7 @@ import static org.junit.Assert.assertThat;
 import static org.openlmis.stockmanagement.web.stockcardsummariesv2.StockCardSummariesV2DtoBuilder.ORDERABLES;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -58,9 +58,13 @@ public class StockCardSummariesV2DtoBuilderTest {
   private OrderableDto orderable2;
   private OrderableDto orderable3;
   private OrderableDto orderable4;
-  private StockCard stockCard;
+  private OrderableFulfillDto orderableFulfill1;
+  private OrderableFulfillDto orderableFulfill2;
+  private OrderableFulfillDto orderableFulfill3;
+  private OrderableFulfillDto orderableFulfill4;
   private StockCard stockCard1;
-  private StockCard stockCard2;
+  private StockCard stockCard3a;
+  private StockCard stockCard3b;
   private Map<UUID, OrderableFulfillDto> fulfillMap;
 
   @Before
@@ -76,33 +80,39 @@ public class StockCardSummariesV2DtoBuilderTest {
         .withFacility(facilityId)
         .withProgram(programId)
         .build();
-    stockCard = new StockCardDataBuilder(event)
+    stockCard1 = new StockCardDataBuilder(event)
         .buildWithStockOnHandAndLineItemAndOrderableId(16,
             new StockCardLineItemDataBuilder().buildWithStockOnHand(16),
             orderable1.getId());
-    stockCard1 = new StockCardDataBuilder(event)
+    stockCard3a = new StockCardDataBuilder(event)
         .buildWithStockOnHandAndLineItemAndOrderableId(30,
             new StockCardLineItemDataBuilder().buildWithStockOnHand(30),
             orderable3.getId());
-    stockCard2 = new StockCardDataBuilder(event)
+    stockCard3b = new StockCardDataBuilder(event)
         .withLot(UUID.randomUUID())
         .buildWithStockOnHandAndLineItemAndOrderableId(10,
             new StockCardLineItemDataBuilder().buildWithStockOnHand(10),
             orderable3.getId());
 
-    fulfillMap = new HashMap<>();
-    fulfillMap.put(orderable1.getId(), new OrderableFulfillDtoDataBuilder()
-        .withCanFulfillForMe(asList(orderable2.getId(), orderable3.getId())).build());
-    fulfillMap.put(orderable2.getId(), new OrderableFulfillDtoDataBuilder()
-        .withCanFulfillForMe(Collections.singletonList(orderable1.getId())).build());
+    orderableFulfill1 = new OrderableFulfillDtoDataBuilder()
+        .withCanFulfillForMe(asList(orderable2.getId(), orderable3.getId())).build();
+    orderableFulfill2 = new OrderableFulfillDtoDataBuilder()
+        .withCanFulfillForMe(Collections.singletonList(orderable1.getId())).build();
+    orderableFulfill3 = new OrderableFulfillDtoDataBuilder().build();
+    orderableFulfill4 = new OrderableFulfillDtoDataBuilder().build();
+
+    fulfillMap = new LinkedHashMap<>();
   }
 
   @Test
   public void shouldBuildStockCardSummaries() {
-    List<StockCard> stockCards = asList(stockCard, stockCard1);
+    List<StockCard> stockCards = asList(stockCard1, stockCard3a);
 
-    List<StockCardSummaryV2Dto> result = builder.build(asList(orderable1, orderable2, orderable3),
-        stockCards, fulfillMap, false);
+    fulfillMap.put(orderable1.getId(), orderableFulfill1);
+    fulfillMap.put(orderable2.getId(), orderableFulfill2);
+    fulfillMap.put(orderable3.getId(), orderableFulfill3);
+
+    List<StockCardSummaryV2Dto> result = builder.build(stockCards, fulfillMap, false);
 
     StockCardSummaryV2Dto summary1 = new StockCardSummaryV2Dto(
         new ObjectReferenceDtoDataBuilder()
@@ -111,9 +121,9 @@ public class StockCardSummariesV2DtoBuilderTest {
             .build(),
         asSet(
             new CanFulfillForMeEntryDtoDataBuilder()
-                .buildWithStockCardAndOrderable(stockCard1, orderable3),
+                .buildWithStockCardAndOrderable(stockCard3a, orderable3),
             new CanFulfillForMeEntryDtoDataBuilder()
-                .buildWithStockCardAndOrderable(stockCard, orderable1))
+                .buildWithStockCardAndOrderable(stockCard1, orderable1))
     );
 
     StockCardSummaryV2Dto summary2 = new StockCardSummaryV2Dto(
@@ -123,7 +133,7 @@ public class StockCardSummariesV2DtoBuilderTest {
             .build(),
         asSet(
             new CanFulfillForMeEntryDtoDataBuilder()
-                .buildWithStockCardAndOrderable(stockCard, orderable1))
+                .buildWithStockCardAndOrderable(stockCard1, orderable1))
     );
 
     StockCardSummaryV2Dto summary3 = new StockCardSummaryV2Dto(
@@ -132,7 +142,7 @@ public class StockCardSummariesV2DtoBuilderTest {
             .withId(orderable3.getId())
             .build(),
         asSet(new CanFulfillForMeEntryDtoDataBuilder()
-            .buildWithStockCardAndOrderable(stockCard1, orderable3))
+            .buildWithStockCardAndOrderable(stockCard3a, orderable3))
     );
 
     assertEquals(3, result.size());
@@ -141,10 +151,13 @@ public class StockCardSummariesV2DtoBuilderTest {
 
   @Test
   public void shouldBuildStockCardSummariesWithMultipleStockCardsForOrderable() {
-    List<StockCard> stockCards = asList(stockCard, stockCard1, stockCard2);
+    List<StockCard> stockCards = asList(stockCard1, stockCard3a, stockCard3b);
 
-    List<StockCardSummaryV2Dto> result = builder.build(asList(orderable1, orderable2, orderable3),
-        stockCards, fulfillMap, false);
+    fulfillMap.put(orderable1.getId(), orderableFulfill1);
+    fulfillMap.put(orderable2.getId(), orderableFulfill2);
+    fulfillMap.put(orderable3.getId(), orderableFulfill3);
+
+    List<StockCardSummaryV2Dto> result = builder.build(stockCards, fulfillMap, false);
 
     StockCardSummaryV2Dto summary1 = new StockCardSummaryV2Dto(
         new ObjectReferenceDtoDataBuilder()
@@ -153,11 +166,11 @@ public class StockCardSummariesV2DtoBuilderTest {
             .build(),
         asSet(
             new CanFulfillForMeEntryDtoDataBuilder()
-                .buildWithStockCardAndOrderable(stockCard1, orderable3),
+                .buildWithStockCardAndOrderable(stockCard3a, orderable3),
             new CanFulfillForMeEntryDtoDataBuilder()
-                .buildWithStockCardAndOrderable(stockCard2, orderable3),
+                .buildWithStockCardAndOrderable(stockCard3b, orderable3),
             new CanFulfillForMeEntryDtoDataBuilder()
-                .buildWithStockCardAndOrderable(stockCard, orderable1))
+                .buildWithStockCardAndOrderable(stockCard1, orderable1))
     );
 
     StockCardSummaryV2Dto summary2 = new StockCardSummaryV2Dto(
@@ -167,7 +180,7 @@ public class StockCardSummariesV2DtoBuilderTest {
             .build(),
         asSet(
             new CanFulfillForMeEntryDtoDataBuilder()
-                .buildWithStockCardAndOrderable(stockCard, orderable1))
+                .buildWithStockCardAndOrderable(stockCard1, orderable1))
     );
 
     StockCardSummaryV2Dto summary3 = new StockCardSummaryV2Dto(
@@ -177,9 +190,9 @@ public class StockCardSummariesV2DtoBuilderTest {
             .build(),
         asSet(
             new CanFulfillForMeEntryDtoDataBuilder()
-                .buildWithStockCardAndOrderable(stockCard1, orderable3),
+                .buildWithStockCardAndOrderable(stockCard3a, orderable3),
             new CanFulfillForMeEntryDtoDataBuilder()
-                .buildWithStockCardAndOrderable(stockCard2, orderable3)
+                .buildWithStockCardAndOrderable(stockCard3b, orderable3)
         )
     );
 
@@ -189,12 +202,12 @@ public class StockCardSummariesV2DtoBuilderTest {
 
   @Test
   public void shouldSortStockCardSummaries() {
-    List<StockCard> stockCards = asList(stockCard, stockCard1, stockCard2);
+    List<StockCard> stockCards = asList(stockCard1, stockCard3a, stockCard3b);
 
-    fulfillMap.remove(orderable1.getId());
+    fulfillMap.put(orderable2.getId(), orderableFulfill2);
+    fulfillMap.put(orderable3.getId(), orderableFulfill3);
 
-    List<StockCardSummaryV2Dto> result = builder.build(asList(orderable2, orderable3),
-        stockCards, fulfillMap, false);
+    List<StockCardSummaryV2Dto> result = builder.build(stockCards, fulfillMap, false);
 
     StockCardSummaryV2Dto summary2 = new StockCardSummaryV2Dto(
         new ObjectReferenceDtoDataBuilder()
@@ -203,7 +216,7 @@ public class StockCardSummariesV2DtoBuilderTest {
             .build(),
         asSet(
             new CanFulfillForMeEntryDtoDataBuilder()
-                .buildWithStockCardAndOrderable(stockCard, orderable1))
+                .buildWithStockCardAndOrderable(stockCard1, orderable1))
     );
 
     StockCardSummaryV2Dto summary3 = new StockCardSummaryV2Dto(
@@ -213,9 +226,9 @@ public class StockCardSummariesV2DtoBuilderTest {
             .build(),
         asSet(
             new CanFulfillForMeEntryDtoDataBuilder()
-                .buildWithStockCardAndOrderable(stockCard1, orderable3),
+                .buildWithStockCardAndOrderable(stockCard3a, orderable3),
             new CanFulfillForMeEntryDtoDataBuilder()
-                .buildWithStockCardAndOrderable(stockCard2, orderable3)
+                .buildWithStockCardAndOrderable(stockCard3b, orderable3)
         )
     );
 
@@ -226,10 +239,12 @@ public class StockCardSummariesV2DtoBuilderTest {
 
   @Test
   public void shouldOmitEmptySummariesIfFlagIsSet() {
-    List<StockCard> stockCards = asList(stockCard, stockCard1);
+    List<StockCard> stockCards = asList(stockCard1, stockCard3a);
 
-    List<StockCardSummaryV2Dto> result = builder.build(asList(orderable3, orderable4),
-        stockCards, fulfillMap, true);
+    fulfillMap.put(orderable3.getId(), orderableFulfill3);
+    fulfillMap.put(orderable4.getId(), orderableFulfill4);
+
+    List<StockCardSummaryV2Dto> result = builder.build(stockCards, fulfillMap, true);
 
     StockCardSummaryV2Dto summary3 = new StockCardSummaryV2Dto(
         new ObjectReferenceDtoDataBuilder()
@@ -237,7 +252,7 @@ public class StockCardSummariesV2DtoBuilderTest {
             .withId(orderable3.getId())
             .build(),
         asSet(new CanFulfillForMeEntryDtoDataBuilder()
-            .buildWithStockCardAndOrderable(stockCard1, orderable3))
+            .buildWithStockCardAndOrderable(stockCard3a, orderable3))
     );
 
     assertEquals(1, result.size());
@@ -246,10 +261,12 @@ public class StockCardSummariesV2DtoBuilderTest {
 
   @Test
   public void shouldNotOmitEmptySummariesIfFlagIsNotSet() {
-    List<StockCard> stockCards = asList(stockCard, stockCard1);
+    List<StockCard> stockCards = asList(stockCard1, stockCard3a);
 
-    List<StockCardSummaryV2Dto> result = builder.build(asList(orderable3, orderable4),
-        stockCards, fulfillMap, false);
+    fulfillMap.put(orderable3.getId(), orderableFulfill3);
+    fulfillMap.put(orderable4.getId(), orderableFulfill4);
+
+    List<StockCardSummaryV2Dto> result = builder.build(stockCards, fulfillMap, false);
 
     StockCardSummaryV2Dto summary3 = new StockCardSummaryV2Dto(
         new ObjectReferenceDtoDataBuilder()
@@ -257,7 +274,7 @@ public class StockCardSummariesV2DtoBuilderTest {
             .withId(orderable3.getId())
             .build(),
         asSet(new CanFulfillForMeEntryDtoDataBuilder()
-            .buildWithStockCardAndOrderable(stockCard1, orderable3))
+            .buildWithStockCardAndOrderable(stockCard3a, orderable3))
     );
 
     StockCardSummaryV2Dto summary4 = new StockCardSummaryV2Dto(
