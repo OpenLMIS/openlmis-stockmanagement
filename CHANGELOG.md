@@ -1,3 +1,9 @@
+5.0.1 / Work in progress
+==================
+
+Bug fixes:
+* [OLMIS-6630](https://openlmis.atlassian.net/browse/OLMIS-6630): Fixed bug with retrieving stock card summaries.
+
 5.0.0 / Work in progress
 ==================
 
