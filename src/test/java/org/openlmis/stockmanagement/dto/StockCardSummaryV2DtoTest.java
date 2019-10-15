@@ -105,44 +105,60 @@ public class StockCardSummaryV2DtoTest {
   }
 
   @Test
-  public void shouldEnsureComparableContracts() {
+  public void shouldCompareTwoSameStockCardSummariesWithSignum() {
+    StockCardSummaryV2Dto stockCard1 = new StockCardSummaryV2DtoDataBuilder().build();
+    StockCardSummaryV2Dto stockCard2 = new StockCardSummaryV2DtoDataBuilder().build();
+
+    assertEquals(Math.signum(stockCard1.compareTo(stockCard2)),
+        -Math.signum(stockCard2.compareTo(stockCard1)), 0);
+  }
+
+  @Test
+  public void shouldCompareEmptyAndNotEmptyStockCardSummaries() {
     StockCardSummaryV2Dto stockCard1 = new StockCardSummaryV2DtoDataBuilder()
-            .build();
+        .withCanFulfillForMe(new HashSet<>(Arrays.asList(
+            new CanFulfillForMeEntryDto(null, null, null, 15, null, null),
+            new CanFulfillForMeEntryDto())))
+        .build();
     StockCardSummaryV2Dto stockCard2 = new StockCardSummaryV2DtoDataBuilder()
-            .build();
+        .withCanFulfillForMe(new CanFulfillForMeEntryDto())
+        .build();
 
     assertEquals(Math.signum(stockCard1.compareTo(stockCard2)),
-            -Math.signum(stockCard2.compareTo(stockCard1)), 0);
+        -Math.signum(stockCard2.compareTo(stockCard1)), 0);
+  }
 
-    stockCard1 = new StockCardSummaryV2DtoDataBuilder()
-            .withCanFulfillForMe(new HashSet<>(Arrays.asList(
-                    new CanFulfillForMeEntryDto(null, null, null, 15, null, null),
-                    new CanFulfillForMeEntryDto())))
-            .build();
-    stockCard2 = new StockCardSummaryV2DtoDataBuilder()
-            .withCanFulfillForMe(new CanFulfillForMeEntryDto())
-            .build();
-
-    assertEquals(Math.signum(stockCard1.compareTo(stockCard2)),
-            -Math.signum(stockCard2.compareTo(stockCard1)), 0);
-
+  @Test
+  public void shouldCompareThreeStockCardSummaries() {
+    StockCardSummaryV2Dto stockCard1 = new StockCardSummaryV2DtoDataBuilder()
+        .withCanFulfillForMe(new HashSet<>(Arrays.asList(
+            new CanFulfillForMeEntryDto(null, null, null, 15, null, null),
+            new CanFulfillForMeEntryDto())))
+        .build();
+    StockCardSummaryV2Dto stockCard2 = new StockCardSummaryV2DtoDataBuilder()
+        .withCanFulfillForMe(new CanFulfillForMeEntryDto())
+        .build();
     StockCardSummaryV2Dto stockCard3 = new StockCardSummaryV2DtoDataBuilder()
-            .build();
+        .build();
 
     assertTrue(stockCard3.compareTo(stockCard2) > 0);
     assertTrue(stockCard2.compareTo(stockCard1) > 0);
     assertTrue(stockCard3.compareTo(stockCard1) > 0);
+  }
 
-    stockCard1 = new StockCardSummaryV2DtoDataBuilder()
-            .withCanFulfillForMe(new CanFulfillForMeEntryDto())
-            .build();
-    stockCard2 = new StockCardSummaryV2DtoDataBuilder()
-            .withCanFulfillForMe(new CanFulfillForMeEntryDto())
-            .build();
+  @Test
+  public void shouldCompareThreeStockCardSummariesWithSignum() {
+    StockCardSummaryV2Dto stockCard1 = new StockCardSummaryV2DtoDataBuilder()
+        .withCanFulfillForMe(new CanFulfillForMeEntryDto())
+        .build();
+    StockCardSummaryV2Dto stockCard2 = new StockCardSummaryV2DtoDataBuilder()
+        .withCanFulfillForMe(new CanFulfillForMeEntryDto())
+        .build();
+    StockCardSummaryV2Dto stockCard3 = new StockCardSummaryV2DtoDataBuilder()
+        .build();
 
     assertEquals(stockCard1.compareTo(stockCard2), 0);
     assertEquals(Math.signum(stockCard1.compareTo(stockCard3)),
-            Math.signum(stockCard2.compareTo(stockCard3)), 0);
-
+        Math.signum(stockCard2.compareTo(stockCard3)), 0);
   }
 }
