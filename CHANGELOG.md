@@ -1,4 +1,4 @@
-5.0.0 / Work in progress
+5.0.0 / 2019-10-17
 ==================
 
 Contract breaking changes:
