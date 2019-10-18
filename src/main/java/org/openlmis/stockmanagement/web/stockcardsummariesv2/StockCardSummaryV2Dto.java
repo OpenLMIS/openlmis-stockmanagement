@@ -59,9 +59,6 @@ public final class StockCardSummaryV2Dto implements Comparable<StockCardSummaryV
 
   @Override
   public int compareTo(StockCardSummaryV2Dto stockCardSummary) {
-    if (this.getCanFulfillForMe().size() == stockCardSummary.getCanFulfillForMe().size()) {
-      return 0;
-    }
-    return isEmpty(this.getCanFulfillForMe()) ? 1 : -1;
+    return Integer.compare(stockCardSummary.canFulfillForMe.size(), this.canFulfillForMe.size());
   }
 }

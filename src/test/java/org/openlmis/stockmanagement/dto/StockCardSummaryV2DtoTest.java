@@ -16,7 +16,10 @@
 package org.openlmis.stockmanagement.dto;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
@@ -99,5 +102,73 @@ public class StockCardSummaryV2DtoTest {
         .withCanFulfillForMe(new CanFulfillForMeEntryDtoDataBuilder().build())
         .build();
     assertEquals(1, stockCard1.compareTo(stockCard2));
+  }
+
+  @Test
+  public void shouldCompareTwoStockCardSummariesWithNoFulfillingProducts() {
+    StockCardSummaryV2Dto stockCardWithNoFulfillingProducts1 =
+        new StockCardSummaryV2DtoDataBuilder().build();
+    StockCardSummaryV2Dto stockCardWithNoFulfillingProducts2 =
+        new StockCardSummaryV2DtoDataBuilder().build();
+
+    assertEquals(
+        stockCardWithNoFulfillingProducts1.compareTo(stockCardWithNoFulfillingProducts2),
+        stockCardWithNoFulfillingProducts2.compareTo(stockCardWithNoFulfillingProducts1));
+  }
+
+  @Test
+  public void shouldCompareStockCardSummariesWithOneAndTwoFulfillingProducts() {
+    StockCardSummaryV2Dto stockCardWithTwoFulfillingProducts =
+        new StockCardSummaryV2DtoDataBuilder()
+            .withCanFulfillForMe(new HashSet<>(Arrays.asList(
+                new CanFulfillForMeEntryDto(null, null, null, 15, null, null),
+                new CanFulfillForMeEntryDto())))
+            .build();
+    StockCardSummaryV2Dto stockCardWithOneFulfillingProduct = new StockCardSummaryV2DtoDataBuilder()
+        .withCanFulfillForMe(new CanFulfillForMeEntryDto())
+        .build();
+
+    assertEquals(
+        stockCardWithTwoFulfillingProducts.compareTo(stockCardWithOneFulfillingProduct),
+        -stockCardWithOneFulfillingProduct.compareTo(stockCardWithTwoFulfillingProducts));
+  }
+
+  @Test
+  public void shouldCompareThreeStockCardSummariesTransitively() {
+    StockCardSummaryV2Dto stockCardWithTwoFulfillingProducts =
+        new StockCardSummaryV2DtoDataBuilder()
+            .withCanFulfillForMe(new HashSet<>(Arrays.asList(
+                new CanFulfillForMeEntryDto(null, null, null, 15, null, null),
+                new CanFulfillForMeEntryDto())))
+            .build();
+    StockCardSummaryV2Dto stockCardWithOneFulfillingProduct = new StockCardSummaryV2DtoDataBuilder()
+        .withCanFulfillForMe(new CanFulfillForMeEntryDto())
+        .build();
+    StockCardSummaryV2Dto stockCardWithNoFulfillingProducts = new StockCardSummaryV2DtoDataBuilder()
+        .build();
+
+    assertTrue(stockCardWithNoFulfillingProducts.compareTo(stockCardWithOneFulfillingProduct) > 0);
+    assertTrue(stockCardWithOneFulfillingProduct.compareTo(stockCardWithTwoFulfillingProducts) > 0);
+    assertTrue(stockCardWithNoFulfillingProducts.compareTo(stockCardWithTwoFulfillingProducts) > 0);
+  }
+
+  @Test
+  public void shouldCompareStockCardSummariesWithSingleFulfillingProductAndWithoutAny() {
+    StockCardSummaryV2Dto stockCardWithOneFulfillingProduct1 =
+        new StockCardSummaryV2DtoDataBuilder()
+            .withCanFulfillForMe(new CanFulfillForMeEntryDto())
+            .build();
+    StockCardSummaryV2Dto stockCardWithOneFulfillingProduct2 =
+        new StockCardSummaryV2DtoDataBuilder()
+            .withCanFulfillForMe(new CanFulfillForMeEntryDto())
+            .build();
+    StockCardSummaryV2Dto stockCardWithNoFulfillingProducts = new StockCardSummaryV2DtoDataBuilder()
+        .build();
+
+    assertEquals(
+        stockCardWithOneFulfillingProduct1.compareTo(stockCardWithOneFulfillingProduct2), 0);
+    assertEquals(
+        stockCardWithOneFulfillingProduct1.compareTo(stockCardWithNoFulfillingProducts),
+        stockCardWithOneFulfillingProduct2.compareTo(stockCardWithNoFulfillingProducts));
   }
 }
