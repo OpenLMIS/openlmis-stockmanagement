@@ -10,9 +10,11 @@ scenarios:
       facility_id: c62dea9b-6974-4101-ba39-b09914165967
       # EPI
       program_id: 418bdc1d-c303-4bd0-b2d3-d8901150a983
+      start_date: 2017-01-01
+      end_date: 2019-12-01
     requests:
       - include-scenario: get-user-token
-      - url: ${__P(base-uri)}/api/stockCardRangeSummaries?facilityId=${facility_id}&programId=${program_id}
+      - url: ${__P(base-uri)}/api/stockCardRangeSummaries?facilityId=${facility_id}&programId=${program_id}&startDate=${start_date}&endDate=${end_date}
         method: GET
         label: GetStockCardRangeSummaries
         headers:
