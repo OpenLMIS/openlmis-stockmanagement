@@ -1,6 +1,9 @@
 5.0.2 / WIP
 ==================
 
+Bug fixes:
+* [OLMIS-6722](https://openlmis.atlassian.net/browse/OLMIS-6722): Fixed slow page load on Physical Inventory page by adding indexes to the database.
+
 5.0.1 / 2019-10-21
 ==================
 
