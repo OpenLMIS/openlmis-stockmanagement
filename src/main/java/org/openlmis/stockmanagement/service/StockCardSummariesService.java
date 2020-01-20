@@ -289,14 +289,22 @@ public class StockCardSummariesService extends StockCardBaseService {
     Set<UUID> stockCardIds = stockCards.stream()
         .map(StockCard::getId)
         .collect(toSet());
-    List<CalculatedStockOnHand> calculatedStockOnHands = calculatedStockOnHandRepository
-        .findByStockCardIdAndOccurredDateBetween(stockCardIds, startDate, endDate);
-    stockCardIds.forEach(stockCardId -> {
-      Optional<CalculatedStockOnHand> calculatedStockOnHand = calculatedStockOnHandRepository
-          .findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(
-              stockCardId, startDate);
-      calculatedStockOnHand.ifPresent(calculatedStockOnHands::add);
-    });
+
+    List<CalculatedStockOnHand> calculatedStockOnHands;
+    if (null == startDate) {
+      calculatedStockOnHands = calculatedStockOnHandRepository
+            .findByStockCardIdAndOccurredDateLessThanEqual(stockCardIds, endDate);
+    } else {
+      calculatedStockOnHands = calculatedStockOnHandRepository
+            .findByStockCardIdAndOccurredDateBetween(stockCardIds, startDate, endDate);
+      stockCardIds.forEach(stockCardId -> {
+        Optional<CalculatedStockOnHand> calculatedStockOnHand = calculatedStockOnHandRepository
+                .findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(
+                        stockCardId, startDate);
+        calculatedStockOnHand.ifPresent(calculatedStockOnHands::add);
+      });
+    }
+
     return new ImmutablePair<>(
         !isEmpty(orderableIds) && !orderableIds.contains(orderableId)
             ? null

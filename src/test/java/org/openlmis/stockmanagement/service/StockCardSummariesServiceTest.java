@@ -348,6 +348,32 @@ public class StockCardSummariesServiceTest {
     assertThat(cardMap.get(orderableId7).getStockCards(), hasItems(stockCard5));
     assertThat(cardMap.get(orderableId1).getCalculatedStockOnHands(),
         hasItems(calculatedStockOnHand, calculatedStockOnHand5));
+
+    when(calculatedStockOnHandRepository
+            .findByStockCardIdAndOccurredDateLessThanEqual(any(), any()))
+            .thenReturn(calculatedStockOnHands);
+
+    Map<UUID, StockCardAggregate> cardMap2 =
+            stockCardSummariesService.getGroupedStockCards(programId, facilityId, null,
+                    null, LocalDate.of(2017, 3, 19));
+
+    assertThat(cardMap2.keySet(), hasItems(orderableId1, orderableId4, orderableId6, orderableId7));
+
+    assertThat(cardMap2.get(orderableId1).getStockCards(), hasItems(stockCard1, stockCard2));
+    assertThat(cardMap2.get(orderableId1).getCalculatedStockOnHands(),
+            hasItems(calculatedStockOnHand, calculatedStockOnHand1, calculatedStockOnHand2));
+
+    assertThat(cardMap2.get(orderableId4).getStockCards(), hasItems(stockCard3));
+    assertThat(cardMap2.get(orderableId1).getCalculatedStockOnHands(),
+            hasItems(calculatedStockOnHand, calculatedStockOnHand3));
+
+    assertThat(cardMap2.get(orderableId6).getStockCards(), hasItems(stockCard4));
+    assertThat(cardMap2.get(orderableId1).getCalculatedStockOnHands(),
+            hasItems(calculatedStockOnHand, calculatedStockOnHand4));
+
+    assertThat(cardMap2.get(orderableId7).getStockCards(), hasItems(stockCard5));
+    assertThat(cardMap2.get(orderableId1).getCalculatedStockOnHands(),
+            hasItems(calculatedStockOnHand, calculatedStockOnHand5));
   }
 
   private OrderableDto createOrderableDto(UUID orderableId, String productName) {
