@@ -20,6 +20,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DATE_WRONG_FORMAT;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_ID_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_INVALID_PARAMS;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_ID_MISSING;
@@ -181,5 +182,23 @@ public class StockCardRangeSummaryParamsTest {
     queryMap.add(END_DATE, "2018-06-06");
 
     new StockCardRangeSummaryParams(queryMap);
+  }
+
+  @Test
+  public void shouldThrowExceptionIfStartDateIsEmpty() {
+    exception.expect(ValidationMessageException.class);
+    exception.expectMessage(ERROR_DATE_WRONG_FORMAT);
+    queryMap.add(START_DATE, "");
+    StockCardRangeSummaryParams params = new StockCardRangeSummaryParams(queryMap);
+    params.getStartDate();
+  }
+
+  @Test
+  public void shouldThrowExceptionIfEndDateIsEmpty() {
+    exception.expect(ValidationMessageException.class);
+    exception.expectMessage(ERROR_DATE_WRONG_FORMAT);
+    queryMap.add(END_DATE, "");
+    StockCardRangeSummaryParams params = new StockCardRangeSummaryParams(queryMap);
+    params.getEndDate();
   }
 }
