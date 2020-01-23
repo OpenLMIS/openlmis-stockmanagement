@@ -20,6 +20,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.junit.Before;
@@ -30,7 +31,10 @@ import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
+import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
+import org.openlmis.stockmanagement.repository.StockCardLineItemRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.testutils.CalculatedStockOnHandDataBuilder;
@@ -56,6 +60,12 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
   private StockCardRepository stockCardRepository;
 
   @Autowired
+  private StockCardLineItemRepository stockCardLineItemRepository;
+
+  @Autowired
+  private StockCardLineItemReasonRepository stockCardLineItemReasonRepository;
+
+  @Autowired
   private StockEventsRepository stockEventsRepository;
 
   private UUID facility = randomUUID();
@@ -66,12 +76,15 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
   private int quantity = 100;
   private int quantity2 = 200;
 
+  private StockEvent event;
   private StockCard stockCard;
+  private List<StockCardLineItem> lineItemlist;
+  private StockCardLineItemReason creditReason;
   private CalculatedStockOnHandDataBuilder calculatedStockOnHandDataBuilder;
 
   @Before
   public void setUp() {
-    StockEvent event = new StockEventDataBuilder()
+    event = new StockEventDataBuilder()
         .withoutId()
         .withFacility(facility)
         .withProgram(program)
@@ -84,6 +97,8 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
         .withLot(lot)
         .build();
     stockCardRepository.save(stockCard);
+
+    creditReason = stockCardLineItemReasonRepository.findByName("Transfer In");
 
     calculatedStockOnHandDataBuilder = new CalculatedStockOnHandDataBuilder()
         .withoutId()
@@ -176,6 +191,10 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
         .withQuantity(15)
         .build();
 
+    lineItemlist = createStockCardLineItemsList(lineItem.getOccurredDate(), creditReason);
+    stockCard.setLineItems(lineItemlist);
+    stockCardRepository.save(stockCard);
+
     calculatedStockOnHandRepository.save(
         calculatedStockOnHandDataBuilder
             .withOccurredDate(lineItem.getOccurredDate().minusDays(1))
@@ -212,6 +231,10 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
         .withQuantity(5)
         .build();
 
+    lineItemlist = createStockCardLineItemsList(lineItem.getOccurredDate(), creditReason);
+    stockCard.setLineItems(lineItemlist);
+    stockCardRepository.save(stockCard);
+
     calculatedStockOnHandRepository.save(
         calculatedStockOnHandDataBuilder
             .withOccurredDate(lineItem.getOccurredDate().minusDays(1))
@@ -246,6 +269,10 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     final StockCardLineItem lineItem = new StockCardLineItemDataBuilder()
         .withQuantity(50)
         .build();
+
+    lineItemlist = createStockCardLineItemsList(lineItem.getOccurredDate(), creditReason);
+    stockCard.setLineItems(lineItemlist);
+    stockCardRepository.save(stockCard);
 
     calculatedStockOnHandRepository.save(
         calculatedStockOnHandDataBuilder
@@ -289,6 +316,10 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     final StockCardLineItem lineItem = new StockCardLineItemDataBuilder()
         .withQuantity(physicalInventoryQuantity)
         .build();
+
+    lineItemlist = createStockCardLineItemsList(lineItem.getOccurredDate(), creditReason);
+    stockCard.setLineItems(lineItemlist);
+    stockCardRepository.save(stockCard);
 
     calculatedStockOnHandRepository.save(
         calculatedStockOnHandDataBuilder
@@ -352,6 +383,10 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
         .withQuantity(15)
         .build();
 
+    lineItemlist = createStockCardLineItemsList(lineItem.getOccurredDate(), creditReason);
+    stockCard.setLineItems(lineItemlist);
+    stockCardRepository.save(stockCard);
+
     calculatedStockOnHandRepository.save(
         calculatedStockOnHandDataBuilder
             .withOccurredDate(lineItem.getOccurredDate())
@@ -366,5 +401,122 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
             lineItem.getOccurredDate());
 
     assertThat(result.get(0).getStockOnHand(), is(25));
+  }
+
+  @Test
+  public void shouldSetPhysicalInventoryValueAsStockOnHandWhenPhysicalInventoryIsTheLastValue() {
+    final StockCardLineItem lineItem = new StockCardLineItemDataBuilder()
+        .withQuantity(150)
+        .build();
+
+    lineItemlist = createStockCardLineItemsList(lineItem.getOccurredDate(), creditReason);
+    stockCard.setLineItems(lineItemlist);
+    stockCardRepository.save(stockCard);
+
+    calculatedStockOnHandRepository.save(
+        calculatedStockOnHandDataBuilder
+            .withOccurredDate(lineItem.getOccurredDate().minusDays(3))
+            .withStockOnHand(10)
+            .build());
+    calculatedStockOnHandRepository.save(
+        calculatedStockOnHandDataBuilder
+            .withOccurredDate(lineItem.getOccurredDate().minusDays(2))
+            .withStockOnHand(20)
+            .build());
+    calculatedStockOnHandRepository.save(
+        calculatedStockOnHandDataBuilder
+            .withOccurredDate(lineItem.getOccurredDate().minusDays(1))
+            .withStockOnHand(30)
+            .build());
+
+    calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem);
+
+    List<CalculatedStockOnHand> result = calculatedStockOnHandRepository
+        .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
+            stockCard.getId(),
+            lineItem.getOccurredDate().minusDays(3));
+
+    assertThat(result.get(0).getStockOnHand(), is(10));
+    assertThat(result.get(1).getStockOnHand(), is(20));
+    assertThat(result.get(2).getStockOnHand(), is(30));
+    assertThat(result.get(3).getStockOnHand(), is(150));
+  }
+
+  @Test
+  public void shouldSetProperSohWhenAddingAdjustmentBeforePhysicalInventoryAsTheLastValue() {
+    final StockCardLineItem lineItem = new StockCardLineItemDataBuilder()
+        .withCreditReason()
+        .withQuantity(15)
+        .build();
+
+    lineItemlist = createStockCardLineItemsList(lineItem.getOccurredDate(), null);
+    stockCard.setLineItems(lineItemlist);
+    stockCardRepository.save(stockCard);
+
+    calculatedStockOnHandRepository.save(
+        calculatedStockOnHandDataBuilder
+            .withOccurredDate(lineItem.getOccurredDate().minusDays(3))
+            .withStockOnHand(10)
+            .build());
+    calculatedStockOnHandRepository.save(
+        calculatedStockOnHandDataBuilder
+            .withOccurredDate(lineItem.getOccurredDate().minusDays(2))
+            .withStockOnHand(20)
+            .build());
+    calculatedStockOnHandRepository.save(
+        calculatedStockOnHandDataBuilder
+            .withOccurredDate(lineItem.getOccurredDate().plusDays(1))
+            .withStockOnHand(10)
+            .build());
+
+    calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem);
+
+    List<CalculatedStockOnHand> result = calculatedStockOnHandRepository
+        .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
+            stockCard.getId(),
+            lineItem.getOccurredDate().minusDays(3));
+
+    assertThat(result.get(0).getStockOnHand(), is(10));
+    assertThat(result.get(1).getStockOnHand(), is(20));
+    assertThat(result.get(2).getStockOnHand(), is(35));
+    assertThat(result.get(3).getStockOnHand(), is(10));
+  }
+
+  private List<StockCardLineItem> createStockCardLineItemsList(LocalDate occurredDate,
+      StockCardLineItemReason reason) {
+
+    StockCardLineItem lineItem1 = new StockCardLineItemDataBuilder()
+        .withReason(reason)
+        .withOccurredDate(occurredDate.minusDays(1))
+        .withQuantity(10)
+        .withOriginEvent(event)
+        .build();
+    lineItem1.setStockCard(stockCard);
+    stockCardLineItemRepository.save(lineItem1);
+
+    StockCardLineItem lineItem2 = new StockCardLineItemDataBuilder()
+        .withReason(reason)
+        .withOccurredDate(occurredDate.plusDays(2))
+        .withQuantity(10)
+        .withOriginEvent(event)
+        .build();
+    lineItem2.setStockCard(stockCard);
+    stockCardLineItemRepository.save(lineItem2);
+
+    StockCardLineItem lineItem3 = new StockCardLineItemDataBuilder()
+        .withReason(reason)
+        .withOccurredDate(occurredDate.plusDays(3))
+        .withQuantity(10)
+        .withOriginEvent(event)
+        .build();
+    lineItem3.setStockCard(stockCard);
+    stockCardLineItemRepository.save(lineItem3);
+
+    List<StockCardLineItem> list = new ArrayList<>();
+    list.add(lineItem1);
+    list.add(lineItem2);
+    list.add(lineItem3);
+
+    return list;
   }
 }
