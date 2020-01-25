@@ -191,7 +191,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
         .withQuantity(15)
         .build();
 
-    lineItemlist = createStockCardLineItemsList(lineItem.getOccurredDate(), creditReason);
+    lineItemlist = createStockCardLineItemsList(lineItem, creditReason);
     stockCard.setLineItems(lineItemlist);
     stockCardRepository.save(stockCard);
 
@@ -231,7 +231,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
         .withQuantity(5)
         .build();
 
-    lineItemlist = createStockCardLineItemsList(lineItem.getOccurredDate(), creditReason);
+    lineItemlist = createStockCardLineItemsList(lineItem, creditReason);
     stockCard.setLineItems(lineItemlist);
     stockCardRepository.save(stockCard);
 
@@ -270,7 +270,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
         .withQuantity(50)
         .build();
 
-    lineItemlist = createStockCardLineItemsList(lineItem.getOccurredDate(), creditReason);
+    lineItemlist = createStockCardLineItemsList(lineItem, creditReason);
     stockCard.setLineItems(lineItemlist);
     stockCardRepository.save(stockCard);
 
@@ -317,7 +317,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
         .withQuantity(physicalInventoryQuantity)
         .build();
 
-    lineItemlist = createStockCardLineItemsList(lineItem.getOccurredDate(), creditReason);
+    lineItemlist = createStockCardLineItemsList(lineItem, creditReason);
     stockCard.setLineItems(lineItemlist);
     stockCardRepository.save(stockCard);
 
@@ -383,7 +383,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
         .withQuantity(15)
         .build();
 
-    lineItemlist = createStockCardLineItemsList(lineItem.getOccurredDate(), creditReason);
+    lineItemlist = createStockCardLineItemsList(lineItem, creditReason);
     stockCard.setLineItems(lineItemlist);
     stockCardRepository.save(stockCard);
 
@@ -409,7 +409,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
         .withQuantity(150)
         .build();
 
-    lineItemlist = createStockCardLineItemsList(lineItem.getOccurredDate(), creditReason);
+    lineItemlist = createStockCardLineItemsList(lineItem, creditReason);
     stockCard.setLineItems(lineItemlist);
     stockCardRepository.save(stockCard);
 
@@ -449,7 +449,9 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
         .withQuantity(15)
         .build();
 
-    lineItemlist = createStockCardLineItemsList(lineItem.getOccurredDate(), null);
+    lineItemlist = createStockCardLineItemsList(lineItem, null);
+    lineItemlist.get(0).setOccurredDate(lineItem.getOccurredDate().minusDays(3));
+    lineItemlist.get(1).setOccurredDate(lineItem.getOccurredDate().minusDays(2));
     stockCard.setLineItems(lineItemlist);
     stockCardRepository.save(stockCard);
 
@@ -482,12 +484,52 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     assertThat(result.get(3).getStockOnHand(), is(10));
   }
 
-  private List<StockCardLineItem> createStockCardLineItemsList(LocalDate occurredDate,
+  @Test
+  public void shouldRecalculateStockOnHandAfterAddingLineItemWithPreviousOccurredDate() {
+    final StockCardLineItem lineItem = new StockCardLineItemDataBuilder()
+        .withQuantity(15)
+        .build();
+
+    lineItemlist = createStockCardLineItemsList(lineItem, creditReason);
+    lineItemlist.get(0).setOccurredDate(lineItem.getOccurredDate().plusDays(1));
+    stockCard.setLineItems(lineItemlist);
+    stockCardRepository.save(stockCard);
+
+    calculatedStockOnHandRepository.save(
+        calculatedStockOnHandDataBuilder
+            .withOccurredDate(lineItem.getOccurredDate().plusDays(1))
+            .withStockOnHand(10)
+            .build());
+    calculatedStockOnHandRepository.save(
+        calculatedStockOnHandDataBuilder
+            .withOccurredDate(lineItem.getOccurredDate().plusDays(2))
+            .withStockOnHand(20)
+            .build());
+    calculatedStockOnHandRepository.save(
+        calculatedStockOnHandDataBuilder
+            .withOccurredDate(lineItem.getOccurredDate().plusDays(3))
+            .withStockOnHand(30)
+            .build());
+
+    calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem);
+
+    List<CalculatedStockOnHand> result = calculatedStockOnHandRepository
+        .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
+            stockCard.getId(),
+            lineItem.getOccurredDate().minusDays(3));
+
+    assertThat(result.get(0).getStockOnHand(), is(15));
+    assertThat(result.get(1).getStockOnHand(), is(25));
+    assertThat(result.get(2).getStockOnHand(), is(35));
+    assertThat(result.get(3).getStockOnHand(), is(45));
+  }
+
+  private List<StockCardLineItem> createStockCardLineItemsList(StockCardLineItem lineItem,
       StockCardLineItemReason reason) {
 
     StockCardLineItem lineItem1 = new StockCardLineItemDataBuilder()
         .withReason(reason)
-        .withOccurredDate(occurredDate.minusDays(1))
+        .withOccurredDate(lineItem.getOccurredDate().minusDays(1))
         .withQuantity(10)
         .withOriginEvent(event)
         .build();
@@ -496,7 +538,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
 
     StockCardLineItem lineItem2 = new StockCardLineItemDataBuilder()
         .withReason(reason)
-        .withOccurredDate(occurredDate.plusDays(2))
+        .withOccurredDate(lineItem.getOccurredDate().plusDays(2))
         .withQuantity(10)
         .withOriginEvent(event)
         .build();
@@ -505,7 +547,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
 
     StockCardLineItem lineItem3 = new StockCardLineItemDataBuilder()
         .withReason(reason)
-        .withOccurredDate(occurredDate.plusDays(3))
+        .withOccurredDate(lineItem.getOccurredDate().plusDays(3))
         .withQuantity(10)
         .withOriginEvent(event)
         .build();

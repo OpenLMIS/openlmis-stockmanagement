@@ -103,18 +103,12 @@ public class CalculatedStockOnHandService {
         .filter(item -> item.getOccurredDate().isAfter(lineItem.getOccurredDate()))
         .collect(Collectors.toList());
 
-    if (followingLineItems.isEmpty()) {
-      Integer previousStockOnHand = getLineItemsPreviousStockOnHand(lineItem, stockCard);
-      deleteFollowingStockOnHandValuesBeforeSave(followingStockOnHands);
-      saveCalculatedStockOnHand(lineItem, previousStockOnHand, stockCard);
-    } else {
-      followingLineItems.add(0, lineItem);
-      followingLineItems.forEach(item -> {
-        int followingItemPreviousStockOnHand = getLineItemsPreviousStockOnHand(item, stockCard);
-        deleteFollowingStockOnHandValuesBeforeSave(followingStockOnHands);
-        saveCalculatedStockOnHand(item, followingItemPreviousStockOnHand, stockCard);
-      });
-    }
+    followingLineItems.add(0, lineItem);
+    followingLineItems.forEach(item -> {
+      int followingItemPreviousStockOnHand = getLineItemsPreviousStockOnHand(item, stockCard);
+      deleteStockOnHands(followingStockOnHands);
+      saveCalculatedStockOnHand(item, followingItemPreviousStockOnHand, stockCard);
+    });
   }
 
   private void fetchStockOnHand(StockCard stockCard, LocalDate asOfDate) {
@@ -131,18 +125,17 @@ public class CalculatedStockOnHandService {
   }
 
   private Integer setStockOnHandValue(StockCardLineItem lineItem, Integer previousStockOnHand) {
-    return lineItem.isPhysicalInventory()
+    int quantity = lineItem.isPhysicalInventory()
         ? lineItem.getQuantity()
         : previousStockOnHand + lineItem.getQuantityWithSign();
+    return quantity < 0 ? 0 : quantity;
   }
 
   private void saveCalculatedStockOnHand(StockCardLineItem lineItem, Integer previousStockOnHand,
       StockCard stockCard) {
-    int quantity = lineItem.getQuantity() < 0
-        ? 0
-        : setStockOnHandValue(lineItem, previousStockOnHand);
-    calculatedStockOnHandRepository.save(new CalculatedStockOnHand(quantity, stockCard,
-        lineItem.getOccurredDate(), lineItem.getProcessedDate()));
+    calculatedStockOnHandRepository.save(new CalculatedStockOnHand(
+        setStockOnHandValue(lineItem, previousStockOnHand),
+        stockCard, lineItem.getOccurredDate(), lineItem.getProcessedDate()));
   }
 
   private Integer getLineItemsPreviousStockOnHand(StockCardLineItem lineItem, StockCard stockCard) {
@@ -155,9 +148,8 @@ public class CalculatedStockOnHandService {
             }).getStockOnHand();
   }
 
-  private void deleteFollowingStockOnHandValuesBeforeSave(
+  private void deleteStockOnHands(
       List<CalculatedStockOnHand> followingStockOnHands) {
     followingStockOnHands.forEach(soh -> calculatedStockOnHandRepository.delete(soh));
-    followingStockOnHands.clear();
   }
 }
