@@ -15,9 +15,18 @@
 
 package org.openlmis.stockmanagement.repository;
 
+import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItems;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
+
+import org.junit.Test;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
@@ -71,5 +80,61 @@ public class CalculatedStockOnHandRepositoryIntegrationTest
         .withoutId()
         .withStockCard(stockCard)
         .build();
+  }
+
+  @Test
+  public void shouldReturnCalculatedStockOnHandsWhenNoStartDateProvided() {
+    CalculatedStockOnHand calculatedStockOnHand1 = this.generateInstance();
+    calculatedStockOnHand1.setOccurredDate(LocalDate.of(2010, 8, 1));
+    calculatedStockOnHandRepository.save(calculatedStockOnHand1);
+
+    CalculatedStockOnHand calculatedStockOnHand2 = this.generateInstance();
+    calculatedStockOnHand2.setOccurredDate(LocalDate.of(2010, 9, 1));
+    calculatedStockOnHandRepository.save(calculatedStockOnHand2);
+
+    CalculatedStockOnHand calculatedStockOnHand3 = this.generateInstance();
+    calculatedStockOnHand3.setOccurredDate(LocalDate.of(2010, 10, 1));
+    calculatedStockOnHandRepository.save(calculatedStockOnHand3);
+
+    List<CalculatedStockOnHand> resultList1 = calculatedStockOnHandRepository
+            .findByStockCardIdInAndOccurredDateLessThanEqual(
+                    asList(calculatedStockOnHand1.getStockCard().getId(),
+                    calculatedStockOnHand2.getStockCard().getId(),
+                    calculatedStockOnHand3.getStockCard().getId()),
+                    LocalDate.of(2010, 11, 1));
+
+    assertThat(resultList1, hasItems(calculatedStockOnHand1,
+            calculatedStockOnHand2, calculatedStockOnHand3));
+    assertEquals(resultList1.size(), 3);
+
+    List<CalculatedStockOnHand> resultList2 = calculatedStockOnHandRepository
+            .findByStockCardIdInAndOccurredDateLessThanEqual(
+                    asList(calculatedStockOnHand1.getStockCard().getId(),
+                            calculatedStockOnHand2.getStockCard().getId(),
+                            calculatedStockOnHand3.getStockCard().getId()),
+                    LocalDate.of(2010, 9, 15));
+
+    assertThat(resultList2, hasItems(calculatedStockOnHand1, calculatedStockOnHand2));
+    assertEquals(resultList2.size(), 2);
+
+    List<CalculatedStockOnHand> resultList3 = calculatedStockOnHandRepository
+            .findByStockCardIdInAndOccurredDateLessThanEqual(
+                    asList(calculatedStockOnHand1.getStockCard().getId(),
+                            calculatedStockOnHand2.getStockCard().getId(),
+                            calculatedStockOnHand3.getStockCard().getId()),
+                    LocalDate.of(2010, 8, 15));
+
+    assertThat(resultList3, hasItems(calculatedStockOnHand1));
+    assertEquals(resultList3.size(), 1);
+
+    List<CalculatedStockOnHand> resultList4 = calculatedStockOnHandRepository
+            .findByStockCardIdInAndOccurredDateLessThanEqual(
+                    asList(calculatedStockOnHand1.getStockCard().getId(),
+                            calculatedStockOnHand2.getStockCard().getId(),
+                            calculatedStockOnHand3.getStockCard().getId()),
+                    LocalDate.of(2010, 4, 15));
+
+    assertTrue(resultList4.isEmpty());
+    assertEquals(resultList4.size(), 0);
   }
 }

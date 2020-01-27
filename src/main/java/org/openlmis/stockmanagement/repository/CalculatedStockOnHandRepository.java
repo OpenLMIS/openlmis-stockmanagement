@@ -39,6 +39,7 @@ public interface CalculatedStockOnHandRepository
   List<CalculatedStockOnHand> findByStockCardIdAndOccurredDateBetween(
       Collection<UUID> stockCardId, LocalDate startDate, LocalDate endDate);
 
-  List<CalculatedStockOnHand> findByStockCardIdAndOccurredDateLessThanEqual(
-      Collection<UUID> stockCardId, LocalDate endDate);
+  List<CalculatedStockOnHand>
+      findByStockCardIdInAndOccurredDateLessThanEqual(
+        Collection<UUID> stockCardId, LocalDate endDate);
 }

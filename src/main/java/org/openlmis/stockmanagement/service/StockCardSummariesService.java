@@ -293,7 +293,13 @@ public class StockCardSummariesService extends StockCardBaseService {
     List<CalculatedStockOnHand> calculatedStockOnHands;
     if (null == startDate) {
       calculatedStockOnHands = calculatedStockOnHandRepository
-            .findByStockCardIdAndOccurredDateLessThanEqual(stockCardIds, endDate);
+            .findByStockCardIdInAndOccurredDateLessThanEqual(stockCardIds, endDate);
+      stockCardIds.forEach(stockCardId -> {
+        Optional<CalculatedStockOnHand> calculatedStockOnHand = calculatedStockOnHandRepository
+                .findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(
+                        stockCardId, endDate);
+        calculatedStockOnHand.ifPresent(calculatedStockOnHands::add);
+      });
     } else {
       calculatedStockOnHands = calculatedStockOnHandRepository
             .findByStockCardIdAndOccurredDateBetween(stockCardIds, startDate, endDate);

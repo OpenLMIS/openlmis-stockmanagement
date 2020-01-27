@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -102,6 +103,17 @@ public class StockCardSummariesServiceTest {
 
   @InjectMocks
   private StockCardSummariesService stockCardSummariesService;
+
+  private final UUID facilityId = randomUUID();
+  private final UUID programId = randomUUID();
+
+  private final UUID orderableId1 = randomUUID();
+  private final UUID orderableId2 = randomUUID();
+  private final UUID orderableId3 = randomUUID();
+  private final UUID orderableId4 = randomUUID();
+  private final UUID orderableId5 = randomUUID();
+  private final UUID orderableId6 = randomUUID();
+  private final UUID orderableId7 = randomUUID();
 
   @Test
   public void shouldCreateDummyCards() {
@@ -247,17 +259,6 @@ public class StockCardSummariesServiceTest {
 
   @Test
   public void shouldAggregateStockCardsByCommodityTypes() {
-    final UUID facilityId = randomUUID();
-    final UUID programId = randomUUID();
-
-    final UUID orderableId1 = randomUUID();
-    final UUID orderableId2 = randomUUID();
-    final UUID orderableId3 = randomUUID();
-    final UUID orderableId4 = randomUUID();
-    final UUID orderableId5 = randomUUID();
-    final UUID orderableId6 = randomUUID();
-    final UUID orderableId7 = randomUUID();
-
     Map<UUID, OrderableFulfillDto> fulfillMap = new HashMap<>();
     fulfillMap.put(orderableId2, new OrderableFulfillDtoDataBuilder()
         .withCanBeFulfilledByMe(singletonList(orderableId1)).build());
@@ -269,7 +270,8 @@ public class StockCardSummariesServiceTest {
 
     when(orderableFulfillReferenceDataService
         .findByIds(
-            ImmutableSet.of(orderableId2, orderableId3, orderableId5, orderableId6, orderableId7)))
+            ImmutableSet.of(orderableId2, orderableId3,
+            orderableId5, orderableId6, orderableId7)))
         .thenReturn(fulfillMap);
 
     StockEvent event = new StockEventDataBuilder()
@@ -331,7 +333,8 @@ public class StockCardSummariesServiceTest {
         stockCardSummariesService.getGroupedStockCards(programId, facilityId, null,
             LocalDate.of(2017, 3, 16), LocalDate.of(2017, 3, 19));
 
-    assertThat(cardMap.keySet(), hasItems(orderableId1, orderableId4, orderableId6, orderableId7));
+    assertThat(cardMap.keySet(), hasItems(orderableId1, orderableId4,
+        orderableId6, orderableId7));
 
     assertThat(cardMap.get(orderableId1).getStockCards(), hasItems(stockCard1, stockCard2));
     assertThat(cardMap.get(orderableId1).getCalculatedStockOnHands(),
@@ -348,32 +351,103 @@ public class StockCardSummariesServiceTest {
     assertThat(cardMap.get(orderableId7).getStockCards(), hasItems(stockCard5));
     assertThat(cardMap.get(orderableId1).getCalculatedStockOnHands(),
         hasItems(calculatedStockOnHand, calculatedStockOnHand5));
+  }
+
+  @Test
+  public void shouldAggregateStockCardsByCommodityTypesWhenNoStartDateProvided() {
+    Map<UUID, OrderableFulfillDto> fulfillMap = new HashMap<>();
+    fulfillMap.put(orderableId2, new OrderableFulfillDtoDataBuilder()
+        .withCanBeFulfilledByMe(singletonList(orderableId1)).build());
+    fulfillMap.put(orderableId3, new OrderableFulfillDtoDataBuilder()
+        .withCanBeFulfilledByMe(singletonList(orderableId1)).build());
+    fulfillMap.put(orderableId5, new OrderableFulfillDtoDataBuilder()
+        .withCanBeFulfilledByMe(singletonList(orderableId4)).build());
+    fulfillMap.put(orderableId7, new OrderableFulfillDtoDataBuilder().build());
+
+    when(orderableFulfillReferenceDataService
+        .findByIds(
+            ImmutableSet.of(orderableId2, orderableId3, orderableId5,
+            orderableId6, orderableId7)))
+        .thenReturn(fulfillMap);
+
+    StockEvent event = new StockEventDataBuilder()
+        .withFacility(facilityId)
+        .withProgram(programId)
+        .build();
+
+    StockCard stockCard1 = new StockCardDataBuilder(event)
+        .withOrderable(orderableId2)
+        .withStockOnHand(12)
+        .build();
+
+    StockCard stockCard2 = new StockCardDataBuilder(event)
+        .withOrderable(orderableId3)
+        .withStockOnHand(26)
+        .build();
+
+    StockCard stockCard3 = new StockCardDataBuilder(event)
+        .withOrderable(orderableId5)
+        .withStockOnHand(36)
+        .build();
+
+    StockCard stockCard4 = new StockCardDataBuilder(event)
+        .withOrderable(orderableId6)
+        .withStockOnHand(46)
+        .build();
+
+    StockCard stockCard5 = new StockCardDataBuilder(event)
+        .withOrderable(orderableId7)
+        .withStockOnHand(56)
+        .build();
+
+    when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId))
+        .thenReturn(asList(stockCard1, stockCard2, stockCard3, stockCard4, stockCard5));
+
+    when(calculatedStockOnHandService
+        .getStockCardsWithStockOnHand(programId, facilityId))
+        .thenReturn(asList(stockCard1, stockCard2, stockCard3, stockCard4, stockCard5));
+
+    List<CalculatedStockOnHand> calculatedStockOnHands = new ArrayList<>();
+    CalculatedStockOnHand calculatedStockOnHand = new CalculatedStockOnHandDataBuilder().build();
+    calculatedStockOnHands.add(calculatedStockOnHand);
 
     when(calculatedStockOnHandRepository
-            .findByStockCardIdAndOccurredDateLessThanEqual(any(), any()))
-            .thenReturn(calculatedStockOnHands);
+        .findByStockCardIdInAndOccurredDateLessThanEqual(any(), any()))
+        .thenReturn(calculatedStockOnHands);
 
-    Map<UUID, StockCardAggregate> cardMap2 =
-            stockCardSummariesService.getGroupedStockCards(programId, facilityId, null,
-                    null, LocalDate.of(2017, 3, 19));
+    final CalculatedStockOnHand calculatedStockOnHand1 =
+            generateCalculatedStockOnHandWithEndDate(stockCard1);
+    final CalculatedStockOnHand calculatedStockOnHand2 =
+            generateCalculatedStockOnHandWithEndDate(stockCard2);
+    final CalculatedStockOnHand calculatedStockOnHand3 =
+            generateCalculatedStockOnHandWithEndDate(stockCard3);
+    final CalculatedStockOnHand calculatedStockOnHand4 =
+            generateCalculatedStockOnHandWithEndDate(stockCard4);
+    final CalculatedStockOnHand calculatedStockOnHand5 =
+            generateCalculatedStockOnHandWithEndDate(stockCard5);
 
-    assertThat(cardMap2.keySet(), hasItems(orderableId1, orderableId4, orderableId6, orderableId7));
+    Map<UUID, StockCardAggregate> cardMap =
+        stockCardSummariesService.getGroupedStockCards(programId, facilityId, null,
+            null, LocalDate.of(2017, 3, 19));
 
-    assertThat(cardMap2.get(orderableId1).getStockCards(), hasItems(stockCard1, stockCard2));
-    assertThat(cardMap2.get(orderableId1).getCalculatedStockOnHands(),
-            hasItems(calculatedStockOnHand, calculatedStockOnHand1, calculatedStockOnHand2));
+    assertThat(cardMap.keySet(), hasItems(orderableId1, orderableId4,
+        orderableId6, orderableId7));
 
-    assertThat(cardMap2.get(orderableId4).getStockCards(), hasItems(stockCard3));
-    assertThat(cardMap2.get(orderableId1).getCalculatedStockOnHands(),
-            hasItems(calculatedStockOnHand, calculatedStockOnHand3));
+    assertThat(cardMap.get(orderableId1).getStockCards(), hasItems(stockCard1, stockCard2));
+    assertThat(cardMap.get(orderableId1).getCalculatedStockOnHands(),
+        hasItems(calculatedStockOnHand, calculatedStockOnHand1, calculatedStockOnHand2));
 
-    assertThat(cardMap2.get(orderableId6).getStockCards(), hasItems(stockCard4));
-    assertThat(cardMap2.get(orderableId1).getCalculatedStockOnHands(),
-            hasItems(calculatedStockOnHand, calculatedStockOnHand4));
+    assertThat(cardMap.get(orderableId4).getStockCards(), hasItems(stockCard3));
+    assertThat(cardMap.get(orderableId1).getCalculatedStockOnHands(),
+        hasItems(calculatedStockOnHand, calculatedStockOnHand3));
 
-    assertThat(cardMap2.get(orderableId7).getStockCards(), hasItems(stockCard5));
-    assertThat(cardMap2.get(orderableId1).getCalculatedStockOnHands(),
-            hasItems(calculatedStockOnHand, calculatedStockOnHand5));
+    assertThat(cardMap.get(orderableId6).getStockCards(), hasItems(stockCard4));
+    assertThat(cardMap.get(orderableId1).getCalculatedStockOnHands(),
+        hasItems(calculatedStockOnHand, calculatedStockOnHand4));
+
+    assertThat(cardMap.get(orderableId7).getStockCards(), hasItems(stockCard5));
+    assertThat(cardMap.get(orderableId1).getCalculatedStockOnHands(),
+        hasItems(calculatedStockOnHand, calculatedStockOnHand5));
   }
 
   private OrderableDto createOrderableDto(UUID orderableId, String productName) {
@@ -392,4 +466,14 @@ public class StockCardSummariesServiceTest {
         .thenReturn(Optional.ofNullable(calculatedStockOnHand));
     return calculatedStockOnHand;
   }
+
+  private CalculatedStockOnHand generateCalculatedStockOnHandWithEndDate(StockCard stockCard) {
+    CalculatedStockOnHand calculatedStockOnHand = new CalculatedStockOnHandDataBuilder().build();
+    when(calculatedStockOnHandRepository
+          .findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(
+                  stockCard.getId(), LocalDate.of(2017, 3, 19)))
+          .thenReturn(Optional.ofNullable(calculatedStockOnHand));
+    return calculatedStockOnHand;
+  }
+
 }
