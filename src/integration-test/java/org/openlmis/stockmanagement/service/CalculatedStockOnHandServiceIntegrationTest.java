@@ -404,6 +404,44 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
   }
 
   @Test
+  public void shouldNotCreateCalculatedSohWhenAddingPriorAdjustmentIfAnySohExistsForGivenDay() {
+    final StockCardLineItem lineItem = new StockCardLineItemDataBuilder()
+        .withCreditReason()
+        .withQuantity(15)
+        .build();
+
+    lineItemlist = createStockCardLineItemsList(lineItem, creditReason);
+    lineItemlist.get(0).setOccurredDate(lineItem.getOccurredDate().plusDays(1));
+    lineItemlist.get(0).setProcessedDate(lineItem.getProcessedDate().plusHours(1));
+    lineItemlist.get(1).setOccurredDate(lineItem.getOccurredDate().plusDays(1));
+    lineItemlist.get(1).setProcessedDate(lineItem.getProcessedDate().plusHours(2));
+    stockCard.setLineItems(lineItemlist);
+    stockCardRepository.save(stockCard);
+
+    calculatedStockOnHandRepository.save(
+        calculatedStockOnHandDataBuilder
+            .withOccurredDate(lineItem.getOccurredDate().plusDays(1))
+            .withStockOnHand(10)
+            .build());
+
+    calculatedStockOnHandRepository.save(
+        calculatedStockOnHandDataBuilder
+            .withOccurredDate(lineItem.getOccurredDate().plusDays(1))
+            .withStockOnHand(20)
+            .build());
+
+    calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem);
+
+    List<CalculatedStockOnHand> result = calculatedStockOnHandRepository
+        .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
+            stockCard.getId(),
+            lineItem.getOccurredDate());
+
+    assertThat(result.get(0).getStockOnHand(), is(15));
+    assertThat(result.get(1).getStockOnHand(), is(35));
+  }
+
+  @Test
   public void shouldSetPhysicalInventoryValueAsStockOnHandWhenPhysicalInventoryIsTheLastValue() {
     final StockCardLineItem lineItem = new StockCardLineItemDataBuilder()
         .withQuantity(150)
@@ -522,6 +560,46 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     assertThat(result.get(1).getStockOnHand(), is(25));
     assertThat(result.get(2).getStockOnHand(), is(35));
     assertThat(result.get(3).getStockOnHand(), is(45));
+  }
+
+  @Test
+  public void shouldSetStockOnHandToZeroWhenResultIsNegative() {
+    final StockCardLineItem lineItem = new StockCardLineItemDataBuilder()
+        .withDebitReason()
+        .withQuantity(15)
+        .build();
+
+    lineItemlist = createStockCardLineItemsList(lineItem, creditReason);
+    stockCard.setLineItems(lineItemlist);
+    stockCardRepository.save(stockCard);
+
+    calculatedStockOnHandRepository.save(
+        calculatedStockOnHandDataBuilder
+            .withOccurredDate(lineItem.getOccurredDate().minusDays(1))
+            .withStockOnHand(10)
+            .build());
+    calculatedStockOnHandRepository.save(
+        calculatedStockOnHandDataBuilder
+            .withOccurredDate(lineItem.getOccurredDate().plusDays(2))
+            .withStockOnHand(20)
+            .build());
+    calculatedStockOnHandRepository.save(
+        calculatedStockOnHandDataBuilder
+            .withOccurredDate(lineItem.getOccurredDate().plusDays(3))
+            .withStockOnHand(30)
+            .build());
+
+    calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem);
+
+    List<CalculatedStockOnHand> result = calculatedStockOnHandRepository
+        .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
+            stockCard.getId(),
+            lineItem.getOccurredDate().minusDays(3));
+
+    assertThat(result.get(0).getStockOnHand(), is(10));
+    assertThat(result.get(1).getStockOnHand(), is(0));
+    assertThat(result.get(2).getStockOnHand(), is(10));
+    assertThat(result.get(3).getStockOnHand(), is(20));
   }
 
   private List<StockCardLineItem> createStockCardLineItemsList(StockCardLineItem lineItem,
