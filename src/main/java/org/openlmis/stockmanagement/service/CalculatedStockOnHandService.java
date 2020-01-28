@@ -149,7 +149,7 @@ public class CalculatedStockOnHandService {
   }
 
   private void deleteStockOnHands(
-      List<CalculatedStockOnHand> followingStockOnHands) {
-    followingStockOnHands.forEach(soh -> calculatedStockOnHandRepository.delete(soh));
+      List<CalculatedStockOnHand> stockOnHands) {
+    stockOnHands.forEach(soh -> calculatedStockOnHandRepository.delete(soh));
   }
 }
