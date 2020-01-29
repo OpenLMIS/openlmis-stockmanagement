@@ -26,11 +26,16 @@ import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
 import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CalculatedStockOnHandService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(CalculatedStockOnHandService.class);
 
   @Autowired
   private StockCardRepository stockCardRepository;
@@ -94,15 +99,10 @@ public class CalculatedStockOnHandService {
    */
   public void recalculateStockOnHand(
       StockCard stockCard, StockCardLineItem lineItem) {
-    List<CalculatedStockOnHand> followingStockOnHands = calculatedStockOnHandRepository
-            .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
-                stockCard.getId(), lineItem.getOccurredDate());
+    Profiler profiler = new Profiler("RECALCULATE_STOCK_ON_HAND");
+    profiler.setLogger(LOGGER);
 
-    List<StockCardLineItem> followingLineItems = stockCard.getLineItems()
-        .stream()
-        .filter(item -> item.getOccurredDate().isAfter(lineItem.getOccurredDate()))
-        .collect(Collectors.toList());
-
+    profiler.start("GET_LINE_ITEMS_PREVIOUS_STOCK_ON_HAND");
     int lineItemsPreviousStockOnHand = calculatedStockOnHandRepository
         .findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(
             stockCard.getId(), lineItem.getOccurredDate()).orElseGet(() -> {
@@ -110,14 +110,29 @@ public class CalculatedStockOnHandService {
               calculatedStockOnHand.setStockOnHand(0);
               return calculatedStockOnHand;
             }).getStockOnHand();
+
+    profiler.start("GET_FOLLOWING_CALCULATED_STOCK_ON_HANDS");
+    List<CalculatedStockOnHand> followingStockOnHands = calculatedStockOnHandRepository
+        .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
+            stockCard.getId(), lineItem.getOccurredDate());
+
+    profiler.start("DELETE_FOLLOWING_CALCULATED_STOCK_ON_HANDS");
     calculatedStockOnHandRepository.delete(followingStockOnHands);
 
+    profiler.start("GET_FOLLOWING_STOCK_CARD_LINE_ITEMS");
+    List<StockCardLineItem> followingLineItems = stockCard.getLineItems()
+        .stream()
+        .filter(item -> item.getOccurredDate().isAfter(lineItem.getOccurredDate()))
+        .collect(Collectors.toList());
+
     followingLineItems.add(0, lineItem);
+    profiler.start("SAVE_RECALCULATED_STOCK_ON_HANDS");
     for (StockCardLineItem item : followingLineItems) {
       Integer calculatedStockOnHand = calculateStockOnHand(item, lineItemsPreviousStockOnHand);
       saveCalculatedStockOnHand(item, calculatedStockOnHand, stockCard);
       lineItemsPreviousStockOnHand = calculatedStockOnHand;
     }
+    profiler.stop().log();
   }
 
   private void fetchStockOnHand(StockCard stockCard, LocalDate asOfDate) {
