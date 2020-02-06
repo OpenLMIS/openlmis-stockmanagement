@@ -5,6 +5,7 @@ Bug fixes:
 * [OLMIS-6722](https://openlmis.atlassian.net/browse/OLMIS-6722): Fixed slow page load on Physical Inventory page by adding indexes to the database.
 * [OLMIS-6679](https://openlmis.atlassian.net/browse/OLMIS-6679): Fixed Internal Server Error for GET /stockCardRangeSummaries by adding a new method.
 * [OLMIS-6728](https://openlmis.atlassian.net/browse/OLMIS-6728): Fixed incorrect calculation of Stock on Hand.
+* [OLMIS-6574](https://openlmis.atlassian.net/browse/OLMIS-6574): Fixed differences of displaying products between Stock Management screens and Stock Card Summaries report.
 
 5.0.1 / 2019-10-21
 ==================
