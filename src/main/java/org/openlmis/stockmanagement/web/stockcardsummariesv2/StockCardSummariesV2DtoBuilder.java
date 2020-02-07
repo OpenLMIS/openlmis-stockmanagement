@@ -61,17 +61,18 @@ public class StockCardSummariesV2DtoBuilder {
             MapUtils.isEmpty(orderableFulfills) ? null : orderableFulfills.get(id)))
         .sorted();
 
-    Stream<StockCardSummaryV2Dto> stockCardsWithNoIdentifiers =
-        getStockCardsForOrderablesWithoutIdentifiers(stockCards, orderableFulfills);
+    Stream<StockCardSummaryV2Dto> stockCardSummariesWithNoIdentifiers =
+        getStockCardSummariesForOrderablesWithoutIdentifiers(stockCards, orderableFulfills);
 
-    Stream<StockCardSummaryV2Dto> summaries = Stream.concat(
-        summariesStream, stockCardsWithNoIdentifiers);
+    Stream<StockCardSummaryV2Dto> stockCardSummaries = Stream.concat(
+        summariesStream, stockCardSummariesWithNoIdentifiers);
 
     if (nonEmptySummariesOnly) {
-      summaries = summaries.filter(summary -> !summary.getCanFulfillForMe().isEmpty());
+      stockCardSummaries = stockCardSummaries.filter(
+          summary -> !summary.getCanFulfillForMe().isEmpty());
     }
 
-    return summaries.sorted().collect(toList());
+    return stockCardSummaries.sorted().collect(toList());
   }
 
   private StockCardSummaryV2Dto build(List<StockCard> stockCards, UUID orderableId,
@@ -93,7 +94,7 @@ public class StockCardSummariesV2DtoBuilder {
     return new StockCardSummaryV2Dto(createOrderableReference(orderableId), canFulfillSet);
   }
 
-  private Stream<StockCardSummaryV2Dto> getStockCardsForOrderablesWithoutIdentifiers(
+  private Stream<StockCardSummaryV2Dto> getStockCardSummariesForOrderablesWithoutIdentifiers(
       List<StockCard> stockCards, Map<UUID, OrderableFulfillDto> orderableFulfills) {
     Set<UUID> orderableIds = stockCards
         .stream()
