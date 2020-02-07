@@ -5,8 +5,8 @@ Bug fixes:
 * [OLMIS-6722](https://openlmis.atlassian.net/browse/OLMIS-6722): Fixed slow page load on Physical Inventory page by adding indexes to the database.
 * [OLMIS-6679](https://openlmis.atlassian.net/browse/OLMIS-6679): Fixed Internal Server Error for GET /stockCardRangeSummaries by adding a new method.
 * [OLMIS-6728](https://openlmis.atlassian.net/browse/OLMIS-6728): Fixed incorrect calculation of Stock on Hand.
-* [OLMIS-6574](https://openlmis.atlassian.net/browse/OLMIS-6574): Fixed issue that Printed Stock on Hand report contained more products than were displayed on the screen:
-    *the screen now displays Stock Card Summaries of Orderables both with and without Identifiers.
+* [OLMIS-6574](https://openlmis.atlassian.net/browse/OLMIS-6574): Fixed issues that Printed Stock on Hand report contained more products than were displayed on the Stock on hand screen and Physical Inventory screen:
+    *the screens now display Stock Card Summaries of Orderables both with and without Identifiers.
 
 5.0.1 / 2019-10-21
 ==================
