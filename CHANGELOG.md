@@ -7,6 +7,7 @@ Bug fixes:
 * [OLMIS-6728](https://openlmis.atlassian.net/browse/OLMIS-6728): Fixed incorrect calculation of Stock on Hand.
 * [OLMIS-6574](https://openlmis.atlassian.net/browse/OLMIS-6574): Fixed issues that Printed Stock on Hand report contained more products than were displayed on the Stock on hand screen and Physical Inventory screen:
     *the screens now display Stock Card Summaries of Orderables both with and without Identifiers.
+* [OLMIS-6559](https://openlmis.atlassian.net/browse/OLMIS-6559): Fixed long product codes being cut in Physical Inventory printout.
 
 5.0.1 / 2019-10-21
 ==================
