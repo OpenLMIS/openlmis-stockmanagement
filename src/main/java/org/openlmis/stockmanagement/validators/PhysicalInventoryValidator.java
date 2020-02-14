@@ -22,6 +22,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVEN
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ORDERABLE_DISABLED_VVM;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_ORDERABLE_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_ID_MISSING;
+import static org.slf4j.ext.XLoggerFactory.getXLogger;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.util.List;
@@ -32,7 +33,6 @@ import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
 import org.slf4j.ext.XLogger;
-import org.slf4j.ext.XLoggerFactory;
 import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -44,7 +44,7 @@ import org.springframework.stereotype.Component;
 @Component("PhysicalInventoryValidator")
 public class PhysicalInventoryValidator {
 
-  private static final XLogger XLOGGER = XLoggerFactory.getXLogger(PhysicalInventoryValidator.class);
+  private static final XLogger XLOGGER = getXLogger(PhysicalInventoryValidator.class);
 
   @Autowired
   private VvmValidator vvmValidator;
