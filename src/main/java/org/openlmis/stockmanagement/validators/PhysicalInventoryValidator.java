@@ -44,7 +44,7 @@ import org.springframework.stereotype.Component;
 @Component("PhysicalInventoryValidator")
 public class PhysicalInventoryValidator {
 
-  private static XLogger XLOGGER = XLoggerFactory.getXLogger(PhysicalInventoryValidator.class);
+  private static final XLogger XLOGGER = XLoggerFactory.getXLogger(PhysicalInventoryValidator.class);
 
   @Autowired
   private VvmValidator vvmValidator;
