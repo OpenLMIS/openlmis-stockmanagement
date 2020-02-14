@@ -31,6 +31,7 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.util.Message;
+import org.slf4j.profiler.Profiler;
 import org.springframework.stereotype.Component;
 
 /**
@@ -44,21 +45,29 @@ public class ReceiveIssueReasonValidator implements StockEventValidator {
 
   @Override
   public void validate(StockEventDto eventDto) {
-    LOGGER.debug("Validate receive and issue reason");
+    XLOGGER.entry(eventDto);
+    Profiler profiler = new Profiler("RECEIVE_ISSUE_VALIDATOR");
+    profiler.setLogger(XLOGGER);
 
     if (!eventDto.hasLineItems()) {
       return;
     }
 
+    profiler.start("CHECK_EVENT_LINE_ITEMS");
     for (StockEventLineItemDto eventLineItem : eventDto.getLineItems()) {
       if (eventLineItem.hasSourceId()) {
+        profiler.start("CHECK_RECEIVE_SOURCE");
         checkReceiveReason(eventDto, eventLineItem);
       }
 
       if (eventLineItem.hasDestinationId()) {
+        profiler.start("CHECK_ISSUE_REASON");
         checkIssueReason(eventDto, eventLineItem);
       }
     }
+
+    profiler.stop().log();
+    XLOGGER.exit(eventDto);
   }
 
   private void checkReceiveReason(StockEventDto event, StockEventLineItemDto lineItem) {

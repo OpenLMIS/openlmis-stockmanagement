@@ -27,6 +27,7 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.util.Message;
+import org.slf4j.profiler.Profiler;
 import org.springframework.stereotype.Component;
 
 /**
@@ -39,11 +40,15 @@ public class FreeTextValidator implements StockEventValidator {
 
   @Override
   public void validate(StockEventDto stockEventDto) {
-    LOGGER.debug("Validate free text");
+    XLOGGER.entry(stockEventDto);
+    Profiler profiler = new Profiler("FREE_TEXT_VALIDATOR");
+    profiler.setLogger(XLOGGER);
+
     if (!stockEventDto.hasLineItems()) {
       return;
     }
 
+    profiler.start("CHECK_EVENT_LINE_ITEMS");
     for (StockEventLineItemDto eventLineItem : stockEventDto.getLineItems()) {
       checkSourceDestinationFreeTextBothPresent(eventLineItem);
 
@@ -60,6 +65,9 @@ public class FreeTextValidator implements StockEventValidator {
 
       checkReasonFreeText(stockEventDto, eventLineItem);
     }
+
+    profiler.stop().log();
+    XLOGGER.exit(stockEventDto);
   }
 
   private void checkSourceDestinationFreeTextBothPresent(StockEventLineItemDto eventLineItem) {

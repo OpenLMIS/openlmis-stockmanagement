@@ -35,6 +35,7 @@ import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
+import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -46,22 +47,31 @@ public class UnpackKitValidator implements StockEventValidator {
 
   @Override
   public void validate(StockEventDto stockEventDto) {
+    XLOGGER.entry(stockEventDto);
+    Profiler profiler = new Profiler("UNPACK_KIT_VALIDATOR");
+    profiler.setLogger(XLOGGER);
+
     // do not try to validate this event if it is not kit unpacking event.
     if (!stockEventDto.isKitUnpacking()) {
       return;
     }
 
     StockEventProcessContext context = stockEventDto.getContext();
+
+    profiler.start("GET_ORDERABLE_IDS");
     List<UUID> orderableIds = stockEventDto
         .getLineItems()
         .stream()
         .map(StockEventLineItemDto::getOrderableId)
         .collect(Collectors.toList());
+
+    profiler.start("SEARCH_FOR_ORDERABLES");
     Map<UUID, OrderableDto> orderables = orderableReferenceDataService
         .findByIds(orderableIds)
         .stream()
         .collect(Collectors.toMap(OrderableDto::getId, Function.identity()));
 
+    profiler.start("GET_NON_UNPACK_QUANTITIES");
     Map<UUID, Integer> nonUnpackQuantities = stockEventDto
         .getLineItems()
         .stream()
@@ -71,6 +81,7 @@ public class UnpackKitValidator implements StockEventValidator {
                 StockEventLineItemDto::getOrderableId,
                 summingInt(StockEventLineItemDto::getQuantity)));
 
+    profiler.start("VALIDATE_UNPACK_KITS");
     stockEventDto.getLineItems()
         .stream()
         .filter(item -> context.getUnpackReasonId().equals(item.getReasonId()))
@@ -82,6 +93,8 @@ public class UnpackKitValidator implements StockEventValidator {
           new Message(ERROR_EVENT_CANNOT_UNPACK_WHEN_EXTRA_CONSTITUENTS_CREDITED));
     }
 
+    profiler.stop().log();
+    XLOGGER.exit(stockEventDto);
   }
 
   private void validateUnpackedKit(StockEventLineItemDto lineItem,

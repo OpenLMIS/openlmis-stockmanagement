@@ -16,8 +16,8 @@
 package org.openlmis.stockmanagement.validators;
 
 import org.openlmis.stockmanagement.dto.StockEventDto;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.ext.XLogger;
+import org.slf4j.ext.XLoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public interface StockEventValidator {
-  Logger LOGGER = LoggerFactory.getLogger(StockEventValidator.class);
+  XLogger XLOGGER = XLoggerFactory.getXLogger(StockEventValidator.class);
 
   void validate(StockEventDto stockEventDto);
 }

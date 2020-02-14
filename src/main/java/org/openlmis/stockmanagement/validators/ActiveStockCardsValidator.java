@@ -24,6 +24,7 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.util.Message;
+import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -42,6 +43,10 @@ public class ActiveStockCardsValidator implements StockEventValidator {
 
   @Override
   public void validate(StockEventDto stockEventDto) {
+    XLOGGER.entry(stockEventDto);
+    Profiler profiler = new Profiler("ACTIVE_STOCK_CARDS_VALIDATOR");
+    profiler.setLogger(XLOGGER);
+
     boolean noProgram = stockEventDto.getProgramId() == null;
     boolean noFacility = stockEventDto.getFacilityId() == null;
     boolean notPhysicalInventory = !stockEventDto.isPhysicalInventory();
@@ -50,14 +55,19 @@ public class ActiveStockCardsValidator implements StockEventValidator {
       return;//only need to do this validation for physical inventory
     }
 
-    checkAllStockCardsCovered(stockEventDto);
+    checkAllStockCardsCovered(stockEventDto, profiler.startNested("CHECK_STOCK_CARDS"));
+
+    profiler.stop().log();
+    XLOGGER.exit(stockEventDto);
   }
 
-  private void checkAllStockCardsCovered(StockEventDto stockEventDto) {
+  private void checkAllStockCardsCovered(StockEventDto stockEventDto, Profiler profiler) {
+    profiler.start("GET_ORDERABLE_LOT_IDENTITIES");
     List<OrderableLotIdentity> coveredIdentities = stockEventDto.getLineItems().stream()
         .map(OrderableLotIdentity::identityOf)
         .collect(toList());
 
+    profiler.start("FIND_STOCK_CARDS_BY_PROGRAM_AND_FACILITY");
     boolean anyMissing = stockCardRepository
         .getIdentitiesBy(stockEventDto.getProgramId(), stockEventDto.getFacilityId())
         .stream().anyMatch(identity -> !coveredIdentities.contains(identity));

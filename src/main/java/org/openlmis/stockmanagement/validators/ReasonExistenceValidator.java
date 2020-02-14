@@ -22,6 +22,7 @@ import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.util.Message;
+import org.slf4j.profiler.Profiler;
 import org.springframework.stereotype.Component;
 
 @Component(value = "ReasonExistenceValidator")
@@ -32,7 +33,10 @@ public class ReasonExistenceValidator implements StockEventValidator {
 
   @Override
   public void validate(StockEventDto stockEventDto) {
-    LOGGER.debug("Validate reason existence");
+    XLOGGER.entry(stockEventDto);
+    Profiler profiler = new Profiler("REASON_EXISTENCE_VALIDATOR");
+    profiler.setLogger(XLOGGER);
+
     if (!stockEventDto.hasLineItems()) {
       return;
     }
@@ -45,6 +49,9 @@ public class ReasonExistenceValidator implements StockEventValidator {
             new Message(ERROR_EVENT_REASON_NOT_EXIST, reasonId));
       }
     }
+
+    profiler.stop().log();
+    XLOGGER.exit(stockEventDto);
   }
 
 }

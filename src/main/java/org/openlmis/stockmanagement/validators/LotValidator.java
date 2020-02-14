@@ -26,6 +26,7 @@ import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.util.Message;
+import org.slf4j.profiler.Profiler;
 import org.springframework.stereotype.Component;
 
 /**
@@ -37,18 +38,25 @@ public class LotValidator implements StockEventValidator {
 
   @Override
   public void validate(StockEventDto stockEventDto) {
-    LOGGER.info("validating lot");
+    XLOGGER.entry(stockEventDto);
+    Profiler profiler = new Profiler("LOT_VALIDATOR");
+    profiler.setLogger(XLOGGER);
+
     if (!stockEventDto.hasLineItems()) {
       return;
     }
 
     stockEventDto.getLineItems().forEach(lineItem -> {
       if (lineItem.hasLotId()) {
+        profiler.start("CHECK_EVENT_LINE_ITEM_LOT");
         LotDto lotDto = stockEventDto.getContext().findLot(lineItem.getLotId());
         checkLotExists(lineItem, lotDto);
         checkLotOrderableMatches(stockEventDto, lineItem, lotDto);
       }
     });
+
+    profiler.stop().log();
+    XLOGGER.exit(stockEventDto);
   }
 
   private void checkLotOrderableMatches(StockEventDto stockEventDto,

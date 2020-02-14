@@ -29,6 +29,7 @@ import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
 import org.openlmis.stockmanagement.util.Message;
+import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,18 +46,27 @@ public class PhysicalInventoryAdjustmentReasonsValidator implements StockEventVa
 
   @Override
   public void validate(StockEventDto stockEventDto) {
+    XLOGGER.entry(stockEventDto);
+    Profiler profiler = new Profiler("PHYSICAL_INVENTORY_ADJUSTMENT_REASONS_VALIDATOR");
+    profiler.setLogger(XLOGGER);
 
     if (stockEventDto.isPhysicalInventory()) {
+      profiler.start("CHECK_EVENT_LINE_ITEMS_IF_PHYSICAL_INVENTORY");
       for (StockEventLineItemDto line : stockEventDto.getLineItems()) {
-        validateAdjustments(stockEventDto, line);
+        validateAdjustments(stockEventDto, line, profiler.startNested("VALIDATE_ADJUSTMENTS"));
       }
     }
+
+    profiler.stop().log();
+    XLOGGER.exit(stockEventDto);
   }
 
-  private void validateAdjustments(StockEventDto event, StockEventLineItemDto line) {
+  private void validateAdjustments(StockEventDto event, StockEventLineItemDto line,
+      Profiler profiler) {
     List<StockEventAdjustmentDto> stockAdjustments = line.getStockAdjustments();
 
     if (stockAdjustments != null) {
+      profiler.start("CHECK_STOCK_ADJUSTMENTS");
       for (StockEventAdjustmentDto adjustment : stockAdjustments) {
         validateQuantity(adjustment.getQuantity());
         validateReason(event, adjustment.getReasonId());

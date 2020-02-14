@@ -29,8 +29,7 @@ import org.openlmis.stockmanagement.dto.StockEventAdjustmentDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.profiler.Profiler;
 import org.springframework.stereotype.Component;
 
 /**
@@ -44,15 +43,17 @@ import org.springframework.stereotype.Component;
 @Component(value = "QuantityValidator")
 public class QuantityValidator implements StockEventValidator {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(QuantityValidator.class);
-
   @Override
   public void validate(StockEventDto stockEventDto) {
-    LOGGER.debug("Validate quantity");
+    XLOGGER.entry(stockEventDto);
+    Profiler profiler = new Profiler("QUANTITY_VALIDATOR");
+    profiler.setLogger(XLOGGER);
+
     if (!stockEventDto.hasLineItems()) {
       return;
     }
 
+    profiler.start("GET_ORDERABLE_GROUPS");
     Map<OrderableLotIdentity, List<StockEventLineItemDto>> sameOrderableGroups = stockEventDto
         .getLineItems()
         .stream()
@@ -60,19 +61,25 @@ public class QuantityValidator implements StockEventValidator {
 
     for (List<StockEventLineItemDto> group : sameOrderableGroups.values()) {
       // increase may cause int overflow, decrease may cause below zero
-      validateEventItems(stockEventDto, group);
+      validateEventItems(stockEventDto, group, profiler.startNested("VALIDATE_EVENT_LINE_ITEMS"));
     }
+
+    profiler.stop().log();
+    XLOGGER.exit(stockEventDto);
   }
 
-  private void validateEventItems(StockEventDto event, List<StockEventLineItemDto> items) {
+  private void validateEventItems(StockEventDto event, List<StockEventLineItemDto> items,
+      Profiler profiler) {
+    profiler.start("SEARCH_FOR_STOCK_CARD");
     StockCard foundCard = tryFindCard(event, items.get(0));
 
     if (event.isPhysicalInventory()) {
+      profiler.start("VALIDATE_PHYSICAL_INVENTORY_QUANTITIES");
       validateQuantities(items);
     }
 
     // create line item from event line item and add it to stock card for recalculation
-    calculateStockOnHand(event, items, foundCard);
+    calculateStockOnHand(event, items, foundCard, profiler.startNested("CALCULATE_STOCK_ON_HAND"));
   }
 
   private StockCard tryFindCard(StockEventDto event, StockEventLineItemDto lineItem) {
@@ -119,13 +126,16 @@ public class QuantityValidator implements StockEventValidator {
   }
 
   private void calculateStockOnHand(StockEventDto eventDto, List<StockEventLineItemDto> group,
-                                    StockCard foundCard) {
+                                    StockCard foundCard, Profiler profiler) {
+
+    profiler.start("CREATE_LINE_ITEMS_FROM_STOCK_EVENT");
     for (StockEventLineItemDto lineItem : group) {
       StockCardLineItem stockCardLineItem = StockCardLineItem
           .createLineItemFrom(eventDto, lineItem, foundCard, null);
       stockCardLineItem.setReason(eventDto.getContext().findEventReason(lineItem.getReasonId()));
     }
 
+    profiler.start("CALCULATE_STOCK_ON_HAND_FOR_STOCK_CARD");
     foundCard.calculateStockOnHand();
   }
 }

@@ -23,6 +23,7 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.util.Message;
+import org.slf4j.profiler.Profiler;
 import org.springframework.stereotype.Component;
 
 /**
@@ -34,7 +35,10 @@ public class AdjustmentReasonValidator implements StockEventValidator {
 
   @Override
   public void validate(StockEventDto stockEventDto) {
-    LOGGER.debug("Validate adjustment reason");
+    XLOGGER.entry(stockEventDto);
+    Profiler profiler = new Profiler("ADJUSTMENT_REASON_VALIDATOR");
+    profiler.setLogger(XLOGGER);
+
     boolean hasSourceOrDestination = stockEventDto.hasSource() || stockEventDto.hasDestination();
     if (hasSourceOrDestination || !stockEventDto.hasLineItems() || stockEventDto.isKitUnpacking()) {
       return;
@@ -42,18 +46,24 @@ public class AdjustmentReasonValidator implements StockEventValidator {
 
     for (StockEventLineItemDto lineItem : stockEventDto.getLineItems()) {
       if (lineItem.hasReasonId()) {
-        validateReason(stockEventDto, lineItem);
+        validateReason(stockEventDto, lineItem, profiler.startNested("VALIDATE_REASON"));
       }
     }
+
+    profiler.stop().log();
+    XLOGGER.exit(stockEventDto);
   }
 
-  private void validateReason(StockEventDto event, StockEventLineItemDto lineItem) {
+  private void validateReason(StockEventDto event, StockEventLineItemDto lineItem,
+      Profiler profiler) {
+    profiler.start("FIND_REASON");
     StockCardLineItemReason foundReason = event
         .getContext()
         .findEventReason(lineItem.getReasonId());
 
     //this validator does not care if reason id not found in db
     //that is handled by other validators
+    profiler.start("VALIDATE_FOUND_REASON");
     if (foundReason != null) {
       validReasonType(foundReason);
       validReasonCategory(foundReason);

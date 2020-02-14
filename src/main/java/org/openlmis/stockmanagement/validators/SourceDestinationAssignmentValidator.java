@@ -27,6 +27,7 @@ import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
+import org.slf4j.profiler.Profiler;
 import org.springframework.stereotype.Component;
 
 /**
@@ -39,7 +40,10 @@ public class SourceDestinationAssignmentValidator implements StockEventValidator
 
   @Override
   public void validate(StockEventDto eventDto) {
-    LOGGER.debug("Validate source and destination assignment");
+    XLOGGER.entry(eventDto);
+    Profiler profiler = new Profiler("SOURCE_DESTINATION_ASSIGNMENT_VALIDATOR");
+    profiler.setLogger(XLOGGER);
+
     if (!eventDto.hasLineItems()) {
       return;
     }
@@ -49,6 +53,7 @@ public class SourceDestinationAssignmentValidator implements StockEventValidator
 
     //this validator does not care if program missing or facility not found in ref data
     //that is handled in other validators
+    profiler.start("CHECK_SOURCE_AND_DESTINATION_ASSIGNMENTS");
     if (null != facilityTypeId && null != programId) {
       eventDto
           .getLineItems()
@@ -58,6 +63,9 @@ public class SourceDestinationAssignmentValidator implements StockEventValidator
           .getLineItems()
           .forEach(eventLineItem -> checkExistingAssignment(eventDto, eventLineItem));
     }
+
+    profiler.stop().log();
+    XLOGGER.exit(eventDto);
   }
 
   private void checkExistingAssignment(StockEventDto eventDto,

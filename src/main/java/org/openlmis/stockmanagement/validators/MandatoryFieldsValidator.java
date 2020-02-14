@@ -31,6 +31,7 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.util.Message;
+import org.slf4j.profiler.Profiler;
 import org.springframework.stereotype.Component;
 
 /**
@@ -42,10 +43,21 @@ public class MandatoryFieldsValidator implements StockEventValidator {
 
   @Override
   public void validate(StockEventDto stockEventDto) {
-    LOGGER.debug("Validate mandatory fields");
+    XLOGGER.entry(stockEventDto);
+    Profiler profiler = new Profiler("MANDATORY_FIELDS_VALIDATOR");
+    profiler.setLogger(XLOGGER);
+
+    profiler.start("VALIDATE_FACILITY_PROGRAM_AND_ORDERABLES");
     validateFacilityProgramAndOrderables(stockEventDto);
+
+    profiler.start("VALIDATE_OCCURRED_DATE");
     validateOccurredDate(stockEventDto);
+
+    profiler.start("VALIDATE_QUANTITY");
     validateQuantity(stockEventDto);
+
+    profiler.stop().log();
+    XLOGGER.exit(stockEventDto);
   }
 
   private void validateFacilityProgramAndOrderables(StockEventDto dto) {

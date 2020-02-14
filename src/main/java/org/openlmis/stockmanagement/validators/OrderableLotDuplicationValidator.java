@@ -24,6 +24,7 @@ import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.util.Message;
+import org.slf4j.profiler.Profiler;
 import org.springframework.stereotype.Component;
 
 /**
@@ -36,12 +37,18 @@ import org.springframework.stereotype.Component;
 public class OrderableLotDuplicationValidator implements StockEventValidator {
   @Override
   public void validate(StockEventDto stockEventDto) {
+    XLOGGER.entry(stockEventDto);
+    Profiler profiler = new Profiler("ORDERABLE_LOT_DUPLICATION_VALIDATOR");
+    profiler.setLogger(XLOGGER);
+
     //duplication is not allow in physical inventory, but is allowed in adjustment
     if (!stockEventDto.hasLineItems() || !stockEventDto.isPhysicalInventory()) {
       return;
     }
 
     Set<OrderableLotIdentity> nonDuplicates = new HashSet<>();
+
+    profiler.start("GET_DUPLICATES");
     Set<OrderableLotIdentity> duplicates = stockEventDto.getLineItems()
         .stream().map(OrderableLotIdentity::identityOf)
         .filter(lotIdentity -> !nonDuplicates.add(lotIdentity))
@@ -51,5 +58,8 @@ public class OrderableLotDuplicationValidator implements StockEventValidator {
       throw new ValidationMessageException(
           new Message(ERROR_EVENT_ORDERABLE_LOT_DUPLICATION, duplicates));
     }
+
+    profiler.stop().log();
+    XLOGGER.exit(stockEventDto);
   }
 }

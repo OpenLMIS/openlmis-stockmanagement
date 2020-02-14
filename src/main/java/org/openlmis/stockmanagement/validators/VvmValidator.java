@@ -26,6 +26,9 @@ import org.openlmis.stockmanagement.domain.common.VvmApplicable;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
+import org.slf4j.ext.XLogger;
+import org.slf4j.ext.XLoggerFactory;
+import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,6 +38,8 @@ import org.springframework.stereotype.Component;
  */
 @Component("VvmValidator")
 public class VvmValidator {
+  private static final XLogger XLOGGER = XLoggerFactory.getXLogger(StockEventValidator.class);
+
   private static final String USE_VVM = "useVVM";
   private static final String VVM_STATUS = "vvmStatus";
 
@@ -50,17 +55,23 @@ public class VvmValidator {
    */
   public void validate(List<? extends VvmApplicable> vvmApplicables, String messageKey,
                        boolean ignoreMissingOrderable) {
+    XLOGGER.entry(vvmApplicables);
+    Profiler profiler = new Profiler("STOCK_EVENT_VVM_VALIDATOR");
+    profiler.setLogger(XLOGGER);
+
     Set<UUID> orderableIds = vvmApplicables
         .stream()
         .map(VvmApplicable::getOrderableId)
         .collect(Collectors.toSet());
 
+    profiler.start("FIND_ORDERABLES_BY_IDS");
     List<OrderableDto> orderables = orderableReferenceDataService.findByIds(orderableIds);
 
     Map<UUID, OrderableDto> groupById = orderables
         .stream()
         .collect(Collectors.toMap(OrderableDto::getId, orderable -> orderable));
 
+    profiler.start("CHECK_VVM_APPLICABLE_ITEMS");
     for (VvmApplicable item : vvmApplicables) {
       OrderableDto orderable = groupById.get(item.getOrderableId());
 
@@ -87,5 +98,8 @@ public class VvmValidator {
         throw new ValidationMessageException(messageKey);
       }
     }
+
+    profiler.stop().log();
+    XLOGGER.exit(vvmApplicables);
   }
 }

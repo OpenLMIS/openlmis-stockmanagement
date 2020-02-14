@@ -31,6 +31,9 @@ import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
+import org.slf4j.ext.XLogger;
+import org.slf4j.ext.XLoggerFactory;
+import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -40,6 +43,8 @@ import org.springframework.stereotype.Component;
  */
 @Component("PhysicalInventoryValidator")
 public class PhysicalInventoryValidator {
+
+  private static XLogger XLOGGER = XLoggerFactory.getXLogger(PhysicalInventoryValidator.class);
 
   @Autowired
   private VvmValidator vvmValidator;
@@ -53,17 +58,28 @@ public class PhysicalInventoryValidator {
     * @param inventory physical inventory to validate.
     */
   public void validateDraft(PhysicalInventoryDto inventory, UUID id) {
+    XLOGGER.entry(inventory);
+    Profiler profiler = new Profiler("STOCK_EVENT_VVM_VALIDATOR");
+    profiler.setLogger(XLOGGER);
+
     if (!inventory.getId().equals(id)) {
       throw new ValidationMessageException(ERROR_PHYSICAL_INVENTORY_ID_MISMATCH);
     }
+
+    profiler.start("FIND_PHYSICAL_INVENTORY_BY_ID");
     PhysicalInventory foundInventory = physicalInventoriesRepository.findOne(id);
     if (foundInventory != null && !foundInventory.getIsDraft()) {
       throw new ValidationMessageException(ERROR_PHYSICAL_INVENTORY_IS_SUBMITTED);
     }
 
     List<PhysicalInventoryLineItemDto> lineItems = inventory.getLineItems();
+
+    profiler.start("VALIDATE_LINE_ITEMS");
     validateLineItems(lineItems);
     vvmValidator.validate(lineItems, ERROR_PHYSICAL_INVENTORY_ORDERABLE_DISABLED_VVM, false);
+
+    profiler.stop().log();
+    XLOGGER.exit(inventory);
   }
 
   /**

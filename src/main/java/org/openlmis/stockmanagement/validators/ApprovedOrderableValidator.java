@@ -29,6 +29,7 @@ import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.util.Message;
+import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -47,7 +48,10 @@ public class ApprovedOrderableValidator implements StockEventValidator {
    * @param stockEventDto the event to be validated.
    */
   public void validate(StockEventDto stockEventDto) {
-    LOGGER.debug("Validate approved product reference data service");
+    XLOGGER.entry(stockEventDto);
+    Profiler profiler = new Profiler("APPROVED_ORDERABLE_VALIDATOR");
+    profiler.setLogger(XLOGGER);
+
     UUID facility = stockEventDto.getFacilityId();
     UUID program = stockEventDto.getProgramId();
     //this validator does not care if facility or program or orderable are missing
@@ -56,10 +60,12 @@ public class ApprovedOrderableValidator implements StockEventValidator {
       return;
     }
 
+    profiler.start("FIND_NON_APPROVED_PRODUCT_IDS");
     List<UUID> nonApprovedIds =
         findNonApprovedIds(stockEventDto, stockEventDto.getContext().getAllApprovedProducts());
 
     if (!isEmpty(nonApprovedIds)) {
+      profiler.start("FIND_ORDERABLES_BY_IDS");
       List<OrderableDto> orderables = orderableReferenceDataService.findByIds(nonApprovedIds);
       String codes = orderables
           .stream()
@@ -69,6 +75,9 @@ public class ApprovedOrderableValidator implements StockEventValidator {
       throw new ValidationMessageException(
           new Message(ERROR_ORDERABLE_NOT_IN_APPROVED_LIST, codes));
     }
+
+    profiler.stop().log();
+    XLOGGER.exit(stockEventDto);
   }
 
   private List<UUID> findNonApprovedIds(StockEventDto stockEventDto,

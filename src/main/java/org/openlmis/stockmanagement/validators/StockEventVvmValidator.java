@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.validators;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_STOCK_EVENT_ORDERABLE_DISABLED_VVM;
 
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,10 +34,18 @@ public class StockEventVvmValidator implements StockEventValidator {
 
   @Override
   public void validate(StockEventDto stockEventDto) {
+    XLOGGER.entry(stockEventDto);
+    Profiler profiler = new Profiler("STOCK_EVENT_VVM_VALIDATOR");
+    profiler.setLogger(XLOGGER);
+
     // we set ignoreMissingOrderable parameter on true
     // because this case is handled by another validator
+    profiler.start("VALIDATE_LINE_ITEMS");
     vvmValidator.validate(
         stockEventDto.getLineItems(), ERROR_STOCK_EVENT_ORDERABLE_DISABLED_VVM, true
     );
+
+    profiler.stop().log();
+    XLOGGER.exit(stockEventDto);
   }
 }

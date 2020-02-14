@@ -30,6 +30,7 @@ import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.ValidDestinationService;
 import org.openlmis.stockmanagement.service.ValidSourceService;
 import org.openlmis.stockmanagement.util.Message;
+import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -49,7 +50,9 @@ public class SourceDestinationGeoLevelAffinityValidator implements StockEventVal
 
   @Override
   public void validate(StockEventDto stockEventDto) {
-    LOGGER.debug("Validate geo level affinity");
+    XLOGGER.entry(stockEventDto);
+    Profiler profiler = new Profiler("SOURCE_DESTINATION_GEO_LEVEL_AFFINITY_VALIDATOR");
+    profiler.setLogger(XLOGGER);
     
     if (!stockEventDto.hasLineItems()) {
       return;
@@ -62,12 +65,16 @@ public class SourceDestinationGeoLevelAffinityValidator implements StockEventVal
     List<StockEventLineItemDto> stockEventLineItems = stockEventDto.getLineItems();
     
     if (stockEventLineItems.get(0).getSourceId() != null) {
+      profiler.start("VALIDATE_SOURCES");
       validateSources(stockEventDto);
     }
     if (stockEventLineItems.get(0).getDestinationId() != null) {
+      profiler.start("VALIDATE_DESTINATIONS");
       validateDestinations(stockEventDto);
     }
 
+    profiler.stop().log();
+    XLOGGER.exit(stockEventDto);
   }
 
   private void  validateDestinations(StockEventDto stockEventDto) {
