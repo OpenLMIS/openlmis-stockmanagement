@@ -46,12 +46,14 @@ public class LotValidator implements StockEventValidator {
       return;
     }
 
+    profiler.start("CHECK_EVENT_LINE_ITEMS");
     stockEventDto.getLineItems().forEach(lineItem -> {
       if (lineItem.hasLotId()) {
         profiler.start("CHECK_EVENT_LINE_ITEM_LOT");
         LotDto lotDto = stockEventDto.getContext().findLot(lineItem.getLotId());
         checkLotExists(lineItem, lotDto);
-        checkLotOrderableMatches(stockEventDto, lineItem, lotDto);
+        checkLotOrderableMatches(stockEventDto, lineItem, lotDto,
+            profiler.startNested("CHECK_LOT_ORDERABLE_MATCHES"));
       }
     });
 
@@ -60,12 +62,15 @@ public class LotValidator implements StockEventValidator {
   }
 
   private void checkLotOrderableMatches(StockEventDto stockEventDto,
-                                        StockEventLineItemDto lineItem, LotDto lotDto) {
+      StockEventLineItemDto lineItem, LotDto lotDto, Profiler profiler) {
+
+    profiler.start("FIND_ORDERABLE");
     Optional<OrderableDto> foundOrderableDto = stockEventDto.getContext()
         .getAllApprovedProducts().stream()
         .filter(orderableDto -> orderableDto.getId().equals(lineItem.getOrderableId()))
         .findFirst();
 
+    profiler.start("FIND_TRADE_ITEM");
     if (foundOrderableDto.isPresent()) {
       String tradeItemId = foundOrderableDto.get().getIdentifiers().get("tradeItem");
       if (tradeItemId == null || !lotDto.getTradeItemId().equals(fromString(tradeItemId))) {

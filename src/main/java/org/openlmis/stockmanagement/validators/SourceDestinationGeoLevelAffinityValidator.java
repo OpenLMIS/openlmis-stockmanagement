@@ -65,24 +65,25 @@ public class SourceDestinationGeoLevelAffinityValidator implements StockEventVal
     List<StockEventLineItemDto> stockEventLineItems = stockEventDto.getLineItems();
     
     if (stockEventLineItems.get(0).getSourceId() != null) {
-      profiler.start("VALIDATE_SOURCES");
-      validateSources(stockEventDto);
+      validateSources(stockEventDto, profiler.startNested("VALIDATE_SOURCES"));
     }
     if (stockEventLineItems.get(0).getDestinationId() != null) {
-      profiler.start("VALIDATE_DESTINATIONS");
-      validateDestinations(stockEventDto);
+      validateDestinations(stockEventDto, profiler.startNested("VALIDATE_DESTINATIONS"));
     }
 
     profiler.stop().log();
     XLOGGER.exit(stockEventDto);
   }
 
-  private void  validateDestinations(StockEventDto stockEventDto) {
+  private void  validateDestinations(StockEventDto stockEventDto, Profiler profiler) {
+    profiler.start("FIND_DESTINATIONS");
     List<ValidSourceDestinationDto> validDestinationDtos = validDestinationService
         .findDestinations(stockEventDto.getProgramId(), stockEventDto.getFacilityId());
 
+    profiler.start("GET_DESTINATION_IDS");
     List<UUID> validDestinationDtoIds = getValidNodeIds(validDestinationDtos);
 
+    profiler.start("FIND_STOCK_EVENTS");
     List<StockEventLineItemDto> stockEventLineItemsNotMatch = 
         findAllStockEventLineItemsWithNoAffinityMatch(stockEventDto.getLineItems(),
           lineItem -> isNotGeoLevelAffinity(lineItem.getDestinationId(), validDestinationDtoIds));
@@ -98,12 +99,15 @@ public class SourceDestinationGeoLevelAffinityValidator implements StockEventVal
 
   }
 
-  private void  validateSources(StockEventDto stockEventDto) {
+  private void  validateSources(StockEventDto stockEventDto, Profiler profiler) {
+    profiler.start("FIND_SOURCES");
     List<ValidSourceDestinationDto> validSourceDtos =
         validSourceService.findSources(stockEventDto.getProgramId(), stockEventDto.getFacilityId());
 
+    profiler.start("GET_SOURCE_IDS");
     List<UUID> validSourceDtoIds = getValidNodeIds(validSourceDtos);
 
+    profiler.start("FIND_STOCK_EVENTS");
     List<StockEventLineItemDto> stockEventLineItemsNotMatch = 
         findAllStockEventLineItemsWithNoAffinityMatch(stockEventDto.getLineItems(),
           lineItem -> isNotGeoLevelAffinity(lineItem.getSourceId(), validSourceDtoIds));

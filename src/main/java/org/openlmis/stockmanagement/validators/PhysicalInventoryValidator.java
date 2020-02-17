@@ -59,7 +59,7 @@ public class PhysicalInventoryValidator {
     */
   public void validateDraft(PhysicalInventoryDto inventory, UUID id) {
     XLOGGER.entry(inventory);
-    Profiler profiler = new Profiler("STOCK_EVENT_VVM_VALIDATOR");
+    Profiler profiler = new Profiler("PHYSICAL_INVENTORY_VALIDATOR");
     profiler.setLogger(XLOGGER);
 
     if (!inventory.getId().equals(id)) {
