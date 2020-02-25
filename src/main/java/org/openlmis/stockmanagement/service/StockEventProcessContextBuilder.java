@@ -162,8 +162,12 @@ public class StockEventProcessContextBuilder {
     context.setFacility(facility);
 
     profiler.start("CREATE_LAZY_APPROVED_PRODUCTS");
+    List<UUID> orderableIds = eventDto.getLineItems()
+        .stream()
+        .map(StockEventLineItemDto::getOrderableId)
+        .collect(Collectors.toList());
     Supplier<List<OrderableDto>> productsSupplier = () -> orderableReferenceDataService
-        .findAll();
+        .findByIds(orderableIds);
     LazyList<OrderableDto> products = new LazyList<>(productsSupplier);
     context.setAllApprovedProducts(products);
 

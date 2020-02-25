@@ -61,6 +61,9 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest extends BaseValidat
   @Before
   public void setUp() throws Exception {
     super.setUp();
+    stockEventDto.setLineItems(
+        Collections.singletonList(
+            generateLineItem(generateAdjustment(reasonId, 5))));
     setContext(stockEventDto);
 
     when(validReasonRepository
@@ -83,9 +86,6 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest extends BaseValidat
   public void shouldPassWhenReasonIsValid() {
     stockEventDto.setProgramId(UUID.randomUUID());
     stockEventDto.setFacilityId(UUID.randomUUID());
-    stockEventDto.setLineItems(
-        Collections.singletonList(
-            generateLineItem(generateAdjustment(reasonId, 5))));
 
     validator.validate(stockEventDto);
 
@@ -104,10 +104,6 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest extends BaseValidat
 
   @Test(expected = ValidationMessageException.class)
   public void shouldNotPassWhenReasonIsNotValid() {
-    stockEventDto.setLineItems(
-        Collections.singletonList(
-            generateLineItem(generateAdjustment(reasonId, 5))));
-
     when(validReasonRepository
         .findByProgramIdAndFacilityTypeIdAndReasonId(
             any(UUID.class), any(UUID.class), any(UUID.class)))
@@ -136,10 +132,6 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest extends BaseValidat
 
   @Test(expected = ValidationMessageException.class)
   public void shouldNotPassWhenFacilityIdIsInvalid() {
-    stockEventDto.setLineItems(
-        Collections.singletonList(
-            generateLineItem(generateAdjustment(reasonId, 5))));
-
     when(facilityService.findOne(stockEventDto.getFacilityId())).thenReturn(null);
 
     setContext(stockEventDto);
