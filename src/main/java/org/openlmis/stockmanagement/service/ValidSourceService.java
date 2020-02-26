@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.service;
 
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_ASSIGNMENT_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_FOUND;
+import static org.slf4j.ext.XLoggerFactory.getXLogger;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,11 +25,15 @@ import org.openlmis.stockmanagement.domain.sourcedestination.ValidSourceAssignme
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.ValidSourceAssignmentRepository;
+import org.slf4j.ext.XLogger;
+import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ValidSourceService extends SourceDestinationBaseService {
+
+  private static final XLogger XLOGGER = getXLogger(ValidSourceService.class);
 
   @Autowired
   private ValidSourceAssignmentRepository validSourceRepository;
@@ -41,7 +46,15 @@ public class ValidSourceService extends SourceDestinationBaseService {
    * @return valid destination assignment DTOs
    */
   public List<ValidSourceDestinationDto> findSources(UUID programId, UUID facilityId) {
-    return findAssignments(programId, facilityId, validSourceRepository);
+    XLOGGER.entry();
+    Profiler profiler = new Profiler("FIND_SOURCE_ASSIGNMENTS");
+    profiler.setLogger(XLOGGER);
+
+    List<ValidSourceDestinationDto> sourceAssignments =
+        findAssignments(programId, facilityId, validSourceRepository, profiler);
+    profiler.stop().log();
+    XLOGGER.exit();
+    return sourceAssignments;
   }
 
   /**

@@ -36,6 +36,7 @@ import org.openlmis.stockmanagement.repository.SourceDestinationAssignmentReposi
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
 import org.openlmis.stockmanagement.util.Message;
+import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -127,12 +128,14 @@ public abstract class SourceDestinationBaseService {
    * @return a list of assignment dto or empty list if not found.
    */
   protected <T extends SourceDestinationAssignment> List<ValidSourceDestinationDto> findAssignments(
-          UUID programId, UUID facilityId, SourceDestinationAssignmentRepository<T> repository) {
+      UUID programId, UUID facilityId, SourceDestinationAssignmentRepository<T> repository,
+      Profiler profiler) {
     boolean isFiltered = programId != null && facilityId != null;
 
+    profiler.start("FIND_ASSIGNMENTS");
     return isFiltered
-        ? findFilteredAssignments(programId, facilityId, repository)
-        : findAllAssignments(repository);
+        ? findFilteredAssignments(programId, facilityId, repository, profiler)
+        : findAllAssignments(repository, profiler);
   }
 
   /**
@@ -229,7 +232,8 @@ public abstract class SourceDestinationBaseService {
 
   private <T extends SourceDestinationAssignment> List<ValidSourceDestinationDto>
       findFilteredAssignments(UUID programId, UUID facilityId,
-                              SourceDestinationAssignmentRepository<T> repository) {
+      SourceDestinationAssignmentRepository<T> repository, Profiler profiler) {
+    profiler.start("FIND_FACILITY_BY_ID");
     FacilityDto facility = facilityRefDataService.findOne(facilityId);
 
     if (facility == null) {
@@ -237,19 +241,24 @@ public abstract class SourceDestinationBaseService {
               new Message(ERROR_FACILITY_NOT_FOUND, facilityId.toString()));
     }
 
+    profiler.start("CHECK_PROGRAM_AND_FACILITY_TYPE_EXIST");
     UUID facilityTypeId = facility.getType().getId();
     programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
+    profiler.start("FIND_ASSIGNMENTS_BY_PROGRAM_AND_FACILITY_TYPE");
     List<T> assignments = repository
             .findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
 
+    profiler.start("FIND_FACILITY_IDS");
     List<UUID> facilitiesIds = assignments.stream()
             .filter(assignment -> assignment.getNode().isRefDataFacility())
             .map(assignment -> assignment.getNode().getReferenceId())
             .collect(Collectors.toList());
 
+    profiler.start("FIND_FACILITIES_BY_ID_MAP");
     Map<UUID, FacilityDto> facilitiesById = facilityRefDataService.findByIds(facilitiesIds);
 
+    profiler.start("FIND_GEO_ASSIGNMENTS");
     List<SourceDestinationAssignment> geoAssigment = assignments.stream()
             .filter(assignment -> !assignment.getNode().isRefDataFacility()
                     || hasGeoAffinity(assignment, facility, facilitiesById))
@@ -261,7 +270,8 @@ public abstract class SourceDestinationBaseService {
   }
 
   private <T extends SourceDestinationAssignment> List<ValidSourceDestinationDto>
-      findAllAssignments(SourceDestinationAssignmentRepository<T> repository) {
+      findAllAssignments(SourceDestinationAssignmentRepository<T> repository, Profiler profiler) {
+    profiler.start("FIND_ALL_GEO_ASSIGNMENTS");
     return repository.findAll().stream()
             .map(assignment -> createAssignmentDto(assignment, null))
             .collect(Collectors.toList());
