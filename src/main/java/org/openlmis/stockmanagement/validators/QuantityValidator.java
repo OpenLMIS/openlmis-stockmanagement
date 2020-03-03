@@ -85,9 +85,8 @@ public class QuantityValidator implements StockEventValidator {
 
   private StockCard tryFindCard(StockEventDto event, StockEventLineItemDto lineItem,
       Profiler profiler) {
-    OrderableLotIdentity item = OrderableLotIdentity.identityOf(lineItem);
     profiler.start("FIND_STOCK_CARD");
-    StockCard foundCard = event.getContext().findCard(item);
+    StockCard foundCard = event.getContext().findCard(OrderableLotIdentity.identityOf(lineItem));
 
     if (foundCard == null) {
       StockCard emptyCard = new StockCard();
