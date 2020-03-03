@@ -44,6 +44,9 @@ public interface StockCardRepository extends JpaRepository<StockCard, UUID> {
       @Param("programId") UUID programId,
       @Param("facilityId") UUID facilityId);
 
+  List<StockCard> findByOrderableIdInAndProgramIdAndFacilityId(
+      Collection<UUID> orderableIds, UUID programId, UUID facilityId);
+
   StockCard findByOriginEvent(@Param("originEventId") StockEvent stockEvent);
 
   @Query(name = StockCard.QUERY_FIND_LOT_IDENT_BY_PROG_FACILITY)

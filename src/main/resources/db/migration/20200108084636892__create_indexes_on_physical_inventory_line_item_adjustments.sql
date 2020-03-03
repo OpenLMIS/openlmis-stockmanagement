@@ -2,7 +2,7 @@
 -- Adding migrations out of order may cause this migration to never execute or behave in an unexpected way.
 -- Migrations should NOT BE EDITED. Add a new migration to apply changes.
 
-CREATE INDEX phys_inv_adj_phys_inv_item_idx ON stockmanagement.physical_inventory_line_item_adjustments(physicalinventorylineitemid);
-CREATE INDEX phys_inv_adj_reason_idx ON stockmanagement.physical_inventory_line_item_adjustments(reasonid);
-CREATE INDEX phys_inv_adj_stock_card_item_idx ON stockmanagement.physical_inventory_line_item_adjustments(stockcardlineitemid);
-CREATE INDEX physical_inventories_stockeventid_idx ON stockmanagement.physical_inventories(stockeventid);
+CREATE INDEX IF NOT EXISTS phys_inv_adj_phys_inv_item_idx ON stockmanagement.physical_inventory_line_item_adjustments(physicalinventorylineitemid);
+CREATE INDEX IF NOT EXISTS phys_inv_adj_reason_idx ON stockmanagement.physical_inventory_line_item_adjustments(reasonid);
+CREATE INDEX IF NOT EXISTS phys_inv_adj_stock_card_item_idx ON stockmanagement.physical_inventory_line_item_adjustments(stockcardlineitemid);
+CREATE INDEX IF NOT EXISTS physical_inventories_stockeventid_idx ON stockmanagement.physical_inventories(stockeventid);

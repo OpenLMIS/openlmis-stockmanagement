@@ -78,6 +78,30 @@ public class CalculatedStockOnHandService {
   }
 
   /**
+   * Returns list of stock cards with fetched Stock on Hand values.
+   *
+   * @param programId program id to find stock card
+   * @param facilityId facility id to find stock card
+   * @param orderableIds orderable ids to find stock card
+   * @return List of stock cards with SOH values, empty list if no stock cards were found.
+   */
+  public List<StockCard> getStockCardsWithStockOnHandByOrderableIds(
+      UUID programId, UUID facilityId, List<UUID> orderableIds) {
+
+    List<StockCard> stockCards = stockCardRepository.findByOrderableIdInAndProgramIdAndFacilityId(
+        orderableIds, programId, facilityId);
+
+    if (null == stockCards) {
+      return Collections.emptyList();
+    }
+
+    stockCards.forEach(stockCard ->
+        fetchStockOnHand(stockCard, LocalDate.now()));
+
+    return stockCards;
+  }
+
+  /**
    * Fetch stock on hand value for given stock card.
    *
    * @param stockCard stock card where the value will be set
