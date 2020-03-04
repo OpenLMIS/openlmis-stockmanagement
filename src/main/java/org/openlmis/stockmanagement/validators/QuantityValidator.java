@@ -19,11 +19,8 @@ import static java.util.stream.Collectors.groupingBy;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.openlmis.stockmanagement.domain.card.StockCard;
-import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.dto.StockEventAdjustmentDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
@@ -70,33 +67,9 @@ public class QuantityValidator implements StockEventValidator {
 
   private void validateEventItems(StockEventDto event, List<StockEventLineItemDto> items,
       Profiler profiler) {
-    profiler.start("SEARCH_FOR_STOCK_CARD");
-    StockCard foundCard = tryFindCard(event, items.get(0),
-        profiler.startNested("TRY_TO_FIND_STOCK_CARD"));
-
     if (event.isPhysicalInventory()) {
       profiler.start("VALIDATE_PHYSICAL_INVENTORY_QUANTITIES");
       validateQuantities(items);
-    }
-
-    // create line item from event line item and add it to stock card for recalculation
-    calculateStockOnHand(event, items, foundCard, profiler.startNested("CALCULATE_STOCK_ON_HAND"));
-  }
-
-  private StockCard tryFindCard(StockEventDto event, StockEventLineItemDto lineItem,
-      Profiler profiler) {
-    profiler.start("FIND_STOCK_CARD");
-    StockCard foundCard = event.getContext().findCard(OrderableLotIdentity.identityOf(lineItem));
-
-    if (foundCard == null) {
-      StockCard emptyCard = new StockCard();
-      emptyCard.setLineItems(new ArrayList<>());
-
-      return emptyCard;
-    } else {
-      profiler.start("COPY_STOCK_CARD");
-      //Model will be modified so we need to copy stock card to avoid persistence of modified model.
-      return foundCard.shallowCopy();
     }
   }
 
@@ -127,19 +100,5 @@ public class QuantityValidator implements StockEventValidator {
     if (hasNegative) {
       throw new ValidationMessageException(ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID);
     }
-  }
-
-  private void calculateStockOnHand(StockEventDto eventDto, List<StockEventLineItemDto> group,
-                                    StockCard foundCard, Profiler profiler) {
-
-    profiler.start("CREATE_LINE_ITEMS_FROM_STOCK_EVENT");
-    for (StockEventLineItemDto lineItem : group) {
-      StockCardLineItem stockCardLineItem = StockCardLineItem
-          .createLineItemFrom(eventDto, lineItem, foundCard, null);
-      stockCardLineItem.setReason(eventDto.getContext().findEventReason(lineItem.getReasonId()));
-    }
-
-    profiler.start("CALCULATE_STOCK_ON_HAND_FOR_STOCK_CARD");
-    foundCard.calculateStockOnHand();
   }
 }

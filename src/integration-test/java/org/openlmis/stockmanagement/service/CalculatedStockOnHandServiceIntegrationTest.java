@@ -32,6 +32,7 @@ import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockCardLineItemRepository;
@@ -562,8 +563,8 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     assertThat(result.get(3).getStockOnHand(), is(45));
   }
 
-  @Test
-  public void shouldSetStockOnHandToZeroWhenResultIsNegative() {
+  @Test(expected = ValidationMessageException.class)
+  public void shouldThrowExceptionWhenQuantityMakesStockOnHandBelowZero() {
     final StockCardLineItem lineItem = new StockCardLineItemDataBuilder()
         .withDebitReason()
         .withQuantity(15)
@@ -590,16 +591,6 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
             .build());
 
     calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem);
-
-    List<CalculatedStockOnHand> result = calculatedStockOnHandRepository
-        .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
-            stockCard.getId(),
-            lineItem.getOccurredDate().minusDays(3));
-
-    assertThat(result.get(0).getStockOnHand(), is(10));
-    assertThat(result.get(1).getStockOnHand(), is(0));
-    assertThat(result.get(2).getStockOnHand(), is(10));
-    assertThat(result.get(3).getStockOnHand(), is(20));
   }
 
   private List<StockCardLineItem> createStockCardLineItemsList(StockCardLineItem lineItem,

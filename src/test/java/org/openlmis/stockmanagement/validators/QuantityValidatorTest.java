@@ -22,7 +22,6 @@ import static org.junit.rules.ExpectedException.none;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 
 import java.time.LocalDate;
@@ -78,24 +77,6 @@ public class QuantityValidatorTest extends BaseValidatorTest {
         .withAdjustmentCategory()
         .withDebitType()
         .build();
-  }
-
-  @Test
-  public void shouldRejectWhenQuantityMakesStockOnHandBelowZero() {
-    expectedException.expect(ValidationMessageException.class);
-    expectedException.expectMessage(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH);
-
-    StockCard card = new StockCard();
-    card.setLineItems(newArrayList(
-        createCreditLineItem(firstDate.plusDays(1), 5),
-        createDebitLineItem(firstDate.plusDays(3), 1),
-        createCreditLineItem(firstDate.plusDays(4), 2)
-    ));
-
-    StockEventDto event = createDebitEventDto(firstDate.plusDays(2), 5);
-    mockCardFound(event, card);
-
-    quantityValidator.validate(event);
   }
 
   @Test
