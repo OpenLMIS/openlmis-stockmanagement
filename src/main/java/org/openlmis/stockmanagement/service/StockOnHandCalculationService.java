@@ -25,10 +25,13 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERRRO_EVENT_SOH_EXCE
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.util.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -36,6 +39,9 @@ public class StockOnHandCalculationService {
 
   private static final Logger LOGGER = LoggerFactory
       .getLogger(StockOnHandCalculationService.class);
+
+  @Autowired
+  private OrderableReferenceDataService orderableService;
 
   /**
    * Recalculates values of stock on hand for single line item and returns aggregated stock on hand.
@@ -51,9 +57,7 @@ public class StockOnHandCalculationService {
         : prevSoH + item.getQuantityWithSign();
 
     if (quantity < 0) {
-      throw new ValidationMessageException(
-          new Message(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH, prevSoH,
-              item.getQuantity()));
+      throwQuantityExceedException(item, prevSoH);
     }
 
     return quantity;
@@ -98,8 +102,7 @@ public class StockOnHandCalculationService {
 
   private Integer tryDecrease(StockCardLineItem item, int prevSoH) {
     if (prevSoH - item.getQuantity() < 0) {
-      throw new ValidationMessageException(
-          new Message(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH, prevSoH, item.getQuantity()));
+      throwQuantityExceedException(item, prevSoH);
     }
 
     LOGGER.debug("try decrease soh: " + prevSoH + " - " + item.getQuantity() + " = "
@@ -133,5 +136,14 @@ public class StockOnHandCalculationService {
 
   private boolean shouldIncrease(StockCardLineItem item) {
     return item.isPositive();
+  }
+
+  private void throwQuantityExceedException(StockCardLineItem item, int prevSoH)
+      throws ValidationMessageException {
+    OrderableDto orderable = orderableService.findOne(item.getStockCard().getOrderableId());
+    String code = (orderable != null) ? orderable.getProductCode() : "";
+    throw new ValidationMessageException(
+        new Message(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH,
+            item.getOccurredDate(), code, prevSoH, item.getQuantity()));
   }
 }

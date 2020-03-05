@@ -19,6 +19,7 @@ import static java.lang.Integer.MAX_VALUE;
 import static org.assertj.core.util.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.rules.ExpectedException.none;
+import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERRRO_EVENT_SOH_EXCEEDS_LIMIT;
 
@@ -27,12 +28,14 @@ import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.UUID;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
@@ -40,7 +43,9 @@ import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonDataBuilder;
 
 @SuppressWarnings("PMD.TooManyMethods")
@@ -49,6 +54,9 @@ public class StockOnHandCalculationServiceTest {
 
   @Rule
   public ExpectedException expectedException = none();
+
+  @Mock
+  private OrderableReferenceDataService orderableService;
 
   @InjectMocks
   private StockOnHandCalculationService stockOnHandCalculationService;
@@ -74,15 +82,19 @@ public class StockOnHandCalculationServiceTest {
 
   @Test
   public void shouldThrowExceptionWhenQuantityMakesStockOnHandBelowZero() {
+    final UUID orderableId = UUID.randomUUID();
+    mockOrderable(orderableId);
+
     expectedException.expect(ValidationMessageException.class);
     expectedException.expectMessage(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH);
 
     StockCard card = new StockCard();
+    card.setOrderableId(orderableId);
     card.setLineItems(newArrayList(
-        createCreditLineItem(firstDate.plusDays(1), 5),
-        createDebitLineItem(firstDate.plusDays(3), 1),
-        createDebitLineItem(firstDate.plusDays(2), 5),
-        createCreditLineItem(firstDate.plusDays(4), 2)
+        createCreditLineItem(firstDate.plusDays(1), 5, card),
+        createDebitLineItem(firstDate.plusDays(3), 1, card),
+        createDebitLineItem(firstDate.plusDays(2), 5, card),
+        createCreditLineItem(firstDate.plusDays(4), 2, card)
     ));
 
     stockOnHandCalculationService.calculateStockOnHand(card);
@@ -92,8 +104,8 @@ public class StockOnHandCalculationServiceTest {
   public void shouldReturnWhenStockOnHandIsNotBelowZero() {
     StockCard card = new StockCard();
     card.setLineItems(newArrayList(
-        createCreditLineItem(firstDate.plusDays(1), 10),
-        createDebitLineItem(firstDate.plusDays(2), 5)
+        createCreditLineItem(firstDate.plusDays(1), 10, card),
+        createDebitLineItem(firstDate.plusDays(2), 5, card)
     ));
     card = stockOnHandCalculationService.calculateStockOnHand(card);
 
@@ -104,7 +116,7 @@ public class StockOnHandCalculationServiceTest {
   public void shouldCalculateSohOfLineItemWithCreditReason() {
     StockCard card = new StockCard();
     card.setLineItems(newArrayList(
-        createCreditLineItem(firstDate, 10)
+        createCreditLineItem(firstDate, 10, card)
     ));
 
     card = stockOnHandCalculationService.calculateStockOnHand(card);
@@ -120,8 +132,8 @@ public class StockOnHandCalculationServiceTest {
     int quantityToAdd = 10;
     StockCard card = new StockCard();
     card.setLineItems(newArrayList(
-        createCreditLineItem(firstDate, MAX_VALUE - quantityToAdd + 1),
-        createCreditLineItem(firstDate.plusDays(1), quantityToAdd)
+        createCreditLineItem(firstDate, MAX_VALUE - quantityToAdd + 1, card),
+        createCreditLineItem(firstDate.plusDays(1), quantityToAdd, card)
     ));
 
     stockOnHandCalculationService.calculateStockOnHand(card);
@@ -131,8 +143,8 @@ public class StockOnHandCalculationServiceTest {
   public void shouldDecreaseSoHOfLineItemWithDebitReason() {
     StockCard card = new StockCard();
     card.setLineItems(newArrayList(
-        createCreditLineItem(firstDate, 15),
-        createDebitLineItem(firstDate.plusDays(1), 5)
+        createCreditLineItem(firstDate, 15, card),
+        createDebitLineItem(firstDate.plusDays(1), 5, card)
     ));
 
     card = stockOnHandCalculationService.calculateStockOnHand(card);
@@ -149,7 +161,7 @@ public class StockOnHandCalculationServiceTest {
 
     StockCard card = new StockCard();
     card.setLineItems(newArrayList(
-        createCreditLineItem(firstDate, 15),
+        createCreditLineItem(firstDate, 15, card),
         lineItem));
 
     card = stockOnHandCalculationService.calculateStockOnHand(card);
@@ -166,7 +178,7 @@ public class StockOnHandCalculationServiceTest {
 
     StockCard card = new StockCard();
     card.setLineItems(newArrayList(
-        createCreditLineItem(firstDate, 15),
+        createCreditLineItem(firstDate, 15, card),
         lineItem));
 
     card = stockOnHandCalculationService.calculateStockOnHand(card);
@@ -181,7 +193,7 @@ public class StockOnHandCalculationServiceTest {
         .quantity(15).build();
     StockCard card = new StockCard();
     card.setLineItems(newArrayList(
-        createCreditLineItem(firstDate, 10),
+        createCreditLineItem(firstDate, 10, card),
         lineItem));
 
     card = stockOnHandCalculationService.calculateStockOnHand(card);
@@ -199,7 +211,7 @@ public class StockOnHandCalculationServiceTest {
         .quantity(15).build();
     StockCard card = new StockCard();
     card.setLineItems(newArrayList(
-        createCreditLineItem(firstDate, 20),
+        createCreditLineItem(firstDate, 20, card),
         lineItem));
 
     card = stockOnHandCalculationService.calculateStockOnHand(card);
@@ -217,7 +229,7 @@ public class StockOnHandCalculationServiceTest {
         .quantity(15).build();
     StockCard card = new StockCard();
     card.setLineItems(newArrayList(
-        createCreditLineItem(firstDate, 15),
+        createCreditLineItem(firstDate, 15, card),
         lineItem));
 
     card = stockOnHandCalculationService.calculateStockOnHand(card);
@@ -230,11 +242,31 @@ public class StockOnHandCalculationServiceTest {
 
   @Test
   public void shouldThrowExceptionWhenStockOnHandBelowZero() {
+    final UUID orderableId = UUID.randomUUID();
+    mockOrderable(orderableId);
+
     expectedException.expect(ValidationMessageException.class);
     expectedException.expectMessage(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH);
 
-    StockCardLineItem lineItem = createDebitLineItem(firstDate, 15);
     StockCard card = new StockCard();
+    StockCardLineItem lineItem = createDebitLineItem(firstDate, 15, card);
+    card.setOrderableId(orderableId);
+    card.setLineItems(newArrayList(lineItem));
+
+    stockOnHandCalculationService.recalculateStockOnHand(lineItem, 0);
+  }
+
+  @Test
+  public void shouldThrowExceptionWhenOrderableNotFound() {
+    final UUID orderableId = UUID.randomUUID();
+    when(orderableService.findOne(orderableId)).thenReturn(null);
+
+    expectedException.expect(ValidationMessageException.class);
+    expectedException.expectMessage(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH);
+
+    StockCard card = new StockCard();
+    StockCardLineItem lineItem = createDebitLineItem(firstDate, 15, card);
+    card.setOrderableId(orderableId);
     card.setLineItems(newArrayList(lineItem));
 
     stockOnHandCalculationService.recalculateStockOnHand(lineItem, 0);
@@ -242,7 +274,7 @@ public class StockOnHandCalculationServiceTest {
 
   @Test
   public void shouldReturnValidSoH() {
-    StockCardLineItem lineItem = createDebitLineItem(firstDate, 15);
+    StockCardLineItem lineItem = createDebitLineItem(firstDate, 15, null);
 
     Integer actual = stockOnHandCalculationService.recalculateStockOnHand(lineItem, 20);
 
@@ -252,10 +284,10 @@ public class StockOnHandCalculationServiceTest {
   @Test
   public void shouldReturnSoHAfterSomeIterations() {
     List<StockCardLineItem> items = newArrayList(
-        createCreditLineItem(firstDate.plusDays(1), 5),
-        createDebitLineItem(firstDate.plusDays(2), 5),
-        createCreditLineItem(firstDate.plusDays(3), 2),
-        createDebitLineItem(firstDate.plusDays(4), 1)
+        createCreditLineItem(firstDate.plusDays(1), 5, null),
+        createDebitLineItem(firstDate.plusDays(2), 5, null),
+        createCreditLineItem(firstDate.plusDays(3), 2, null),
+        createDebitLineItem(firstDate.plusDays(4), 1, null)
     );
 
     Integer soh = 0;
@@ -265,23 +297,32 @@ public class StockOnHandCalculationServiceTest {
     assertEquals(soh, Integer.valueOf(1));
   }
 
-  private StockCardLineItem createDebitLineItem(LocalDate date, int quantity) {
+  private StockCardLineItem createDebitLineItem(LocalDate date, int quantity, StockCard card) {
     return StockCardLineItem
         .builder()
         .quantity(quantity)
         .occurredDate(date)
         .processedDate(ZonedDateTime.of(date, LocalTime.NOON, ZoneOffset.UTC))
         .reason(debitAdjustmentReason)
+        .stockCard(card)
         .build();
   }
 
-  private StockCardLineItem createCreditLineItem(LocalDate date, int quantity) {
+  private StockCardLineItem createCreditLineItem(LocalDate date, int quantity, StockCard card) {
     return StockCardLineItem
         .builder()
         .quantity(quantity)
         .occurredDate(date)
         .processedDate(ZonedDateTime.of(date, LocalTime.NOON, ZoneOffset.UTC))
         .reason(creditAdjustmentReason)
+        .stockCard(card)
         .build();
+  }
+
+  private void mockOrderable(UUID orderableId) {
+    OrderableDto dto = new OrderableDto();
+    dto.setId(orderableId);
+    dto.setProductCode("TEST");
+    when(orderableService.findOne(orderableId)).thenReturn(dto);
   }
 }

@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.service;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -32,18 +33,21 @@ import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockCardLineItemRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
+import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.testutils.CalculatedStockOnHandDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -69,6 +73,9 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
   @Autowired
   private StockEventsRepository stockEventsRepository;
 
+  @MockBean
+  private OrderableReferenceDataService orderableReferenceDataService;
+
   private UUID facility = randomUUID();
   private UUID program = randomUUID();
   private UUID product = randomUUID();
@@ -85,6 +92,12 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
 
   @Before
   public void setUp() {
+    when(orderableReferenceDataService.findOne(product)).thenReturn(
+        OrderableDto.builder()
+            .id(product)
+            .productCode("TEST")
+            .build());
+
     event = new StockEventDataBuilder()
         .withoutId()
         .withFacility(facility)
@@ -572,6 +585,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
 
     lineItemlist = createStockCardLineItemsList(lineItem, creditReason);
     stockCard.setLineItems(lineItemlist);
+    lineItem.setStockCard(stockCard);
     stockCardRepository.save(stockCard);
 
     calculatedStockOnHandRepository.save(
