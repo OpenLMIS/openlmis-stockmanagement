@@ -96,6 +96,9 @@ public class StockCardService extends StockCardBaseService {
   @Autowired
   private AuthenticationHelper authenticationHelper;
 
+  @Autowired
+  private StockOnHandCalculationService calculationSoHService;
+
   /**
    * Generate stock card line items and stock cards based on event, and persist them.
    *
@@ -142,7 +145,7 @@ public class StockCardService extends StockCardBaseService {
     LOGGER.debug("Stock card found");
     permissionService.canViewStockCard(foundCard.getProgramId(), foundCard.getFacilityId());
 
-    foundCard.calculateStockOnHand();
+    calculationSoHService.calculateStockOnHand(foundCard);
 
     StockCardDto cardDto = createDtos(singletonList(foundCard)).get(0);
     cardDto.setOrderable(orderableRefDataService.findOne(foundCard.getOrderableId()));

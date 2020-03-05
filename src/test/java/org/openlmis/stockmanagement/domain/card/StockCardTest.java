@@ -19,8 +19,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemDataBuilder;
@@ -60,31 +58,13 @@ public class StockCardTest {
         .build();
 
     //when
-    stockCard.calculateStockOnHand();
+    stockCard.reorderLineItems();
 
     //then
     assertThat(stockCard.getLineItems().get(0), is(lineItem4));
     assertThat(stockCard.getLineItems().get(1), is(lineItem3));
     assertThat(stockCard.getLineItems().get(2), is(lineItem2));
     assertThat(stockCard.getLineItems().get(3), is(lineItem1));
-  }
-
-  @Test
-  public void shouldGetSohByCalculatingSohOfEachLineItem() {
-    StockCardLineItem lineItem1 = spy(new StockCardLineItemDataBuilder()
-        .withQuantity(123)
-        .build());
-    StockCardLineItem lineItem2 = spy(new StockCardLineItemDataBuilder()
-        .withOccurredDateNextDay()
-        .withQuantity(456)
-        .build());
-    StockCard card = new StockCard();
-    card.setLineItems(asList(lineItem1, lineItem2));
-
-    card.calculateStockOnHand();
-
-    verify(lineItem1).calculateStockOnHand(0);
-    verify(lineItem2).calculateStockOnHand(123);
   }
 
   @Test

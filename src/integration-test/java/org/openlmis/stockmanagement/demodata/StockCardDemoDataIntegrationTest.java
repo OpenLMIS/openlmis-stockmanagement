@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
+import org.openlmis.stockmanagement.service.StockOnHandCalculationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -40,6 +41,9 @@ public class StockCardDemoDataIntegrationTest {
   @Autowired
   private StockCardRepository stockCardRepository;
 
+  @Autowired
+  private StockOnHandCalculationService soHCalculationService;
+
   @Test
   public void demoDataTest() {
     assertThat(stockCardRepository.count()).isGreaterThan(0);
@@ -55,7 +59,7 @@ public class StockCardDemoDataIntegrationTest {
 
       // we verify that stock card line items contain valid data and the stock on hand will be
       // calculated correctly.
-      page.forEach(StockCard::calculateStockOnHand);
+      page.forEach(x -> soHCalculationService.calculateStockOnHand(x));
       pageable = pageable.next();
     }
   }

@@ -17,7 +17,6 @@ package org.openlmis.stockmanagement.domain.card;
 
 import static javax.persistence.CascadeType.ALL;
 import static org.apache.commons.beanutils.BeanUtils.cloneBean;
-import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.hibernate.annotations.LazyCollectionOption.FALSE;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparators.byOccurredDate;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparators.byProcessedDate;
@@ -139,24 +138,6 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
   }
 
   /**
-   * Calculate stock on hand for each line item and the card itself.
-   */
-  public void calculateStockOnHand() {
-    if (isEmpty(lineItems)) {
-      return;
-    }
-
-    reorderLineItems();
-    int previousSoh = 0;
-    for (StockCardLineItem lineItem : getLineItems()) {
-      previousSoh = lineItem.calculateStockOnHand(previousSoh);
-    }
-    LOGGER.debug("Calculated stock on hand: {}", previousSoh);
-
-    stockOnHand = previousSoh;
-  }
-
-  /**
    * Creates a shallow copy of this stock card. Used during recalculation to avoid updates on
    * existing stock cards and line items.
    */
@@ -186,8 +167,12 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
     return clone;
   }
 
+  /**
+   * Reorders stock card's line items basing on:
+   * occurrence date, processing date and reason priority.
+   */
   @PostLoad
-  private void reorderLineItems() {
+  public void reorderLineItems() {
     Comparator<StockCardLineItem> comparator = byOccurredDate()
         .thenComparing(byProcessedDate())
         .thenComparing(byReasonPriority());

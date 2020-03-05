@@ -15,8 +15,6 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH;
-
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
@@ -26,10 +24,8 @@ import java.util.stream.Collectors;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
-import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
-import org.openlmis.stockmanagement.util.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.profiler.Profiler;
@@ -46,6 +42,9 @@ public class CalculatedStockOnHandService {
 
   @Autowired
   private CalculatedStockOnHandRepository calculatedStockOnHandRepository;
+
+  @Autowired
+  private StockOnHandCalculationService calculationSoHService;
 
   /**
    * Returns list of stock cards with fetched Stock on Hand values.
@@ -156,7 +155,8 @@ public class CalculatedStockOnHandService {
     followingLineItems.add(0, lineItem);
     profiler.start("SAVE_RECALCULATED_STOCK_ON_HANDS");
     for (StockCardLineItem item : followingLineItems) {
-      Integer calculatedStockOnHand = calculateStockOnHand(item, lineItemsPreviousStockOnHand);
+      Integer calculatedStockOnHand = calculationSoHService
+          .recalculateStockOnHand(item, lineItemsPreviousStockOnHand);
       saveCalculatedStockOnHand(item, calculatedStockOnHand, stockCard);
       lineItemsPreviousStockOnHand = calculatedStockOnHand;
     }
@@ -174,20 +174,6 @@ public class CalculatedStockOnHandService {
       stockCard.setOccurredDate(calculatedStockOnHand.getOccurredDate());
       stockCard.setProcessedDate(calculatedStockOnHand.getProcessedDate());
     }
-  }
-
-  private Integer calculateStockOnHand(StockCardLineItem lineItem, Integer previousStockOnHand) {
-    int quantity = lineItem.isPhysicalInventory()
-        ? lineItem.getQuantity()
-        : previousStockOnHand + lineItem.getQuantityWithSign();
-
-    if (quantity < 0) {
-      throw new ValidationMessageException(
-          new Message(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH, previousStockOnHand,
-              lineItem.getQuantity()));
-    }
-
-    return quantity;
   }
 
   private void saveCalculatedStockOnHand(StockCardLineItem lineItem, Integer stockOnHand,

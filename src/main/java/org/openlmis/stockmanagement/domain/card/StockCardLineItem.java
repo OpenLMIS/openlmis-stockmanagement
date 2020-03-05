@@ -18,11 +18,6 @@ package org.openlmis.stockmanagement.domain.card;
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static java.time.ZonedDateTime.now;
 import static javax.persistence.CascadeType.ALL;
-import static org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason.physicalBalance;
-import static org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason.physicalCredit;
-import static org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason.physicalDebit;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERRRO_EVENT_SOH_EXCEEDS_LIMIT;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -55,8 +50,6 @@ import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
-import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.util.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -191,25 +184,6 @@ public class StockCardLineItem extends BaseEntity {
   }
 
   /**
-   * Calculate stock on hand with previous stock on hand.
-   *
-   * @param previousStockOnHand previous stock on hand.
-   */
-  public Integer calculateStockOnHand(int previousStockOnHand) {
-    if (isPhysicalInventory()) {
-      setReason(determineReasonByQuantity(previousStockOnHand));
-      this.stockOnHand = quantity;
-      setQuantity(Math.abs(this.stockOnHand - previousStockOnHand));
-      LOGGER.debug("Physical inventory: " + this.stockOnHand);
-      return this.stockOnHand;
-    } else if (shouldIncrease()) {
-      return tryIncrease(previousStockOnHand);
-    } else {
-      return tryDecrease(previousStockOnHand);
-    }
-  }
-
-  /**
    * Returns quantity value with correct sign depending on reason type.
    *
    * @return quantity value, is negative for Debit reason
@@ -218,7 +192,7 @@ public class StockCardLineItem extends BaseEntity {
     if (null == this.getQuantity()) {
       return 0;
     }
-    return this.shouldIncrease()
+    return this.isPositive()
         ? this.getQuantity()
         : this.getQuantity() * -1;
   }
@@ -242,42 +216,12 @@ public class StockCardLineItem extends BaseEntity {
     return source == null && destination == null && reason == null;
   }
 
-  private Integer tryDecrease(int previousStockOnHand) {
-    if (previousStockOnHand - quantity < 0) {
-      throw new ValidationMessageException(
-          new Message(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH, previousStockOnHand, quantity));
-    }
-
-    LOGGER.debug("try decrease soh: " + previousStockOnHand + " - " + quantity + " = "
-        + (previousStockOnHand - quantity));
-
-    setStockOnHand(previousStockOnHand - quantity);
-    return this.stockOnHand;
-  }
-
-  private Integer tryIncrease(int previousStockOnHand) {
-    try {
-      LOGGER.debug("try increase soh: " + previousStockOnHand + " + " + quantity + " = "
-          + Math.addExact(previousStockOnHand, quantity));
-      setStockOnHand(Math.addExact(previousStockOnHand, quantity));
-    } catch (ArithmeticException ex) {
-      throw new ValidationMessageException(
-          new Message(ERRRO_EVENT_SOH_EXCEEDS_LIMIT, previousStockOnHand, quantity, ex));
-    }
-    return this.stockOnHand;
-  }
-
-  private StockCardLineItemReason determineReasonByQuantity(int previousStockOnHand) {
-    if (quantity > previousStockOnHand) {
-      return physicalCredit();
-    } else if (quantity < previousStockOnHand) {
-      return physicalDebit();
-    } else {
-      return physicalBalance();
-    }
-  }
-
-  private boolean shouldIncrease() {
+  /**
+   * Checks if line item will add quantity to SoH.
+   *
+   * @return true if is physical inventory
+   */
+  public boolean isPositive() {
     boolean hasSource = source != null;
     boolean isCredit = reason != null && reason.getReasonType() == ReasonType.CREDIT;
     return hasSource || isCredit;
