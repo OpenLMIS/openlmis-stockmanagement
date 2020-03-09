@@ -27,7 +27,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARDS_VIEW;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -233,6 +232,6 @@ public class StockCardServiceTest {
     assertEquals(stockCard.getOrderableId(), stockCardDto.getOrderableId());
     assertEquals(stockCard.getLotId(), stockCardDto.getLotId());
     verify(calculatedStockOnHandService, times(1))
-        .fetchStockOnHandForSpecificDate(any(StockCard.class), any(LocalDate.class));
+        .fetchCurrentStockOnHand(any(StockCard.class));
   }
 }

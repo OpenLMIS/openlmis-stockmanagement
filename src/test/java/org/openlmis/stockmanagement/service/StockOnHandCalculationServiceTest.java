@@ -27,7 +27,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Rule;
@@ -238,63 +237,6 @@ public class StockOnHandCalculationServiceTest {
     assertEquals(card.getStockOnHand(), Integer.valueOf(15));
     assertEquals(ReasonType.BALANCE_ADJUSTMENT, lineItem.getReason().getReasonType());
     assertEquals(ReasonCategory.PHYSICAL_INVENTORY, lineItem.getReason().getReasonCategory());
-  }
-
-  @Test
-  public void shouldThrowExceptionWhenStockOnHandBelowZero() {
-    final UUID orderableId = UUID.randomUUID();
-    mockOrderable(orderableId);
-
-    expectedException.expect(ValidationMessageException.class);
-    expectedException.expectMessage(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH);
-
-    StockCard card = new StockCard();
-    StockCardLineItem lineItem = createDebitLineItem(firstDate, 15, card);
-    card.setOrderableId(orderableId);
-    card.setLineItems(newArrayList(lineItem));
-
-    stockOnHandCalculationService.recalculateStockOnHand(lineItem, 0);
-  }
-
-  @Test
-  public void shouldThrowExceptionWhenOrderableNotFound() {
-    final UUID orderableId = UUID.randomUUID();
-    when(orderableService.findOne(orderableId)).thenReturn(null);
-
-    expectedException.expect(ValidationMessageException.class);
-    expectedException.expectMessage(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH);
-
-    StockCard card = new StockCard();
-    StockCardLineItem lineItem = createDebitLineItem(firstDate, 15, card);
-    card.setOrderableId(orderableId);
-    card.setLineItems(newArrayList(lineItem));
-
-    stockOnHandCalculationService.recalculateStockOnHand(lineItem, 0);
-  }
-
-  @Test
-  public void shouldReturnValidSoH() {
-    StockCardLineItem lineItem = createDebitLineItem(firstDate, 15, null);
-
-    Integer actual = stockOnHandCalculationService.recalculateStockOnHand(lineItem, 20);
-
-    assertEquals(actual, Integer.valueOf(5));
-  }
-
-  @Test
-  public void shouldReturnSoHAfterSomeIterations() {
-    List<StockCardLineItem> items = newArrayList(
-        createCreditLineItem(firstDate.plusDays(1), 5, null),
-        createDebitLineItem(firstDate.plusDays(2), 5, null),
-        createCreditLineItem(firstDate.plusDays(3), 2, null),
-        createDebitLineItem(firstDate.plusDays(4), 1, null)
-    );
-
-    Integer soh = 0;
-    for (StockCardLineItem item : items) {
-      soh = stockOnHandCalculationService.recalculateStockOnHand(item, soh);
-    }
-    assertEquals(soh, Integer.valueOf(1));
   }
 
   private StockCardLineItem createDebitLineItem(LocalDate date, int quantity, StockCard card) {

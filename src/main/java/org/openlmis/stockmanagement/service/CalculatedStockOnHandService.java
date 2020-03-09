@@ -15,6 +15,8 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH;
+
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
@@ -24,8 +26,12 @@ import java.util.stream.Collectors;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
+import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
+import org.openlmis.stockmanagement.util.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.profiler.Profiler;
@@ -44,7 +50,7 @@ public class CalculatedStockOnHandService {
   private CalculatedStockOnHandRepository calculatedStockOnHandRepository;
 
   @Autowired
-  private StockOnHandCalculationService calculationSoHService;
+  private OrderableReferenceDataService orderableService;
 
   /**
    * Returns list of stock cards with fetched Stock on Hand values.
@@ -105,6 +111,15 @@ public class CalculatedStockOnHandService {
   }
 
   /**
+   * Fetch stock on hand value for given stock card and current date.
+   *
+   * @param stockCard stock card where the value will be set
+   */
+  public void fetchCurrentStockOnHand(StockCard stockCard) {
+    fetchStockOnHandForSpecificDate(stockCard, LocalDate.now());
+  }
+
+  /**
    * Fetch stock on hand value for given stock card.
    *
    * @param stockCard stock card where the value will be set
@@ -155,8 +170,7 @@ public class CalculatedStockOnHandService {
     followingLineItems.add(0, lineItem);
     profiler.start("SAVE_RECALCULATED_STOCK_ON_HANDS");
     for (StockCardLineItem item : followingLineItems) {
-      Integer calculatedStockOnHand = calculationSoHService
-          .recalculateStockOnHand(item, lineItemsPreviousStockOnHand);
+      Integer calculatedStockOnHand = calculateStockOnHand(item, lineItemsPreviousStockOnHand);
       saveCalculatedStockOnHand(item, calculatedStockOnHand, stockCard);
       lineItemsPreviousStockOnHand = calculatedStockOnHand;
     }
@@ -190,4 +204,34 @@ public class CalculatedStockOnHandService {
     calculatedStockOnHandRepository.save(new CalculatedStockOnHand(stockOnHand, stockCard,
         lineItem.getOccurredDate(), lineItem.getProcessedDate()));
   }
+
+  /**
+   * Recalculates values of stock on hand for single line item and returns aggregated stock on hand.
+   * It's designed to aggregate a collection of line items.
+   *
+   * @param item    containing quantity that will be aggregated with prevSoH
+   * @param prevSoH tmp stock on hand calculated for previous line items
+   * @return prevSoH aggregated with quantity of line item
+   */
+  private Integer calculateStockOnHand(StockCardLineItem item, int prevSoH) {
+    int quantity = item.isPhysicalInventory()
+        ? item.getQuantity()
+        : prevSoH + item.getQuantityWithSign();
+
+    if (quantity < 0) {
+      throwQuantityExceedException(item, prevSoH);
+    }
+
+    return quantity;
+  }
+
+  private void throwQuantityExceedException(StockCardLineItem item, int prevSoH)
+      throws ValidationMessageException {
+    OrderableDto orderable = orderableService.findOne(item.getStockCard().getOrderableId());
+    String code = (orderable != null) ? orderable.getProductCode() : "";
+    throw new ValidationMessageException(
+        new Message(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH,
+            item.getOccurredDate(), code, prevSoH, item.getQuantity()));
+  }
+
 }

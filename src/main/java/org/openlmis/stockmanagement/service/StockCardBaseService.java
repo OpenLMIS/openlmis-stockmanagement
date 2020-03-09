@@ -19,7 +19,6 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
-import java.time.LocalDate;
 import java.util.List;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.dto.StockCardDto;
@@ -76,7 +75,7 @@ public abstract class StockCardBaseService {
 
   private StockCardDto cardToDto(FacilityDto facility, ProgramDto program,
                                  StockCard card) {
-    calculatedStockOnHandService.fetchStockOnHandForSpecificDate(card, LocalDate.now());
+    calculatedStockOnHandService.fetchCurrentStockOnHand(card);
     StockCardDto cardDto = StockCardDto.createFrom(card);
     
     cardDto.setFacility(facility);

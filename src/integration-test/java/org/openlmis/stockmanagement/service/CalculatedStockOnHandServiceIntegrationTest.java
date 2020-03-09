@@ -184,7 +184,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
   
   @Test
   public void shouldGetStockCardWithNullStockOnHandIfCalculatedStockOnHandNotFound() {
-    calculatedStockOnHandService.fetchStockOnHandForSpecificDate(stockCard, LocalDate.now());
+    calculatedStockOnHandService.fetchCurrentStockOnHand(stockCard);
 
     assertThat(stockCard.getStockOnHand(), is(0));
   }
@@ -193,7 +193,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
   public void shouldSetStockOnHandForStockCard() {
     calculatedStockOnHandRepository.save(calculatedStockOnHandDataBuilder.build());
     
-    calculatedStockOnHandService.fetchStockOnHandForSpecificDate(stockCard, LocalDate.now());
+    calculatedStockOnHandService.fetchCurrentStockOnHand(stockCard);
 
     assertThat(stockCard.getStockOnHand(), is(quantity));
   }

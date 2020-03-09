@@ -44,32 +44,14 @@ public class StockOnHandCalculationService {
   private OrderableReferenceDataService orderableService;
 
   /**
-   * Recalculates values of stock on hand for single line item and returns aggregated stock on hand.
-   * It's designed to aggregate a collection of line items.
-   *
-   * @param item    containing quantity that will be aggregated with prevSoH
-   * @param prevSoH tmp stock on hand calculated for previous line items
-   * @return prevSoH aggregated with quantity of line item
-   */
-  public Integer recalculateStockOnHand(StockCardLineItem item, int prevSoH) {
-    int quantity = item.isPhysicalInventory()
-        ? item.getQuantity()
-        : prevSoH + item.getQuantityWithSign();
-
-    if (quantity < 0) {
-      throwQuantityExceedException(item, prevSoH);
-    }
-
-    return quantity;
-  }
-
-  /**
    * Returns stock card with updated Stock on Hand value.
    *
    * @param card containing line items
    * @return stock card with updated SOH value
    * @throws ValidationMessageException thrown when SoH < 0 or arithmetic error occurred
    */
+  // TODO: OLMIS-6779 Do not use that service
+  @Deprecated
   public StockCard calculateStockOnHand(StockCard card) throws ValidationMessageException {
     int soh = 0;
 
