@@ -251,8 +251,7 @@ public class CalculatedStockOnHandService {
     return quantity;
   }
 
-  private void throwQuantityExceedException(StockCardLineItem item, int prevSoH)
-      throws ValidationMessageException {
+  private void throwQuantityExceedException(StockCardLineItem item, int prevSoH) {
     OrderableDto orderable = orderableService.findOne(item.getStockCard().getOrderableId());
     String code = (orderable != null) ? orderable.getProductCode() : "";
     throw new ValidationMessageException(

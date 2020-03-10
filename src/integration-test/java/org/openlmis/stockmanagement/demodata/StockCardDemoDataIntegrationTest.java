@@ -16,14 +16,22 @@
 package org.openlmis.stockmanagement.demodata;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
+import java.util.UUID;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.openlmis.stockmanagement.BaseIntegrationTest;
 import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.CalculatedStockOnHandService;
+import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -36,13 +44,26 @@ import org.springframework.test.context.junit4.SpringRunner;
 @ActiveProfiles("test,demo-data")
 @SpringBootTest
 @DirtiesContext
-public class StockCardDemoDataIntegrationTest {
+public class StockCardDemoDataIntegrationTest extends BaseIntegrationTest {
 
   @Autowired
   private StockCardRepository stockCardRepository;
 
   @Autowired
   private CalculatedStockOnHandService calculatedStockOnHandService;
+
+  @MockBean
+  private OrderableReferenceDataService orderableReferenceDataService;
+
+  @Before
+  public void setUp() throws Exception {
+    mockAuthentication();
+    when(orderableReferenceDataService.findOne(any(UUID.class))).thenReturn(
+        OrderableDto.builder()
+            .id(UUID.randomUUID())
+            .productCode("TEST")
+            .build());
+  }
 
   @Test
   public void demoDataTest() {

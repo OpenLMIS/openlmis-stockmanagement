@@ -52,7 +52,7 @@ public class StockOnHandCalculationService {
    */
   // TODO: OLMIS-6779 Do not use that service
   @Deprecated
-  public StockCard calculateStockOnHand(StockCard card) throws ValidationMessageException {
+  public StockCard calculateStockOnHand(StockCard card) {
     int soh = 0;
 
     if (isNotEmpty(card.getLineItems())) {
@@ -67,8 +67,7 @@ public class StockOnHandCalculationService {
     return card;
   }
 
-  private Integer calculateStockOnHand(StockCardLineItem item, int prevSoH)
-      throws ValidationMessageException {
+  private Integer calculateStockOnHand(StockCardLineItem item, int prevSoH) {
     if (item.isPhysicalInventory()) {
       item.setReason(determineReasonByQuantity(item, prevSoH));
       item.setStockOnHand(item.getQuantity());
@@ -120,8 +119,7 @@ public class StockOnHandCalculationService {
     return item.isPositive();
   }
 
-  private void throwQuantityExceedException(StockCardLineItem item, int prevSoH)
-      throws ValidationMessageException {
+  private void throwQuantityExceedException(StockCardLineItem item, int prevSoH) {
     OrderableDto orderable = orderableService.findOne(item.getStockCard().getOrderableId());
     String code = (orderable != null) ? orderable.getProductCode() : "";
     throw new ValidationMessageException(
