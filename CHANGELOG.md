@@ -9,6 +9,7 @@ Bug fixes:
     *the screens now display Stock Card Summaries of Orderables both with and without Identifiers.
 * [OLMIS-6559](https://openlmis.atlassian.net/browse/OLMIS-6559): Fixed long product codes being cut in Physical Inventory printout.
 * [OLMIS-6745](https://openlmis.atlassian.net/browse/OLMIS-6745): Fixed incorrect calculation of Stock on Hand for edge cases.
+* [OLMIS-6759](https://openlmis.atlassian.net/browse/OLMIS-6759): Improved the error message when SoH is below zero.
 
 Improvements:
 * [OLMIS-3490](https://openlmis.atlassian.net/browse/OLMIS-3490): Performance improvements of Validate step in stock event.
