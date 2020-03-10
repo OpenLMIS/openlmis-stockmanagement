@@ -121,8 +121,7 @@ public class StockCardService extends StockCardBaseService {
     cardRepository.save(cardsToUpdate);
     cardRepository.flush();
 
-    lineItemsToUpdate.forEach(lineItem ->
-        calculatedStockOnHandService.recalculateStockOnHand(lineItem.getStockCard(), lineItem));
+    calculatedStockOnHandService.recalculateStockOnHand(lineItemsToUpdate);
 
     stockEventDto.getContext().refreshCards();
 

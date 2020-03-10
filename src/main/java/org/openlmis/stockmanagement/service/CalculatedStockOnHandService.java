@@ -19,6 +19,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_DEBIT_QU
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -132,15 +133,40 @@ public class CalculatedStockOnHandService {
   }
 
   /**
-   * Recalculates values of stock on hand
-   * in all line items that happened after one given in parameter.
+   * Recalculate values of stock on hand
+   * for all line items from the lineItems param separately in a proper order,
+   * with stock cards taken from each of them by default.
    *
-   * @param stockCard stock card for which
-   * @param lineItem  date used to get latest stock on hand before or equal specific date. If date
-   *     is not specified, current date will be used.
+   * @param lineItems line items to recalculate the value for.
+   */
+  public void recalculateStockOnHand(List<StockCardLineItem> lineItems) {
+    lineItems.stream().sorted(Comparator.comparing(StockCardLineItem::getOccurredDate,
+        Comparator.reverseOrder()))
+        .forEach(i -> recalculateStockOnHand(i.getStockCard(), i));
+  }
+
+  /**
+   * Recalculate values of stock on hand
+   * for all line items from the lineItems param separately in a proper order.
+   *
+   * @param stockCard stock card for which the value will be calculated.
+   * @param lineItems line items to recalculate the value for.
    */
   public void recalculateStockOnHand(
-      StockCard stockCard, StockCardLineItem lineItem) {
+      StockCard stockCard, List<StockCardLineItem> lineItems) {
+    lineItems.stream().sorted(Comparator.comparing(StockCardLineItem::getOccurredDate,
+        Comparator.reverseOrder()))
+        .forEach(i -> recalculateStockOnHand(stockCard, i));
+  }
+
+  /**
+   * Recalculate values of stock on hand
+   * in all line items that happened after one given in a parameter.
+   *
+   * @param stockCard stock card for which the value will be calculated.
+   * @param lineItem first line item to consider in recalculation.
+   */
+  private void recalculateStockOnHand(StockCard stockCard, StockCardLineItem lineItem) {
     Profiler profiler = new Profiler("RECALCULATE_STOCK_ON_HAND");
     profiler.setLogger(LOGGER);
 
@@ -206,7 +232,7 @@ public class CalculatedStockOnHandService {
   }
 
   /**
-   * Recalculates values of stock on hand for single line item and returns aggregated stock on hand.
+   * Recalculate values of stock on hand for single line item and returns aggregated stock on hand.
    * It's designed to aggregate a collection of line items.
    *
    * @param item    containing quantity that will be aggregated with prevSoH

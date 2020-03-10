@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import org.junit.Before;
@@ -229,7 +230,8 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
             .withStockOnHand(30)
             .build());
 
-    calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem);
+    calculatedStockOnHandService.recalculateStockOnHand(stockCard,
+        Collections.singletonList(lineItem));
 
     List<CalculatedStockOnHand> result = calculatedStockOnHandRepository
         .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
@@ -269,7 +271,8 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
             .withStockOnHand(30)
             .build());
 
-    calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem);
+    calculatedStockOnHandService.recalculateStockOnHand(stockCard,
+        Collections.singletonList(lineItem));
 
     List<CalculatedStockOnHand> result = calculatedStockOnHandRepository
         .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
@@ -308,7 +311,8 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
             .withStockOnHand(30)
             .build());
 
-    calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem);
+    calculatedStockOnHandService.recalculateStockOnHand(stockCard,
+        Collections.singletonList(lineItem));
 
     List<CalculatedStockOnHand> result = calculatedStockOnHandRepository
         .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
@@ -355,7 +359,8 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
             .withStockOnHand(thirdDaySoh)
             .build());
 
-    calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem);
+    calculatedStockOnHandService.recalculateStockOnHand(stockCard,
+        Collections.singletonList(lineItem));
 
     List<CalculatedStockOnHand> result = calculatedStockOnHandRepository
         .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
@@ -384,7 +389,8 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
         .withQuantity(15)
         .build();
 
-    calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem);
+    calculatedStockOnHandService.recalculateStockOnHand(stockCard,
+        Collections.singletonList(lineItem));
 
     List<CalculatedStockOnHand> result = calculatedStockOnHandRepository
         .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
@@ -411,7 +417,8 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
             .withStockOnHand(10)
             .build());
 
-    calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem);
+    calculatedStockOnHandService.recalculateStockOnHand(stockCard,
+        Collections.singletonList(lineItem));
 
     List<CalculatedStockOnHand> result = calculatedStockOnHandRepository
         .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
@@ -448,7 +455,8 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
             .withStockOnHand(20)
             .build());
 
-    calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem);
+    calculatedStockOnHandService.recalculateStockOnHand(stockCard,
+        Collections.singletonList(lineItem));
 
     List<CalculatedStockOnHand> result = calculatedStockOnHandRepository
         .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
@@ -485,7 +493,8 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
             .withStockOnHand(30)
             .build());
 
-    calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem);
+    calculatedStockOnHandService.recalculateStockOnHand(stockCard,
+        Collections.singletonList(lineItem));
 
     List<CalculatedStockOnHand> result = calculatedStockOnHandRepository
         .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
@@ -578,7 +587,8 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
             .withStockOnHand(10)
             .build());
 
-    calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem);
+    calculatedStockOnHandService.recalculateStockOnHand(stockCard,
+        Collections.singletonList(lineItem));
 
     List<CalculatedStockOnHand> result = calculatedStockOnHandRepository
         .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
@@ -618,7 +628,8 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
             .withStockOnHand(30)
             .build());
 
-    calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem);
+    calculatedStockOnHandService.recalculateStockOnHand(stockCard,
+        Collections.singletonList(lineItem));
 
     List<CalculatedStockOnHand> result = calculatedStockOnHandRepository
         .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
@@ -659,15 +670,14 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
             .withStockOnHand(30)
             .build());
 
-    calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem);
+    calculatedStockOnHandService.recalculateStockOnHand(stockCard,
+        Collections.singletonList(lineItem));
   }
 
   private void recalculateStockOnHand(List<StockCardLineItem> lineItemlist) {
     stockCard.setLineItems(lineItemlist);
     stockCardRepository.save(stockCard);
-
-    lineItemlist.forEach(lineItem ->
-        calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem));
+    calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItemlist);
   }
 
   private StockCardLineItem createDebitLineItem(int quantity, LocalDate occuredDate) {
