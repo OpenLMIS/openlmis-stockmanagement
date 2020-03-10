@@ -21,7 +21,9 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import org.junit.Before;
@@ -88,6 +90,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
   private StockCard stockCard;
   private List<StockCardLineItem> lineItemlist;
   private StockCardLineItemReason creditReason;
+  private StockCardLineItemReason debitReason;
   private CalculatedStockOnHandDataBuilder calculatedStockOnHandDataBuilder;
 
   @Before
@@ -113,6 +116,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     stockCardRepository.save(stockCard);
 
     creditReason = stockCardLineItemReasonRepository.findByName("Transfer In");
+    debitReason = stockCardLineItemReasonRepository.findByName("Consumed");
 
     calculatedStockOnHandDataBuilder = new CalculatedStockOnHandDataBuilder()
         .withoutId()
@@ -146,7 +150,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
         .build());
 
     List<StockCard> foundStockCards = calculatedStockOnHandService
-        .getStockCardsWithStockOnHand(program, facility, LocalDate.of(2017,5,10));
+        .getStockCardsWithStockOnHand(program, facility, LocalDate.of(2017, 5, 10));
 
     assertThat(foundStockCards.size(), is(1));
     assertThat(foundStockCards.get(0).getStockOnHand(), is(quantity));
@@ -173,7 +177,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     assertThat(foundStockCards.get(0).getStockOnHand(), is(quantity));
     assertThat(foundStockCards.get(0).getOccurredDate(), is(newDate));
   }
-  
+
   @Test
   public void shouldGetEmptyListIfStockCardsNotFound() {
     List<StockCard> foundStockCards = calculatedStockOnHandService
@@ -181,7 +185,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
 
     assertThat(foundStockCards.size(), is(0));
   }
-  
+
   @Test
   public void shouldGetStockCardWithNullStockOnHandIfCalculatedStockOnHandNotFound() {
     calculatedStockOnHandService.fetchCurrentStockOnHand(stockCard);
@@ -495,6 +499,57 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
   }
 
   @Test
+  public void shouldSetProperSohForAdjustmentsOnFollowingDaysForTheSameProduct() {
+    LocalDate firstDate = LocalDate.of(2020, 2, 3);
+    int initialSoh = 80;
+
+    calculatedStockOnHandRepository.save(new CalculatedStockOnHand(initialSoh, stockCard,
+        firstDate, firstDate.atStartOfDay(ZoneId.systemDefault())));
+
+    recalculateStockOnHand(Arrays.asList(
+        stockCardLineItemRepository.save(createDebitLineItem(1, firstDate)),
+        stockCardLineItemRepository.save(createDebitLineItem(1, firstDate.plusDays(1)))
+    ));
+
+    calculatedStockOnHandService.fetchStockOnHandForSpecificDate(stockCard, firstDate.plusDays(1));
+    assertThat(stockCard.getStockOnHand(), is(78));
+  }
+
+  @Test
+  public void shouldSetProperSohForAdjustmentsOnFollowingDaysForTheSameProductAddedInInvOrder() {
+    LocalDate firstDate = LocalDate.of(2016, 1, 31);
+    int initialSoh = 14;
+
+    calculatedStockOnHandRepository.save(new CalculatedStockOnHand(initialSoh, stockCard,
+        firstDate, firstDate.atStartOfDay(ZoneId.systemDefault())));
+
+    recalculateStockOnHand(Arrays.asList(
+        stockCardLineItemRepository.save(createDebitLineItem(2, firstDate.plusDays(1))),
+        stockCardLineItemRepository.save(createDebitLineItem(2, firstDate))
+    ));
+
+    calculatedStockOnHandService.fetchStockOnHandForSpecificDate(stockCard, firstDate.plusDays(1));
+    assertThat(stockCard.getStockOnHand(), is(10));
+  }
+
+  @Test
+  public void shouldSetProperSohForAdjustmentsOnTheSameDayForTheSameProduct() {
+    LocalDate date = LocalDate.of(2018, 4, 15);
+    int initialSoh = 60;
+
+    calculatedStockOnHandRepository.save(new CalculatedStockOnHand(initialSoh, stockCard,
+        date, date.atStartOfDay(ZoneId.systemDefault())));
+
+    recalculateStockOnHand(Arrays.asList(
+        stockCardLineItemRepository.save(createDebitLineItem(1, date)),
+        stockCardLineItemRepository.save(createDebitLineItem(2, date))
+    ));
+
+    calculatedStockOnHandService.fetchStockOnHandForSpecificDate(stockCard, date);
+    assertThat(stockCard.getStockOnHand(), is(57));
+  }
+
+  @Test
   public void shouldSetProperSohWhenAddingAdjustmentBeforePhysicalInventoryAsTheLastValue() {
     final StockCardLineItem lineItem = new StockCardLineItemDataBuilder()
         .withCreditReason()
@@ -605,6 +660,24 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
             .build());
 
     calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem);
+  }
+
+  private void recalculateStockOnHand(List<StockCardLineItem> lineItemlist) {
+    stockCard.setLineItems(lineItemlist);
+    stockCardRepository.save(stockCard);
+
+    lineItemlist.forEach(lineItem ->
+        calculatedStockOnHandService.recalculateStockOnHand(stockCard, lineItem));
+  }
+
+  private StockCardLineItem createDebitLineItem(int quantity, LocalDate occuredDate) {
+    return new StockCardLineItemDataBuilder()
+        .withReason(debitReason)
+        .withOccurredDate(occuredDate)
+        .withOriginEvent(event)
+        .withQuantity(quantity)
+        .withStockCard(stockCard)
+        .build();
   }
 
   private List<StockCardLineItem> createStockCardLineItemsList(StockCardLineItem lineItem,

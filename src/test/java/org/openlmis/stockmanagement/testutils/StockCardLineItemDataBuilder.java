@@ -101,6 +101,11 @@ public class StockCardLineItemDataBuilder {
     return this;
   }
 
+  public StockCardLineItemDataBuilder withStockCard(StockCard card) {
+    this.stockCard = card;
+    return this;
+  }
+
   public StockCardLineItemDataBuilder withoutId() {
     id = null;
     return this;
