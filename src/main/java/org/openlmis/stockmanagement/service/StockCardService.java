@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import javax.transaction.Transactional;
 import javax.validation.constraints.NotNull;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
@@ -105,6 +106,7 @@ public class StockCardService extends StockCardBaseService {
    * @param stockEventDto the origin event.
    * @param savedEventId  saved event id.
    */
+  @Transactional
   void saveFromEvent(StockEventDto stockEventDto, UUID savedEventId) {
 
     List<StockCard> cardsToUpdate = new ArrayList<>();
