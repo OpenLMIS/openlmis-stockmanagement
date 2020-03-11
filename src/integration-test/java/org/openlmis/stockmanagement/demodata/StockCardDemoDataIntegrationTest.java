@@ -81,7 +81,7 @@ public class StockCardDemoDataIntegrationTest extends BaseIntegrationTest {
       // we verify that stock card line items contain valid data and the stock on hand will be
       // calculated correctly.
       page.forEach(card ->
-          calculatedStockOnHandService.recalculateStockOnHand(card, card.getLineItems()));
+          calculatedStockOnHandService.recalculateStockOnHand(card.getLineItems()));
       pageable = pageable.next();
     }
   }

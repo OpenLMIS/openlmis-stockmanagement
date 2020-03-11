@@ -18,9 +18,11 @@ package org.openlmis.stockmanagement.service;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -38,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CalculatedStockOnHandService {
@@ -56,15 +59,15 @@ public class CalculatedStockOnHandService {
   /**
    * Returns list of stock cards with fetched Stock on Hand values.
    *
-   * @param programId program id to find stock cards
+   * @param programId  program id to find stock cards
    * @param facilityId facility id to find stock cards
-   * @param asOfDate date used to get latest stock on hand before or equal specific date
+   * @param asOfDate   date used to get latest stock on hand before or equal specific date
    * @return List of stock cards with SOH values, empty list if no stock cards were found.
    */
   public List<StockCard> getStockCardsWithStockOnHand(
-          UUID programId, UUID facilityId, LocalDate asOfDate) {
+      UUID programId, UUID facilityId, LocalDate asOfDate) {
     List<StockCard> stockCards =
-            stockCardRepository.findByProgramIdAndFacilityId(programId, facilityId);
+        stockCardRepository.findByProgramIdAndFacilityId(programId, facilityId);
 
     if (null == stockCards) {
       return Collections.emptyList();
@@ -79,7 +82,7 @@ public class CalculatedStockOnHandService {
   /**
    * Returns list of stock cards with fetched Stock on Hand values.
    *
-   * @param programId program id to find stock cards
+   * @param programId  program id to find stock cards
    * @param facilityId facility id to find stock cards
    * @return List of stock cards with SOH values, empty list if no stock cards were found.
    */
@@ -90,8 +93,8 @@ public class CalculatedStockOnHandService {
   /**
    * Returns list of stock cards with fetched Stock on Hand values.
    *
-   * @param programId program id to find stock card
-   * @param facilityId facility id to find stock card
+   * @param programId    program id to find stock card
+   * @param facilityId   facility id to find stock card
    * @param orderableIds orderable ids to find stock card
    * @return List of stock cards with SOH values, empty list if no stock cards were found.
    */
@@ -124,8 +127,8 @@ public class CalculatedStockOnHandService {
    * Fetch stock on hand value for given stock card.
    *
    * @param stockCard stock card where the value will be set
-   * @param asOfDate date used to get latest stock on hand before or equal specific date. If date
-   *     is not specified, current date will be used.
+   * @param asOfDate  date used to get latest stock on hand before or equal specific date. If date
+   *                  is not specified, current date will be used.
    */
   public void fetchStockOnHandForSpecificDate(StockCard stockCard, LocalDate asOfDate) {
     LocalDate queryDate = null == asOfDate ? LocalDate.now() : asOfDate;
@@ -133,38 +136,27 @@ public class CalculatedStockOnHandService {
   }
 
   /**
-   * Recalculate values of stock on hand
-   * for all line items from the lineItems param separately in a proper order,
-   * with stock cards taken from each of them by default.
+   * Recalculate values of stock on hand for the first line item from all different stock on hand,
+   * which in result will update soh for all following line items from the list as well.
    *
    * @param lineItems line items to recalculate the value for.
    */
+  @Transactional
   public void recalculateStockOnHand(List<StockCardLineItem> lineItems) {
-    lineItems.stream().sorted(Comparator.comparing(StockCardLineItem::getOccurredDate,
-        Comparator.reverseOrder()))
-        .forEach(i -> recalculateStockOnHand(i.getStockCard(), i));
+    Map<StockCard, List<StockCardLineItem>> map = mapStockCardsWithLineItems(lineItems);
+    map.forEach((key, value) -> {
+      value.sort(StockCard.getLineItemsComparator());
+      value.stream().findFirst()
+          .ifPresent(item -> recalculateStockOnHand(item.getStockCard(), item));
+    });
   }
 
   /**
-   * Recalculate values of stock on hand
-   * for all line items from the lineItems param separately in a proper order.
+   * Recalculate values of stock on hand in all line items that happened after one given in a
+   * parameter.
    *
    * @param stockCard stock card for which the value will be calculated.
-   * @param lineItems line items to recalculate the value for.
-   */
-  public void recalculateStockOnHand(
-      StockCard stockCard, List<StockCardLineItem> lineItems) {
-    lineItems.stream().sorted(Comparator.comparing(StockCardLineItem::getOccurredDate,
-        Comparator.reverseOrder()))
-        .forEach(i -> recalculateStockOnHand(stockCard, i));
-  }
-
-  /**
-   * Recalculate values of stock on hand
-   * in all line items that happened after one given in a parameter.
-   *
-   * @param stockCard stock card for which the value will be calculated.
-   * @param lineItem first line item to consider in recalculation.
+   * @param lineItem  first line item to consider in recalculation.
    */
   private void recalculateStockOnHand(StockCard stockCard, StockCardLineItem lineItem) {
     Profiler profiler = new Profiler("RECALCULATE_STOCK_ON_HAND");
@@ -190,7 +182,8 @@ public class CalculatedStockOnHandService {
     profiler.start("GET_FOLLOWING_STOCK_CARD_LINE_ITEMS");
     List<StockCardLineItem> followingLineItems = stockCard.getLineItems()
         .stream()
-        .filter(item -> item.getOccurredDate().isAfter(lineItem.getOccurredDate()))
+        .filter(item -> !item.getOccurredDate().isBefore(lineItem.getOccurredDate())
+            && item.getId() != lineItem.getId())
         .collect(Collectors.toList());
 
     followingLineItems.add(0, lineItem);
@@ -203,10 +196,22 @@ public class CalculatedStockOnHandService {
     profiler.stop().log();
   }
 
+  private Map<StockCard, List<StockCardLineItem>> mapStockCardsWithLineItems(
+      List<StockCardLineItem> lineItems) {
+    Map<StockCard, List<StockCardLineItem>> map = new HashMap<>();
+    for (StockCardLineItem item : lineItems) {
+      if (!map.containsKey(item.getStockCard())) {
+        map.put(item.getStockCard(), new ArrayList<>());
+      }
+      map.get(item.getStockCard()).add(item);
+    }
+    return map;
+  }
+
   private void fetchStockOnHand(StockCard stockCard, LocalDate asOfDate) {
     Optional<CalculatedStockOnHand> calculatedStockOnHandOptional = calculatedStockOnHandRepository
-            .findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(
-                stockCard.getId(), asOfDate);
+        .findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(
+            stockCard.getId(), asOfDate);
 
     if (calculatedStockOnHandOptional.isPresent()) {
       CalculatedStockOnHand calculatedStockOnHand = calculatedStockOnHandOptional.get();
@@ -258,5 +263,4 @@ public class CalculatedStockOnHandService {
         new Message(ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH,
             item.getOccurredDate(), code, prevSoH, item.getQuantity()));
   }
-
 }

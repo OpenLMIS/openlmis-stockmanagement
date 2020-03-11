@@ -168,15 +168,20 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
   }
 
   /**
-   * Reorders stock card's line items basing on:
-   * occurrence date, processing date and reason priority.
+   * Reorders stock card's line items basing on line items comparator.
    */
   @PostLoad
   public void reorderLineItems() {
-    Comparator<StockCardLineItem> comparator = byOccurredDate()
+    lineItems.sort(getLineItemsComparator());
+  }
+
+  /**
+   * Returns line items comparator that base on
+   * occurrence date, processing date and reason priority.
+   */
+  public static Comparator<StockCardLineItem> getLineItemsComparator() {
+    return byOccurredDate()
         .thenComparing(byProcessedDate())
         .thenComparing(byReasonPriority());
-
-    lineItems.sort(comparator);
   }
 }
