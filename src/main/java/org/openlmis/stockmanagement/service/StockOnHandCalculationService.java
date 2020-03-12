@@ -35,6 +35,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+/*
+ * StockOnHandCalculationService should NOT be used.
+ * Instead please, use {@link org.openlmis.stockmanagement.service.CalculatedStockOnHandService}.
+ * Removing this logic is described in task OLMIS-6779.
+ */
 public class StockOnHandCalculationService {
 
   private static final Logger LOGGER = LoggerFactory
@@ -50,8 +55,6 @@ public class StockOnHandCalculationService {
    * @return stock card with updated SOH value
    * @throws ValidationMessageException thrown when SoH < 0 or arithmetic error occurred
    */
-  // TODO: OLMIS-6779 Do not use that service
-  @Deprecated
   public StockCard calculateStockOnHand(StockCard card) {
     int soh = 0;
 
@@ -72,7 +75,7 @@ public class StockOnHandCalculationService {
       item.setReason(determineReasonByQuantity(item, prevSoH));
       item.setStockOnHand(item.getQuantity());
       item.setQuantity(Math.abs(item.getStockOnHand() - prevSoH));
-      LOGGER.debug("Physical inventory: " + item.getStockOnHand());
+      LOGGER.debug("Physical inventory: {}", item.getStockOnHand());
       return item.getStockOnHand();
     } else if (shouldIncrease(item)) {
       return tryIncrease(item, prevSoH);
@@ -86,18 +89,18 @@ public class StockOnHandCalculationService {
       throwQuantityExceedException(item, prevSoH);
     }
 
-    LOGGER.debug("try decrease soh: " + prevSoH + " - " + item.getQuantity() + " = "
-        + (prevSoH - item.getQuantity()));
+    int difference = (prevSoH - item.getQuantity());
+    LOGGER.debug("try decrease soh: {} - {} = {}", prevSoH, item.getQuantity(), difference);
+    item.setStockOnHand(difference);
 
-    item.setStockOnHand(prevSoH - item.getQuantity());
     return item.getStockOnHand();
   }
 
   private Integer tryIncrease(StockCardLineItem item, int prevSoH) {
     try {
-      LOGGER.debug("try increase soh: " + prevSoH + " + " + item.getQuantity() + " = "
-          + Math.addExact(prevSoH, item.getQuantity()));
-      item.setStockOnHand(Math.addExact(prevSoH, item.getQuantity()));
+      int sum = Math.addExact(prevSoH, item.getQuantity());
+      LOGGER.debug("try increase soh: {} + {} = {}", prevSoH, item.getQuantity(), sum);
+      item.setStockOnHand(sum);
     } catch (ArithmeticException ex) {
       throw new ValidationMessageException(
           new Message(ERRRO_EVENT_SOH_EXCEEDS_LIMIT, prevSoH, item.getQuantity(), ex));
