@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import javax.validation.constraints.NotNull;
 import org.openlmis.stockmanagement.domain.card.StockCard;
@@ -111,10 +112,12 @@ public class StockCardService extends StockCardBaseService {
 
     List<StockCard> cardsToUpdate = new ArrayList<>();
     List<StockCardLineItem> lineItemsToUpdate = new ArrayList<>();
+    List<StockCardLineItem> existingLineItems = new ArrayList<>();
 
     for (StockEventLineItemDto eventLineItem : stockEventDto.getLineItems()) {
       StockCard stockCard = findOrCreateCard(
           stockEventDto, eventLineItem, savedEventId, cardsToUpdate);
+      existingLineItems.addAll(stockCard.getLineItems());
 
       lineItemsToUpdate.add(createLineItemFrom(
           stockEventDto, eventLineItem, stockCard, savedEventId));
@@ -123,7 +126,8 @@ public class StockCardService extends StockCardBaseService {
     cardRepository.save(cardsToUpdate);
     cardRepository.flush();
 
-    calculatedStockOnHandService.recalculateStockOnHand(lineItemsToUpdate);
+    calculatedStockOnHandService.recalculateStockOnHand(
+        getSavedButNewLineItems(cardsToUpdate, existingLineItems));
 
     stockEventDto.getContext().refreshCards();
 
@@ -206,6 +210,14 @@ public class StockCardService extends StockCardBaseService {
     }
 
     return Pagination.getPage(createDtos(page.getContent()), pageable, page.getTotalElements());
+  }
+
+  private List<StockCardLineItem> getSavedButNewLineItems(List<StockCard> cardsToUpdate,
+      List<StockCardLineItem> existingLineItems) {
+    return cardsToUpdate.stream()
+        .flatMap(card -> card.getLineItems().stream())
+        .filter(item -> !existingLineItems.contains(item))
+        .collect(Collectors.toList());
   }
 
   private StockCard findOrCreateCard(StockEventDto eventDto, StockEventLineItemDto eventLineItem,
