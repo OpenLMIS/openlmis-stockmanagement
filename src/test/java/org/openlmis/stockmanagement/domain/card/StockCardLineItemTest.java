@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.domain.card;
 
+import static java.time.ZonedDateTime.now;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
@@ -82,7 +83,7 @@ public class StockCardLineItemTest {
     UUID eventId = randomUUID();
 
     StockCardLineItem cardLineItem =
-        createLineItemFrom(eventDto, eventLineItem, stockCard, eventId);
+        createLineItemFrom(eventDto, eventLineItem, stockCard, eventId, now());
 
     //then
     assertThat(cardLineItem.getSourceFreeText(), is(eventLineItem.getSourceFreeText()));
@@ -107,7 +108,7 @@ public class StockCardLineItemTest {
     assertEquals(cardLineItem.getStockAdjustments(), eventLineItem.stockAdjustments());
 
     ZonedDateTime processedDate = cardLineItem.getProcessedDate();
-    long between = SECONDS.between(processedDate, ZonedDateTime.now());
+    long between = SECONDS.between(processedDate, now());
 
     assertThat(between, lessThan(2L));
   }

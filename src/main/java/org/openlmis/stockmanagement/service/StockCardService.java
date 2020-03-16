@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static java.time.ZonedDateTime.now;
 import static java.util.Collections.singletonList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.domain.card.StockCard.createStockCardFrom;
@@ -23,6 +24,7 @@ import static org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity.
 import static org.openlmis.stockmanagement.domain.reason.ReasonCategory.PHYSICAL_INVENTORY;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARDS_VIEW;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -111,16 +113,15 @@ public class StockCardService extends StockCardBaseService {
   void saveFromEvent(StockEventDto stockEventDto, UUID savedEventId) {
 
     List<StockCard> cardsToUpdate = new ArrayList<>();
-    List<StockCardLineItem> lineItemsToUpdate = new ArrayList<>();
     List<StockCardLineItem> existingLineItems = new ArrayList<>();
+    ZonedDateTime processedDate = now();
 
     for (StockEventLineItemDto eventLineItem : stockEventDto.getLineItems()) {
       StockCard stockCard = findOrCreateCard(
           stockEventDto, eventLineItem, savedEventId, cardsToUpdate);
       existingLineItems.addAll(stockCard.getLineItems());
 
-      lineItemsToUpdate.add(createLineItemFrom(
-          stockEventDto, eventLineItem, stockCard, savedEventId));
+      createLineItemFrom(stockEventDto, eventLineItem, stockCard, savedEventId, processedDate);
     }
 
     cardRepository.save(cardsToUpdate);

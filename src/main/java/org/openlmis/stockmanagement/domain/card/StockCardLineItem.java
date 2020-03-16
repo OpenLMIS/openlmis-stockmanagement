@@ -16,7 +16,6 @@
 package org.openlmis.stockmanagement.domain.card;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
-import static java.time.ZonedDateTime.now;
 import static javax.persistence.CascadeType.ALL;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -133,7 +132,7 @@ public class StockCardLineItem extends BaseEntity {
    */
   public static StockCardLineItem createLineItemFrom(
       StockEventDto eventDto, StockEventLineItemDto eventLineItem,
-      StockCard stockCard, UUID savedEventId) {
+      StockCard stockCard, UUID savedEventId, ZonedDateTime processedDate) {
     StockCardLineItemBuilder builder = StockCardLineItem.builder();
 
     if (null != savedEventId) {
@@ -165,7 +164,7 @@ public class StockCardLineItem extends BaseEntity {
         .stockAdjustments(eventLineItem.stockAdjustments())
 
         .occurredDate(eventLineItem.getOccurredDate())
-        .processedDate(now())
+        .processedDate(processedDate)
 
         .reasonFreeText(eventLineItem.getReasonFreeText())
         .sourceFreeText(eventLineItem.getSourceFreeText())
