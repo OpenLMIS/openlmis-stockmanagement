@@ -22,12 +22,14 @@ import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.DatesUtil.getBaseDate;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.transaction.Transactional;
 import org.junit.Before;
 import org.junit.Test;
@@ -384,7 +386,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
 
     calculatedStockOnHandRepository.save(
         calculatedStockOnHandDataBuilder
-            .withOccurredDate(lineItem.getOccurredDate())
+            .withOccurredDate(lineItem.getOccurredDate().minusDays(1))
             .withStockOnHand(10)
             .build());
 
@@ -476,7 +478,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     int initialSoh = 80;
 
     calculatedStockOnHandRepository.save(new CalculatedStockOnHand(initialSoh, stockCard,
-        firstDate, firstDate.atStartOfDay(ZoneId.systemDefault())));
+        firstDate.minusDays(1), ZonedDateTime.now()));
 
     lineItemlist = Arrays.asList(
         stockCardLineItemRepository.save(createDebitLineItem(1, firstDate)),
@@ -490,12 +492,79 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
   }
 
   @Test
+  public void shouldSetProperSohForAdjustmentsOnFollowingDaysForTheSameProductDoneTwice() {
+    LocalDate firstDate = LocalDate.of(2010, 2, 14);
+    int initialSoh = 64;
+
+    calculatedStockOnHandRepository.save(new CalculatedStockOnHand(initialSoh, stockCard,
+        firstDate.minusDays(1), ZonedDateTime.now()));
+
+    List<StockCardLineItem> firstLineItemsList = Arrays.asList(
+        stockCardLineItemRepository.save(createDebitLineItem(1, firstDate)),
+        stockCardLineItemRepository.save(createDebitLineItem(1, firstDate.plusDays(1)))
+    );
+    stockCard.setLineItems(firstLineItemsList);
+    calculatedStockOnHandService.recalculateStockOnHand(firstLineItemsList);
+
+    List<StockCardLineItem> secondLineItemsList = Arrays.asList(
+        stockCardLineItemRepository.save(createDebitLineItem(1, firstDate)),
+        stockCardLineItemRepository.save(createDebitLineItem(1, firstDate.plusDays(1)))
+    );
+    lineItemlist = Stream.concat(firstLineItemsList.stream(), secondLineItemsList.stream())
+        .collect(Collectors.toList());
+    stockCard.setLineItems(lineItemlist);
+    calculatedStockOnHandService.recalculateStockOnHand(secondLineItemsList);
+
+    calculatedStockOnHandService.fetchStockOnHandForSpecificDate(stockCard, firstDate.plusDays(1));
+    assertThat(stockCard.getStockOnHand(), is(60));
+  }
+
+  @Test
+  public void shouldSetProperSohForAllAdjustmentsAfterUpdatingTheValueForPreviousEvents() {
+    LocalDate firstDate = LocalDate.of(2019, 5, 3);
+    int initialSoh = 50;
+
+    calculatedStockOnHandRepository.save(new CalculatedStockOnHand(initialSoh, stockCard,
+        firstDate.minusDays(1), ZonedDateTime.now()));
+
+    List<StockCardLineItem> firstEventItems = Collections.singletonList(
+        stockCardLineItemRepository.save(createDebitLineItem(5, firstDate))
+    );
+    stockCard.setLineItems(firstEventItems);
+    calculatedStockOnHandService.recalculateStockOnHand(firstEventItems);
+
+    List<StockCardLineItem> secondEventItems = Collections.singletonList(
+        stockCardLineItemRepository.save(createDebitLineItem(10, firstDate.plusDays(2)))
+    );
+    lineItemlist = Stream.concat(firstEventItems.stream(), secondEventItems.stream())
+        .collect(Collectors.toList());
+    stockCard.setLineItems(lineItemlist);
+    calculatedStockOnHandService.recalculateStockOnHand(secondEventItems);
+
+    List<StockCardLineItem> thirdEventItems = Arrays.asList(
+        stockCardLineItemRepository.save(createDebitLineItem(1, firstDate)),
+        stockCardLineItemRepository.save(createDebitLineItem(2, firstDate.plusDays(1)))
+    );
+    lineItemlist = Stream.concat(lineItemlist.stream(), thirdEventItems.stream())
+        .collect(Collectors.toList());
+    stockCard.setLineItems(lineItemlist);
+    calculatedStockOnHandService.recalculateStockOnHand(thirdEventItems);
+
+    calculatedStockOnHandService.fetchStockOnHandForSpecificDate(stockCard, firstDate);
+    assertThat(stockCard.getStockOnHand(), is(44));
+    calculatedStockOnHandService.fetchStockOnHandForSpecificDate(stockCard, firstDate.plusDays(1));
+    assertThat(stockCard.getStockOnHand(), is(42));
+    calculatedStockOnHandService.fetchStockOnHandForSpecificDate(stockCard, firstDate.plusDays(2));
+    assertThat(stockCard.getStockOnHand(), is(32));
+  }
+
+  @Test
   public void shouldSetProperSohForAdjustmentsOnFollowingDaysForTheSameProductAddedInInvOrder() {
     LocalDate firstDate = LocalDate.of(2016, 1, 31);
     int initialSoh = 14;
 
     calculatedStockOnHandRepository.save(new CalculatedStockOnHand(initialSoh, stockCard,
-        firstDate, firstDate.atStartOfDay(ZoneId.systemDefault())));
+        firstDate.minusDays(1), ZonedDateTime.now()));
 
     lineItemlist = Arrays.asList(
         stockCardLineItemRepository.save(createDebitLineItem(2, firstDate.plusDays(1))),
@@ -514,7 +583,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     int initialSoh = 60;
 
     calculatedStockOnHandRepository.save(new CalculatedStockOnHand(initialSoh, stockCard,
-        date, date.atStartOfDay(ZoneId.systemDefault())));
+        date.minusDays(1), ZonedDateTime.now()));
 
     lineItemlist = Arrays.asList(
         stockCardLineItemRepository.save(createDebitLineItem(1, date)),
@@ -533,7 +602,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     int initialSoh = 40;
 
     calculatedStockOnHandRepository.save(new CalculatedStockOnHand(initialSoh, stockCard,
-        date, date.atStartOfDay(ZoneId.systemDefault())));
+        date.minusDays(1), ZonedDateTime.now()));
     StockCardLineItem baseLineItem = stockCardLineItemRepository
         .save(createDebitLineItem(1, date, stockCard));
     stockCardRepository.save(stockCard);
@@ -542,7 +611,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     StockEvent alternateEvent = prepareEvent(randomUUID(), randomUUID());
     StockCard alternateStockCard = prepareStockCard(alternateEvent, randomUUID(), randomUUID());
     calculatedStockOnHandRepository.save(new CalculatedStockOnHand(initialSoh, alternateStockCard,
-        date, date.atStartOfDay(ZoneId.systemDefault())));
+        date.minusDays(1), ZonedDateTime.now()));
     StockCardLineItem alternateLineItem = stockCardLineItemRepository
         .save(createDebitLineItem(3, date, alternateStockCard));
     stockCardRepository.save(alternateStockCard);
@@ -664,21 +733,21 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
   }
 
   private StockEvent prepareEvent(UUID facility, UUID program) {
-    StockEvent event = new StockEventDataBuilder()
+    StockEvent result = new StockEventDataBuilder()
         .withoutId()
         .withFacility(facility)
         .withProgram(program)
         .build();
-    return stockEventsRepository.save(event);
+    return stockEventsRepository.save(result);
   }
 
   private StockCard prepareStockCard(StockEvent event, UUID product, UUID lot) {
-    StockCard stockCard = new StockCardDataBuilder(event)
+    StockCard result = new StockCardDataBuilder(event)
         .withoutId()
         .withOrderable(product)
         .withLot(lot)
         .build();
-    return stockCardRepository.save(stockCard);
+    return stockCardRepository.save(result);
   }
 
   private StockCardLineItem createDebitLineItem(int quantity, LocalDate occuredDate) {

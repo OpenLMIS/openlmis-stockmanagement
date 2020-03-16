@@ -165,7 +165,7 @@ public class CalculatedStockOnHandService {
     profiler.start("GET_LINE_ITEMS_PREVIOUS_STOCK_ON_HAND");
     int lineItemsPreviousStockOnHand = calculatedStockOnHandRepository
         .findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(
-            stockCard.getId(), lineItem.getOccurredDate()).orElseGet(() -> {
+            stockCard.getId(), lineItem.getOccurredDate().minusDays(1)).orElseGet(() -> {
               CalculatedStockOnHand calculatedStockOnHand = new CalculatedStockOnHand();
               calculatedStockOnHand.setStockOnHand(0);
               return calculatedStockOnHand;
@@ -183,7 +183,7 @@ public class CalculatedStockOnHandService {
     List<StockCardLineItem> followingLineItems = stockCard.getLineItems()
         .stream()
         .filter(item -> !item.getOccurredDate().isBefore(lineItem.getOccurredDate())
-            && item.getId() != lineItem.getId())
+            && item.getId() != lineItem.getId()).sorted(StockCard.getLineItemsComparator())
         .collect(Collectors.toList());
 
     followingLineItems.add(0, lineItem);
