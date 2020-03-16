@@ -128,16 +128,14 @@ public class PhysicalInventoryService {
    * @param id physical inventory id.
    */
   public void deletePhysicalInventory(UUID id) {
-    PhysicalInventory foundInventory = physicalInventoriesRepository.findOne(id);
-    if (foundInventory != null) {
-      checkPermission(foundInventory.getProgramId(), foundInventory.getFacilityId());
-      if (!foundInventory.getIsDraft()) {
-        throw new ValidationMessageException(ERROR_PHYSICAL_INVENTORY_IS_SUBMITTED);
-      }
-      physicalInventoriesRepository.delete(foundInventory);
-    } else {
-      throw new ResourceNotFoundException(new Message(ERROR_PHYSICAL_INVENTORY_NOT_FOUND, id));
+    PhysicalInventory foundInventory = physicalInventoriesRepository.findById(id)
+        .orElseThrow(() -> 
+            new ResourceNotFoundException(new Message(ERROR_PHYSICAL_INVENTORY_NOT_FOUND, id)));
+    checkPermission(foundInventory.getProgramId(), foundInventory.getFacilityId());
+    if (!foundInventory.getIsDraft()) {
+      throw new ValidationMessageException(ERROR_PHYSICAL_INVENTORY_IS_SUBMITTED);
     }
+    physicalInventoriesRepository.delete(foundInventory);
   }
 
   /**

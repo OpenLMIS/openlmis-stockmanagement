@@ -106,10 +106,10 @@ public class ValidReasonAssignmentController {
 
     permissionService.canManageReasons();
 
-    if (!reasonAssignmentRepository.exists(assignmentId)) {
+    if (!reasonAssignmentRepository.existsById(assignmentId)) {
       throw new ValidationMessageException(new Message(ERROR_REASON_ASSIGNMENT_NOT_FOUND));
     }
-    reasonAssignmentRepository.delete(assignmentId);
+    reasonAssignmentRepository.deleteById(assignmentId);
 
     return new ResponseEntity<>(null, NO_CONTENT);
   }
@@ -138,7 +138,7 @@ public class ValidReasonAssignmentController {
       throw new ValidationMessageException(new Message(ERROR_REASON_ID_EMPTY));
     }
 
-    if (!reasonRepository.exists(assignment.getReason().getId())) {
+    if (!reasonRepository.existsById(assignment.getReason().getId())) {
       throw new ValidationMessageException(new Message(ERROR_REASON_NOT_FOUND));
     }
   }

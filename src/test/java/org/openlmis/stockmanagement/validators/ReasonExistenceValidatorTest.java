@@ -16,7 +16,6 @@
 package org.openlmis.stockmanagement.validators;
 
 import static org.junit.rules.ExpectedException.none;
-import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_REASON_NOT_EXIST;
 
 import java.util.UUID;
@@ -63,8 +62,6 @@ public class ReasonExistenceValidatorTest extends BaseValidatorTest  {
     UUID reasonId = UUID.randomUUID();
     stockEventDto.getLineItems().get(0).setReasonId(reasonId);
     setContext(stockEventDto);
-
-    when(reasonRepository.findOne(reasonId)).thenReturn(null);
 
     //when
     reasonExistenceValidator.validate(stockEventDto);

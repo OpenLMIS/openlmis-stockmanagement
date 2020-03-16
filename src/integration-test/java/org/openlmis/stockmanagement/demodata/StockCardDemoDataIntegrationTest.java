@@ -69,7 +69,7 @@ public class StockCardDemoDataIntegrationTest extends BaseIntegrationTest {
   public void demoDataTest() {
     assertThat(stockCardRepository.count()).isGreaterThan(0);
 
-    Pageable pageable = new PageRequest(0, 1, Direction.ASC, "id");
+    Pageable pageable = PageRequest.of(0, 1, Direction.ASC, "id");
 
     while (true) {
       Page<StockCard> page = stockCardRepository.findAll(pageable);

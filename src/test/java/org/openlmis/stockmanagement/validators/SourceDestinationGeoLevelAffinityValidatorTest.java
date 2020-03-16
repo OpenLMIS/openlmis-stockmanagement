@@ -49,8 +49,6 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
   private static final String ORGANIZATION_NODE_NAME = "ORGANIZATION_NODE_NAME";
   private static final String FACILITY_NODE_NAME = "FACILITY_NODE_NAME";
   private static final String CONTEXT_FACILITY_NAME = "CONTEXT_FACILITY";
-  private static final String CHOSEN_SOURCE_NAME = "CHOSEN_SOURCE_NAME";
-  private static final String CHOSEN_DESTINATION_NAME = "CHOSEN_DESTINATION_NAME";
   
   @Mock
   private ValidDestinationService validDestinationService;
@@ -114,9 +112,6 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
     when(facilityService.findOne(any(UUID.class))).thenReturn(facility);
     setContext(stockEventDto);
     
-    when(validSourceService.findById(any(UUID.class))).thenReturn(
-        createValidSourceDestinationDto(randomUUID(), CHOSEN_DESTINATION_NAME));
-    
     List<ValidSourceDestinationDto> validDestinationAssignments = asList(
         createValidSourceDestinationDto(randomUUID(), FACILITY_NODE_NAME),
         createValidSourceDestinationDto(randomUUID(), ORGANIZATION_NODE_NAME));
@@ -141,9 +136,6 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
     when(facilityService.findOne(any(UUID.class))).thenReturn(facility);
     setContext(stockEventDto);
     
-    when(validSourceService.findById(any(UUID.class))).thenReturn(
-        createValidSourceDestinationDto(randomUUID(), CHOSEN_DESTINATION_NAME));
-    
     when(
         validSourceService.findSources(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
         .thenReturn(Collections.emptyList());
@@ -163,9 +155,6 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
     
     when(facilityService.findOne(any(UUID.class))).thenReturn(facility);
     setContext(stockEventDto);
-    
-    when(validSourceService.findById(any(UUID.class))).thenReturn(
-        createValidSourceDestinationDto(randomUUID(), CHOSEN_SOURCE_NAME));
     
     List<ValidSourceDestinationDto> validDestinationAssignments = asList(
         createValidSourceDestinationDto(randomUUID(), FACILITY_NODE_NAME),
@@ -190,9 +179,6 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
     FacilityDto facility = FacilityDto.builder().name(CONTEXT_FACILITY_NAME).build();
     when(facilityService.findOne(any(UUID.class))).thenReturn(facility);
     setContext(stockEventDto);
-    
-    when(validDestinationService.findById(any(UUID.class))).thenReturn(
-        createValidSourceDestinationDto(randomUUID(), CHOSEN_DESTINATION_NAME));
     
     List<ValidSourceDestinationDto> validDestinationAssignments = asList(
         createValidSourceDestinationDto(randomUUID(), FACILITY_NODE_NAME),

@@ -38,6 +38,7 @@ import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
+import org.openlmis.stockmanagement.domain.sourcedestination.Organization;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
@@ -124,7 +125,7 @@ public class StockCardService extends StockCardBaseService {
       createLineItemFrom(stockEventDto, eventLineItem, stockCard, savedEventId, processedDate);
     }
 
-    cardRepository.save(cardsToUpdate);
+    cardRepository.saveAll(cardsToUpdate);
     cardRepository.flush();
 
     calculatedStockOnHandService.recalculateStockOnHand(
@@ -142,7 +143,7 @@ public class StockCardService extends StockCardBaseService {
    * @return the found stock card.
    */
   public StockCardDto findStockCardById(UUID stockCardId) {
-    StockCard card = cardRepository.findOne(stockCardId);
+    StockCard card = cardRepository.findById(stockCardId).orElse(null);
     if (card == null) {
       return null;
     }
@@ -274,7 +275,13 @@ public class StockCardService extends StockCardBaseService {
       LOGGER.debug("Calling ref data to retrieve facility info for line item");
       return facilityRefDataService.findOne(node.getReferenceId());
     } else {
-      return FacilityDto.createFrom(organizationRepository.findOne(node.getReferenceId()));
+      Organization org = organizationRepository.findById(node.getReferenceId()).orElse(null);
+      if (null != org) {
+        return FacilityDto.createFrom(org);
+      } else {
+        LOGGER.warn("Could not find any organization matching node id {}", node.getReferenceId());
+        return FacilityDto.createFrom(new Organization());
+      }
     }
   }
 }

@@ -27,6 +27,7 @@ import com.google.common.collect.Lists;
 import guru.nidi.ramltester.junit.RamlMatchers;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import javax.persistence.PersistenceException;
 import org.apache.commons.lang.RandomStringUtils;
@@ -214,7 +215,7 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebInt
   @Test(expected = IllegalArgumentException.class)
   public void shouldNotAllowPaginationWithZeroSize() {
     //given
-    Pageable page = new PageRequest(0, 0);
+    Pageable page = PageRequest.of(0, 0);
 
     restAssured
             .given()
@@ -231,7 +232,7 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebInt
   @Test(expected = IllegalArgumentException.class)
   public void shouldNotAllowPaginationWithoutSize() {
     //given
-    Pageable page = new PageRequest(0, 0);
+    Pageable page = PageRequest.of(0, 0);
 
     restAssured
             .given()
@@ -249,8 +250,8 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebInt
     //given
     StockCardLineItemReason reason = new StockCardLineItemReasonDataBuilder().build();
 
-    when(stockCardLineItemReasonRepository.findOne(reason.getId()))
-        .thenReturn(reason);
+    when(stockCardLineItemReasonRepository.findById(reason.getId()))
+        .thenReturn(Optional.of(reason));
 
     //when
     StockCardLineItemReasonDto response = restAssured
@@ -272,7 +273,7 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebInt
   @Test
   public void shouldReturnErrorMessageIfReasonDoesNotExist() {
     //given
-    when(stockCardLineItemReasonRepository.findOne(any(UUID.class))).thenReturn(null);
+    when(stockCardLineItemReasonRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
     //when
     restAssured

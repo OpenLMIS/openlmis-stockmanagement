@@ -19,7 +19,6 @@ import static java.util.Collections.singletonList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.core.StringContains.containsString;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_FREE_TEXT_NOT_ALLOWED;
@@ -35,7 +34,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
-import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
@@ -51,7 +49,6 @@ public class FreeTextValidatorTest extends BaseValidatorTest {
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    when(nodeRepository.findOne(null)).thenThrow(new IllegalArgumentException());
   }
 
   @Test
@@ -144,10 +141,6 @@ public class FreeTextValidatorTest extends BaseValidatorTest {
 
   @Test
   public void shouldFailWhenReasonFreeTextNotAllowedButExist() throws Exception {
-    StockCardLineItemReason mockReason = mock(StockCardLineItemReason.class);
-    when(reasonRepository.findOne(any(UUID.class))).thenReturn(mockReason);
-    when(mockReason.getIsFreeTextAllowed()).thenReturn(false);
-
     StockEventDto eventDto = createNoSourceDestinationStockEventDto();
     eventDto.getLineItems().get(0).setReasonId(fromString("e3fc3cf3-da18-44b0-a220-77c985202e06"));
     eventDto.getLineItems().get(0).setReasonFreeText("reason free text");

@@ -17,10 +17,10 @@ package org.openlmis.stockmanagement.testutils;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -42,7 +42,7 @@ public class DummyPage<E> implements Page {
   }
 
   @Override
-  public Page map(Converter converter) {
+  public Page map(Function converter) {
     return null;
   }
 

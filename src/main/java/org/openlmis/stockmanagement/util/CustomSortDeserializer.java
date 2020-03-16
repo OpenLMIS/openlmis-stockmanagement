@@ -15,19 +15,27 @@
 
 package org.openlmis.stockmanagement.util;
 
-import java.io.Serializable;
-import org.hibernate.engine.spi.SharedSessionContractImplementor;
-import org.hibernate.id.UUIDGenerator;
-import org.openlmis.stockmanagement.domain.BaseEntity;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import java.io.IOException;
+import org.springframework.data.domain.Sort;
 
-public class ConditionalUuidGenerator extends UUIDGenerator {
+public class CustomSortDeserializer extends JsonDeserializer<Sort> {
 
   @Override
-  public Serializable generate(SharedSessionContractImplementor session, Object object) {
-    if ((((BaseEntity) object).getId()) == null) {
-      return super.generate(session, object);
-    } else {
-      return ((BaseEntity) object).getId();
+  public Sort deserialize(JsonParser parser, DeserializationContext context)
+      throws IOException {
+    ArrayNode node = parser.getCodec().readTree(parser);
+    Sort.Order[] orders = new Sort.Order[node.size()];
+    int index = 0;
+    for (JsonNode obj : node) {
+      orders[index] =  new Sort.Order(Sort.Direction.valueOf(obj.get("direction").asText()),
+          obj.get("property").asText());
+      index++;
     }
+    return Sort.by(orders);
   }
 }

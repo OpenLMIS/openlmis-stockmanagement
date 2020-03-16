@@ -123,6 +123,7 @@ public abstract class MessageKeys {
   //report
   public static final String ERROR_GENERATE_REPORT_FAILED = ERROR_PREFIX + ".generateReport.failed";
   public static final String ERROR_REPORT_ID_NOT_FOUND = ERROR_PREFIX + ".report.id.notFound";
+  public static final String ERROR_REPORT_FORMAT_UNKNOWN = ERROR_PREFIX + ".report.format.unknown";
   public static final String ERROR_JASPER_FILE_CREATION = ERROR_PREFIX + ".jasper.fileCreation";
   public static final String ERROR_CLASS_NOT_FOUND = ERROR_PREFIX + ".classNotFound";
   public static final String ERROR_REPORTING_TEMPLATE_NOT_FOUND_WITH_NAME = ERROR_PREFIX

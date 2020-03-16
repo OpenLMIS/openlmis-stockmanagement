@@ -19,8 +19,8 @@ import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.util.Lists.newArrayList;
 import static org.junit.rules.ExpectedException.none;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTMENT_QUANITITY_INVALID;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 
@@ -260,10 +260,7 @@ public class QuantityValidatorTest extends BaseValidatorTest {
     card.setOrderableId(event.getLineItems().get(0).getOrderableId());
     card.setLotId(event.getLineItems().get(0).getLotId());
 
-    when(stockCardRepository
-        .findByProgramIdAndFacilityId(event.getProgramId(), event.getFacilityId()))
-        .thenReturn(singletonList(card));
-    when(calculatedStockOnHandService
+    lenient().when(calculatedStockOnHandService
         .getStockCardsWithStockOnHand(event.getProgramId(), event.getFacilityId()))
         .thenReturn(singletonList(card));
 

@@ -67,7 +67,7 @@ public class PhysicalInventoryValidator {
     }
 
     profiler.start("FIND_PHYSICAL_INVENTORY_BY_ID");
-    PhysicalInventory foundInventory = physicalInventoriesRepository.findOne(id);
+    PhysicalInventory foundInventory = physicalInventoriesRepository.findById(id).orElse(null);
     if (foundInventory != null && !foundInventory.getIsDraft()) {
       throw new ValidationMessageException(ERROR_PHYSICAL_INVENTORY_IS_SUBMITTED);
     }

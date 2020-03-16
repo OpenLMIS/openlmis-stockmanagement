@@ -30,6 +30,7 @@ import lombok.Getter;
 import org.apache.commons.collections.CollectionUtils;
 import org.openlmis.stockmanagement.web.Pagination;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 @Getter(AccessLevel.PACKAGE)
 // we keep implementation classes inside this one to give a single access point by ofXXX methods.
@@ -51,8 +52,8 @@ public abstract class Merger<T> {
     return of(elements).orElseGet(() -> new ArraysMerger<>(elements));
   }
 
-  public static <E> Merger<PageImplRepresentation<E>> ofPages(
-      List<PageImplRepresentation<E>> elements) {
+  public static <E> Merger<PageDto<E>> ofPages(
+      List<PageDto<E>> elements) {
     return of(elements).orElseGet(() -> new PageMerger<>(elements));
   }
 
@@ -139,24 +140,24 @@ public abstract class Merger<T> {
     }
   }
 
-  private static final class PageMerger<T> extends Merger<PageImplRepresentation<T>> {
+  private static final class PageMerger<T> extends Merger<PageDto<T>> {
 
-    private PageMerger(List<PageImplRepresentation<T>> elements) {
+    private PageMerger(List<PageDto<T>> elements) {
       super(elements);
     }
 
     @Override
-    public PageImplRepresentation<T> merge() {
+    public PageDto<T> merge() {
       List<T> content = getElements()
           .stream()
           .filter(Objects::nonNull)
-          .map(PageImplRepresentation::getContent)
+          .map(PageDto::getContent)
           .flatMap(Collection::stream)
           .distinct()
           .collect(Collectors.toList());
 
-      Page<T> page = Pagination.getPage(content);
-      return new PageImplRepresentation<>(page);
+      Page<T> page = Pagination.getPage(content, PageRequest.of(0, content.size()));
+      return new PageDto<>(page);
     }
   }
 

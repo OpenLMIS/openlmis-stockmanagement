@@ -45,7 +45,7 @@ import org.openlmis.stockmanagement.testutils.StockCardDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardRangeSummaryDtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
-import org.openlmis.stockmanagement.util.PageImplRepresentation;
+import org.openlmis.stockmanagement.util.PageDto;
 import org.openlmis.stockmanagement.web.BaseWebIntegrationTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
@@ -94,7 +94,7 @@ public class StockCardRangeSummaryControllerIntegrationTest extends BaseWebInteg
     doReturn(groupedStockCards)
         .when(stockCardSummariesService).getGroupedStockCards(any(), any(), any(), any(), any());
 
-    pageable = new PageRequest(0, 10);
+    pageable = PageRequest.of(0, 10);
 
     rangeSummaryPage = new PageImpl(
         singletonList(new StockCardRangeSummaryDtoDataBuilder()
@@ -107,7 +107,7 @@ public class StockCardRangeSummaryControllerIntegrationTest extends BaseWebInteg
 
   @Test
   public void shouldGetStockRangeSummaries() {
-    PageImplRepresentation response = restAssured
+    PageDto response = restAssured
         .given()
         .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
         .queryParam(FACILITY_ID, facilityId)
@@ -117,7 +117,7 @@ public class StockCardRangeSummaryControllerIntegrationTest extends BaseWebInteg
         .then()
         .statusCode(HttpStatus.OK.value())
         .extract()
-        .as(PageImplRepresentation.class);
+        .as(PageDto.class);
 
     assertEquals("10",
         ((LinkedHashMap) response.getContent().get(0)).get("stockOutDays").toString());
@@ -125,7 +125,7 @@ public class StockCardRangeSummaryControllerIntegrationTest extends BaseWebInteg
     verify(stockCardSummariesService)
         .getGroupedStockCards(programId, facilityId, null, null, LocalDate.now());
     verify(builder).build(
-        groupedStockCards, null, null, LocalDate.now(), new PageRequest(0, Integer.MAX_VALUE));
+        groupedStockCards, null, null, LocalDate.now(), PageRequest.of(0, Integer.MAX_VALUE));
   }
 
   @Test
@@ -136,7 +136,7 @@ public class StockCardRangeSummaryControllerIntegrationTest extends BaseWebInteg
     final UUID orderableId1 = randomUUID();
     final UUID orderableId2 = randomUUID();
 
-    PageImplRepresentation response = restAssured
+    PageDto response = restAssured
         .given()
         .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
         .queryParam(FACILITY_ID, facilityId)
@@ -153,7 +153,7 @@ public class StockCardRangeSummaryControllerIntegrationTest extends BaseWebInteg
         .then()
         .statusCode(HttpStatus.OK.value())
         .extract()
-        .as(PageImplRepresentation.class);
+        .as(PageDto.class);
 
     assertEquals("10",
         ((LinkedHashMap) response.getContent().get(0)).get("stockOutDays").toString());

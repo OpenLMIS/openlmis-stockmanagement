@@ -151,7 +151,7 @@ public class StockCardServiceTest {
 
     stockCardService.saveFromEvent(event, savedEventId);
 
-    verify(cardRepository).save(cardCaptor.capture());
+    verify(cardRepository).saveAll(cardCaptor.capture());
 
     List<StockCard> saved = cardCaptor.getValue();
 
@@ -174,7 +174,7 @@ public class StockCardServiceTest {
   public void shouldGetStockCardsBasedOnPermissionString() {
     when(cardRepository.findByFacilityIdInAndProgramIdIn(facilityIds, programIds, pageable))
         .thenReturn(
-            new PageImpl<>(Collections.singletonList(stockCard), null, 10));
+            new PageImpl<>(Collections.singletonList(stockCard), Pageable.unpaged(), 10));
 
     Page<StockCardDto> stockCardDtoPage = stockCardService.search(emptyList(), pageable);
 
@@ -186,7 +186,7 @@ public class StockCardServiceTest {
     when(cardRepository
         .findByFacilityIdInAndProgramIdInAndIdIn(facilityIds, programIds, ids, pageable))
         .thenReturn(
-            new PageImpl<>(Collections.singletonList(stockCard), null, 10));
+            new PageImpl<>(Collections.singletonList(stockCard), Pageable.unpaged(), 10));
 
     Page<StockCardDto> stockCardDtoPage =
         stockCardService.search(ids, pageable);
@@ -200,7 +200,7 @@ public class StockCardServiceTest {
     when(cardRepository
         .findAll(pageable))
         .thenReturn(
-            new PageImpl<>(Collections.singletonList(stockCard), null, 10));
+            new PageImpl<>(Collections.singletonList(stockCard), Pageable.unpaged(), 10));
 
     Page<StockCardDto> stockCardDtoPage =
         stockCardService.search(emptyList(), pageable);
@@ -214,7 +214,7 @@ public class StockCardServiceTest {
     when(cardRepository
         .findByIdIn(ids, pageable))
         .thenReturn(
-            new PageImpl<>(Collections.singletonList(stockCard), null, 10));
+            new PageImpl<>(Collections.singletonList(stockCard), Pageable.unpaged(), 10));
 
     Page<StockCardDto> stockCardDtoPage =
         stockCardService.search(ids, pageable);

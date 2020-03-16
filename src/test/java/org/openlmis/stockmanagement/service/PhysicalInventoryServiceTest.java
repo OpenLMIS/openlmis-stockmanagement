@@ -34,6 +34,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import org.junit.Test;
@@ -247,8 +248,8 @@ public class PhysicalInventoryServiceTest {
     PhysicalInventory physicalInventory =
         createInventoryDraft(UUID.randomUUID(), programId, facilityId);
     physicalInventory.setId(UUID.randomUUID());
-    when(physicalInventoryRepository.findOne(physicalInventory.getId()))
-        .thenReturn(physicalInventory);
+    when(physicalInventoryRepository.findById(physicalInventory.getId()))
+        .thenReturn(Optional.of(physicalInventory));
 
     physicalInventoryService.deletePhysicalInventory(physicalInventory.getId());
 
@@ -261,7 +262,7 @@ public class PhysicalInventoryServiceTest {
   @Test(expected = ResourceNotFoundException.class)
   public void shouldThrowExceptionWhenDeleteIfInventoryNotFound() {
     UUID physicalInventoryId = UUID.randomUUID();
-    when(physicalInventoryRepository.findOne(physicalInventoryId)).thenReturn(null);
+    when(physicalInventoryRepository.findById(physicalInventoryId)).thenReturn(Optional.empty());
 
     physicalInventoryService.deletePhysicalInventory(physicalInventoryId);
   }
@@ -271,8 +272,8 @@ public class PhysicalInventoryServiceTest {
     UUID physicalInventoryId = UUID.randomUUID();
     PhysicalInventory physicalInventory = mock(PhysicalInventory.class);
     when(physicalInventory.getIsDraft()).thenReturn(false);
-    when(physicalInventoryRepository.findOne(physicalInventoryId))
-        .thenReturn(physicalInventory);
+    when(physicalInventoryRepository.findById(physicalInventoryId))
+        .thenReturn(Optional.of(physicalInventory));
 
     physicalInventoryService.deletePhysicalInventory(physicalInventoryId);
   }

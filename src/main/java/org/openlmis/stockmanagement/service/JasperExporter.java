@@ -1,6 +1,6 @@
 /*
  * This program is part of the OpenLMIS logistics management information system platform software.
- * Copyright © 2017 VillageReach
+ * Copyright © 2020 VillageReach
  *
  * This program is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation, either
@@ -13,21 +13,11 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.stockmanagement.util;
+package org.openlmis.stockmanagement.service;
 
-import java.io.Serializable;
-import org.hibernate.engine.spi.SharedSessionContractImplementor;
-import org.hibernate.id.UUIDGenerator;
-import org.openlmis.stockmanagement.domain.BaseEntity;
+import net.sf.jasperreports.engine.JRException;
 
-public class ConditionalUuidGenerator extends UUIDGenerator {
+public interface JasperExporter {
 
-  @Override
-  public Serializable generate(SharedSessionContractImplementor session, Object object) {
-    if ((((BaseEntity) object).getId()) == null) {
-      return super.generate(session, object);
-    } else {
-      return ((BaseEntity) object).getId();
-    }
-  }
+  byte[] exportReport() throws JRException;
 }

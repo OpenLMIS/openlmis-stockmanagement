@@ -70,7 +70,7 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
   private StockCardSummariesV2SearchParams params =
       new StockCardSummariesV2SearchParamsDataBuilder().build();
   private StockCardSummaries summaries = ObjectGenerator.of(StockCardSummaries.class);
-  private Pageable pageable = new PageRequest(0, 10);
+  private Pageable pageable = PageRequest.of(0, 10);
 
   @Before
   public void setUp() {
@@ -112,7 +112,7 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
 
   @Test
   public void shouldSetIntegerMaxValueAsDefaultPageSize() throws Exception {
-    pageable = new PageRequest(0, Integer.MAX_VALUE);
+    pageable = PageRequest.of(0, Integer.MAX_VALUE);
 
     ResultActions resultActions = mvc.perform(
         get(API_STOCK_CARD_SUMMARIES)

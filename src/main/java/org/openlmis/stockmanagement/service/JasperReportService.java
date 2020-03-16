@@ -22,6 +22,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_CLASS_NOT_FOUN
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_GENERATE_REPORT_FAILED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_IO;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_JASPER_FILE_CREATION;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REPORT_FORMAT_UNKNOWN;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REPORT_ID_NOT_FOUND;
 
 import java.io.ByteArrayInputStream;
@@ -42,6 +43,9 @@ import java.util.function.Function;
 import javax.sql.DataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
@@ -52,21 +56,14 @@ import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.jasperreports.JasperReportsMultiFormatView;
-import org.springframework.web.servlet.view.jasperreports.JasperReportsPdfView;
 
 @Service
 public class JasperReportService {
 
-  private static final String CARD_REPORT_URL = "/jasperTemplates/stockCard.jrxml";
-  private static final String CARD_SUMMARY_REPORT_URL = "/jasperTemplates/stockCardSummary.jrxml";
+  static final String CARD_REPORT_URL = "/jasperTemplates/stockCard.jrxml";
+  static final String CARD_SUMMARY_REPORT_URL = "/jasperTemplates/stockCardSummary.jrxml";
   private static final String PI_LINES_REPORT_URL = "/jasperTemplates/physicalinventoryLines.jrxml";
-
-  @Autowired
-  private ApplicationContext appContext;
 
   @Autowired
   private StockCardService stockCardService;
@@ -95,7 +92,7 @@ public class JasperReportService {
    * @param stockCardId stock card id
    * @return generated stock card report.
    */
-  public ModelAndView getStockCardReportView(UUID stockCardId) {
+  public byte[] generateStockCardReport(UUID stockCardId) {
     StockCardDto stockCardDto = stockCardService.findStockCardById(stockCardId);
     if (stockCardDto == null) {
       throw new ResourceNotFoundException(new Message(ERROR_REPORT_ID_NOT_FOUND));
@@ -108,7 +105,7 @@ public class JasperReportService {
     params.put("dateFormat", dateFormat);
     params.put("decimalFormat", createDecimalFormat());
 
-    return generateReport(CARD_REPORT_URL, params);
+    return fillAndExportReport(compileReportAndGetUrl(CARD_REPORT_URL), params);
   }
 
   /**
@@ -118,7 +115,7 @@ public class JasperReportService {
    * @param facility facility id
    * @return generated stock card summary report.
    */
-  public ModelAndView getStockCardSummariesReportView(UUID program, UUID facility) {
+  public byte[] generateStockCardSummariesReport(UUID program, UUID facility) {
     List<StockCardDto> cards = stockCardSummariesService
         .findStockCards(program, facility);
     StockCardDto firstCard = cards.get(0);
@@ -128,7 +125,7 @@ public class JasperReportService {
     params.put("program", firstCard.getProgram());
     params.put("facility", firstCard.getFacility());
     //right now, each report can only be about one program, one facility
-    //in the future we may want to support one reprot for multiple programs
+    //in the future we may want to support one report for multiple programs
     params.put("showProgram", getCount(cards, card -> card.getProgram().getId().toString()) > 1);
     params.put("showFacility", getCount(cards, card -> card.getFacility().getId().toString()) > 1);
     params.put("showLot", cards.stream().anyMatch(card -> card.getLotId() != null));
@@ -136,24 +133,20 @@ public class JasperReportService {
     params.put("dateTimeFormat", dateTimeFormat);
     params.put("decimalFormat", createDecimalFormat());
 
-    return generateReport(CARD_SUMMARY_REPORT_URL, params);
+    return fillAndExportReport(compileReportAndGetUrl(CARD_SUMMARY_REPORT_URL), params);
   }
 
   /**
-   * Create Jasper Report View.
-   * Create Jasper Report (".jasper" file) from bytes from Template entity.
-   * Set 'Jasper' exporter parameters, JDBC data source, web application context, url to file.
+   * Generate a report based on the Jasper template.
+   * Create compiled report (".jasper" file) from bytes from Template entity, and get URL.
+   * Using compiled report URL to fill in data and export to desired format.
    *
-   * @param jasperTemplate template that will be used to create a view
-   * @return created jasper view.
-   * @throws JasperReportViewException if there will be any problem with creating the view.
+   * @param jasperTemplate template that will be used to generate a report
+   * @param params  map of parameters
+   * @return data of generated report
    */
-  public JasperReportsMultiFormatView getJasperReportsView(JasperTemplate jasperTemplate) {
-    JasperReportsMultiFormatView jasperView = new JasperReportsMultiFormatView();
-    jasperView.setJdbcDataSource(replicationDataSource);
-    jasperView.setUrl(getReportUrlForReportData(jasperTemplate));
-    jasperView.setApplicationContext(appContext);
-    return jasperView;
+  public byte[] generateReport(JasperTemplate jasperTemplate, Map<String, Object> params) {
+    return fillAndExportReport(getReportUrlForReportData(jasperTemplate), params);
   }
 
   /**
@@ -173,11 +166,40 @@ public class JasperReportService {
     return stockCards.stream().map(mapper).distinct().count();
   }
 
-  private ModelAndView generateReport(String templateUrl, Map<String, Object> params) {
-    JasperReportsPdfView view = createJasperReportsPdfView();
-    view.setUrl(compileReportAndGetUrl(templateUrl));
-    view.setApplicationContext(appContext);
-    return new ModelAndView(view, params);
+  byte[] fillAndExportReport(String compiledTemplateUrl, Map<String, Object> params) {
+
+    byte[] bytes;
+
+    try {
+      JasperPrint jasperPrint = JasperFillManager.fillReport(
+          compiledTemplateUrl,
+          params,
+          replicationDataSource.getConnection());
+
+      JasperExporter exporter;
+      String format = (String) params.get("format");
+      if ("pdf".equals(format)) {
+        bytes = JasperExportManager.exportReportToPdf(jasperPrint);
+      } else if ("csv".equals(format)) {
+        exporter = new JasperCsvExporter(jasperPrint);
+        bytes = exporter.exportReport();
+      } else if ("xls".equals(format)) {
+        exporter = new JasperXlsExporter(jasperPrint);
+        bytes = exporter.exportReport();
+      } else if ("html".equals(format)) {
+        exporter = new JasperHtmlExporter(jasperPrint);
+        bytes = exporter.exportReport();
+      } else {
+        throw new IllegalArgumentException(format);
+      }
+    } catch (IllegalArgumentException iae) {
+      throw new JasperReportViewException(ERROR_REPORT_FORMAT_UNKNOWN + iae.getMessage(),
+          iae);
+    } catch (Exception e) {
+      throw new JasperReportViewException(ERROR_GENERATE_REPORT_FAILED, e);
+    }
+
+    return bytes;
   }
 
   private String compileReportAndGetUrl(String templateUrl) {
@@ -237,9 +259,5 @@ public class JasperReportService {
     DecimalFormat decimalFormat = new DecimalFormat("", decimalFormatSymbols);
     decimalFormat.setGroupingSize(Integer.valueOf(groupingSize));
     return decimalFormat;
-  }
-
-  protected JasperReportsPdfView createJasperReportsPdfView() {
-    return new JasperReportsPdfView();
   }
 }

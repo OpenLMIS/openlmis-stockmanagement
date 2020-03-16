@@ -88,6 +88,10 @@ public class NearExpiryNotifierTest {
     when(mockRight.getId()).thenReturn(rightId);
     when(stockCardRepository.findByLotIdIn(Collections.singleton(expiringLotId)))
         .thenReturn(Collections.singletonList(testStockCard));
+    when(testStockCard.getId()).thenReturn(UUID.randomUUID());
+    when(testStockCard.getFacilityId()).thenReturn(UUID.randomUUID());
+    when(testStockCard.getProgramId()).thenReturn(UUID.randomUUID());
+    when(testStockCard.getOrderableId()).thenReturn(UUID.randomUUID());
     when(testStockCard.getLotId()).thenReturn(expiringLotId);
 
     when(stockCardNotifier.getFacilityName(any(UUID.class))).thenReturn(FACILITY_NAME);

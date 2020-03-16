@@ -40,6 +40,7 @@ import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.security.core.context.SecurityContext;
@@ -48,6 +49,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(SecurityContextHolder.class)
+@PowerMockIgnore("javax.security.auth.*")
 public class StockEventProcessContextBuilderTest {
 
   @Mock

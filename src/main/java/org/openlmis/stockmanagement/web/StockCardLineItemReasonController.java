@@ -116,7 +116,7 @@ public class StockCardLineItemReasonController extends BaseController {
     Profiler profiler = getProfiler("GET_REASON");
 
     profiler.start("DB_CALL");
-    StockCardLineItemReason reason = reasonRepository.findOne(reasonId);
+    StockCardLineItemReason reason = reasonRepository.findById(reasonId).orElse(null);
 
     if (null == reason) {
       stopProfiler(profiler, null);

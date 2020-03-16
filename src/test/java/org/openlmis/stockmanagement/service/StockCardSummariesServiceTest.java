@@ -234,11 +234,6 @@ public class StockCardSummariesServiceTest {
             params.getAsOfDate()))
         .thenReturn(stockCards);
 
-    when(cardRepository.findByProgramIdAndFacilityId(
-        params.getProgramId(),
-        params.getFacilityId()))
-        .thenReturn(stockCards);
-
     StockCardSummaries result = stockCardSummariesService.findStockCards(params);
 
     assertEquals(3, result.getOrderableFulfillMap().size());
@@ -304,9 +299,6 @@ public class StockCardSummariesServiceTest {
         .withStockOnHand(56)
         .build();
 
-    when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId))
-        .thenReturn(asList(stockCard1, stockCard2, stockCard3, stockCard4, stockCard5));
-
     when(calculatedStockOnHandService
         .getStockCardsWithStockOnHand(programId, facilityId))
         .thenReturn(asList(stockCard1, stockCard2, stockCard3, stockCard4, stockCard5));
@@ -315,7 +307,7 @@ public class StockCardSummariesServiceTest {
     CalculatedStockOnHand calculatedStockOnHand = new CalculatedStockOnHandDataBuilder().build();
     calculatedStockOnHands.add(calculatedStockOnHand);
     when(calculatedStockOnHandRepository
-        .findByStockCardIdAndOccurredDateBetween(any(), any(), any()))
+        .findByStockCardIdInAndOccurredDateBetween(any(), any(), any()))
         .thenReturn(calculatedStockOnHands);
 
     final CalculatedStockOnHand calculatedStockOnHand1 =
@@ -399,9 +391,6 @@ public class StockCardSummariesServiceTest {
         .withOrderable(orderableId7)
         .withStockOnHand(56)
         .build();
-
-    when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId))
-        .thenReturn(asList(stockCard1, stockCard2, stockCard3, stockCard4, stockCard5));
 
     when(calculatedStockOnHandService
         .getStockCardsWithStockOnHand(programId, facilityId))

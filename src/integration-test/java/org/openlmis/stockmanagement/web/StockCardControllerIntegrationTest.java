@@ -138,7 +138,7 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
     UUID programId = UUID.randomUUID();
     UUID facilityId = UUID.randomUUID();
 
-    PageRequest pageable = new PageRequest(0, 20);
+    PageRequest pageable = PageRequest.of(0, 20);
     when(stockCardSummariesService
         .findStockCards(programId, facilityId, pageable))
         .thenReturn(new PageImpl<>(singletonList(StockCardDtoDataBuilder.createStockCardDto())));
@@ -161,7 +161,7 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
     UUID stockCardId1 = UUID.randomUUID();
     UUID stockCardId2 = UUID.randomUUID();
 
-    Pageable pageable = new PageRequest(0, 10);
+    Pageable pageable = PageRequest.of(0, 10);
 
     doReturn(new PageImpl<>(singletonList(StockCardDtoDataBuilder.createStockCardDto())))
         .when(stockCardService).search(ImmutableSet.of(stockCardId1, stockCardId2), pageable);

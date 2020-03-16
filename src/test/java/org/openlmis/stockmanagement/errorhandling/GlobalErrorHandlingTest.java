@@ -21,7 +21,6 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REAS
 
 import java.sql.SQLException;
 import javax.persistence.PersistenceException;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -42,15 +41,6 @@ public class GlobalErrorHandlingTest {
 
   @InjectMocks
   private GlobalErrorHandling globalErrorHandling;
-
-
-  private Message.LocalizedMessage localizedMessage;
-
-  @Before
-  public void setup() {
-    localizedMessage = new Message(MESSAGE).new LocalizedMessage(TRANSLATED_MESSAGE);
-    when(messageService.localize(new Message(MESSAGE))).thenReturn(localizedMessage);
-  }
 
   @Test
   public void shouldHandleSqlException() {
