@@ -186,7 +186,9 @@ public class CalculatedStockOnHandService {
             && item.getId() != lineItem.getId()).sorted(StockCard.getLineItemsComparator())
         .collect(Collectors.toList());
 
-    followingLineItems.add(0, lineItem);
+    long lineItemsAtTheSameDay = followingLineItems.stream()
+        .filter(x -> !x.getOccurredDate().isAfter(lineItem.getOccurredDate())).count();
+    followingLineItems.add((int) lineItemsAtTheSameDay, lineItem);
     profiler.start("SAVE_RECALCULATED_STOCK_ON_HANDS");
     for (StockCardLineItem item : followingLineItems) {
       Integer calculatedStockOnHand = calculateStockOnHand(item, lineItemsPreviousStockOnHand);

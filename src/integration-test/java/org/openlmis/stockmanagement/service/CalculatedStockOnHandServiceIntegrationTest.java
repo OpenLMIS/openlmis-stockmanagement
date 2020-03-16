@@ -559,6 +559,32 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
   }
 
   @Test
+  public void shouldPutAdjustmentsAsLastLineItemForASpecificDate() {
+    LocalDate firstDate = LocalDate.of(2018, 3, 3);
+    int initialSoh = 70;
+
+    calculatedStockOnHandRepository.save(new CalculatedStockOnHand(initialSoh, stockCard,
+        firstDate.minusDays(1), ZonedDateTime.now()));
+
+    List<StockCardLineItem> firstEventItems = Collections.singletonList(
+        stockCardLineItemRepository.save(createDebitLineItem(60, firstDate))
+    );
+    stockCard.setLineItems(firstEventItems);
+    calculatedStockOnHandService.recalculateStockOnHand(firstEventItems);
+
+    List<StockCardLineItem> secondEventItems = Collections.singletonList(
+        stockCardLineItemRepository.save(createPhysicalInventory(40, firstDate))
+    );
+    lineItemlist = Stream.concat(firstEventItems.stream(), secondEventItems.stream())
+        .collect(Collectors.toList());
+    stockCard.setLineItems(lineItemlist);
+    calculatedStockOnHandService.recalculateStockOnHand(secondEventItems);
+
+    calculatedStockOnHandService.fetchStockOnHandForSpecificDate(stockCard, firstDate);
+    assertThat(stockCard.getStockOnHand(), is(40));
+  }
+
+  @Test
   public void shouldSetProperSohForAdjustmentsOnFollowingDaysForTheSameProductAddedInInvOrder() {
     LocalDate firstDate = LocalDate.of(2016, 1, 31);
     int initialSoh = 14;
@@ -748,6 +774,10 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
         .withLot(lot)
         .build();
     return stockCardRepository.save(result);
+  }
+
+  private StockCardLineItem createPhysicalInventory(int quantity, LocalDate occuredDate) {
+    return createLineItem(quantity, occuredDate, stockCard, null);
   }
 
   private StockCardLineItem createDebitLineItem(int quantity, LocalDate occuredDate) {
