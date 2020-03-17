@@ -16,11 +16,10 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.util.Collections.singletonList;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.service.JasperReportService.CARD_REPORT_URL;
-import static org.openlmis.stockmanagement.service.JasperReportService.CARD_SUMMARY_REPORT_URL;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -30,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import javax.sql.DataSource;
+import net.sf.jasperreports.engine.JasperReport;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -96,8 +96,7 @@ public class JasperReportServiceTest {
 
     jasperReportService.generateStockCardReport(stockCard.getId());
 
-    verify(jasperReportService).fillAndExportReport(
-        CARD_REPORT_URL.replace("jrxml", "jasper"), params);
+    verify(jasperReportService).fillAndExportReport(any(JasperReport.class), params);
   }
 
   @Test
@@ -125,8 +124,7 @@ public class JasperReportServiceTest {
 
     jasperReportService.generateStockCardSummariesReport(programId, facilityId);
 
-    verify(jasperReportService).fillAndExportReport(
-        CARD_SUMMARY_REPORT_URL.replace("jrxml", "jasper"), params);
+    verify(jasperReportService).fillAndExportReport(any(JasperReport.class), params);
   }
 
   private DecimalFormat createDecimalFormat() {

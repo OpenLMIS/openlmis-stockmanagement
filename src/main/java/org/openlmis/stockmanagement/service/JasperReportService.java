@@ -15,23 +15,16 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static java.io.File.createTempFile;
 import static java.util.Collections.singletonList;
-import static org.apache.commons.io.FileUtils.writeByteArrayToFile;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_CLASS_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_GENERATE_REPORT_FAILED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_IO;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_JASPER_FILE_CREATION;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REPORT_FORMAT_UNKNOWN;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REPORT_ID_NOT_FOUND;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Collections;
@@ -41,12 +34,14 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import javax.sql.DataSource;
+import net.sf.jasperreports.engine.JREmptyDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.openlmis.stockmanagement.domain.JasperTemplate;
@@ -105,7 +100,7 @@ public class JasperReportService {
     params.put("dateFormat", dateFormat);
     params.put("decimalFormat", createDecimalFormat());
 
-    return fillAndExportReport(compileReportAndGetUrl(CARD_REPORT_URL), params);
+    return fillAndExportReport(compileReportFromTemplateUrl(CARD_REPORT_URL), params);
   }
 
   /**
@@ -133,7 +128,7 @@ public class JasperReportService {
     params.put("dateTimeFormat", dateTimeFormat);
     params.put("decimalFormat", createDecimalFormat());
 
-    return fillAndExportReport(compileReportAndGetUrl(CARD_SUMMARY_REPORT_URL), params);
+    return fillAndExportReport(compileReportFromTemplateUrl(CARD_SUMMARY_REPORT_URL), params);
   }
 
   /**
@@ -146,7 +141,7 @@ public class JasperReportService {
    * @return data of generated report
    */
   public byte[] generateReport(JasperTemplate jasperTemplate, Map<String, Object> params) {
-    return fillAndExportReport(getReportUrlForReportData(jasperTemplate), params);
+    return fillAndExportReport(getReportFromTemplateData(jasperTemplate), params);
   }
 
   /**
@@ -166,35 +161,24 @@ public class JasperReportService {
     return stockCards.stream().map(mapper).distinct().count();
   }
 
-  byte[] fillAndExportReport(String compiledTemplateUrl, Map<String, Object> params) {
+  byte[] fillAndExportReport(JasperReport compiledReport, Map<String, Object> params) {
 
     byte[] bytes;
 
     try {
-      JasperPrint jasperPrint = JasperFillManager.fillReport(
-          compiledTemplateUrl,
-          params,
-          replicationDataSource.getConnection());
-
-      JasperExporter exporter;
-      String format = (String) params.get("format");
-      if ("pdf".equals(format)) {
-        bytes = JasperExportManager.exportReportToPdf(jasperPrint);
-      } else if ("csv".equals(format)) {
-        exporter = new JasperCsvExporter(jasperPrint);
-        bytes = exporter.exportReport();
-      } else if ("xls".equals(format)) {
-        exporter = new JasperXlsExporter(jasperPrint);
-        bytes = exporter.exportReport();
-      } else if ("html".equals(format)) {
-        exporter = new JasperHtmlExporter(jasperPrint);
-        bytes = exporter.exportReport();
+      JasperPrint jasperPrint;
+      if (params.containsKey("datasource")) {
+        jasperPrint = JasperFillManager.fillReport(compiledReport, params,
+            new JRBeanCollectionDataSource((List<StockCardDto>) params.get("datasource")));
+      } else if (params.containsKey("stockCardSummaries")) {
+        jasperPrint = JasperFillManager.fillReport(compiledReport, params, 
+            new JREmptyDataSource());
       } else {
-        throw new IllegalArgumentException(format);
+        jasperPrint = JasperFillManager.fillReport(compiledReport, params,
+            replicationDataSource.getConnection());
       }
-    } catch (IllegalArgumentException iae) {
-      throw new JasperReportViewException(ERROR_REPORT_FORMAT_UNKNOWN + iae.getMessage(),
-          iae);
+
+      bytes = JasperExportManager.exportReportToPdf(jasperPrint);
     } catch (Exception e) {
       throw new JasperReportViewException(ERROR_GENERATE_REPORT_FAILED, e);
     }
@@ -202,11 +186,10 @@ public class JasperReportService {
     return bytes;
   }
 
-  private String compileReportAndGetUrl(String templateUrl) {
+  private JasperReport compileReportFromTemplateUrl(String templateUrl) {
     try (InputStream inputStream = getClass().getResourceAsStream(templateUrl)) {
-      JasperReport report = JasperCompileManager.compileReport(inputStream);
 
-      return saveAndGetUrl(report, "report_temp");
+      return JasperCompileManager.compileReport(inputStream);
     } catch (IOException ex) {
       throw new JasperReportViewException(new Message((ERROR_IO), ex.getMessage()), ex);
     } catch (JRException ex) {
@@ -219,13 +202,12 @@ public class JasperReportService {
    *
    * @return Url to ".jasper" file.
    */
-  private String getReportUrlForReportData(JasperTemplate jasperTemplate) {
+  private JasperReport getReportFromTemplateData(JasperTemplate jasperTemplate) {
 
     try (ObjectInputStream inputStream =
              new ObjectInputStream(new ByteArrayInputStream(jasperTemplate.getData()))) {
-      JasperReport jasperReport = (JasperReport) inputStream.readObject();
 
-      return saveAndGetUrl(jasperReport, jasperTemplate.getName() + "_temp");
+      return (JasperReport) inputStream.readObject();
     } catch (IOException ex) {
       throw new JasperReportViewException(new Message((ERROR_IO), ex.getMessage()), ex);
     } catch (ClassNotFoundException ex) {
@@ -233,25 +215,6 @@ public class JasperReportService {
           new Message(ERROR_CLASS_NOT_FOUND, JasperReport.class.getName()), ex);
     }
   }
-
-  private String saveAndGetUrl(JasperReport report, String templateName) throws IOException {
-    File reportTempFile;
-    try {
-      reportTempFile = createTempFile(templateName, ".jasper");
-    } catch (IOException ex) {
-      throw new JasperReportViewException(ERROR_JASPER_FILE_CREATION, ex);
-    }
-
-    try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-         ObjectOutputStream out = new ObjectOutputStream(bos)) {
-
-      out.writeObject(report);
-      writeByteArrayToFile(reportTempFile, bos.toByteArray());
-
-      return reportTempFile.toURI().toURL().toString();
-    }
-  }
-
 
   private DecimalFormat createDecimalFormat() {
     DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols();
