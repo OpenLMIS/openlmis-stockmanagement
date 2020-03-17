@@ -16,35 +16,43 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.util.Collections.singletonList;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.service.JasperReportService.CARD_REPORT_URL;
+import static org.openlmis.stockmanagement.service.JasperReportService.CARD_SUMMARY_REPORT_URL;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import javax.sql.DataSource;
+import net.sf.jasperreports.engine.JREmptyDataSource;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.testutils.StockCardDtoDataBuilder;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({JasperFillManager.class,JasperExportManager.class})
 public class JasperReportServiceTest {
 
   private static final String DATE_FORMAT = "dd/MM/yyyy";
@@ -61,9 +69,6 @@ public class JasperReportServiceTest {
   @Mock
   private StockCardSummariesService stockCardSummariesService;
   
-  @Mock
-  private DataSource dataSource;
-
   @Before
   public void setUp() {
     jasperReportService = spy(new JasperReportService());
@@ -72,6 +77,8 @@ public class JasperReportServiceTest {
     ReflectionTestUtils.setField(jasperReportService, "groupingSeparator", GROUPING_SEPARATOR);
     ReflectionTestUtils.setField(jasperReportService, "groupingSize", GROUPING_SIZE);
     MockitoAnnotations.initMocks(this);
+    mockStatic(JasperFillManager.class);
+    mockStatic(JasperExportManager.class);
   }
 
   @Test(expected = ResourceNotFoundException.class)
@@ -83,25 +90,33 @@ public class JasperReportServiceTest {
   }
 
   @Test
-  @Ignore
-  public void shouldGenerateReportWithProperParamsIfStockCardExists() throws SQLException {
+  public void shouldGenerateReportWithProperParamsIfStockCardExists() throws JRException {
     StockCardDto stockCard = StockCardDtoDataBuilder.createStockCardDto();
+
     when(stockCardService.findStockCardById(stockCard.getId())).thenReturn(stockCard);
+
     Map<String, Object> params = new HashMap<>();
     params.put("datasource", singletonList(stockCard));
     params.put("hasLot", stockCard.hasLot());
     params.put("dateFormat", DATE_FORMAT);
     params.put("decimalFormat", createDecimalFormat());
-    when(dataSource.getConnection()).thenReturn(Mockito.mock(Connection.class));
+
+    JasperReport jasperReport = mock(JasperReport.class);
+    JasperPrint jasperPrint = mock(JasperPrint.class);
+    when(jasperReportService.compileReportFromTemplateUrl(CARD_REPORT_URL))
+        .thenReturn(jasperReport);
+    PowerMockito.when(JasperFillManager.fillReport(jasperReport, params,
+        new JRBeanCollectionDataSource((List<StockCardDto>) params.get("datasource"))))
+        .thenReturn(jasperPrint);
+    PowerMockito.when(JasperExportManager.exportReportToPdf(jasperPrint)).thenReturn(new byte[1]);
 
     jasperReportService.generateStockCardReport(stockCard.getId());
 
-    verify(jasperReportService).fillAndExportReport(any(JasperReport.class), params);
+    verify(jasperReportService).fillAndExportReport(jasperReport, params);
   }
 
   @Test
-  @Ignore
-  public void shouldGenerateReportWithProperParamsIfStockCardSummaryExists() throws SQLException {
+  public void shouldGenerateReportWithProperParamsIfStockCardSummaryExists() throws JRException {
     StockCardDto stockCard = StockCardDtoDataBuilder.createStockCardDto();
 
     Map<String, Object> params = new HashMap<>();
@@ -120,18 +135,25 @@ public class JasperReportServiceTest {
 
     when(stockCardSummariesService.findStockCards(programId, facilityId))
         .thenReturn(singletonList(stockCard));
-    when(dataSource.getConnection()).thenReturn(Mockito.mock(Connection.class));
+
+    JasperReport jasperReport = mock(JasperReport.class);
+    JasperPrint jasperPrint = mock(JasperPrint.class);
+    when(jasperReportService.compileReportFromTemplateUrl(CARD_SUMMARY_REPORT_URL))
+        .thenReturn(jasperReport);
+    PowerMockito.when(JasperFillManager.fillReport(jasperReport, params, new JREmptyDataSource()))
+        .thenReturn(jasperPrint);
+    PowerMockito.when(JasperExportManager.exportReportToPdf(jasperPrint)).thenReturn(new byte[1]);
 
     jasperReportService.generateStockCardSummariesReport(programId, facilityId);
 
-    verify(jasperReportService).fillAndExportReport(any(JasperReport.class), params);
+    verify(jasperReportService).fillAndExportReport(jasperReport, params);
   }
 
   private DecimalFormat createDecimalFormat() {
     DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols();
     decimalFormatSymbols.setGroupingSeparator(GROUPING_SEPARATOR.charAt(0));
     DecimalFormat decimalFormat = new DecimalFormat("", decimalFormatSymbols);
-    decimalFormat.setGroupingSize(Integer.valueOf(GROUPING_SIZE));
+    decimalFormat.setGroupingSize(Integer.parseInt(GROUPING_SIZE));
     return decimalFormat;
   }
 }

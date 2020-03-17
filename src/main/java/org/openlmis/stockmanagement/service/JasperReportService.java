@@ -60,6 +60,8 @@ public class JasperReportService {
   static final String CARD_SUMMARY_REPORT_URL = "/jasperTemplates/stockCardSummary.jrxml";
   private static final String PI_LINES_REPORT_URL = "/jasperTemplates/physicalinventoryLines.jrxml";
 
+  private static final String PARAM_DATASOURCE = "datasource";
+  
   @Autowired
   private StockCardService stockCardService;
 
@@ -95,7 +97,7 @@ public class JasperReportService {
 
     Collections.reverse(stockCardDto.getLineItems());
     Map<String, Object> params = new HashMap<>();
-    params.put("datasource", singletonList(stockCardDto));
+    params.put(PARAM_DATASOURCE, singletonList(stockCardDto));
     params.put("hasLot", stockCardDto.hasLot());
     params.put("dateFormat", dateFormat);
     params.put("decimalFormat", createDecimalFormat());
@@ -167,9 +169,9 @@ public class JasperReportService {
 
     try {
       JasperPrint jasperPrint;
-      if (params.containsKey("datasource")) {
+      if (params.containsKey(PARAM_DATASOURCE)) {
         jasperPrint = JasperFillManager.fillReport(compiledReport, params,
-            new JRBeanCollectionDataSource((List<StockCardDto>) params.get("datasource")));
+            new JRBeanCollectionDataSource((List<StockCardDto>) params.get(PARAM_DATASOURCE)));
       } else if (params.containsKey("stockCardSummaries")) {
         jasperPrint = JasperFillManager.fillReport(compiledReport, params, 
             new JREmptyDataSource());
@@ -186,7 +188,7 @@ public class JasperReportService {
     return bytes;
   }
 
-  private JasperReport compileReportFromTemplateUrl(String templateUrl) {
+  JasperReport compileReportFromTemplateUrl(String templateUrl) {
     try (InputStream inputStream = getClass().getResourceAsStream(templateUrl)) {
 
       return JasperCompileManager.compileReport(inputStream);
@@ -202,7 +204,7 @@ public class JasperReportService {
    *
    * @return Url to ".jasper" file.
    */
-  private JasperReport getReportFromTemplateData(JasperTemplate jasperTemplate) {
+  JasperReport getReportFromTemplateData(JasperTemplate jasperTemplate) {
 
     try (ObjectInputStream inputStream =
              new ObjectInputStream(new ByteArrayInputStream(jasperTemplate.getData()))) {
@@ -220,7 +222,7 @@ public class JasperReportService {
     DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols();
     decimalFormatSymbols.setGroupingSeparator(groupingSeparator.charAt(0));
     DecimalFormat decimalFormat = new DecimalFormat("", decimalFormatSymbols);
-    decimalFormat.setGroupingSize(Integer.valueOf(groupingSize));
+    decimalFormat.setGroupingSize(Integer.parseInt(groupingSize));
     return decimalFormat;
   }
 }
