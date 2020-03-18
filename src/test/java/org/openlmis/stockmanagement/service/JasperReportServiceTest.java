@@ -16,22 +16,29 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.service.JasperReportService.CARD_REPORT_URL;
 import static org.openlmis.stockmanagement.service.JasperReportService.CARD_SUMMARY_REPORT_URL;
+import static org.openlmis.stockmanagement.service.JasperReportService.PI_LINES_REPORT_URL;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
+import java.sql.Connection;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import javax.sql.DataSource;
 import net.sf.jasperreports.engine.JREmptyDataSource;
 import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -43,6 +50,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.openlmis.stockmanagement.domain.JasperTemplate;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.testutils.StockCardDtoDataBuilder;
@@ -69,6 +77,11 @@ public class JasperReportServiceTest {
   @Mock
   private StockCardSummariesService stockCardSummariesService;
   
+  @Mock
+  private DataSource dataSource;
+
+  private byte[] testReportData;
+  
   @Before
   public void setUp() {
     jasperReportService = spy(new JasperReportService());
@@ -79,6 +92,7 @@ public class JasperReportServiceTest {
     MockitoAnnotations.initMocks(this);
     mockStatic(JasperFillManager.class);
     mockStatic(JasperExportManager.class);
+    testReportData = new byte[]{0x1};
   }
 
   @Test(expected = ResourceNotFoundException.class)
@@ -95,40 +109,23 @@ public class JasperReportServiceTest {
 
     when(stockCardService.findStockCardById(stockCard.getId())).thenReturn(stockCard);
 
-    Map<String, Object> params = new HashMap<>();
-    params.put("datasource", singletonList(stockCard));
-    params.put("hasLot", stockCard.hasLot());
-    params.put("dateFormat", DATE_FORMAT);
-    params.put("decimalFormat", createDecimalFormat());
-
-    JasperReport jasperReport = mock(JasperReport.class);
-    JasperPrint jasperPrint = mock(JasperPrint.class);
     when(jasperReportService.compileReportFromTemplateUrl(CARD_REPORT_URL))
-        .thenReturn(jasperReport);
-    PowerMockito.when(JasperFillManager.fillReport(jasperReport, params,
-        new JRBeanCollectionDataSource((List<StockCardDto>) params.get("datasource"))))
+        .thenReturn(mock(JasperReport.class));
+    JasperPrint jasperPrint = mock(JasperPrint.class);
+    PowerMockito.when(JasperFillManager.fillReport(any(JasperReport.class), anyMap(),
+        any(JRBeanCollectionDataSource.class)))
         .thenReturn(jasperPrint);
-    PowerMockito.when(JasperExportManager.exportReportToPdf(jasperPrint)).thenReturn(new byte[1]);
+    PowerMockito.when(JasperExportManager.exportReportToPdf(jasperPrint))
+        .thenReturn(testReportData);
 
-    jasperReportService.generateStockCardReport(stockCard.getId());
+    byte[] reportData = jasperReportService.generateStockCardReport(stockCard.getId());
 
-    verify(jasperReportService).fillAndExportReport(jasperReport, params);
+    assertEquals(testReportData, reportData);
   }
 
   @Test
   public void shouldGenerateReportWithProperParamsIfStockCardSummaryExists() throws JRException {
     StockCardDto stockCard = StockCardDtoDataBuilder.createStockCardDto();
-
-    Map<String, Object> params = new HashMap<>();
-    params.put("stockCardSummaries", singletonList(stockCard));
-    params.put("program", stockCard.getProgram());
-    params.put("facility", stockCard.getFacility());
-    params.put("showProgram", false);
-    params.put("showFacility", false);
-    params.put("showLot", false);
-    params.put("dateFormat", DATE_FORMAT);
-    params.put("dateTimeFormat", DATE_TIME_FORMAT);
-    params.put("decimalFormat", createDecimalFormat());
 
     UUID programId = UUID.randomUUID();
     UUID facilityId = UUID.randomUUID();
@@ -136,17 +133,45 @@ public class JasperReportServiceTest {
     when(stockCardSummariesService.findStockCards(programId, facilityId))
         .thenReturn(singletonList(stockCard));
 
-    JasperReport jasperReport = mock(JasperReport.class);
-    JasperPrint jasperPrint = mock(JasperPrint.class);
     when(jasperReportService.compileReportFromTemplateUrl(CARD_SUMMARY_REPORT_URL))
-        .thenReturn(jasperReport);
-    PowerMockito.when(JasperFillManager.fillReport(jasperReport, params, new JREmptyDataSource()))
+        .thenReturn(mock(JasperReport.class));
+    JasperPrint jasperPrint = mock(JasperPrint.class);
+    PowerMockito.when(JasperFillManager.fillReport(any(JasperReport.class), anyMap(),
+        any(JREmptyDataSource.class)))
         .thenReturn(jasperPrint);
-    PowerMockito.when(JasperExportManager.exportReportToPdf(jasperPrint)).thenReturn(new byte[1]);
+    PowerMockito.when(JasperExportManager.exportReportToPdf(jasperPrint))
+        .thenReturn(testReportData);
 
-    jasperReportService.generateStockCardSummariesReport(programId, facilityId);
+    byte[] reportData = jasperReportService.generateStockCardSummariesReport(programId, facilityId);
 
-    verify(jasperReportService).fillAndExportReport(jasperReport, params);
+    assertEquals(testReportData, reportData);
+  }
+
+  @Test
+  public void shouldGenerateReportWithProperParamsForPrintPhysicalInventory() throws Exception {
+    Map<String, Object> params = new HashMap<>();
+    params.put("dateTimeFormat", DATE_TIME_FORMAT);
+    params.put("dateFormat", DATE_FORMAT);
+    params.put("format", "pdf");
+    params.put("decimalFormat", createDecimalFormat());
+
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    ObjectOutputStream out = new ObjectOutputStream(bos);
+    out.writeObject(JasperCompileManager.compileReport(getClass().getResourceAsStream(
+        PI_LINES_REPORT_URL)));
+    JasperTemplate jasperTemplate = new JasperTemplate("test template", bos.toByteArray(), "type",
+        "description");
+    when(dataSource.getConnection()).thenReturn(mock(Connection.class));
+    JasperPrint jasperPrint = mock(JasperPrint.class);
+    PowerMockito.when(JasperFillManager.fillReport(any(JasperReport.class), anyMap(),
+        any(Connection.class)))
+        .thenReturn(jasperPrint);
+    PowerMockito.when(JasperExportManager.exportReportToPdf(jasperPrint))
+        .thenReturn(testReportData);
+
+    byte[] reportData = jasperReportService.generateReport(jasperTemplate, params);
+
+    assertEquals(testReportData, reportData);
   }
 
   private DecimalFormat createDecimalFormat() {

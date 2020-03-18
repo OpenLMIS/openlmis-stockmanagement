@@ -58,7 +58,7 @@ public class JasperReportService {
 
   static final String CARD_REPORT_URL = "/jasperTemplates/stockCard.jrxml";
   static final String CARD_SUMMARY_REPORT_URL = "/jasperTemplates/stockCardSummary.jrxml";
-  private static final String PI_LINES_REPORT_URL = "/jasperTemplates/physicalinventoryLines.jrxml";
+  static final String PI_LINES_REPORT_URL = "/jasperTemplates/physicalinventoryLines.jrxml";
 
   private static final String PARAM_DATASOURCE = "datasource";
   
