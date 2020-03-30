@@ -9,6 +9,8 @@ Bug fixes:
     *the screens now display Stock Card Summaries of Orderables both with and without Identifiers.
 * [OLMIS-6559](https://openlmis.atlassian.net/browse/OLMIS-6559): Fixed long product codes being cut in Physical Inventory printout.
 * [OLMIS-6745](https://openlmis.atlassian.net/browse/OLMIS-6745): Fixed incorrect calculation of Stock on Hand for edge cases.
+* [OLMIS-6776](https://openlmis.atlassian.net/browse/OLMIS-6776): Fixed the issue with invalid token error:
+  * A mechanism to retry authentication load after encountering the error was introduced.
 
 Improvements:
 * [OLMIS-3490](https://openlmis.atlassian.net/browse/OLMIS-3490): Performance improvements of Validate step in stock event.

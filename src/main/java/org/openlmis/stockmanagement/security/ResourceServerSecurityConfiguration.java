@@ -113,11 +113,12 @@ public class ResourceServerSecurityConfiguration implements ResourceServerConfig
    */
   @Bean
   @Autowired
-  public RemoteTokenServices remoteTokenServices(@Value("${auth.server.url}") String checkTokenUrl,
-                                                 @Value("${auth.server.clientId}") String clientId,
-                                                 @Value("${auth.server.clientSecret}")
-                                                         String clientSecret) {
-    final RemoteTokenServices remoteTokenServices = new RemoteTokenServices();
+  public RemoteTokenServices remoteTokenServices(
+      @Value("${auth.server.url}") String checkTokenUrl,
+      @Value("${auth.server.clientId}") String clientId,
+      @Value("${auth.server.clientSecret}") String clientSecret,
+      @Value("${auth.server.invalidToken.retryLimit}") int invalidTokenRetryLimit) {
+    final RemoteTokenServices remoteTokenServices = new CustomTokenServices(invalidTokenRetryLimit);
     remoteTokenServices.setCheckTokenEndpointUrl(checkTokenUrl);
     remoteTokenServices.setClientId(clientId);
     remoteTokenServices.setClientSecret(clientSecret);
