@@ -23,6 +23,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,11 +31,15 @@ import java.net.URI;
 import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.openlmis.stockmanagement.service.referencedata.DataRetrievalException;
 import org.openlmis.stockmanagement.testutils.ObjectGenerator;
 import org.openlmis.stockmanagement.util.DynamicPageTypeReference;
 import org.openlmis.stockmanagement.util.PageImplRepresentation;
@@ -42,14 +47,19 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 @SuppressWarnings("PMD.TooManyMethods")
 @RunWith(MockitoJUnitRunner.class)
 public abstract class BaseCommunicationServiceTest<T> {
   private static final String TOKEN = UUID.randomUUID().toString();
+
+  @Rule
+  public final ExpectedException expectedException = ExpectedException.none();
 
   @Mock
   protected RestTemplate restTemplate;
@@ -68,14 +78,36 @@ public abstract class BaseCommunicationServiceTest<T> {
 
   protected boolean checkAuth = true;
 
+  private BaseCommunicationService<T> service;
+
   @Before
   public void setUp() throws Exception {
     mockAuth();
+    service = prepareService();
   }
 
   @After
   public void tearDown() throws Exception {
     checkAuth();
+  }
+
+  @Test
+  public void shouldRetryObtainingAccessToken() {
+    // given
+    HttpStatusCodeException exception = mock(HttpStatusCodeException.class);
+    when(exception.getStatusCode()).thenReturn(HttpStatus.UNAUTHORIZED);
+    when(exception.getResponseBodyAsString()).thenReturn(
+        "{\"error\":\"invalid_token\",\"error_description\":\"" + UUID.randomUUID() + "}");
+    UUID id = UUID.randomUUID();
+
+    // when
+    mockRequestFail(exception);
+
+    expectedException.expect(DataRetrievalException.class);
+    service.findOne(id);
+
+    verify(authService, times(1)).clearTokenCache();
+    verify(authService, times(2)).obtainAccessToken();
   }
 
   protected abstract BaseCommunicationService<T> getService();
@@ -135,5 +167,11 @@ public abstract class BaseCommunicationServiceTest<T> {
     when(restTemplate.exchange(any(URI.class), any(HttpMethod.class), any(HttpEntity.class),
         any(Class.class))).thenReturn(arrayResponse);
     when(arrayResponse.getBody()).thenReturn(responseArray);
+  }
+
+  protected void mockRequestFail(Exception exception) {
+    when(restTemplate.exchange(any(URI.class), any(HttpMethod.class),
+        any(HttpEntity.class), any(Class.class)))
+        .thenThrow(exception);
   }
 }

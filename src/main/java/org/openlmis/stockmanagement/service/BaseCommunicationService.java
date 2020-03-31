@@ -123,10 +123,11 @@ public abstract class BaseCommunicationService<T> {
         .setAll(parameters);
 
     try {
-      ResponseEntity<T> responseEntity = restTemplate.exchange(
-          RequestHelper.createUri(url, params), HttpMethod.GET, createEntity(),
-          type);
-      return responseEntity.getBody();
+      return runWithTokenRetry(() -> restTemplate.exchange(
+          RequestHelper.createUri(url, params),
+          HttpMethod.GET,
+          createEntity(),
+          type)).getBody();
     } catch (HttpStatusCodeException ex) {
       // rest template will handle 404 as an exception, instead of returning null
       if (HttpStatus.NOT_FOUND == ex.getStatusCode()) {
@@ -155,8 +156,8 @@ public abstract class BaseCommunicationService<T> {
     RequestParameters params = RequestParameters.of(parameters);
 
     try {
-      ResponseEntity<T[]> responseEntity = doListRequest(
-          url, params, HttpMethod.GET, getArrayResultClass()
+      ResponseEntity<T[]> responseEntity = runWithTokenRetry(
+          () -> doListRequest(url, params, HttpMethod.GET, getArrayResultClass())
       );
       return new ArrayList<>(Arrays.asList(responseEntity.getBody()));
     } catch (HttpStatusCodeException ex) {
@@ -241,8 +242,8 @@ public abstract class BaseCommunicationService<T> {
     String url = getServiceUrl() + getUrl() + resourceUrl;
 
     try {
-      ResponseEntity<PageImplRepresentation<P>> response = doPageRequest(
-          url, parameters, payload, method, type
+      ResponseEntity<PageImplRepresentation<P>> response = runWithTokenRetry(
+          () -> doPageRequest(url, parameters, payload, method, type)
       );
       return response.getBody();
 
@@ -255,11 +256,12 @@ public abstract class BaseCommunicationService<T> {
       Class<P> type) {
     String url = getServiceUrl() + getUrl() + resourceUrl;
 
-    ResponseEntity<ResultDto<P>> response = restTemplate.exchange(
+    ResponseEntity<ResultDto<P>> response = runWithTokenRetry(() -> restTemplate.exchange(
         RequestHelper.createUri(url, parameters),
         HttpMethod.GET,
         createEntity(),
-        new DynamicParametrizedTypeReference<>(type));
+        new DynamicParametrizedTypeReference<>(type)
+    ));
 
     return response.getBody();
   }
@@ -348,5 +350,25 @@ public abstract class BaseCommunicationService<T> {
 
   private RequestHeaders createHeadersWithAuth() {
     return RequestHeaders.init().setAuth(authService.obtainAccessToken());
+  }
+
+  protected <P> ResponseEntity<P> runWithTokenRetry(HttpTask<P> task) {
+    try {
+      return task.run();
+    } catch (HttpStatusCodeException ex) {
+      if (HttpStatus.UNAUTHORIZED == ex.getStatusCode()) {
+        // the token has (most likely) expired - clear the cache and retry once
+        authService.clearTokenCache();
+        return task.run();
+      }
+      throw ex;
+    }
+  }
+
+  @FunctionalInterface
+  protected interface HttpTask<T> {
+
+    ResponseEntity<T> run();
+
   }
 }

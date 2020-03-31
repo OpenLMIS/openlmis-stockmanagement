@@ -21,6 +21,8 @@ import java.util.Map;
 import org.apache.commons.codec.binary.Base64;
 import org.openlmis.stockmanagement.util.RequestParameters;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -49,6 +51,7 @@ public class AuthService {
    *
    * @return token.
    */
+  @Cacheable("token")
   public String obtainAccessToken() {
     String plainCreds = clientId + ":" + clientSecret;
     byte[] plainCredsBytes = plainCreds.getBytes();
@@ -69,5 +72,10 @@ public class AuthService {
     );
 
     return ((Map<String, String>) response.getBody()).get(ACCESS_TOKEN);
+  }
+
+  @CacheEvict(cacheNames = "token", allEntries = true)
+  public void clearTokenCache() {
+    // Intentionally blank
   }
 }
