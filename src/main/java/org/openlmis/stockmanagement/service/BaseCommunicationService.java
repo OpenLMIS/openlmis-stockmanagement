@@ -36,7 +36,7 @@ import org.openlmis.stockmanagement.service.referencedata.DataRetrievalException
 import org.openlmis.stockmanagement.util.DynamicPageTypeReference;
 import org.openlmis.stockmanagement.util.DynamicParametrizedTypeReference;
 import org.openlmis.stockmanagement.util.Merger;
-import org.openlmis.stockmanagement.util.PageImplRepresentation;
+import org.openlmis.stockmanagement.util.PageDto;
 import org.openlmis.stockmanagement.util.RequestHelper;
 import org.openlmis.stockmanagement.util.RequestParameters;
 import org.slf4j.Logger;
@@ -242,7 +242,7 @@ public abstract class BaseCommunicationService<T> {
     String url = getServiceUrl() + getUrl() + resourceUrl;
 
     try {
-      ResponseEntity<PageImplRepresentation<P>> response = runWithTokenRetry(
+      ResponseEntity<PageDto<P>> response = runWithTokenRetry(
           () -> doPageRequest(url, parameters, payload, method, type)
       );
       return response.getBody();
@@ -304,23 +304,23 @@ public abstract class BaseCommunicationService<T> {
     return new ResponseEntity<>(body, HttpStatus.OK);
   }
 
-  private <E> ResponseEntity<PageImplRepresentation<E>> doPageRequest(String url,
+  private <E> ResponseEntity<PageDto<E>> doPageRequest(String url,
                                                                       RequestParameters parameters,
                                                                       Object payload,
                                                                       HttpMethod method,
                                                                       Class<E> type) {
     HttpEntity<Object> entity = createEntity(payload);
-    ParameterizedTypeReference<PageImplRepresentation<E>> parameterizedType =
+    ParameterizedTypeReference<PageDto<E>> parameterizedType =
         new DynamicPageTypeReference<>(type);
-    List<PageImplRepresentation<E>> pages = new ArrayList<>();
+    List<PageDto<E>> pages = new ArrayList<>();
 
     for (URI uri : RequestHelper.splitRequest(url, parameters, maxUrlLength)) {
       pages.add(restTemplate.exchange(uri, method, entity, parameterizedType).getBody());
     }
 
-    PageImplRepresentation<E> body = Merger
+    PageDto<E> body = Merger
         .ofPages(pages)
-        .withDefaultValue(PageImplRepresentation::new)
+        .withDefaultValue(PageDto::new)
         .merge();
 
     return new ResponseEntity<>(body, HttpStatus.OK);

@@ -166,7 +166,7 @@ public class StockCardSummariesServiceIntegrationTest extends BaseIntegrationTes
 
     doReturn(emptyList()).when(lotReferenceDataService).getAllLotsOf(any(UUID.class));
 
-    PageRequest pageRequest = new PageRequest(0, 1);
+    PageRequest pageRequest = PageRequest.of(0, 1);
     //when
     Page<StockCardDto> stockCards = stockCardSummariesService
         .findStockCards(programId, facilityId, pageRequest);

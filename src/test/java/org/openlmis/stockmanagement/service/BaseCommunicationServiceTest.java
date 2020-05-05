@@ -42,7 +42,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.service.referencedata.DataRetrievalException;
 import org.openlmis.stockmanagement.testutils.ObjectGenerator;
 import org.openlmis.stockmanagement.util.DynamicPageTypeReference;
-import org.openlmis.stockmanagement.util.PageImplRepresentation;
+import org.openlmis.stockmanagement.util.PageDto;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -145,14 +145,14 @@ public abstract class BaseCommunicationServiceTest<T> {
   }
 
   protected void mockPageResponseEntity(Object dto) {
-    ResponseEntity<PageImplRepresentation<T>> response = stubRestTemplateAndGetPageResponseEntity();
-    doReturn(new PageImplRepresentation<>(new PageImpl<>(newArrayList(dto))))
+    ResponseEntity<PageDto<T>> response = stubRestTemplateAndGetPageResponseEntity();
+    doReturn(new PageDto<>(new PageImpl<>(newArrayList(dto))))
         .when(response)
         .getBody();
   }
 
-  private ResponseEntity<PageImplRepresentation<T>> stubRestTemplateAndGetPageResponseEntity() {
-    ResponseEntity<PageImplRepresentation<T>> response = mock(ResponseEntity.class);
+  private ResponseEntity<PageDto<T>> stubRestTemplateAndGetPageResponseEntity() {
+    ResponseEntity<PageDto<T>> response = mock(ResponseEntity.class);
     when(restTemplate.exchange(
         any(URI.class),
         any(HttpMethod.class),

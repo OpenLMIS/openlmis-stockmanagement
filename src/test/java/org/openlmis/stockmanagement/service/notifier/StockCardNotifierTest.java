@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.service.notifier;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -153,9 +154,11 @@ public class StockCardNotifierTest {
   private void mockMessages() {
     Message.LocalizedMessage localizedMessage = new Message(DUMMY_KEY)
         .new LocalizedMessage(MESSAGE_SUBJECT);
-    when(messageService.localize(new Message(MESSAGE_SUBJECT))).thenReturn(localizedMessage);
+    lenient().when(messageService.localize(new Message(MESSAGE_SUBJECT)))
+        .thenReturn(localizedMessage);
 
     localizedMessage = new Message(DUMMY_KEY).new LocalizedMessage(MESSAGE_CONTENT);
-    when(messageService.localize(new Message(MESSAGE_CONTENT))).thenReturn(localizedMessage);
+    lenient().when(messageService.localize(new Message(MESSAGE_CONTENT)))
+        .thenReturn(localizedMessage);
   }
 }

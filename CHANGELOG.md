@@ -1,3 +1,16 @@
+5.1.0 / WIP
+=================
+New functionality added in a backwards-compatible manner:
+* [OLMIS-6772](https://openlmis.atlassian.net/browse/OLMIS-6772): Update Spring Boot version to 2.x:
+  * Spring Boot version is 2.2.2.
+  * Flyway is at 6.0.8, new mechanism for loading Spring Security for OAuth2 (matching Spring Boot version), new versions for REST Assured, RAML tester, RAML parser, PowerMock, Mockito (so tests will pass) and Java callback mechanism has changed to a general handle() method.
+  * Spring application properties for Flyway have changed.
+  * Re-implement generation of Jasper reports.
+  * Fix repository method signatures (findOne is now findById, etc.); additionally they return Optional.
+  * Fix unit tests.
+  * Fix integration tests.
+  * API definitions require "Keep-Alive" header for web integration tests.
+
 5.0.2 / 2020-04-14
 ==================
 
@@ -9,8 +22,6 @@ Bug fixes:
     *the screens now display Stock Card Summaries of Orderables both with and without Identifiers.
 * [OLMIS-6559](https://openlmis.atlassian.net/browse/OLMIS-6559): Fixed long product codes being cut in Physical Inventory printout.
 * [OLMIS-6745](https://openlmis.atlassian.net/browse/OLMIS-6745): Fixed incorrect calculation of Stock on Hand for edge cases.
-* [OLMIS-6776](https://openlmis.atlassian.net/browse/OLMIS-6776): Fixed the issue with invalid token error:
-  * A mechanism to retry authentication load after encountering the error was introduced.
 
 Improvements:
 * [OLMIS-3490](https://openlmis.atlassian.net/browse/OLMIS-3490): Performance improvements of Validate step in stock event.

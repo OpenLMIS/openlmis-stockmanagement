@@ -31,7 +31,6 @@ import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.web.servlet.ModelAndView;
 
 public class ReportsControllerIntegrationTest extends BaseWebTest {
 
@@ -48,8 +47,8 @@ public class ReportsControllerIntegrationTest extends BaseWebTest {
   public void return200WhenStockCardReportGenerated() throws Exception {
     //given
     UUID stockCardId = UUID.randomUUID();
-    when(reportService.getStockCardReportView(stockCardId))
-        .thenReturn(new ModelAndView("stockCardReportPDF"));
+    when(reportService.generateStockCardReport(stockCardId))
+        .thenReturn(new byte[1]);
 
     //when
     ResultActions resultActions = mvc.perform(get(format(CARD_REPORT, stockCardId.toString()))
@@ -64,8 +63,8 @@ public class ReportsControllerIntegrationTest extends BaseWebTest {
     //given
     UUID program = UUID.randomUUID();
     UUID facility = UUID.randomUUID();
-    when(reportService.getStockCardSummariesReportView(program, facility))
-        .thenReturn(new ModelAndView("stockCardSummaryReportPDF"));
+    when(reportService.generateStockCardSummariesReport(program, facility))
+        .thenReturn(new byte[1]);
 
     //when
     ResultActions resultActions = mvc.perform(get(CARD_SUMMARY_REPORT)

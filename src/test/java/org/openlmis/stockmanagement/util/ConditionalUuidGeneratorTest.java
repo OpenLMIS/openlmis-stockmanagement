@@ -74,7 +74,7 @@ public class ConditionalUuidGeneratorTest {
 
     when(strategy.generateUUID(session)).thenReturn(expected);
     when(valueTransformer.transform(any(UUID.class)))
-        .thenAnswer(args -> args.getArgumentAt(0, UUID.class));
+        .thenAnswer(args -> args.getArgument(0, UUID.class));
 
     when(entity.getId()).thenReturn(null);
     Serializable actual = generator.generate(session, entity);

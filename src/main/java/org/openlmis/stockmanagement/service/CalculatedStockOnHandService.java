@@ -171,7 +171,7 @@ public class CalculatedStockOnHandService {
             stockCard.getId(), lineItem.getOccurredDate());
 
     profiler.start("DELETE_FOLLOWING_CALCULATED_STOCK_ON_HANDS");
-    calculatedStockOnHandRepository.delete(followingStockOnHands);
+    calculatedStockOnHandRepository.deleteAll(followingStockOnHands);
 
     profiler.start("GET_FOLLOWING_STOCK_CARD_LINE_ITEMS");
     List<StockCardLineItem> followingLineItems = getFollowingLineItems(stockCard, lineItem);

@@ -5,14 +5,15 @@ buildscript {
 }
 
 plugins {
-    id 'org.springframework.boot' version '1.5.1.RELEASE'
-    id "org.flywaydb.flyway" version "4.0"
+    id 'org.springframework.boot' version '2.2.2.RELEASE'
+    id "org.flywaydb.flyway" version "6.0.8"
     id "org.sonarqube" version "2.6.2"
     id "com.moowork.node" version "0.12"
 }
 
 apply plugin: 'java'
 apply plugin: 'idea'
+apply plugin: 'io.spring.dependency-management'
 apply plugin: 'checkstyle'
 apply plugin: 'jacoco'
 apply plugin: 'pmd'
@@ -36,36 +37,36 @@ dependencies {
     compile "org.springframework.boot:spring-boot-starter-data-rest"
     compile "org.springframework.boot:spring-boot-starter-data-jpa"
     compile "org.springframework.boot:spring-boot-starter-security"
-    compile "org.springframework.security.oauth:spring-security-oauth2"
+    compile "org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.2.2.RELEASE"
     compile 'org.springframework:spring-context-support'
     compile 'org.hibernate:hibernate-java8'
-    compile 'org.flywaydb:flyway-core:4.1.2'
+    compile 'org.flywaydb:flyway-core'
     compile 'org.openlmis:openlmis-service-util:3.0.0'
 
-    compile "org.projectlombok:lombok:1.16.8"
+    compile "org.projectlombok:lombok"
     compile "org.postgresql:postgresql:42.0.0"
     compile "com.google.guava:guava:18.0"
     compile 'org.webjars.npm:api-console:3.0.17'
-    compile 'org.apache.commons:commons-lang3:3.6'
+    compile 'org.apache.commons:commons-lang3'
     compile 'org.apache.commons:commons-csv:1.4'
     compile 'org.apache.commons:commons-collections4:4.1'
     compile 'commons-io:commons-io:2.5'
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
-    compile "net.sf.jasperreports:jasperreports:6.3.0"
-    compile "org.slf4j:slf4j-ext:1.7.25"
+    compile "net.sf.jasperreports:jasperreports:6.5.1"
+    compile "org.slf4j:slf4j-ext"
     compile "com.github.tomakehurst:wiremock:1.58"
 
     testCompile "junit:junit"
-    testCompile "org.mockito:mockito-core:1.+"
-    testCompile "org.powermock:powermock-api-mockito:1.6.5"
-    testCompile "org.powermock:powermock-module-junit4:1.6.5"
+    testCompile "org.powermock:powermock-api-mockito2:2.0.4"
+    testCompile "org.powermock:powermock-module-junit4:2.0.4"
     testCompile "org.springframework.boot:spring-boot-starter-test"
     testCompile('org.flywaydb.flyway-test-extensions:flyway-spring-test:4.1.0')
     testCompile 'org.springframework.security:spring-security-test'
     testCompile "org.springframework:spring-test"
 
     testCompile "com.jayway.restassured:rest-assured:2.7.0"
-    testCompile "guru.nidi.raml:raml-tester:0.8.9"
+    testCompile "guru.nidi.raml:raml-tester:0.8.15"
+    testCompile "org.raml:raml-parser:0.8.37"
     testCompile "nl.jqno.equalsverifier:equalsverifier:2.4"
     testCompile "be.joengenduvel.java.verifiers:to-string:1.0.2"
 }
@@ -83,6 +84,10 @@ idea {
                 }
             }
         }
+    }
+    module {
+        sourceDirs -= file('src/integration-test/java')
+        testSourceDirs += file('src/integration-test/java')
     }
 }
 
@@ -113,7 +118,7 @@ configurations {
 }
 
 task integrationTest(type: Test) {
-    testClassesDir = sourceSets.integrationTest.output.classesDir
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
     testLogging {
         events "passed", "skipped", "failed"
@@ -125,7 +130,7 @@ task integrationTest(type: Test) {
 }
 
 task demoDataTest(type: Test) {
-    testClassesDir = sourceSets.integrationTest.output.classesDir
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
     testLogging {
         events "passed", "skipped", "failed"
@@ -146,16 +151,18 @@ tasks.withType(Test) {
 //          Defaults to 'migration' as migration name
 // Example: gradle generateMigration -PmigrationName=add_column_to_users
 //          Will create a file in migration folder with name yyyyMMddHHmmssSSS_add_column_to_users.sql.
-task generateMigration << {
+task generateMigration {
     description 'Creates an empty new file within the src/main/resources/db/migration directory into which developers can add new SQL migration code.'
-    def fileName = project.hasProperty('migrationName') ? migrationName : 'migration'
-    def timestamp = new Date().format('yyyyMMddHHmmssSSS', TimeZone.getTimeZone('GMT'))
-    def fullFileName = "${timestamp}__${fileName}.sql"
-    def migrationFile = new File(sourceSets.main.resources.srcDirs.first(), 'db/migration/' + fullFileName)
-    migrationFile << "-- WHEN COMMITTING OR REVIEWING THIS FILE: Make sure that the timestamp in the file name (that serves as a version) is the latest timestamp, and that no new migration have been added in the meanwhile.\n"
-    migrationFile << "-- Adding migrations out of order may cause this migration to never execute or behave in an unexpected way.\n"
-    migrationFile << "-- Migrations should NOT BE EDITED. Add a new migration to apply changes."
-    migrationFile.createNewFile()
+    doLast {
+        def fileName = project.hasProperty('migrationName') ? migrationName : 'migration'
+        def timestamp = new Date().format('yyyyMMddHHmmssSSS', TimeZone.getTimeZone('GMT'))
+        def fullFileName = "${timestamp}__${fileName}.sql"
+        def migrationFile = new File(sourceSets.main.resources.srcDirs.first(), 'db/migration/' + fullFileName)
+        migrationFile << "-- WHEN COMMITTING OR REVIEWING THIS FILE: Make sure that the timestamp in the file name (that serves as a version) is the latest timestamp, and that no new migration have been added in the meanwhile.\n"
+        migrationFile << "-- Adding migrations out of order may cause this migration to never execute or behave in an unexpected way.\n"
+        migrationFile << "-- Migrations should NOT BE EDITED. Add a new migration to apply changes."
+        migrationFile.createNewFile()
+    }
 }
 
 task checkApiIsRaml(type: Exec) {

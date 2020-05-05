@@ -302,7 +302,7 @@ public class StockCardSummariesService extends StockCardBaseService {
       });
     } else {
       calculatedStockOnHands = calculatedStockOnHandRepository
-            .findByStockCardIdAndOccurredDateBetween(stockCardIds, startDate, endDate);
+            .findByStockCardIdInAndOccurredDateBetween(stockCardIds, startDate, endDate);
       stockCardIds.forEach(stockCardId -> {
         Optional<CalculatedStockOnHand> calculatedStockOnHand = calculatedStockOnHandRepository
                 .findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(

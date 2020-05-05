@@ -45,7 +45,6 @@ import org.springframework.web.client.RestTemplate;
 @RunWith(MockitoJUnitRunner.class)
 public class NotificationServiceTest {
   private static final String ACCESS_TOKEN = "token";
-  private static final String USER_EMAIL = "test@test.te";
   private static final String MAIL_SUBJECT = "subject";
   private static final String MAIL_CONTENT = "content";
   private static final String BASE_URL = "http://localhost";
@@ -71,7 +70,6 @@ public class NotificationServiceTest {
   @Test
   public void shouldNotifyUser() throws Exception {
     UserDto user = mock(UserDto.class);
-    when(user.getEmail()).thenReturn(USER_EMAIL);
 
     notificationService.notify(user, MAIL_SUBJECT, MAIL_CONTENT);
 

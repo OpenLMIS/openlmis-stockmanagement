@@ -62,7 +62,7 @@ public abstract class BaseCrudRepositoryIntegrationTest<T extends BaseEntity> {
     instance = repository.save(instance);
     assertInstance(instance);
 
-    Assert.assertTrue(repository.exists(instance.getId()));
+    Assert.assertTrue(repository.existsById(instance.getId()));
   }
 
   @Test
@@ -76,7 +76,7 @@ public abstract class BaseCrudRepositoryIntegrationTest<T extends BaseEntity> {
 
     UUID id = instance.getId();
 
-    instance = repository.findOne(id);
+    instance = repository.findById(id).orElse(null);
     assertInstance(instance);
     Assert.assertEquals(id, instance.getId());
   }
@@ -93,7 +93,7 @@ public abstract class BaseCrudRepositoryIntegrationTest<T extends BaseEntity> {
 
     UUID id = instance.getId();
 
-    repository.delete(id);
-    Assert.assertFalse(repository.exists(id));
+    repository.deleteById(id);
+    Assert.assertFalse(repository.existsById(id));
   }
 }

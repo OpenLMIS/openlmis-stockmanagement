@@ -28,6 +28,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.Rule;
 import org.junit.Test;
@@ -80,9 +81,6 @@ public class PhysicalInventoryValidatorTest {
     PhysicalInventoryDto inventory = newInventory();
     inventory.setLineItems(Collections.emptyList());
 
-    doNothing()
-        .when(vvmValidator).validate(eq(inventory.getLineItems()), anyString(), eq(false));
-
     // when
     validator.validateDraft(inventory, inventory.getId());
 
@@ -96,9 +94,6 @@ public class PhysicalInventoryValidatorTest {
     // given
     PhysicalInventoryDto inventory = newInventory();
     inventory.setLineItems(Collections.singletonList(new PhysicalInventoryLineItemDto()));
-
-    doNothing()
-        .when(vvmValidator).validate(eq(inventory.getLineItems()), anyString(), eq(false));
 
     // when
     validator.validateDraft(inventory, inventory.getId());
@@ -145,7 +140,7 @@ public class PhysicalInventoryValidatorTest {
     PhysicalInventoryDto inventory = newInventory();
     PhysicalInventory existingInventory = mock(PhysicalInventory.class);
     when(existingInventory.getIsDraft()).thenReturn(isDraft);
-    when(repository.findOne(inventory.getId())).thenReturn(existingInventory);
+    when(repository.findById(inventory.getId())).thenReturn(Optional.of(existingInventory));
 
     validator.validateDraft(inventory, inventory.getId());
   }

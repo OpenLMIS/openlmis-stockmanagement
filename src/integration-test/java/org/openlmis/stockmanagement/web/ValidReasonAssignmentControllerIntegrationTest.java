@@ -30,6 +30,7 @@ import guru.nidi.ramltester.junit.RamlMatchers;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
@@ -247,7 +248,7 @@ public class ValidReasonAssignmentControllerIntegrationTest extends BaseWebInteg
     assignment.setProgramId(UUID.randomUUID());
     assignment.setFacilityTypeId(UUID.randomUUID());
 
-    when(stockCardLineItemReasonRepository.exists(reasonId)).thenReturn(true);
+    when(stockCardLineItemReasonRepository.existsById(reasonId)).thenReturn(true);
     when(reasonAssignmentRepository.findByProgramIdAndFacilityTypeIdAndReasonId(
         assignment.getProgramId(), assignment.getFacilityTypeId(), reasonId))
         .thenReturn(new ValidReasonAssignment());
@@ -284,7 +285,7 @@ public class ValidReasonAssignmentControllerIntegrationTest extends BaseWebInteg
 
   @Test
   public void shouldReturn400IfReasonNotExist() {
-    when(stockCardLineItemReasonRepository.findOne(any(UUID.class))).thenReturn(null);
+    when(stockCardLineItemReasonRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
     restAssured.given()
         .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
@@ -302,7 +303,7 @@ public class ValidReasonAssignmentControllerIntegrationTest extends BaseWebInteg
 
   @Test
   public void return204WhenRemoveReasonSuccess() {
-    when(reasonAssignmentRepository.exists(any(UUID.class))).thenReturn(true);
+    when(reasonAssignmentRepository.existsById(any(UUID.class))).thenReturn(true);
 
     restAssured.given()
         .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
@@ -314,12 +315,12 @@ public class ValidReasonAssignmentControllerIntegrationTest extends BaseWebInteg
         .statusCode(204);
 
     verify(permissionService, times(1)).canManageReasons();
-    verify(reasonAssignmentRepository, times(1)).delete(reasonAssignment.getId());
+    verify(reasonAssignmentRepository, times(1)).deleteById(reasonAssignment.getId());
   }
 
   @Test
   public void return400WhenReasonIsNotFound() {
-    when(reasonAssignmentRepository.exists(any(UUID.class))).thenReturn(false);
+    when(reasonAssignmentRepository.existsById(any(UUID.class))).thenReturn(false);
 
     restAssured.given()
         .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
@@ -340,7 +341,8 @@ public class ValidReasonAssignmentControllerIntegrationTest extends BaseWebInteg
     assignment.setFacilityTypeId(reasonId);
     assignment.setHidden(isHidden);
 
-    when(stockCardLineItemReasonRepository.exists(assignment.getReason().getId())).thenReturn(true);
+    when(stockCardLineItemReasonRepository.existsById(assignment.getReason().getId()))
+        .thenReturn(true);
     return assignment;
   }
 }

@@ -59,7 +59,7 @@ public class StockCardRepositoryIntegrationTest
   private UUID programId1 = randomUUID();
   private UUID programId2 = randomUUID();
 
-  private Pageable pageable = new PageRequest(0, 10);
+  private Pageable pageable = PageRequest.of(0, 10);
 
   private StockCard stockCard1;
   private StockCard stockCard2;
@@ -180,7 +180,7 @@ public class StockCardRepositoryIntegrationTest
 
   @Test
   public void findByIds() throws Exception {
-    pageable = new PageRequest(0, 10);
+    pageable = PageRequest.of(0, 10);
 
     stockCard1 = stockCardRepository.save(generateInstance());
     stockCard2 = stockCardRepository.save(generateInstance());

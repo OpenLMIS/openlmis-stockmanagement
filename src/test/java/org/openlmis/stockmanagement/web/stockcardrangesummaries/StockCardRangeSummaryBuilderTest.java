@@ -87,7 +87,7 @@ public class StockCardRangeSummaryBuilderTest {
 
     groupedStockCards = ImmutableMap.of(orderableId1, aggregate1, orderableId2, aggregate2);
 
-    pageable = new PageRequest(0, 10);
+    pageable = PageRequest.of(0, 10);
 
     when(reasonRepository.existsByTag(any())).thenReturn(true);
   }
@@ -170,22 +170,12 @@ public class StockCardRangeSummaryBuilderTest {
 
     String tag = "tag";
 
-    when(aggregate1.getAmount(tag, startDate, endDate))
-        .thenReturn(10);
-    when(aggregate2.getAmount(tag, startDate, endDate))
-        .thenReturn(20);
-    when(aggregate3.getAmount(tag, startDate, endDate))
-        .thenReturn(30);
-
-    when(aggregate3.getStockoutDays(startDate, endDate))
-        .thenReturn(3L);
-
     groupedStockCards = ImmutableMap.of(
         orderableId1, aggregate1,
         orderableId2, aggregate2,
         orderableId3, aggregate3);
 
-    pageable = new PageRequest(1, 1);
+    pageable = PageRequest.of(1, 1);
 
     Page<StockCardRangeSummaryDto> result = builder.build(
         groupedStockCards,
@@ -203,22 +193,12 @@ public class StockCardRangeSummaryBuilderTest {
 
     when(reasonRepository.existsByTag(tag2)).thenReturn(false);
 
-    when(aggregate1.getAmount(tag2, startDate, endDate))
-        .thenReturn(10);
-    when(aggregate2.getAmount(tag2, startDate, endDate))
-        .thenReturn(20);
-    when(aggregate3.getAmount(tag2, startDate, endDate))
-        .thenReturn(30);
-
-    when(aggregate3.getStockoutDays(startDate, endDate))
-        .thenReturn(3L);
-
     groupedStockCards = ImmutableMap.of(
         orderableId1, aggregate1,
         orderableId2, aggregate2,
         orderableId3, aggregate3);
 
-    pageable = new PageRequest(1, 1);
+    pageable = PageRequest.of(1, 1);
 
     Page<StockCardRangeSummaryDto> result = builder.build(
         groupedStockCards,

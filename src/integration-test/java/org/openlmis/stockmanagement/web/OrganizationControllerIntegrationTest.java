@@ -26,6 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.sourcedestination.Organization;
@@ -85,7 +86,8 @@ public class OrganizationControllerIntegrationTest extends BaseWebTest {
     //given
     Organization organization = createOrganization("Updated Org");
     organization.setId(UUID.randomUUID());
-    when(organizationRepository.findOne(organization.getId())).thenReturn(organization);
+    when(organizationRepository.findById(organization.getId()))
+        .thenReturn(Optional.of(organization));
     when(organizationRepository.save(organization)).thenReturn(organization);
 
     //when
@@ -164,7 +166,7 @@ public class OrganizationControllerIntegrationTest extends BaseWebTest {
       throws Exception {
     //given
     Organization updateOrg = createOrganization("Existing Org Name");
-    when(organizationRepository.findOne(updateOrg.getId())).thenReturn(updateOrg);
+    when(organizationRepository.findById(updateOrg.getId())).thenReturn(Optional.of(updateOrg));
     when(organizationRepository.findByName(updateOrg.getName()))
         .thenReturn(createOrganization("Existing Org Name"));
 

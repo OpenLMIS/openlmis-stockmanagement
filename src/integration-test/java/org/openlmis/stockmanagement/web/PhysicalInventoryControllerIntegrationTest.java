@@ -18,9 +18,10 @@ package org.openlmis.stockmanagement.web;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_IS_SUBMITTED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,8 +51,6 @@ import org.openlmis.stockmanagement.service.JasperTemplateService;
 import org.openlmis.stockmanagement.service.PhysicalInventoryService;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.web.servlet.view.jasperreports.JasperReportsMultiFormatView;
 
 @SuppressWarnings("PMD.TooManyMethods")
 public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrationTest {
@@ -140,8 +140,8 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
     PhysicalInventoryDto expectedInventory = generatePhysicalInventory();
 
     UUID piId = UUID.randomUUID();
-    when(physicalInventoriesRepository.findOne(piId))
-        .thenReturn(expectedInventory.toPhysicalInventoryForDraft());
+    when(physicalInventoriesRepository.findById(piId))
+        .thenReturn(Optional.of(expectedInventory.toPhysicalInventoryForDraft()));
 
     // when
     PhysicalInventoryDto response = restAssured.given()
@@ -338,14 +338,14 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
     PhysicalInventory physicalInventory = generatePhysicalInventory()
         .toPhysicalInventoryForSubmit();
     JasperTemplate template = new JasperTemplate();
+    template.setName("Test template");
 
     when(jasperTemplateService.getByName(PRINT_PI)).thenReturn(template);
-    when(physicalInventoriesRepository.findOne(physicalInventory.getId()))
-        .thenReturn(physicalInventory);
+    when(physicalInventoriesRepository.findById(physicalInventory.getId()))
+        .thenReturn(Optional.of(physicalInventory));
 
-    JasperReportsMultiFormatView view = mock(JasperReportsMultiFormatView.class);
-    when(view.getContentType()).thenReturn(MediaType.APPLICATION_PDF_VALUE);
-    when(jasperReportService.getJasperReportsView(template)).thenReturn(view);
+    when(jasperReportService.generateReport(any(JasperTemplate.class), anyMap()))
+        .thenReturn(new byte[1]);
 
     restAssured.given()
         .header(HttpHeaders.AUTHORIZATION, getTokenHeader())

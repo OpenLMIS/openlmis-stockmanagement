@@ -24,6 +24,7 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
@@ -44,6 +45,7 @@ import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.util.ReportUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,8 +59,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.jasperreports.JasperReportsMultiFormatView;
 
 @Controller
 @RequestMapping("/api/physicalInventories")
@@ -129,14 +129,14 @@ public class PhysicalInventoryController {
   @ResponseStatus(OK)
   @ResponseBody
   public PhysicalInventoryDto getPhysicalInventory(@PathVariable UUID id) {
-    PhysicalInventory foundInventory = physicalInventoryRepository.findOne(id);
-    if (foundInventory != null) {
-      physicalInventoryService.checkPermission(
-          foundInventory.getProgramId(), foundInventory.getFacilityId());
-      return PhysicalInventoryDto.from(foundInventory);
-    } else {
-      throw new ResourceNotFoundException(new Message(ERROR_PHYSICAL_INVENTORY_NOT_FOUND, id));
-    }
+    PhysicalInventory foundInventory = physicalInventoryRepository.findById(id)
+        .orElseThrow(() -> 
+            new ResourceNotFoundException(new Message(ERROR_PHYSICAL_INVENTORY_NOT_FOUND, id)));
+
+    physicalInventoryService.checkPermission(
+        foundInventory.getProgramId(), foundInventory.getFacilityId());
+
+    return PhysicalInventoryDto.from(foundInventory);
   }
 
   /**
@@ -190,7 +190,7 @@ public class PhysicalInventoryController {
    */
   @GetMapping(value = ID_PATH_VARIABLE, params = "format")
   @ResponseBody
-  public ModelAndView print(@PathVariable("id") UUID id, @RequestParam String format) {
+  public ResponseEntity<byte[]> print(@PathVariable("id") UUID id, @RequestParam String format) {
     checkPermission(id);
     checkFormat(format.toLowerCase());
 
@@ -200,18 +200,31 @@ public class PhysicalInventoryController {
           new Message(ERROR_REPORTING_TEMPLATE_NOT_FOUND_WITH_NAME, PRINT_PI));
     }
 
-    JasperReportsMultiFormatView jasperView =
-        jasperReportService.getJasperReportsView(printTemplate);
+    byte[] bytes = jasperReportService.generateReport(printTemplate, getParams(id, format));
 
-    return new ModelAndView(jasperView, getParams(id, format));
+    MediaType mediaType;
+    if ("csv".equals(format)) {
+      mediaType = new MediaType("text", "csv", StandardCharsets.UTF_8);
+    } else if ("xls".equals(format)) {
+      mediaType = new MediaType("application", "vnd.ms-excel", StandardCharsets.UTF_8);
+    } else if ("html".equals(format)) {
+      mediaType = new MediaType("text", "html", StandardCharsets.UTF_8);
+    } else {
+      mediaType = new MediaType("application", "pdf", StandardCharsets.UTF_8);
+    }
+    String fileName = printTemplate.getName().replaceAll("\\s+", "_");
+
+    return ResponseEntity
+        .ok()
+        .contentType(mediaType)
+        .header("Content-Disposition", "inline; filename=" + fileName + "." + format)
+        .body(bytes);
   }
 
   private void checkPermission(UUID id) {
-    PhysicalInventory pi = repository.findOne(id);
-    if (pi == null) {
-      throw new ResourceNotFoundException(
-          new Message(ERROR_PHYSICAL_INVENTORY_NOT_FOUND, id));
-    }
+    PhysicalInventory pi = repository.findById(id)
+        .orElseThrow(() ->
+            new ResourceNotFoundException(new Message(ERROR_PHYSICAL_INVENTORY_NOT_FOUND, id)));
     permissionService.canEditPhysicalInventory(pi.getProgramId(), pi.getFacilityId());
   }
 

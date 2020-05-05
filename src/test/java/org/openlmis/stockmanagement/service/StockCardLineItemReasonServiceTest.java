@@ -27,6 +27,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REAS
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_TYPE_CHANGED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_TYPE_MISSING;
 
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.Rule;
 import org.junit.Test;
@@ -112,7 +113,7 @@ public class StockCardLineItemReasonServiceTest {
 
     willThrowValidationMessageException(ERROR_LINE_ITEM_REASON_ID_NOT_FOUND);
 
-    when(reasonRepository.exists(reasonId)).thenReturn(false);
+    when(reasonRepository.existsById(reasonId)).thenReturn(false);
     reasonService.checkUpdateReasonIdExists(reasonId);
   }
 
@@ -121,7 +122,7 @@ public class StockCardLineItemReasonServiceTest {
     //given
     UUID reasonId = UUID.randomUUID();
 
-    when(reasonRepository.exists(reasonId)).thenReturn(true);
+    when(reasonRepository.existsById(reasonId)).thenReturn(true);
 
     reasonService.checkUpdateReasonIdExists(reasonId);
   }
@@ -191,7 +192,7 @@ public class StockCardLineItemReasonServiceTest {
     StockCardLineItemReason reason = new StockCardLineItemReasonDataBuilder().build();
 
     //when
-    when(reasonRepository.findOne(reason.getId())).thenReturn(null);
+    when(reasonRepository.findById(reason.getId())).thenReturn(Optional.empty());
 
     reasonService.saveOrUpdate(reason);
 
@@ -212,7 +213,7 @@ public class StockCardLineItemReasonServiceTest {
         .withName("def")
         .build();
 
-    when(reasonRepository.findOne(updatingReason.getId())).thenReturn(existingReason);
+    when(reasonRepository.findById(updatingReason.getId())).thenReturn(Optional.of(existingReason));
 
     //when
     reasonService.saveOrUpdate(updatingReason);
@@ -234,7 +235,7 @@ public class StockCardLineItemReasonServiceTest {
 
     willThrowValidationMessageException(ERROR_LINE_ITEM_REASON_TYPE_CHANGED);
 
-    when(reasonRepository.findOne(updatingReason.getId())).thenReturn(existingReason);
+    when(reasonRepository.findById(updatingReason.getId())).thenReturn(Optional.of(existingReason));
 
     //when
     reasonService.saveOrUpdate(updatingReason);
@@ -253,7 +254,7 @@ public class StockCardLineItemReasonServiceTest {
 
     willThrowValidationMessageException(ERROR_LINE_ITEM_REASON_CATEGORY_CHANGED);
 
-    when(reasonRepository.findOne(updatingReason.getId())).thenReturn(existingReason);
+    when(reasonRepository.findById(updatingReason.getId())).thenReturn(Optional.of(existingReason));
 
     //when
     reasonService.saveOrUpdate(updatingReason);

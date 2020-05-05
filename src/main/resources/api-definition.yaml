@@ -249,6 +249,8 @@ traits:
         responses:
           201:
             description: Stock event has been processed with no validatoin error or persistence error.
+            headers:
+              Keep-Alive:
             body:
               application/json:
                 schema: uuid
@@ -402,6 +404,8 @@ traits:
                   type: string
           responses:
               200:
+                  headers:
+                    Keep-Alive:
                   body:
                       application/json:
                           schema: stockCardReasonSummaryPage
@@ -412,6 +416,8 @@ traits:
                           schema: localizedMessage
               403:
                   description: User does not have permission to view stock cards of given facility and program.
+                  headers:
+                    Keep-Alive:
                   body:
                       application/json:
                           schema: localizedMessage
@@ -713,6 +719,8 @@ traits:
         responses:
           200:
             description: Valid reason response
+            headers:
+              Keep-Alive:
             body:
               application/json:
                 schema: validReasonAssignments
@@ -742,6 +750,8 @@ traits:
                 schema: validReasonAssignment
           201:
             description: Given reason is configured.
+            headers:
+              Keep-Alive:
             body:
               application/json:
                 schema: validReasonAssignment
@@ -784,6 +794,8 @@ traits:
         responses:
           200:
             description: Return a list of stock line item reasons.
+            headers:
+              Keep-Alive:
             body:
               application/json:
                 schema: reasons
@@ -798,6 +810,8 @@ traits:
         responses:
           201:
             description: Created a new reason.
+            headers:
+              Keep-Alive:
             body:
               application/json:
                 schema: reason
@@ -825,10 +839,14 @@ traits:
           description: Get a stock card line item reason.
           responses:
             200:
+              headers:
+                Keep-Alive:
               body:
                 application/json:
                   schema: reason
             404:
+              headers:
+                Keep-Alive:
               body:
                 application/json:
                   schema: localizedMessage
@@ -843,6 +861,8 @@ traits:
           responses:
             200:
               description: Updated a reason.
+              headers:
+                Keep-Alive:
               body:
                 application/json:
                   schema: reason
@@ -865,6 +885,8 @@ traits:
           duplicates.
         responses:
           200:
+            headers:
+              Keep-Alive:
             body:
               application/json:
                 schema: arrayOfStrings
@@ -963,6 +985,8 @@ traits:
         responses:
           200:
             description: list of physical inventories.
+            headers:
+              Keep-Alive:
             body:
               application/json:
                 schema: physicalInventories
@@ -982,6 +1006,8 @@ traits:
         responses:
           201:
             description: Draft saved.
+            headers:
+              Keep-Alive:
             body:
               application/json:
                 schema: physicalInventory
@@ -1016,6 +1042,8 @@ traits:
 
             responses:
                 200:
+                    headers:
+                      Keep-Alive:
                     body:
                       application/pdf:
                       application/json:
@@ -1039,6 +1067,8 @@ traits:
           responses:
             200:
               description: Draft saved.
+              headers:
+                Keep-Alive:
               body:
                 application/json:
                   schema: physicalInventory
@@ -1061,6 +1091,8 @@ traits:
           responses:
             204:
               description: Draft deleted.
+              headers:
+                Keep-Alive:
             400:
               description: Physical inventory is submittted.
               body:
@@ -1073,6 +1105,8 @@ traits:
                     schema: localizedMessage
             404:
               description: Physical inventory not found.
+              headers:
+                Keep-Alive:
               body:
                 application/json:
                   schema: localizedMessage

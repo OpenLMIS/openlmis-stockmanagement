@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
+import org.openlmis.stockmanagement.domain.sourcedestination.Organization;
 import org.openlmis.stockmanagement.domain.sourcedestination.SourceDestinationAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
@@ -36,6 +37,8 @@ import org.openlmis.stockmanagement.repository.SourceDestinationAssignmentReposi
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
 import org.openlmis.stockmanagement.util.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,6 +46,8 @@ import org.springframework.stereotype.Service;
 @Service
 @SuppressWarnings("PMD.TooManyMethods")
 public abstract class SourceDestinationBaseService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(SourceDestinationBaseService.class);
 
   @Autowired
   private ProgramFacilityTypeExistenceService programFacilityTypeExistenceService;
@@ -66,10 +71,10 @@ public abstract class SourceDestinationBaseService {
    */
   protected <T extends SourceDestinationAssignment> void doDelete(
       UUID assignmentId, SourceDestinationAssignmentRepository<T> repository, String errorKey) {
-    if (!repository.exists(assignmentId)) {
+    if (!repository.existsById(assignmentId)) {
       throw new ValidationMessageException(new Message(errorKey));
     }
-    repository.delete(assignmentId);
+    repository.deleteById(assignmentId);
   }
 
   /**
@@ -84,10 +89,8 @@ public abstract class SourceDestinationBaseService {
    */
   protected <T extends SourceDestinationAssignment> ValidSourceDestinationDto findById(
       UUID assignmentId, SourceDestinationAssignmentRepository<T> repository, String errorKey) {
-    SourceDestinationAssignment assignment = repository.findOne(assignmentId);
-    if (assignment == null) {
-      throw new ValidationMessageException(new Message(errorKey));
-    }
+    SourceDestinationAssignment assignment = repository.findById(assignmentId)
+        .orElseThrow(() -> new ValidationMessageException(new Message(errorKey)));
     return createAssignmentDto(assignment, null);
   }
 
@@ -151,7 +154,7 @@ public abstract class SourceDestinationBaseService {
       T assignment, String errorKey, SourceDestinationAssignmentRepository<T> repository) {
     UUID referenceId = assignment.getNode().getReferenceId();
     boolean isRefFacility = facilityRefDataService.exists(referenceId);
-    boolean isOrganization = organizationRepository.exists(referenceId);
+    boolean isOrganization = organizationRepository.existsById(referenceId);
     if (isRefFacility || isOrganization) {
       assignment.setNode(findOrCreateNode(referenceId, isRefFacility));
       return createAssignmentDto(repository.save(assignment), null);
@@ -227,7 +230,13 @@ public abstract class SourceDestinationBaseService {
       }
       return createFrom(assignment, facilityRefDataService.findOne(referenceId).getName());
     }
-    return createFrom(assignment, organizationRepository.findOne(referenceId).getName());
+    Organization org = organizationRepository.findById(referenceId).orElse(null);
+    if (null != org) {
+      return createFrom(assignment, org.getName());
+    } else {
+      LOGGER.warn("Could not find any organization matching node id {}", referenceId);
+      return createFrom(assignment, null);
+    }
   }
 
   private <T extends SourceDestinationAssignment> List<ValidSourceDestinationDto>

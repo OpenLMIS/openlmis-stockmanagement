@@ -104,10 +104,9 @@ public class PhysicalInventoryAdjustmentReasonsValidatorTest extends BaseValidat
 
   @Test(expected = ValidationMessageException.class)
   public void shouldNotPassWhenReasonIsNotValid() {
-    when(validReasonRepository
-        .findByProgramIdAndFacilityTypeIdAndReasonId(
-            any(UUID.class), any(UUID.class), any(UUID.class)))
-        .thenReturn(null);
+    stockEventDto.setLineItems(
+        Collections.singletonList(
+            generateLineItem(generateAdjustment(reasonId, 5))));
 
     validator.validate(stockEventDto);
   }

@@ -15,8 +15,8 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.util.List;
 import org.junit.Before;
@@ -85,8 +85,8 @@ public abstract class BaseValidatorTest {
 
     OAuth2Authentication authentication = mock(OAuth2Authentication.class);
 
-    when(securityContext.getAuthentication()).thenReturn(authentication);
-    when(authentication.isClientOnly()).thenReturn(true);
+    lenient().when(securityContext.getAuthentication()).thenReturn(authentication);
+    lenient().when(authentication.isClientOnly()).thenReturn(true);
   }
 
   void setContext(StockEventDto event) {
@@ -95,7 +95,7 @@ public abstract class BaseValidatorTest {
   }
 
   void setReasons(StockEventDto event, List<StockCardLineItemReason> reasons) {
-    when(reasonRepository.findByIdIn(event.getReasonIds()))
+    lenient().when(reasonRepository.findByIdIn(event.getReasonIds()))
         .thenReturn(reasons);
   }
 

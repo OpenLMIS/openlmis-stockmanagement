@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.validators;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_BOTH_PRESENT;
@@ -63,11 +64,11 @@ public class SourceDestinationAssignmentValidatorTest extends BaseValidatorTest 
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    when(validSourceAssignment.getNode()).thenReturn(node);
+    lenient().when(validSourceAssignment.getNode()).thenReturn(node);
     when(validDestinationAssignment.getNode()).thenReturn(node);
     when(node.getId()).thenReturn(UUID.randomUUID());
 
-    when(validSourceAssignmentRepository
+    lenient().when(validSourceAssignmentRepository
         .findByProgramIdAndFacilityTypeId(any(UUID.class), any(UUID.class)))
         .thenReturn(singletonList(validSourceAssignment));
 

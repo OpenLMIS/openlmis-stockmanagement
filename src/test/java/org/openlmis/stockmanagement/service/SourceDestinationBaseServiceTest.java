@@ -36,6 +36,7 @@ import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationDataB
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -176,8 +177,8 @@ public class SourceDestinationBaseServiceTest {
         createSourceAssignment(programId, facilityTypeId, createNode(sourceId, false)));
     Organization organization = new Organization();
     organization.setName(ORGANIZATION_NAME);
-    when(organizationRepository.exists(sourceId)).thenReturn(true);
-    when(organizationRepository.findOne(sourceId)).thenReturn(organization);
+    when(organizationRepository.existsById(sourceId)).thenReturn(true);
+    when(organizationRepository.findById(sourceId)).thenReturn(Optional.of(organization));
     when(nodeRepository.findByReferenceId(sourceId)).thenReturn(null);
     ValidSourceAssignment assignment = createSource(programId, facilityTypeId, sourceId);
 
@@ -200,8 +201,6 @@ public class SourceDestinationBaseServiceTest {
     UUID facilityTypeId = randomUUID();
     UUID sourceId = randomUUID();
     ValidSourceAssignment assignment = createSource(programId, facilityTypeId, sourceId);
-    when(organizationRepository.findOne(sourceId)).thenReturn(null);
-    when(nodeRepository.findByReferenceId(sourceId)).thenReturn(null);
 
     //when
     validSourceService.assignSource(assignment);
@@ -275,8 +274,8 @@ public class SourceDestinationBaseServiceTest {
         createDestinationAssignment(programId, facilityTypeId, createNode(destinationId, false)));
     Organization organization = new Organization();
     organization.setName(ORGANIZATION_NAME);
-    when(organizationRepository.exists(destinationId)).thenReturn(true);
-    when(organizationRepository.findOne(destinationId)).thenReturn(organization);
+    when(organizationRepository.existsById(destinationId)).thenReturn(true);
+    when(organizationRepository.findById(destinationId)).thenReturn(Optional.of(organization));
     when(nodeRepository.findByReferenceId(destinationId)).thenReturn(null);
     ValidDestinationAssignment assignment = createDestination(
         programId, facilityTypeId, destinationId);
@@ -301,8 +300,6 @@ public class SourceDestinationBaseServiceTest {
     UUID destinationId = randomUUID();
     ValidDestinationAssignment assignment = createDestination(
         programId, facilityTypeId, destinationId);
-    when(organizationRepository.findOne(destinationId)).thenReturn(null);
-    when(nodeRepository.findByReferenceId(destinationId)).thenReturn(null);
 
     //when
     validDestinationService.assignDestination(assignment);
@@ -575,7 +572,7 @@ public class SourceDestinationBaseServiceTest {
   public void shouldThrowExceptionWhenDeleteSourceAssignmentNotExists()
       throws Exception {
     UUID assignmentId = randomUUID();
-    when(sourceRepository.exists(assignmentId)).thenReturn(false);
+    when(sourceRepository.existsById(assignmentId)).thenReturn(false);
     validSourceService.deleteSourceAssignmentById(assignmentId);
   }
 
@@ -583,7 +580,7 @@ public class SourceDestinationBaseServiceTest {
   public void shouldThrowExceptionWhenDeleteDestinationAssignmentNotExists()
       throws Exception {
     UUID assignmentId = randomUUID();
-    when(destinationRepository.exists(assignmentId)).thenReturn(false);
+    when(destinationRepository.existsById(assignmentId)).thenReturn(false);
     validDestinationService.deleteDestinationAssignmentById(assignmentId);
   }
 
@@ -598,26 +595,26 @@ public class SourceDestinationBaseServiceTest {
   public void shouldDeleteSourceAssignmentById() throws Exception {
     //given
     UUID assignmentId = randomUUID();
-    when(sourceRepository.exists(assignmentId)).thenReturn(true);
+    when(sourceRepository.existsById(assignmentId)).thenReturn(true);
 
     //when
     validSourceService.deleteSourceAssignmentById(assignmentId);
 
     //then
-    verify(sourceRepository, times(1)).delete(assignmentId);
+    verify(sourceRepository, times(1)).deleteById(assignmentId);
   }
 
   @Test
   public void shouldDeleteDestinationAssignmentById() throws Exception {
     //given
     UUID assignmentId = randomUUID();
-    when(destinationRepository.exists(assignmentId)).thenReturn(true);
+    when(destinationRepository.existsById(assignmentId)).thenReturn(true);
 
     //when
     validDestinationService.deleteDestinationAssignmentById(assignmentId);
 
     //then
-    verify(destinationRepository, times(1)).delete(assignmentId);
+    verify(destinationRepository, times(1)).deleteById(assignmentId);
   }
 
   private Node createNode(UUID referenceId, boolean isRefDataFacility) {
@@ -694,7 +691,8 @@ public class SourceDestinationBaseServiceTest {
     Organization organization = new Organization();
     organization.setName(name);
     organization.setId(randomUUID());
-    when(organizationRepository.findOne(organization.getId())).thenReturn(organization);
+    when(organizationRepository.findById(organization.getId()))
+        .thenReturn(Optional.of(organization));
 
     Node node = new Node();
     node.setRefDataFacility(false);

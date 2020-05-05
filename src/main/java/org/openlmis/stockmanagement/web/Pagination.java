@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 public class Pagination {
@@ -44,7 +45,7 @@ public class Pagination {
    * See {@link #getPage(List, Pageable)}
    */
   public static <T> Page<T> getPage(List<T> originalList) {
-    return getPage(originalList, null);
+    return getPage(originalList, PageRequest.of(0, originalList.size()));
   }
 
   /**

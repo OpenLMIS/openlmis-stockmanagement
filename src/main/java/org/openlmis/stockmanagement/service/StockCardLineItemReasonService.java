@@ -64,7 +64,7 @@ public class StockCardLineItemReasonService {
    * @param reasonId would be updated reason's ID
    */
   public void checkUpdateReasonIdExists(UUID reasonId) {
-    if (!reasonRepository.exists(reasonId)) {
+    if (!reasonRepository.existsById(reasonId)) {
       throw new ValidationMessageException(new Message(ERROR_LINE_ITEM_REASON_ID_NOT_FOUND));
     }
   }
@@ -75,7 +75,7 @@ public class StockCardLineItemReasonService {
       return;
     }
 
-    StockCardLineItemReason foundReason = reasonRepository.findOne(reason.getId());
+    StockCardLineItemReason foundReason = reasonRepository.findById(reason.getId()).orElse(null);
 
     if (null == foundReason) {
       // a new reason but with the given id

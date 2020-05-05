@@ -15,19 +15,18 @@
 
 package org.openlmis.stockmanagement.util;
 
-import java.io.Serializable;
-import org.hibernate.engine.spi.SharedSessionContractImplementor;
-import org.hibernate.id.UUIDGenerator;
-import org.openlmis.stockmanagement.domain.BaseEntity;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
+import org.junit.Test;
 
-public class ConditionalUuidGenerator extends UUIDGenerator {
+public class PageDtoTest {
 
-  @Override
-  public Serializable generate(SharedSessionContractImplementor session, Object object) {
-    if ((((BaseEntity) object).getId()) == null) {
-      return super.generate(session, object);
-    } else {
-      return ((BaseEntity) object).getId();
-    }
+  @Test
+  public void equalsContract() {
+    EqualsVerifier
+        .forClass(PageDto.class)
+        .suppress(Warning.NONFINAL_FIELDS) // fields cannot be final
+        .verify();
   }
+
 }

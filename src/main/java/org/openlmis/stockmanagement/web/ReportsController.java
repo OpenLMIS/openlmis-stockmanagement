@@ -23,12 +23,13 @@ import org.openlmis.stockmanagement.service.PermissionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 @RequestMapping("/api")
@@ -50,10 +51,16 @@ public class ReportsController {
    */
   @RequestMapping(value = "/stockCards/{id}/print", method = GET)
   @ResponseBody
-  public ModelAndView getStockCard(@PathVariable("id") UUID stockCardId) {
-    LOGGER.info("Try to generate stock card report with id: " + stockCardId);
+  public ResponseEntity<byte[]> getStockCard(@PathVariable("id") UUID stockCardId) {
+    LOGGER.info("Try to generate stock card report with id: {}", stockCardId);
 
-    return reportService.getStockCardReportView(stockCardId);
+    byte[] report = reportService.generateStockCardReport(stockCardId);
+
+    return ResponseEntity
+        .ok()
+        .contentType(MediaType.APPLICATION_PDF)
+        .header("Content-Disposition", "inline; filename=stock_card_" + stockCardId + ".pdf")
+        .body(report);
   }
 
 
@@ -64,12 +71,19 @@ public class ReportsController {
    */
   @RequestMapping(value = "/stockCardSummaries/print", method = GET)
   @ResponseBody
-  public ModelAndView getStockCardSummaries(
+  public ResponseEntity<byte[]> getStockCardSummaries(
       @RequestParam("program") UUID program,
       @RequestParam("facility") UUID facility) {
     LOGGER.info("Try to generate stock card summaries report by program %s and facility %s.",
         program.toString(), facility.toString());
     permissionService.canViewStockCard(program, facility);
-    return reportService.getStockCardSummariesReportView(program, facility);
+    byte[] report = reportService.generateStockCardSummariesReport(program, facility);
+
+    return ResponseEntity
+        .ok()
+        .contentType(MediaType.APPLICATION_PDF)
+        .header("Content-Disposition",
+            "inline; filename=stock_card_summaries" + program + "_" + facility + ".pdf")
+        .body(report);
   }
 }
