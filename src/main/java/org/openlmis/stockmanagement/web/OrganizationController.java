@@ -113,9 +113,9 @@ public class OrganizationController {
   }
 
   private void checkUpdateIdExists(UUID id) {
-    organizationRepository.findById(id)
-        .orElseThrow(
-            () -> new ValidationMessageException(new Message(ERROR_ORGANIZATION_ID_NOT_FOUND)));
+    if (!organizationRepository.existsById(id)) {
+      throw new ValidationMessageException(new Message(ERROR_ORGANIZATION_ID_NOT_FOUND));
+    }
   }
 
   private void checkRequiredFieldsExist(Organization organization) {

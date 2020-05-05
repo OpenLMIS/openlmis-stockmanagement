@@ -86,8 +86,7 @@ public class OrganizationControllerIntegrationTest extends BaseWebTest {
     //given
     Organization organization = createOrganization("Updated Org");
     organization.setId(UUID.randomUUID());
-    when(organizationRepository.findById(organization.getId()))
-        .thenReturn(Optional.of(organization));
+    when(organizationRepository.existsById(organization.getId())).thenReturn(true);
     when(organizationRepository.save(organization)).thenReturn(organization);
 
     //when
