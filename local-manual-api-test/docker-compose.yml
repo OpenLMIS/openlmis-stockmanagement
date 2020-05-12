@@ -23,7 +23,7 @@ services:
     depends_on: [consul]
 
   stockmanagement:
-    image: openlmis/dev:4.2
+    image: openlmis/dev:5.2
     ports:
       - "5005:5005"
       - "8080:8080"
@@ -48,7 +48,7 @@ services:
     depends_on: [consul,log,db]
 
   db:
-    image: openlmis/postgres:9.6-postgis
+    image: openlmis/postgres:9.6-debezium
     ports:
       - "5432:5432"
     env_file: .manual-api-test-env
