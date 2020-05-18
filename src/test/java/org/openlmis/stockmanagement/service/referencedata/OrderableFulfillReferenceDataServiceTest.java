@@ -61,8 +61,6 @@ public class OrderableFulfillReferenceDataServiceTest {
   private OrderableFulfillReferenceDataService service;
 
   private UUID id = UUID.randomUUID();
-  private UUID facilityId = UUID.randomUUID();
-  private UUID programId = UUID.randomUUID();
 
   @Before
   public void setUp() {
@@ -88,24 +86,6 @@ public class OrderableFulfillReferenceDataServiceTest {
         .thenReturn(map);
 
     Map<UUID, OrderableFulfillDto> result = service.findByIds(Collections.singletonList(id));
-
-    assertEquals(result, map);
-  }
-
-  @Test
-  public void shouldReturnMapOfOrderableFulfillsFoundByFacilityIdAndProgramId() {
-    Map<UUID, OrderableFulfillDto> map = new HashMap<>();
-    map.put(UUID.randomUUID(), new OrderableFulfillDtoDataBuilder().build());
-
-    doReturn(new ResponseEntity<>(map, HttpStatus.OK))
-        .when(restTemplate)
-        .exchange(any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(Map.class));
-
-    when(objectMapper.convertValue(any(Object.class), any(JavaType.class)))
-        .thenReturn(map);
-
-    Map<UUID, OrderableFulfillDto> result = service
-        .findByFacilityIdProgramId(facilityId, programId);
 
     assertEquals(result, map);
   }

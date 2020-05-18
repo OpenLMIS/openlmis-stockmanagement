@@ -24,6 +24,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
 
 @AllArgsConstructor
@@ -31,7 +32,9 @@ import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
 @Getter
 @Setter
 public class StockCardSummaries {
+  private List<OrderableDto> pageOfApprovedProducts;
   private List<StockCard> stockCardsForFulfillOrderables;
   private Map<UUID, OrderableFulfillDto> orderableFulfillMap;
   private LocalDate asOfDate;
+  private Long totalElements;
 }

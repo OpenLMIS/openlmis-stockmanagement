@@ -11,6 +11,9 @@ New functionality added in a backwards-compatible manner:
   * Fix integration tests.
   * API definitions require "Keep-Alive" header for web integration tests.
 
+Bug fixes:
+* [OLMIS-6853](https://openlmis.atlassian.net/browse/OLMIS-6853): Fixed missing products by reverting OLMIS-6614
+
 5.0.2 / 2020-04-14
 ==================
 

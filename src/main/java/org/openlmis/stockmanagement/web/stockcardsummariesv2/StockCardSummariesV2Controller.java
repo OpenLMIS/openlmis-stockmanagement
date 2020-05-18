@@ -67,6 +67,7 @@ public class StockCardSummariesV2Controller {
 
     profiler.start("TO_DTO");
     List<StockCardSummaryV2Dto> dtos = stockCardSummariesV2DtoBuilder.build(
+        summaries.getPageOfApprovedProducts(),
         summaries.getStockCardsForFulfillOrderables(),
         summaries.getOrderableFulfillMap(),
         params.isNonEmptyOnly());

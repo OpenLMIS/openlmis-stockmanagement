@@ -28,6 +28,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
@@ -50,12 +51,15 @@ import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.dto.StockCardDto;
+import org.openlmis.stockmanagement.dto.referencedata.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderablesAggregator;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
+import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableFulfillReferenceDataService;
@@ -71,6 +75,9 @@ import org.openlmis.stockmanagement.util.Message;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StockCardSummariesServiceTest {
+
+  @Mock
+  private ApprovedProductReferenceDataService approvedProductReferenceDataService;
 
   @Mock
   private OrderableFulfillReferenceDataService orderableFulfillReferenceDataService;
@@ -197,19 +204,29 @@ public class StockCardSummariesServiceTest {
     OrderableDto orderable2 = new OrderableDtoDataBuilder().build();
     OrderableDto orderable3 = new OrderableDtoDataBuilder().build();
 
-    Map<UUID, OrderableFulfillDto> fulfillMap = new HashMap<>();
-    fulfillMap.put(orderable.getId(), new OrderableFulfillDtoDataBuilder()
-        .withCanFulfillForMe(asList(orderable2.getId(), orderable3.getId())).build());
-    fulfillMap.put(orderable2.getId(), new OrderableFulfillDtoDataBuilder()
-        .withCanFulfillForMe(asList(orderable.getId(), orderable3.getId())).build());
-    fulfillMap.put(orderable3.getId(), new OrderableFulfillDtoDataBuilder().build());
+    OrderablesAggregator orderablesAggregator = new OrderablesAggregator(asList(
+            new ApprovedProductDto(orderable),
+            new ApprovedProductDto(orderable2),
+            new ApprovedProductDto(orderable3)
+    ));
 
     StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParamsDataBuilder()
         .withOrderableIds(asList(orderable.getId(), orderable2.getId()))
         .build();
 
+    when(approvedProductReferenceDataService
+        .getApprovedProducts(eq(params.getFacilityId()), eq(params.getProgramId()),
+            eq(params.getOrderableIds())))
+        .thenReturn(orderablesAggregator);
+
+    Map<UUID, OrderableFulfillDto> fulfillMap = new HashMap<>();
+    fulfillMap.put(orderable.getId(), new OrderableFulfillDtoDataBuilder()
+        .withCanFulfillForMe(asList(orderable2.getId(), orderable3.getId())).build());
+    fulfillMap.put(orderable2.getId(), new OrderableFulfillDtoDataBuilder()
+        .withCanFulfillForMe(asList(orderable.getId(), orderable3.getId())).build());
+
     when(orderableFulfillReferenceDataService
-        .findByFacilityIdProgramId(params.getFacilityId(), params.getProgramId()))
+        .findByIds(asList(orderable.getId(), orderable2.getId(), orderable3.getId())))
         .thenReturn(fulfillMap);
 
     StockEvent event = new StockEventDataBuilder()
@@ -236,7 +253,7 @@ public class StockCardSummariesServiceTest {
 
     StockCardSummaries result = stockCardSummariesService.findStockCards(params);
 
-    assertEquals(3, result.getOrderableFulfillMap().size());
+    assertEquals(3, result.getPageOfApprovedProducts().size());
   }
 
   @Test(expected = PermissionMessageException.class)

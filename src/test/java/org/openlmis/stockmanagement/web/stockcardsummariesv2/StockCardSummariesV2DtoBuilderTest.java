@@ -112,7 +112,8 @@ public class StockCardSummariesV2DtoBuilderTest {
     fulfillMap.put(orderable2.getId(), orderableFulfill2);
     fulfillMap.put(orderable3.getId(), orderableFulfill3);
 
-    List<StockCardSummaryV2Dto> result = builder.build(stockCards, fulfillMap, false);
+    List<StockCardSummaryV2Dto> result = builder.build(asList(orderable1, orderable2, orderable3),
+        stockCards, fulfillMap, false);
 
     StockCardSummaryV2Dto summary1 = new StockCardSummaryV2Dto(
         new ObjectReferenceDtoDataBuilder()
@@ -157,7 +158,8 @@ public class StockCardSummariesV2DtoBuilderTest {
     fulfillMap.put(orderable2.getId(), orderableFulfill2);
     fulfillMap.put(orderable3.getId(), orderableFulfill3);
 
-    List<StockCardSummaryV2Dto> result = builder.build(stockCards, fulfillMap, false);
+    List<StockCardSummaryV2Dto> result = builder.build(asList(orderable1, orderable2, orderable3),
+        stockCards, fulfillMap, false);
 
     StockCardSummaryV2Dto summary1 = new StockCardSummaryV2Dto(
         new ObjectReferenceDtoDataBuilder()
@@ -207,7 +209,8 @@ public class StockCardSummariesV2DtoBuilderTest {
     fulfillMap.put(orderable2.getId(), orderableFulfill2);
     fulfillMap.put(orderable3.getId(), orderableFulfill3);
 
-    List<StockCardSummaryV2Dto> result = builder.build(stockCards, fulfillMap, false);
+    List<StockCardSummaryV2Dto> result = builder.build(asList(orderable2, orderable3),
+        stockCards, fulfillMap, false);
 
     StockCardSummaryV2Dto summary2 = new StockCardSummaryV2Dto(
         new ObjectReferenceDtoDataBuilder()
@@ -244,7 +247,8 @@ public class StockCardSummariesV2DtoBuilderTest {
     fulfillMap.put(orderable3.getId(), orderableFulfill3);
     fulfillMap.put(orderable4.getId(), orderableFulfill4);
 
-    List<StockCardSummaryV2Dto> result = builder.build(stockCards, fulfillMap, true);
+    List<StockCardSummaryV2Dto> result = builder.build(asList(orderable3, orderable4),
+        stockCards, fulfillMap, true);
 
     StockCardSummaryV2Dto summary1 = new StockCardSummaryV2Dto(
         new ObjectReferenceDtoDataBuilder()
@@ -275,7 +279,8 @@ public class StockCardSummariesV2DtoBuilderTest {
     fulfillMap.put(orderable3.getId(), orderableFulfill3);
     fulfillMap.put(orderable4.getId(), orderableFulfill4);
 
-    List<StockCardSummaryV2Dto> result = builder.build(stockCards, fulfillMap, false);
+    List<StockCardSummaryV2Dto> result = builder.build(asList(orderable3, orderable4),
+        stockCards, fulfillMap, false);
 
     StockCardSummaryV2Dto summary1 = new StockCardSummaryV2Dto(
         new ObjectReferenceDtoDataBuilder()

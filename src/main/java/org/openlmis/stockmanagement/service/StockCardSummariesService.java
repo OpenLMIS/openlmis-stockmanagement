@@ -43,8 +43,10 @@ import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderablesAggregator;
 import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
+import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableFulfillReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
@@ -78,6 +80,9 @@ public class StockCardSummariesService extends StockCardBaseService {
   private LotReferenceDataService lotReferenceDataService;
 
   @Autowired
+  private ApprovedProductReferenceDataService approvedProductReferenceDataService;
+
+  @Autowired
   private StockCardRepository stockCardRepository;
 
   @Autowired
@@ -85,6 +90,7 @@ public class StockCardSummariesService extends StockCardBaseService {
 
   @Autowired
   private PermissionService permissionService;
+  
 
   /**
    * Get a map of stock cards assigned to orderable ids.
@@ -98,21 +104,15 @@ public class StockCardSummariesService extends StockCardBaseService {
    */
   public Map<UUID, StockCardAggregate> getGroupedStockCards(UUID programId, UUID facilityId,
       Set<UUID> orderableIds, LocalDate startDate, LocalDate endDate) {
-    Profiler profiler = new Profiler("GET_GROUPED_STOCK_CARDS");
-    profiler.setLogger(LOGGER);
-
-    profiler.start("FIND_STOCK_CARD_BY_PROGRAM_AND_FACILITY");
     List<StockCard> stockCards = calculatedStockOnHandService
         .getStockCardsWithStockOnHand(programId, facilityId);
 
-    profiler.start("FIND_ORDERABLE_FULFILL_BY_IDS");
     Map<UUID, OrderableFulfillDto> orderableFulfillMap =
         orderableFulfillService.findByIds(stockCards.stream()
             .map(StockCard::getOrderableId)
             .collect(toSet()));
 
-    profiler.start("ASSIGN_ORDERABLES_TO_STOCK_CARD");
-    Map<UUID, StockCardAggregate> stockCardAggregateMap = stockCards.stream()
+    return stockCards.stream()
         .map(stockCard -> assignOrderableToStockCard(
             stockCard, orderableFulfillMap, orderableIds, startDate, endDate))
         .filter(pair -> null != pair.getLeft())
@@ -123,8 +123,6 @@ public class StockCardSummariesService extends StockCardBaseService {
               aggregate1.getStockCards().addAll(aggregate2.getStockCards());
               return aggregate1;
             }));
-    profiler.stop().log();
-    return stockCardAggregateMap;
   }
 
   /**
@@ -140,9 +138,14 @@ public class StockCardSummariesService extends StockCardBaseService {
     profiler.start("VALIDATE_VIEW_RIGHTS");
     permissionService.canViewStockCard(params.getProgramId(), params.getFacilityId());
 
-    profiler.start("FIND_ORDERABLE_FULFILL_BY_FACILITY_AND_PROGRAM");
-    Map<UUID, OrderableFulfillDto> orderableFulfillMap = orderableFulfillService
-        .findByFacilityIdProgramId(params.getFacilityId(), params.getProgramId());
+    profiler.start("GET_APPROVED_PRODUCTS");
+    OrderablesAggregator approvedProducts = approvedProductReferenceDataService
+        .getApprovedProducts(params.getFacilityId(), params.getProgramId(),
+            params.getOrderableIds());
+
+    profiler.start("FIND_ORDERABLE_FULFILL_BY_ID");
+    Map<UUID, OrderableFulfillDto> orderableFulfillMap = orderableFulfillService.findByIds(
+        approvedProducts.getIdentifiers());
 
     profiler.start("FIND_STOCK_CARD_BY_PROGRAM_AND_FACILITY");
     
@@ -150,9 +153,10 @@ public class StockCardSummariesService extends StockCardBaseService {
         .getStockCardsWithStockOnHand(params.getProgramId(), params.getFacilityId(),
                                         params.getAsOfDate());
 
+    Page<OrderableDto> orderablesPage = approvedProducts.getOrderablesPage();
     StockCardSummaries result = new StockCardSummaries(
-            stockCards, orderableFulfillMap,
-            params.getAsOfDate());
+            orderablesPage.getContent(), stockCards, orderableFulfillMap,
+            params.getAsOfDate(), orderablesPage.getTotalElements());
     profiler.stop().log();
     return result;
   }
