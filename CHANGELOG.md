@@ -1,3 +1,9 @@
+5.1.1 / WIP
+==================
+
+Bug fixes:
+* [OLMIS-6860](https://openlmis.atlassian.net/browse/OLMIS-6860): Fixed duplicated Physical Inventory Line Items by reverting OLMIS-6574
+
 5.1.0 / 2020-05-20
 ==================
 
