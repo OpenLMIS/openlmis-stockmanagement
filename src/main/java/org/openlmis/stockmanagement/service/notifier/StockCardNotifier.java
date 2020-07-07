@@ -68,7 +68,7 @@ public class StockCardNotifier extends BaseNotifier {
 
     profiler.start("NOTIFY_RECIPIENTS");
     for (UserDto recipient : recipients) {
-      if (recipient.getHomeFacilityId().equals(stockCard.getFacilityId())) {
+      if (stockCard.getFacilityId().equals(recipient.getHomeFacilityId())) {
         valuesMap.put("username", recipient.getUsername());
         XLOGGER.debug("Recipient username = {}", recipient.getUsername());
         notificationService.notify(recipient,

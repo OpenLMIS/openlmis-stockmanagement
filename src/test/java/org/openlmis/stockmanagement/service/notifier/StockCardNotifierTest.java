@@ -101,7 +101,18 @@ public class StockCardNotifierTest {
     
     mockMessages(); // for BaseNotifier.getMessage()
   }
-  
+
+  @Test
+  public void shouldNotThrowErrorDuringNotificationWhenSomeUsersHasNoHomeFacility() {
+    UserDto editorWithoutHomeFacility = mock(UserDto.class);
+    when(editorWithoutHomeFacility.getHomeFacilityId()).thenReturn(null);
+
+    when(supervisingUsersReferenceDataService.findAll(supervisoryNodeId, rightId, programId))
+        .thenReturn(Collections.singletonList(editorWithoutHomeFacility));
+
+    stockCardNotifier.notifyStockEditors(stockCard, rightId, params);
+  }
+
   @Test
   public void notifyStockEditorsShouldNotifyStockEditors() {
     // when
