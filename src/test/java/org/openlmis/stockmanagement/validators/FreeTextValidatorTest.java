@@ -44,7 +44,7 @@ public class FreeTextValidatorTest extends BaseValidatorTest {
   public ExpectedException exception = ExpectedException.none();
 
   @InjectMocks
-  private FreeTextValidator freeTextValidator;
+  private DefaultFreeTextValidator freeTextValidator;
 
   @Before
   public void setUp() throws Exception {

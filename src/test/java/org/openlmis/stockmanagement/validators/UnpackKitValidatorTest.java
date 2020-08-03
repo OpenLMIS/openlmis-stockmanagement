@@ -59,7 +59,7 @@ public class UnpackKitValidatorTest {
   private StockEventProcessContext context;
 
   @InjectMocks
-  private UnpackKitValidator validator;
+  private DefaultUnpackKitValidator validator;
 
 
   private OrderableDto kitDto;

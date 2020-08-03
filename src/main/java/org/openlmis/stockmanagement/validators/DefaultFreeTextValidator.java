@@ -26,6 +26,7 @@ import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.extension.point.FreeTextValidator;
 import org.openlmis.stockmanagement.util.Message;
 import org.slf4j.profiler.Profiler;
 import org.springframework.stereotype.Component;
@@ -35,8 +36,8 @@ import org.springframework.stereotype.Component;
  * text is only allowed when reason id is present and the reason allows free text. Same case for
  * source free text and destination free text.
  */
-@Component(value = "FreeTextValidator")
-public class FreeTextValidator implements StockEventValidator {
+@Component(value = "DefaultFreeTextValidator")
+public class DefaultFreeTextValidator implements FreeTextValidator {
 
   @Override
   public void validate(StockEventDto stockEventDto) {
@@ -78,7 +79,7 @@ public class FreeTextValidator implements StockEventValidator {
   }
 
   private void checkNodeFreeText(StockEventDto event, UUID nodeId,
-                                 String freeText, String errorKey) {
+      String freeText, String errorKey) {
     if (nodeId != null) {
       Node node = event.getContext().findNode(nodeId);
 

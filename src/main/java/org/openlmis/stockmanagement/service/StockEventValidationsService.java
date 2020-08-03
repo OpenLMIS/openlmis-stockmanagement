@@ -17,6 +17,10 @@ package org.openlmis.stockmanagement.service;
 
 import java.util.List;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.extension.ExtensionManager;
+import org.openlmis.stockmanagement.extension.point.AdjustmentReasonValidator;
+import org.openlmis.stockmanagement.extension.point.FreeTextValidator;
+import org.openlmis.stockmanagement.extension.point.UnpackKitValidator;
 import org.openlmis.stockmanagement.validators.StockEventValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +36,9 @@ public class StockEventValidationsService {
   @Autowired
   private List<StockEventValidator> stockEventValidators;
 
+  @Autowired
+  private ExtensionManager extensionManager;
+
   /**
    * Validate stock event with permission service and all validators.
    *
@@ -41,6 +48,17 @@ public class StockEventValidationsService {
     for (StockEventValidator validator : stockEventValidators) {
       validator.validate(stockEventDto);
     }
+
+    AdjustmentReasonValidator adjustmentReasonValidator = extensionManager.getExtension(
+        AdjustmentReasonValidator.POINT_ID, AdjustmentReasonValidator.class);
+    FreeTextValidator freeTextValidator = extensionManager.getExtension(
+        FreeTextValidator.POINT_ID, FreeTextValidator.class);
+    UnpackKitValidator unpackKitValidator = extensionManager.getExtension(
+        UnpackKitValidator.POINT_ID, UnpackKitValidator.class);
+
+    adjustmentReasonValidator.validate(stockEventDto);
+    freeTextValidator.validate(stockEventDto);
+    unpackKitValidator.validate(stockEventDto);
   }
 
 }

@@ -32,7 +32,7 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
-import org.openlmis.stockmanagement.validators.AdjustmentReasonValidator;
+import org.openlmis.stockmanagement.validators.DefaultAdjustmentReasonValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -42,7 +42,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class AdjustmentReasonValidatorIntegrationTest extends BaseIntegrationTest {
 
   @Autowired
-  private AdjustmentReasonValidator adjustmentReasonValidator;
+  private DefaultAdjustmentReasonValidator adjustmentReasonValidator;
 
   @Autowired
   private StockCardLineItemReasonRepository reasonRepository;

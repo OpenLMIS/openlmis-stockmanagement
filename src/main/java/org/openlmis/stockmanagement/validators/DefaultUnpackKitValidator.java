@@ -32,6 +32,7 @@ import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableChildDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.extension.point.UnpackKitValidator;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
@@ -39,8 +40,8 @@ import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component("UnpackKitValidator")
-public class UnpackKitValidator implements StockEventValidator {
+@Component("DefaultUnpackKitValidator")
+public class DefaultUnpackKitValidator implements UnpackKitValidator {
 
   @Autowired
   OrderableReferenceDataService orderableReferenceDataService;

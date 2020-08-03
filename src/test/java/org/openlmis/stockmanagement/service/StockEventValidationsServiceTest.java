@@ -21,17 +21,23 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.extension.ExtensionManager;
+import org.openlmis.stockmanagement.extension.point.AdjustmentReasonValidator;
+import org.openlmis.stockmanagement.extension.point.FreeTextValidator;
+import org.openlmis.stockmanagement.extension.point.UnpackKitValidator;
 import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
-import org.openlmis.stockmanagement.validators.AdjustmentReasonValidator;
 import org.openlmis.stockmanagement.validators.ApprovedOrderableValidator;
-import org.openlmis.stockmanagement.validators.FreeTextValidator;
+import org.openlmis.stockmanagement.validators.DefaultAdjustmentReasonValidator;
+import org.openlmis.stockmanagement.validators.DefaultFreeTextValidator;
+import org.openlmis.stockmanagement.validators.DefaultUnpackKitValidator;
 import org.openlmis.stockmanagement.validators.LotValidator;
 import org.openlmis.stockmanagement.validators.MandatoryFieldsValidator;
 import org.openlmis.stockmanagement.validators.OrderableLotDuplicationValidator;
@@ -43,7 +49,6 @@ import org.openlmis.stockmanagement.validators.SourceDestinationAssignmentValida
 import org.openlmis.stockmanagement.validators.SourceDestinationGeoLevelAffinityValidator;
 import org.openlmis.stockmanagement.validators.StockEventValidator;
 import org.openlmis.stockmanagement.validators.StockEventVvmValidator;
-import org.openlmis.stockmanagement.validators.UnpackKitValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -78,10 +83,10 @@ public class StockEventValidationsServiceTest {
   private ReceiveIssueReasonValidator receiveIssueReasonValidator;
 
   @MockBean
-  private AdjustmentReasonValidator adjustmentReasonValidator;
+  private DefaultAdjustmentReasonValidator adjustmentReasonValidator;
 
   @MockBean
-  private FreeTextValidator freeTextValidator;
+  private DefaultFreeTextValidator freeTextValidator;
 
   @MockBean
   private QuantityValidator quantityValidator;
@@ -99,10 +104,13 @@ public class StockEventValidationsServiceTest {
   private PhysicalInventoryAdjustmentReasonsValidator physicalInventoryReasonsValidator;
 
   @MockBean
-  private UnpackKitValidator unpackKitValidator;
+  private DefaultUnpackKitValidator unpackKitValidator;
 
   @MockBean
   private SourceDestinationGeoLevelAffinityValidator sourceDestinationGeoLeveLAffinityValidator;
+
+  @MockBean
+  private ExtensionManager extensionManager;
 
   @Before
   public void setUp() throws Exception {
@@ -122,6 +130,15 @@ public class StockEventValidationsServiceTest {
     doNothing().when(reasonExistenceValidator).validate(any(StockEventDto.class));
     doNothing().when(physicalInventoryReasonsValidator).validate(any(StockEventDto.class));
     doNothing().when(unpackKitValidator).validate(any(StockEventDto.class));
+    when(extensionManager
+        .getExtension(AdjustmentReasonValidator.POINT_ID, AdjustmentReasonValidator.class))
+        .thenReturn(adjustmentReasonValidator);
+    when(extensionManager
+        .getExtension(FreeTextValidator.POINT_ID, FreeTextValidator.class))
+        .thenReturn(freeTextValidator);
+    when(extensionManager
+        .getExtension(UnpackKitValidator.POINT_ID, UnpackKitValidator.class))
+        .thenReturn(unpackKitValidator);
   }
 
   @Test
