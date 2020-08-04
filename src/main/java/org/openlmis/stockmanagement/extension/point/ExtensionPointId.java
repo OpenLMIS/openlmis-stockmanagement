@@ -21,4 +21,5 @@ public final class ExtensionPointId {
   public static final String FREE_TEXT_POINT_ID = "FreeTextValidator";
   public static final String UNPACK_KIT_POINT_ID = "UnpackKitValidator";
 
+  private ExtensionPointId() { }
 }
