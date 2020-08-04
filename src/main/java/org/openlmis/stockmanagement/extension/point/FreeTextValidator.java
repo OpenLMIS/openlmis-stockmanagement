@@ -19,5 +19,4 @@ import org.openlmis.stockmanagement.validators.StockEventValidator;
 
 public interface FreeTextValidator extends StockEventValidator {
 
-  String POINT_ID = "FreeTextValidator";
 }

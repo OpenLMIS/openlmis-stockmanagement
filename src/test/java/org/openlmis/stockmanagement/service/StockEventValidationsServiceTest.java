@@ -30,6 +30,7 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.extension.ExtensionManager;
 import org.openlmis.stockmanagement.extension.point.AdjustmentReasonValidator;
+import org.openlmis.stockmanagement.extension.point.ExtensionPointId;
 import org.openlmis.stockmanagement.extension.point.FreeTextValidator;
 import org.openlmis.stockmanagement.extension.point.UnpackKitValidator;
 import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
@@ -47,7 +48,6 @@ import org.openlmis.stockmanagement.validators.ReasonExistenceValidator;
 import org.openlmis.stockmanagement.validators.ReceiveIssueReasonValidator;
 import org.openlmis.stockmanagement.validators.SourceDestinationAssignmentValidator;
 import org.openlmis.stockmanagement.validators.SourceDestinationGeoLevelAffinityValidator;
-import org.openlmis.stockmanagement.validators.StockEventValidator;
 import org.openlmis.stockmanagement.validators.StockEventVvmValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -60,12 +60,6 @@ public class StockEventValidationsServiceTest {
 
   @Autowired
   private StockEventValidationsService stockEventValidationsService;
-
-  @MockBean(name = "v1")
-  private StockEventValidator validator1;
-
-  @MockBean(name = "v2")
-  private StockEventValidator validator2;
 
   @MockBean
   private StockEventVvmValidator stockEventVvmValidator;
@@ -131,13 +125,13 @@ public class StockEventValidationsServiceTest {
     doNothing().when(physicalInventoryReasonsValidator).validate(any(StockEventDto.class));
     doNothing().when(unpackKitValidator).validate(any(StockEventDto.class));
     when(extensionManager
-        .getExtension(AdjustmentReasonValidator.POINT_ID, AdjustmentReasonValidator.class))
+        .getExtension(ExtensionPointId.ADJUSTMENT_REASON_POINT_ID, AdjustmentReasonValidator.class))
         .thenReturn(adjustmentReasonValidator);
     when(extensionManager
-        .getExtension(FreeTextValidator.POINT_ID, FreeTextValidator.class))
+        .getExtension(ExtensionPointId.FREE_TEXT_POINT_ID, FreeTextValidator.class))
         .thenReturn(freeTextValidator);
     when(extensionManager
-        .getExtension(UnpackKitValidator.POINT_ID, UnpackKitValidator.class))
+        .getExtension(ExtensionPointId.UNPACK_KIT_POINT_ID, UnpackKitValidator.class))
         .thenReturn(unpackKitValidator);
   }
 
@@ -150,8 +144,20 @@ public class StockEventValidationsServiceTest {
     stockEventValidationsService.validate(stockEventDto);
 
     //then:
-    verify(validator1, times(1)).validate(stockEventDto);
-    verify(validator2, times(1)).validate(stockEventDto);
+    verify(stockEventVvmValidator, times(1)).validate(stockEventDto);
+    verify(approvedOrderableValidator, times(1)).validate(stockEventDto);
+    verify(sourceDestinationAssignmentValidator, times(1)).validate(stockEventDto);
+    verify(sourceDestinationGeoLeveLAffinityValidator, times(1)).validate(stockEventDto);
+    verify(mandatoryFieldsValidator, times(1)).validate(stockEventDto);
+    verify(receiveIssueReasonValidator, times(1)).validate(stockEventDto);
+    verify(quantityValidator, times(1)).validate(stockEventDto);
+    verify(lotValidator, times(1)).validate(stockEventDto);
+    verify(orderableLotDuplicationValidator, times(1)).validate(stockEventDto);
+    verify(reasonExistenceValidator, times(1)).validate(stockEventDto);
+    verify(physicalInventoryReasonsValidator, times(1)).validate(stockEventDto);
+    verify(adjustmentReasonValidator, times(1)).validate(stockEventDto);
+    verify(freeTextValidator, times(1)).validate(stockEventDto);
+    verify(unpackKitValidator, times(1)).validate(stockEventDto);
   }
 
   @Test
@@ -159,15 +165,15 @@ public class StockEventValidationsServiceTest {
     //given
     StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
     doThrow(new ValidationMessageException(new Message("some error")))
-        .when(validator1).validate(stockEventDto);
+        .when(approvedOrderableValidator).validate(stockEventDto);
 
     //when:
     try {
       stockEventValidationsService.validate(stockEventDto);
     } catch (ValidationMessageException ex) {
       //then:
-      verify(validator1, times(1)).validate(stockEventDto);
-      verify(validator2, never()).validate(stockEventDto);
+      verify(approvedOrderableValidator, times(1)).validate(stockEventDto);
+      verify(lotValidator, never()).validate(stockEventDto);
     }
   }
 

@@ -15,8 +15,10 @@
 
 package org.openlmis.stockmanagement.extension.point;
 
-import org.openlmis.stockmanagement.validators.StockEventValidator;
+public final class ExtensionPointId {
 
-public interface AdjustmentReasonValidator extends StockEventValidator {
+  public static final String ADJUSTMENT_REASON_POINT_ID = "AdjustmentReasonValidator";
+  public static final String FREE_TEXT_POINT_ID = "FreeTextValidator";
+  public static final String UNPACK_KIT_POINT_ID = "UnpackKitValidator";
 
 }

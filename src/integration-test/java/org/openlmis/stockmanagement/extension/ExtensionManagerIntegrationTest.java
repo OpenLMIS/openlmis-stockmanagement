@@ -21,6 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.extension.point.AdjustmentReasonValidator;
+import org.openlmis.stockmanagement.extension.point.ExtensionPointId;
 import org.openlmis.stockmanagement.validators.DefaultAdjustmentReasonValidator;
 import org.openlmis.stockmanagement.validators.StockEventValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,7 @@ public class ExtensionManagerIntegrationTest {
   @Before
   public void setUp() {
     extensions = new HashMap<>();
-    extensions.put(AdjustmentReasonValidator.POINT_ID, extensionId);
+    extensions.put(ExtensionPointId.ADJUSTMENT_REASON_POINT_ID, extensionId);
     extensions.put(invalidPointId, invalidExtensionId);
     extensionManager.setExtensions(extensions);
   }
@@ -55,7 +56,7 @@ public class ExtensionManagerIntegrationTest {
   @Test
   public void testShouldReturnExtensionWithGivenIdAndClass() {
     StockEventValidator orderQuantity = (StockEventValidator) extensionManager
-        .getExtension(AdjustmentReasonValidator.POINT_ID, AdjustmentReasonValidator.class);
+        .getExtension(ExtensionPointId.ADJUSTMENT_REASON_POINT_ID, AdjustmentReasonValidator.class);
     Assert.assertEquals(orderQuantity.getClass(), DefaultAdjustmentReasonValidator.class);
   }
 

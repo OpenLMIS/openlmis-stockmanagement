@@ -19,5 +19,4 @@ import org.openlmis.stockmanagement.validators.StockEventValidator;
 
 public interface UnpackKitValidator extends StockEventValidator {
 
-  String POINT_ID = "UnpackKitValidator";
 }

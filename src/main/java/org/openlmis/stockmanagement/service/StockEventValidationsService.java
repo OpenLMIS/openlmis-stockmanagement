@@ -15,13 +15,23 @@
 
 package org.openlmis.stockmanagement.service;
 
-import java.util.List;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.extension.ExtensionManager;
 import org.openlmis.stockmanagement.extension.point.AdjustmentReasonValidator;
+import org.openlmis.stockmanagement.extension.point.ExtensionPointId;
 import org.openlmis.stockmanagement.extension.point.FreeTextValidator;
 import org.openlmis.stockmanagement.extension.point.UnpackKitValidator;
-import org.openlmis.stockmanagement.validators.StockEventValidator;
+import org.openlmis.stockmanagement.validators.ApprovedOrderableValidator;
+import org.openlmis.stockmanagement.validators.LotValidator;
+import org.openlmis.stockmanagement.validators.MandatoryFieldsValidator;
+import org.openlmis.stockmanagement.validators.OrderableLotDuplicationValidator;
+import org.openlmis.stockmanagement.validators.PhysicalInventoryAdjustmentReasonsValidator;
+import org.openlmis.stockmanagement.validators.QuantityValidator;
+import org.openlmis.stockmanagement.validators.ReasonExistenceValidator;
+import org.openlmis.stockmanagement.validators.ReceiveIssueReasonValidator;
+import org.openlmis.stockmanagement.validators.SourceDestinationAssignmentValidator;
+import org.openlmis.stockmanagement.validators.SourceDestinationGeoLevelAffinityValidator;
+import org.openlmis.stockmanagement.validators.StockEventVvmValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +44,37 @@ import org.springframework.stereotype.Service;
 public class StockEventValidationsService {
 
   @Autowired
-  private List<StockEventValidator> stockEventValidators;
+  private ApprovedOrderableValidator approvedOrderableValidator;
+
+  @Autowired
+  private LotValidator lotValidator;
+
+  @Autowired
+  private MandatoryFieldsValidator mandatoryFieldsValidator;
+
+  @Autowired
+  private OrderableLotDuplicationValidator orderableLotDuplicationValidator;
+
+  @Autowired
+  private PhysicalInventoryAdjustmentReasonsValidator physicalInventoryAdjustmentReasonsValidator;
+
+  @Autowired
+  private QuantityValidator quantityValidator;
+
+  @Autowired
+  private ReasonExistenceValidator existenceValidator;
+
+  @Autowired
+  private ReceiveIssueReasonValidator receiveIssueReasonValidator;
+
+  @Autowired
+  private SourceDestinationAssignmentValidator destinationAssignmentValidator;
+
+  @Autowired
+  private SourceDestinationGeoLevelAffinityValidator destinationGeoLevelAffinityValidator;
+
+  @Autowired
+  private StockEventVvmValidator stockEventVvmValidator;
 
   @Autowired
   private ExtensionManager extensionManager;
@@ -45,16 +85,24 @@ public class StockEventValidationsService {
    * @param stockEventDto the event to be validated.
    */
   public void validate(StockEventDto stockEventDto) {
-    for (StockEventValidator validator : stockEventValidators) {
-      validator.validate(stockEventDto);
-    }
+    approvedOrderableValidator.validate(stockEventDto);
+    lotValidator.validate(stockEventDto);
+    mandatoryFieldsValidator.validate(stockEventDto);
+    orderableLotDuplicationValidator.validate(stockEventDto);
+    physicalInventoryAdjustmentReasonsValidator.validate(stockEventDto);
+    quantityValidator.validate(stockEventDto);
+    existenceValidator.validate(stockEventDto);
+    receiveIssueReasonValidator.validate(stockEventDto);
+    destinationAssignmentValidator.validate(stockEventDto);
+    destinationGeoLevelAffinityValidator.validate(stockEventDto);
+    stockEventVvmValidator.validate(stockEventDto);
 
     AdjustmentReasonValidator adjustmentReasonValidator = extensionManager.getExtension(
-        AdjustmentReasonValidator.POINT_ID, AdjustmentReasonValidator.class);
+        ExtensionPointId.ADJUSTMENT_REASON_POINT_ID, AdjustmentReasonValidator.class);
     FreeTextValidator freeTextValidator = extensionManager.getExtension(
-        FreeTextValidator.POINT_ID, FreeTextValidator.class);
+        ExtensionPointId.FREE_TEXT_POINT_ID, FreeTextValidator.class);
     UnpackKitValidator unpackKitValidator = extensionManager.getExtension(
-        UnpackKitValidator.POINT_ID, UnpackKitValidator.class);
+        ExtensionPointId.UNPACK_KIT_POINT_ID, UnpackKitValidator.class);
 
     adjustmentReasonValidator.validate(stockEventDto);
     freeTextValidator.validate(stockEventDto);
