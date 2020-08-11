@@ -15,6 +15,8 @@
 
 package org.openlmis.stockmanagement.dto;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.Test;
 import org.openlmis.stockmanagement.testutils.ObjectReferenceDtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.ToStringTestUtils;
@@ -22,10 +24,19 @@ import org.openlmis.stockmanagement.testutils.ToStringTestUtils;
 public class ObjectReferenceDtoTest {
 
   @Test
+  public void equalsContract() {
+    EqualsVerifier
+        .forClass(ObjectReferenceDto.class)
+        .suppress(Warning.STRICT_INHERITANCE)
+        .withRedefinedSuperclass()
+        .suppress(Warning.NONFINAL_FIELDS)
+        .verify();
+  }
+
+  @Test
   public void shouldImplementToString() {
     ObjectReferenceDto objectReference = new ObjectReferenceDtoDataBuilder().build();
     ToStringTestUtils.verify(ObjectReferenceDto.class, objectReference, "SEPARATOR");
   }
-
 
 }
