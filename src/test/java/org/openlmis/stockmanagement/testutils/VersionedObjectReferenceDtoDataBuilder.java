@@ -17,7 +17,6 @@ package org.openlmis.stockmanagement.testutils;
 
 import java.util.UUID;
 
-import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
 import org.openlmis.stockmanagement.dto.referencedata.VersionObjectReferenceDto;
 
 public class VersionedObjectReferenceDtoDataBuilder {
@@ -27,7 +26,7 @@ public class VersionedObjectReferenceDtoDataBuilder {
   private Long versionNumber;
 
   /**
-   * Creates builder for creating new instance of {@link ObjectReferenceDto}.
+   * Creates builder for creating new instance of {@link VersionObjectReferenceDto}.
    */
   public VersionedObjectReferenceDtoDataBuilder() {
     id = UUID.randomUUID();
@@ -37,7 +36,7 @@ public class VersionedObjectReferenceDtoDataBuilder {
   }
 
   /**
-   * Creates new instance of {@link ObjectReferenceDto} with properties.
+   * Creates new instance of {@link VersionObjectReferenceDto} with properties.
    * @return created object reference.
    */
   public VersionObjectReferenceDto build() {

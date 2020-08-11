@@ -5,7 +5,7 @@ New functionality added in a backwards-compatible manner:
 * [OLMIS-6911](https://openlmis.atlassian.net/browse/OLMIS-6911): Added extension points for AdjustmentReason FreeText and UnpackKit validators.
 
 Improvements:
-* [OLMIS-6901](https://openlmis.atlassian.net/browse/OLMIS-6901): Added orderable versions to StockCardSummaryV2Dto.
+* [OLMIS-6901](https://openlmis.atlassian.net/browse/OLMIS-6901): Updated StockCardSummaryV2Dto to include versioned object reference of orderable.
 
 Bug fixes:
 * [OLMIS-6848](https://openlmis.atlassian.net/browse/OLMIS-6848): Fixed NPE during sending notification of near expiry
