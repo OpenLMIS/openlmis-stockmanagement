@@ -42,4 +42,5 @@ public class OrderableDto {
   private Set<OrderableChildDto> children;
   private Map<String, String> identifiers;
   private Map<String, String> extraData;
+  private MetaDataDto meta = new MetaDataDto();
 }

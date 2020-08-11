@@ -26,7 +26,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
+import org.openlmis.stockmanagement.dto.referencedata.VersionObjectReferenceDto;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -36,7 +36,7 @@ public final class StockCardSummaryV2Dto implements Comparable<StockCardSummaryV
 
   @Getter
   @Setter
-  private ObjectReferenceDto orderable;
+  private VersionObjectReferenceDto orderable;
 
   @Getter
   @Setter

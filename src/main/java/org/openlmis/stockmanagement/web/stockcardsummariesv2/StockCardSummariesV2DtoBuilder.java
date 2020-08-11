@@ -33,6 +33,7 @@ import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
+import org.openlmis.stockmanagement.dto.referencedata.VersionObjectReferenceDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -58,7 +59,7 @@ public class StockCardSummariesV2DtoBuilder {
       List<StockCard> stockCards, Map<UUID, OrderableFulfillDto> orderables,
       boolean nonEmptySummariesOnly) {
     Stream<StockCardSummaryV2Dto> summariesStream = approvedProducts.stream()
-        .map(p -> build(stockCards, p.getId(),
+        .map(p -> build(stockCards, p.getId(), p.getMeta().getVersionNumber(),
             MapUtils.isEmpty(orderables) ? null : orderables.get(p.getId())))
         .sorted();
 
@@ -71,7 +72,7 @@ public class StockCardSummariesV2DtoBuilder {
   }
 
   private StockCardSummaryV2Dto build(List<StockCard> stockCards, UUID orderableId,
-                                      OrderableFulfillDto fulfills) {
+                                      Long orderableVersionNumber, OrderableFulfillDto fulfills) {
 
     Set<CanFulfillForMeEntryDto> canFulfillSet = null == fulfills ? new HashSet<>()
         : fulfills.getCanFulfillForMe()
@@ -86,7 +87,8 @@ public class StockCardSummariesV2DtoBuilder {
             orderableId,
             findStockCardByOrderableId(orderableId, stockCards)));
 
-    return new StockCardSummaryV2Dto(createOrderableReference(orderableId), canFulfillSet);
+    return new StockCardSummaryV2Dto(createVersionReference(
+            orderableId, ORDERABLES, orderableVersionNumber),canFulfillSet);
   }
 
   private List<CanFulfillForMeEntryDto> buildFulfillsEntries(UUID orderableId,
@@ -104,7 +106,7 @@ public class StockCardSummariesV2DtoBuilder {
                                                               UUID orderableId) {
     return new CanFulfillForMeEntryDto(
         createStockCardReference(stockCard.getId()),
-        createOrderableReference(orderableId),
+        createReference(orderableId, ORDERABLES),
         stockCard.getLotId() == null ? null : createLotReference(stockCard.getLotId()),
         stockCard.getStockOnHand(),
         stockCard.getOccurredDate(),
@@ -120,10 +122,6 @@ public class StockCardSummariesV2DtoBuilder {
         .collect(toList());
   }
 
-  private ObjectReferenceDto createOrderableReference(UUID id) {
-    return createReference(id, ORDERABLES);
-  }
-
   private ObjectReferenceDto createStockCardReference(UUID id) {
     return createReference(id, STOCK_CARDS);
   }
@@ -134,5 +132,10 @@ public class StockCardSummariesV2DtoBuilder {
 
   private ObjectReferenceDto createReference(UUID id, String resourceName) {
     return new ObjectReferenceDto(serviceUrl, resourceName, id);
+  }
+
+  private VersionObjectReferenceDto createVersionReference(
+          UUID id, String resourceName,Long versionNumber) {
+    return new VersionObjectReferenceDto(id, serviceUrl, resourceName, versionNumber);
   }
 }

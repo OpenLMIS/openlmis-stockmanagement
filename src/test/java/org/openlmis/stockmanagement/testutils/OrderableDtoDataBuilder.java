@@ -15,12 +15,17 @@
 
 package org.openlmis.stockmanagement.testutils;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.openlmis.stockmanagement.dto.referencedata.DispensableDto;
+import org.openlmis.stockmanagement.dto.referencedata.MetaDataDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableChildDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 
@@ -36,6 +41,7 @@ public class OrderableDtoDataBuilder {
   private Set<OrderableChildDto> children;
   private Map<String, String> identifiers;
   private Map<String, String> extraData;
+  private MetaDataDto metaDataDto;
 
   /**
    * Creates builder for creating new instance of {@link OrderableDtoDataBuilder}.
@@ -51,6 +57,8 @@ public class OrderableDtoDataBuilder {
     dispensable = new DispensableDto("pack", "Pack");
     identifiers = new HashMap<>();
     extraData = null;
+    metaDataDto = new MetaDataDto(Long.parseLong("1"),
+            ZonedDateTime.of(LocalDate.of(2020, 1, 1), LocalTime.NOON, ZoneOffset.UTC));
   }
 
   /**
@@ -60,7 +68,8 @@ public class OrderableDtoDataBuilder {
    */
   public OrderableDto build() {
     return new OrderableDto(
-        id, productCode, fullProductName, netContent, dispensable, children, identifiers, extraData
+        id, productCode, fullProductName, netContent, dispensable, children, identifiers,
+            extraData, metaDataDto
     );
   }
 

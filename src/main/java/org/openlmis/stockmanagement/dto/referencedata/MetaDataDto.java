@@ -13,36 +13,24 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.stockmanagement.dto;
+package org.openlmis.stockmanagement.dto.referencedata;
 
-import static org.openlmis.stockmanagement.service.ResourceNames.BASE_PATH;
-import static org.openlmis.stockmanagement.service.ResourceNames.SEPARATOR;
+import java.time.ZonedDateTime;
 
-import java.util.UUID;
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.apache.commons.lang3.StringUtils;
 
-@EqualsAndHashCode(callSuper = true)
-@ToString
+@Getter
+@Setter
 @NoArgsConstructor
-public class ObjectReferenceDto extends BaseDto {
-
-  @Getter
-  @Setter
-  private String href;
-
-  /**
-   * Returns new object reference.
-   *
-   * @param path resource path
-   * @param id   object id
-   */
-  public ObjectReferenceDto(String serviceUrl, String path, UUID id) {
-    super(id);
-    this.href = StringUtils.joinWith(SEPARATOR, serviceUrl + BASE_PATH, path, id);
-  }
+@AllArgsConstructor
+@EqualsAndHashCode
+@ToString
+public final class MetaDataDto {
+  private Long versionNumber;
+  private ZonedDateTime lastUpdated;
 }

@@ -15,21 +15,11 @@
 
 package org.openlmis.stockmanagement.dto;
 
-import nl.jqno.equalsverifier.EqualsVerifier;
-import nl.jqno.equalsverifier.Warning;
 import org.junit.Test;
 import org.openlmis.stockmanagement.testutils.ObjectReferenceDtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.ToStringTestUtils;
 
 public class ObjectReferenceDtoTest {
-
-  @Test
-  public void equalsContract() {
-    EqualsVerifier.forClass(ObjectReferenceDto.class)
-        .withRedefinedSuperclass()
-        .suppress(Warning.NONFINAL_FIELDS) // fields cannot be final
-        .verify();
-  }
 
   @Test
   public void shouldImplementToString() {
