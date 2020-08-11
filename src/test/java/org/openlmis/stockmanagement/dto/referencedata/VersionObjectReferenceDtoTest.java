@@ -15,24 +15,26 @@
 
 package org.openlmis.stockmanagement.dto.referencedata;
 
-import java.util.UUID;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
+import org.junit.Test;
+import org.openlmis.stockmanagement.testutils.ToStringTestUtils;
+import org.openlmis.stockmanagement.testutils.VersionedObjectReferenceDtoDataBuilder;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+public class VersionObjectReferenceDtoTest {
+  @Test
+  public void equalsContract() {
+    EqualsVerifier
+            .forClass(VersionObjectReferenceDto.class)
+            .withRedefinedSuperclass()
+            .suppress(Warning.NONFINAL_FIELDS) // DTO fields cannot be final
+            .verify();
+  }
 
-import lombok.ToString;
-import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
-
-@EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
-public final class VersionObjectReferenceDto extends ObjectReferenceDto {
-
-  @Getter
-  private Long versionNumber;
-
-  public VersionObjectReferenceDto(UUID id, String serviceUrl,
-                                   String resourceName, Long versionNumber) {
-    super(serviceUrl, resourceName, id);
-    this.versionNumber = versionNumber;
+  @Test
+  public void shouldImplementToString() {
+    VersionObjectReferenceDto versionObjectReferenceDto =
+            new VersionedObjectReferenceDtoDataBuilder().build();
+    ToStringTestUtils.verify(VersionObjectReferenceDto.class, versionObjectReferenceDto);
   }
 }

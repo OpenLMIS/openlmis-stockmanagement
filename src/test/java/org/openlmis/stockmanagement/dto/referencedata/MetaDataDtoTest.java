@@ -15,24 +15,24 @@
 
 package org.openlmis.stockmanagement.dto.referencedata;
 
-import java.util.UUID;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
+import org.junit.Test;
+import org.openlmis.stockmanagement.testutils.ToStringTestUtils;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+public class MetaDataDtoTest {
+  @Test
+  public void equalsContract() {
+    EqualsVerifier
+            .forClass(MetaDataDto.class)
+            .suppress(Warning.STRICT_INHERITANCE)
+            .suppress(Warning.NONFINAL_FIELDS)
+            .verify();
+  }
 
-import lombok.ToString;
-import org.openlmis.stockmanagement.dto.ObjectReferenceDto;
-
-@EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
-public final class VersionObjectReferenceDto extends ObjectReferenceDto {
-
-  @Getter
-  private Long versionNumber;
-
-  public VersionObjectReferenceDto(UUID id, String serviceUrl,
-                                   String resourceName, Long versionNumber) {
-    super(serviceUrl, resourceName, id);
-    this.versionNumber = versionNumber;
+  @Test
+  public void shouldImplementToString() {
+    MetaDataDto metaDataDto = new MetaDataDto();
+    ToStringTestUtils.verify(MetaDataDto.class, metaDataDto);
   }
 }
