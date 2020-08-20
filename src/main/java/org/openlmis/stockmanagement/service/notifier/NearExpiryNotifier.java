@@ -31,9 +31,11 @@ import java.util.stream.Collectors;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.RightDto;
+import org.openlmis.stockmanagement.i18n.MessageService;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.RightReferenceDataService;
+import org.openlmis.stockmanagement.util.Message;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +59,9 @@ public class NearExpiryNotifier {
   
   @Autowired
   StockCardNotifier stockCardNotifier;
+
+  @Autowired
+  private MessageService messageService;
 
   @Value("${time.zoneId}")
   private String timeZoneId;
@@ -89,7 +94,8 @@ public class NearExpiryNotifier {
     UUID rightId = right.getId();
     expiringStockCards.forEach(card -> {
       NotificationMessageParams params = new NotificationMessageParams(
-          NOTIFICATION_NEAR_EXPIRY_SUBJECT, NOTIFICATION_NEAR_EXPIRY_CONTENT,
+          getMessage(NOTIFICATION_NEAR_EXPIRY_SUBJECT),
+          getMessage(NOTIFICATION_NEAR_EXPIRY_CONTENT),
           constructSubstitutionMap(card));
       stockCardNotifier.notifyStockEditors(card, rightId, params);
     });
@@ -105,5 +111,11 @@ public class NearExpiryNotifier {
     valuesMap.put("expirationDate", stockCardNotifier.getDateFormatter().format(expirationDate));
     valuesMap.put("urlToViewBinCard", stockCardNotifier.getUrlToViewBinCard(stockCard.getId()));
     return valuesMap;
+  }
+
+  private String getMessage(String key) {
+    return messageService
+        .localize(new Message(key))
+        .getMessage();
   }
 }

@@ -9,6 +9,7 @@ Improvements:
 
 Bug fixes:
 * [OLMIS-6848](https://openlmis.atlassian.net/browse/OLMIS-6848): Fixed NPE during sending notification of near expiry
+* [OLMIS-6849](https://openlmis.atlassian.net/browse/OLMIS-6849): Fixed subject and content of the notification of near expiry
 
 
 5.1.1 / 2020-06-01

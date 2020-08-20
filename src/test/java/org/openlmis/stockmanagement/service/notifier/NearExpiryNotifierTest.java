@@ -21,6 +21,8 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.NOTIFICATION_NEAR_EXPIRY_CONTENT;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.NOTIFICATION_NEAR_EXPIRY_SUBJECT;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_INVENTORIES_EDIT;
 import static org.openlmis.stockmanagement.service.notifier.BaseNotifierTest.FACILITY_NAME;
 import static org.openlmis.stockmanagement.service.notifier.BaseNotifierTest.LOT_CODE;
@@ -42,9 +44,12 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.RightDto;
+import org.openlmis.stockmanagement.i18n.MessageService;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.RightReferenceDataService;
+import org.openlmis.stockmanagement.util.Message;
+import org.openlmis.stockmanagement.util.Message.LocalizedMessage;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -57,6 +62,9 @@ public class NearExpiryNotifierTest {
 
   @Mock
   private RightReferenceDataService rightReferenceDataService;
+
+  @Mock
+  private MessageService messageService;
 
   @Mock
   private StockCardRepository stockCardRepository;
@@ -106,6 +114,18 @@ public class NearExpiryNotifierTest {
     when(expiringLot.getId()).thenReturn(expiringLotId);
     when(expiringLot.getLotCode()).thenReturn(LOT_CODE);
     ReflectionTestUtils.setField(nearExpiryNotifier, "expirationDate", LocalDate.parse(TEST_DATE));
+
+    Message stockoutSubjectMessage = new Message(NOTIFICATION_NEAR_EXPIRY_SUBJECT);
+    LocalizedMessage stockoutSubjectLocalizedMessage =
+        stockoutSubjectMessage.new LocalizedMessage("Near expiry subject");
+    when(messageService.localize(stockoutSubjectMessage))
+        .thenReturn(stockoutSubjectLocalizedMessage);
+
+    Message stockoutContentMessage = new Message(NOTIFICATION_NEAR_EXPIRY_CONTENT);
+    LocalizedMessage stockoutContentLocalizedMessage =
+        stockoutSubjectMessage.new LocalizedMessage("Near expiry content");
+    when(messageService.localize(stockoutContentMessage))
+        .thenReturn(stockoutContentLocalizedMessage);
   }
   
   @Test
