@@ -6,6 +6,7 @@ New functionality added in a backwards-compatible manner:
 
 Improvements:
 * [OLMIS-6901](https://openlmis.atlassian.net/browse/OLMIS-6901): Updated StockCardSummaryV2Dto to include versioned object reference of orderable.
+* [OLMIS-6899](https://openlmis.atlassian.net/browse/OLMIS-6899): Physical Inventory submission will no longer accept drafts that are already marked as submitted in the database.
 
 Bug fixes:
 * [OLMIS-6848](https://openlmis.atlassian.net/browse/OLMIS-6848): Fixed NPE during sending notification of near expiry
