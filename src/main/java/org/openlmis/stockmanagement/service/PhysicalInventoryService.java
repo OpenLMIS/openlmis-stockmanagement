@@ -17,12 +17,14 @@ package org.openlmis.stockmanagement.service;
 
 import static java.util.stream.Collectors.toMap;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_DRAFT_EXISTS;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_DRAFT_SUBMIT;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_IS_SUBMITTED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PHYSICAL_INVENTORY_NOT_FOUND;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
@@ -155,6 +157,7 @@ public class PhysicalInventoryService {
   void submitPhysicalInventory(PhysicalInventoryDto inventoryDto, UUID eventId) {
     LOGGER.info("submit physical inventory");
 
+    checkDraftIsSubmittable(inventoryDto);
     PhysicalInventory inventory = inventoryDto.toPhysicalInventoryForSubmit();
 
     if (null != eventId) {
@@ -200,6 +203,15 @@ public class PhysicalInventoryService {
           new Message(ERROR_PHYSICAL_INVENTORY_DRAFT_EXISTS,
               dto.getProgramId(),
               dto.getFacilityId()));
+    }
+  }
+
+  private void checkDraftIsSubmittable(PhysicalInventoryDto inventoryDto) {
+    Optional<PhysicalInventory> inventory =
+        physicalInventoriesRepository.findById(inventoryDto.getId());
+
+    if (inventory.isPresent() && !inventory.get().getIsDraft()) {
+      throw new ValidationMessageException(ERROR_PHYSICAL_INVENTORY_DRAFT_SUBMIT);
     }
   }
 }

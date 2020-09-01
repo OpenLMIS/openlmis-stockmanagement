@@ -242,6 +242,8 @@ public abstract class MessageKeys {
       PHYSICAL_INVENTORY_ERROR_PREFIX + ".isSubmitted";
   public static final String ERROR_PHYSICAL_INVENTORY_DRAFT_EXISTS =
       PHYSICAL_INVENTORY_ERROR_PREFIX + ".draft.exists";
+  public static final String ERROR_PHYSICAL_INVENTORY_DRAFT_SUBMIT =
+      PHYSICAL_INVENTORY_ERROR_PREFIX + ".draft.submit";
 
   public static final String ERROR_SIZE_NULL
           = ERROR_PREFIX + ".pageable.size.null";

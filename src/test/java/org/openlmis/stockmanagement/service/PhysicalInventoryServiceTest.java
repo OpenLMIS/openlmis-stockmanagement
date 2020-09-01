@@ -190,6 +190,22 @@ public class PhysicalInventoryServiceTest {
     physicalInventoryService.createNewDraft(piDto);
   }
 
+  @Test(expected = ValidationMessageException.class)
+  public void shouldThrowExceptionWhenSubmittingAlreadySubmittedDraft() {
+    UUID programId = UUID.randomUUID();
+    UUID facilityId = UUID.randomUUID();
+    PhysicalInventoryDto piDto = createInventoryDto(programId, facilityId);
+
+    PhysicalInventory submittedPhysicalInventory = mock(PhysicalInventory.class);
+    when(submittedPhysicalInventory.getIsDraft()).thenReturn(false);
+
+    when(physicalInventoryRepository
+        .findById(piDto.getId()))
+        .thenReturn(Optional.of(submittedPhysicalInventory));
+
+    physicalInventoryService.submitPhysicalInventory(piDto, null);
+  }
+
   @Test
   public void shouldSaveDraftWhenPassValidations() {
     UUID programId = UUID.randomUUID();
