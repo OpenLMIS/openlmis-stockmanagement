@@ -105,6 +105,25 @@ public class PhysicalInventoryServiceTest {
   }
 
   @Test
+  public void shouldSubmitPhysicalInventoryWhenNoDraftExists() {
+    PhysicalInventoryDto physicalInventoryDto = newInventoryForSubmitWithoutId();
+    int previousSoH = new Random().nextInt();
+    when(calculatedStockOnHandService.getStockCardsWithStockOnHand(
+        physicalInventoryDto.getProgramId(),
+        physicalInventoryDto.getFacilityId()))
+        .thenReturn(singletonList(stockCard));
+    when(stockCard.getOrderableId()).thenReturn(lineItemDto.getOrderableId());
+    when(stockCard.getLotId()).thenReturn(lineItemDto.getLotId());
+    when(stockCard.getStockOnHand()).thenReturn(previousSoH);
+
+    physicalInventoryService.submitPhysicalInventory(physicalInventoryDto, UUID.randomUUID());
+
+    verify(physicalInventoryRepository, times(1)).save(inventoryArgumentCaptor.capture());
+
+    verifyPhysicalInventorySavedWithSohAndAsDraft(previousSoH);
+  }
+
+  @Test
   public void shouldLeavePreviousSohAsNullWhenSubmitPhysicalInventoryIfNoStockCardFound() {
     PhysicalInventoryDto physicalInventoryDto = newInventoryForSubmit();
     when(calculatedStockOnHandService.getStockCardsWithStockOnHand(
@@ -302,6 +321,12 @@ public class PhysicalInventoryServiceTest {
     inventory.setIsDraft(true);
     lineItemDto = generateLineItem();
     inventory.setLineItems(Collections.singletonList(lineItemDto));
+    return inventory;
+  }
+
+  private PhysicalInventoryDto newInventoryForSubmitWithoutId() {
+    PhysicalInventoryDto inventory = newInventoryForSubmit();
+    inventory.setId(null);
     return inventory;
   }
 

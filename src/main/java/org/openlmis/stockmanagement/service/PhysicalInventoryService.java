@@ -207,11 +207,13 @@ public class PhysicalInventoryService {
   }
 
   private void checkDraftIsSubmittable(PhysicalInventoryDto inventoryDto) {
-    Optional<PhysicalInventory> inventory =
-        physicalInventoriesRepository.findById(inventoryDto.getId());
+    if (inventoryDto.getId() != null) {
+      Optional<PhysicalInventory> inventory =
+          physicalInventoriesRepository.findById(inventoryDto.getId());
 
-    if (inventory.isPresent() && !inventory.get().getIsDraft()) {
-      throw new ValidationMessageException(ERROR_PHYSICAL_INVENTORY_DRAFT_SUBMIT);
+      if (inventory.isPresent() && !inventory.get().getIsDraft()) {
+        throw new ValidationMessageException(ERROR_PHYSICAL_INVENTORY_DRAFT_SUBMIT);
+      }
     }
   }
 }
