@@ -21,10 +21,12 @@ import org.openlmis.stockmanagement.extension.point.ExtensionPointId;
 import org.openlmis.stockmanagement.i18n.ExposedMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMethod;
 
-@RestController
+@Controller
+@RequestMapping("/api/extensionPoint")
 public class MessageController extends BaseController {
 
   @Autowired
@@ -39,7 +41,7 @@ public class MessageController extends BaseController {
    * extension point in extensions.properties file.
    * @return information saying which class was returned as OrderQuantity implementation.
    */
-  @RequestMapping("/extensionPoint")
+  @RequestMapping(method = RequestMethod.GET)
   public String extensionPoint() {
     AdjustmentReasonValidator adjustmentReasonValidator = extensionManager.getExtension(
         ExtensionPointId.ADJUSTMENT_REASON_POINT_ID, AdjustmentReasonValidator.class);
