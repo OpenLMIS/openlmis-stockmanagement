@@ -72,6 +72,18 @@ public class ExtensionManager {
     return extensionPoint;
   }
 
+  public Object getExtensionByPointId(String pointId) throws ExtensionException {
+    Object object;
+    String extensionId = extensions.get(pointId);
+    try {
+      object = appContext.getBean(extensionId);
+    } catch (NoSuchBeanDefinitionException ex) {
+      throw new ExtensionException("It was not possible to find an extension with id "
+          + extensionId, ex);
+    }
+    return object;
+  }
+
   @PostConstruct
   private void loadConfigurationFile() {
     Properties prop = new Properties();
