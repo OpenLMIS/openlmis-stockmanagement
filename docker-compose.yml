@@ -5,9 +5,12 @@ services:
     links:
       - db
       - log
+      - extensions
     ports:
       - "8080"
     env_file: .env
+    volumes:
+      - 'extensions:/extensions'
   db:
     image: openlmis/postgres:9.6-debezium
     ports:
@@ -17,3 +20,10 @@ services:
     image: openlmis/rsyslog:1
     volumes:
       - '../logs/stockmanagement:/var/log'
+  extensions:
+    image: openlmis/openlmis-example-extensions
+    volumes:
+      - 'extensions:/extensions'
+volumes:
+  extensions:
+    external: false
