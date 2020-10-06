@@ -138,7 +138,7 @@ pipeline {
                 }
             }
         }
-        /*stage('Parallel: Sonar analysis and contract tests') {
+        stage('Parallel: Sonar analysis and contract tests') {
             parallel {
                 stage('Sonar analysis') {
                     agent any
@@ -211,7 +211,7 @@ pipeline {
                     }
                 }
             }
-        }*/
+        }
         stage('ERD generation') {
             agent {
                 node {
