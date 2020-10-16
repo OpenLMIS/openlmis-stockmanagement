@@ -177,14 +177,6 @@ configure(checkApiIsRaml) {
     description = 'Verify that the api-specification is valid RAML'
 }
 
-task fatJar(type: Jar) {
-    manifest {
-        attributes 'Main-Class': 'org.openlmis.stockmanagement.Application'
-    }
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
-}
-
 jacocoTestReport {
     group = "reporting"
     description = "Generate Jacoco coverage reports after running tests."
