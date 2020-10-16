@@ -184,15 +184,6 @@ traits:
 
 /api:
 
-  /extensionPoint:
-    get:
-      is: [ secured ]
-      description: Returns information about extensionPoint called OrderQuantity.
-      responses:
-        200:
-          body:
-            text/html:
-
   /stockCardTemplates:
       get:
         is: [ secured ]
