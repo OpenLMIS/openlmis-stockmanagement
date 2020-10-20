@@ -69,6 +69,8 @@ dependencies {
     testCompile "org.raml:raml-parser:0.8.37"
     testCompile "nl.jqno.equalsverifier:equalsverifier:2.4"
     testCompile "be.joengenduvel.java.verifiers:to-string:1.0.2"
+
+    runtime fileTree(dir: '/extensions/', include: '*.jar')
 }
 
 idea {
