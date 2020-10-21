@@ -17,6 +17,17 @@ apply plugin: 'io.spring.dependency-management'
 apply plugin: 'checkstyle'
 apply plugin: 'jacoco'
 apply plugin: 'pmd'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+ext {
+    ossrhUsername = System.getenv("OSSRH_USERNAME")
+    ossrhPassword = System.getenv("OSSRH_PASSWORD")
+}
+ext.set("signing.secretKeyRingFile", ".signing/secring.gpg")
+ext.set("signing.keyId", System.getenv("SIGNING_KEYID"))
+ext.set("signing.password", System.getenv("SIGNING_PASSWORD"))
 
 group = serviceGroup
 version = serviceVersion
@@ -30,6 +41,7 @@ repositories {
     jcenter()
     maven { url "http://jaspersoft.artifactoryonline.com/jaspersoft/third-party-ce-artifacts/" }
     maven { url "http://jasperreports.sourceforge.net/maven2/" }
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
 }
 
 dependencies {
@@ -55,6 +67,8 @@ dependencies {
     compile "net.sf.jasperreports:jasperreports:6.5.1"
     compile "org.slf4j:slf4j-ext"
     compile "com.github.tomakehurst:wiremock:1.58"
+
+    compile group: 'javax.interceptor', name: 'javax.interceptor-api', version: '1.2'
 
     testCompile "junit:junit"
     testCompile "org.powermock:powermock-api-mockito2:2.0.4"
@@ -245,6 +259,53 @@ test {
 //bootRun {
 //    jvmArgs = ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"]
 //}
+
+signing {
+    sign configurations.archives
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signArchives.onlyIf {project.findProperty("signing.keyId") && project.findProperty("signing.password")}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+            pom.project {
+                name project.name
+                packaging 'jar'
+                description project.description()
+                licenses {
+                    license {
+                        name 'GNU Affero General Public License, Version 3'
+                        url 'https://www.gnu.org/licenses/agpl-3.0.txt'
+                    }
+                }
+            }
+        }
+    }
+}
+
+uploadArchives.onlyIf { project.getProperty("ossrhUsername") && project.getProperty("ossrhPassword") }
 
 apply from: "documentation.gradle"
 integrationTest {

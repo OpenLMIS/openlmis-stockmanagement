@@ -68,7 +68,17 @@ pipeline {
                 STAGING_VERSION = "${STAGING_VERSION}"
             }
             steps {
-                withCredentials([file(credentialsId: '8da5ba56-8ebb-4a6a-bdb5-43c9d0efb120', variable: 'ENV_FILE')]) {
+                withCredentials([file(credentialsId: '8da5ba56-8ebb-4a6a-bdb5-43c9d0efb120', variable: 'ENV_FILE'),
+                                 file(credentialsId: 'b35ad1bd-ccca-437f-a2cd-3578c10da7bf', variable: 'SECRING_FILE'),
+                                 usernamePassword(
+                                         credentialsId: "70dd29d6-7990-4598-a2f8-aa3e1f038ac1",
+                                         usernameVariable: "SIGNING_KEYID",
+                                         passwordVariable: "SIGNING_PASSWORD"),
+                                 usernamePassword(
+                                         credentialsId: "79aa4a36-2c52-486f-bbca-1ed06b314a96",
+                                         usernameVariable: "OSSRH_USERNAME",
+                                         passwordVariable: "OSSRH_PASSWORD"
+                                 )]) {
                     script {
                         try {
                             sh(script: "./ci-buildImage.sh")

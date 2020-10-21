@@ -3,6 +3,7 @@
 
 New functionality added in a backwards-compatible manner:
 * [OLMIS-6911](https://openlmis.atlassian.net/browse/OLMIS-6911): Added extension points for AdjustmentReason FreeText and UnpackKit validators.
+* [OLMIS-6954](https://openlmis.atlassian.net/browse/OLMIS-6954): Published Stock Management service to Maven.
 
 Improvements:
 * [OLMIS-6901](https://openlmis.atlassian.net/browse/OLMIS-6901): Updated StockCardSummaryV2Dto to include versioned object reference of orderable.

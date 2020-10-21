@@ -53,7 +53,7 @@ public class StockOnHandCalculationService {
    *
    * @param card containing line items
    * @return stock card with updated SOH value
-   * @throws ValidationMessageException thrown when SoH < 0 or arithmetic error occurred
+   * @throws ValidationMessageException thrown when SoH is below 0 or arithmetic error occurred
    */
   public StockCard calculateStockOnHand(StockCard card) {
     int soh = 0;
