@@ -8,8 +8,8 @@ function finish {
 }
 trap finish EXIT
 
+sudo rm -f .signing/secring.gpg
 sudo rm -f .env
-mkdir .signing/
 cp $SECRING_FILE .signing/secring.gpg
 cp $ENV_FILE .env
 if [ "$GIT_BRANCH" != "master" ]; then
