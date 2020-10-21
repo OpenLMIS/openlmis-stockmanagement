@@ -325,6 +325,7 @@ processResources {
 check {
     dependsOn checkApiIsRaml
     dependsOn integrationTest
+    finalizedBy uploadArchives
 }
 
 apply from: "registration.gradle"
