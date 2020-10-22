@@ -87,6 +87,14 @@ dependencies {
     runtime fileTree(dir: '/extensions/', include: '*.jar')
 }
 
+jar {
+    enabled = true
+}
+
+bootJar {
+    classifier = 'exec'
+}
+
 idea {
     project {
         vcs = 'Git'
