@@ -274,8 +274,13 @@ task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
 }
 
+task execJar(type: Jar) {
+    classifier = 'exec'
+    from sourceSets.main.output
+}
+
 artifacts {
-    archives javadocJar, sourcesJar
+    archives javadocJar, sourcesJar, execJar
 }
 
 signArchives.onlyIf {project.findProperty("signing.keyId") && project.findProperty("signing.password")}
