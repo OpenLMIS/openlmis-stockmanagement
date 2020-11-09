@@ -211,6 +211,11 @@ pipeline {
                             string(name: 'serviceName', value: 'fulfillment'),
                             text(name: 'customEnv', value: "OL_STOCKMANAGEMENT_VERSION=${STAGING_VERSION}")
                         ]
+                        build job: "OpenLMIS-contract-tests-pipeline/${params.contractTestsBranch}", propagate: true, wait: true,
+                        parameters: [
+                            string(name: 'serviceName', value: 'stockmanagementextension'),
+                            text(name: 'customEnv', value: "OL_STOCKMANAGEMENT_VERSION=${STAGING_VERSION}")
+                        ]
                     }
                     post {
                         failure {
