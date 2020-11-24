@@ -299,11 +299,25 @@ uploadArchives {
                 name project.name
                 packaging 'jar'
                 description project.description()
+                url = System.getenv("BASE_URL")
                 licenses {
                     license {
                         name 'GNU Affero General Public License, Version 3'
                         url 'https://www.gnu.org/licenses/agpl-3.0.txt'
                     }
+                }
+                developers {
+                    developer {
+                        name = 'Josh Zamor'
+                        email = 'info@openlmis.org'
+                        organization = 'OpenLMIS'
+                        organizationUrl = 'https://openlmis.org/'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/OpenLMIS/openlmis-stockmanagement.git'
+                    developerConnection = 'scm:git:ssh://github.com/OpenLMIS/openlmis-stockmanagement.git'
+                    url = 'http://github.com/OpenLMIS/openlmis-stockmanagement/'
                 }
             }
         }
