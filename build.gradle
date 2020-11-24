@@ -299,7 +299,7 @@ uploadArchives {
                 name project.name
                 packaging 'jar'
                 description project.description()
-                url = System.getenv("BASE_URL")
+                url = 'https://openlmis.org'
                 licenses {
                     license {
                         name 'GNU Affero General Public License, Version 3'
@@ -308,10 +308,10 @@ uploadArchives {
                 }
                 developers {
                     developer {
-                        name = 'Josh Zamor'
+                        id = 'techcommittee'
+                        name = 'tech committee'
                         email = 'info@openlmis.org'
-                        organization = 'OpenLMIS'
-                        organizationUrl = 'https://openlmis.org/'
+                        organizationUrl = 'https://villagereach.org'
                     }
                 }
                 scm {
