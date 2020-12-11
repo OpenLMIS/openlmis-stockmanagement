@@ -25,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.sql.Connection;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Collections;
@@ -176,8 +177,10 @@ public class JasperReportService {
         jasperPrint = JasperFillManager.fillReport(compiledReport, params, 
             new JREmptyDataSource());
       } else {
-        jasperPrint = JasperFillManager.fillReport(compiledReport, params,
-            replicationDataSource.getConnection());
+        try (Connection connection = replicationDataSource.getConnection()) {
+          jasperPrint = JasperFillManager.fillReport(compiledReport, params,
+              connection);
+        }
       }
 
       bytes = JasperExportManager.exportReportToPdf(jasperPrint);
