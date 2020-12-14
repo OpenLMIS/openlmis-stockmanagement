@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.service;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import net.sf.jasperreports.engine.JRException;
@@ -35,10 +36,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 @DirtiesContext
 @RunWith(SpringRunner.class)
-public class JasperReportsViewServiceIntegrationTest {
+public class JasperReportServiceIntegrationTest {
 
   private static final String EMPTY_REPORT_RESOURCE = "/empty-report.jrxml";
   private static final int HIKARI_DEFAULT_POOL_SIZE = 10;
+  private static final String DATE_FORMAT = "dd/MM/yyyy";
+  private static final String DATE_TIME_FORMAT = "dd/MM/yyyy HH:mm:ss";
 
   @Autowired
   private JasperReportService service;
@@ -59,6 +62,54 @@ public class JasperReportsViewServiceIntegrationTest {
     for (int i = 0; i < HIKARI_DEFAULT_POOL_SIZE + 1; i++) {
       service.generateReport(template, params);
     }
+  }
+
+  @Test
+  public void shouldGenerateReportForDatasourceParam()
+      throws JRException, IOException {
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    ObjectOutputStream out = new ObjectOutputStream(bos);
+    out.writeObject(getEmptyReport());
+    out.flush();
+
+    JasperTemplate template = new JasperTemplate();
+    template.setData(bos.toByteArray());
+    Map<String, Object> params = new HashMap<>();
+    params.put("datasource", new ArrayList<>());
+
+    service.generateReport(template, params);
+  }
+
+  @Test
+  public void shouldGenerateReportWithProperParams()
+      throws JRException, IOException {
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    ObjectOutputStream out = new ObjectOutputStream(bos);
+    out.writeObject(getEmptyReport());
+    out.flush();
+
+    JasperTemplate template = new JasperTemplate();
+    template.setData(bos.toByteArray());
+    Map<String, Object> params = new HashMap<>();
+    params.put("dateTimeFormat", DATE_TIME_FORMAT);
+    params.put("dateFormat", DATE_FORMAT);
+    params.put("format", "pdf");
+
+    service.generateReport(template, params);
+  }
+
+  @Test(expected = JasperReportViewException.class)
+  public void shouldThrowJasperReportViewExceptionWhenNoParamsPassed()
+      throws JRException, IOException {
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    ObjectOutputStream out = new ObjectOutputStream(bos);
+    out.writeObject(getEmptyReport());
+    out.flush();
+
+    JasperTemplate template = new JasperTemplate();
+    template.setData(bos.toByteArray());
+
+    service.generateReport(template, null);
   }
 
   private JasperReport getEmptyReport() throws JRException {
