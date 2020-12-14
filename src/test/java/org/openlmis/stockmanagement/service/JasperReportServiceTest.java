@@ -30,7 +30,6 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
@@ -53,7 +52,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.openlmis.stockmanagement.domain.JasperTemplate;
 import org.openlmis.stockmanagement.dto.StockCardDto;
-import org.openlmis.stockmanagement.exception.JasperReportViewException;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.testutils.StockCardDtoDataBuilder;
 import org.powermock.api.mockito.PowerMockito;
@@ -62,7 +60,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({JasperReportService.class, JasperFillManager.class,JasperExportManager.class})
+@PrepareForTest({JasperFillManager.class,JasperExportManager.class})
 public class JasperReportServiceTest {
 
   private static final String DATE_FORMAT = "dd/MM/yyyy";
@@ -174,21 +172,6 @@ public class JasperReportServiceTest {
     byte[] reportData = jasperReportService.generateReport(jasperTemplate, params);
 
     assertEquals(testReportData, reportData);
-  }
-
-  @Test(expected = JasperReportViewException.class)
-  public void shouldThrowJasperReportViewExceptionWhenConnectionCantBeOpen() throws Exception {
-    Map<String, Object> params = new HashMap<>();
-    params.put("format", "pdf");
-    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    ObjectOutputStream out = new ObjectOutputStream(bos);
-    out.writeObject(JasperCompileManager.compileReport(getClass().getResourceAsStream(
-        PI_LINES_REPORT_URL)));
-    JasperTemplate jasperTemplate = new JasperTemplate("test template", bos.toByteArray(), "type",
-        "description");
-
-    when(dataSource.getConnection()).thenThrow(new SQLException());
-    jasperReportService.generateReport(jasperTemplate, params);
   }
 
   private DecimalFormat createDecimalFormat() {
