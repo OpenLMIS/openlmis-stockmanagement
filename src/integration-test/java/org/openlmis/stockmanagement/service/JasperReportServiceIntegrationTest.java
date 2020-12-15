@@ -28,6 +28,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperReport;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,6 +50,8 @@ public class JasperReportServiceIntegrationTest {
   private static final String DATE_TIME_FORMAT = "dd/MM/yyyy HH:mm:ss";
   private static final String FORMAT = "format";
   private static final String PDF = "pdf";
+  private static final String ERROR_GENERATE_REPORT_FAILED =
+      "stockmanagement.error.generateReport.failed";
 
   @InjectMocks
   private JasperReportService service;
@@ -119,7 +122,7 @@ public class JasperReportServiceIntegrationTest {
     try {
       service.generateReport(template, params);
     } catch (JasperReportViewException e) {
-      assertTrue(e.getMessage().contains("stockmanagement.error.generateReport.failed"));
+      assertTrue(e.getMessage().contains(ERROR_GENERATE_REPORT_FAILED));
     }
   }
 
@@ -130,13 +133,75 @@ public class JasperReportServiceIntegrationTest {
     out.flush();
 
     template.setData(bos.toByteArray());
-    params.put(FORMAT, "pdf");
+    params.put(FORMAT, PDF);
 
     when(dataSource.getConnection()).thenThrow(SQLException.class);
     try {
       service.generateReport(template, params);
     } catch (JasperReportViewException e) {
-      assertTrue(e.getMessage().contains("stockmanagement.error.generateReport.failed"));
+      assertTrue(e.getMessage().contains(ERROR_GENERATE_REPORT_FAILED));
+    }
+  }
+
+  @Test
+  public void shouldCatchJasperReportViewExceptionWhenDatasourceConnectionIsNotClosed()
+      throws JRException, IOException, SQLException {
+    out.writeObject(getEmptyReport());
+    out.flush();
+
+    template.setData(bos.toByteArray());
+    params.put(FORMAT, PDF);
+
+    when(dataSource.getConnection())
+        .thenAnswer(invocation -> {
+          throw new IOException("Connection not closed");
+        });
+
+    try {
+      service.generateReport(template, params);
+    } catch (JasperReportViewException e) {
+      assertTrue(e.getMessage().contains(ERROR_GENERATE_REPORT_FAILED));
+    }
+  }
+
+  @Test
+  public void shouldCatchJasperReportViewExceptionIfNullPointerExceptionIsCaught()
+      throws JRException, IOException, SQLException {
+    JasperReport compiledReport = getEmptyReport();
+    out.writeObject(compiledReport);
+    out.flush();
+
+    template.setData(bos.toByteArray());
+    params.put(FORMAT, PDF);
+
+    when(JasperFillManager.fillReport(compiledReport, params, dataSource.getConnection()))
+        .thenThrow(NullPointerException.class);
+    try {
+      service.generateReport(template, params);
+    } catch (JasperReportViewException e) {
+      assertTrue(e.getMessage().contains(ERROR_GENERATE_REPORT_FAILED));
+    }
+  }
+
+  @Test
+  public void shouldCatchJasperReportViewExceptionIfJreExceptionIsCaught()
+      throws JRException, IOException, SQLException {
+    JasperReport compiledReport = getEmptyReport();
+    out.writeObject(compiledReport);
+    out.flush();
+
+    template.setData(bos.toByteArray());
+    params.put(FORMAT, PDF);
+
+    when(JasperFillManager.fillReport(compiledReport, params, dataSource.getConnection()))
+        .thenAnswer(invocation -> {
+          throw new JRException("Jasper Report Exception");
+        });
+
+    try {
+      service.generateReport(template, params);
+    } catch (JasperReportViewException e) {
+      assertTrue(e.getMessage().contains(ERROR_GENERATE_REPORT_FAILED));
     }
   }
 
