@@ -15,51 +15,67 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import javax.sql.DataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperReport;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
 import org.openlmis.stockmanagement.domain.JasperTemplate;
 import org.openlmis.stockmanagement.exception.JasperReportViewException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @SpringBootTest
-@DirtiesContext
 @RunWith(SpringRunner.class)
 public class JasperReportServiceIntegrationTest {
 
   private static final String EMPTY_REPORT_RESOURCE = "/empty-report.jrxml";
-  private static final int HIKARI_DEFAULT_POOL_SIZE = 10;
+  private static final int DOUBLE_HIKARI_DEFAULT_POOL_SIZE = 20;
   private static final String DATE_FORMAT = "dd/MM/yyyy";
   private static final String DATE_TIME_FORMAT = "dd/MM/yyyy HH:mm:ss";
+  private static final String FORMAT = "format";
+  private static final String PDF = "pdf";
 
-  @Autowired
+  @InjectMocks
   private JasperReportService service;
 
+  @Spy
+  private DataSource dataSource;
+
+  private ByteArrayOutputStream bos = new ByteArrayOutputStream();
+  private ObjectOutputStream out;
+  private JasperTemplate template = new JasperTemplate();
+  private Map<String, Object> params = new HashMap<>();
+
+  @Before
+  public void setUp() throws IOException {
+    out = new ObjectOutputStream(bos);
+  }
+
   @Test
-  public void generateReportShouldNotThrowErrorAfterPrintingReport10Times()
+  public void generateReportShouldNotThrowErrorAfterPrintingReport20Times()
       throws JRException, IOException, JasperReportViewException {
-    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    ObjectOutputStream out = new ObjectOutputStream(bos);
     out.writeObject(getEmptyReport());
     out.flush();
 
-    JasperTemplate template = new JasperTemplate();
     template.setData(bos.toByteArray());
-    Map<String, Object> params = new HashMap<>();
-    params.put("format", "pdf");
+    params.put(FORMAT, PDF);
 
-    for (int i = 0; i < HIKARI_DEFAULT_POOL_SIZE + 1; i++) {
+    for (int i = 0; i <= DOUBLE_HIKARI_DEFAULT_POOL_SIZE; i++) {
       service.generateReport(template, params);
     }
   }
@@ -67,14 +83,10 @@ public class JasperReportServiceIntegrationTest {
   @Test
   public void shouldGenerateReportForDatasourceParam()
       throws JRException, IOException {
-    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    ObjectOutputStream out = new ObjectOutputStream(bos);
     out.writeObject(getEmptyReport());
     out.flush();
 
-    JasperTemplate template = new JasperTemplate();
     template.setData(bos.toByteArray());
-    Map<String, Object> params = new HashMap<>();
     params.put("datasource", new ArrayList<>());
 
     service.generateReport(template, params);
@@ -83,17 +95,55 @@ public class JasperReportServiceIntegrationTest {
   @Test
   public void shouldGenerateReportWithProperParams()
       throws JRException, IOException {
-    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    ObjectOutputStream out = new ObjectOutputStream(bos);
     out.writeObject(getEmptyReport());
     out.flush();
 
-    JasperTemplate template = new JasperTemplate();
     template.setData(bos.toByteArray());
-    Map<String, Object> params = new HashMap<>();
     params.put("dateTimeFormat", DATE_TIME_FORMAT);
     params.put("dateFormat", DATE_FORMAT);
-    params.put("format", "pdf");
+    params.put(FORMAT, PDF);
+
+    service.generateReport(template, params);
+  }
+
+  @Test
+  public void shouldCatchJasperReportViewExceptionWhenDatasourceReturnsNull()
+      throws JRException, IOException, SQLException {
+    out.writeObject(getEmptyReport());
+    out.flush();
+
+    template.setData(bos.toByteArray());
+    params.put(FORMAT, PDF);
+
+    when(dataSource.getConnection()).thenThrow(NullPointerException.class);
+    try {
+      service.generateReport(template, params);
+    } catch (JasperReportViewException e) {
+      assertTrue(e.getMessage().contains("stockmanagement.error.generateReport.failed"));
+    }
+  }
+
+  @Test
+  public void shouldCatchJasperReportViewExceptionWhenDatasourceReturnsSqlException()
+      throws JRException, IOException, SQLException {
+    out.writeObject(getEmptyReport());
+    out.flush();
+
+    template.setData(bos.toByteArray());
+    params.put(FORMAT, "pdf");
+
+    when(dataSource.getConnection()).thenThrow(SQLException.class);
+    try {
+      service.generateReport(template, params);
+    } catch (JasperReportViewException e) {
+      assertTrue(e.getMessage().contains("stockmanagement.error.generateReport.failed"));
+    }
+  }
+
+  @Test(expected = JasperReportViewException.class)
+  public void shouldThrowJasperReportViewExceptionIfReportIsNotSavedAsObjectOutputStream() {
+    template.setData(bos.toByteArray());
+    params.put(FORMAT, PDF);
 
     service.generateReport(template, params);
   }
@@ -101,12 +151,9 @@ public class JasperReportServiceIntegrationTest {
   @Test(expected = JasperReportViewException.class)
   public void shouldThrowJasperReportViewExceptionWhenNoParamsPassed()
       throws JRException, IOException {
-    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    ObjectOutputStream out = new ObjectOutputStream(bos);
     out.writeObject(getEmptyReport());
     out.flush();
 
-    JasperTemplate template = new JasperTemplate();
     template.setData(bos.toByteArray());
 
     service.generateReport(template, null);
