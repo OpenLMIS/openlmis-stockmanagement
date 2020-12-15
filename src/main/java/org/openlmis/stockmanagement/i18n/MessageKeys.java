@@ -67,6 +67,8 @@ public abstract class MessageKeys {
       + ".reason.reasonCategory.invalid";
   public static final String ERROR_REASON_ASSIGNMENT_NOT_FOUND = ERROR_PREFIX
       + ".reasonAssignment.notFound";
+  public static final String ERROR_REASON_ASSIGNMENT_EXISTS =
+          ERROR_PREFIX + ".reasonAssignment.exists";
   //permission error
   public static final String ERROR_NO_FOLLOWING_PERMISSION = ERROR_PREFIX
       + ".authorization.noFollowingPermission";

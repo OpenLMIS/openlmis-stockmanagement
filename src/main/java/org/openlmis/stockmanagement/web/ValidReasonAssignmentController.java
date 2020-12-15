@@ -15,12 +15,14 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_ASSIGNMENT_EXISTS;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_ASSIGNMENT_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_ID_EMPTY;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_NOT_FOUND;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
+
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -153,7 +155,7 @@ public class ValidReasonAssignmentController {
         .findByProgramIdAndFacilityTypeIdAndReasonId(programId, facilityTypeId, reasonId);
 
     if (foundAssignment != null) {
-      return new ResponseEntity<>(reasonAssignmentDtoBuilder.build(foundAssignment), OK);
+      throw new ValidationMessageException(new Message(ERROR_REASON_ASSIGNMENT_EXISTS));
     }
 
     ValidReasonAssignmentDto assignmentDto =

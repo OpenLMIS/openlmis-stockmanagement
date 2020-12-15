@@ -260,7 +260,7 @@ public class ValidReasonAssignmentControllerIntegrationTest extends BaseWebInteg
         .when()
         .post(VALID_REASON_API)
         .then()
-        .statusCode(200)
+        .statusCode(400)
         .extract()
         .as(ValidReasonAssignmentDto.class);
 
