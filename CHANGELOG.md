@@ -1,3 +1,9 @@
+5.1.4 / WIP
+==================
+
+Bug fixes:
+* [OLMIS-4423](https://openlmis.atlassian.net/browse/OLMIS-4423): Fixed issue with the wrong HTTP code returned for some POST requests on the API /api/validReasons.
+
 5.1.3 / WIP
 ==================
 
