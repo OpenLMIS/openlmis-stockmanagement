@@ -153,7 +153,9 @@ public class ValidReasonAssignmentController {
         .findByProgramIdAndFacilityTypeIdAndReasonId(programId, facilityTypeId, reasonId);
 
     if (foundAssignment != null) {
-      throw new ValidationMessageException(new Message(ERROR_REASON_ASSIGNMENT_EXISTS));
+      throw new ValidationMessageException(
+              new Message(ERROR_REASON_ASSIGNMENT_EXISTS, programId, facilityTypeId, reasonId)
+      );
     }
 
     ValidReasonAssignmentDto assignmentDto =
