@@ -1,3 +1,9 @@
+5.1.4 / WIP
+==================
+
+Improvements:
+* [OLMIS-7298](https://openlmis.atlassian.net/browse/OLMIS-7298): Added page and size parameters for /validSources and /validDestinations endpoints.
+
 5.1.3 / 2020-12-17
 ==================
 

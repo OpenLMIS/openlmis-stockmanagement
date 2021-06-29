@@ -505,7 +505,7 @@ traits:
 
   /validDestinations:
       get:
-        is: [ secured ]
+        is: [ secured, paginated ]
         description: Get a list of valid destinations of a program and a facility. The filtration works only if both params are provided. If no params are present all assignments are returned.
         queryParameters:
           programId:
@@ -581,7 +581,7 @@ traits:
 
   /validSources:
         get:
-          is: [ secured ]
+          is: [ secured, paginated ]
           description: Get a list of valid sources of a program and a facility. The filtration works only if both params are provided. If no params are present all assignments are returned.
           queryParameters:
             programId:
