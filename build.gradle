@@ -42,6 +42,7 @@ repositories {
     maven { url "http://jaspersoft.artifactoryonline.com/jaspersoft/third-party-ce-artifacts/" }
     maven { url "http://jasperreports.sourceforge.net/maven2/" }
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    maven { url "https://jaspersoft.jfrog.io/artifactory/third-party-ce-artifacts"}
 }
 
 dependencies {
