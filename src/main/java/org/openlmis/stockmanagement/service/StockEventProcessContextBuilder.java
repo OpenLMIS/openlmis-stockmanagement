@@ -60,6 +60,7 @@ import org.slf4j.ext.XLogger;
 import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
@@ -213,14 +214,16 @@ public class StockEventProcessContextBuilder {
 
     profiler.start("CREATE_LAZY_SOURCES");
     Supplier<List<ValidSourceAssignment>> sourcesSupplier = () -> validSourceAssignmentRepository
-        .findByProgramIdAndFacilityTypeId(eventDto.getProgramId(), context.getFacilityTypeId());
+        .findByProgramIdAndFacilityTypeId(
+                eventDto.getProgramId(), context.getFacilityTypeId(), Pageable.unpaged());
     LazyList<ValidSourceAssignment> sources = new LazyList<>(sourcesSupplier);
     context.setSources(sources);
 
     profiler.start("CREATE_LAZY_DESTINATIONS");
     Supplier<List<ValidDestinationAssignment>> destinationsSupplier = () ->
         validDestinationAssignmentRepository
-        .findByProgramIdAndFacilityTypeId(eventDto.getProgramId(), context.getFacilityTypeId());
+        .findByProgramIdAndFacilityTypeId(
+                eventDto.getProgramId(), context.getFacilityTypeId(), Pageable.unpaged());
     LazyList<ValidDestinationAssignment> destinations = new LazyList<>(destinationsSupplier);
     context.setDestinations(destinations);
 

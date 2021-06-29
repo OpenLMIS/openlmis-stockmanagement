@@ -20,7 +20,6 @@ import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
 
-import java.util.List;
 import java.util.UUID;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidSourceAssignment;
@@ -31,6 +30,8 @@ import org.openlmis.stockmanagement.service.ValidSourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -60,19 +61,21 @@ public class ValidSourceDestinationController {
   private ValidDestinationService validDestinationService;
 
   /**
-   * Get a list of valid destinations.
+   * Get a page with list of valid destinations.
    *
    * @param parameters filtering parameters.
+   * @param pageable valid sources pagination parameters
    * @return found valid destinations
    */
   @GetMapping(value = "/validDestinations")
-  public List<ValidSourceDestinationDto> getValidDestinations(
-      @RequestParam MultiValueMap<String, String> parameters) {
+  public Page<ValidSourceDestinationDto> getValidDestinations(
+      @RequestParam MultiValueMap<String, String> parameters, Pageable pageable) {
     ValidSourceDestinationSearchParams params = new ValidSourceDestinationSearchParams(parameters);
 
     LOGGER.debug(format("Try to find valid destinations with program %s and facility %s",
         params.getProgramId(), params.getFacilityId()));
-    return validDestinationService.findDestinations(params.getProgramId(), params.getFacilityId());
+    return validDestinationService.findDestinations(
+            params.getProgramId(), params.getFacilityId(), pageable);
   }
 
   /**
@@ -98,20 +101,21 @@ public class ValidSourceDestinationController {
   }
 
   /**
-   * Get a list of valid sources.
+   * Get a page with list of valid sources.
    *
    * @param parameters filtering parameters.
-   * @return found valid destinations
+   * @param pageable valid sources pagination parameters
+   * @return found valid sources
    */
   @GetMapping(value = "/validSources")
-  public List<ValidSourceDestinationDto> getValidSources(
-      @RequestParam MultiValueMap<String, String> parameters) {
+  public Page<ValidSourceDestinationDto> getValidSources(
+      @RequestParam MultiValueMap<String, String> parameters, Pageable pageable) {
     ValidSourceDestinationSearchParams params = new ValidSourceDestinationSearchParams(parameters);
 
     LOGGER.debug(format("Try to find valid sources with program %s and facility %s",
         params.getProgramId(), params.getFacilityId()));
     return validSourceService.findSources(
-        params.getProgramId(), params.getFacilityId());
+        params.getProgramId(), params.getFacilityId(), pageable);
   }
 
   /**

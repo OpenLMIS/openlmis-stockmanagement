@@ -37,10 +37,13 @@ import org.openlmis.stockmanagement.repository.SourceDestinationAssignmentReposi
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
 import org.openlmis.stockmanagement.util.Message;
+import org.openlmis.stockmanagement.web.Pagination;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -130,15 +133,15 @@ public abstract class SourceDestinationBaseService {
    * @param <T> assignment type
    * @return a list of assignment dto or empty list if not found.
    */
-  protected <T extends SourceDestinationAssignment> List<ValidSourceDestinationDto> findAssignments(
+  protected <T extends SourceDestinationAssignment> Page<ValidSourceDestinationDto> findAssignments(
       UUID programId, UUID facilityId, SourceDestinationAssignmentRepository<T> repository,
-      Profiler profiler) {
+      Profiler profiler, Pageable pageable) {
     boolean isFiltered = programId != null && facilityId != null;
 
     profiler.start("FIND_ASSIGNMENTS");
     return isFiltered
-        ? findFilteredAssignments(programId, facilityId, repository, profiler)
-        : findAllAssignments(repository, profiler);
+        ? findFilteredAssignments(programId, facilityId, repository, profiler, pageable)
+        : findAllAssignments(repository, profiler, pageable);
   }
 
   /**
@@ -239,9 +242,9 @@ public abstract class SourceDestinationBaseService {
     }
   }
 
-  private <T extends SourceDestinationAssignment> List<ValidSourceDestinationDto>
+  private <T extends SourceDestinationAssignment> Page<ValidSourceDestinationDto>
       findFilteredAssignments(UUID programId, UUID facilityId,
-      SourceDestinationAssignmentRepository<T> repository, Profiler profiler) {
+      SourceDestinationAssignmentRepository<T> repository, Profiler profiler, Pageable pageable) {
     profiler.start("FIND_FACILITY_BY_ID");
     FacilityDto facility = facilityRefDataService.findOne(facilityId);
 
@@ -256,7 +259,7 @@ public abstract class SourceDestinationBaseService {
 
     profiler.start("FIND_ASSIGNMENTS_BY_PROGRAM_AND_FACILITY_TYPE");
     List<T> assignments = repository
-            .findByProgramIdAndFacilityTypeId(programId, facilityTypeId);
+            .findByProgramIdAndFacilityTypeId(programId, facilityTypeId, pageable);
 
     profiler.start("FIND_FACILITY_IDS");
     List<UUID> facilitiesIds = assignments.stream()
@@ -273,16 +276,21 @@ public abstract class SourceDestinationBaseService {
                     || hasGeoAffinity(assignment, facility, facilitiesById))
             .collect(Collectors.toList());
 
-    return geoAssigment.stream()
+    List<ValidSourceDestinationDto> result = geoAssigment.stream()
             .map(assignment -> createAssignmentDto(assignment, facilitiesById))
             .collect(Collectors.toList());
+
+    return Pagination.getPage(result, pageable, result.size());
   }
 
-  private <T extends SourceDestinationAssignment> List<ValidSourceDestinationDto>
-      findAllAssignments(SourceDestinationAssignmentRepository<T> repository, Profiler profiler) {
+  private <T extends SourceDestinationAssignment> Page<ValidSourceDestinationDto>
+      findAllAssignments(SourceDestinationAssignmentRepository<T> repository,
+                         Profiler profiler, Pageable pageable) {
     profiler.start("FIND_ALL_GEO_ASSIGNMENTS");
-    return repository.findAll().stream()
+
+    List<ValidSourceDestinationDto> result = repository.findAll(pageable).getContent().stream()
             .map(assignment -> createAssignmentDto(assignment, null))
             .collect(Collectors.toList());
+    return Pagination.getPage(result, pageable, result.size());
   }
 }

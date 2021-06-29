@@ -19,7 +19,6 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_ASSIGNM
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_FOUND;
 import static org.slf4j.ext.XLoggerFactory.getXLogger;
 
-import java.util.List;
 import java.util.UUID;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
@@ -28,6 +27,8 @@ import org.openlmis.stockmanagement.repository.ValidSourceAssignmentRepository;
 import org.slf4j.ext.XLogger;
 import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -39,19 +40,21 @@ public class ValidSourceService extends SourceDestinationBaseService {
   private ValidSourceAssignmentRepository validSourceRepository;
 
   /**
-   * Find valid destinations by program ID and facility ID.
+   * Find valid destinations page by program ID and facility ID.
    *
    * @param programId      program ID
    * @param facilityId facility ID
-   * @return valid destination assignment DTOs
+   * @param pageable pagination and sorting parameters
+   * @return page of valid destination assignment DTOs
    */
-  public List<ValidSourceDestinationDto> findSources(UUID programId, UUID facilityId) {
+  public Page<ValidSourceDestinationDto> findSources(UUID programId,
+                                                     UUID facilityId, Pageable pageable) {
     XLOGGER.entry();
     Profiler profiler = new Profiler("FIND_SOURCE_ASSIGNMENTS");
     profiler.setLogger(XLOGGER);
 
-    List<ValidSourceDestinationDto> sourceAssignments =
-        findAssignments(programId, facilityId, validSourceRepository, profiler);
+    Page<ValidSourceDestinationDto> sourceAssignments =
+            findAssignments(programId, facilityId, validSourceRepository, profiler, pageable);
     profiler.stop().log();
     XLOGGER.exit();
     return sourceAssignments;

@@ -19,7 +19,6 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_AS
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_NOT_FOUND;
 import static org.slf4j.ext.XLoggerFactory.getXLogger;
 
-import java.util.List;
 import java.util.UUID;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
@@ -28,6 +27,8 @@ import org.openlmis.stockmanagement.repository.ValidDestinationAssignmentReposit
 import org.slf4j.ext.XLogger;
 import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -39,19 +40,21 @@ public class ValidDestinationService extends SourceDestinationBaseService {
   private ValidDestinationAssignmentRepository validDestinationRepository;
 
   /**
-   * Find valid sources by program ID and facility type ID.
+   * Find valid sources page by program ID and facility type ID.
    *
    * @param programId program ID
    * @param facilityId facility ID
+   * @param pageable pagination and sorting parameters
    * @return valid source assignment DTOs
    */
-  public List<ValidSourceDestinationDto> findDestinations(UUID programId, UUID facilityId) {
+  public Page<ValidSourceDestinationDto> findDestinations(UUID programId,
+                                                          UUID facilityId, Pageable pageable) {
     XLOGGER.entry();
     Profiler profiler = new Profiler("FIND_DESTINATION_ASSIGNMENTS");
     profiler.setLogger(XLOGGER);
 
-    List<ValidSourceDestinationDto> assignments =
-        findAssignments(programId, facilityId, validDestinationRepository, profiler);
+    Page<ValidSourceDestinationDto> assignments =
+            findAssignments(programId, facilityId, validDestinationRepository, profiler, pageable);
     profiler.stop().log();
     XLOGGER.exit();
     return assignments;

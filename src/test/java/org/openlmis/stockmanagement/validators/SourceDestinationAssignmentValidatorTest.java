@@ -42,6 +42,7 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityTypeDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.springframework.data.domain.Pageable;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SourceDestinationAssignmentValidatorTest extends BaseValidatorTest {
@@ -69,11 +70,11 @@ public class SourceDestinationAssignmentValidatorTest extends BaseValidatorTest 
     when(node.getId()).thenReturn(UUID.randomUUID());
 
     lenient().when(validSourceAssignmentRepository
-        .findByProgramIdAndFacilityTypeId(any(UUID.class), any(UUID.class)))
+        .findByProgramIdAndFacilityTypeId(any(UUID.class), any(UUID.class), any(Pageable.class)))
         .thenReturn(singletonList(validSourceAssignment));
 
     when(validDestinationAssignmentRepository
-        .findByProgramIdAndFacilityTypeId(any(UUID.class), any(UUID.class)))
+        .findByProgramIdAndFacilityTypeId(any(UUID.class), any(UUID.class), any(Pageable.class)))
         .thenReturn(singletonList(validDestinationAssignment));
   }
 
@@ -103,7 +104,7 @@ public class SourceDestinationAssignmentValidatorTest extends BaseValidatorTest 
     eventDto.getLineItems().get(0).setDestinationId(null);
 
     when(validSourceAssignmentRepository
-        .findByProgramIdAndFacilityTypeId(any(UUID.class), any(UUID.class)))
+        .findByProgramIdAndFacilityTypeId(any(UUID.class), any(UUID.class), any(Pageable.class)))
         .thenReturn(new ArrayList<>());
 
     expectedEx.expect(ValidationMessageException.class);
@@ -123,7 +124,7 @@ public class SourceDestinationAssignmentValidatorTest extends BaseValidatorTest 
     eventDto.getLineItems().get(0).setSourceId(null);
 
     when(validDestinationAssignmentRepository
-        .findByProgramIdAndFacilityTypeId(any(UUID.class), any(UUID.class)))
+        .findByProgramIdAndFacilityTypeId(any(UUID.class), any(UUID.class), any(Pageable.class)))
         .thenReturn(new ArrayList<>());
 
     expectedEx.expect(ValidationMessageException.class);

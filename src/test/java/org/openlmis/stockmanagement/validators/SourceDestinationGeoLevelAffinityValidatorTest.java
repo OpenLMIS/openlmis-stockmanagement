@@ -23,7 +23,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationDtoDataBuilder.createValidSourceDestinationDto;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import org.junit.Before;
@@ -42,6 +41,9 @@ import org.openlmis.stockmanagement.i18n.MessageKeys;
 import org.openlmis.stockmanagement.service.ValidDestinationService;
 import org.openlmis.stockmanagement.service.ValidSourceService;
 import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
+import org.openlmis.stockmanagement.web.Pagination;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidatorTest {
@@ -49,7 +51,7 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
   private static final String ORGANIZATION_NODE_NAME = "ORGANIZATION_NODE_NAME";
   private static final String FACILITY_NODE_NAME = "FACILITY_NODE_NAME";
   private static final String CONTEXT_FACILITY_NAME = "CONTEXT_FACILITY";
-  
+
   @Mock
   private ValidDestinationService validDestinationService;
 
@@ -58,15 +60,15 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
 
   @InjectMocks
   private SourceDestinationGeoLevelAffinityValidator sourceDestinationGeoLeveLAffinityValidator;
-  
+
   @Rule
   public ExpectedException expectedEx = ExpectedException.none();
-    
+
   @Before
   public void setUp() throws Exception {
     super.setUp();
   }
-  
+
   @Test
   public void shouldNotRejectSourceWhenGeoAffinityMatch() {
     UUID sourceId = UUID.randomUUID();
@@ -78,12 +80,13 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
         createValidSourceDestinationDto(randomUUID(), ORGANIZATION_NODE_NAME));
 
     when(
-        validSourceService.findSources(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
-        .thenReturn(validDestinationAssignments);
+        validSourceService.findSources(stockEventDto.getProgramId(),
+        stockEventDto.getFacilityId(), Pageable.unpaged()))
+        .thenReturn(Pagination.getPage(validDestinationAssignments));
 
     sourceDestinationGeoLeveLAffinityValidator.validate(stockEventDto);
   }
-  
+
   @Test
   public void shouldNotRejectDestinationWhenGeoAffinityMatch() {
     UUID destinationId = UUID.randomUUID();
@@ -95,9 +98,9 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
         createValidSourceDestinationDto(randomUUID(), ORGANIZATION_NODE_NAME));
 
     when(
-        validDestinationService
-            .findDestinations(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
-        .thenReturn(validDestinationAssignments);
+        validDestinationService.findDestinations(
+                stockEventDto.getProgramId(), stockEventDto.getFacilityId(), Pageable.unpaged()))
+        .thenReturn(Pagination.getPage(validDestinationAssignments));
 
     sourceDestinationGeoLeveLAffinityValidator.validate(stockEventDto);
   }
@@ -111,18 +114,19 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
     FacilityDto facility = FacilityDto.builder().name(CONTEXT_FACILITY_NAME).build();
     when(facilityService.findOne(any(UUID.class))).thenReturn(facility);
     setContext(stockEventDto);
-    
+
     List<ValidSourceDestinationDto> validDestinationAssignments = asList(
         createValidSourceDestinationDto(randomUUID(), FACILITY_NODE_NAME),
         createValidSourceDestinationDto(randomUUID(), ORGANIZATION_NODE_NAME));
 
     when(
-        validSourceService.findSources(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
-        .thenReturn(validDestinationAssignments);
-    
+        validSourceService.findSources(stockEventDto.getProgramId(),
+        stockEventDto.getFacilityId(), Pageable.unpaged()))
+        .thenReturn(Pagination.getPage(validDestinationAssignments));
+
     expectedEx.expect(ValidationMessageException.class);
     expectedEx.expectMessage(MessageKeys.ERROR_SOURCE_ASSIGNMENT_NO_MATCH_GEO_LEVEL_AFFINITY);
-    
+
     sourceDestinationGeoLeveLAffinityValidator.validate(stockEventDto);
   }
 
@@ -131,45 +135,46 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
     UUID sourceId = UUID.randomUUID();
     StockEventDto stockEventDto = StockEventDtoDataBuilder
         .createWithSourceAndDestination(sourceId, null);
-    
+
     FacilityDto facility = FacilityDto.builder().name(CONTEXT_FACILITY_NAME).build();
+
     when(facilityService.findOne(any(UUID.class))).thenReturn(facility);
     setContext(stockEventDto);
-    
+
     when(
-        validSourceService.findSources(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
-        .thenReturn(Collections.emptyList());
+        validSourceService.findSources(stockEventDto.getProgramId(),
+        stockEventDto.getFacilityId(), Pageable.unpaged()))
+        .thenReturn(Page.empty());
 
     expectedEx.expect(ValidationMessageException.class);
     expectedEx.expectMessage(MessageKeys.ERROR_SOURCE_ASSIGNMENT_NO_MATCH_GEO_LEVEL_AFFINITY);
-    
+
     sourceDestinationGeoLeveLAffinityValidator.validate(stockEventDto);
   }
-  
+
   @Test
   public void shouldRejectSourceWithMessageWhenGeoAffinityNotMatch() {
     UUID sourceId = UUID.randomUUID();
     StockEventDto stockEventDto = StockEventDtoDataBuilder
         .createWithSourceAndDestination(sourceId, null);
     FacilityDto facility = FacilityDto.builder().name(CONTEXT_FACILITY_NAME).build();
-    
     when(facilityService.findOne(any(UUID.class))).thenReturn(facility);
     setContext(stockEventDto);
-    
+
     List<ValidSourceDestinationDto> validDestinationAssignments = asList(
         createValidSourceDestinationDto(randomUUID(), FACILITY_NODE_NAME),
         createValidSourceDestinationDto(randomUUID(), ORGANIZATION_NODE_NAME));
 
-    when(
-        validSourceService.findSources(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
-        .thenReturn(validDestinationAssignments);
-    
+    when(validSourceService.findSources(stockEventDto.getProgramId(),
+        stockEventDto.getFacilityId(),  Pageable.unpaged()))
+        .thenReturn(Pagination.getPage(validDestinationAssignments));
+
     expectedEx.expect(ValidationMessageException.class);
     expectedEx.expectMessage(MessageKeys.ERROR_SOURCE_ASSIGNMENT_NO_MATCH_GEO_LEVEL_AFFINITY);
-    
+
     sourceDestinationGeoLeveLAffinityValidator.validate(stockEventDto);
   }
-  
+
   @Test
   public void shouldRejectDestinationWhenGeoAffinityNotMatch() {
     UUID destinationId = UUID.randomUUID();
@@ -179,17 +184,19 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
     FacilityDto facility = FacilityDto.builder().name(CONTEXT_FACILITY_NAME).build();
     when(facilityService.findOne(any(UUID.class))).thenReturn(facility);
     setContext(stockEventDto);
-    
+
     List<ValidSourceDestinationDto> validDestinationAssignments = asList(
         createValidSourceDestinationDto(randomUUID(), FACILITY_NODE_NAME),
         createValidSourceDestinationDto(randomUUID(), ORGANIZATION_NODE_NAME));
 
-    when(validDestinationService.findDestinations(stockEventDto.getProgramId(), 
-          stockEventDto.getFacilityId())).thenReturn(validDestinationAssignments);
-    
+    when(validDestinationService.findDestinations(stockEventDto.getProgramId(),
+          stockEventDto.getFacilityId(), Pageable.unpaged()))
+            .thenReturn(Pagination.getPage(validDestinationAssignments));
+
     expectedEx.expect(ValidationMessageException.class);
-    expectedEx.expectMessage(MessageKeys.ERROR_DESTINATION_ASSIGNMENT_NO_MATCH_GEO_LEVEL_AFFINITY);
-    
+    expectedEx.expectMessage(
+            MessageKeys.ERROR_DESTINATION_ASSIGNMENT_NO_MATCH_GEO_LEVEL_AFFINITY);
+
     sourceDestinationGeoLeveLAffinityValidator.validate(stockEventDto);
   }
 
@@ -199,10 +206,12 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
         .createNoSourceDestinationStockEventDto();
 
     stockEventDto.getLineItems().forEach(lineItem -> lineItem.setReasonId(null));
-    
+
     sourceDestinationGeoLeveLAffinityValidator.validate(stockEventDto);
-    
-    verify(validDestinationService, times(0)).findDestinations(any(), any());
-    verify(validSourceService, times(0)).findSources(any(), any());
+
+    verify(validDestinationService, times(0))
+            .findDestinations(any(), any(), any());
+    verify(validSourceService, times(0))
+            .findSources(any(), any(), any());
   }
 }

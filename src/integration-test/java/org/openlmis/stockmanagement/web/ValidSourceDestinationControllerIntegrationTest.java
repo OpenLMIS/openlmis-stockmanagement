@@ -38,6 +38,8 @@ import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.ValidDestinationService;
 import org.openlmis.stockmanagement.service.ValidSourceService;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -50,6 +52,7 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
   private static final String PROGRAM_EXP = "$.programId";
   private static final String FACILITY_TYPE_EXP = "$.facilityTypeId";
   private static final String NODE_REFERENCE_ID_EXP = "$.node.referenceId";
+  private Pageable pageRequest = PageRequest.of(0, 20);
 
   @MockBean
   private ValidSourceService validSourceService;
@@ -72,11 +75,12 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
 
     UUID program = randomUUID();
     UUID facility = randomUUID();
-    when(validSourceService.findSources(program, facility))
-        .thenReturn(singletonList(sourceDestination));
 
-    when(validDestinationService.findDestinations(program, facility))
-        .thenReturn(singletonList(sourceDestination));
+    when(validSourceService.findSources(program, facility, pageRequest))
+        .thenReturn(Pagination.getPage(singletonList(sourceDestination)));
+
+    when(validDestinationService.findDestinations(program, facility, pageRequest))
+        .thenReturn(Pagination.getPage(singletonList(sourceDestination)));
 
     verifyZeroInteractions(permissionService);
 
@@ -97,11 +101,11 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
     destinationAssignmentDto.setIsFreeTextAllowed(true);
     ValidSourceDestinationDto sourceAssignmentDto = destinationAssignmentDto;
 
-    when(validSourceService.findSources(null, null))
-            .thenReturn(singletonList(sourceAssignmentDto));
+    when(validSourceService.findSources(null, null, pageRequest))
+            .thenReturn(Pagination.getPage(singletonList(sourceAssignmentDto)));
 
-    when(validDestinationService.findDestinations(null, null))
-            .thenReturn(singletonList(destinationAssignmentDto));
+    when(validDestinationService.findDestinations(null, null, pageRequest))
+            .thenReturn(Pagination.getPage(singletonList(destinationAssignmentDto)));
 
     verifyZeroInteractions(permissionService);
 
@@ -253,14 +257,16 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
     ResultActions resultActions = mvc.perform(get(uri)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
         .param(PROGRAM_ID, programId != null ? programId.toString() : null)
-        .param(FACILITY_ID, facilityId != null ? facilityId.toString() : null));
+        .param(FACILITY_ID, facilityId != null ? facilityId.toString() : null)
+        .param("page", "0")
+        .param("size", "20"));
 
     //then
     resultActions
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(1)))
-        .andExpect(jsonPath("$[0].id", is(sourceDestinationDto.getId().toString())))
-        .andExpect(jsonPath("$[0].name", is(sourceDestinationDto.getName())))
-        .andExpect(jsonPath("$[0].isFreeTextAllowed", is(true)));
+        .andExpect(jsonPath("$.content", hasSize(1)))
+        .andExpect(jsonPath("$.content[0].id", is(sourceDestinationDto.getId().toString())))
+        .andExpect(jsonPath("$.content[0].name", is(sourceDestinationDto.getName())))
+        .andExpect(jsonPath("$.content[0].isFreeTextAllowed", is(true)));
   }
 }

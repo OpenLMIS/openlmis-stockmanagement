@@ -24,8 +24,8 @@ import org.springframework.data.domain.Pageable;
 
 public class Pagination {
 
-  private static final int DEFAULT_PAGE_NUMBER = 0;
-  private static final int NO_PAGINATION = Integer.MAX_VALUE;
+  public static final int DEFAULT_PAGE_NUMBER = 0;
+  public static final int NO_PAGINATION = Integer.MAX_VALUE;
 
   private Pagination() {
     throw new UnsupportedOperationException();

@@ -32,6 +32,8 @@ import org.openlmis.stockmanagement.service.ValidSourceService;
 import org.openlmis.stockmanagement.util.Message;
 import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 /**
@@ -77,50 +79,53 @@ public class SourceDestinationGeoLevelAffinityValidator implements StockEventVal
 
   private void  validateDestinations(StockEventDto stockEventDto, Profiler profiler) {
     profiler.start("FIND_DESTINATIONS");
-    List<ValidSourceDestinationDto> validDestinationDtos = validDestinationService
-        .findDestinations(stockEventDto.getProgramId(), stockEventDto.getFacilityId());
+    Page<ValidSourceDestinationDto> validDestinationDtos = validDestinationService
+        .findDestinations(
+                stockEventDto.getProgramId(), stockEventDto.getFacilityId(), Pageable.unpaged());
 
     profiler.start("GET_DESTINATION_IDS");
-    List<UUID> validDestinationDtoIds = getValidNodeIds(validDestinationDtos);
+    List<UUID> validDestinationDtoIds = getValidNodeIds(validDestinationDtos.getContent());
 
     profiler.start("FIND_STOCK_EVENTS");
-    List<StockEventLineItemDto> stockEventLineItemsNotMatch = 
+    List<StockEventLineItemDto> stockEventLineItemsNotMatch =
         findAllStockEventLineItemsWithNoAffinityMatch(stockEventDto.getLineItems(),
-          lineItem -> isNotGeoLevelAffinity(lineItem.getDestinationId(), validDestinationDtoIds));
-    
+          lineItem -> isNotGeoLevelAffinity(lineItem.getDestinationId(),
+          validDestinationDtoIds));
+
     if (stockEventLineItemsNotMatch.isEmpty()) {
       return;
     }
-    
+
     UUID notValidNodeAssignmentId = stockEventLineItemsNotMatch.get(0).getDestinationId();
     FacilityDto facilityDto = stockEventDto.getContext().getFacility();
-    throwError(ERROR_DESTINATION_ASSIGNMENT_NO_MATCH_GEO_LEVEL_AFFINITY, 
+    throwError(ERROR_DESTINATION_ASSIGNMENT_NO_MATCH_GEO_LEVEL_AFFINITY,
         notValidNodeAssignmentId, facilityDto.getName());
 
   }
 
   private void  validateSources(StockEventDto stockEventDto, Profiler profiler) {
     profiler.start("FIND_SOURCES");
-    List<ValidSourceDestinationDto> validSourceDtos =
-        validSourceService.findSources(stockEventDto.getProgramId(), stockEventDto.getFacilityId());
+    Page<ValidSourceDestinationDto> validSourceDtos =
+        validSourceService.findSources(stockEventDto.getProgramId(),
+        stockEventDto.getFacilityId(), Pageable.unpaged());
 
     profiler.start("GET_SOURCE_IDS");
-    List<UUID> validSourceDtoIds = getValidNodeIds(validSourceDtos);
+    List<UUID> validSourceDtoIds = getValidNodeIds(validSourceDtos.getContent());
 
     profiler.start("FIND_STOCK_EVENTS");
-    List<StockEventLineItemDto> stockEventLineItemsNotMatch = 
+    List<StockEventLineItemDto> stockEventLineItemsNotMatch =
         findAllStockEventLineItemsWithNoAffinityMatch(stockEventDto.getLineItems(),
           lineItem -> isNotGeoLevelAffinity(lineItem.getSourceId(), validSourceDtoIds));
-     
+
     if (stockEventLineItemsNotMatch.isEmpty()) {
       return;
     }
 
     UUID notValidNodeAssignmentId = stockEventLineItemsNotMatch.get(0).getSourceId();
     FacilityDto facilityDto = stockEventDto.getContext().getFacility();
-    throwError(ERROR_SOURCE_ASSIGNMENT_NO_MATCH_GEO_LEVEL_AFFINITY, 
+    throwError(ERROR_SOURCE_ASSIGNMENT_NO_MATCH_GEO_LEVEL_AFFINITY,
         notValidNodeAssignmentId, facilityDto.getName());
-    
+
   }
 
   private List<StockEventLineItemDto> findAllStockEventLineItemsWithNoAffinityMatch(
