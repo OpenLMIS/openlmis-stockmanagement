@@ -20,7 +20,6 @@ public final class ExtensionPointId {
   public static final String ADJUSTMENT_REASON_POINT_ID = "AdjustmentReasonValidator";
   public static final String FREE_TEXT_POINT_ID = "FreeTextValidator";
   public static final String UNPACK_KIT_POINT_ID = "UnpackKitValidator";
-  public static final String STOCK_EVENT_POINT_ID = "StockEventPostProcessor";
 
   private ExtensionPointId() { }
 }

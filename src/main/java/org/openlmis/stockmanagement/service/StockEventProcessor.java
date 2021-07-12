@@ -21,9 +21,6 @@ import java.util.UUID;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
-import org.openlmis.stockmanagement.extension.ExtensionManager;
-import org.openlmis.stockmanagement.extension.point.ExtensionPointId;
-import org.openlmis.stockmanagement.extension.point.StockEventPostProcessor;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import org.slf4j.Logger;
@@ -62,9 +59,6 @@ public class StockEventProcessor {
   @Autowired
   private StockEventNotificationProcessor stockEventNotificationProcessor;
 
-  @Autowired
-  private ExtensionManager extensionManager;
-
   /**
    * Validate and persist event and create stock card and line items from it.
    *
@@ -87,10 +81,6 @@ public class StockEventProcessor {
     UUID eventId = saveEventAndGenerateLineItems(
         eventDto, profiler.startNested("SAVE_AND_GENERATE_LINE_ITEMS")
     );
-
-    StockEventPostProcessor stockEventPostProcessor = extensionManager.getExtension(
-        ExtensionPointId.STOCK_EVENT_POINT_ID, StockEventPostProcessor.class);
-    stockEventPostProcessor.process(eventDto);
 
     profiler.stop().log();
     XLOGGER.exit(eventId);
