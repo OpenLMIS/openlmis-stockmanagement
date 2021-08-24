@@ -36,7 +36,7 @@ public class StockCardDataBuilder {
   private LocalDate occurredDate = getBaseDate();
   private ZonedDateTime processedDate = getBaseDateTime();
   private StockEvent originalEvent;
-  private Boolean isShowed;
+  private Boolean isShowed = true;
 
   public StockCardDataBuilder(StockEvent originalEvent) {
     this.originalEvent = originalEvent;
