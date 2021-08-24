@@ -40,6 +40,7 @@ import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.domain.sourcedestination.Organization;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.NodeRepository;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
@@ -92,6 +93,9 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
   @Autowired
   private StockCardLineItemReasonRepository stockCardLineItemReasonRepository;
 
+  @Autowired
+  private CalculatedStockOnHandRepository calculatedStockOnHandRepository;
+
   @Mock
   private SecurityContext securityContext;
 
@@ -135,6 +139,7 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
   @After
   public void tearDown() throws Exception {
     physicalInventoriesRepository.deleteAll();
+    calculatedStockOnHandRepository.deleteAll();
     stockCardRepository.deleteAll();
     stockEventsRepository.deleteAll();
     nodeRepository.deleteAll();
@@ -150,6 +155,7 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
     stockEventDto.getLineItems().get(0).setSourceId(node.getId());
     stockEventDto.getLineItems().get(0).setDestinationId(node.getId());
     stockEventDto.setUserId(userId);
+    stockEventDto.setShowed(true);
     setContext(stockEventDto);
 
     Mockito.doThrow(new RuntimeException("something wrong from validations service"))
@@ -176,6 +182,7 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
     stockEventDto.getLineItems().get(0).setSourceId(node.getId());
     stockEventDto.getLineItems().get(0).setDestinationId(node.getId());
     stockEventDto.setUserId(userId);
+    stockEventDto.setShowed(true);
     setContext(stockEventDto);
 
     //when
@@ -192,6 +199,7 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
     //given
     StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.setUserId(userId);
+    stockEventDto.setShowed(true);
     stockEventDto.getLineItems().get(0).setReasonId(null);
     stockEventDto.getLineItems().get(0).setSourceId(null);
     stockEventDto.getLineItems().get(0).setDestinationId(null);

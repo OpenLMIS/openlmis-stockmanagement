@@ -81,6 +81,7 @@ public class StockCardTemplateService {
 
     if (found != null) {
       template.setId(found.getId());
+      template.setShowed(true);
       templateRepository.delete(found);
     } else {
       programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(

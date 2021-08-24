@@ -75,13 +75,14 @@ public class StockEventNotificationProcessorTest {
   @Before
   public void setUp() {
     stockCard = new StockCard(null, facilityId, programId, orderableId, lotId, null, 0,
-        getBaseDate(), getBaseDateTime());
+        getBaseDate(), getBaseDateTime(), true);
     stockCard.setId(stockCardId);
 
     context = mock(StockEventProcessContext.class);
 
     stockEventDto = createStockEventDto();
     stockEventDto.setUserId(userId);
+    stockEventDto.setShowed(true);
     stockEventDto.setProgramId(programId);
     stockEventDto.setFacilityId(facilityId);
     firstLineItem = stockEventDto.getLineItems().get(0);
@@ -122,7 +123,7 @@ public class StockEventNotificationProcessorTest {
     UUID anotherLotId = UUID.randomUUID();
 
     StockCard anotherStockCard = new StockCard(null, facilityId, programId, orderableId, lotId,
-        null, 0, getBaseDate(), getBaseDateTime());
+        null, 0, getBaseDate(), getBaseDateTime(), true);
     anotherStockCard.setId(anotherStockCardId);
 
     StockEventLineItemDto secondLineItem = createStockEventLineItem();

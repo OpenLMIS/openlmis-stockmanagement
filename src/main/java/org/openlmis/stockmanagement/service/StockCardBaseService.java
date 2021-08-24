@@ -81,6 +81,9 @@ public abstract class StockCardBaseService {
     cardDto.setFacility(facility);
     cardDto.setProgram(program);
     cardDto.setOrderable(OrderableDto.builder().id(card.getOrderableId()).build());
+    if (card.getShowed() != null) {
+      cardDto.setShowed(card.getShowed());
+    }
     if (card.getLotId() != null) {
       cardDto.setLot(LotDto.builder().id(card.getLotId()).build());
     }

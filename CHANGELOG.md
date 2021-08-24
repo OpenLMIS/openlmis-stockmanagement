@@ -3,6 +3,7 @@
 
 Improvements:
 * [OLMIS-7298](https://openlmis.atlassian.net/browse/OLMIS-7298): Added page and size parameters for /validSources and /validDestinations endpoints.
+* [OLMIS-7370](https://openlmis.atlassian.net/browse/OLMIS-7370): Added flag for active/inactive for stock card.
 
 5.1.3 / 2020-12-17
 ==================

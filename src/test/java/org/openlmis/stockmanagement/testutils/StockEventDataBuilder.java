@@ -28,6 +28,7 @@ public class StockEventDataBuilder {
   private UUID programId = UUID.randomUUID();
   private UUID userId = UUID.randomUUID();
   private ZonedDateTime processedDate = ZonedDateTime.now();
+  private Boolean isShowed;
   private String signature;
   private String documentNumber;
   private List<StockEventLineItem> lineItems = Lists.newArrayList();
@@ -47,12 +48,17 @@ public class StockEventDataBuilder {
     return this;
   }
 
+  public StockEventDataBuilder withIsShowed(Boolean isShowed) {
+    this.isShowed = isShowed;
+    return this;
+  }
+
   /**
    * Creates stock event based on parameters from the builder.
    */
   public StockEvent build() {
     StockEvent event = new StockEvent(
-        facilityId, programId, userId, processedDate, signature, documentNumber, lineItems
+        facilityId, programId, userId,processedDate, isShowed, signature, documentNumber, lineItems
     );
     event.setId(id);
 

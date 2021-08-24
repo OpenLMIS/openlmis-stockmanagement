@@ -36,6 +36,7 @@ public class StockCardDataBuilder {
   private LocalDate occurredDate = getBaseDate();
   private ZonedDateTime processedDate = getBaseDateTime();
   private StockEvent originalEvent;
+  private Boolean isShowed;
 
   public StockCardDataBuilder(StockEvent originalEvent) {
     this.originalEvent = originalEvent;
@@ -79,6 +80,11 @@ public class StockCardDataBuilder {
     return this;
   }
 
+  public StockCardDataBuilder withIsShowed(Boolean isShowed) {
+    this.isShowed = isShowed;
+    return this;
+  }
+
   /**
    * Creates stock card based on parameters from the builder.
    */
@@ -98,7 +104,7 @@ public class StockCardDataBuilder {
   public StockCard build() {
     StockCard card = new StockCard(
         originalEvent, originalEvent.getFacilityId(), originalEvent.getProgramId(), orderableId,
-        lotId, lineItems, stockOnHand, occurredDate, processedDate
+        lotId, lineItems, stockOnHand, occurredDate, processedDate, true
     );
     card.setId(id);
 

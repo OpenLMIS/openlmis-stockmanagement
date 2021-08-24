@@ -55,6 +55,10 @@
       }
     }
   },
+  "isShowed": {
+    "type": "boolean",
+    "title": "isShowed"
+  },
   "required": [
     "programId",
     "facilityTypeId",

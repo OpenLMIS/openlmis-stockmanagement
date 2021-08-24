@@ -106,6 +106,17 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
   @Transient
   private ZonedDateTime processedDate = null;
 
+  @Column(nullable = true)
+  private Boolean isShowed;
+
+  public Boolean getShowed() {
+    return isShowed;
+  }
+
+  public void setShowed(Boolean showed) {
+    isShowed = showed;
+  }
+
   /**
    * Create stock card from stock event dto and its line item.
    *
@@ -134,6 +145,7 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
 
         .lineItems(new ArrayList<>())
         .stockOnHand(0)
+        .isShowed(true)
         .build();
   }
 
@@ -150,7 +162,7 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
     clone.setProgramId(programId);
     clone.setFacilityId(facilityId);
     clone.setLineItems(new ArrayList<>());
-
+    clone.setShowed(isShowed);
     try {
       if (lineItems != null) {
         for (StockCardLineItem lineItem : this.getLineItems()) {

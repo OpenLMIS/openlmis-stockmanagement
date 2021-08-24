@@ -58,6 +58,7 @@ import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
+import org.openlmis.stockmanagement.repository.ValidSourceAssignmentRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
@@ -93,6 +94,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
   @Autowired
   private StockCardLineItemReasonRepository stockCardLineItemReasonRepository;
+
+  @Autowired
+  private ValidSourceAssignmentRepository validSourceAssignmentRepository;
 
   @Autowired
   private CalculatedStockOnHandRepository calculatedStockOnHandRepository;
@@ -140,6 +144,7 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     calculatedStockOnHandRepository.deleteAll();
     stockCardRepository.deleteAll();
     stockEventsRepository.deleteAll();
+    validSourceAssignmentRepository.deleteAll();
     nodeRepository.deleteAll();
     stockCardLineItemReasonRepository.deleteAll();
   }

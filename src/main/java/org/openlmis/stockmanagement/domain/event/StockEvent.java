@@ -47,6 +47,9 @@ public class StockEvent extends BaseEntity {
   @Column(nullable = false, columnDefinition = "timestamp")
   private ZonedDateTime processedDate;
 
+  @Column(nullable = true)
+  private Boolean isShowed;
+
   private String signature;
 
   private String documentNumber;

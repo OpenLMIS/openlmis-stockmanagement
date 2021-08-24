@@ -29,6 +29,10 @@
     "stockOnHand": {
       "type": "integer"
     },
+    "isShowed": {
+      "type": "boolean",
+      "title": "isShowed"
+    },
     "lastUpdate": {
       "type": "string",
       "format": "date"

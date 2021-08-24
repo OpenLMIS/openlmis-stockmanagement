@@ -61,6 +61,7 @@ public class StockCardDtoDataBuilder {
         .program(ProgramDto.builder().name("HIV").id(UUID.randomUUID()).build())
         .orderable(OrderableDto.builder().productCode("ABC01").build())
         .lineItems(Arrays.asList(lineItemDto))
+        .isShowed(true)
         .build();
   }
 }

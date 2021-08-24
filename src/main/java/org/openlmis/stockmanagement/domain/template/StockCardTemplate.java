@@ -50,4 +50,11 @@ public class StockCardTemplate extends BaseEntity {
   @LazyCollection(FALSE)
   @OneToMany(cascade = ALL, mappedBy = "stockCardTemplate")
   private List<StockCardLineItemFields> stockCardLineItemFields = new ArrayList<>();
+
+  @Column(nullable = true, columnDefinition = "boolean default true")
+  private Boolean isShowed;
+
+  public void setShowed(Boolean showed) {
+    isShowed = showed;
+  }
 }

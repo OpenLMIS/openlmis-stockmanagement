@@ -30,6 +30,10 @@
         "title": "Stock event line item",
         "$ref": "stockEventLineItemDto.json"
       }
+    },
+    "isShowed": {
+      "type": "boolean",
+      "title": "isShowed"
     }
   },
   "required": [
