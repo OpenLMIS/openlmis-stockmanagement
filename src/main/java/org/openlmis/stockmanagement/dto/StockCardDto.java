@@ -81,7 +81,7 @@ public final class StockCardDto implements IdentifiableByOrderableLot {
   }
 
   public Boolean getShowed() {
-    return isShowed == null ? true : isShowed;
+    return isShowed != null && isShowed;
   }
 
   public void setShowed(Boolean showed) {
