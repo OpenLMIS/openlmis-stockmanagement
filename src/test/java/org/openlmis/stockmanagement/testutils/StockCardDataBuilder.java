@@ -104,7 +104,7 @@ public class StockCardDataBuilder {
   public StockCard build() {
     StockCard card = new StockCard(
         originalEvent, originalEvent.getFacilityId(), originalEvent.getProgramId(), orderableId,
-        lotId, lineItems, stockOnHand, occurredDate, processedDate, true
+        lotId, lineItems, stockOnHand, occurredDate, processedDate, isShowed
     );
     card.setId(id);
 

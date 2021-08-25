@@ -28,7 +28,7 @@ public class StockEventDataBuilder {
   private UUID programId = UUID.randomUUID();
   private UUID userId = UUID.randomUUID();
   private ZonedDateTime processedDate = ZonedDateTime.now();
-  private Boolean isShowed;
+  private Boolean isShowed = true;
   private String signature;
   private String documentNumber;
   private List<StockEventLineItem> lineItems = Lists.newArrayList();
