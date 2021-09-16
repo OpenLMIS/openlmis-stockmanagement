@@ -288,9 +288,6 @@ public abstract class SourceDestinationBaseService {
                          Profiler profiler, Pageable pageable) {
     profiler.start("FIND_ALL_GEO_ASSIGNMENTS");
 
-    List<ValidSourceDestinationDto> result = repository.findAll(pageable).getContent().stream()
-            .map(assignment -> createAssignmentDto(assignment, null))
-            .collect(Collectors.toList());
-    return Pagination.getPage(result, pageable, result.size());
+    return repository.findAll(pageable).map(assignment -> createAssignmentDto(assignment, null));
   }
 }
