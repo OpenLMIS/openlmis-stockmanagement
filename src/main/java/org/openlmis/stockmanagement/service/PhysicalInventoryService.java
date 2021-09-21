@@ -94,7 +94,6 @@ public class PhysicalInventoryService {
    * @return the saved inventory.
    */
   public PhysicalInventoryDto createNewDraft(PhysicalInventoryDto dto) {
-    LOGGER.info("create physical inventory draft");
     physicalInventoryValidator.validateEmptyDraft(dto);
     checkPermission(dto.getProgramId(), dto.getFacilityId());
 
@@ -102,6 +101,7 @@ public class PhysicalInventoryService {
 
     dto.setId(null);
     PhysicalInventory save = physicalInventoriesRepository.save(dto.toEmptyPhysicalInventory());
+    LOGGER.info("Saved physical inventory draft " + save.getId().toString());
     dto.setId(save.getId());
 
     return dto;
@@ -114,7 +114,7 @@ public class PhysicalInventoryService {
    * @return the saved inventory.
    */
   public PhysicalInventoryDto saveDraft(PhysicalInventoryDto dto, UUID id) {
-    LOGGER.info("save physical inventory draft");
+    LOGGER.info("Saving physical inventory draft " + dto.getId().toString());
     physicalInventoryValidator.validateDraft(dto, id);
     checkPermission(dto.getProgramId(), dto.getFacilityId());
 
@@ -155,8 +155,6 @@ public class PhysicalInventoryService {
    * @param eventId      eventId.
    */
   void submitPhysicalInventory(PhysicalInventoryDto inventoryDto, UUID eventId) {
-    LOGGER.info("submit physical inventory");
-
     checkDraftIsSubmittable(inventoryDto);
     PhysicalInventory inventory = inventoryDto.toPhysicalInventoryForSubmit();
 
@@ -179,7 +177,9 @@ public class PhysicalInventoryService {
       }
     }
 
-    physicalInventoriesRepository.save(inventory);
+    LOGGER.info("Saved physical inventory "
+            + physicalInventoriesRepository.save(inventory).getId().toString()
+    );
   }
 
   private void checkIfDraftExists(PhysicalInventoryDto dto) {

@@ -104,7 +104,7 @@ public class StockEventProcessor {
 
     profiler.start("DB_SAVE");
     UUID savedEventId = stockEventsRepository.save(stockEvent).getId();
-    LOGGER.debug("Saved stock event with id " + savedEventId);
+    LOGGER.info("Saved stock event with id " + savedEventId.toString());
 
     if (eventDto.isPhysicalInventory()) {
       profiler.start("CREATE_PHYSICAL_INVENTORY_DTO");
