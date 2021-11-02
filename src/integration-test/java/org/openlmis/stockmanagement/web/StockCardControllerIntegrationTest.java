@@ -31,6 +31,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.google.common.collect.ImmutableSet;
+
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -192,7 +194,7 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
     UUID stockCardId = UUID.randomUUID();
     StockEvent event = new StockEventDataBuilder().build();
     StockCard stockCard = new StockCardDataBuilder(event).withIsActive(false).build();
-    when(stockCardService.setInactive(stockCardId)).thenReturn(stockCard);
+    when(stockCardService.setInactive(stockCardId)).thenReturn(Optional.of(stockCard));
 
     // when
     ResultActions resultActions = mvc.perform(
