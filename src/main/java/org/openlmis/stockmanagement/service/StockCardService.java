@@ -223,7 +223,7 @@ public class StockCardService extends StockCardBaseService {
   public StockCard setInactive(UUID stockCardId) {
     StockCard stockCard = cardRepository.findById(stockCardId).orElse(null);
     if (null != stockCard) {
-      stockCard.setIsShowed(false);
+      stockCard.setActive(false);
       return cardRepository.saveAndFlush(stockCard);
     }
     return stockCard;

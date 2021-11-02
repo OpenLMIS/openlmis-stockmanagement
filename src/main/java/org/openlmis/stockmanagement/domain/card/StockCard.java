@@ -107,14 +107,14 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
   private ZonedDateTime processedDate = null;
 
   @Column(nullable = true)
-  private Boolean isShowed;
+  private boolean isActive;
 
-  public Boolean getShowed() {
-    return isShowed;
+  public boolean isActive() {
+    return isActive;
   }
 
-  public void setShowed(Boolean showed) {
-    isShowed = showed;
+  public void setActive(boolean active) {
+    isActive = active;
   }
 
   /**
@@ -145,7 +145,7 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
 
         .lineItems(new ArrayList<>())
         .stockOnHand(0)
-        .isShowed(true)
+        .isActive(true)
         .build();
   }
 
@@ -162,7 +162,7 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
     clone.setProgramId(programId);
     clone.setFacilityId(facilityId);
     clone.setLineItems(new ArrayList<>());
-    clone.setShowed(isShowed);
+    clone.setActive(isActive);
     try {
       if (lineItems != null) {
         for (StockCardLineItem lineItem : this.getLineItems()) {

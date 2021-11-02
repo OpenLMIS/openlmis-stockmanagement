@@ -117,7 +117,7 @@ public class StockEventsControllerIntegrationTest extends BaseWebIntegrationTest
     stockEvent.setProgramId(UUID.randomUUID());
     stockEvent.setSignature("signature");
     stockEvent.setDocumentNumber("number");
-    stockEvent.setShowed(true);
+    stockEvent.setActive(true);
     stockEvent.setLineItems(Collections.singletonList(generateStockEventLineItem()));
 
     return stockEvent;

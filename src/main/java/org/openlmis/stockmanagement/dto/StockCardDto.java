@@ -58,7 +58,7 @@ public final class StockCardDto implements IdentifiableByOrderableLot {
   private OrderableDto orderable;
   private LotDto lot;
   private Map<String, String> extraData;
-  private Boolean isShowed;
+  private boolean isActive;
 
   @JsonFormat(shape = STRING)
   private LocalDate lastUpdate;
@@ -80,12 +80,12 @@ public final class StockCardDto implements IdentifiableByOrderableLot {
     return getLotId() != null;
   }
 
-  public Boolean getShowed() {
-    return isShowed != null && isShowed;
+  public boolean isActive() {
+    return isActive;
   }
 
-  public void setShowed(Boolean showed) {
-    isShowed = showed;
+  public void setActive(boolean active) {
+    isActive = active;
   }
 
   /**
@@ -101,7 +101,7 @@ public final class StockCardDto implements IdentifiableByOrderableLot {
         .lineItems(stockCard.getLineItems().stream()
             .map(StockCardLineItemDto::createFrom).collect(toList()))
         .stockOnHand(stockCard.getStockOnHand())
-        .isShowed(stockCard.getShowed())
+        .isActive(stockCard.isActive())
         .build();
   }
 }

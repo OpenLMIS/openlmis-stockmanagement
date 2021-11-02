@@ -28,7 +28,7 @@ public class StockEventDataBuilder {
   private UUID programId = UUID.randomUUID();
   private UUID userId = UUID.randomUUID();
   private ZonedDateTime processedDate = ZonedDateTime.now();
-  private Boolean isShowed = true;
+  private boolean isActive = true;
   private String signature;
   private String documentNumber;
   private List<StockEventLineItem> lineItems = Lists.newArrayList();
@@ -48,8 +48,8 @@ public class StockEventDataBuilder {
     return this;
   }
 
-  public StockEventDataBuilder withIsShowed(Boolean isShowed) {
-    this.isShowed = isShowed;
+  public StockEventDataBuilder withisActive(boolean isActive) {
+    this.isActive = isActive;
     return this;
   }
 
@@ -58,7 +58,7 @@ public class StockEventDataBuilder {
    */
   public StockEvent build() {
     StockEvent event = new StockEvent(
-        facilityId, programId, userId,processedDate, isShowed, signature, documentNumber, lineItems
+        facilityId, programId, userId,processedDate, isActive, signature, documentNumber, lineItems
     );
     event.setId(id);
 

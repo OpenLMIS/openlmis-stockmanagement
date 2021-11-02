@@ -48,7 +48,7 @@ public class StockEvent extends BaseEntity {
   private ZonedDateTime processedDate;
 
   @Column(nullable = true)
-  private Boolean isShowed;
+  private boolean isActive;
 
   private String signature;
 

@@ -37,7 +37,7 @@ public class StockEventDtoDataBuilder {
   private String signature = RandomStringUtils.random(5);
   private String documentNumber = RandomStringUtils.random(5);
   private UUID userId = UUID.randomUUID();
-  private Boolean isShowed = true;
+  private boolean isActive = true;
   private List<StockEventLineItemDto> lineItems = new ArrayList<>();
   private StockEventProcessContext context;
 
@@ -85,7 +85,7 @@ public class StockEventDtoDataBuilder {
 
     stockEventDto.setProgramId(UUID.randomUUID());
     stockEventDto.setFacilityId(UUID.randomUUID());
-    stockEventDto.setShowed(true);
+    stockEventDto.setActive(true);
 
     StockEventLineItemDto eventLineItemDto = createStockEventLineItem();
 
@@ -144,7 +144,7 @@ public class StockEventDtoDataBuilder {
 
   public StockEventDto build() {
     return new StockEventDto(resourceId, facilityId, programId, signature, documentNumber, userId,
-        isShowed, lineItems, context);
+        isActive, lineItems, context);
   }
 
   public StockEventDtoDataBuilder addLineItem(StockEventLineItemDto... lineItemDtos) {

@@ -82,7 +82,7 @@ public class StockEventNotificationProcessorTest {
 
     stockEventDto = createStockEventDto();
     stockEventDto.setUserId(userId);
-    stockEventDto.setShowed(true);
+    stockEventDto.setActive(true);
     stockEventDto.setProgramId(programId);
     stockEventDto.setFacilityId(facilityId);
     firstLineItem = stockEventDto.getLineItems().get(0);

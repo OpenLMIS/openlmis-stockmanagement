@@ -155,7 +155,7 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
     stockEventDto.getLineItems().get(0).setSourceId(node.getId());
     stockEventDto.getLineItems().get(0).setDestinationId(node.getId());
     stockEventDto.setUserId(userId);
-    stockEventDto.setShowed(true);
+    stockEventDto.setActive(true);
     setContext(stockEventDto);
 
     Mockito.doThrow(new RuntimeException("something wrong from validations service"))
@@ -182,7 +182,7 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
     stockEventDto.getLineItems().get(0).setSourceId(node.getId());
     stockEventDto.getLineItems().get(0).setDestinationId(node.getId());
     stockEventDto.setUserId(userId);
-    stockEventDto.setShowed(true);
+    stockEventDto.setActive(true);
     setContext(stockEventDto);
 
     //when
@@ -199,7 +199,7 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
     //given
     StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.setUserId(userId);
-    stockEventDto.setShowed(true);
+    stockEventDto.setActive(true);
     stockEventDto.getLineItems().get(0).setReasonId(null);
     stockEventDto.getLineItems().get(0).setSourceId(null);
     stockEventDto.getLineItems().get(0).setDestinationId(null);

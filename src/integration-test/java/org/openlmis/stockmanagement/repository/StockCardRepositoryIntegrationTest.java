@@ -82,7 +82,7 @@ public class StockCardRepositoryIntegrationTest
         .withoutId()
         .withFacility(facility)
         .withProgram(program)
-        .withIsShowed(true)
+        .withIsActive(true)
         .build();
 
     event = stockEventsRepository.save(event);
@@ -97,7 +97,7 @@ public class StockCardRepositoryIntegrationTest
         .withOrderable(product)
         .withLot(lot)
         .withLineItem(lineItem)
-        .withIsShowed(true)
+        .withIsActive(true)
         .build();
     lineItem.setStockCard(stockCard);
 

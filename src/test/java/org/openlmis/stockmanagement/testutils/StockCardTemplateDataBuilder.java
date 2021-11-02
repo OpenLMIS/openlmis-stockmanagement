@@ -36,7 +36,7 @@ public class StockCardTemplateDataBuilder {
     StockCardTemplate template = new StockCardTemplate();
     template.setFacilityTypeId(UUID.randomUUID());
     template.setProgramId(UUID.randomUUID());
-    template.setShowed(true);
+    template.setActive(true);
 
     AvailableStockCardFields packSize = new AvailableStockCardFields();
     packSize.setId(UUID.fromString("7663b4d2-d6da-11e6-bf26-cec0c932ce01"));
@@ -62,7 +62,7 @@ public class StockCardTemplateDataBuilder {
     StockCardTemplateDto dto = new StockCardTemplateDto();
     dto.setFacilityTypeId(UUID.randomUUID());
     dto.setProgramId(UUID.randomUUID());
-    dto.setShowed(true);
+    dto.setActive(true);
     dto.getStockCardFields().add(new StockCardFieldDto("packSize", true, 123));
     dto.getStockCardLineItemFields().add(
             new StockCardLineItemFieldDto("documentNumber", true, 456));

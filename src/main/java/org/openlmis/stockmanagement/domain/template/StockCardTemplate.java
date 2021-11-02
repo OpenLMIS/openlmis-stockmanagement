@@ -52,9 +52,9 @@ public class StockCardTemplate extends BaseEntity {
   private List<StockCardLineItemFields> stockCardLineItemFields = new ArrayList<>();
 
   @Column(nullable = true, columnDefinition = "boolean default true")
-  private Boolean isShowed;
+  private boolean isActive;
 
-  public void setShowed(Boolean showed) {
-    isShowed = showed;
+  public void setActive(boolean active) {
+    isActive = active;
   }
 }

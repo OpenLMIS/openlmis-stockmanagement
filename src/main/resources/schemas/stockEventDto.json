@@ -31,9 +31,9 @@
         "$ref": "stockEventLineItemDto.json"
       }
     },
-    "isShowed": {
+    "isActive": {
       "type": "boolean",
-      "title": "isShowed"
+      "title": "isActive"
     }
   },
   "required": [

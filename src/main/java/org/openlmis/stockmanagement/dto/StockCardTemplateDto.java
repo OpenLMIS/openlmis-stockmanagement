@@ -36,11 +36,9 @@ public class StockCardTemplateDto {
 
   private List<StockCardFieldDto> stockCardFields = new ArrayList<>();
   private List<StockCardLineItemFieldDto> stockCardLineItemFields = new ArrayList<>();
-  private Boolean isShowed;
+  private boolean isActive;
 
-  public void setShowed(Boolean showed) {
-    isShowed = showed;
-  }
+  public void setActive(boolean active) { isActive = active; }
 
   /**
    * Create stock card template dto object from DB model object.
@@ -80,7 +78,7 @@ public class StockCardTemplateDto {
     StockCardTemplate template = new StockCardTemplate();
     template.setFacilityTypeId(this.getFacilityTypeId());
     template.setProgramId(this.getProgramId());
-    template.setShowed(this.isShowed);
+    template.setActive(this.isActive);
 
     template.setStockCardFields(stockCardFields.stream().distinct()
             .map(cardFieldDto -> cardFieldDto.toModel(template, availableCardFields))

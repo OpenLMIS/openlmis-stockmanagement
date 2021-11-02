@@ -191,7 +191,7 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
     // given
     UUID stockCardId = UUID.randomUUID();
     StockEvent event = new StockEventDataBuilder().build();
-    StockCard stockCard = new StockCardDataBuilder(event).withIsShowed(false).build();
+    StockCard stockCard = new StockCardDataBuilder(event).withIsActive(false).build();
     when(stockCardService.setInactive(stockCardId)).thenReturn(stockCard);
 
     // when
@@ -202,7 +202,7 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
     // then
     resultActions.andExpect(status().isOk())
         .andDo(print())
-        .andExpect(jsonPath("$.isShowed", is(false)));
+        .andExpect(jsonPath("$.isActive", is(false)));
   }
 
   @Test
