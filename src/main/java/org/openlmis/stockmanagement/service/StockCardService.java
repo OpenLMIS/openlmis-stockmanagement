@@ -220,8 +220,8 @@ public class StockCardService extends StockCardBaseService {
    * @param stockCardId      id of stockCard to update
    */
   @Transactional
-  public StockCard setInactive(UUID stockCardId) {
-    StockCard stockCard = cardRepository.findById(stockCardId).orElse(null);
+  public Optional<StockCard> setInactive(UUID stockCardId) {
+    Optional<StockCard> stockCard = cardRepository.findById(stockCardId).orElse(null);
     if (stockCard.ifPresent()) {
       stockCard.setActive(false);
       return cardRepository.saveAndFlush(stockCard);
