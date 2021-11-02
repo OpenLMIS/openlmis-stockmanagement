@@ -19,6 +19,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.openlmis.stockmanagement.domain.card.StockCard;
@@ -132,13 +133,13 @@ public class StockCardsController {
       @PathVariable("stockCardId") UUID stockCardId) {
     LOGGER.debug("Try to make stock card with id: {} inactive", stockCardId);
 
-    StockCard stockCard = stockCardService.setInactive(stockCardId);
-    if (stockCard == null) {
+    Optional<StockCard> stockCard = stockCardService.setInactive(stockCardId);
+    if (stockCard.isPresent()) {
+      LOGGER.debug("Stock card with id: {} made inactive", stockCardId);
+      return new ResponseEntity<>(StockCardDto.createFrom(stockCard.get()), OK);
+    } else {
       LOGGER.debug("Not found stock card with id: {}", stockCardId);
       return new ResponseEntity<>(NOT_FOUND);
-    } else {
-      LOGGER.debug("Stock card with id: {} made inactive", stockCardId);
-      return new ResponseEntity<>(StockCardDto.createFrom(stockCard), OK);
     }
   }
 }
