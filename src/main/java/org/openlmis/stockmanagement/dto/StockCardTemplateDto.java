@@ -38,7 +38,9 @@ public class StockCardTemplateDto {
   private List<StockCardLineItemFieldDto> stockCardLineItemFields = new ArrayList<>();
   private boolean isActive;
 
-  public void setActive(boolean active) { isActive = active; }
+  public void setActive(boolean active) {
+    isActive = active;
+  }
 
   /**
    * Create stock card template dto object from DB model object.
