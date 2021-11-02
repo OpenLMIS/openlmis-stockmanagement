@@ -17,7 +17,6 @@ package org.openlmis.stockmanagement.web;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -35,7 +34,6 @@ import com.google.common.collect.ImmutableSet;
 import java.util.UUID;
 
 import org.junit.Test;
-import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
@@ -43,7 +41,6 @@ import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardService;
 import org.openlmis.stockmanagement.service.StockCardSummariesService;
-import org.openlmis.stockmanagement.testutils.StockCardDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardDtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
@@ -193,7 +190,6 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
   public void shouldMakeStockCardInactive() throws Exception {
     // given
     UUID stockCardId = UUID.randomUUID();
-    StockEvent event = new StockEventDataBuilder().build();
     doNothing().when(stockCardService).setInactive(stockCardId);
 
     // when
