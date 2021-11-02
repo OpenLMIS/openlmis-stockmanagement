@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.google.common.collect.ImmutableSet;
+import java.util.UUID;
 
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.card.StockCard;
@@ -52,7 +53,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.ResultActions;
 
-import java.util.UUID;
 
 //the name of this controller test is intentional wrong: cardz insteads of cards
 //because there is a problem with "spring security test" that seems to be relates
