@@ -18,11 +18,11 @@ package org.openlmis.stockmanagement.service;
 import static java.time.ZonedDateTime.now;
 import static java.util.Collections.singletonList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.mockito.Mockito.doNothing;
 import static org.openlmis.stockmanagement.domain.card.StockCard.createStockCardFrom;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemFrom;
 import static org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity.identityOf;
 import static org.openlmis.stockmanagement.domain.reason.ReasonCategory.PHYSICAL_INVENTORY;
+import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARDS_VIEW;
 
 import java.time.ZonedDateTime;
@@ -225,8 +225,8 @@ public class StockCardService extends StockCardBaseService {
   public void setInactive(UUID stockCardId) {
     cardRepository.findById(stockCardId)
         .map(stockCard -> {
-          stockCard.setIsShowed(false);
-          cardRepository.saveAndFlush(stockCard);
+          stockCard.setActive(false);
+          return cardRepository.saveAndFlush(stockCard);
         })
         .orElseThrow(() -> new ResourceNotFoundException("Not found stock card with id: " + stockCardId));
   }

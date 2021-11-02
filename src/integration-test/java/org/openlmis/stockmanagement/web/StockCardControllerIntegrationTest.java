@@ -32,13 +32,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.google.common.collect.ImmutableSet;
 
-import java.util.UUID;
-
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
+import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardService;
 import org.openlmis.stockmanagement.service.StockCardSummariesService;
@@ -51,6 +50,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.ResultActions;
+
+import java.util.UUID;
 
 //the name of this controller test is intentional wrong: cardz insteads of cards
 //because there is a problem with "spring security test" that seems to be relates
@@ -192,7 +193,6 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
     // given
     UUID stockCardId = UUID.randomUUID();
     StockEvent event = new StockEventDataBuilder().build();
-    StockCard stockCard = new StockCardDataBuilder(event).withIsActive(false).build();
     doNothing().when(stockCardService).setInactive(stockCardId);
 
     // when
