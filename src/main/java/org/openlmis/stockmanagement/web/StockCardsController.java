@@ -133,12 +133,11 @@ public class StockCardsController {
   public ResponseEntity<StockCardDto> deactivate(
       @PathVariable("stockCardId") UUID stockCardId) {
     LOGGER.debug("Try to make stock card with id: {} inactive", stockCardId);
-
-   try {
-     stockCardService.setInactive(stockCardId);
-     LOGGER.debug("Stock card with id: {} made inactive", stockCardId);
+    try {
+      stockCardService.setInactive(stockCardId);
+      LOGGER.debug("Stock card with id: {} made inactive", stockCardId);
       return new ResponseEntity<>(stockCardService.findStockCardById(stockCardId), OK);
-    } catch(ResourceNotFoundException e) {
+    } catch (ResourceNotFoundException e) {
       LOGGER.debug("Not found stock card with id: {}, Exception: {}" + stockCardId, e);
       return new ResponseEntity<>(NOT_FOUND);
     }

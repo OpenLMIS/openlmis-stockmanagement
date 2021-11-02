@@ -22,7 +22,6 @@ import static org.openlmis.stockmanagement.domain.card.StockCard.createStockCard
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemFrom;
 import static org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity.identityOf;
 import static org.openlmis.stockmanagement.domain.reason.ReasonCategory.PHYSICAL_INVENTORY;
-import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARDS_VIEW;
 
 import java.time.ZonedDateTime;
@@ -30,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -46,6 +44,7 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
+import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.i18n.MessageService;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
@@ -228,7 +227,8 @@ public class StockCardService extends StockCardBaseService {
           stockCard.setActive(false);
           return cardRepository.saveAndFlush(stockCard);
         })
-        .orElseThrow(() -> new ResourceNotFoundException("Not found stock card with id: " + stockCardId));
+        .orElseThrow(() ->
+            new ResourceNotFoundException("Not found stock card with id: " + stockCardId));
   }
 
   private List<StockCardLineItem> getSavedButNewLineItems(List<StockCard> cardsToUpdate,
