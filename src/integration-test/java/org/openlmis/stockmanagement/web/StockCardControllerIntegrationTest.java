@@ -62,7 +62,7 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
   private static final String PAGE = "page";
   private static final String SIZE = "size";
   private static final String ID = "id";
-  private static final String INACTIVE = "/inactive";
+  private static final String INACTIVE = "/deactivate";
 
   @MockBean
   private StockCardService stockCardService;

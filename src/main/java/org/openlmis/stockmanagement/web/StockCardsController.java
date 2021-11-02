@@ -126,9 +126,9 @@ public class StockCardsController {
    *
    * @param stockCardId stock card id.
    */
-  @PutMapping("/stockCards/{stockCardId}/inactive")
+  @PutMapping("/stockCards/{stockCardId}/deactivate")
   @ResponseStatus(HttpStatus.OK)
-  public ResponseEntity<StockCardDto> makeStockCardInactive(
+  public ResponseEntity<StockCardDto> deactivate(
       @PathVariable("stockCardId") UUID stockCardId) {
     LOGGER.debug("Try to make stock card with id: {} inactive", stockCardId);
 

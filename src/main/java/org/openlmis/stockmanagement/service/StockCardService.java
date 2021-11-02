@@ -221,12 +221,12 @@ public class StockCardService extends StockCardBaseService {
    */
   @Transactional
   public StockCard setInactive(UUID stockCardId) {
-    StockCard stockCard = cardRepository.findById(stockCardId).orElse(null);
-    if (null != stockCard) {
-      stockCard.setActive(false);
-      return cardRepository.saveAndFlush(stockCard);
-    }
-    return stockCard;
+    return cardRepository.findById(stockCardId)
+        .map(stockCard -> {
+          stockCard.setActive(false);
+          return cardRepository.saveAdnFlush(stockCard);
+        })
+        .orElse(null);
   }
 
   private List<StockCardLineItem> getSavedButNewLineItems(List<StockCard> cardsToUpdate,
