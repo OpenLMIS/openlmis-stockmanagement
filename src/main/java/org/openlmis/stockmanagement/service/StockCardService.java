@@ -214,6 +214,21 @@ public class StockCardService extends StockCardBaseService {
     return Pagination.getPage(createDtos(page.getContent()), pageable, page.getTotalElements());
   }
 
+  /**
+   * Set stock card to inactive.
+   *
+   * @param stockCardId      id of stockCard to update
+   */
+  @Transactional
+  public StockCard setInactive(UUID stockCardId) {
+    StockCard stockCard = cardRepository.findById(stockCardId).orElse(null);
+    if (null != stockCard) {
+      stockCard.setIsShowed(false);
+      return cardRepository.saveAndFlush(stockCard);
+    }
+    return stockCard;
+  }
+
   private List<StockCardLineItem> getSavedButNewLineItems(List<StockCard> cardsToUpdate,
       List<StockCardLineItem> existingLineItems) {
     return cardsToUpdate.stream()

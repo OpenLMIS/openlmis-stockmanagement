@@ -17,12 +17,14 @@ package org.openlmis.stockmanagement.web;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.StockCardDtoDataBuilder.createStockCardDto;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -30,13 +32,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.google.common.collect.ImmutableSet;
 import java.util.UUID;
+
 import org.junit.Test;
+import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardService;
 import org.openlmis.stockmanagement.service.StockCardSummariesService;
+import org.openlmis.stockmanagement.testutils.StockCardDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardDtoDataBuilder;
+import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
@@ -55,6 +62,7 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
   private static final String PAGE = "page";
   private static final String SIZE = "size";
   private static final String ID = "id";
+  private static final String INACTIVE = "/inactive";
 
   @MockBean
   private StockCardService stockCardService;
@@ -165,7 +173,6 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
 
     doReturn(new PageImpl<>(singletonList(StockCardDtoDataBuilder.createStockCardDto())))
         .when(stockCardService).search(ImmutableSet.of(stockCardId1, stockCardId2), pageable);
-
     ResultActions resultActions = mvc.perform(
         get(API_STOCK_CARDS)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
@@ -177,5 +184,39 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
     resultActions.andExpect(status().isOk())
         .andDo(print())
         .andExpect(jsonPath("$.content", hasSize(1)));
+  }
+
+  @Test
+  public void shouldMakeStockCardInactive() throws Exception {
+    // given
+    UUID stockCardId = UUID.randomUUID();
+    StockEvent event = new StockEventDataBuilder().build();
+    StockCard stockCard = new StockCardDataBuilder(event).withIsShowed(false).build();
+    when(stockCardService.setInactive(stockCardId)).thenReturn(stockCard);
+
+    // when
+    ResultActions resultActions = mvc.perform(
+        put(API_STOCK_CARDS + stockCardId.toString() + INACTIVE)
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
+
+    // then
+    resultActions.andExpect(status().isOk())
+        .andDo(print())
+        .andExpect(jsonPath("$.isShowed", is(false)));
+  }
+
+  @Test
+  public void shouldReturn404WhenStockCardNotFoundWhileMakingInactive() throws Exception {
+    // given
+    UUID stockCardId = UUID.randomUUID();
+    when(stockCardService.setInactive(stockCardId)).thenReturn(null);
+
+    // when
+    ResultActions resultActions = mvc.perform(
+        put(API_STOCK_CARDS + stockCardId.toString() + INACTIVE)
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
+
+    // then
+    resultActions.andExpect(status().isNotFound());
   }
 }

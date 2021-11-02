@@ -502,6 +502,19 @@ traits:
                   description: Stock card with given id does not exist, can not get report.
                   body:
                     application/json:
+          /inactive:
+            put:
+              is: [ secured ]
+              description: Set stock card as inactive.
+              responses:
+                200:
+                  body:
+                    application/json:
+                      schema: stockCard
+                404:
+                  description: Stock card with given id does not exist, can not make inactive.
+                  body:
+                    application/json:
 
   /validDestinations:
       get:
