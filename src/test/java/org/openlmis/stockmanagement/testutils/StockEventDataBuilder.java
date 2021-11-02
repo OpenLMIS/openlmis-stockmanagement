@@ -48,7 +48,7 @@ public class StockEventDataBuilder {
     return this;
   }
 
-  public StockEventDataBuilder withisActive(boolean isActive) {
+  public StockEventDataBuilder withIsActive(boolean isActive) {
     this.isActive = isActive;
     return this;
   }
