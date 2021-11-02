@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.service;
 import static java.time.ZonedDateTime.now;
 import static java.util.Collections.singletonList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.mockito.Mockito.doNothing;
 import static org.openlmis.stockmanagement.domain.card.StockCard.createStockCardFrom;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemFrom;
 import static org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity.identityOf;
@@ -221,12 +222,13 @@ public class StockCardService extends StockCardBaseService {
    * @param stockCardId      id of stockCard to update
    */
   @Transactional
-  public Optional<StockCard> setInactive(UUID stockCardId) {
-    return cardRepository.findById(stockCardId)
+  public void setInactive(UUID stockCardId) {
+    cardRepository.findById(stockCardId)
         .map(stockCard -> {
-          stockCard.setActive(false);
-          return cardRepository.saveAndFlush(stockCard);
-        });
+          stockCard.setIsShowed(false);
+          cardRepository.saveAndFlush(stockCard);
+        })
+        .orElseThrow(() -> new ResourceNotFoundException("Not found stock card with id: " + stockCardId));
   }
 
   private List<StockCardLineItem> getSavedButNewLineItems(List<StockCard> cardsToUpdate,

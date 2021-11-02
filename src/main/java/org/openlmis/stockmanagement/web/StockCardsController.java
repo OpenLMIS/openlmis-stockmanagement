@@ -133,12 +133,12 @@ public class StockCardsController {
       @PathVariable("stockCardId") UUID stockCardId) {
     LOGGER.debug("Try to make stock card with id: {} inactive", stockCardId);
 
-    Optional<StockCard> stockCard = stockCardService.setInactive(stockCardId);
-    if (stockCard.isPresent()) {
-      LOGGER.debug("Stock card with id: {} made inactive", stockCardId);
+   try {
+     stockCardService.setInactive(stockCardId);
+     LOGGER.debug("Stock card with id: {} made inactive", stockCardId);
       return new ResponseEntity<>(StockCardDto.createFrom(stockCard.get()), OK);
-    } else {
-      LOGGER.debug("Not found stock card with id: {}", stockCardId);
+    } catch(ResourceNotFoundException e) {
+      LOGGER.debug(e);
       return new ResponseEntity<>(NOT_FOUND);
     }
   }

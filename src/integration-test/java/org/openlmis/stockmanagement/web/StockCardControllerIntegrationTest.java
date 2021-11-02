@@ -19,7 +19,7 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.StockCardDtoDataBuilder.createStockCardDto;
@@ -32,7 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.google.common.collect.ImmutableSet;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -194,7 +193,7 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
     UUID stockCardId = UUID.randomUUID();
     StockEvent event = new StockEventDataBuilder().build();
     StockCard stockCard = new StockCardDataBuilder(event).withIsActive(false).build();
-    when(stockCardService.setInactive(stockCardId)).thenReturn(Optional.of(stockCard));
+    doNothing().when(stockCardService).setInactive(stockCardId);
 
     // when
     ResultActions resultActions = mvc.perform(
@@ -211,7 +210,8 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
   public void shouldReturn404WhenStockCardNotFoundWhileMakingInactive() throws Exception {
     // given
     UUID stockCardId = UUID.randomUUID();
-    when(stockCardService.setInactive(stockCardId)).thenReturn(null);
+    doThrow(new ResourceNotFoundException("Not found stock card with id: " + stockCardId))
+        .when(stockCardService).setInactive(stockCardId);
 
     // when
     ResultActions resultActions = mvc.perform(
