@@ -127,11 +127,10 @@ public class StockCardsController {
    */
   @PutMapping("/stockCards/{stockCardId}/deactivate")
   @ResponseStatus(HttpStatus.OK)
-  public ResponseEntity<StockCardDto> deactivate(
+  public void deactivate(
       @PathVariable("stockCardId") UUID stockCardId) {
     LOGGER.debug("Try to make stock card with id: {} inactive", stockCardId);
     stockCardService.setInactive(stockCardId);
     LOGGER.debug("Stock card with id: {} made inactive", stockCardId);
-    return new ResponseEntity<>(stockCardService.findStockCardById(stockCardId), OK);
   }
 }
