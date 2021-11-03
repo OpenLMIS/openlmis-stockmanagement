@@ -222,13 +222,10 @@ public class StockCardService extends StockCardBaseService {
    */
   @Transactional
   public void setInactive(UUID stockCardId) {
-    cardRepository.findById(stockCardId)
-        .map(stockCard -> {
-          stockCard.setActive(false);
-          return cardRepository.saveAndFlush(stockCard);
-        })
-        .orElseThrow(() ->
-            new ResourceNotFoundException("Not found stock card with id: " + stockCardId));
+    StockCard stockCard = cardRepository.findById(stockCardId).orElseThrow(() ->
+        new ResourceNotFoundException("Not found stock card with id: " + stockCardId));
+    stockCard.setActive(false);
+    cardRepository.saveAndFlush(stockCard);
   }
 
   private List<StockCardLineItem> getSavedButNewLineItems(List<StockCard> cardsToUpdate,
