@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.openlmis.stockmanagement.dto.StockCardDto;
-import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardService;
 import org.openlmis.stockmanagement.service.StockCardSummariesService;
@@ -131,13 +130,8 @@ public class StockCardsController {
   public ResponseEntity<StockCardDto> deactivate(
       @PathVariable("stockCardId") UUID stockCardId) {
     LOGGER.debug("Try to make stock card with id: {} inactive", stockCardId);
-    try {
-      stockCardService.setInactive(stockCardId);
-      LOGGER.debug("Stock card with id: {} made inactive", stockCardId);
-      return new ResponseEntity<>(stockCardService.findStockCardById(stockCardId), OK);
-    } catch (ResourceNotFoundException e) {
-      LOGGER.debug("Not found stock card with id: {}, Exception: {}" + stockCardId, e);
-      return new ResponseEntity<>(NOT_FOUND);
-    }
+    stockCardService.setInactive(stockCardId);
+    LOGGER.debug("Stock card with id: {} made inactive", stockCardId);
+    return new ResponseEntity<>(stockCardService.findStockCardById(stockCardId), OK);
   }
 }
