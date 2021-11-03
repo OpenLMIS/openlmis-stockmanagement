@@ -34,7 +34,6 @@ import com.google.common.collect.ImmutableSet;
 import java.util.UUID;
 
 import org.junit.Test;
-import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
@@ -42,7 +41,6 @@ import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardService;
 import org.openlmis.stockmanagement.service.StockCardSummariesService;
 import org.openlmis.stockmanagement.testutils.StockCardDtoDataBuilder;
-import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
