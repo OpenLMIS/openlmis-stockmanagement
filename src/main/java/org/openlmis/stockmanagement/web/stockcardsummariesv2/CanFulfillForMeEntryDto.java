@@ -59,4 +59,8 @@ public final class CanFulfillForMeEntryDto {
   @Setter
   @JsonFormat(shape = STRING)
   private ZonedDateTime processedDate;
+
+  @Getter
+  @Setter
+  private boolean active;
 }

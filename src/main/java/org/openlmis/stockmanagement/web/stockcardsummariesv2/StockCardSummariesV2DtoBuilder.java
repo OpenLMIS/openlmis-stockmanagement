@@ -110,7 +110,8 @@ public class StockCardSummariesV2DtoBuilder {
         stockCard.getLotId() == null ? null : createLotReference(stockCard.getLotId()),
         stockCard.getStockOnHand(),
         stockCard.getOccurredDate(),
-        stockCard.getProcessedDate()
+        stockCard.getProcessedDate(),
+        stockCard.isActive()
       );
   }
 

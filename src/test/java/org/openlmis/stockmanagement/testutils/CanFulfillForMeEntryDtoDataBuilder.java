@@ -30,6 +30,7 @@ public class CanFulfillForMeEntryDtoDataBuilder {
   private Integer stockOnHand;
   private LocalDate occurredDate;
   private ZonedDateTime processedDate;
+  private boolean active;
 
   /**
    * Creates builder for creating new instance of {@link CanFulfillForMeEntryDto}.
@@ -40,6 +41,7 @@ public class CanFulfillForMeEntryDtoDataBuilder {
     lot = new ObjectReferenceDtoDataBuilder().withPath("api/lots").build();
     stockOnHand = 10;
     occurredDate = LocalDate.now();
+    active = true;
   }
 
   /**
@@ -48,7 +50,7 @@ public class CanFulfillForMeEntryDtoDataBuilder {
    */
   public CanFulfillForMeEntryDto build() {
     return new CanFulfillForMeEntryDto(stockCard, orderable, lot, stockOnHand,
-        occurredDate, processedDate);
+        occurredDate, processedDate, active);
   }
 
   /**
@@ -75,6 +77,7 @@ public class CanFulfillForMeEntryDtoDataBuilder {
             .withId(stockCard.getLotId())
             .build()
             : null)
+        .withActive(stockCard != null ? stockCard.isActive() : null)
         .withOccurredDate(stockCard != null ? stockCard.getOccurredDate() : null)
         .withProcessedDate(stockCard != null ? stockCard.getProcessedDate() : null)
         .build();
@@ -107,6 +110,11 @@ public class CanFulfillForMeEntryDtoDataBuilder {
   
   public CanFulfillForMeEntryDtoDataBuilder withProcessedDate(ZonedDateTime processedDate) {
     this.processedDate = processedDate;
+    return this;
+  }
+
+  public CanFulfillForMeEntryDtoDataBuilder withActive(boolean active) {
+    this.active = active;
     return this;
   }
   
