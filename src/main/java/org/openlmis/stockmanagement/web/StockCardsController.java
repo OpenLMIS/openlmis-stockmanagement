@@ -35,8 +35,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -125,7 +125,7 @@ public class StockCardsController {
    *
    * @param stockCardId stock card id.
    */
-  @PutMapping("/stockCards/{stockCardId}/deactivate")
+  @RequestMapping(value = "/stockCards/{stockCardId}/deactivate", method = RequestMethod.PUT)
   @ResponseStatus(HttpStatus.OK)
   public void deactivate(
       @PathVariable("stockCardId") UUID stockCardId) {
