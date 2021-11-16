@@ -24,7 +24,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.StockCardDtoDataBuilder.createStockCardDto;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -192,7 +192,7 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
 
     // when
     ResultActions resultActions = mvc.perform(
-        put(API_STOCK_CARDS + stockCardId.toString() + INACTIVE)
+        post(API_STOCK_CARDS + stockCardId.toString() + INACTIVE)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
 
     // then
@@ -209,7 +209,7 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
 
     // when
     ResultActions resultActions = mvc.perform(
-        put(API_STOCK_CARDS + stockCardId.toString() + INACTIVE)
+        post(API_STOCK_CARDS + stockCardId.toString() + INACTIVE)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
 
     // then

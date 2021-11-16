@@ -864,7 +864,7 @@ traits:
                 application/json:
                   schema: localizedMessage
 
-        put:
+        post:
           is: [ secured ]
           description: Update a stock card line item reason.
           body:
