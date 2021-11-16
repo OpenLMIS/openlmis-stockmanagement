@@ -165,7 +165,6 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebInt
 
     //then
     assertThat(response, is(StockCardLineItemReasonDto.newInstance(updatedReason)));
-    assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
   @Test
