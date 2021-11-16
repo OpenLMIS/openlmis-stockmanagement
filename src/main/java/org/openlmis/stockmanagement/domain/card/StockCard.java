@@ -145,7 +145,7 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
 
         .lineItems(new ArrayList<>())
         .stockOnHand(0)
-        .isActive(true)
+        .isActive(stockEventDto.isActive())
         .build();
   }
 

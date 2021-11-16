@@ -57,6 +57,10 @@ public class StockEventDto {
 
   private StockEventProcessContext context;
 
+  public boolean isActive() {
+    return isActive;
+  }
+
   public void setActive(boolean active) {
     isActive = active;
   }
