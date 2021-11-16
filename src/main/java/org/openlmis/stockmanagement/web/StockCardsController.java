@@ -21,6 +21,7 @@ import static org.springframework.http.HttpStatus.OK;
 import java.util.List;
 import java.util.UUID;
 
+import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardService;
@@ -126,10 +127,16 @@ public class StockCardsController {
    */
   @RequestMapping(value = "/stockCards/{stockCardId}/deactivate")
   @ResponseStatus(HttpStatus.OK)
-  public void deactivate(
+  public ResponseEntity deactivate(
       @PathVariable("stockCardId") UUID stockCardId) {
     LOGGER.debug("Try to make stock card with id: {} inactive", stockCardId);
-    stockCardService.setInactive(stockCardId);
-    LOGGER.debug("Stock card with id: {} made inactive", stockCardId);
+    StockCard stockCard = stockCardService.setInactive(stockCardId);
+    if (stockCard == null) {
+      LOGGER.debug("Not found stock card with id: {}", stockCardId);
+      return new ResponseEntity<>(NOT_FOUND);
+    } else {
+      LOGGER.debug("Stock card with id: {} made inactive", stockCardId);
+      return new ResponseEntity<>(StockCardDto.createFrom(stockCard), OK);
+    }
   }
 }

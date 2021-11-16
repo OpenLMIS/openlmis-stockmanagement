@@ -221,11 +221,12 @@ public class StockCardService extends StockCardBaseService {
    * @param stockCardId      id of stockCard to update
    */
   @Transactional
-  public void setInactive(UUID stockCardId) {
+  public StockCard setInactive(UUID stockCardId) {
     StockCard stockCard = cardRepository.findById(stockCardId).orElseThrow(() ->
         new ResourceNotFoundException("Not found stock card with id: " + stockCardId));
     stockCard.setActive(false);
     cardRepository.saveAndFlush(stockCard);
+    return stockCard;
   }
 
   private List<StockCardLineItem> getSavedButNewLineItems(List<StockCard> cardsToUpdate,
