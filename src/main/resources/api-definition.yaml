@@ -502,7 +502,7 @@ traits:
                   description: Stock card with given id does not exist, can not get report.
                   body:
                     application/json:
-          /inactive:
+          /deactivate:
             put:
               is: [ secured ]
               description: Set stock card as inactive.

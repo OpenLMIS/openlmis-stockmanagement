@@ -21,7 +21,6 @@ import static org.springframework.http.HttpStatus.OK;
 import java.util.List;
 import java.util.UUID;
 
-import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardService;
@@ -37,6 +36,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -125,18 +125,12 @@ public class StockCardsController {
    *
    * @param stockCardId stock card id.
    */
-  @RequestMapping(value = "/stockCards/{stockCardId}/deactivate")
+  @RequestMapping(value = "/stockCards/{stockCardId}/deactivate", method = RequestMethod.POST)
   @ResponseStatus(HttpStatus.OK)
-  public ResponseEntity deactivate(
+  public void deactivate(
       @PathVariable("stockCardId") UUID stockCardId) {
     LOGGER.debug("Try to make stock card with id: {} inactive", stockCardId);
-    StockCard stockCard = stockCardService.setInactive(stockCardId);
-    if (stockCard == null) {
-      LOGGER.debug("Not found stock card with id: {}", stockCardId);
-      return new ResponseEntity<>(NOT_FOUND);
-    } else {
-      LOGGER.debug("Stock card with id: {} made inactive", stockCardId);
-      return new ResponseEntity<>(StockCardDto.createFrom(stockCard), OK);
-    }
+    stockCardService.setInactive(stockCardId);
+    LOGGER.debug("Stock card with id: {} made inactive", stockCardId);
   }
 }
