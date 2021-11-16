@@ -204,7 +204,7 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
     // then
     resultActions.andExpect(status().isOk())
         .andDo(print())
-        .andExpect(jsonPath("$.isActive", is(false)));
+        .andExpect(jsonPath("$.active", is(false)));
   }
 
   @Test
