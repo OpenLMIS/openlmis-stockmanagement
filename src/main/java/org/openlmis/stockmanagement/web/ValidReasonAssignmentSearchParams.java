@@ -38,7 +38,7 @@ public class ValidReasonAssignmentSearchParams {
   static final String FACILITY_TYPE = "facilityType";
   static final String REASON_TYPE = "reasonType";
   static final String REASON = "reason";
-  static final String ACTIVE = "reason";
+  static final String ACTIVE = "active";
 
   private SearchParams queryParams;
 
