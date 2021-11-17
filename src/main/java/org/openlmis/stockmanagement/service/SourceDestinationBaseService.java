@@ -19,6 +19,7 @@ import static org.openlmis.stockmanagement.dto.ValidSourceDestinationDto.createF
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_ASSIGNMENT_ID_MISSING;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -242,6 +243,52 @@ public abstract class SourceDestinationBaseService {
     }
   }
 
+  private List<ValidSourceDestinationDto> createAssignmentDto(
+          List<? extends SourceDestinationAssignment> assignments
+  ) {
+    List<UUID> ids = assignments
+            .stream()
+            .filter(a -> a.getNode().isRefDataFacility())
+            .map(a -> a.getNode().getReferenceId())
+            .collect(Collectors.toList());
+
+    Map<UUID, FacilityDto> facilitiesById = ids.isEmpty()
+            ? new HashMap<>()
+            : facilityRefDataService.findByIds(ids);
+    List<ValidSourceDestinationDto> validDestinations = new ArrayList<>();
+
+    for (SourceDestinationAssignment assignment : assignments) {
+      UUID referenceId = assignment.getNode().getReferenceId();
+
+      if (assignment.getNode().isRefDataFacility()) {
+        FacilityDto facilityDto = facilitiesById.get(referenceId);
+
+        String name = null;
+
+        if (facilityDto == null) {
+          LOGGER.warn("Could not find facility for assignment {}", assignment.getId());
+        } else {
+          name = facilityDto.getName();
+        }
+
+        validDestinations.add(createFrom(assignment, name));
+        continue;
+      }
+
+      String name = organizationRepository.findById(referenceId)
+              .map(Organization::getName)
+              .orElse(null);
+
+      if (name == null) {
+        LOGGER.warn("Could not find any organization matching node id {}", referenceId);
+      }
+
+      validDestinations.add(createFrom(assignment, name));
+    }
+
+    return validDestinations;
+  }
+
   private <T extends SourceDestinationAssignment> Page<ValidSourceDestinationDto>
       findFilteredAssignments(UUID programId, UUID facilityId,
       SourceDestinationAssignmentRepository<T> repository, Profiler profiler, Pageable pageable) {
@@ -288,6 +335,10 @@ public abstract class SourceDestinationBaseService {
                          Profiler profiler, Pageable pageable) {
     profiler.start("FIND_ALL_GEO_ASSIGNMENTS");
 
-    return repository.findAll(pageable).map(assignment -> createAssignmentDto(assignment, null));
+    Page<? extends SourceDestinationAssignment> foundPage = repository.findAll(pageable);
+
+    List<ValidSourceDestinationDto> validDestinations = createAssignmentDto(foundPage.getContent());
+
+    return Pagination.getPage(validDestinations, pageable, foundPage.getTotalElements());
   }
 }

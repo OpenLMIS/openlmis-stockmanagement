@@ -35,7 +35,9 @@ import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationDataB
 import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationDataBuilder.createOrganizationSourceAssignment;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.Test;
@@ -321,7 +323,11 @@ public class SourceDestinationBaseServiceTest {
     FacilityDto facilityDto = createFacilityDtoWithFacilityType(facilityId, facilityTypeId);
     facilityDto.setName(FACILITY_NODE_NAME);
 
-    when(facilityReferenceDataService.findOne(facilityId)).thenReturn(facilityDto);
+    Map<UUID, FacilityDto> facilityMap = new HashMap<>();
+    facilityMap.put(facilityId, facilityDto);
+
+    when(facilityReferenceDataService.findByIds(Collections.singletonList(facilityId)))
+            .thenReturn(facilityMap);
 
     List<ValidDestinationAssignment> validDestinationAssignments = asList(
             createOrganizationDestination(mockedOrganizationNode(ORGANIZATION_NODE_NAME)),
@@ -397,7 +403,11 @@ public class SourceDestinationBaseServiceTest {
     FacilityDto facilityDto = createFacilityDtoWithFacilityType(facilityId, facilityTypeId);
     facilityDto.setName(FACILITY_NODE_NAME);
 
-    when(facilityReferenceDataService.findOne(facilityId)).thenReturn(facilityDto);
+    Map<UUID, FacilityDto> facilityMap = new HashMap<>();
+    facilityMap.put(facilityId, facilityDto);
+
+    when(facilityReferenceDataService.findByIds(Collections.singletonList(facilityId)))
+            .thenReturn(facilityMap);
 
     List<ValidSourceAssignment> validSourceAssignments = asList(
             createOrganizationSourceAssignment(mockedOrganizationNode(ORGANIZATION_NODE_NAME)),
