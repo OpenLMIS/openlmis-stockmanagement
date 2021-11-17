@@ -72,7 +72,7 @@ public class ValidSourceDestinationController {
       @RequestParam MultiValueMap<String, String> parameters, Pageable pageable) {
     ValidSourceDestinationSearchParams params = new ValidSourceDestinationSearchParams(parameters);
 
-    LOGGER.debug(format("Try to find valid destinations with program %s and facility %s",
+    LOGGER.info(format("Try to find valid destinations with program %s and facility %s",
         params.getProgramId(), params.getFacilityId()));
     return validDestinationService.findDestinations(
             params.getProgramId(), params.getFacilityId(), pageable);
