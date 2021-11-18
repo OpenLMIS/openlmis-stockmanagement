@@ -235,7 +235,6 @@ public class CalculatedStockOnHandService {
       stockCard.setStockOnHand(calculatedStockOnHand.getStockOnHand());
       stockCard.setOccurredDate(calculatedStockOnHand.getOccurredDate());
       stockCard.setProcessedDate(calculatedStockOnHand.getProcessedDate());
-      stockCard.setActive(true);
     }
   }
 
