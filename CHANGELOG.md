@@ -1,3 +1,9 @@
+5.1.5 / WIP
+==================
+
+Bug fixes:
+* [OLMIS-7442](https://openlmis.atlassian.net/browse/OLMIS-7442): Fix timeout on /api/validDestinations endpoint
+
 5.1.4 / 2021-10-29
 ==================
 
