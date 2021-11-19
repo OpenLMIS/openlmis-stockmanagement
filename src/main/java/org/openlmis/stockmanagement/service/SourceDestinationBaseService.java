@@ -339,6 +339,6 @@ public abstract class SourceDestinationBaseService {
 
     List<ValidSourceDestinationDto> validDestinations = createAssignmentDto(foundPage.getContent());
 
-    return Pagination.getPage(validDestinations, pageable, validDestinations.size());
+    return Pagination.getPage(validDestinations, pageable, foundPage.getTotalElements());
   }
 }
