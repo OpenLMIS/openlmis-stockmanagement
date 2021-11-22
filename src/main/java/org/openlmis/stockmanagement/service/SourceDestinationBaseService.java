@@ -327,7 +327,9 @@ public abstract class SourceDestinationBaseService {
             .map(assignment -> createAssignmentDto(assignment, facilitiesById))
             .collect(Collectors.toList());
 
-    return Pagination.getPage(result, pageable, result.size());
+    return pageable.isUnpaged()
+            ? Pagination.getPage(result)
+            : Pagination.getPage(result, pageable);
   }
 
   private <T extends SourceDestinationAssignment> Page<ValidSourceDestinationDto>

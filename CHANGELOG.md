@@ -3,6 +3,7 @@
 
 Bug fixes:
 * [OLMIS-7442](https://openlmis.atlassian.net/browse/OLMIS-7442): Fix timeout on /api/validDestinations endpoint
+* [OLMIS-7387](https://openlmis.atlassian.net/browse/OLMIS-7387): Fix pagination for filtered /api/validSources endpoint
 
 5.1.4 / 2021-10-29
 ==================
