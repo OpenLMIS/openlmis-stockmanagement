@@ -1,14 +1,11 @@
-5.1.5 / WIP
-==================
-
-Bug fixes:
-* [OLMIS-7442](https://openlmis.atlassian.net/browse/OLMIS-7442): Fix timeout on /api/validDestinations endpoint
-
-5.1.4 / 2021-10-29
+5.1.6 / WIP
 ==================
 
 Improvements:
 * [OLMIS-7430](https://openlmis.atlassian.net/browse/OLMIS-7430): Add logic to set flag to inactive, filter all inactive items on physical inventory and stock on hand pages
+
+Bug fixes:
+* [OLMIS-7442](https://openlmis.atlassian.net/browse/OLMIS-7442): Fix timeout on /api/validDestinations endpoint
 
 5.1.4 / 2021-10-29
 ==================
