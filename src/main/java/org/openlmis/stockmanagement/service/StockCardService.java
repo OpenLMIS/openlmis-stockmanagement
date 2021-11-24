@@ -257,7 +257,7 @@ public class StockCardService extends StockCardBaseService {
       cardsToUpdate.add(card);
     }
 
-    if (null != card && card.getStockOnHand() > 0 && !card.isActive()) {
+    if (null != card && eventLineItem.getQuantity() > 0 && !card.isActive()) {
       card.setActive(true);
     }
 
