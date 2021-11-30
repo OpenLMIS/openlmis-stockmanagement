@@ -306,7 +306,7 @@ public abstract class SourceDestinationBaseService {
 
     profiler.start("FIND_ASSIGNMENTS_BY_PROGRAM_AND_FACILITY_TYPE");
     List<T> assignments = repository
-            .findByProgramIdAndFacilityTypeId(programId, facilityTypeId, pageable);
+            .findByProgramIdAndFacilityTypeId(programId, facilityTypeId, Pageable.unpaged());
 
     profiler.start("FIND_FACILITY_IDS");
     List<UUID> facilitiesIds = assignments.stream()

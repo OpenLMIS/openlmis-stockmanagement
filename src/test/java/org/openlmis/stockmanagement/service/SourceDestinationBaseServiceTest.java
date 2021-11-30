@@ -375,7 +375,7 @@ public class SourceDestinationBaseServiceTest {
     );
 
     when(destinationRepository.findByProgramIdAndFacilityTypeId(
-            programId, facilityTypeId, pageRequest))
+            programId, facilityTypeId, Pageable.unpaged()))
         .thenReturn(validDestinationAssignments);
 
     when(facilityReferenceDataService.findByIds(anyListOf(UUID.class))).thenReturn(
@@ -456,7 +456,7 @@ public class SourceDestinationBaseServiceTest {
         createFacilitySourceAssignment(mockedFacilityNode(facilityId, FACILITY_NODE_NAME)));
 
     when(sourceRepository.findByProgramIdAndFacilityTypeId(
-            programId, facilityTypeId, pageRequest))
+            programId, facilityTypeId, Pageable.unpaged()))
         .thenReturn(validSourceAssignments);
 
     when(facilityReferenceDataService.findByIds(anyListOf(UUID.class))).thenReturn(
@@ -578,7 +578,7 @@ public class SourceDestinationBaseServiceTest {
             FACILITY_NODE_NAME), geoLevelAffinity));
 
     when(destinationRepository.findByProgramIdAndFacilityTypeId(
-            programId, facilityTypeId, pageRequest))
+            programId, facilityTypeId, Pageable.unpaged()))
         .thenReturn(validDestinationAssignments);
 
     FacilityDto refDataFacilityDto = createFacilityDtoWithFacilityType(refDataFacilityId,
