@@ -36,7 +36,6 @@ public class StockCardTemplateDataBuilder {
     StockCardTemplate template = new StockCardTemplate();
     template.setFacilityTypeId(UUID.randomUUID());
     template.setProgramId(UUID.randomUUID());
-    template.setActive(true);
 
     AvailableStockCardFields packSize = new AvailableStockCardFields();
     packSize.setId(UUID.fromString("7663b4d2-d6da-11e6-bf26-cec0c932ce01"));
