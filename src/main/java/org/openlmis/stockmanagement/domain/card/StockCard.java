@@ -106,7 +106,7 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
   @Transient
   private ZonedDateTime processedDate = null;
 
-  @Column(name = "is_active", nullable = false)
+  @Column( nullable = false)
   private boolean isActive;
 
   /**

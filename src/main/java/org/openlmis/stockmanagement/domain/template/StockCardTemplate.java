@@ -51,10 +51,7 @@ public class StockCardTemplate extends BaseEntity {
   @OneToMany(cascade = ALL, mappedBy = "stockCardTemplate")
   private List<StockCardLineItemFields> stockCardLineItemFields = new ArrayList<>();
 
-  @Column(nullable = true, columnDefinition = "boolean default true")
+  @Column(name = "is_active", nullable = true, columnDefinition = "boolean default true")
   private boolean isActive;
 
-  public void setActive(boolean active) {
-    isActive = active;
-  }
 }
