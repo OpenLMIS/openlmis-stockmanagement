@@ -5,8 +5,12 @@ Improvements:
 * [OLMIS-7430](https://openlmis.atlassian.net/browse/OLMIS-7430): Add logic to set flag to inactive, filter all inactive items on physical inventory and stock on hand pages
 * [OLMIS-7433](https://openlmis.atlassian.net/browse/OLMIS-7433): Add logic to set flag to active - on stock events
 
+5.1.5 / 2021-12-13
+==================
+
 Bug fixes:
 * [OLMIS-7442](https://openlmis.atlassian.net/browse/OLMIS-7442): Fix timeout on /api/validDestinations endpoint
+* [OLMIS-7387](https://openlmis.atlassian.net/browse/OLMIS-7387): Fix pagination for filtered /api/validSources endpoint
 
 5.1.4 / 2021-10-29
 ==================

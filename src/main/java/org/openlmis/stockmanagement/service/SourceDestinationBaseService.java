@@ -306,7 +306,7 @@ public abstract class SourceDestinationBaseService {
 
     profiler.start("FIND_ASSIGNMENTS_BY_PROGRAM_AND_FACILITY_TYPE");
     List<T> assignments = repository
-            .findByProgramIdAndFacilityTypeId(programId, facilityTypeId, pageable);
+            .findByProgramIdAndFacilityTypeId(programId, facilityTypeId, Pageable.unpaged());
 
     profiler.start("FIND_FACILITY_IDS");
     List<UUID> facilitiesIds = assignments.stream()
@@ -327,7 +327,9 @@ public abstract class SourceDestinationBaseService {
             .map(assignment -> createAssignmentDto(assignment, facilitiesById))
             .collect(Collectors.toList());
 
-    return Pagination.getPage(result, pageable, result.size());
+    return pageable.isUnpaged()
+            ? Pagination.getPage(result)
+            : Pagination.getPage(result, pageable);
   }
 
   private <T extends SourceDestinationAssignment> Page<ValidSourceDestinationDto>
