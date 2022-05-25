@@ -56,12 +56,43 @@ public class ApprovedProductReferenceDataService extends
    */
   public OrderablesAggregator getApprovedProducts(UUID facilityId, UUID programId,
                                                   Collection<UUID> orderableIds) {
+    return this.getApprovedProducts(facilityId, programId, orderableIds, null, null);
+  }
+
+  /**
+   * Retrieves all facility approved products from the reference data service, based on the
+   * provided facility and full supply flag. It can be optionally filtered by the program ID.
+   * The result is wrapped to a separate class to improve the performance
+   *
+   * @param facilityId id of the facility
+   * @param programId  id of the program
+   * @param orderableIds Id of orderables
+   * @param orderableCode Code of the orderables
+   * @param orderableName Name of the orderables
+   *
+   * @return wrapped collection of approved products matching the search criteria
+   */
+  public OrderablesAggregator getApprovedProducts(
+      UUID facilityId,
+      UUID programId,
+      Collection<UUID> orderableIds,
+      String orderableCode,
+      String orderableName
+  ) {
     RequestParameters params = RequestParameters.init();
 
     params.set("programId", programId);
 
     if (!isEmpty(orderableIds)) {
       params.set("orderableId", orderableIds);
+    }
+
+    if (orderableCode != null) {
+      params.set("orderableCode", orderableCode);
+    }
+
+    if (orderableName != null) {
+      params.set("orderableName", orderableName);
     }
 
     Page<ApprovedProductDto> approvedProductPage =

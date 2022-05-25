@@ -352,6 +352,21 @@ traits:
           description: Flag defining whether only summaries with non empty set of canFulfillForMe should be returned. Defaults to false.
           repeat: false
           type: boolean
+        orderableCode:
+          required: false
+          description: Code of orderable
+          repeat: false
+          type: string
+        orderableName:
+          required: false
+          description: Name of orderable
+          repeat: false
+          type: string
+        lotCode:
+          required: false
+          description: Lot code of orderables which can fulfill stock card
+          repeat: false
+          type: string
       responses:
         200:
           body:

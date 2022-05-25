@@ -27,6 +27,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -35,6 +36,7 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.ImmutableSet;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +74,7 @@ import org.openlmis.stockmanagement.testutils.StockCardDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardSummariesV2SearchParamsDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
+import org.springframework.data.domain.PageImpl;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StockCardSummariesServiceTest {
@@ -215,8 +218,13 @@ public class StockCardSummariesServiceTest {
         .build();
 
     when(approvedProductReferenceDataService
-        .getApprovedProducts(eq(params.getFacilityId()), eq(params.getProgramId()),
-            eq(params.getOrderableIds())))
+        .getApprovedProducts(
+            eq(params.getFacilityId()),
+            eq(params.getProgramId()),
+            eq(params.getOrderableIds()),
+            eq(params.getOrderableCode()),
+            eq(params.getOrderableName())
+        ))
         .thenReturn(orderablesAggregator);
 
     Map<UUID, OrderableFulfillDto> fulfillMap = new HashMap<>();
@@ -228,6 +236,12 @@ public class StockCardSummariesServiceTest {
     when(orderableFulfillReferenceDataService
         .findByIds(asList(orderable.getId(), orderable2.getId(), orderable3.getId())))
         .thenReturn(fulfillMap);
+
+    when(lotReferenceDataService.getPage(anyMap()))
+        .thenReturn(new PageImpl<>(Collections.emptyList()));
+
+    when(orderableReferenceDataService.getPage(anyMap()))
+        .thenReturn(new PageImpl<>(Collections.emptyList()));
 
     StockEvent event = new StockEventDataBuilder()
         .withFacility(params.getFacilityId())
@@ -248,7 +262,7 @@ public class StockCardSummariesServiceTest {
 
     when(calculatedStockOnHandService
         .getStockCardsWithStockOnHand(params.getProgramId(), params.getFacilityId(),
-            params.getAsOfDate()))
+            params.getAsOfDate(), Collections.emptyList()))
         .thenReturn(stockCards);
 
     StockCardSummaries result = stockCardSummariesService.findStockCards(params);

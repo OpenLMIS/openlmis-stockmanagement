@@ -52,12 +52,19 @@ public final class StockCardSummariesV2SearchParams {
   static final String AS_OF_DATE = "asOfDate";
   static final String ORDERABLE_ID = "orderableId";
   static final String NON_EMPTY_ONLY = "nonEmptyOnly";
+  static final String ORDERABLE_CODE = "orderableCode";
+  static final String ORDERABLE_NAME = "orderableName";
+  static final String LOT_CODE = "lotCode";
 
   private UUID programId;
   private UUID facilityId;
   private List<UUID> orderableIds;
   private LocalDate asOfDate;
   private boolean nonEmptyOnly;
+
+  private String orderableCode;
+  private String orderableName;
+  private String lotCode;
 
   /**
    * Creates stock card summaries search params from multi value map.
@@ -78,6 +85,9 @@ public final class StockCardSummariesV2SearchParams {
       this.asOfDate = getDate(AS_OF_DATE, parameters);
       this.orderableIds = getIds(ORDERABLE_ID, parameters);
       this.nonEmptyOnly = Boolean.valueOf(parameters.getFirst(NON_EMPTY_ONLY));
+      this.orderableCode = parameters.getFirst(ORDERABLE_CODE);
+      this.orderableName = parameters.getFirst(ORDERABLE_NAME);
+      this.lotCode = parameters.getFirst(LOT_CODE);
     }
   }
 

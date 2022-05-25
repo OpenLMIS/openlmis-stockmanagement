@@ -27,13 +27,17 @@ import static org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity.
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
+
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
@@ -90,7 +94,6 @@ public class StockCardSummariesService extends StockCardBaseService {
 
   @Autowired
   private PermissionService permissionService;
-  
 
   /**
    * Get a map of stock cards assigned to orderable ids.
@@ -141,22 +144,45 @@ public class StockCardSummariesService extends StockCardBaseService {
     profiler.start("GET_APPROVED_PRODUCTS");
     OrderablesAggregator approvedProducts = approvedProductReferenceDataService
         .getApprovedProducts(params.getFacilityId(), params.getProgramId(),
-            params.getOrderableIds());
+            params.getOrderableIds(), params.getOrderableCode(), params.getOrderableName()
+        );
 
     profiler.start("FIND_ORDERABLE_FULFILL_BY_ID");
     Map<UUID, OrderableFulfillDto> orderableFulfillMap = orderableFulfillService.findByIds(
         approvedProducts.getIdentifiers());
 
     profiler.start("FIND_STOCK_CARD_BY_PROGRAM_AND_FACILITY");
-    
+
+    List<UUID> orderableIdForStockCard = Collections.emptyList();
+    String lotCode = params.getLotCode();
+
+    if (!StringUtils.isBlank(lotCode)) {
+
+      Map<String, Object> searchParams = new HashMap<>();
+      searchParams.put("lotCode", lotCode);
+
+
+      List<UUID> tradeItemsMatchingLotCode = lotReferenceDataService.getPage(searchParams)
+          .map(LotDto::getTradeItemId)
+          .toList();
+
+      // FIXME: Add filtering by trade item in referencedaa
+      searchParams.clear();
+      searchParams.put("tradeItemId", tradeItemsMatchingLotCode);
+      orderableIdForStockCard = orderableReferenceDataService.getPage(searchParams)
+          .stream()
+          .map(OrderableDto::getId)
+          .collect(toList());
+    }
+
     List<StockCard> stockCards = calculatedStockOnHandService
         .getStockCardsWithStockOnHand(params.getProgramId(), params.getFacilityId(),
-                                        params.getAsOfDate());
+            params.getAsOfDate(), orderableIdForStockCard);
 
     Page<OrderableDto> orderablesPage = approvedProducts.getOrderablesPage();
     StockCardSummaries result = new StockCardSummaries(
-            orderablesPage.getContent(), stockCards, orderableFulfillMap,
-            params.getAsOfDate(), orderablesPage.getTotalElements());
+        orderablesPage.getContent(), stockCards, orderableFulfillMap,
+        params.getAsOfDate(), orderablesPage.getTotalElements());
     profiler.stop().log();
     return result;
   }
@@ -297,20 +323,20 @@ public class StockCardSummariesService extends StockCardBaseService {
     List<CalculatedStockOnHand> calculatedStockOnHands;
     if (null == startDate) {
       calculatedStockOnHands = calculatedStockOnHandRepository
-            .findByStockCardIdInAndOccurredDateLessThanEqual(stockCardIds, endDate);
+          .findByStockCardIdInAndOccurredDateLessThanEqual(stockCardIds, endDate);
       stockCardIds.forEach(stockCardId -> {
         Optional<CalculatedStockOnHand> calculatedStockOnHand = calculatedStockOnHandRepository
-                .findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(
-                        stockCardId, endDate);
+            .findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(
+                stockCardId, endDate);
         calculatedStockOnHand.ifPresent(calculatedStockOnHands::add);
       });
     } else {
       calculatedStockOnHands = calculatedStockOnHandRepository
-            .findByStockCardIdInAndOccurredDateBetween(stockCardIds, startDate, endDate);
+          .findByStockCardIdInAndOccurredDateBetween(stockCardIds, startDate, endDate);
       stockCardIds.forEach(stockCardId -> {
         Optional<CalculatedStockOnHand> calculatedStockOnHand = calculatedStockOnHandRepository
-                .findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(
-                        stockCardId, startDate);
+            .findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(
+                stockCardId, startDate);
         calculatedStockOnHand.ifPresent(calculatedStockOnHands::add);
       });
     }
