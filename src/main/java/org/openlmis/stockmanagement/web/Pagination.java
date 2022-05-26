@@ -45,7 +45,9 @@ public class Pagination {
    * See {@link #getPage(List, Pageable)}
    */
   public static <T> Page<T> getPage(List<T> originalList) {
-    return getPage(originalList, PageRequest.of(0, originalList.size()));
+    return originalList.isEmpty()
+        ? Page.empty()
+        : getPage(originalList, PageRequest.of(0, originalList.size()));
   }
 
   /**
