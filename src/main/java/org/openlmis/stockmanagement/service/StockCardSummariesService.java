@@ -28,7 +28,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -178,7 +177,8 @@ public class StockCardSummariesService extends StockCardBaseService {
           .collect(toList());
     }
 
-    // FIXME: Fix page retrieving/calculation, page size may be wrong when there are orderables matching not only by lot codes
+    // FIXME: Fix page retrieving/calculation,
+    //  page size may be wrong when there are orderables matching not only by lot codes
     List<StockCard> stockCards = calculatedStockOnHandService
         .getStockCardsWithStockOnHand(params.getProgramId(), params.getFacilityId(),
             params.getAsOfDate(), orderableIdForStockCard);

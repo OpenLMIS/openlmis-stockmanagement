@@ -32,6 +32,7 @@ import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.service.StockCardSummaries;
 import org.openlmis.stockmanagement.service.StockCardSummariesService;
 import org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams;
+import org.openlmis.stockmanagement.testutils.CanFulfillForMeEntryDtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.ObjectGenerator;
 import org.openlmis.stockmanagement.testutils.StockCardSummariesV2SearchParamsDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardSummaryV2DtoDataBuilder;
@@ -65,7 +66,9 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
   @MockBean
   private StockCardSummariesV2DtoBuilder stockCardSummariesV2DtoBuilder;
 
-  private StockCardSummaryV2Dto stockCardSummary = new StockCardSummaryV2DtoDataBuilder().build();
+  private StockCardSummaryV2Dto stockCardSummary = new StockCardSummaryV2DtoDataBuilder()
+      .withCanFulfillForMe(new CanFulfillForMeEntryDtoDataBuilder().build())
+      .build();
   private StockCardSummaryV2Dto stockCardSummary2 = new StockCardSummaryV2DtoDataBuilder().build();
   private StockCardSummariesV2SearchParams params =
       new StockCardSummariesV2SearchParamsDataBuilder().build();

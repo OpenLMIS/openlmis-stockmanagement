@@ -18,7 +18,6 @@ package org.openlmis.stockmanagement.testutils;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.collections4.SetUtils;
 import org.openlmis.stockmanagement.dto.referencedata.VersionObjectReferenceDto;
 import org.openlmis.stockmanagement.web.stockcardsummariesv2.CanFulfillForMeEntryDto;
 import org.openlmis.stockmanagement.web.stockcardsummariesv2.StockCardSummaryV2Dto;
@@ -28,14 +27,12 @@ public class StockCardSummaryV2DtoDataBuilder {
   private VersionObjectReferenceDto orderable;
   private Set<CanFulfillForMeEntryDto> canFulfillForMe;
 
+  /**
+   *  Constructor.
+   */
   public StockCardSummaryV2DtoDataBuilder() {
     orderable = new VersionedObjectReferenceDtoDataBuilder().withPath("api/orderables").build();
     canFulfillForMe = new HashSet<>();
-    canFulfillForMe.add(
-        new CanFulfillForMeEntryDtoDataBuilder()
-            .withOrderable(orderable)
-            .build()
-    );
   }
 
   /**

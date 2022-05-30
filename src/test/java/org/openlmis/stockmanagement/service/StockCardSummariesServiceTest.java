@@ -27,7 +27,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -74,6 +73,7 @@ import org.openlmis.stockmanagement.testutils.StockCardDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardSummariesV2SearchParamsDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
+import org.openlmis.stockmanagement.util.RequestParameters;
 import org.springframework.data.domain.PageImpl;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -237,10 +237,10 @@ public class StockCardSummariesServiceTest {
         .findByIds(asList(orderable.getId(), orderable2.getId(), orderable3.getId())))
         .thenReturn(fulfillMap);
 
-    when(lotReferenceDataService.getPage(anyMap()))
+    when(lotReferenceDataService.getPage(any(RequestParameters.class)))
         .thenReturn(new PageImpl<>(Collections.emptyList()));
 
-    when(orderableReferenceDataService.getPage(anyMap()))
+    when(orderableReferenceDataService.getPage(any(RequestParameters.class)))
         .thenReturn(new PageImpl<>(Collections.emptyList()));
 
     StockEvent event = new StockEventDataBuilder()
