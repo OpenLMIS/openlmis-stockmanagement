@@ -54,6 +54,7 @@ import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferen
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableFulfillReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
+import org.openlmis.stockmanagement.util.RequestParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.profiler.Profiler;
@@ -157,24 +158,27 @@ public class StockCardSummariesService extends StockCardBaseService {
     String lotCode = params.getLotCode();
 
     if (!StringUtils.isBlank(lotCode)) {
-
-      Map<String, Object> searchParams = new HashMap<>();
-      searchParams.put("lotCode", lotCode);
-
+      RequestParameters searchParams = RequestParameters
+          .init()
+          .set("size", Integer.MAX_VALUE)
+          .set("lotCode", lotCode);
 
       List<UUID> tradeItemsMatchingLotCode = lotReferenceDataService.getPage(searchParams)
           .map(LotDto::getTradeItemId)
           .toList();
 
-      // FIXME: Add filtering by trade item in referencedaa
-      searchParams.clear();
-      searchParams.put("tradeItemId", tradeItemsMatchingLotCode);
+      searchParams = RequestParameters
+          .init()
+          .set("size", tradeItemsMatchingLotCode.size())
+          .set("tradeItemId", tradeItemsMatchingLotCode);
+
       orderableIdForStockCard = orderableReferenceDataService.getPage(searchParams)
           .stream()
           .map(OrderableDto::getId)
           .collect(toList());
     }
 
+    // FIXME: Fix page retrieving/calculation, page size may be wrong when there are orderables matching not only by lot codes
     List<StockCard> stockCards = calculatedStockOnHandService
         .getStockCardsWithStockOnHand(params.getProgramId(), params.getFacilityId(),
             params.getAsOfDate(), orderableIdForStockCard);

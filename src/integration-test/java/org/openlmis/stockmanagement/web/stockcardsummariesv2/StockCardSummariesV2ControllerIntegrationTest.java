@@ -97,7 +97,10 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
             .param(FACILITY_ID, params.getFacilityId().toString())
             .param(AS_OF_DATE, params.getAsOfDate().toString())
             .param(ORDERABLE_ID, params.getOrderableIds().get(0).toString())
-            .param(ORDERABLE_ID, params.getOrderableIds().get(1).toString()));
+            .param(ORDERABLE_ID, params.getOrderableIds().get(1).toString())
+            .param("orderableCode", "code1")
+            .param("orderableName", "name1")
+            .param("lotCode", "code2"));
 
     resultActions
         .andExpect(status().isOk())
@@ -108,7 +111,15 @@ public class StockCardSummariesV2ControllerIntegrationTest extends BaseWebTest {
         .andExpect(jsonPath(ORDERABLE_ID_REFERENCE,
             is(stockCardSummary.getOrderable().getId().toString())))
         .andExpect(jsonPath("$.content[1].orderable.id",
-            is(stockCardSummary2.getOrderable().getId().toString())));
+            is(stockCardSummary2.getOrderable().getId().toString())))
+        .andExpect(jsonPath("$.content[0].canFulfillForMe[0].lot.id",
+            is(
+                stockCardSummary.getCanFulfillForMe()
+                    .stream()
+                    .findFirst()
+                    .map(entryDto -> entryDto.getLot().getId().toString())
+                    .orElse("NO LOT")
+            )));
   }
 
   @Test
