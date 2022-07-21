@@ -27,7 +27,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NavigableMap;
 import java.util.TreeMap;
+
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -116,7 +118,7 @@ public class StockCardAggregate {
    * @return number of days without stock available
    */
   public Long getStockoutDays(LocalDate startDate, LocalDate endDate) {
-    Map<LocalDate, Integer> stockOnHands = calculatedStockOnHands.stream()
+    NavigableMap<LocalDate, Integer> stockOnHands = calculatedStockOnHands.stream()
         .collect(toMap(
             CalculatedStockOnHand::getOccurredDate,
             CalculatedStockOnHand::getStockOnHand,
@@ -139,13 +141,15 @@ public class StockCardAggregate {
   }
 
   private Map<LocalDate, LocalDate> getStockoutPeriods(
-      Map<LocalDate, Integer> stockOnHands, LocalDate endDate) {
+      NavigableMap<LocalDate, Integer> stockOnHands, LocalDate endDate) {
     LocalDate stockOutStartDate = null;
     Map<LocalDate, LocalDate> stockOutDaysMap = new TreeMap<>();
 
     for (Entry<LocalDate, Integer> stockOnHandEntry : stockOnHands.entrySet()) {
       if (stockOnHandEntry.getValue() <= 0) {
-        stockOutStartDate = stockOnHandEntry.getKey();
+        if (!wasStockoutEntryBefore(stockOnHands,stockOnHandEntry.getKey())) {
+          stockOutStartDate = stockOnHandEntry.getKey();
+        }
       } else if (null != stockOutStartDate) {
         LOGGER.debug("stock out days from {} to {}", stockOutStartDate, stockOnHandEntry.getKey());
         stockOutDaysMap.put(stockOutStartDate, stockOnHandEntry.getKey());
@@ -159,6 +163,12 @@ public class StockCardAggregate {
     }
 
     return stockOutDaysMap;
+  }
+
+  private boolean wasStockoutEntryBefore(NavigableMap<LocalDate,Integer> stockOnHand,
+                                         LocalDate period) {
+    Entry<LocalDate, Integer> previousPeriod = stockOnHand.lowerEntry(period);
+    return previousPeriod != null && previousPeriod.getValue() == 0;
   }
 
   private Long calculateStockoutDays(Map<LocalDate, LocalDate> stockOutDaysMap,
