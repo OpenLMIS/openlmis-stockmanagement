@@ -100,10 +100,21 @@ public class StockCardAggregateTest {
             .withStockOnHand(20)
             .build(),
         new CalculatedStockOnHandDataBuilder()
+            .withStockCard(stockCard2)
+            .withOccurredDate(LocalDate.of(2022, 5, 1))
+            .withStockOnHand(0)
+            .build(),
+        new CalculatedStockOnHandDataBuilder()
+            .withStockCard(stockCard2)
+            .withOccurredDate(LocalDate.of(2022, 5, 30))
+            .withStockOnHand(0)
+            .build(),
+        new CalculatedStockOnHandDataBuilder()
             .withStockCard(stockCard3)
             .withOccurredDate(LocalDate.of(2018, 5, 13))
             .withStockOnHand(50)
             .build()));
+
 
     stockCardAggregate = new StockCardAggregate(
         asList(stockCard1, stockCard2, stockCard3), calculatedStockOnHands);
@@ -157,11 +168,6 @@ public class StockCardAggregateTest {
   }
 
   @Test
-  public void shouldGetStockOutDays() {
-    assertEquals(new Long(1), stockCardAggregate.getStockoutDays(null, null));
-  }
-
-  @Test
   public void shouldGetStockOutDaysInRange() {
     assertEquals(new Long(1), stockCardAggregate.getStockoutDays(
         LocalDate.of(2018, 5, 10), LocalDate.of(2018, 5, 11)));
@@ -171,7 +177,12 @@ public class StockCardAggregateTest {
         LocalDate.of(2018, 5, 11), LocalDate.of(2018, 5, 12)));
     assertEquals(new Long(0), stockCardAggregate.getStockoutDays(
         LocalDate.of(2018, 5, 12), LocalDate.of(2018, 5, 13)));
+    assertEquals(new Long(29), stockCardAggregate.getStockoutDays(
+            LocalDate.of(2022, 5, 1), LocalDate.of(2022, 5, 30)));
+
+
   }
+
 
   @Test
   public void shouldIncludeStockoutToCurrentDay() {
