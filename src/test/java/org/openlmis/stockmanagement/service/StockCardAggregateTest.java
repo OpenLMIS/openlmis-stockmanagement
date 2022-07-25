@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
-import org.joda.time.Days;
 import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.card.StockCard;
