@@ -123,7 +123,31 @@ public class StockCardAggregate {
             Integer::sum,
             TreeMap::new));
 
-    return calculateStockoutDays(getStockoutPeriods(stockOnHands, endDate), startDate, endDate);
+    long stockOutDays;
+    if (startDate == null || endDate == null) {
+      stockOutDays = calculateStockoutDays(
+          getStockoutPeriods(stockOnHands, endDate), startDate, endDate);
+    } else {
+
+      int sumOfStockOnHandDuringPeriod = 0;
+      for (Map.Entry<LocalDate, Integer> entry : stockOnHands.entrySet()) {
+        if (isAfterOrEqual(startDate, entry.getKey()) && isBeforeOrEqual(endDate, entry.getKey())) {
+          sumOfStockOnHandDuringPeriod += entry.getValue();
+        }
+      }
+      if (sumOfStockOnHandDuringPeriod == 0) {
+        long daysBetween = DAYS.between(startDate, endDate) + 1;
+        // According to OLMIS project specification month length can be maximum 30 days.
+        if (daysBetween >= 28) {
+          daysBetween -= 1;
+        }
+        stockOutDays = daysBetween;
+      } else {
+        stockOutDays = calculateStockoutDays(
+            getStockoutPeriods(stockOnHands, endDate), startDate, endDate);
+      }
+    }
+    return stockOutDays;
   }
 
   private List<StockCardLineItem> filterLineItems(LocalDate startDate,
@@ -161,7 +185,7 @@ public class StockCardAggregate {
     return stockOutDaysMap;
   }
 
-  private Long calculateStockoutDays(Map<LocalDate, LocalDate> stockOutDaysMap,
+  private long calculateStockoutDays(Map<LocalDate, LocalDate> stockOutDaysMap,
       LocalDate startDate, LocalDate endDate) {
 
     return stockOutDaysMap.isEmpty() ? 0 : stockOutDaysMap.keySet().stream()
