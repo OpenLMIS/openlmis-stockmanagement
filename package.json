@@ -1,5 +1,5 @@
 {
-  "name": "openlmis-stockmanagement", 
+  "name": "openlmis-stockmanagement",   
   "version": "0.0.1",
   "devDependencies": {
     "raml2html": "~3.0.0"
