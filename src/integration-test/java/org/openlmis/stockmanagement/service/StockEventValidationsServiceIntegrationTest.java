@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.openlmis.stockmanagement.BaseIntegrationTest;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.extension.ExtensionManager;
@@ -56,7 +57,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class StockEventValidationsServiceTest {
+public class StockEventValidationsServiceIntegrationTest extends BaseIntegrationTest {
 
   @Autowired
   private StockEventValidationsService stockEventValidationsService;

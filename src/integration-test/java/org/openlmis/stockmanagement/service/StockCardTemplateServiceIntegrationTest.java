@@ -25,6 +25,7 @@ import static org.openlmis.stockmanagement.testutils.StockCardTemplateDataBuilde
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.openlmis.stockmanagement.BaseIntegrationTest;
 import org.openlmis.stockmanagement.dto.StockCardFieldDto;
 import org.openlmis.stockmanagement.dto.StockCardLineItemFieldDto;
 import org.openlmis.stockmanagement.dto.StockCardTemplateDto;
@@ -37,7 +38,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class StockCardTemplateServiceTest {
+public class StockCardTemplateServiceIntegrationTest extends BaseIntegrationTest {
 
   @Autowired
   private StockCardTemplateService stockCardTemplateService;
