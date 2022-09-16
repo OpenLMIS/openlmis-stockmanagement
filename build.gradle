@@ -202,7 +202,7 @@ jacocoTestReport {
         csv.enabled false
     }
 
-       additionalSourceDirs = files(sourceSets.main.allJava.srcDirs)
+       additionalSourceDirs(files(sourceSets.main.allJava.srcDirs))
 }
 
 checkstyle {

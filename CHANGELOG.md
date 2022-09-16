@@ -1,3 +1,9 @@
+5.1.7-SNAPSHOT / WIP
+==================
+
+Bug fixes:
+* [OLMIS-7590](https://openlmis.atlassian.net/browse/OLMIS-7590): Fixed wrong stockOutDays calculation
+
 5.1.6 / 2022-04-21
 ==================
 
