@@ -92,14 +92,19 @@ public class StockCardAggregate {
 
     return isEmpty(filteredLineItems) ? new HashMap<>() : filteredLineItems.stream()
         .map(lineItem -> {
+          List<ImmutablePair<String,Integer>> totalTagsValues = lineItem.getStockAdjustments()
+              .stream().flatMap(adjustment -> adjustment.getReason().getTags().stream()
+                  .map(tags -> new ImmutablePair<>(tags, Math.abs(adjustment.getQuantity()))))
+              .collect(toList());
           int value = lineItem.getQuantityWithSign();
           List<String> tags = null == lineItem.getReason()
               ? emptyList()
               : lineItem.getReason().getTags();
 
-          return tags.stream()
+          totalTagsValues.addAll(tags.stream()
               .map(tag -> new ImmutablePair<>(tag, value))
-              .collect(toList());
+              .collect(toList()));
+          return totalTagsValues;
         })
         .flatMap(Collection::stream)
         .collect(toMap(
