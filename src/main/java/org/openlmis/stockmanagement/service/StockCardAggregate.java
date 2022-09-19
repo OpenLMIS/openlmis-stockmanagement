@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -92,18 +93,9 @@ public class StockCardAggregate {
 
     return isEmpty(filteredLineItems) ? new HashMap<>() : filteredLineItems.stream()
         .map(lineItem -> {
-          List<ImmutablePair<String,Integer>> totalTagsValues = lineItem.getStockAdjustments()
-              .stream().flatMap(adjustment -> adjustment.getReason().getTags().stream()
-                  .map(tags -> new ImmutablePair<>(tags, Math.abs(adjustment.getQuantity()))))
-              .collect(toList());
-          int value = lineItem.getQuantityWithSign();
-          List<String> tags = null == lineItem.getReason()
-              ? emptyList()
-              : lineItem.getReason().getTags();
-
-          totalTagsValues.addAll(tags.stream()
-              .map(tag -> new ImmutablePair<>(tag, value))
-              .collect(toList()));
+          List<ImmutablePair<String, Integer>> totalTagsValues = new ArrayList<>(
+              calculateTagValuesForStockAdjustments(lineItem));
+          totalTagsValues.addAll(calculateTagValuesForLineItem(lineItem));
           return totalTagsValues;
         })
         .flatMap(Collection::stream)
@@ -153,6 +145,28 @@ public class StockCardAggregate {
       }
     }
     return stockOutDays;
+  }
+
+  private List<ImmutablePair<String, Integer>> calculateTagValuesForStockAdjustments(
+      StockCardLineItem lineItem) {
+
+    return lineItem.getStockAdjustments()
+        .stream().flatMap(adjustment -> adjustment.getReason().getTags().stream()
+            .map(tags -> new ImmutablePair<>(tags, Math.abs(adjustment.getQuantity()))))
+        .collect(toList());
+  }
+
+  private List<ImmutablePair<String, Integer>> calculateTagValuesForLineItem(
+      StockCardLineItem lineItem) {
+
+    int value = lineItem.getQuantityWithSign();
+    List<String> tags = null == lineItem.getReason()
+        ? emptyList()
+        : lineItem.getReason().getTags();
+
+    return tags.stream()
+        .map(tag -> new ImmutablePair<>(tag, value))
+        .collect(toList());
   }
 
   private List<StockCardLineItem> filterLineItems(LocalDate startDate,
