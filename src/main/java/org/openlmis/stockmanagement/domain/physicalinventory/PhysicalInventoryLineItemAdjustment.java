@@ -25,6 +25,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.openlmis.stockmanagement.domain.BaseEntity;
+import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 
 @Data
@@ -42,4 +43,15 @@ public class PhysicalInventoryLineItemAdjustment extends BaseEntity {
   @Column(nullable = false)
   private Integer quantity;
 
+  /**
+   * Returns quantity value with correct sign depending on reason type.
+   *
+   * @return quantity value, is negative for Debit reason
+   */
+  public Integer getQuantityWithSign() {
+    if (reason != null && reason.getReasonType() == ReasonType.DEBIT) {
+      return this.getQuantity() * -1;
+    }
+    return this.getQuantity();
+  }
 }
