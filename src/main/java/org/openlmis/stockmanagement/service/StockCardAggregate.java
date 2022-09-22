@@ -152,7 +152,7 @@ public class StockCardAggregate {
 
     return lineItem.getStockAdjustments()
         .stream().flatMap(adjustment -> adjustment.getReason().getTags().stream()
-            .map(tags -> new ImmutablePair<>(tags, Math.abs(adjustment.getQuantity()))))
+            .map(tags -> new ImmutablePair<>(tags, adjustment.getQuantityWithSign())))
         .collect(toList());
   }
 
