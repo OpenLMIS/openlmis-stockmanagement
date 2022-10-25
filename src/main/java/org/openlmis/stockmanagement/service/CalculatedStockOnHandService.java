@@ -97,6 +97,29 @@ public class CalculatedStockOnHandService {
    *
    * @param programId  program id to find stock cards
    * @param facilityId facility id to find stock cards
+   * @param asOfDate   date used to get latest stock on hand before or equal specific date
+   * @param orderableIds  orderable ids to find stock card
+   * @param lotCodeIds  lot code ids to find stock card
+   * @return List of stock cards with SOH values, empty list if no stock cards were found.
+   */
+  public List<StockCard> getStockCardsWithStockOnHand(
+          UUID programId, UUID facilityId, LocalDate asOfDate, List<UUID> orderableIds,
+          List<UUID> lotCodeIds) {
+
+    List<StockCard> stockCards = getStockCardsWithStockOnHand(programId, facilityId,
+            asOfDate, orderableIds);
+
+    return lotCodeIds.isEmpty()
+            ? stockCards
+            : stockCards.stream().filter(card -> lotCodeIds.contains(card.getLotId()))
+            .collect(Collectors.toList());
+  }
+
+  /**
+   * Returns list of stock cards with fetched Stock on Hand values.
+   *
+   * @param programId  program id to find stock cards
+   * @param facilityId facility id to find stock cards
    * @return List of stock cards with SOH values, empty list if no stock cards were found.
    */
   public List<StockCard> getStockCardsWithStockOnHand(UUID programId, UUID facilityId) {
