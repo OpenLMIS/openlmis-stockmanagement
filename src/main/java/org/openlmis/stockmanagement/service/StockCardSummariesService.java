@@ -154,7 +154,7 @@ public class StockCardSummariesService extends StockCardBaseService {
     profiler.start("FIND_STOCK_CARD_BY_PROGRAM_AND_FACILITY");
 
     List<UUID> orderableIdsForStockCard = Collections.emptyList();
-    List<UUID> lotCodeIds = Collections.emptyList();
+    Set<UUID> lotCodeIds = Collections.emptySet();
     String lotCode = params.getLotCode();
 
     if (!StringUtils.isBlank(lotCode)) {
@@ -168,7 +168,7 @@ public class StockCardSummariesService extends StockCardBaseService {
       List<UUID> tradeItemsMatchingLotCode = lotPage.map(LotDto::getTradeItemId)
           .toList();
 
-      lotCodeIds = lotPage.map(LotDto::getId).toList();
+      lotCodeIds = lotPage.map(LotDto::getId).toSet();
 
       searchParams = RequestParameters
           .init()
