@@ -153,7 +153,8 @@ public class StockCardSummariesService extends StockCardBaseService {
 
     profiler.start("FIND_STOCK_CARD_BY_PROGRAM_AND_FACILITY");
 
-    List<UUID> orderableIdForStockCard = Collections.emptyList();
+    List<UUID> orderableIdsForStockCard = Collections.emptyList();
+    Set<UUID> lotCodeIds = Collections.emptySet();
     String lotCode = params.getLotCode();
 
     if (!StringUtils.isBlank(lotCode)) {
@@ -162,16 +163,19 @@ public class StockCardSummariesService extends StockCardBaseService {
           .set("size", Integer.MAX_VALUE)
           .set("lotCode", lotCode);
 
-      List<UUID> tradeItemsMatchingLotCode = lotReferenceDataService.getPage(searchParams)
-          .map(LotDto::getTradeItemId)
+      Page<LotDto> lotPage = lotReferenceDataService.getPage(searchParams);
+
+      List<UUID> tradeItemsMatchingLotCode = lotPage.map(LotDto::getTradeItemId)
           .toList();
+
+      lotCodeIds = lotPage.map(LotDto::getId).toSet();
 
       searchParams = RequestParameters
           .init()
           .set("size", tradeItemsMatchingLotCode.size())
           .set("tradeItemId", tradeItemsMatchingLotCode);
 
-      orderableIdForStockCard = orderableReferenceDataService.getPage(searchParams)
+      orderableIdsForStockCard = orderableReferenceDataService.getPage(searchParams)
           .stream()
           .map(OrderableDto::getId)
           .collect(toList());
@@ -179,14 +183,15 @@ public class StockCardSummariesService extends StockCardBaseService {
 
     // FIXME: Fix page retrieving/calculation,
     //  page size may be wrong when there are orderables matching not only by lot codes
-    List<StockCard> stockCards = calculatedStockOnHandService
-        .getStockCardsWithStockOnHand(params.getProgramId(), params.getFacilityId(),
-            params.getAsOfDate(), orderableIdForStockCard);
+    List<StockCard> stockCards = calculatedStockOnHandService.getStockCardsWithStockOnHand(
+            params.getProgramId(), params.getFacilityId(), params.getAsOfDate(),
+            orderableIdsForStockCard, lotCodeIds);
 
     Page<OrderableDto> orderablesPage = approvedProducts.getOrderablesPage();
     StockCardSummaries result = new StockCardSummaries(
         orderablesPage.getContent(), stockCards, orderableFulfillMap,
         params.getAsOfDate(), orderablesPage.getTotalElements());
+
     profiler.stop().log();
     return result;
   }

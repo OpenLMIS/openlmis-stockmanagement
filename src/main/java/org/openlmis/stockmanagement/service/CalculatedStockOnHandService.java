@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
@@ -62,25 +63,14 @@ public class CalculatedStockOnHandService {
    * @param programId  program id to find stock cards
    * @param facilityId facility id to find stock cards
    * @param asOfDate   date used to get latest stock on hand before or equal specific date
-   * @return List of stock cards with SOH values, empty list if no stock cards were found.
-   */
-  public List<StockCard> getStockCardsWithStockOnHand(
-      UUID programId, UUID facilityId, LocalDate asOfDate) {
-
-    return getStockCardsWithStockOnHand(programId, facilityId, asOfDate, Collections.emptyList());
-  }
-
-  /**
-   * Returns list of stock cards with fetched Stock on Hand values.
-   *
-   * @param programId  program id to find stock cards
-   * @param facilityId facility id to find stock cards
-   * @param asOfDate   date used to get latest stock on hand before or equal specific date
    * @param orderableIds  orderable ids to find stock card
+   * @param lotCodeIds  lot code ids to find stock card
    * @return List of stock cards with SOH values, empty list if no stock cards were found.
    */
   public List<StockCard> getStockCardsWithStockOnHand(
-      UUID programId, UUID facilityId, LocalDate asOfDate, List<UUID> orderableIds) {
+          UUID programId, UUID facilityId, LocalDate asOfDate, List<UUID> orderableIds,
+          Set<UUID> lotCodeIds) {
+
     List<StockCard> stockCards = orderableIds.isEmpty()
         ? stockCardRepository.findByProgramIdAndFacilityId(programId, facilityId)
         : stockCardRepository.findByOrderableIdInAndProgramIdAndFacilityId(
@@ -89,7 +79,10 @@ public class CalculatedStockOnHandService {
     stockCards.forEach(stockCard ->
         fetchStockOnHand(stockCard, asOfDate != null ? asOfDate : LocalDate.now()));
 
-    return stockCards;
+    return lotCodeIds.isEmpty()
+            ? stockCards
+            : stockCards.stream().filter(card -> lotCodeIds.contains(card.getLotId()))
+            .collect(Collectors.toList());
   }
 
   /**
@@ -106,16 +99,47 @@ public class CalculatedStockOnHandService {
   /**
    * Returns list of stock cards with fetched Stock on Hand values.
    *
+   * @param programId  program id to find stock cards
+   * @param facilityId facility id to find stock cards
+   * @param asOfDate   date used to get latest stock on hand before or equal specific date
+   * @return List of stock cards with SOH values, empty list if no stock cards were found.
+   */
+  public List<StockCard> getStockCardsWithStockOnHand(
+          UUID programId, UUID facilityId, LocalDate asOfDate) {
+
+    return getStockCardsWithStockOnHand(programId, facilityId, asOfDate, Collections.emptyList());
+  }
+
+  /**
+   * Returns list of stock cards with fetched Stock on Hand values.
+   *
+   * @param programId  program id to find stock cards
+   * @param facilityId facility id to find stock cards
+   * @param asOfDate   date used to get latest stock on hand before or equal specific date
+   * @param orderableIds  orderable ids to find stock card
+   * @return List of stock cards with SOH values, empty list if no stock cards were found.
+   */
+  public List<StockCard> getStockCardsWithStockOnHand(
+          UUID programId, UUID facilityId, LocalDate asOfDate, List<UUID> orderableIds) {
+
+    return getStockCardsWithStockOnHand(programId, facilityId,
+            asOfDate, orderableIds, Collections.emptySet());
+  }
+
+  /**
+   * Returns list of stock cards with fetched Stock on Hand values.
+   *
    * @param programId    program id to find stock card
    * @param facilityId   facility id to find stock card
    * @param orderableIds orderable ids to find stock card
    * @return List of stock cards with SOH values, empty list if no stock cards were found.
    */
   public List<StockCard> getStockCardsWithStockOnHandByOrderableIds(
-      UUID programId, UUID facilityId, List<UUID> orderableIds) {
+          UUID programId, UUID facilityId, List<UUID> orderableIds) {
 
     return getStockCardsWithStockOnHand(programId, facilityId, LocalDate.now(), orderableIds);
   }
+
 
   /**
    * Fetch stock on hand value for given stock card and current date.

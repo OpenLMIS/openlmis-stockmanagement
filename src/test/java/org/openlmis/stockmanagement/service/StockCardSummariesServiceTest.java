@@ -262,7 +262,7 @@ public class StockCardSummariesServiceTest {
 
     when(calculatedStockOnHandService
         .getStockCardsWithStockOnHand(params.getProgramId(), params.getFacilityId(),
-            params.getAsOfDate(), Collections.emptyList()))
+            params.getAsOfDate(), Collections.emptyList(), Collections.emptySet()))
         .thenReturn(stockCards);
 
     StockCardSummaries result = stockCardSummariesService.findStockCards(params);
