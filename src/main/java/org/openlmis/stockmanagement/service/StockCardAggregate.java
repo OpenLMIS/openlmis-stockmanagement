@@ -20,15 +20,18 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOH_NOT_FOUND;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -39,6 +42,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,26 +126,33 @@ public class StockCardAggregate {
 
     long stockOutDays;
     if (startDate == null || endDate == null) {
-      stockOutDays = calculateStockoutDays(
-          getStockoutPeriods(stockOnHands, endDate), startDate, endDate);
+      stockOutDays = calculateStockoutDays(getStockoutPeriods(stockOnHands, endDate),
+              startDate, endDate);
     } else {
 
-      int sumOfStockOnHandDuringPeriod = 0;
+      boolean wasAnySohChangesInPeriod = false;
       for (Map.Entry<LocalDate, Integer> entry : stockOnHands.entrySet()) {
         if (isAfterOrEqual(startDate, entry.getKey()) && isBeforeOrEqual(endDate, entry.getKey())) {
-          sumOfStockOnHandDuringPeriod += entry.getValue();
+          wasAnySohChangesInPeriod = true;
+          break;
         }
       }
-      if (sumOfStockOnHandDuringPeriod == 0) {
-        long daysBetween = DAYS.between(startDate, endDate) + 1;
-        // According to OLMIS project specification month length can be maximum 30 days.
-        if (daysBetween >= 28) {
-          daysBetween -= 1;
+
+      int beginningBalance = getMostRecentStockOnHandBeforeDate(stockOnHands, startDate);
+      if (!wasAnySohChangesInPeriod) {
+        if (beginningBalance > 0) {
+          stockOutDays = 0L;
+        } else {
+          long daysBetween = DAYS.between(startDate, endDate) + 1;
+          // According to OLMIS project specification month length can be maximum 30 days.
+          if (daysBetween >= 28) {
+            daysBetween -= 1;
+          }
+          stockOutDays = daysBetween;
         }
-        stockOutDays = daysBetween;
       } else {
-        stockOutDays = calculateStockoutDays(
-            getStockoutPeriods(stockOnHands, endDate), startDate, endDate);
+        stockOutDays = calculateStockoutDays(getStockoutPeriods(stockOnHands, endDate),
+                startDate, endDate);
       }
     }
     return stockOutDays;
@@ -220,6 +231,30 @@ public class StockCardAggregate {
                 ? endDate.plusDays(1)
                 : stockOutDaysMap.get(key)))
         .sum();
+  }
+
+  private int getMostRecentStockOnHandBeforeDate(Map<LocalDate, Integer> stockOnHands,
+                                                 LocalDate date) {
+    if (stockOnHands.isEmpty() || !wasAnyStockOnHandBeforeDate(stockOnHands, date)) {
+      return 0;
+    }
+
+    LocalDate mostRecentDate = stockOnHands.keySet()
+            .stream()
+            .filter(ld -> ld.isBefore(date))
+            .max(Comparator.naturalOrder())
+            .orElseThrow(() -> new ValidationMessageException(ERROR_SOH_NOT_FOUND));
+
+    return stockOnHands.get(mostRecentDate);
+  }
+
+  private boolean wasAnyStockOnHandBeforeDate(Map<LocalDate, Integer> stockOnHands,
+                                              LocalDate date) {
+    return stockOnHands.keySet()
+            .stream()
+            .filter(ld -> ld.isBefore(date))
+            .max(Comparator.naturalOrder())
+            .isPresent();
   }
 
   private boolean isBeforeOrEqual(LocalDate date, LocalDate dateToCompare) {

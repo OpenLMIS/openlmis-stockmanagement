@@ -221,13 +221,13 @@ public class StockCardAggregateTest {
     assertEquals(new Long(0), stockCardAggregate.getStockoutDays(
         LocalDate.of(2018, 5, 12), LocalDate.of(2018, 5, 13)));
 
-    assertEquals(new Long(29), stockCardAggregate.getStockoutDays(
+    assertEquals(new Long(0), stockCardAggregate.getStockoutDays(
         LocalDate.of(2018, 6, 1), LocalDate.of(2018, 6, 30)));
 
-    assertEquals(new Long(30), stockCardAggregate.getStockoutDays(
+    assertEquals(new Long(0), stockCardAggregate.getStockoutDays(
         LocalDate.of(2018, 7, 1), LocalDate.of(2018, 7, 31)));
 
-    assertEquals(new Long(30), stockCardAggregate.getStockoutDays(
+    assertEquals(new Long(0), stockCardAggregate.getStockoutDays(
         LocalDate.of(2018, 8, 1), LocalDate.of(2018, 8, 31)));
 
     assertEquals(new Long(29), stockCardAggregate.getStockoutDays(

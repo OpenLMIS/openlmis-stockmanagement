@@ -2,6 +2,7 @@
 ==================
 Bug fixes:
 * [OLMIS-7373](https://openlmis.atlassian.net/browse/OLMIS-7373): Fixed filtering by lot code in stock on hand
+* [OLMIS-7711](https://openlmis.atlassian.net/browse/OLMIS-7711): Fixed wrong stockout days calculation
 
 5.1.7 / 2022-10-07
 ==================
