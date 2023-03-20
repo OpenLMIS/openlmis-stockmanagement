@@ -20,7 +20,6 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOH_NOT_FOUND;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -30,8 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.TreeMap;
-
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -42,7 +41,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
-import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -235,26 +233,16 @@ public class StockCardAggregate {
 
   private int getMostRecentStockOnHandBeforeDate(Map<LocalDate, Integer> stockOnHands,
                                                  LocalDate date) {
-    if (stockOnHands.isEmpty() || !wasAnyStockOnHandBeforeDate(stockOnHands, date)) {
+    if (stockOnHands.isEmpty()) {
       return 0;
     }
 
-    LocalDate mostRecentDate = stockOnHands.keySet()
+    Optional<LocalDate> mostRecentDate = stockOnHands.keySet()
             .stream()
             .filter(ld -> ld.isBefore(date))
-            .max(Comparator.naturalOrder())
-            .orElseThrow(() -> new ValidationMessageException(ERROR_SOH_NOT_FOUND));
+            .max(Comparator.naturalOrder());
 
-    return stockOnHands.get(mostRecentDate);
-  }
-
-  private boolean wasAnyStockOnHandBeforeDate(Map<LocalDate, Integer> stockOnHands,
-                                              LocalDate date) {
-    return stockOnHands.keySet()
-            .stream()
-            .filter(ld -> ld.isBefore(date))
-            .max(Comparator.naturalOrder())
-            .isPresent();
+    return mostRecentDate.isPresent() ? stockOnHands.get(mostRecentDate.get()) : 0;
   }
 
   private boolean isBeforeOrEqual(LocalDate date, LocalDate dateToCompare) {
