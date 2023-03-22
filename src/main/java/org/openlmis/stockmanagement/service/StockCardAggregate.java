@@ -24,10 +24,12 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.TreeMap;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -122,26 +124,33 @@ public class StockCardAggregate {
 
     long stockOutDays;
     if (startDate == null || endDate == null) {
-      stockOutDays = calculateStockoutDays(
-          getStockoutPeriods(stockOnHands, endDate), startDate, endDate);
+      stockOutDays = calculateStockoutDays(getStockoutPeriods(stockOnHands, endDate),
+              startDate, endDate);
     } else {
 
-      int sumOfStockOnHandDuringPeriod = 0;
+      boolean wasAnySohChangesInPeriod = false;
       for (Map.Entry<LocalDate, Integer> entry : stockOnHands.entrySet()) {
         if (isAfterOrEqual(startDate, entry.getKey()) && isBeforeOrEqual(endDate, entry.getKey())) {
-          sumOfStockOnHandDuringPeriod += entry.getValue();
+          wasAnySohChangesInPeriod = true;
+          break;
         }
       }
-      if (sumOfStockOnHandDuringPeriod == 0) {
-        long daysBetween = DAYS.between(startDate, endDate) + 1;
-        // According to OLMIS project specification month length can be maximum 30 days.
-        if (daysBetween >= 28) {
-          daysBetween -= 1;
+
+      int beginningBalance = getMostRecentStockOnHandBeforeDate(stockOnHands, startDate);
+      if (!wasAnySohChangesInPeriod) {
+        if (beginningBalance > 0) {
+          stockOutDays = 0L;
+        } else {
+          long daysBetween = DAYS.between(startDate, endDate) + 1;
+          // According to OLMIS project specification month length can be maximum 30 days.
+          if (daysBetween >= 28) {
+            daysBetween -= 1;
+          }
+          stockOutDays = daysBetween;
         }
-        stockOutDays = daysBetween;
       } else {
-        stockOutDays = calculateStockoutDays(
-            getStockoutPeriods(stockOnHands, endDate), startDate, endDate);
+        stockOutDays = calculateStockoutDays(getStockoutPeriods(stockOnHands, endDate),
+                startDate, endDate);
       }
     }
     return stockOutDays;
@@ -220,6 +229,20 @@ public class StockCardAggregate {
                 ? endDate.plusDays(1)
                 : stockOutDaysMap.get(key)))
         .sum();
+  }
+
+  private int getMostRecentStockOnHandBeforeDate(Map<LocalDate, Integer> stockOnHands,
+                                                 LocalDate date) {
+    if (stockOnHands.isEmpty()) {
+      return 0;
+    }
+
+    Optional<LocalDate> mostRecentDate = stockOnHands.keySet()
+            .stream()
+            .filter(ld -> ld.isBefore(date))
+            .max(Comparator.naturalOrder());
+
+    return mostRecentDate.isPresent() ? stockOnHands.get(mostRecentDate.get()) : 0;
   }
 
   private boolean isBeforeOrEqual(LocalDate date, LocalDate dateToCompare) {
