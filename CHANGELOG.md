@@ -1,4 +1,4 @@
-5.1.8-SNAPSHOT / WIP
+5.1.8 / 2023-04-05
 ==================
 Bug fixes:
 * [OLMIS-7373](https://openlmis.atlassian.net/browse/OLMIS-7373): Fixed filtering by lot code in stock on hand
