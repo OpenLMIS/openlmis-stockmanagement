@@ -255,6 +255,10 @@ test {
         events 'started', 'passed'
         exceptionFormat = 'full'
     }
+    dependsOn checkstyleMain
+    dependsOn checkstyleTest
+    dependsOn pmdMain
+    dependsOn pmdTest
 }
 
 //enable the lines below if you need to debug spring running in docker
