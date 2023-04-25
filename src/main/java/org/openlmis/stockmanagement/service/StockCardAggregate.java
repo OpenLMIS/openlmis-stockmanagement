@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.TreeMap;
+
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -78,8 +79,8 @@ public class StockCardAggregate {
     List<StockCardLineItem> filteredLineItems = filterLineItems(startDate, endDate, tag);
 
     return isEmpty(filteredLineItems) ? 0 : filterLineItems(startDate, endDate, tag).stream()
-        .mapToInt(StockCardLineItem::getQuantityWithSign)
-        .sum();
+            .mapToInt(StockCardLineItem::getQuantityWithSign)
+            .sum();
   }
 
   /**
@@ -94,17 +95,17 @@ public class StockCardAggregate {
     List<StockCardLineItem> filteredLineItems = filterLineItems(startDate, endDate, null);
 
     return isEmpty(filteredLineItems) ? new HashMap<>() : filteredLineItems.stream()
-        .map(lineItem -> {
-          List<ImmutablePair<String, Integer>> totalTagsValues = new ArrayList<>(
-              calculateTagValuesForStockAdjustments(lineItem));
-          totalTagsValues.addAll(calculateTagValuesForLineItem(lineItem));
-          return totalTagsValues;
-        })
-        .flatMap(Collection::stream)
-        .collect(toMap(
-            ImmutablePair::getLeft,
-            ImmutablePair::getRight,
-            Integer::sum));
+            .map(lineItem -> {
+              List<ImmutablePair<String, Integer>> totalTagsValues = new ArrayList<>(
+                      calculateTagValuesForStockAdjustments(lineItem));
+              totalTagsValues.addAll(calculateTagValuesForLineItem(lineItem));
+              return totalTagsValues;
+            })
+            .flatMap(Collection::stream)
+            .collect(toMap(
+                    ImmutablePair::getLeft,
+                    ImmutablePair::getRight,
+                    Integer::sum));
   }
 
   /**
@@ -116,38 +117,27 @@ public class StockCardAggregate {
    */
   public Long getStockoutDays(LocalDate startDate, LocalDate endDate) {
     Map<LocalDate, Integer> stockOnHands = calculatedStockOnHands.stream()
-        .collect(toMap(
-            CalculatedStockOnHand::getOccurredDate,
-            CalculatedStockOnHand::getStockOnHand,
-            Integer::sum,
-            TreeMap::new));
+            .collect(toMap(
+                    CalculatedStockOnHand::getOccurredDate,
+                    CalculatedStockOnHand::getStockOnHand,
+                    Integer::sum,
+                    TreeMap::new));
 
     long stockOutDays;
     if (startDate == null || endDate == null) {
       stockOutDays = calculateStockoutDays(getStockoutPeriods(stockOnHands, endDate),
               startDate, endDate);
     } else {
-
-      boolean wasAnySohChangesInPeriod = false;
-      for (Map.Entry<LocalDate, Integer> entry : stockOnHands.entrySet()) {
-        if (isAfterOrEqual(startDate, entry.getKey()) && isBeforeOrEqual(endDate, entry.getKey())) {
-          wasAnySohChangesInPeriod = true;
-          break;
-        }
-      }
+      ImmutablePair<Integer, Boolean> result =
+              processStockOnHands(stockOnHands, startDate, endDate);
 
       int beginningBalance = getMostRecentStockOnHandBeforeDate(stockOnHands, startDate);
-      if (!wasAnySohChangesInPeriod) {
-        if (beginningBalance > 0) {
-          stockOutDays = 0L;
-        } else {
-          long daysBetween = DAYS.between(startDate, endDate) + 1;
-          // According to OLMIS project specification month length can be maximum 30 days.
-          if (daysBetween >= 28) {
-            daysBetween -= 1;
-          }
-          stockOutDays = daysBetween;
-        }
+
+      if (!result.getValue() && beginningBalance > 0) {
+        stockOutDays = 0L;
+      } else if (!result.getValue()
+              || (result.getKey() == 0 && beginningBalance == 0)) {
+        stockOutDays = getDaysBetween(startDate, endDate);
       } else {
         stockOutDays = calculateStockoutDays(getStockoutPeriods(stockOnHands, endDate),
                 startDate, endDate);
@@ -156,42 +146,75 @@ public class StockCardAggregate {
     return stockOutDays;
   }
 
+  /**
+   * It checks whether there were any changes in stock on hand in a given period and, if necessary,
+   * sums up the values of these changes.
+   *
+   * @param stockOnHands dates and values stock on hands
+   * @param startDate    the beginning of the checked period
+   * @param endDate      the end of the checked period
+   * @return {@link ImmutablePair} where the key is the sum of changes in stock on hand in a given
+   *     period, and the value indicates whether there have been any changes at all (because the
+   *     sum of changes in stock on hand equals 0 does not mean no changes)
+   */
+  private ImmutablePair<Integer, Boolean> processStockOnHands(
+          Map<LocalDate, Integer> stockOnHands, LocalDate startDate, LocalDate endDate) {
+    boolean wasAnySohChangesInPeriod = false;
+    int sumOfStockOnHandDuringPeriod = 0;
+    for (Map.Entry<LocalDate, Integer> entry : stockOnHands.entrySet()) {
+      if (isAfterOrEqual(startDate, entry.getKey()) && isBeforeOrEqual(endDate, entry.getKey())) {
+        wasAnySohChangesInPeriod = true;
+        sumOfStockOnHandDuringPeriod += entry.getValue();
+      }
+    }
+    return new ImmutablePair<>(sumOfStockOnHandDuringPeriod, wasAnySohChangesInPeriod);
+  }
+
+  private long getDaysBetween(LocalDate startDate, LocalDate endDate) {
+    long daysBetween = DAYS.between(startDate, endDate) + 1;
+    // According to OLMIS project specification month length can be maximum 30 days.
+    if (daysBetween >= 28) {
+      daysBetween -= 1;
+    }
+    return daysBetween;
+  }
+
   private List<ImmutablePair<String, Integer>> calculateTagValuesForStockAdjustments(
-      StockCardLineItem lineItem) {
+          StockCardLineItem lineItem) {
 
     return lineItem.getStockAdjustments()
-        .stream().flatMap(adjustment -> adjustment.getReason().getTags().stream()
-            .map(tags -> new ImmutablePair<>(tags, adjustment.getQuantityWithSign())))
-        .collect(toList());
+            .stream().flatMap(adjustment -> adjustment.getReason().getTags().stream()
+                    .map(tags -> new ImmutablePair<>(tags, adjustment.getQuantityWithSign())))
+            .collect(toList());
   }
 
   private List<ImmutablePair<String, Integer>> calculateTagValuesForLineItem(
-      StockCardLineItem lineItem) {
+          StockCardLineItem lineItem) {
 
     int value = lineItem.getQuantityWithSign();
     List<String> tags = null == lineItem.getReason()
-        ? emptyList()
-        : lineItem.getReason().getTags();
+            ? emptyList()
+            : lineItem.getReason().getTags();
 
     return tags.stream()
-        .map(tag -> new ImmutablePair<>(tag, value))
-        .collect(toList());
+            .map(tag -> new ImmutablePair<>(tag, value))
+            .collect(toList());
   }
 
   private List<StockCardLineItem> filterLineItems(LocalDate startDate,
-      LocalDate endDate, String tag) {
+                                                  LocalDate endDate, String tag) {
 
     return stockCards.stream()
-        .flatMap(stockCard -> stockCard.getLineItems().stream())
-        .filter(lineItem ->
-            isBeforeOrEqual(lineItem.getOccurredDate(), startDate)
-                && isAfterOrEqual(lineItem.getOccurredDate(), endDate)
-                && (null == tag || lineItem.containsTag(tag)))
-        .collect(toList());
+            .flatMap(stockCard -> stockCard.getLineItems().stream())
+            .filter(lineItem ->
+                    isBeforeOrEqual(lineItem.getOccurredDate(), startDate)
+                            && isAfterOrEqual(lineItem.getOccurredDate(), endDate)
+                            && (null == tag || lineItem.containsTag(tag)))
+            .collect(toList());
   }
 
   private Map<LocalDate, LocalDate> getStockoutPeriods(
-      Map<LocalDate, Integer> stockOnHands, LocalDate endDate) {
+          Map<LocalDate, Integer> stockOnHands, LocalDate endDate) {
     LocalDate stockOutStartDate = null;
     Map<LocalDate, LocalDate> stockOutDaysMap = new TreeMap<>();
 
@@ -214,7 +237,7 @@ public class StockCardAggregate {
   }
 
   private long calculateStockoutDays(Map<LocalDate, LocalDate> stockOutDaysMap,
-      LocalDate startDate, LocalDate endDate) {
+                                     LocalDate startDate, LocalDate endDate) {
 
     return stockOutDaysMap.isEmpty() ? 0 : stockOutDaysMap.keySet().stream()
         .filter(key -> isAfterOrEqual(key, endDate))

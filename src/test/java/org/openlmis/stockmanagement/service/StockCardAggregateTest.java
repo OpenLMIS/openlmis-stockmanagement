@@ -54,113 +54,113 @@ public class StockCardAggregateTest {
   public void setUp() {
     StockEvent event = new StockEventDataBuilder().build();
     stockCard1 = new StockCardDataBuilder(event)
-        .withLineItem(new StockCardLineItemDataBuilder()
-            .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
-                ReasonType.CREDIT,
-                singletonList(tag1),
-                10,
-                LocalDate.of(2018, 5, 10)))
-        .withLineItem(new StockCardLineItemDataBuilder()
-            .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
-                ReasonType.DEBIT,
-                singletonList(tag2),
-                10,
-                LocalDate.of(2018, 5, 11)))
-        .build();
+            .withLineItem(new StockCardLineItemDataBuilder()
+                    .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
+                            ReasonType.CREDIT,
+                            singletonList(tag1),
+                            10,
+                            LocalDate.of(2018, 5, 10)))
+            .withLineItem(new StockCardLineItemDataBuilder()
+                    .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
+                            ReasonType.DEBIT,
+                            singletonList(tag2),
+                            10,
+                            LocalDate.of(2018, 5, 11)))
+            .build();
     stockCard2 = new StockCardDataBuilder(event)
-        .withLineItem(new StockCardLineItemDataBuilder()
-            .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
-                ReasonType.CREDIT,
-                singletonList(tag1),
-                20,
-                LocalDate.of(2018, 5, 12)))
-        .build();
+            .withLineItem(new StockCardLineItemDataBuilder()
+                    .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
+                            ReasonType.CREDIT,
+                            singletonList(tag1),
+                            20,
+                            LocalDate.of(2018, 5, 12)))
+            .build();
     StockCard stockCard3 = new StockCardDataBuilder(event)
-        .withLineItem(new StockCardLineItemDataBuilder()
-            .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
-                ReasonType.CREDIT,
-                asList(tag3, tag1),
-                30,
-                LocalDate.of(2018, 5, 13)))
-        .build();
+            .withLineItem(new StockCardLineItemDataBuilder()
+                    .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
+                            ReasonType.CREDIT,
+                            asList(tag3, tag1),
+                            30,
+                            LocalDate.of(2018, 5, 13)))
+            .build();
     StockCard stockCard4 = new StockCardDataBuilder(event)
-        .withLineItem(new StockCardLineItemDataBuilder()
-            .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
-                ReasonType.CREDIT,
-                singletonList(tag4),
-                30,
-                LocalDate.of(2018, 6, 15)))
-        .build();
+            .withLineItem(new StockCardLineItemDataBuilder()
+                    .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
+                            ReasonType.CREDIT,
+                            singletonList(tag4),
+                            30,
+                            LocalDate.of(2018, 6, 15)))
+            .build();
     StockCard stockCard5 = new StockCardDataBuilder(event)
-        .withLineItem(new StockCardLineItemDataBuilder()
-            .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
-                ReasonType.CREDIT,
-                singletonList(tag4),
-                30,
-                LocalDate.of(2018, 7, 1)))
-        .build();
+            .withLineItem(new StockCardLineItemDataBuilder()
+                    .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
+                            ReasonType.CREDIT,
+                            singletonList(tag4),
+                            30,
+                            LocalDate.of(2018, 7, 1)))
+            .build();
     StockCard stockCard6 = new StockCardDataBuilder(event)
-        .withLineItem(new StockCardLineItemDataBuilder()
-            .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
-                ReasonType.CREDIT,
-                singletonList(tag4),
-                10,
-                LocalDate.of(2018, 8, 1)))
-        .withLineItem(new StockCardLineItemDataBuilder()
-            .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
-                ReasonType.DEBIT,
-                singletonList(tag4),
-                10,
-                LocalDate.of(2018, 8, 31)))
-        .build();
+            .withLineItem(new StockCardLineItemDataBuilder()
+                    .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
+                            ReasonType.CREDIT,
+                            singletonList(tag4),
+                            10,
+                            LocalDate.of(2018, 8, 1)))
+            .withLineItem(new StockCardLineItemDataBuilder()
+                    .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
+                            ReasonType.DEBIT,
+                            singletonList(tag4),
+                            10,
+                            LocalDate.of(2018, 8, 31)))
+            .build();
 
 
     List<CalculatedStockOnHand> calculatedStockOnHands = new ArrayList<>(asList(
-        new CalculatedStockOnHandDataBuilder()
-            .withStockCard(stockCard1)
-            .withOccurredDate(LocalDate.of(2018, 5, 10))
-            .withStockOnHand(10)
-            .build(),
-        new CalculatedStockOnHandDataBuilder()
-            .withStockCard(stockCard1)
-            .withOccurredDate(LocalDate.of(2018, 5, 11))
-            .withStockOnHand(0)
-            .build(),
-        new CalculatedStockOnHandDataBuilder()
-            .withStockCard(stockCard2)
-            .withOccurredDate(LocalDate.of(2018, 5, 12))
-            .withStockOnHand(20)
-            .build(),
-        new CalculatedStockOnHandDataBuilder()
-            .withStockCard(stockCard3)
-            .withOccurredDate(LocalDate.of(2018, 5, 13))
-            .withStockOnHand(50)
-            .build(),
-        new CalculatedStockOnHandDataBuilder()
-            .withStockCard(stockCard4)
-            .withOccurredDate(LocalDate.of(2018, 6, 15))
-            .withStockOnHand(0)
-            .build(),
-        new CalculatedStockOnHandDataBuilder()
-            .withStockCard(stockCard5)
-            .withOccurredDate(LocalDate.of(2018, 7, 1))
-            .withStockOnHand(0)
-            .build(),
-        new CalculatedStockOnHandDataBuilder()
-            .withStockCard(stockCard6)
-            .withOccurredDate(LocalDate.of(2018, 8, 1))
-            .withStockOnHand(0)
-            .build(),
-        new CalculatedStockOnHandDataBuilder()
-            .withStockCard(stockCard6)
-            .withOccurredDate(LocalDate.of(2018, 8, 31))
-            .withStockOnHand(0)
-            .build()
+            new CalculatedStockOnHandDataBuilder()
+                    .withStockCard(stockCard1)
+                    .withOccurredDate(LocalDate.of(2018, 5, 10))
+                    .withStockOnHand(10)
+                    .build(),
+            new CalculatedStockOnHandDataBuilder()
+                    .withStockCard(stockCard1)
+                    .withOccurredDate(LocalDate.of(2018, 5, 11))
+                    .withStockOnHand(0)
+                    .build(),
+            new CalculatedStockOnHandDataBuilder()
+                    .withStockCard(stockCard2)
+                    .withOccurredDate(LocalDate.of(2018, 5, 12))
+                    .withStockOnHand(20)
+                    .build(),
+            new CalculatedStockOnHandDataBuilder()
+                    .withStockCard(stockCard3)
+                    .withOccurredDate(LocalDate.of(2018, 5, 13))
+                    .withStockOnHand(50)
+                    .build(),
+            new CalculatedStockOnHandDataBuilder()
+                    .withStockCard(stockCard4)
+                    .withOccurredDate(LocalDate.of(2018, 6, 15))
+                    .withStockOnHand(0)
+                    .build(),
+            new CalculatedStockOnHandDataBuilder()
+                    .withStockCard(stockCard5)
+                    .withOccurredDate(LocalDate.of(2018, 7, 1))
+                    .withStockOnHand(0)
+                    .build(),
+            new CalculatedStockOnHandDataBuilder()
+                    .withStockCard(stockCard6)
+                    .withOccurredDate(LocalDate.of(2018, 8, 1))
+                    .withStockOnHand(0)
+                    .build(),
+            new CalculatedStockOnHandDataBuilder()
+                    .withStockCard(stockCard6)
+                    .withOccurredDate(LocalDate.of(2018, 8, 31))
+                    .withStockOnHand(0)
+                    .build()
     ));
 
     stockCardAggregate = new StockCardAggregate(
-        asList(stockCard1, stockCard2, stockCard3,
-            stockCard4, stockCard5, stockCard6), calculatedStockOnHands);
+            asList(stockCard1, stockCard2, stockCard3,
+                    stockCard4, stockCard5, stockCard6), calculatedStockOnHands);
   }
 
   @Test
@@ -173,11 +173,11 @@ public class StockCardAggregateTest {
   @Test
   public void shouldGetAmountForTagInRange() {
     assertEquals(new Integer(60), stockCardAggregate.getAmount(tag1,
-        LocalDate.of(2018, 5, 10), LocalDate.of(2018, 5, 13)));
+            LocalDate.of(2018, 5, 10), LocalDate.of(2018, 5, 13)));
     assertEquals(new Integer(30), stockCardAggregate.getAmount(tag1,
-        LocalDate.of(2018, 5, 10), LocalDate.of(2018, 5, 12)));
+            LocalDate.of(2018, 5, 10), LocalDate.of(2018, 5, 12)));
     assertEquals(new Integer(30), stockCardAggregate.getAmount(tag1,
-        LocalDate.of(2018, 5, 13), LocalDate.of(2018, 5, 13)));
+            LocalDate.of(2018, 5, 13), LocalDate.of(2018, 5, 13)));
   }
 
   @Test
@@ -188,7 +188,7 @@ public class StockCardAggregateTest {
   @Test
   public void shouldReturnZeroIfThereIsNoLineItemsAvailableInRange() {
     assertEquals(new Integer(0), stockCardAggregate.getAmount("tag1",
-        LocalDate.of(2018, 1, 1), LocalDate.of(2018, 1, 2)));
+            LocalDate.of(2018, 1, 1), LocalDate.of(2018, 1, 2)));
   }
 
   @Test
@@ -203,7 +203,7 @@ public class StockCardAggregateTest {
   @Test
   public void shouldGetAmountsInRange() {
     Map<String, Integer> amounts = stockCardAggregate.getAmounts(
-        LocalDate.of(2018, 5, 10), LocalDate.of(2018, 5, 11));
+            LocalDate.of(2018, 5, 10), LocalDate.of(2018, 5, 11));
 
     assertEquals(new Integer(10), amounts.get(tag1));
     assertEquals(new Integer(-10), amounts.get(tag2));
@@ -213,25 +213,25 @@ public class StockCardAggregateTest {
   @Test
   public void shouldGetStockOutDaysInRange() {
     assertEquals(new Long(1), stockCardAggregate.getStockoutDays(
-        LocalDate.of(2018, 5, 10), LocalDate.of(2018, 5, 11)));
+            LocalDate.of(2018, 5, 10), LocalDate.of(2018, 5, 11)));
     assertEquals(new Long(1), stockCardAggregate.getStockoutDays(
-        LocalDate.of(2018, 5, 11), LocalDate.of(2018, 5, 11)));
+            LocalDate.of(2018, 5, 11), LocalDate.of(2018, 5, 11)));
     assertEquals(new Long(1), stockCardAggregate.getStockoutDays(
-        LocalDate.of(2018, 5, 11), LocalDate.of(2018, 5, 12)));
+            LocalDate.of(2018, 5, 11), LocalDate.of(2018, 5, 12)));
     assertEquals(new Long(0), stockCardAggregate.getStockoutDays(
-        LocalDate.of(2018, 5, 12), LocalDate.of(2018, 5, 13)));
+            LocalDate.of(2018, 5, 12), LocalDate.of(2018, 5, 13)));
 
     assertEquals(new Long(0), stockCardAggregate.getStockoutDays(
-        LocalDate.of(2018, 6, 1), LocalDate.of(2018, 6, 30)));
+            LocalDate.of(2018, 6, 1), LocalDate.of(2018, 6, 30)));
 
-    assertEquals(new Long(0), stockCardAggregate.getStockoutDays(
-        LocalDate.of(2018, 7, 1), LocalDate.of(2018, 7, 31)));
+    assertEquals(new Long(30), stockCardAggregate.getStockoutDays(
+            LocalDate.of(2018, 7, 1), LocalDate.of(2018, 7, 31)));
 
-    assertEquals(new Long(0), stockCardAggregate.getStockoutDays(
-        LocalDate.of(2018, 8, 1), LocalDate.of(2018, 8, 31)));
+    assertEquals(new Long(30), stockCardAggregate.getStockoutDays(
+            LocalDate.of(2018, 8, 1), LocalDate.of(2018, 8, 31)));
 
     assertEquals(new Long(29), stockCardAggregate.getStockoutDays(
-        LocalDate.of(2018, 9, 1), LocalDate.of(2018, 9, 30)));
+            LocalDate.of(2018, 9, 1), LocalDate.of(2018, 9, 30)));
   }
 
   @Test
@@ -239,34 +239,34 @@ public class StockCardAggregateTest {
     LocalDate date = LocalDate.of(2018, 11, 15);
 
     stockCardAggregate.getCalculatedStockOnHands().add(new CalculatedStockOnHandDataBuilder()
-        .withStockCard(stockCard1)
-        .withOccurredDate(date)
-        .withStockOnHand(0)
-        .build());
+            .withStockCard(stockCard1)
+            .withOccurredDate(date)
+            .withStockOnHand(0)
+            .build());
 
     assertEquals(
-        new Long(1 + DAYS.between(date, LocalDate.now())),
-        stockCardAggregate.getStockoutDays(null, null));
+            new Long(1 + DAYS.between(date, LocalDate.now())),
+            stockCardAggregate.getStockoutDays(null, null));
   }
 
   @Test
   public void equalsContract() {
     EqualsVerifier
-        .forClass(StockCardAggregate.class)
-        .suppress(Warning.NONFINAL_FIELDS)
-        .suppress(Warning.STRICT_INHERITANCE)
-        .withPrefabValues(StockCard.class, stockCard1, stockCard2)
-        .verify();
+            .forClass(StockCardAggregate.class)
+            .suppress(Warning.NONFINAL_FIELDS)
+            .suppress(Warning.STRICT_INHERITANCE)
+            .withPrefabValues(StockCard.class, stockCard1, stockCard2)
+            .verify();
   }
 
   @Test
   public void shouldImplementToString() {
     StockCard stockCard = new StockCardDataBuilder(new StockEvent()).build();
     StockCardAggregate stockCardAggregate = new StockCardAggregate(
-        singletonList(stockCard),
-        singletonList(new CalculatedStockOnHandDataBuilder()
-            .withStockCard(stockCard)
-            .build()));
+            singletonList(stockCard),
+            singletonList(new CalculatedStockOnHandDataBuilder()
+                    .withStockCard(stockCard)
+                    .build()));
     ToStringTestUtils.verify(StockCardAggregate.class, stockCardAggregate, "LOGGER");
   }
 }
