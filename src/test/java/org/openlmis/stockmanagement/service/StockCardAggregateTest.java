@@ -248,6 +248,9 @@ public class StockCardAggregateTest {
 
     assertEquals(new Long(16), stockCardAggregate.getStockoutDays(
             LocalDate.of(2018, 12, 1), LocalDate.of(2018, 12, 31)));
+
+    assertEquals(new Long(30), stockCardAggregate.getStockoutDays(
+            LocalDate.of(2019, 3, 1), LocalDate.of(2019, 3, 31)));
   }
 
   @Test
