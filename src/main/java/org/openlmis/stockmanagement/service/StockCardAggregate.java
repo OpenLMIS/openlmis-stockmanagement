@@ -139,7 +139,8 @@ public class StockCardAggregate {
               || (result.getKey() == 0 && beginningBalance == 0)) {
         stockOutDays = getDaysBetween(startDate, endDate);
       } else {
-        stockOutDays = calculateStockoutDays(getStockoutPeriods(stockOnHands, endDate),
+        Map<LocalDate, LocalDate> stockoutPeriods = getStockoutPeriods(stockOnHands, endDate);
+        stockOutDays = calculateStockoutDays(stockoutPeriods,
                 startDate, endDate);
       }
     }
@@ -220,6 +221,9 @@ public class StockCardAggregate {
 
     for (Entry<LocalDate, Integer> stockOnHandEntry : stockOnHands.entrySet()) {
       if (stockOnHandEntry.getValue() <= 0) {
+        if (null != stockOutStartDate) {
+          stockOutDaysMap.put(stockOutStartDate, stockOnHandEntry.getKey());
+        }
         stockOutStartDate = stockOnHandEntry.getKey();
       } else if (null != stockOutStartDate) {
         LOGGER.debug("stock out days from {} to {}", stockOutStartDate, stockOnHandEntry.getKey());
