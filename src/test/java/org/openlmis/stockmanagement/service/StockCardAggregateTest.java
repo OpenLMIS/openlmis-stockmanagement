@@ -263,7 +263,8 @@ public class StockCardAggregateTest {
         .withStockOnHand(0)
         .build());
 
-    long stockoutDaysBeforeDate = stockCardAggregate.getStockoutDays(null, date.minusDays(1));
+    // calculated stockout days from calculatedStockOnHands before 11/15/2019
+    long stockoutDaysBeforeDate = 474;
 
     assertEquals(
         new Long(stockoutDaysBeforeDate + DAYS.between(date, LocalDate.now())),
