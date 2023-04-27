@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.TreeMap;
-
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -79,8 +78,8 @@ public class StockCardAggregate {
     List<StockCardLineItem> filteredLineItems = filterLineItems(startDate, endDate, tag);
 
     return isEmpty(filteredLineItems) ? 0 : filterLineItems(startDate, endDate, tag).stream()
-            .mapToInt(StockCardLineItem::getQuantityWithSign)
-            .sum();
+        .mapToInt(StockCardLineItem::getQuantityWithSign)
+        .sum();
   }
 
   /**
@@ -95,17 +94,17 @@ public class StockCardAggregate {
     List<StockCardLineItem> filteredLineItems = filterLineItems(startDate, endDate, null);
 
     return isEmpty(filteredLineItems) ? new HashMap<>() : filteredLineItems.stream()
-            .map(lineItem -> {
-              List<ImmutablePair<String, Integer>> totalTagsValues = new ArrayList<>(
-                      calculateTagValuesForStockAdjustments(lineItem));
-              totalTagsValues.addAll(calculateTagValuesForLineItem(lineItem));
-              return totalTagsValues;
-            })
-            .flatMap(Collection::stream)
-            .collect(toMap(
-                    ImmutablePair::getLeft,
-                    ImmutablePair::getRight,
-                    Integer::sum));
+        .map(lineItem -> {
+          List<ImmutablePair<String, Integer>> totalTagsValues = new ArrayList<>(
+              calculateTagValuesForStockAdjustments(lineItem));
+          totalTagsValues.addAll(calculateTagValuesForLineItem(lineItem));
+          return totalTagsValues;
+        })
+        .flatMap(Collection::stream)
+        .collect(toMap(
+            ImmutablePair::getLeft,
+            ImmutablePair::getRight,
+            Integer::sum));
   }
 
   /**
@@ -117,11 +116,11 @@ public class StockCardAggregate {
    */
   public Long getStockoutDays(LocalDate startDate, LocalDate endDate) {
     Map<LocalDate, Integer> stockOnHands = calculatedStockOnHands.stream()
-            .collect(toMap(
-                    CalculatedStockOnHand::getOccurredDate,
-                    CalculatedStockOnHand::getStockOnHand,
-                    Integer::sum,
-                    TreeMap::new));
+        .collect(toMap(
+            CalculatedStockOnHand::getOccurredDate,
+            CalculatedStockOnHand::getStockOnHand,
+            Integer::sum,
+            TreeMap::new));
 
     long stockOutDays;
     if (startDate == null || endDate == null) {
@@ -181,41 +180,41 @@ public class StockCardAggregate {
   }
 
   private List<ImmutablePair<String, Integer>> calculateTagValuesForStockAdjustments(
-          StockCardLineItem lineItem) {
+      StockCardLineItem lineItem) {
 
     return lineItem.getStockAdjustments()
-            .stream().flatMap(adjustment -> adjustment.getReason().getTags().stream()
-                    .map(tags -> new ImmutablePair<>(tags, adjustment.getQuantityWithSign())))
-            .collect(toList());
+        .stream().flatMap(adjustment -> adjustment.getReason().getTags().stream()
+            .map(tags -> new ImmutablePair<>(tags, adjustment.getQuantityWithSign())))
+        .collect(toList());
   }
 
   private List<ImmutablePair<String, Integer>> calculateTagValuesForLineItem(
-          StockCardLineItem lineItem) {
+      StockCardLineItem lineItem) {
 
     int value = lineItem.getQuantityWithSign();
     List<String> tags = null == lineItem.getReason()
-            ? emptyList()
-            : lineItem.getReason().getTags();
+        ? emptyList()
+        : lineItem.getReason().getTags();
 
     return tags.stream()
-            .map(tag -> new ImmutablePair<>(tag, value))
-            .collect(toList());
+        .map(tag -> new ImmutablePair<>(tag, value))
+        .collect(toList());
   }
 
   private List<StockCardLineItem> filterLineItems(LocalDate startDate,
-                                                  LocalDate endDate, String tag) {
+      LocalDate endDate, String tag) {
 
     return stockCards.stream()
-            .flatMap(stockCard -> stockCard.getLineItems().stream())
-            .filter(lineItem ->
-                    isBeforeOrEqual(lineItem.getOccurredDate(), startDate)
-                            && isAfterOrEqual(lineItem.getOccurredDate(), endDate)
-                            && (null == tag || lineItem.containsTag(tag)))
-            .collect(toList());
+        .flatMap(stockCard -> stockCard.getLineItems().stream())
+        .filter(lineItem ->
+            isBeforeOrEqual(lineItem.getOccurredDate(), startDate)
+                && isAfterOrEqual(lineItem.getOccurredDate(), endDate)
+                && (null == tag || lineItem.containsTag(tag)))
+        .collect(toList());
   }
 
   private Map<LocalDate, LocalDate> getStockoutPeriods(
-          Map<LocalDate, Integer> stockOnHands, LocalDate endDate) {
+      Map<LocalDate, Integer> stockOnHands, LocalDate endDate) {
     LocalDate stockOutStartDate = null;
     Map<LocalDate, LocalDate> stockOutDaysMap = new TreeMap<>();
 
@@ -241,7 +240,7 @@ public class StockCardAggregate {
   }
 
   private long calculateStockoutDays(Map<LocalDate, LocalDate> stockOutDaysMap,
-                                     LocalDate startDate, LocalDate endDate) {
+      LocalDate startDate, LocalDate endDate) {
 
     return stockOutDaysMap.isEmpty() ? 0 : stockOutDaysMap.keySet().stream()
         .filter(key -> isAfterOrEqual(key, endDate))
