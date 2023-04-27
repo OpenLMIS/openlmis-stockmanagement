@@ -127,33 +127,56 @@ public class StockCardAggregate {
       stockOutDays = calculateStockoutDays(getStockoutPeriods(stockOnHands, endDate),
               startDate, endDate);
     } else {
-
-      boolean wasAnySohChangesInPeriod = false;
-      for (Map.Entry<LocalDate, Integer> entry : stockOnHands.entrySet()) {
-        if (isAfterOrEqual(startDate, entry.getKey()) && isBeforeOrEqual(endDate, entry.getKey())) {
-          wasAnySohChangesInPeriod = true;
-          break;
-        }
-      }
+      ImmutablePair<Integer, Boolean> result =
+              processStockOnHands(stockOnHands, startDate, endDate);
 
       int beginningBalance = getMostRecentStockOnHandBeforeDate(stockOnHands, startDate);
-      if (!wasAnySohChangesInPeriod) {
-        if (beginningBalance > 0) {
-          stockOutDays = 0L;
-        } else {
-          long daysBetween = DAYS.between(startDate, endDate) + 1;
-          // According to OLMIS project specification month length can be maximum 30 days.
-          if (daysBetween >= 28) {
-            daysBetween -= 1;
-          }
-          stockOutDays = daysBetween;
-        }
+
+      if (!result.getValue() && beginningBalance > 0) {
+        stockOutDays = 0L;
+      } else if (!result.getValue()
+              || (result.getKey() == 0 && beginningBalance == 0)) {
+        stockOutDays = getDaysBetween(startDate, endDate);
       } else {
-        stockOutDays = calculateStockoutDays(getStockoutPeriods(stockOnHands, endDate),
+        Map<LocalDate, LocalDate> stockoutPeriods = getStockoutPeriods(stockOnHands, endDate);
+        stockOutDays = calculateStockoutDays(stockoutPeriods,
                 startDate, endDate);
       }
     }
     return stockOutDays;
+  }
+
+  /**
+   * It checks whether there were any changes in stock on hand in a given period and, if necessary,
+   * sums up the values of these changes.
+   *
+   * @param stockOnHands dates and values stock on hands
+   * @param startDate    the beginning of the checked period
+   * @param endDate      the end of the checked period
+   * @return {@link ImmutablePair} where the key is the sum of changes in stock on hand in a given
+   *     period, and the value indicates whether there have been any changes at all (because the
+   *     sum of changes in stock on hand equals 0 does not mean no changes)
+   */
+  private ImmutablePair<Integer, Boolean> processStockOnHands(
+          Map<LocalDate, Integer> stockOnHands, LocalDate startDate, LocalDate endDate) {
+    boolean wasAnySohChangesInPeriod = false;
+    int sumOfStockOnHandDuringPeriod = 0;
+    for (Map.Entry<LocalDate, Integer> entry : stockOnHands.entrySet()) {
+      if (isAfterOrEqual(startDate, entry.getKey()) && isBeforeOrEqual(endDate, entry.getKey())) {
+        wasAnySohChangesInPeriod = true;
+        sumOfStockOnHandDuringPeriod += entry.getValue();
+      }
+    }
+    return new ImmutablePair<>(sumOfStockOnHandDuringPeriod, wasAnySohChangesInPeriod);
+  }
+
+  private long getDaysBetween(LocalDate startDate, LocalDate endDate) {
+    long daysBetween = DAYS.between(startDate, endDate) + 1;
+    // According to OLMIS project specification month length can be maximum 30 days.
+    if (daysBetween >= 28) {
+      daysBetween -= 1;
+    }
+    return daysBetween;
   }
 
   private List<ImmutablePair<String, Integer>> calculateTagValuesForStockAdjustments(
@@ -197,6 +220,9 @@ public class StockCardAggregate {
 
     for (Entry<LocalDate, Integer> stockOnHandEntry : stockOnHands.entrySet()) {
       if (stockOnHandEntry.getValue() <= 0) {
+        if (null != stockOutStartDate) {
+          stockOutDaysMap.put(stockOutStartDate, stockOnHandEntry.getKey());
+        }
         stockOutStartDate = stockOnHandEntry.getKey();
       } else if (null != stockOutStartDate) {
         LOGGER.debug("stock out days from {} to {}", stockOutStartDate, stockOnHandEntry.getKey());
