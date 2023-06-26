@@ -1,4 +1,4 @@
-5.1.9-SNAPSHOT / WIP
+5.1.9 / 2023-06-26
 ==================
 Bug fixes:
 * [OD-37](https://openlmis.atlassian.net/browse/OD-37): Fixed wrong stockout days calculation
