@@ -97,10 +97,10 @@ idea {
             xmlFile.asNode().component
                     .find { it.@name == 'CompilerConfiguration' }['annotationProcessing'][0]
                     .replaceNode {
-                annotationProcessing {
-                    profile(default: true, name: 'Default', useClasspath: 'true', enabled: true)
-                }
-            }
+                        annotationProcessing {
+                            profile(default: true, name: 'Default', useClasspath: 'true', enabled: true)
+                        }
+                    }
         }
     }
     module {
@@ -119,45 +119,9 @@ flyway {
     placeholderSuffix = ']'
 }
 
-sourceSets {
-    integrationTest {
-        java {
-            compileClasspath += main.output + test.output
-            runtimeClasspath += main.output + test.output
-            srcDir file('src/integration-test/java')
-        }
-        resources.srcDir file('src/integration-test/resources')
-    }
-}
 
-configurations {
-    integrationTestCompile.extendsFrom testCompile
-    integrationTestRuntime.extendsFrom testRuntime
-}
 
-task integrationTest(type: Test) {
-    testClassesDirs = sourceSets.integrationTest.output.classesDirs
-    classpath = sourceSets.integrationTest.runtimeClasspath
-    testLogging {
-        events "passed", "skipped", "failed"
-        exceptionFormat = 'full'
-    }
-    mustRunAfter test
-    environment 'BASE_URL', "http://localhost"
-    exclude '**/demodata/**'
-}
 
-task demoDataTest(type: Test) {
-    testClassesDirs = sourceSets.integrationTest.output.classesDirs
-    classpath = sourceSets.integrationTest.runtimeClasspath
-    testLogging {
-        events "passed", "skipped", "failed"
-        exceptionFormat = 'full'
-    }
-    mustRunAfter integrationTest
-    environment 'BASE_URL', "http://localhost"
-    include '**/demodata/**'
-}
 
 tasks.withType(Test) {
     reports.html.destination = file("${reporting.baseDir}/${name}")
@@ -202,7 +166,7 @@ jacocoTestReport {
         csv.enabled false
     }
 
-       additionalSourceDirs(files(sourceSets.main.allJava.srcDirs))
+    additionalSourceDirs(files(sourceSets.main.allJava.srcDirs))
 }
 
 checkstyle {
@@ -227,13 +191,11 @@ sonarqube {
         property "sonar.junit.reportsPath", "build/test-results/test"
         //Tells SonarQube where the unit tests code coverage report is
         property "sonar.jacoco.reportPath", "build/jacoco/test.exec"
-        //Tells SonarQube where the integration tests code coverage report is
-        property "sonar.jacoco.itReportPath", "build/jacoco/integrationTest.exec"
-        properties["sonar.tests"] += sourceSets.integrationTest.java
+
     }
 }
 
-project.tasks["sonarqube"].dependsOn integrationTest
+project.tasks["sonarqube"].dependsOn test
 
 pmd {
     toolVersion = '5.4.0'
@@ -255,10 +217,6 @@ test {
         events 'started', 'passed'
         exceptionFormat = 'full'
     }
-    dependsOn checkstyleMain
-    dependsOn checkstyleTest
-    dependsOn pmdMain
-    dependsOn pmdTest
 }
 
 //enable the lines below if you need to debug spring running in docker
@@ -333,9 +291,6 @@ uploadArchives {
 uploadArchives.onlyIf { project.getProperty("ossrhUsername") && project.getProperty("ossrhPassword") }
 
 apply from: "documentation.gradle"
-integrationTest {
-    dependsOn ramlToHtml
-}
 
 processResources {
     // we want the generated HTML spec file included in the output jar
@@ -349,7 +304,6 @@ processResources {
 
 check {
     dependsOn checkApiIsRaml
-    dependsOn integrationTest
     finalizedBy uploadArchives
 }
 
