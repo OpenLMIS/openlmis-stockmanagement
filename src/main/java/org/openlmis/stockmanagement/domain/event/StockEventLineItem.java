@@ -14,6 +14,7 @@
  */
 
 package org.openlmis.stockmanagement.domain.event;
+package org.openlmis.stockmanagement.dto;
 
 import static javax.persistence.CascadeType.ALL;
 
