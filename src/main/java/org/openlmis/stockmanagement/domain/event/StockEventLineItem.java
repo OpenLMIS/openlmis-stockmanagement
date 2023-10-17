@@ -14,7 +14,7 @@
  */
 
 package org.openlmis.stockmanagement.domain.event;
-import org.openlmis.stockmanagement.dto.StockEventAdjustmentDto;
+//import org.openlmis.stockmanagement.dto.StockEventAdjustmentDto;
 
 import static javax.persistence.CascadeType.ALL;
 
@@ -85,7 +85,7 @@ public class StockEventLineItem extends BaseEntity
   @JoinColumn(name = "stockEventLineItemId")
   private List<PhysicalInventoryLineItemAdjustment> stockAdjustments;
 
-
+/* 
   private String referenceNumber;
   private String invoiceNumber;
   private Double unitPrice;
