@@ -101,4 +101,6 @@ public class StockEventLineItem extends BaseEntity
     return null;
   }
 
+  private String referenceNumber;
+
 }
