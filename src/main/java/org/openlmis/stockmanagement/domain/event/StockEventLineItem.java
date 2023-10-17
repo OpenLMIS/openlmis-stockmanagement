@@ -14,7 +14,7 @@
  */
 
 package org.openlmis.stockmanagement.domain.event;
-package org.openlmis.stockmanagement.dto;
+import org.openlmis.stockmanagement.dto.StockEventAdjustmentDto;
 
 import static javax.persistence.CascadeType.ALL;
 
