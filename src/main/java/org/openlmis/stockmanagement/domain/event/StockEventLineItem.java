@@ -90,6 +90,28 @@ public class StockEventLineItem extends BaseEntity
   private Double unitPrice;
 
 
+  public StockEventLineItem(UUID orderableId, UUID lotId, Integer quantity, Map<String, String> extraData, LocalDate occurredDate, 
+  UUID reasonId, String reasonFreeText, UUID sourceId, String sourceFreeText, UUID destinationId, String destinationFreeText, 
+  List<StockEventAdjustmentDto> stockAdjustments, String referenceNumber, String invoiceNumber, Double unitPrice){
+
+    orderableId=orderableId;
+    lotId=lotId;
+    quantity=quantity
+    extraData=extraData 
+    occurredDate=occurredDate;
+    reasonId=reasonId;
+    reasonFreeText=reasonFreeText;
+    sourceId= sourceId;
+    sourceFreeText=sourceFreeText;
+    destinationId=destinationId; 
+    destinationFreeText=destinationFreeText; 
+  
+    stockAdjustments=stockAdjustments;
+    referenceNumber=referenceNumber; 
+    invoiceNumber=invoiceNumber;
+    unitPrice=unitPrice;
+
+  }
   /**
    * Returns clean copy of stock adjustments.
    */
