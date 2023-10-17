@@ -84,6 +84,12 @@ public class StockEventLineItem extends BaseEntity
   @JoinColumn(name = "stockEventLineItemId")
   private List<PhysicalInventoryLineItemAdjustment> stockAdjustments;
 
+
+  private String referenceNumber;
+  private String invoiceNumber;
+  private Double unitPrice;
+
+
   /**
    * Returns clean copy of stock adjustments.
    */
