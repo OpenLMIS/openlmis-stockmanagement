@@ -96,8 +96,8 @@ public class StockEventLineItem extends BaseEntity
 
     orderableId=orderableId;
     lotId=lotId;
-    quantity=quantity
-    extraData=extraData 
+    quantity=quantity;
+    extraData=extraData;
     occurredDate=occurredDate;
     reasonId=reasonId;
     reasonFreeText=reasonFreeText;
