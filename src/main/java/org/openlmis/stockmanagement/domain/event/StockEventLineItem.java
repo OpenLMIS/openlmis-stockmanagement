@@ -14,6 +14,7 @@
  */
 
 package org.openlmis.stockmanagement.domain.event;
+//import org.openlmis.stockmanagement.dto.StockEventAdjustmentDto;
 
 import static javax.persistence.CascadeType.ALL;
 
@@ -76,6 +77,10 @@ public class StockEventLineItem extends BaseEntity
   @ManyToOne()
   @JoinColumn(nullable = false)
   private StockEvent stockEvent;
+
+  private String referenceNumber;
+  private String invoiceNumber;
+  private Double unitPrice;
 
   @OneToMany(
       cascade = ALL,

@@ -7,4 +7,5 @@
   --source-file src/main/resources/messages_en.properties
 
 # Run Gradle build
-gradle clean build demoDataTest
+#gradle clean build demoDataTest
+gradle clean build

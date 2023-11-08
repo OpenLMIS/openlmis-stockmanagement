@@ -39,6 +39,9 @@ public class StockEventLineItemDtoDataBuilder {
   private String sourceFreeText = RandomStringUtils.random(5);
   private UUID destinationId = UUID.randomUUID();
   private String destinationFreeText = RandomStringUtils.random(5);
+  private String referenceNumber = RandomStringUtils.random(5);
+  private String invoiceNumber = RandomStringUtils.random(5);
+  private Double unitPrice = 0.0;
   private List<StockEventAdjustmentDto> stockAdjustments = new ArrayList<>();
 
   /**
@@ -58,7 +61,7 @@ public class StockEventLineItemDtoDataBuilder {
     noSourceAndDestination();
     return new StockEventLineItemDto(orderableId, lotId,quantity, extraData, occurredDate, reasonId,
         reasonFreeText, sourceId, sourceFreeText, destinationId, destinationFreeText,
-        stockAdjustments);
+        referenceNumber, invoiceNumber, unitPrice, stockAdjustments);
   }
 
   /**
@@ -67,7 +70,7 @@ public class StockEventLineItemDtoDataBuilder {
   public StockEventLineItemDto build() {
     return new StockEventLineItemDto(orderableId, lotId,quantity, extraData, occurredDate, reasonId,
         reasonFreeText, sourceId, sourceFreeText, destinationId, destinationFreeText,
-        stockAdjustments);
+        referenceNumber, invoiceNumber, unitPrice, stockAdjustments);
   }
 
   /**
