@@ -94,6 +94,11 @@ public class StockCardLineItem extends BaseEntity {
   private String reasonFreeText;
   private String signature;
 
+  //additional field required on stockcard
+  private String referenceNumber;
+  private String invoiceNumber;
+  private Double unitPrice;
+
   @ManyToOne
   @JoinColumn
   private Node source;
@@ -173,6 +178,10 @@ public class StockCardLineItem extends BaseEntity {
         .documentNumber(eventDto.getDocumentNumber())
         .signature(eventDto.getSignature())
         .userId(eventDto.getContext().getCurrentUserId())
+
+        .referenceNumber(eventLineItem.getReferenceNumber())
+        .unitPrice(eventLineItem.getUnitPrice())
+        .invoiceNumber(eventLineItem.getInvoiceNumber())
 
         .extraData(eventLineItem.getExtraData())
         .build();
