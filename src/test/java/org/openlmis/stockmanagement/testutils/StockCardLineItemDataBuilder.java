@@ -54,6 +54,9 @@ public class StockCardLineItemDataBuilder {
   private UUID userId = UUID.randomUUID();
   private Integer stockOnHand = 0;
   private List<PhysicalInventoryLineItemAdjustment> stockAdjustments = Lists.newArrayList();
+  private String referenceNumber = "REF-001";
+  private String invoiceNumber = "INV-001";
+  private Double unitPrice = 2.50;
 
   public StockCardLineItemDataBuilder withCreditReason() {
     return this.withReason(new StockCardLineItemReasonDataBuilder().withCreditType().build());
@@ -154,8 +157,8 @@ public class StockCardLineItemDataBuilder {
   public StockCardLineItem build() {
     StockCardLineItem lineItem = new StockCardLineItem(
         stockCard, originEvent, quantity, extraData, reason, sourceFreeText, destinationFreeText,
-        documentNumber, reasonFreeText, signature, source, destination, occurredDate,
-        processedDateTime, userId, stockOnHand, stockAdjustments
+        documentNumber, reasonFreeText, signature, referenceNumber, invoiceNumber, unitPrice,
+        source, destination, occurredDate, processedDateTime, userId, stockOnHand, stockAdjustments
     );
     lineItem.setId(id);
 
