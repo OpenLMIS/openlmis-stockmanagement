@@ -184,12 +184,12 @@ jacocoTestReport {
     group = "reporting"
     description = "Generate Jacoco coverage reports after running tests."
     reports {
-        xml.enabled false
+        xml.enabled true
         html.enabled true
         csv.enabled false
     }
 
-       additionalSourceDirs(files(sourceSets.main.allJava.srcDirs))
+    additionalSourceDirs(files(sourceSets.main.allJava.srcDirs))
 }
 
 checkstyle {
