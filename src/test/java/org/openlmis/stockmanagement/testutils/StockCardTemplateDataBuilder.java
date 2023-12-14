@@ -39,9 +39,11 @@ public class StockCardTemplateDataBuilder {
 
     AvailableStockCardFields packSize = new AvailableStockCardFields();
     packSize.setId(UUID.fromString("7663b4d2-d6da-11e6-bf26-cec0c932ce01"));
+    packSize.setName("packSize");
 
     AvailableStockCardLineItemFields docNumber = new AvailableStockCardLineItemFields();
     docNumber.setId(UUID.fromString("b15ad020-d6da-11e6-bf26-cec0c932ce01"));
+    docNumber.setName("documentNumber");
 
     template.getStockCardFields()
             .add(new StockCardFields(template, packSize, true, 123));

@@ -41,7 +41,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-@ActiveProfiles({"test", "demo-data", "test-run"})
+@ActiveProfiles({"test", "demo-data"})
 @SpringBootTest
 @DirtiesContext
 public class StockCardDemoDataIntegrationTest extends BaseIntegrationTest {
