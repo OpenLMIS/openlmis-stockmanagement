@@ -26,12 +26,14 @@ import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Transactional
+@ActiveProfiles("test-run")
 public abstract class BaseCrudRepositoryIntegrationTest<T extends BaseEntity> {
 
   abstract CrudRepository<T, UUID> getRepository();

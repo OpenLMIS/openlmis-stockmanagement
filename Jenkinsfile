@@ -148,59 +148,6 @@ pipeline {
                 }
             }
         }
-        stage('Parallel: Sonar analysis and contract tests') {
-            when {
-                expression {
-                    return VERSION.endsWith("SNAPSHOT")
-                }
-            }
-            parallel {
-                stage('Sonar analysis') {
-                    agent any
-                    environment {
-                        PATH = "/usr/local/bin/:$PATH"
-                    }
-                    steps {
-                        withSonarQubeEnv('Sonar OpenLMIS') {
-                            withCredentials([string(credentialsId: 'SONAR_LOGIN', variable: 'SONAR_LOGIN'), string(credentialsId: 'SONAR_PASSWORD', variable: 'SONAR_PASSWORD')]) {
-                                script {
-                                    sh(script: "./ci-sonarAnalysis.sh")
-
-                                    // workaround: Sonar plugin retrieves the path directly from the output
-                                    sh 'echo "Working dir: ${WORKSPACE}/build/sonar"'
-                                }
-                            }
-                        }
-                        timeout(time: 1, unit: 'HOURS') {
-                            script {
-                                def gate = waitForQualityGate()
-                                if (gate.status != 'OK') {
-                                    echo 'Quality Gate FAILED'
-                                    currentBuild.result = 'UNSTABLE'
-                                }
-                            }
-                        }
-                    }
-                    post {
-                        unstable {
-                            script {
-                                notifyAfterFailure()
-                            }
-                        }
-                        failure {
-                            script {
-                                notifyAfterFailure()
-                            }
-                        }
-                        cleanup {
-                            script {
-                                sh "sudo rm -rf ${WORKSPACE}/{*,.*} || true"
-                            }
-                        }
-                    }
-                }
-            }
-        }
         stage('ERD generation') {
             agent {
                 node {

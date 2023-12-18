@@ -9,5 +9,3 @@ out/
 .manual-api-test-env
 .tx/
 node_modules/
-gradle/
-gradlew*
