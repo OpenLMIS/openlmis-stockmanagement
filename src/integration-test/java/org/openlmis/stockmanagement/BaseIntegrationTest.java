@@ -26,9 +26,11 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(locations = {"classpath:application.properties", "classpath:test.properties"})
+@ActiveProfiles("test-run")
 @DirtiesContext
 public abstract class BaseIntegrationTest {
 

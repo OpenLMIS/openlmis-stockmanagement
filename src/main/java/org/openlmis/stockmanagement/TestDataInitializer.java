@@ -29,7 +29,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile("demo-data")
+@Profile("demo-data & !test-run")
 @Order(5)
 public class TestDataInitializer implements CommandLineRunner {
   private static final XLogger XLOGGER = XLoggerFactory.getXLogger(TestDataInitializer.class);

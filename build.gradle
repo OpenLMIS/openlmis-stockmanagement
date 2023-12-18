@@ -7,7 +7,7 @@ buildscript {
 plugins {
     id 'org.springframework.boot' version '2.2.2.RELEASE'
     id "org.flywaydb.flyway" version "6.0.8"
-    id "org.sonarqube" version "2.6.2"
+    id "org.sonarqube" version "3.3"
     id "com.moowork.node" version "0.12"
 }
 
@@ -68,7 +68,7 @@ dependencies {
     compile "org.slf4j:slf4j-ext"
     compile "com.github.tomakehurst:wiremock:1.58"
 
-    annotationProcessor 'org.projectlombok:lombok:1.18.10'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
     compile group: 'javax.interceptor', name: 'javax.interceptor-api', version: '1.2'
 
     testCompile "junit:junit"
@@ -78,7 +78,7 @@ dependencies {
     testCompile('org.flywaydb.flyway-test-extensions:flyway-spring-test:4.1.0')
     testCompile 'org.springframework.security:spring-security-test'
     testCompile "org.springframework:spring-test"
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.10'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
 
     testCompile "com.jayway.restassured:rest-assured:2.7.0"
     testCompile "guru.nidi.raml:raml-tester:0.8.15"
@@ -144,19 +144,6 @@ task integrationTest(type: Test) {
     }
     mustRunAfter test
     environment 'BASE_URL', "http://localhost"
-    exclude '**/demodata/**'
-}
-
-task demoDataTest(type: Test) {
-    testClassesDirs = sourceSets.integrationTest.output.classesDirs
-    classpath = sourceSets.integrationTest.runtimeClasspath
-    testLogging {
-        events "passed", "skipped", "failed"
-        exceptionFormat = 'full'
-    }
-    mustRunAfter integrationTest
-    environment 'BASE_URL', "http://localhost"
-    include '**/demodata/**'
 }
 
 tasks.withType(Test) {
@@ -197,43 +184,28 @@ jacocoTestReport {
     group = "reporting"
     description = "Generate Jacoco coverage reports after running tests."
     reports {
-        xml.enabled false
+        xml.enabled true
         html.enabled true
         csv.enabled false
     }
 
-       additionalSourceDirs(files(sourceSets.main.allJava.srcDirs))
+    additionalSourceDirs(files(sourceSets.main.allJava.srcDirs))
 }
 
 checkstyle {
     toolVersion = "8.12"
 }
 
-//Usage: gradle sonarqube
+//NOTE: This plugin requires that this task be named 'sonarqube'. In fact, it is performing SonarCloud analysis.
 sonarqube {
     properties {
-        def branch = System.getenv("SONAR_BRANCH")
-        if (branch && branch != 'master') {
-            property "sonar.branch", branch
-        }
-        property "sonar.projectName", "OpenLMIS Stock Management Service"
-        property "sonar.projectKey", "org.sonarqube:$rootProject.name"
-        property "sonar.projectVersion", version
-        property "sonar.host.url", "http://sonar.openlmis.org"
-        property "sonar.login", System.getenv("SONAR_LOGIN")
-        property "sonar.password", System.getenv("SONAR_PASSWORD")
-        property "sonar.java.coveragePlugin", "jacoco"
-        //Tells SonarQube where the unit tests execution reports are
-        property "sonar.junit.reportsPath", "build/test-results/test"
-        //Tells SonarQube where the unit tests code coverage report is
-        property "sonar.jacoco.reportPath", "build/jacoco/test.exec"
-        //Tells SonarQube where the integration tests code coverage report is
-        property "sonar.jacoco.itReportPath", "build/jacoco/integrationTest.exec"
-        properties["sonar.tests"] += sourceSets.integrationTest.java
+        property "sonar.projectKey", "OpenLMIS_openlmis-stockmanagement"
+        property "sonar.organization", "openlmis"
+        property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.java.source", "17"
+        property "sonar.coverage.jacoco.xmlReportPaths", "./report.xml"
     }
 }
-
-project.tasks["sonarqube"].dependsOn integrationTest
 
 pmd {
     toolVersion = '5.4.0'
