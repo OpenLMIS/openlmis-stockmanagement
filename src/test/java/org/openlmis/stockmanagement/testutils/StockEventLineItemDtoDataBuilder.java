@@ -48,6 +48,7 @@ public class StockEventLineItemDtoDataBuilder {
   private Integer quantityShipped = 0;
   private Integer quantityOnDeliveryNote = 0;
   private List<StockEventAdjustmentDto> stockAdjustments = new ArrayList<>();
+  private List<DiscrepancyDto> discrepancies = new ArrayList<>();
 
   /**
    * Builds Physical Inventory Event.
@@ -67,7 +68,7 @@ public class StockEventLineItemDtoDataBuilder {
     return new StockEventLineItemDto(orderableId, lotId,quantity, extraData, occurredDate, reasonId,
         reasonFreeText, sourceId, sourceFreeText, destinationId, destinationFreeText,
         referenceNumber, invoiceNumber, unitPrice, quantityRejected, rejectionReasonId, rejectionReasonFreeText, 
-        quantityShipped, quantityOnDeliveryNote, stockAdjustments);
+        quantityShipped, quantityOnDeliveryNote, stockAdjustments, discrepancies);
   }
 
   /**
