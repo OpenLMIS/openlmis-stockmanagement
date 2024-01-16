@@ -33,7 +33,6 @@ public class DiscrepancyDto {
 
   private UUID id;
   private RejectionReasonDto rejectionReason;
-  private String shipmentType;
   private Integer quantityAffected;
   private String comments;
 
@@ -45,7 +44,6 @@ public class DiscrepancyDto {
   public Discrepancy toDiscrepancy() {
     Discrepancy discrepancy = new Discrepancy(
         rejectionReason.getId(),
-        shipmentType,
         quantityAffected,
         comments);
 
