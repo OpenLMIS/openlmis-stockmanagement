@@ -62,6 +62,7 @@ public class StockEventLineItemDto implements IdentifiableByOrderableLot, VvmApp
   private Integer quantityShipped;
   private Integer quantityOnDeliveryNote;
   private List<StockEventAdjustmentDto> stockAdjustments;
+  private List<DiscrepancyDto> discrepancies;
   
 
   StockEventLineItem toEventLineItem() {
