@@ -80,7 +80,7 @@ public class StockEventLineItemDtoDataBuilder {
     return new StockEventLineItemDto(orderableId, lotId,quantity, extraData, occurredDate, reasonId,
         reasonFreeText, sourceId, sourceFreeText, destinationId, destinationFreeText,
         referenceNumber, invoiceNumber, unitPrice, quantityRejected, rejectionReasonId, rejectionReasonFreeText, 
-        quantityShipped, quantityOnDeliveryNote, stockAdjustments);
+        quantityShipped, quantityOnDeliveryNote, stockAdjustments,discrepancies);
   }
 
   /**
