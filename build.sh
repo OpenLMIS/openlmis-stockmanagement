@@ -8,4 +8,4 @@
 
 # Run Gradle build
 #gradle clean build demoDataTest
-gradle clean build --scan
+gradle clean build
