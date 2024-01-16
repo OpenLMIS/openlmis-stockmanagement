@@ -13,27 +13,27 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
- package org.openlmis.stockmanagement.domain.qualitychecks;
+package org.openlmis.stockmanagement.domain.qualitychecks;
 
- import java.util.UUID;
- import javax.persistence.Entity;
- import javax.persistence.JoinColumn;
- import javax.persistence.ManyToOne;
- import javax.persistence.Table;
- import lombok.AllArgsConstructor;
- import lombok.Data;
- import lombok.NoArgsConstructor;
- import org.openlmis.stockmanagement.domain.BaseEntity;
- import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
+import java.util.UUID;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.openlmis.stockmanagement.domain.BaseEntity;
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 
  
  
- @Entity
- @Data
- @NoArgsConstructor
- @AllArgsConstructor
- @Table(name = "stock_event_line_item_discrepencies", schema = "stockmanagement")
- public class Discrepancy extends BaseEntity {
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "stock_event_line_item_discrepencies", schema = "stockmanagement")
+public class Discrepancy extends BaseEntity {
  
    private UUID rejectionReasonId;
    private Integer quantityAffected;
@@ -55,6 +55,6 @@
      this.comments = comments;
      // stockEventLineItem can be set later or remain null
    }
- }
+}
  
  
