@@ -24,6 +24,7 @@
  import lombok.Data;
  import lombok.NoArgsConstructor;
  import org.openlmis.stockmanagement.domain.BaseEntity;
+ import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 
  
  
