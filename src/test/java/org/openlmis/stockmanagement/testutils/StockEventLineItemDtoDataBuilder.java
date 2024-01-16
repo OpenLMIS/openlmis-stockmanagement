@@ -23,8 +23,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.commons.lang.RandomStringUtils;
+import org.openlmis.stockmanagement.dto.DiscrepancyDto;
 import org.openlmis.stockmanagement.dto.StockEventAdjustmentDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
+
 
 public class StockEventLineItemDtoDataBuilder {
 
