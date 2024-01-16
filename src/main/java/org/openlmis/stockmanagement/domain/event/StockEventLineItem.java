@@ -96,6 +96,12 @@ public class StockEventLineItem extends BaseEntity
   @JoinColumn(name = "stockEventLineItemId")
   private List<PhysicalInventoryLineItemAdjustment> stockAdjustments;
 
+
+   // One-to-many relationship with Discrepancy
+   @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+   @JoinColumn(name = "stock_event_line_item_id") // foreign key in Discrepancy table
+   private List<Discrepancy> discrepancies;
+
   /**
    * Returns clean copy of stock adjustments.
    */
