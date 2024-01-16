@@ -63,14 +63,19 @@ public class StockEventLineItemDto implements IdentifiableByOrderableLot, VvmApp
   
 
   StockEventLineItem toEventLineItem() {
+
+    List<Discrepancy> discrepanciesList = new ArrayList<>();
+    for (DiscrepancyDto discrepancydto : discrepancies) {
+      discrepanciesList.add(discrepancydto.toDiscrepancy());
+    }
+
     // event is set in StockEventDto.toEvent()
     return new StockEventLineItem(
         orderableId, lotId, quantity, extraData, occurredDate, reasonId, reasonFreeText, sourceId,
         sourceFreeText, destinationId, destinationFreeText, null, 
         referenceNumber, invoiceNumber, unitPrice, quantityRejected, 
         rejectionReasonId, rejectionReasonFreeText, quantityShipped, 
-        quantityOnDeliveryNote, stockAdjustments()
-    );
+        quantityOnDeliveryNote, stockAdjustments(),discrepanciesList);
   }
 
   public boolean hasReasonId() {
