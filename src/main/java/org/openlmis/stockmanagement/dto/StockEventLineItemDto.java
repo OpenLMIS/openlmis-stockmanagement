@@ -67,10 +67,10 @@ public class StockEventLineItemDto implements IdentifiableByOrderableLot, VvmApp
 
   StockEventLineItem toEventLineItem() {
 
-    List<Discrepancy> discrepanciesList = new ArrayList<>();
-    for (DiscrepancyDto discrepancydto : discrepancies) {
-      discrepanciesList.add(discrepancydto.toDiscrepancy());
-    }
+    // List<Discrepancy> discrepanciesList = new ArrayList<>();
+    // for (DiscrepancyDto discrepancydto : discrepancies) {
+    //   discrepanciesList.add(discrepancydto.toDiscrepancy());
+    // }
 
     // event is set in StockEventDto.toEvent()
     return new StockEventLineItem(
@@ -78,7 +78,7 @@ public class StockEventLineItemDto implements IdentifiableByOrderableLot, VvmApp
         sourceFreeText, destinationId, destinationFreeText, null, 
         referenceNumber, invoiceNumber, unitPrice, quantityRejected, 
         rejectionReasonId, rejectionReasonFreeText, quantityShipped, 
-        quantityOnDeliveryNote, stockAdjustments(),discrepanciesList);
+        quantityOnDeliveryNote, stockAdjustments(),discrepancies());
   }
 
   public boolean hasReasonId() {
@@ -121,5 +121,20 @@ public class StockEventLineItemDto implements IdentifiableByOrderableLot, VvmApp
         .stream()
         .map(StockEventAdjustmentDto::toPhysicalInventoryLineItemAdjustment)
         .collect(Collectors.toList());
+  }
+
+  /**
+   * Gets discrepancies as {@link Discrepancy}.
+   */
+  public List<Discrepancy> discrepancies() {
+    if (null == discrepancies) {
+      return emptyList();
+    }
+
+    List<Discrepancy> discrepanciesList = new ArrayList<>();
+    for (DiscrepancyDto discrepancydto : discrepancies) {
+      discrepanciesList.add(discrepancydto.toDiscrepancy());
+    }
+    return discrepanciesList;
   }
 }
