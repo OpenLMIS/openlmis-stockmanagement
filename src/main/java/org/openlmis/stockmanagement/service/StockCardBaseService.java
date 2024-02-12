@@ -27,8 +27,11 @@ import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
+import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +58,9 @@ public abstract class StockCardBaseService {
   
   @Autowired
   protected CalculatedStockOnHandService calculatedStockOnHandService;
+
+  @Autowired
+  protected UserReferenceDataService userReferenceDataService;
 
   protected List<StockCardDto> createDtos(List<StockCard> stockCards) {
     if (stockCards.isEmpty()) {
@@ -86,6 +92,16 @@ public abstract class StockCardBaseService {
       cardDto.setLot(LotDto.builder().id(card.getLotId()).build());
     }
     List<StockCardLineItemDto> lineItems = cardDto.getLineItems();
+
+    //Team Lesotho modification - substitute signature with user's names
+    for (StockCardLineItemDto lineItem : lineItems) {
+      UserDto userDto = userReferenceDataService.findUser(lineItem.getLineItem().getUserId());
+      if (userDto != null) {
+        lineItem.getLineItem().setSignature(userDto.getFirstName() + " " + userDto.getLastName());
+      }
+    }
+    // End of modification
+
     if (!isEmpty(lineItems)) {
       cardDto.setLastUpdate(card.getOccurredDate());
       cardDto.setExtraData(lineItems.get(lineItems.size() - 1).getLineItem().getExtraData());

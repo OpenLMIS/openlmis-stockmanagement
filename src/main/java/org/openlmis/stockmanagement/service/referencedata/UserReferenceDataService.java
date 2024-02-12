@@ -17,8 +17,10 @@ package org.openlmis.stockmanagement.service.referencedata;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
@@ -61,6 +63,24 @@ public class UserReferenceDataService extends BaseReferenceDataService<UserDto> 
     Page<UserDto> users = getPage("search", Collections.emptyMap(), payload);
     return users.getContent().isEmpty() ? null : users.getContent().get(0);
   }
+
+  /**
+   * This method retrieves a user with id.
+   *
+   * @param id the name of user.
+   * @return UserDto containing user's data, or null if such user was not found.
+   */
+  public UserDto findUser(UUID id) {
+    // Wrap the UUID in a collection (Set or List)
+    Set<UUID> ids = new HashSet<>();
+    ids.add(id);
+
+    // Use the collection as the value for the "id" parameter
+    Map<String, Object> payload = Collections.singletonMap("id", ids);
+
+    Page<UserDto> users = getPage("search", Collections.emptyMap(), payload);
+    return users.getContent().isEmpty() ? null : users.getContent().get(0);
+  }  
 
   /**
    * Check if user has a right with certain criteria.

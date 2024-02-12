@@ -62,8 +62,8 @@ import org.slf4j.LoggerFactory;
 @JsonIgnoreProperties({
     "stockCard", "originEvent",
     "source", "destination",
-    "processedDate",
-    "userId"})
+    "processedDate"/*,
+    "userId"*/})
 @Table(name = "stock_card_line_items", schema = "stockmanagement")
 public class StockCardLineItem extends BaseEntity {
 
