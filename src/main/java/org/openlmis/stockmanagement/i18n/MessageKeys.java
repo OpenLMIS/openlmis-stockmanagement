@@ -23,6 +23,14 @@ public abstract class MessageKeys {
       SERVICE_PREFIX + ".email.stockout.subject";
   public static final String NOTIFICATION_STOCKOUT_CONTENT =
       SERVICE_PREFIX + ".email.stockout.content";
+  public static final String NOTIFICATION_LOWSTOCK_SUBJECT =
+      SERVICE_PREFIX + ".email.lowstock.subject";
+  public static final String NOTIFICATION_LOWSTOCK_CONTENT =
+      SERVICE_PREFIX + ".email.lowstock.content";
+  public static final String NOTIFICATION_HIGHSTOCK_SUBJECT =
+      SERVICE_PREFIX + ".email.highstock.subject";
+  public static final String NOTIFICATION_HIGHSTOCK_CONTENT =
+      SERVICE_PREFIX + ".email.highstock.content";
   public static final String NOTIFICATION_NEAR_EXPIRY_SUBJECT =
       SERVICE_PREFIX + ".email.nearExpiry.subject";
   public static final String NOTIFICATION_NEAR_EXPIRY_CONTENT =

@@ -83,6 +83,20 @@ public class StockCardAggregate {
   }
 
   /**
+   * Calculates the total stock on hand from all stock cards in the stockCardAggregate.
+   *
+   * @return the sum of stock on hand from all stock cards
+   */
+  public Integer getTotalStockOnHand() {
+    if (stockCards == null || stockCards.isEmpty()) {
+      return 0;
+    }
+    return stockCards.stream()
+      .mapToInt(StockCard::getStockOnHand)
+      .sum();
+  }
+
+  /**
    * Returns map of tags found in reasons from all stock card line items
    * and accumulated value of line items that have reason with given tag.
    *
