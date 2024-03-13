@@ -93,7 +93,7 @@ public class StockEventNotificationProcessor {
     int averageConsumption = (int) Math.ceil(averageConsumption(stockCard));
     Integer aggregateStockOnHand = aggregateStockOnHand(stockCard);
 
-    if (stockCard.getStockOnHand() == 0) {
+    if (aggregateStockOnHand == 0) {
       stockoutNotifier.notifyStockEditors(stockCard, rightId);
     } else if (aggregateStockOnHand < averageConsumption) {
       lowStockNotifier.notifyStockEditors(stockCard, rightId, averageConsumption);
