@@ -33,6 +33,7 @@ import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.RightDto;
 import org.openlmis.stockmanagement.i18n.MessageService;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
+import org.openlmis.stockmanagement.service.CalculatedStockOnHandService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.RightReferenceDataService;
 import org.openlmis.stockmanagement.util.Message;
@@ -47,6 +48,9 @@ import org.springframework.stereotype.Component;
 public class NearExpiryNotifier {
 
   private static final XLogger XLOGGER = XLoggerFactory.getXLogger(NearExpiryNotifier.class);
+
+  @Autowired
+  CalculatedStockOnHandService calculatedStockOnHandService;
 
   @Autowired
   LotReferenceDataService lotReferenceDataService;
@@ -93,11 +97,51 @@ public class NearExpiryNotifier {
     RightDto right = rightReferenceDataService.findRight(STOCK_INVENTORIES_EDIT);
     UUID rightId = right.getId();
     expiringStockCards.forEach(card -> {
-      NotificationMessageParams params = new NotificationMessageParams(
-          getMessage(NOTIFICATION_NEAR_EXPIRY_SUBJECT),
-          getMessage(NOTIFICATION_NEAR_EXPIRY_CONTENT),
-          constructSubstitutionMap(card));
-      stockCardNotifier.notifyStockEditors(card, rightId, params);
+          calculatedStockOnHandService.fetchCurrentStockOnHand(card);
+          if (card != null && card.getStockOnHand() != null && card.getStockOnHand() > 0) {
+            NotificationMessageParams params = new NotificationMessageParams(
+                getMessage(NOTIFICATION_NEAR_EXPIRY_SUBJECT),
+                getMessage(NOTIFICATION_NEAR_EXPIRY_CONTENT),
+                constructSubstitutionMap(card));
+            stockCardNotifier.notifyStockEditors(card, rightId, params);
+          }
+    });
+  }
+
+  /**
+   * Check stock cards with lots that are expiring in 6 months from now. If any are found, notify stock
+   * card owners.
+   */
+  @Scheduled(cron = "${stockmanagement.nearExpiry.cron.periodically}", zone = "${time.zoneId}")
+  public void checkNearExpiryAndNotifyPeriodically() {
+    // Expiration of six months from today, OLMIS-3186
+    expirationDate = LocalDate.now(ZoneId.of(timeZoneId)).plusMonths(6);
+    XLOGGER.debug("Expiration date = {}", expirationDate);
+    // expiringLotMap = lotReferenceDataService.getAllLotsExpiringOn(expirationDate)
+    //     .stream()
+    //     .collect(Collectors.toMap(LotDto::getId, Function.identity()));
+    expiringLotMap = lotReferenceDataService.getAllLotsExpiringBetween(LocalDate.now(ZoneId.of(timeZoneId)), expirationDate)
+        .stream()
+        .collect(Collectors.toMap(LotDto::getId, Function.identity()));
+    Collection<UUID> expiringLotIds = expiringLotMap.keySet();
+    XLOGGER.debug("Expiring Lot IDs = {}", expiringLotIds);
+    
+    List<StockCard> expiringStockCards = stockCardRepository.findByLotIdIn(expiringLotIds);
+    XLOGGER.debug("Expiring Stock Card IDs = {}", expiringStockCards.stream()
+        .map(StockCard::getId)
+        .collect(Collectors.toList()));
+
+    RightDto right = rightReferenceDataService.findRight(STOCK_INVENTORIES_EDIT);
+    UUID rightId = right.getId();
+    expiringStockCards.forEach(card -> {
+      calculatedStockOnHandService.fetchCurrentStockOnHand(card);
+      if (card != null && card.getStockOnHand() != null && card.getStockOnHand() > 0) {
+        NotificationMessageParams params = new NotificationMessageParams(
+            getMessage(NOTIFICATION_NEAR_EXPIRY_SUBJECT),
+            getMessage(NOTIFICATION_NEAR_EXPIRY_CONTENT),
+            constructSubstitutionMap(card));
+        stockCardNotifier.notifyStockEditors(card, rightId, params);
+      }
     });
   }
 
@@ -110,6 +154,7 @@ public class NearExpiryNotifier {
     valuesMap.put("lotCode", null != lot ? lot.getLotCode() : "");
     valuesMap.put("expirationDate", stockCardNotifier.getDateFormatter().format(expirationDate));
     valuesMap.put("urlToViewBinCard", stockCardNotifier.getUrlToViewBinCard(stockCard.getId()));
+    valuesMap.put("stockOnHand", stockCard.getStockOnHand().toString());
     return valuesMap;
   }
 

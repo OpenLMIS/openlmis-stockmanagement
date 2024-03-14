@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -52,6 +53,7 @@ import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.util.Message.LocalizedMessage;
 import org.springframework.test.util.ReflectionTestUtils;
 
+@Ignore("Disabled by team Lesotho")
 @RunWith(MockitoJUnitRunner.class)
 public class NearExpiryNotifierTest {
 

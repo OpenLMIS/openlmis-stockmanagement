@@ -68,7 +68,34 @@ public class LotReferenceDataService extends BaseReferenceDataService<LotDto> {
     if (null != expirationDate) {
       params.put("expirationDate", expirationDate);
     }
+    
+    return getPage(params).getContent();
+  }
 
+  /**
+   * Search for lots expiring between certain dates.
+   *
+   * @param expirationDateFrom expiration date.
+   * @param expirationDateTo expiration date.
+   * @return found list of lots.
+   */
+  public List<LotDto> getAllLotsExpiringBetween(LocalDate expirationDateFrom, LocalDate expirationDateTo) {
+    return getAllLotsBetween(null, expirationDateFrom, expirationDateTo);
+  }
+
+  private List<LotDto> getAllLotsBetween(UUID tradeItemId, LocalDate expirationDateFrom, LocalDate expirationDateTo) {
+    HashMap<String, Object> params = new HashMap<>();
+
+    if (null != tradeItemId) {
+      params.put("tradeItemId", tradeItemId);
+    }
+    if (null != expirationDateFrom) {
+      params.put("expirationDateFrom", expirationDateFrom);
+    }
+    if (null != expirationDateTo) {
+      params.put("expirationDateTo", expirationDateTo);
+    }
+    
     return getPage(params).getContent();
   }
 }
