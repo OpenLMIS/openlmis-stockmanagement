@@ -16,13 +16,16 @@
 package org.openlmis.stockmanagement.service.notifier;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.SupervisoryNodeDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.service.notification.NotificationService;
+import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.SupervisingUsersReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.SupervisoryNodeReferenceDataService;
 import org.slf4j.ext.XLogger;
@@ -46,6 +49,9 @@ public class StockCardNotifier extends BaseNotifier {
   @Autowired
   private NotificationService notificationService;
 
+  @Autowired
+  private FacilityReferenceDataService facilityReferenceDataService;
+
   /**
    * Notify users with a certain right for the facility/program that facility has stocked out of a
    * product.
@@ -68,7 +74,7 @@ public class StockCardNotifier extends BaseNotifier {
 
     profiler.start("NOTIFY_RECIPIENTS");
     for (UserDto recipient : recipients) {
-      if (stockCard.getFacilityId().equals(recipient.getHomeFacilityId()) || recipient.getHomeFacilityId() == null) {
+      if (stockCard.getFacilityId().equals(recipient.getHomeFacilityId()) || isSupervisingUser(recipient)) {
         valuesMap.put("username", recipient.getUsername());
         XLOGGER.debug("Recipient username = {}", recipient.getUsername());
         notificationService.notify(recipient,
@@ -94,4 +100,20 @@ public class StockCardNotifier extends BaseNotifier {
     return supervisingUsersReferenceDataService
         .findAll(supervisoryNode.getId(), rightId, stockCard.getProgramId());
   }
+
+  private Boolean isSupervisingUser(UserDto user) {
+    if (user.getHomeFacilityId() == null) {
+        return true;
+    } else {
+        FacilityDto homeFacility = facilityReferenceDataService
+            .findByIds(Collections.singleton(user.getHomeFacilityId()))
+            .get(user.getHomeFacilityId());
+        
+        if (homeFacility != null && homeFacility.getName() != null) {
+            return homeFacility.getName().toLowerCase().contains("dhmt");
+        }
+    }
+    return false;
+  }
+
 }

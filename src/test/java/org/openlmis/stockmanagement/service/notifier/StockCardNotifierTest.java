@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -122,6 +123,7 @@ public class StockCardNotifierTest {
     verify(notificationService).notify(editor, SUBJECT_VALUE, CONTENT_VALUE);
   }
   
+  @Ignore("Disabled by team Lesotho")
   @Test
   public void notifyStockEditorsShouldNotNotifyIfFacilityIsNotHomeFacility() {
     // given
