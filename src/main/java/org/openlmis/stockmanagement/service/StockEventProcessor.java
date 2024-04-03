@@ -113,6 +113,8 @@ public class StockEventProcessor {
       profiler.start("SUBMIT_PHYSICAL_INVENTORY");
       physicalInventoryService.submitPhysicalInventory(inventoryDto, savedEventId);
     }
+    profiler.start("SORT_EVENT_LINE_ITEMS");
+    sortEventDtos(eventDto);
 
     profiler.start("SAVE_FROM_EVENT");
     stockCardService.saveFromEvent(eventDto, savedEventId);
@@ -121,5 +123,9 @@ public class StockEventProcessor {
     stockEventNotificationProcessor.callAllNotifications(eventDto);
 
     return savedEventId;
+  }
+
+  private void sortEventDtos(StockEventDto eventDto) {
+    eventDto.sortLineItemsByOccurreddate();
   }
 }

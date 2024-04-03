@@ -21,6 +21,7 @@ import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Sets;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -176,5 +177,11 @@ public class StockEventDto {
         && lineItems
         .stream()
         .anyMatch(l -> context.getUnpackReasonId().equals(l.getReasonId()));
+  }
+
+  public void sortLineItemsByOccurreddate() {
+    if (lineItems != null) {
+      lineItems.sort(Comparator.comparing(StockEventLineItemDto::getOccurredDate).reversed());
+    }
   }
 }
