@@ -1,6 +1,6 @@
 /*
  * This program is part of the OpenLMIS logistics management information system platform software.
- * Copyright © 2017 VillageReach
+ * Copyright © 2017-2024 VillageReach, Techie Planet Ltd
  *
  * This program is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation, either
@@ -113,6 +113,8 @@ public class StockEventProcessor {
       profiler.start("SUBMIT_PHYSICAL_INVENTORY");
       physicalInventoryService.submitPhysicalInventory(inventoryDto, savedEventId);
     }
+    profiler.start("SORT_EVENT_LINE_ITEMS");
+    sortEventDtos(eventDto);
 
     profiler.start("SAVE_FROM_EVENT");
     stockCardService.saveFromEvent(eventDto, savedEventId);
@@ -121,5 +123,9 @@ public class StockEventProcessor {
     stockEventNotificationProcessor.callAllNotifications(eventDto);
 
     return savedEventId;
+  }
+
+  private void sortEventDtos(StockEventDto eventDto) {
+    eventDto.sortLineItemsByOccurreddate();
   }
 }

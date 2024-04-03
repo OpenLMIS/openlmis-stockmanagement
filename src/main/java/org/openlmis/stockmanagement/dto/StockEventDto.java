@@ -1,6 +1,6 @@
 /*
  * This program is part of the OpenLMIS logistics management information system platform software.
- * Copyright © 2017 VillageReach
+ * Copyright © 2017-2024 VillageReach, Techie Planet Ltd
  *
  * This program is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation, either
@@ -21,6 +21,7 @@ import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Sets;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -176,5 +177,14 @@ public class StockEventDto {
         && lineItems
         .stream()
         .anyMatch(l -> context.getUnpackReasonId().equals(l.getReasonId()));
+  }
+
+  /**
+   * Sorts the EventDto line items by occurred date.
+   */
+  public void sortLineItemsByOccurreddate() {
+    if (lineItems != null) {
+      lineItems.sort(Comparator.comparing(StockEventLineItemDto::getOccurredDate).reversed());
+    }
   }
 }
