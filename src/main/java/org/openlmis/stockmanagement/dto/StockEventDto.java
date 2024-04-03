@@ -1,6 +1,6 @@
 /*
  * This program is part of the OpenLMIS logistics management information system platform software.
- * Copyright © 2017 VillageReach
+ * Copyright © 2017-2024 VillageReach, Techie Planet Ltd
  *
  * This program is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation, either
