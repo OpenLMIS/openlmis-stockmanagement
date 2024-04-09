@@ -18,8 +18,8 @@ package org.openlmis.stockmanagement.repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.hibernate.jpa.TypedParameterValue;
+import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -28,18 +28,19 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface StockCardLineItemRepository
         extends PagingAndSortingRepository<StockCardLineItem, UUID> {
-    @Query(value = "SELECT EXISTS (SELECT 1 " +
-            "FROM stockmanagement.stock_card_line_items scli " +
-            "JOIN stockmanagement.stock_cards sc ON sc.id = scli.stockcardid " +
-            "WHERE sc.facilityid= :facilityId " +
-            "AND (cast(:lotId as uuid) IS NULL OR sc.lotId= :lotId) " +
-            "AND sc.orderableid= :orderableId " +
-            "AND (cast(:destinationId as uuid) IS NULL OR scli.destinationid= :destinationId) " +
-            "AND (cast(:sourceId as uuid) IS NULL OR scli.sourceId= :sourceId) " +
-            "AND scli.occurreddate= CAST(:occurredDate AS DATE) " +
-            "AND scli.quantity = :quantity " +
-            "AND (cast(:reasonId as uuid) IS NULL OR scli.reasonid= :reasonId) " +
-            "AND (cast(:vvmStatus as VARCHAR) IS NULL OR scli.extradata ->> 'vvmStatus' = :vvmStatus))",
+  @Query(value = "SELECT EXISTS (SELECT 1 "
+          + "FROM stockmanagement.stock_card_line_items scli "
+          + "JOIN stockmanagement.stock_cards sc ON sc.id = scli.stockcardid "
+          + "WHERE sc.facilityid= :facilityId "
+          + "AND (cast(:lotId as uuid) IS NULL OR sc.lotId= :lotId) "
+          + "AND sc.orderableid= :orderableId "
+          + "AND (cast(:destinationId as uuid) IS NULL OR scli.destinationid= :destinationId) "
+          + "AND (cast(:sourceId as uuid) IS NULL OR scli.sourceId= :sourceId) "
+          + "AND scli.occurreddate= CAST(:occurredDate AS DATE) "
+          + "AND scli.quantity = :quantity "
+          + "AND (cast(:reasonId as uuid) IS NULL OR scli.reasonid= :reasonId) "
+          + "AND (cast(:vvmStatus as VARCHAR) "
+          + "IS NULL OR scli.extradata ->> 'vvmStatus' = :vvmStatus))",
             nativeQuery = true)
     boolean getByAllGivenFields(
             UUID facilityId,

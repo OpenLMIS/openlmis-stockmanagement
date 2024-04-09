@@ -15,6 +15,8 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_IS_DUPLICATE;
+
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +35,6 @@ import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_IS_DUPLICATE;
 
 /**
  * This validator ensures that the stock event being sent in is not a duplicate, by
@@ -58,6 +59,7 @@ public class DuplicateTransactionValidator implements StockEventValidator {
     profiler.stop().log();
     XLOGGER.exit(stockEventDto);
   }
+
   private void validateNotDuplicate(StockEventDto stockEventDto) {
     int lineItemCount = stockEventDto.getLineItems().size();
     int duplicateCount = 0;
@@ -69,11 +71,12 @@ public class DuplicateTransactionValidator implements StockEventValidator {
     }
     System.out.println("number of items: " + lineItemCount);
     System.out.println("number of duplicates: " + duplicateCount);
-    if (duplicateCount == lineItemCount){
+    if (duplicateCount == lineItemCount) {
       throw new ValidationMessageException(
               new Message(ERROR_EVENT_IS_DUPLICATE));
     }
   }
+
   private boolean checkDuplicate(
           StockEventLineItemDto stockEventLineItemDto, UUID facilityId) {
     TypedParameterValue lotId = new TypedParameterValue(
