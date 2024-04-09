@@ -45,6 +45,7 @@ public class DuplicateTransactionValidator implements StockEventValidator {
   private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
   @Autowired
   private StockCardLineItemRepository stockCardLineItemRepository;
+
   @Override
   public void validate(StockEventDto stockEventDto) {
     XLOGGER.entry(stockEventDto);
