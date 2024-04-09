@@ -18,13 +18,10 @@ package org.openlmis.stockmanagement.validators;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_IS_DUPLICATE;
 
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.hibernate.jpa.TypedParameterValue;
 import org.hibernate.type.PostgresUUIDType;
 import org.hibernate.type.StringType;
-import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;

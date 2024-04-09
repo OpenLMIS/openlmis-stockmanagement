@@ -15,14 +15,11 @@
 
 package org.openlmis.stockmanagement.repository;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.hibernate.jpa.TypedParameterValue;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
