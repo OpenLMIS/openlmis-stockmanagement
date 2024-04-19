@@ -1,3 +1,8 @@
+5.1.10 / 2024-04-19
+==================
+Bug fixes:
+* [OLMIS-7910](https://openlmis.atlassian.net/browse/OLMIS-7910): Fixed wrong stock on hand on first Receive
+
 5.1.9 / 2023-06-26
 ==================
 Bug fixes:
