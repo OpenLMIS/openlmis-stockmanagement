@@ -34,4 +34,5 @@ public interface SourceDestinationAssignmentRepository<T extends SourceDestinati
   T findByProgramIdAndFacilityTypeIdAndNodeId(
       @Param("programId") UUID programId, @Param("facilityTypeId") UUID facilityTypeId,
       @Param("nodeId") UUID nodeId);
+
 }

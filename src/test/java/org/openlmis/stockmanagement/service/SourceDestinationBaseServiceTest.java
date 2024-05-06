@@ -117,7 +117,7 @@ public class SourceDestinationBaseServiceTest {
         .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
     //when
-    validSourceService.findSources(programId, facilityId, pageRequest);
+    validSourceService.findSources(programId, facilityId, null, pageRequest);
   }
 
   @Test
@@ -338,7 +338,7 @@ public class SourceDestinationBaseServiceTest {
 
     //when
     Page<ValidSourceDestinationDto> validDestinations =
-            validDestinationService.findDestinations(null, null, pageRequest);
+            validDestinationService.findDestinations(null, null, null, pageRequest);
 
     //then
     assertThat(validDestinations.getContent().size(), is(2));
@@ -383,7 +383,7 @@ public class SourceDestinationBaseServiceTest {
 
     //when
     Page<ValidSourceDestinationDto> validDestinations =
-        validDestinationService.findDestinations(programId, facilityId, pageRequest);
+        validDestinationService.findDestinations(programId, facilityId, null, pageRequest);
 
     //then
     assertThat(validDestinations.getContent().size(), is(2));
@@ -422,7 +422,7 @@ public class SourceDestinationBaseServiceTest {
 
     //when
     Page<ValidSourceDestinationDto> validSources =
-            validSourceService.findSources(null, null, pageRequest);
+            validSourceService.findSources(null, null, null, pageRequest);
 
     //then
     assertThat(validSources.getContent().size(), is(2));
@@ -464,7 +464,7 @@ public class SourceDestinationBaseServiceTest {
 
     //when
     Page<ValidSourceDestinationDto> validSources =
-        validSourceService.findSources(programId, facilityId, pageRequest);
+        validSourceService.findSources(programId, facilityId, null, pageRequest);
 
     //then
     assertThat(validSources.getContent().size(), is(2));
@@ -493,7 +493,7 @@ public class SourceDestinationBaseServiceTest {
 
     //when
     Page<ValidSourceDestinationDto> validDestinations =
-        validDestinationService.findDestinations(programId, facilityId, pageRequest);
+        validDestinationService.findDestinations(programId, facilityId, null, pageRequest);
 
     //then
     assertThat(validDestinations.getContent().size(), is(2));
@@ -522,7 +522,7 @@ public class SourceDestinationBaseServiceTest {
 
     //when
     Page<ValidSourceDestinationDto> validDestinations =
-        validDestinationService.findDestinations(programId, facilityId, pageRequest);
+        validDestinationService.findDestinations(programId, facilityId, null, pageRequest);
 
     //then
     assertThat(validDestinations.getContent().size(), is(2));
@@ -551,7 +551,7 @@ public class SourceDestinationBaseServiceTest {
 
     //when
     Page<ValidSourceDestinationDto> validDestinations =
-        validDestinationService.findDestinations(programId, facilityId, pageRequest);
+        validDestinationService.findDestinations(programId, facilityId, null, pageRequest);
 
     //then
     assertThat(validDestinations.getContent().size(), is(1));
@@ -612,7 +612,7 @@ public class SourceDestinationBaseServiceTest {
   public void shouldThrowExceptionWhenFacilityNotExists()
       throws Exception {
     when(facilityReferenceDataService.findOne(any(UUID.class))).thenReturn(null);
-    validDestinationService.findDestinations(randomUUID(), randomUUID(), pageRequest);
+    validDestinationService.findDestinations(randomUUID(), randomUUID(), null, pageRequest);
   }
 
   @Test
