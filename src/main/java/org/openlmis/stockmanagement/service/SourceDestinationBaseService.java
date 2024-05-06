@@ -130,6 +130,7 @@ public abstract class SourceDestinationBaseService {
    *
    * @param programId program id
    * @param facilityId facility id
+   * @param geographicZoneId geographicZone id
    * @param repository assignment repository
    * @param <T> assignment type
    * @return a list of assignment dto or empty list if not found.
