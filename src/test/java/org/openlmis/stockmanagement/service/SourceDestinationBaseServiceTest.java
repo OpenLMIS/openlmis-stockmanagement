@@ -468,11 +468,11 @@ public class SourceDestinationBaseServiceTest {
     when(facilityReferenceDataService.findByIds(Collections.singletonList(facility1Id)))
         .thenReturn(Collections.singletonMap(facility1Id, facility1));
 
-    ValidSourceAssignment vsa1 = createFacilitySourceAssignment(mockedFacilityNode(facility1Id,
-        FACILITY_NODE_NAME));
-    ValidSourceAssignment vsa2 = createFacilitySourceAssignment(mockedFacilityNode(facility2Id,
-        otherFacilityNodeName));
-    List<ValidSourceAssignment> validSourceAssignments = asList(vsa1, vsa2);
+    List<ValidSourceAssignment> validSourceAssignments = asList(
+        createOrganizationSourceAssignment(mockedOrganizationNode(ORGANIZATION_NODE_NAME)),
+        createFacilitySourceAssignment(mockedFacilityNode(facility1Id, FACILITY_NODE_NAME)),
+        createFacilitySourceAssignment(mockedFacilityNode(facility2Id, otherFacilityNodeName))
+    );
 
     when(sourceRepository.findAll())
         .thenReturn(validSourceAssignments);

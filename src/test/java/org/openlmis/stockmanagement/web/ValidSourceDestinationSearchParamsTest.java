@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.web;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.openlmis.stockmanagement.web.ValidSourceDestinationSearchParams.FACILITY_ID;
+import static org.openlmis.stockmanagement.web.ValidSourceDestinationSearchParams.GEOGRAPHIC_ZONE_ID;
 import static org.openlmis.stockmanagement.web.ValidSourceDestinationSearchParams.PROGRAM_ID;
 
 import java.util.UUID;
@@ -29,6 +30,7 @@ public class ValidSourceDestinationSearchParamsTest {
 
   private static final UUID PROGRAM_ID_VALUE = UUID.randomUUID();
   private static final UUID FACILITY_ID_VALUE = UUID.randomUUID();
+  private static final UUID GEOGRAPHIC_ZONE_ID_VALUE = UUID.randomUUID();
 
   @Test
   public void shouldGetProgramIdValueFromParameters() {
@@ -90,6 +92,17 @@ public class ValidSourceDestinationSearchParamsTest {
   @Test
   public void shouldNotThrowExceptionIfAnyParameterIsProvided() {
     new ValidSourceDestinationSearchParams(new LinkedMultiValueMap<>());
+  }
+
+  @Test
+  public void shouldGetGeographicZoneIdValueFromParameters() {
+    LinkedMultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>();
+    queryMap.add(PROGRAM_ID, PROGRAM_ID_VALUE.toString());
+    queryMap.add(FACILITY_ID, FACILITY_ID_VALUE.toString());
+    queryMap.add(GEOGRAPHIC_ZONE_ID, GEOGRAPHIC_ZONE_ID_VALUE.toString());
+    ValidSourceDestinationSearchParams params = new ValidSourceDestinationSearchParams(queryMap);
+
+    assertEquals(GEOGRAPHIC_ZONE_ID_VALUE, params.getGeographicZone());
   }
 
 }
