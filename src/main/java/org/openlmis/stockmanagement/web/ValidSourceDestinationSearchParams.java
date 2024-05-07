@@ -31,6 +31,7 @@ public class ValidSourceDestinationSearchParams {
 
   public static final String PROGRAM_ID = "programId";
   public static final String FACILITY_ID = "facilityId";
+  public static final String GEOGRAPHIC_ZONE_ID = "geographicZoneId";
 
   private SearchParams queryParams;
 
@@ -68,8 +69,21 @@ public class ValidSourceDestinationSearchParams {
     return UuidUtil.fromString(facilityType).orElse(null);
   }
 
+  /**
+   * Gets geographic zone id.
+   *
+   * @return UUID value of geographic zone id or null if params doesn't contain this param.
+   */
+  public UUID getGeographicZone() {
+    if (!queryParams.containsKey(GEOGRAPHIC_ZONE_ID)) {
+      return null;
+    }
+    String geographicZone = queryParams.getFirst(GEOGRAPHIC_ZONE_ID);
+    return UuidUtil.fromString(geographicZone).orElse(null);
+  }
+
   private void validate() {
-    if (!Collections.unmodifiableList(asList(PROGRAM_ID, FACILITY_ID))
+    if (!Collections.unmodifiableList(asList(PROGRAM_ID, FACILITY_ID, GEOGRAPHIC_ZONE_ID))
         .containsAll(queryParams.keySet())) {
       throw new ValidationMessageException(new Message(ERROR_INVALID_PARAMS));
     }

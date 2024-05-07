@@ -117,7 +117,7 @@ public class SourceDestinationBaseServiceTest {
         .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
     //when
-    validSourceService.findSources(programId, facilityId, pageRequest);
+    validSourceService.findSources(programId, facilityId, null, pageRequest);
   }
 
   @Test
@@ -338,7 +338,7 @@ public class SourceDestinationBaseServiceTest {
 
     //when
     Page<ValidSourceDestinationDto> validDestinations =
-            validDestinationService.findDestinations(null, null, pageRequest);
+            validDestinationService.findDestinations(null, null, null, pageRequest);
 
     //then
     assertThat(validDestinations.getContent().size(), is(2));
@@ -383,7 +383,7 @@ public class SourceDestinationBaseServiceTest {
 
     //when
     Page<ValidSourceDestinationDto> validDestinations =
-        validDestinationService.findDestinations(programId, facilityId, pageRequest);
+        validDestinationService.findDestinations(programId, facilityId, null, pageRequest);
 
     //then
     assertThat(validDestinations.getContent().size(), is(2));
@@ -422,7 +422,7 @@ public class SourceDestinationBaseServiceTest {
 
     //when
     Page<ValidSourceDestinationDto> validSources =
-            validSourceService.findSources(null, null, pageRequest);
+            validSourceService.findSources(null, null, null, pageRequest);
 
     //then
     assertThat(validSources.getContent().size(), is(2));
@@ -432,6 +432,59 @@ public class SourceDestinationBaseServiceTest {
     assertThat(organization.getIsFreeTextAllowed(), is(true));
 
     ValidSourceDestinationDto facility = validSources.getContent().get(1);
+    assertThat(facility.getName(), is(FACILITY_NODE_NAME));
+    assertThat(facility.getIsFreeTextAllowed(), is(false));
+  }
+
+  @Test
+  public void shouldReturnListOfSourcesDtosWhenFindingValidSourcesAssignmentByGeographicZone()
+      throws Exception {
+    //given
+    UUID geographicZoneId = randomUUID();
+    UUID facilityTypeId = randomUUID();
+    UUID facility1Id = randomUUID();
+    FacilityDto facility1 = createFacilityDtoWithFacilityType(facility1Id, facilityTypeId);
+    facility1.setName(FACILITY_NODE_NAME);
+    GeographicZoneDto geographicZoneDto = new GeographicZoneDtoDataBuilder()
+        .withId(geographicZoneId)
+        .build();
+    facility1.setGeographicZone(geographicZoneDto);
+
+    UUID facility2Id = randomUUID();
+    FacilityDto facility2 = createFacilityDtoWithFacilityType(facility2Id, facilityTypeId);
+    final String otherFacilityNodeName = "otherNodeName";
+    facility2.setName(otherFacilityNodeName);
+    GeographicZoneDto otherGeographicZoneDto = new GeographicZoneDtoDataBuilder()
+        .withId(randomUUID())
+        .build();
+    facility2.setGeographicZone(otherGeographicZoneDto);
+
+    Map<UUID, FacilityDto> facilityMap = new HashMap<>();
+    facilityMap.put(facility1Id, facility1);
+    facilityMap.put(facility2Id, facility2);
+
+    when(facilityReferenceDataService.findByIds(asList(facility1Id, facility2Id)))
+        .thenReturn(facilityMap);
+    when(facilityReferenceDataService.findByIds(Collections.singletonList(facility1Id)))
+        .thenReturn(Collections.singletonMap(facility1Id, facility1));
+
+    List<ValidSourceAssignment> validSourceAssignments = asList(
+        createOrganizationSourceAssignment(mockedOrganizationNode(ORGANIZATION_NODE_NAME)),
+        createFacilitySourceAssignment(mockedFacilityNode(facility1Id, FACILITY_NODE_NAME)),
+        createFacilitySourceAssignment(mockedFacilityNode(facility2Id, otherFacilityNodeName))
+    );
+
+    when(sourceRepository.findAll())
+        .thenReturn(validSourceAssignments);
+
+    //when
+    Page<ValidSourceDestinationDto> validSources =
+        validSourceService.findSources(null, null, geographicZoneId, pageRequest);
+
+    //then
+    assertThat(validSources.getContent().size(), is(1));
+
+    ValidSourceDestinationDto facility = validSources.getContent().get(0);
     assertThat(facility.getName(), is(FACILITY_NODE_NAME));
     assertThat(facility.getIsFreeTextAllowed(), is(false));
   }
@@ -464,7 +517,7 @@ public class SourceDestinationBaseServiceTest {
 
     //when
     Page<ValidSourceDestinationDto> validSources =
-        validSourceService.findSources(programId, facilityId, pageRequest);
+        validSourceService.findSources(programId, facilityId, null, pageRequest);
 
     //then
     assertThat(validSources.getContent().size(), is(2));
@@ -493,7 +546,7 @@ public class SourceDestinationBaseServiceTest {
 
     //when
     Page<ValidSourceDestinationDto> validDestinations =
-        validDestinationService.findDestinations(programId, facilityId, pageRequest);
+        validDestinationService.findDestinations(programId, facilityId, null, pageRequest);
 
     //then
     assertThat(validDestinations.getContent().size(), is(2));
@@ -522,7 +575,7 @@ public class SourceDestinationBaseServiceTest {
 
     //when
     Page<ValidSourceDestinationDto> validDestinations =
-        validDestinationService.findDestinations(programId, facilityId, pageRequest);
+        validDestinationService.findDestinations(programId, facilityId, null, pageRequest);
 
     //then
     assertThat(validDestinations.getContent().size(), is(2));
@@ -551,7 +604,7 @@ public class SourceDestinationBaseServiceTest {
 
     //when
     Page<ValidSourceDestinationDto> validDestinations =
-        validDestinationService.findDestinations(programId, facilityId, pageRequest);
+        validDestinationService.findDestinations(programId, facilityId, null, pageRequest);
 
     //then
     assertThat(validDestinations.getContent().size(), is(1));
@@ -612,7 +665,7 @@ public class SourceDestinationBaseServiceTest {
   public void shouldThrowExceptionWhenFacilityNotExists()
       throws Exception {
     when(facilityReferenceDataService.findOne(any(UUID.class))).thenReturn(null);
-    validDestinationService.findDestinations(randomUUID(), randomUUID(), pageRequest);
+    validDestinationService.findDestinations(randomUUID(), randomUUID(), null, pageRequest);
   }
 
   @Test

@@ -542,6 +542,9 @@ traits:
           facilityId:
             required: false
             description: Facility ID, indicates the facility that the valid destinations are under.
+          geographicZoneId:
+            required: false
+            description: Geographic Zone ID of facility, if node refers to facility.
         responses:
           200:
             body:
@@ -618,6 +621,9 @@ traits:
             facilityId:
               required: false
               description: Facility ID, indicates the facility that the valid sources are under.
+            geographicZoneId:
+              required: false
+              description: Geographic Zone ID of facility, if node refers to facility.
           responses:
             200:
               body:
