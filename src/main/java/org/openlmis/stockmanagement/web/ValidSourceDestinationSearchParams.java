@@ -22,6 +22,8 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROVIDED_PROGR
 
 import java.util.Collections;
 import java.util.UUID;
+
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.util.UuidUtil;
@@ -32,6 +34,7 @@ public class ValidSourceDestinationSearchParams {
   public static final String PROGRAM_ID = "programId";
   public static final String FACILITY_ID = "facilityId";
   public static final String GEOGRAPHIC_ZONE_ID = "geographicZoneId";
+  public static final String INCLUDE_DISABLED = "includeDisabled";
 
   private SearchParams queryParams;
 
@@ -82,8 +85,20 @@ public class ValidSourceDestinationSearchParams {
     return UuidUtil.fromString(geographicZone).orElse(null);
   }
 
+  /**
+   * Gets include disabled flag.
+   *
+   * @return value of include disabled flag or null if params doesn't contain this param.
+   */
+  public Boolean getIncludeDisabled() {
+    if (!queryParams.containsKey(INCLUDE_DISABLED)) {
+      return null;
+    }
+    return Boolean.valueOf(queryParams.getFirst(INCLUDE_DISABLED));
+  }
+
   private void validate() {
-    if (!Collections.unmodifiableList(asList(PROGRAM_ID, FACILITY_ID, GEOGRAPHIC_ZONE_ID))
+    if (!Collections.unmodifiableList(asList(PROGRAM_ID, FACILITY_ID, GEOGRAPHIC_ZONE_ID, INCLUDE_DISABLED))
         .containsAll(queryParams.keySet())) {
       throw new ValidationMessageException(new Message(ERROR_INVALID_PARAMS));
     }
