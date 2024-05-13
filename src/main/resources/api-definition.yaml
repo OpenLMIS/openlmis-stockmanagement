@@ -545,6 +545,9 @@ traits:
           geographicZoneId:
             required: false
             description: Geographic Zone ID of facility, if node refers to facility.
+          includeDisabled:
+            required: false
+            description: Boolean flag, indicates if result should include disabled organizations.
         responses:
           200:
             body:
@@ -624,6 +627,9 @@ traits:
             geographicZoneId:
               required: false
               description: Geographic Zone ID of facility, if node refers to facility.
+            includeDisabled:
+              required: false
+              description: Boolean flag, indicates if result should include disabled organizations.
           responses:
             200:
               body:
