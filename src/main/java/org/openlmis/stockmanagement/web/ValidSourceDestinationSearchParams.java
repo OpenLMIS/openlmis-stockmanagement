@@ -15,19 +15,16 @@
 
 package org.openlmis.stockmanagement.web;
 
-import static java.util.Arrays.asList;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_INVALID_PARAMS;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROVIDED_FACILITY_ID_WITHOUT_PROGRAM_ID;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROVIDED_PROGRAM_ID_WITHOUT_FACILITY_ID;
-
-import java.util.Collections;
-import java.util.UUID;
-
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.util.UuidUtil;
 import org.springframework.util.MultiValueMap;
+
+import java.util.Collections;
+import java.util.UUID;
+
+import static java.util.Arrays.asList;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.*;
 
 public class ValidSourceDestinationSearchParams {
 
