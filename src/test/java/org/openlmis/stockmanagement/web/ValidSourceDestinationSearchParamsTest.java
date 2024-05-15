@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.openlmis.stockmanagement.web.ValidSourceDestinationSearchParams.FACILITY_ID;
 import static org.openlmis.stockmanagement.web.ValidSourceDestinationSearchParams.GEOGRAPHIC_ZONE_ID;
+import static org.openlmis.stockmanagement.web.ValidSourceDestinationSearchParams.INCLUDE_DISABLED;
 import static org.openlmis.stockmanagement.web.ValidSourceDestinationSearchParams.PROGRAM_ID;
 
 import java.util.UUID;
@@ -26,11 +27,13 @@ import org.junit.Test;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.springframework.util.LinkedMultiValueMap;
 
+@SuppressWarnings("PMD.TooManyMethods")
 public class ValidSourceDestinationSearchParamsTest {
 
   private static final UUID PROGRAM_ID_VALUE = UUID.randomUUID();
   private static final UUID FACILITY_ID_VALUE = UUID.randomUUID();
   private static final UUID GEOGRAPHIC_ZONE_ID_VALUE = UUID.randomUUID();
+  private static final Boolean INCLUDE_DISABLED_VALUE = Boolean.TRUE;
 
   @Test
   public void shouldGetProgramIdValueFromParameters() {
@@ -103,6 +106,23 @@ public class ValidSourceDestinationSearchParamsTest {
     ValidSourceDestinationSearchParams params = new ValidSourceDestinationSearchParams(queryMap);
 
     assertEquals(GEOGRAPHIC_ZONE_ID_VALUE, params.getGeographicZone());
+  }
+
+  @Test
+  public void shouldAssignNullIfIncludeDisabledIsAbsentInParameters() {
+    ValidSourceDestinationSearchParams params =
+        new ValidSourceDestinationSearchParams(new LinkedMultiValueMap<>());
+
+    assertNull(params.getIncludeDisabled());
+  }
+
+  @Test
+  public void shouldGetIncludeDisabledValueFromParameters() {
+    LinkedMultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>();
+    queryMap.add(INCLUDE_DISABLED, INCLUDE_DISABLED_VALUE.toString());
+    ValidSourceDestinationSearchParams params = new ValidSourceDestinationSearchParams(queryMap);
+
+    assertEquals(INCLUDE_DISABLED_VALUE, params.getIncludeDisabled());
   }
 
 }

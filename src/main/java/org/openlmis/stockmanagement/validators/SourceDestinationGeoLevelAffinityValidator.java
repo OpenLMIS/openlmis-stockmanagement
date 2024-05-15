@@ -80,7 +80,7 @@ public class SourceDestinationGeoLevelAffinityValidator implements StockEventVal
   private void  validateDestinations(StockEventDto stockEventDto, Profiler profiler) {
     profiler.start("FIND_DESTINATIONS");
     Page<ValidSourceDestinationDto> validDestinationDtos = validDestinationService
-        .findDestinations(stockEventDto.getProgramId(), stockEventDto.getFacilityId(), null,
+        .findDestinations(stockEventDto.getProgramId(), stockEventDto.getFacilityId(), null, null,
             Pageable.unpaged());
 
     profiler.start("GET_DESTINATION_IDS");
@@ -107,7 +107,7 @@ public class SourceDestinationGeoLevelAffinityValidator implements StockEventVal
     profiler.start("FIND_SOURCES");
     Page<ValidSourceDestinationDto> validSourceDtos =
         validSourceService.findSources(stockEventDto.getProgramId(),
-        stockEventDto.getFacilityId(), null, Pageable.unpaged());
+        stockEventDto.getFacilityId(), null, null, Pageable.unpaged());
 
     profiler.start("GET_SOURCE_IDS");
     List<UUID> validSourceDtoIds = getValidNodeIds(validSourceDtos.getContent());

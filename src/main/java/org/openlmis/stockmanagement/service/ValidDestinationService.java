@@ -51,13 +51,14 @@ public class ValidDestinationService extends SourceDestinationBaseService {
   public Page<ValidSourceDestinationDto> findDestinations(UUID programId,
                                                           UUID facilityId,
                                                           UUID geographicZoneId,
+                                                          Boolean includeDisabled,
                                                           Pageable pageable) {
     XLOGGER.entry();
     Profiler profiler = new Profiler("FIND_DESTINATION_ASSIGNMENTS");
     profiler.setLogger(XLOGGER);
 
     Page<ValidSourceDestinationDto> assignments = findAssignments(programId, facilityId,
-        geographicZoneId, validDestinationRepository, profiler, pageable);
+        geographicZoneId, includeDisabled, validDestinationRepository, profiler, pageable);
     profiler.stop().log();
     XLOGGER.exit();
     return assignments;

@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.service;
 
 import static org.openlmis.stockmanagement.dto.ValidSourceDestinationDto.createFrom;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_NOT_FOUND;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_ORGANIZATION_ID_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_ASSIGNMENT_ID_MISSING;
 
 import java.util.ArrayList;
@@ -137,15 +138,17 @@ public abstract class SourceDestinationBaseService {
    */
   protected <T extends SourceDestinationAssignment> Page<ValidSourceDestinationDto>
       findAssignments(UUID programId, UUID facilityId, UUID geographicZoneId,
-      SourceDestinationAssignmentRepository<T> repository,
+      Boolean includeDisabled, SourceDestinationAssignmentRepository<T> repository,
       Profiler profiler, Pageable pageable) {
 
     profiler.start("FIND_ASSIGNMENTS");
     if (programId != null && facilityId != null) {
       return findAssignmentsByProgramAndFacility(programId, facilityId, geographicZoneId,
-          repository, profiler, pageable);
+          includeDisabled, repository, profiler, pageable);
     } else if (geographicZoneId != null) {
       return findAssignmentsByGeographicZone(geographicZoneId, repository, profiler, pageable);
+    } else if (includeDisabled != null && !includeDisabled) {
+      return findEnabledAssignments(repository, profiler, pageable);
     } else {
       return findAllAssignments(repository, profiler, pageable);
     }
@@ -297,7 +300,8 @@ public abstract class SourceDestinationBaseService {
 
   private <T extends SourceDestinationAssignment> Page<ValidSourceDestinationDto>
       findAssignmentsByProgramAndFacility(UUID programId, UUID facilityId, UUID geographicZoneId,
-      SourceDestinationAssignmentRepository<T> repository, Profiler profiler, Pageable pageable) {
+      Boolean includeDisabled, SourceDestinationAssignmentRepository<T> repository,
+      Profiler profiler, Pageable pageable) {
     profiler.start("FIND_FACILITY_BY_ID");
     FacilityDto facility = facilityRefDataService.findOne(facilityId);
 
@@ -330,7 +334,15 @@ public abstract class SourceDestinationBaseService {
           } else {
             return true;
           }
-        }).collect(Collectors.toList());
+        })
+        .filter(assignment -> {
+          if (includeDisabled != null && !includeDisabled) {
+            return checkIfAssignmentIsEnabled(assignment);
+          } else {
+            return true;
+          }
+        })
+        .collect(Collectors.toList());
 
     List<ValidSourceDestinationDto> result = geoAssigment.stream()
             .map(assignment -> createAssignmentDto(assignment, facilitiesById))
@@ -377,6 +389,36 @@ public abstract class SourceDestinationBaseService {
     return pageable.isUnpaged()
         ? Pagination.getPage(validDestinations)
         : Pagination.getPage(validDestinations, pageable);
+  }
+
+  private <T extends SourceDestinationAssignment> Page<ValidSourceDestinationDto>
+      findEnabledAssignments(SourceDestinationAssignmentRepository<T> repository,
+                                  Profiler profiler, Pageable pageable) {
+    profiler.start("FIND_ENABLED_ASSIGNMENTS");
+
+    List<? extends SourceDestinationAssignment> assignments = repository.findAll();
+
+    assignments = assignments.stream()
+        .filter(this::checkIfAssignmentIsEnabled)
+        .collect(Collectors.toList());
+
+    List<ValidSourceDestinationDto> validDestinations = createAssignmentDto(assignments);
+
+    return pageable.isUnpaged()
+        ? Pagination.getPage(validDestinations)
+        : Pagination.getPage(validDestinations, pageable);
+  }
+
+  private boolean checkIfAssignmentIsEnabled(SourceDestinationAssignment assignment) {
+    Node node = assignment.getNode();
+    if (!node.isRefDataFacility()) {
+      Organization organization = organizationRepository.findById(node.getReferenceId())
+          .orElseThrow(() -> new ValidationMessageException(
+              new Message(ERROR_ORGANIZATION_ID_NOT_FOUND)));
+      return !organization.isDisabled();
+    } else {
+      return true;
+    }
   }
 
   private <T extends SourceDestinationAssignment> boolean
