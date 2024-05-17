@@ -93,8 +93,8 @@ public class OrganizationController {
       @PathVariable("id") UUID id, @RequestBody Organization organization) {
     permissionService.canManageOrganizations();
     LOGGER.debug("Try to update organization with id: ", id.toString());
-    checkIsValidUpdateModel(id, organization);
     organization.setId(id);
+    checkIsValidUpdateModel(id, organization);
     return new ResponseEntity<>(organizationRepository.save(organization), OK);
   }
 
