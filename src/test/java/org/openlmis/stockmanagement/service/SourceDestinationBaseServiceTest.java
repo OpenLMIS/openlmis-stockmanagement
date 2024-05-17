@@ -314,8 +314,7 @@ public class SourceDestinationBaseServiceTest {
   }
 
   @Test
-  public void
-      shouldReturnListOfAllDestinationDtosWhenIncludeDisabledTrue()
+  public void shouldReturnListOfAllDestinationDtosWhenIncludeDisabledTrue()
       throws Exception {
     //given
     UUID facilityTypeId = randomUUID();
@@ -370,6 +369,7 @@ public class SourceDestinationBaseServiceTest {
 
     List<ValidDestinationAssignment> validDestinationAssignments = asList(
         createOrganizationDestination(mockedOrganizationNode(ORGANIZATION_NODE_NAME)),
+        createOrganizationDestination(mockedOrganizationNode(ORGANIZATION_NODE_NAME, true)),
         createFacilityDestination(mockedFacilityNode(facilityId, FACILITY_NODE_NAME)),
         createFacilityDestination(mockedFacilityNode(facilityId, FACILITY_NODE_NAME))
     );
@@ -394,6 +394,54 @@ public class SourceDestinationBaseServiceTest {
     assertThat(organization.getIsFreeTextAllowed(), is(true));
 
     ValidSourceDestinationDto facility = validDestinations.getContent().get(1);
+    assertThat(facility.getName(), is(FACILITY_NODE_NAME));
+    assertThat(facility.getIsFreeTextAllowed(), is(false));
+  }
+
+  @Test
+  public void
+        shouldReturnListOfAllDestinationDtosWhenFindValidDestinationAssignmentWithParams()
+      throws Exception {
+    //given
+    UUID programId = randomUUID();
+    UUID facilityTypeId = randomUUID();
+    UUID facilityId = randomUUID();
+    FacilityDto facilityDto = createFacilityDtoWithFacilityType(facilityId, facilityTypeId);
+    facilityDto.setName(FACILITY_NODE_NAME);
+    PageRequest pageRequest = PageRequest.of(0,4);
+
+    when(facilityReferenceDataService.findOne(facilityId)).thenReturn(facilityDto);
+
+    doNothing().when(programFacilityTypeExistenceService)
+        .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
+
+    List<ValidDestinationAssignment> validDestinationAssignments = asList(
+        createOrganizationDestination(mockedOrganizationNode(ORGANIZATION_NODE_NAME)),
+        createOrganizationDestination(mockedOrganizationNode(ORGANIZATION_NODE_NAME, true)),
+        createFacilityDestination(mockedFacilityNode(facilityId, FACILITY_NODE_NAME)),
+        createFacilityDestination(mockedFacilityNode(facilityId, FACILITY_NODE_NAME))
+    );
+
+    when(destinationRepository.findByProgramIdAndFacilityTypeId(
+        programId, facilityTypeId, Pageable.unpaged()))
+        .thenReturn(validDestinationAssignments);
+
+    when(facilityReferenceDataService.findByIds(anyListOf(UUID.class))).thenReturn(
+        Collections.singletonMap(facilityId, facilityDto));
+
+    //when
+    Page<ValidSourceDestinationDto> validDestinations =
+        validDestinationService.findDestinations(programId, facilityId, true, pageRequest);
+
+    //then
+    assertThat(validDestinations.getContent().size(), is(4));
+    assertThat(validDestinations.getTotalPages(), is(1));
+
+    ValidSourceDestinationDto organization = validDestinations.getContent().get(0);
+    assertThat(organization.getName(), is(ORGANIZATION_NODE_NAME));
+    assertThat(organization.getIsFreeTextAllowed(), is(true));
+
+    ValidSourceDestinationDto facility = validDestinations.getContent().get(2);
     assertThat(facility.getName(), is(FACILITY_NODE_NAME));
     assertThat(facility.getIsFreeTextAllowed(), is(false));
   }

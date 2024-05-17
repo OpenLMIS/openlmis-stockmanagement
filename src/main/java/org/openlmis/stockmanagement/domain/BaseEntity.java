@@ -27,7 +27,7 @@ import org.hibernate.annotations.Type;
 @MappedSuperclass
 public abstract class BaseEntity {
   protected static final String TEXT_COLUMN_DEFINITION = "text";
-  protected static final String BOOLEAN_COLUMN_DEFINITION = "bool";
+  protected static final String BOOLEAN_COLUMN_DEFINITION = "boolean";
   protected static final String PG_UUID = "pg-uuid";
 
   @Id
