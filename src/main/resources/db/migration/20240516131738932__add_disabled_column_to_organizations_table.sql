@@ -1,0 +1,1 @@
+ALTER TABLE stockmanagement.organizations ADD COLUMN IF NOT EXISTS disabled boolean DEFAULT FALSE;

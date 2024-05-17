@@ -8,6 +8,9 @@
     },
     "name": {
       "type": "string"
+    },
+    "disabled": {
+      "type": "boolean"
     }
   },
   "required": [

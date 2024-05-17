@@ -542,6 +542,9 @@ traits:
           facilityId:
             required: false
             description: Facility ID, indicates the facility that the valid destinations are under.
+          includeDisabled:
+            required: false
+            description: Boolean flag, indicates if result should include disabled organizations.
         responses:
           200:
             body:
@@ -618,6 +621,9 @@ traits:
             facilityId:
               required: false
               description: Facility ID, indicates the facility that the valid sources are under.
+            includeDisabled:
+              required: false
+              description: Boolean flag, indicates if result should include disabled organizations.
           responses:
             200:
               body:

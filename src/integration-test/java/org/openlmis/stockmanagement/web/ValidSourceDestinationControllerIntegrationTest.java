@@ -76,10 +76,10 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
     UUID program = randomUUID();
     UUID facility = randomUUID();
 
-    when(validSourceService.findSources(program, facility, pageRequest))
+    when(validSourceService.findSources(program, facility, false, pageRequest))
         .thenReturn(Pagination.getPage(singletonList(sourceDestination)));
 
-    when(validDestinationService.findDestinations(program, facility, pageRequest))
+    when(validDestinationService.findDestinations(program, facility, false, pageRequest))
         .thenReturn(Pagination.getPage(singletonList(sourceDestination)));
 
     verifyZeroInteractions(permissionService);
@@ -101,10 +101,10 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
     destinationAssignmentDto.setIsFreeTextAllowed(true);
     ValidSourceDestinationDto sourceAssignmentDto = destinationAssignmentDto;
 
-    when(validSourceService.findSources(null, null, pageRequest))
+    when(validSourceService.findSources(null, null, false, pageRequest))
             .thenReturn(Pagination.getPage(singletonList(sourceAssignmentDto)));
 
-    when(validDestinationService.findDestinations(null, null, pageRequest))
+    when(validDestinationService.findDestinations(null, null, false, pageRequest))
             .thenReturn(Pagination.getPage(singletonList(destinationAssignmentDto)));
 
     verifyZeroInteractions(permissionService);

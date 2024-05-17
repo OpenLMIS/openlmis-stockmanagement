@@ -106,7 +106,8 @@ public class OrganizationController {
 
   private void checkUpdateOrganizationDuplicate(Organization organization) {
     Organization foundByName = organizationRepository.findByName(organization.getName());
-    if (foundByName != null && foundByName.getId() != organization.getId()) {
+    if (foundByName != null && foundByName.getId() != organization.getId()
+        && foundByName.isDisabled() == organization.isDisabled()) {
       throw new ValidationMessageException(
           new Message(ERROR_ORGANIZATION_UPDATE_CONTENT_DUPLICATE));
     }

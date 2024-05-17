@@ -48,13 +48,16 @@ public class ValidSourceService extends SourceDestinationBaseService {
    * @return page of valid destination assignment DTOs
    */
   public Page<ValidSourceDestinationDto> findSources(UUID programId,
-                                                     UUID facilityId, Pageable pageable) {
+                                                     UUID facilityId,
+                                                     boolean includeDisabled,
+                                                     Pageable pageable) {
     XLOGGER.entry();
     Profiler profiler = new Profiler("FIND_SOURCE_ASSIGNMENTS");
     profiler.setLogger(XLOGGER);
 
     Page<ValidSourceDestinationDto> sourceAssignments =
-            findAssignments(programId, facilityId, validSourceRepository, profiler, pageable);
+            findAssignments(programId, facilityId, includeDisabled,
+                validSourceRepository, profiler, pageable);
     profiler.stop().log();
     XLOGGER.exit();
     return sourceAssignments;

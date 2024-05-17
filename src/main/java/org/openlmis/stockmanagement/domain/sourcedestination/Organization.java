@@ -27,4 +27,7 @@ import org.openlmis.stockmanagement.domain.BaseEntity;
 public class Organization extends BaseEntity {
   @Column(nullable = false, columnDefinition = TEXT_COLUMN_DEFINITION)
   String name;
+
+  @Column(columnDefinition = BOOLEAN_COLUMN_DEFINITION)
+  boolean disabled;
 }
