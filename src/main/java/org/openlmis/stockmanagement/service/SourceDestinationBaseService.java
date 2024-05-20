@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.service;
 
 import static org.openlmis.stockmanagement.dto.ValidSourceDestinationDto.createFrom;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_NOT_FOUND;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_ORGANIZATION_ID_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_DESTINATION_ASSIGNMENT_ID_MISSING;
 
 import java.util.ArrayList;
@@ -135,14 +136,19 @@ public abstract class SourceDestinationBaseService {
    * @return a list of assignment dto or empty list if not found.
    */
   protected <T extends SourceDestinationAssignment> Page<ValidSourceDestinationDto> findAssignments(
-      UUID programId, UUID facilityId, SourceDestinationAssignmentRepository<T> repository,
+      UUID programId, UUID facilityId, boolean includeDisabled,
+      SourceDestinationAssignmentRepository<T> repository,
       Profiler profiler, Pageable pageable) {
-    boolean isFiltered = programId != null && facilityId != null;
 
     profiler.start("FIND_ASSIGNMENTS");
-    return isFiltered
-        ? findFilteredAssignments(programId, facilityId, repository, profiler, pageable)
-        : findAllAssignments(repository, profiler, pageable);
+    if (programId != null && facilityId != null) {
+      return findFilteredAssignments(programId, facilityId, includeDisabled,
+          repository, profiler, pageable);
+    } else if (includeDisabled) {
+      return findAllAssignments(repository, profiler, pageable);
+    } else {
+      return findEnabledAssignments(repository, profiler, pageable);
+    }
   }
 
   /**
@@ -290,7 +296,7 @@ public abstract class SourceDestinationBaseService {
   }
 
   private <T extends SourceDestinationAssignment> Page<ValidSourceDestinationDto>
-      findFilteredAssignments(UUID programId, UUID facilityId,
+      findFilteredAssignments(UUID programId, UUID facilityId, boolean includeDisabled,
       SourceDestinationAssignmentRepository<T> repository, Profiler profiler, Pageable pageable) {
     profiler.start("FIND_FACILITY_BY_ID");
     FacilityDto facility = facilityRefDataService.findOne(facilityId);
@@ -319,13 +325,20 @@ public abstract class SourceDestinationBaseService {
 
     profiler.start("FIND_GEO_ASSIGNMENTS");
     List<SourceDestinationAssignment> geoAssigment = assignments.stream()
-            .filter(assignment -> !assignment.getNode().isRefDataFacility()
-                    || hasGeoAffinity(assignment, facility, facilitiesById))
-            .collect(Collectors.toList());
+        .filter(assignment -> {
+          if (!includeDisabled) {
+            return checkIfAssignmentIsEnabled(assignment);
+          } else {
+            return true;
+          }
+        })
+        .filter(assignment -> !assignment.getNode().isRefDataFacility()
+            || hasGeoAffinity(assignment, facility, facilitiesById))
+        .collect(Collectors.toList());
 
     List<ValidSourceDestinationDto> result = geoAssigment.stream()
-            .map(assignment -> createAssignmentDto(assignment, facilitiesById))
-            .collect(Collectors.toList());
+        .map(assignment -> createAssignmentDto(assignment, facilitiesById))
+        .collect(Collectors.toList());
 
     return pageable.isUnpaged()
             ? Pagination.getPage(result)
@@ -343,4 +356,35 @@ public abstract class SourceDestinationBaseService {
 
     return Pagination.getPage(validDestinations, pageable, foundPage.getTotalElements());
   }
+
+  private <T extends SourceDestinationAssignment> Page<ValidSourceDestinationDto>
+      findEnabledAssignments(SourceDestinationAssignmentRepository<T> repository,
+                         Profiler profiler, Pageable pageable) {
+    profiler.start("FIND_ENABLED_ASSIGNMENTS");
+
+    List<? extends SourceDestinationAssignment> assignments = repository.findAll();
+
+    assignments = assignments.stream()
+        .filter(this::checkIfAssignmentIsEnabled)
+        .collect(Collectors.toList());
+
+    List<ValidSourceDestinationDto> validDestinations = createAssignmentDto(assignments);
+
+    return pageable.isUnpaged()
+        ? Pagination.getPage(validDestinations)
+        : Pagination.getPage(validDestinations, pageable);
+  }
+
+  private boolean checkIfAssignmentIsEnabled(SourceDestinationAssignment assignment) {
+    Node node = assignment.getNode();
+    if (!node.isRefDataFacility()) {
+      Organization organization = organizationRepository.findById(node.getReferenceId())
+          .orElseThrow(() -> new ValidationMessageException(
+              new Message(ERROR_ORGANIZATION_ID_NOT_FOUND)));
+      return !organization.isDisabled();
+    } else {
+      return true;
+    }
+  }
+
 }

@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.validators;
 
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -81,7 +82,7 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
 
     when(
         validSourceService.findSources(stockEventDto.getProgramId(),
-        stockEventDto.getFacilityId(), Pageable.unpaged()))
+        stockEventDto.getFacilityId(), false, Pageable.unpaged()))
         .thenReturn(Pagination.getPage(validDestinationAssignments));
 
     sourceDestinationGeoLeveLAffinityValidator.validate(stockEventDto);
@@ -98,8 +99,8 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
         createValidSourceDestinationDto(randomUUID(), ORGANIZATION_NODE_NAME));
 
     when(
-        validDestinationService.findDestinations(
-                stockEventDto.getProgramId(), stockEventDto.getFacilityId(), Pageable.unpaged()))
+        validDestinationService.findDestinations(stockEventDto.getProgramId(),
+            stockEventDto.getFacilityId(), false, Pageable.unpaged()))
         .thenReturn(Pagination.getPage(validDestinationAssignments));
 
     sourceDestinationGeoLeveLAffinityValidator.validate(stockEventDto);
@@ -121,7 +122,7 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
 
     when(
         validSourceService.findSources(stockEventDto.getProgramId(),
-        stockEventDto.getFacilityId(), Pageable.unpaged()))
+        stockEventDto.getFacilityId(), false, Pageable.unpaged()))
         .thenReturn(Pagination.getPage(validDestinationAssignments));
 
     expectedEx.expect(ValidationMessageException.class);
@@ -143,7 +144,7 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
 
     when(
         validSourceService.findSources(stockEventDto.getProgramId(),
-        stockEventDto.getFacilityId(), Pageable.unpaged()))
+        stockEventDto.getFacilityId(), false, Pageable.unpaged()))
         .thenReturn(Page.empty());
 
     expectedEx.expect(ValidationMessageException.class);
@@ -166,7 +167,7 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
         createValidSourceDestinationDto(randomUUID(), ORGANIZATION_NODE_NAME));
 
     when(validSourceService.findSources(stockEventDto.getProgramId(),
-        stockEventDto.getFacilityId(),  Pageable.unpaged()))
+        stockEventDto.getFacilityId(),  false, Pageable.unpaged()))
         .thenReturn(Pagination.getPage(validDestinationAssignments));
 
     expectedEx.expect(ValidationMessageException.class);
@@ -190,7 +191,7 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
         createValidSourceDestinationDto(randomUUID(), ORGANIZATION_NODE_NAME));
 
     when(validDestinationService.findDestinations(stockEventDto.getProgramId(),
-          stockEventDto.getFacilityId(), Pageable.unpaged()))
+          stockEventDto.getFacilityId(), false, Pageable.unpaged()))
             .thenReturn(Pagination.getPage(validDestinationAssignments));
 
     expectedEx.expect(ValidationMessageException.class);
@@ -210,8 +211,8 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
     sourceDestinationGeoLeveLAffinityValidator.validate(stockEventDto);
 
     verify(validDestinationService, times(0))
-            .findDestinations(any(), any(), any());
+            .findDestinations(any(), any(), anyBoolean(), any());
     verify(validSourceService, times(0))
-            .findSources(any(), any(), any());
+            .findSources(any(), any(), anyBoolean(), any());
   }
 }

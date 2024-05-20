@@ -117,7 +117,7 @@ public class SourceDestinationBaseServiceTest {
         .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
     //when
-    validSourceService.findSources(programId, facilityId, pageRequest);
+    validSourceService.findSources(programId, facilityId, false, pageRequest);
   }
 
   @Test
@@ -314,8 +314,7 @@ public class SourceDestinationBaseServiceTest {
   }
 
   @Test
-  public void
-      shouldReturnListOfAllDestinationDtosWhenFindingValidDestinationAssignmentWithoutParams()
+  public void shouldReturnListOfAllDestinationDtosWhenIncludeDisabledTrue()
       throws Exception {
     //given
     UUID facilityTypeId = randomUUID();
@@ -330,7 +329,7 @@ public class SourceDestinationBaseServiceTest {
             .thenReturn(facilityMap);
 
     List<ValidDestinationAssignment> validDestinationAssignments = asList(
-            createOrganizationDestination(mockedOrganizationNode(ORGANIZATION_NODE_NAME)),
+            createOrganizationDestination(mockedOrganizationNode(ORGANIZATION_NODE_NAME, true)),
             createFacilityDestination(mockedFacilityNode(facilityId, FACILITY_NODE_NAME)));
 
     when(destinationRepository.findAll(pageRequest))
@@ -338,7 +337,7 @@ public class SourceDestinationBaseServiceTest {
 
     //when
     Page<ValidSourceDestinationDto> validDestinations =
-            validDestinationService.findDestinations(null, null, pageRequest);
+            validDestinationService.findDestinations(null, null, true, pageRequest);
 
     //then
     assertThat(validDestinations.getContent().size(), is(2));
@@ -370,6 +369,7 @@ public class SourceDestinationBaseServiceTest {
 
     List<ValidDestinationAssignment> validDestinationAssignments = asList(
         createOrganizationDestination(mockedOrganizationNode(ORGANIZATION_NODE_NAME)),
+        createOrganizationDestination(mockedOrganizationNode(ORGANIZATION_NODE_NAME, true)),
         createFacilityDestination(mockedFacilityNode(facilityId, FACILITY_NODE_NAME)),
         createFacilityDestination(mockedFacilityNode(facilityId, FACILITY_NODE_NAME))
     );
@@ -383,7 +383,7 @@ public class SourceDestinationBaseServiceTest {
 
     //when
     Page<ValidSourceDestinationDto> validDestinations =
-        validDestinationService.findDestinations(programId, facilityId, pageRequest);
+        validDestinationService.findDestinations(programId, facilityId, false, pageRequest);
 
     //then
     assertThat(validDestinations.getContent().size(), is(2));
@@ -399,7 +399,55 @@ public class SourceDestinationBaseServiceTest {
   }
 
   @Test
-  public void shouldReturnListOfAllSourcesDtosWhenFindingValidSourcesAssignmentWithoutParams()
+  public void
+        shouldReturnListOfAllDestinationDtosWhenFindValidDestinationAssignmentWithParams()
+      throws Exception {
+    //given
+    UUID programId = randomUUID();
+    UUID facilityTypeId = randomUUID();
+    UUID facilityId = randomUUID();
+    FacilityDto facilityDto = createFacilityDtoWithFacilityType(facilityId, facilityTypeId);
+    facilityDto.setName(FACILITY_NODE_NAME);
+    PageRequest pageRequest = PageRequest.of(0,4);
+
+    when(facilityReferenceDataService.findOne(facilityId)).thenReturn(facilityDto);
+
+    doNothing().when(programFacilityTypeExistenceService)
+        .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
+
+    List<ValidDestinationAssignment> validDestinationAssignments = asList(
+        createOrganizationDestination(mockedOrganizationNode(ORGANIZATION_NODE_NAME)),
+        createOrganizationDestination(mockedOrganizationNode(ORGANIZATION_NODE_NAME, true)),
+        createFacilityDestination(mockedFacilityNode(facilityId, FACILITY_NODE_NAME)),
+        createFacilityDestination(mockedFacilityNode(facilityId, FACILITY_NODE_NAME))
+    );
+
+    when(destinationRepository.findByProgramIdAndFacilityTypeId(
+        programId, facilityTypeId, Pageable.unpaged()))
+        .thenReturn(validDestinationAssignments);
+
+    when(facilityReferenceDataService.findByIds(anyListOf(UUID.class))).thenReturn(
+        Collections.singletonMap(facilityId, facilityDto));
+
+    //when
+    Page<ValidSourceDestinationDto> validDestinations =
+        validDestinationService.findDestinations(programId, facilityId, true, pageRequest);
+
+    //then
+    assertThat(validDestinations.getContent().size(), is(4));
+    assertThat(validDestinations.getTotalPages(), is(1));
+
+    ValidSourceDestinationDto organization = validDestinations.getContent().get(0);
+    assertThat(organization.getName(), is(ORGANIZATION_NODE_NAME));
+    assertThat(organization.getIsFreeTextAllowed(), is(true));
+
+    ValidSourceDestinationDto facility = validDestinations.getContent().get(2);
+    assertThat(facility.getName(), is(FACILITY_NODE_NAME));
+    assertThat(facility.getIsFreeTextAllowed(), is(false));
+  }
+
+  @Test
+  public void shouldReturnListOfAllSourcesDtosWhenIncludeDisabledParamTrue()
           throws Exception {
     //given
     UUID facilityTypeId = randomUUID();
@@ -414,7 +462,8 @@ public class SourceDestinationBaseServiceTest {
             .thenReturn(facilityMap);
 
     List<ValidSourceAssignment> validSourceAssignments = asList(
-            createOrganizationSourceAssignment(mockedOrganizationNode(ORGANIZATION_NODE_NAME)),
+            createOrganizationSourceAssignment(mockedOrganizationNode(ORGANIZATION_NODE_NAME,
+                true)),
             createFacilitySourceAssignment(mockedFacilityNode(facilityId, FACILITY_NODE_NAME)));
 
     when(sourceRepository.findAll(pageRequest))
@@ -422,7 +471,7 @@ public class SourceDestinationBaseServiceTest {
 
     //when
     Page<ValidSourceDestinationDto> validSources =
-            validSourceService.findSources(null, null, pageRequest);
+            validSourceService.findSources(null, null, true, pageRequest);
 
     //then
     assertThat(validSources.getContent().size(), is(2));
@@ -453,6 +502,7 @@ public class SourceDestinationBaseServiceTest {
 
     List<ValidSourceAssignment> validSourceAssignments = asList(
         createOrganizationSourceAssignment(mockedOrganizationNode(ORGANIZATION_NODE_NAME)),
+        createOrganizationSourceAssignment(mockedOrganizationNode(ORGANIZATION_NODE_NAME, true)),
         createFacilitySourceAssignment(mockedFacilityNode(facilityId, FACILITY_NODE_NAME)));
 
     when(sourceRepository.findByProgramIdAndFacilityTypeId(
@@ -464,7 +514,44 @@ public class SourceDestinationBaseServiceTest {
 
     //when
     Page<ValidSourceDestinationDto> validSources =
-        validSourceService.findSources(programId, facilityId, pageRequest);
+        validSourceService.findSources(programId, facilityId, false, pageRequest);
+
+    //then
+    assertThat(validSources.getContent().size(), is(2));
+
+    ValidSourceDestinationDto organization = validSources.getContent().get(0);
+    assertThat(organization.getName(), is(ORGANIZATION_NODE_NAME));
+    assertThat(organization.getIsFreeTextAllowed(), is(true));
+
+    ValidSourceDestinationDto facility = validSources.getContent().get(1);
+    assertThat(facility.getName(), is(FACILITY_NODE_NAME));
+    assertThat(facility.getIsFreeTextAllowed(), is(false));
+  }
+
+  @Test
+  public void shouldReturnListOfSourceDtosWhenIncludeDisabledParamFalse()
+      throws Exception {
+    //given
+    UUID facilityTypeId = randomUUID();
+    UUID facilityId = randomUUID();
+    FacilityDto facilityDto = createFacilityDtoWithFacilityType(facilityId, facilityTypeId);
+    facilityDto.setName(FACILITY_NODE_NAME);
+    PageRequest pageRequest = PageRequest.of(0, 3);
+
+    List<ValidSourceAssignment> validSourceAssignments = asList(
+        createOrganizationSourceAssignment(mockedOrganizationNode(ORGANIZATION_NODE_NAME)),
+        createOrganizationSourceAssignment(mockedOrganizationNode(ORGANIZATION_NODE_NAME, true)),
+        createFacilitySourceAssignment(mockedFacilityNode(facilityId, FACILITY_NODE_NAME)));
+
+    when(sourceRepository.findAll())
+        .thenReturn(validSourceAssignments);
+
+    when(facilityReferenceDataService.findByIds(anyListOf(UUID.class))).thenReturn(
+        Collections.singletonMap(facilityId, facilityDto));
+
+    //when
+    Page<ValidSourceDestinationDto> validSources =
+        validSourceService.findSources(null, null, false, pageRequest);
 
     //then
     assertThat(validSources.getContent().size(), is(2));
@@ -493,7 +580,7 @@ public class SourceDestinationBaseServiceTest {
 
     //when
     Page<ValidSourceDestinationDto> validDestinations =
-        validDestinationService.findDestinations(programId, facilityId, pageRequest);
+        validDestinationService.findDestinations(programId, facilityId, false, pageRequest);
 
     //then
     assertThat(validDestinations.getContent().size(), is(2));
@@ -522,7 +609,7 @@ public class SourceDestinationBaseServiceTest {
 
     //when
     Page<ValidSourceDestinationDto> validDestinations =
-        validDestinationService.findDestinations(programId, facilityId, pageRequest);
+        validDestinationService.findDestinations(programId, facilityId, false, pageRequest);
 
     //then
     assertThat(validDestinations.getContent().size(), is(2));
@@ -551,7 +638,7 @@ public class SourceDestinationBaseServiceTest {
 
     //when
     Page<ValidSourceDestinationDto> validDestinations =
-        validDestinationService.findDestinations(programId, facilityId, pageRequest);
+        validDestinationService.findDestinations(programId, facilityId, false, pageRequest);
 
     //then
     assertThat(validDestinations.getContent().size(), is(1));
@@ -612,7 +699,7 @@ public class SourceDestinationBaseServiceTest {
   public void shouldThrowExceptionWhenFacilityNotExists()
       throws Exception {
     when(facilityReferenceDataService.findOne(any(UUID.class))).thenReturn(null);
-    validDestinationService.findDestinations(randomUUID(), randomUUID(), pageRequest);
+    validDestinationService.findDestinations(randomUUID(), randomUUID(), false, pageRequest);
   }
 
   @Test
@@ -712,9 +799,14 @@ public class SourceDestinationBaseServiceTest {
   }
 
   private Node mockedOrganizationNode(String name) {
+    return mockedOrganizationNode(name, false);
+  }
+
+  private Node mockedOrganizationNode(String name, boolean disabled) {
     Organization organization = new Organization();
     organization.setName(name);
     organization.setId(randomUUID());
+    organization.setDisabled(disabled);
     when(organizationRepository.findById(organization.getId()))
         .thenReturn(Optional.of(organization));
 
@@ -724,4 +816,5 @@ public class SourceDestinationBaseServiceTest {
     node.setReferenceId(organization.getId());
     return node;
   }
+
 }

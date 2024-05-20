@@ -93,8 +93,8 @@ public class OrganizationController {
       @PathVariable("id") UUID id, @RequestBody Organization organization) {
     permissionService.canManageOrganizations();
     LOGGER.debug("Try to update organization with id: ", id.toString());
-    checkIsValidUpdateModel(id, organization);
     organization.setId(id);
+    checkIsValidUpdateModel(id, organization);
     return new ResponseEntity<>(organizationRepository.save(organization), OK);
   }
 
@@ -106,7 +106,7 @@ public class OrganizationController {
 
   private void checkUpdateOrganizationDuplicate(Organization organization) {
     Organization foundByName = organizationRepository.findByName(organization.getName());
-    if (foundByName != null && foundByName.getId() != organization.getId()) {
+    if (foundByName != null && !foundByName.getId().equals(organization.getId())) {
       throw new ValidationMessageException(
           new Message(ERROR_ORGANIZATION_UPDATE_CONTENT_DUPLICATE));
     }

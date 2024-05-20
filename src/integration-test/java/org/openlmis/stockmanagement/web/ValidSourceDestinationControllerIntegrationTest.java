@@ -47,6 +47,7 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
 
   private static final String PROGRAM_ID = "programId";
   private static final String FACILITY_ID = "facilityId";
+  private static final String INCLUDE_DISABLED = "includeDisabled";
   private static final String API_VALID_DESTINATIONS = "/api/validDestinations";
   private static final String API_VALID_SOURCES = "/api/validSources";
   private static final String PROGRAM_EXP = "$.programId";
@@ -76,19 +77,20 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
     UUID program = randomUUID();
     UUID facility = randomUUID();
 
-    when(validSourceService.findSources(program, facility, pageRequest))
+    when(validSourceService.findSources(program, facility, false, pageRequest))
         .thenReturn(Pagination.getPage(singletonList(sourceDestination)));
 
-    when(validDestinationService.findDestinations(program, facility, pageRequest))
+    when(validDestinationService.findDestinations(program, facility, false, pageRequest))
         .thenReturn(Pagination.getPage(singletonList(sourceDestination)));
 
     verifyZeroInteractions(permissionService);
 
     //1. perform valid destinations
-    performSourcesOrDestinations(program, facility, sourceDestination, API_VALID_DESTINATIONS);
+    performSourcesOrDestinations(program, facility, false, sourceDestination,
+        API_VALID_DESTINATIONS);
 
     //2. perform valid sources
-    performSourcesOrDestinations(program, facility, sourceDestination, API_VALID_SOURCES);
+    performSourcesOrDestinations(program, facility, false, sourceDestination, API_VALID_SOURCES);
   }
 
   @Test
@@ -101,19 +103,21 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
     destinationAssignmentDto.setIsFreeTextAllowed(true);
     ValidSourceDestinationDto sourceAssignmentDto = destinationAssignmentDto;
 
-    when(validSourceService.findSources(null, null, pageRequest))
+    when(validSourceService.findSources(null, null, true, pageRequest))
             .thenReturn(Pagination.getPage(singletonList(sourceAssignmentDto)));
 
-    when(validDestinationService.findDestinations(null, null, pageRequest))
+    when(validDestinationService.findDestinations(null, null, true, pageRequest))
             .thenReturn(Pagination.getPage(singletonList(destinationAssignmentDto)));
 
     verifyZeroInteractions(permissionService);
 
     //1. perform valid destinations
-    performSourcesOrDestinations(null, null, destinationAssignmentDto, API_VALID_DESTINATIONS);
+    performSourcesOrDestinations(null, null, true, destinationAssignmentDto,
+        API_VALID_DESTINATIONS);
 
     //2. perform valid sources
-    performSourcesOrDestinations(null, null, sourceAssignmentDto, API_VALID_SOURCES);
+    performSourcesOrDestinations(null, null, true, sourceAssignmentDto,
+        API_VALID_SOURCES);
   }
 
   @Test
@@ -252,12 +256,13 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
   }
 
   private void performSourcesOrDestinations(
-      UUID programId, UUID facilityId,
+      UUID programId, UUID facilityId, boolean includeDisabled,
       ValidSourceDestinationDto sourceDestinationDto, String uri) throws Exception {
     ResultActions resultActions = mvc.perform(get(uri)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
         .param(PROGRAM_ID, programId != null ? programId.toString() : null)
         .param(FACILITY_ID, facilityId != null ? facilityId.toString() : null)
+        .param(INCLUDE_DISABLED, Boolean.toString(includeDisabled))
         .param("page", "0")
         .param("size", "20"));
 

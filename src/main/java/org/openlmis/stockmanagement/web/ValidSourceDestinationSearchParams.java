@@ -31,6 +31,7 @@ public class ValidSourceDestinationSearchParams {
 
   public static final String PROGRAM_ID = "programId";
   public static final String FACILITY_ID = "facilityId";
+  public static final String INCLUDE_DISABLED = "includeDisabled";
 
   private SearchParams queryParams;
 
@@ -68,8 +69,20 @@ public class ValidSourceDestinationSearchParams {
     return UuidUtil.fromString(facilityType).orElse(null);
   }
 
+  /**
+   * Gets include disabled flag.
+   *
+   * @return value of include disabled flag or false if params doesn't contain this param.
+   */
+  public boolean getIncludeDisabled() {
+    if (!queryParams.containsKey(INCLUDE_DISABLED)) {
+      return false;
+    }
+    return Boolean.parseBoolean(queryParams.getFirst(INCLUDE_DISABLED));
+  }
+
   private void validate() {
-    if (!Collections.unmodifiableList(asList(PROGRAM_ID, FACILITY_ID))
+    if (!Collections.unmodifiableList(asList(PROGRAM_ID, FACILITY_ID, INCLUDE_DISABLED))
         .containsAll(queryParams.keySet())) {
       throw new ValidationMessageException(new Message(ERROR_INVALID_PARAMS));
     }
