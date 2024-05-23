@@ -52,6 +52,7 @@ public class StockCardLineItemDataBuilder {
   private LocalDate occurredDate = getBaseDate();
   private ZonedDateTime processedDateTime = getBaseDateTime();
   private UUID userId = UUID.randomUUID();
+  private UUID unitOfOrderableId = UUID.randomUUID();
   private Integer stockOnHand = 0;
   private List<PhysicalInventoryLineItemAdjustment> stockAdjustments = Lists.newArrayList();
 
@@ -155,7 +156,7 @@ public class StockCardLineItemDataBuilder {
     StockCardLineItem lineItem = new StockCardLineItem(
         stockCard, originEvent, quantity, extraData, reason, sourceFreeText, destinationFreeText,
         documentNumber, reasonFreeText, signature, source, destination, occurredDate,
-        processedDateTime, userId, stockOnHand, stockAdjustments
+        processedDateTime, userId, unitOfOrderableId, stockOnHand, stockAdjustments
     );
     lineItem.setId(id);
 
