@@ -112,6 +112,8 @@ public class StockCardLineItem extends BaseEntity {
   @Column(nullable = false)
   private UUID userId;
 
+  private UUID unitOfOrderableId;
+
   @Transient
   private Integer stockOnHand;
 
@@ -128,6 +130,7 @@ public class StockCardLineItem extends BaseEntity {
    * @param eventDto     stock eventDto.
    * @param stockCard    the card that this line item belongs to.
    * @param savedEventId saved event id.
+   * @param processedDate processed date
    * @return created line item.
    */
   public static StockCardLineItem createLineItemFrom(
