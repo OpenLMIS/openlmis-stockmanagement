@@ -145,7 +145,9 @@ public class StockCardLineItem extends BaseEntity {
     }
 
     if (null != eventLineItemDto.getReasonId()) {
-      builder = builder.reason(eventDto.getContext().findEventReason(eventLineItemDto.getReasonId()));
+      builder = builder.reason(eventDto.getContext().findEventReason(
+          eventLineItemDto.getReasonId()
+      ));
     }
 
     if (null != eventLineItemDto.getSourceId()) {
