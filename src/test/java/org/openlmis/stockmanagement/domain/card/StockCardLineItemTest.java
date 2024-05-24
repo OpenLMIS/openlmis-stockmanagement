@@ -60,13 +60,14 @@ public class StockCardLineItemTest {
 
     //when
     UUID userId = randomUUID();
-    UUID unitOfOrderableId = randomUUID();
 
     StockEventProcessContext context = new StockEventProcessContext();
     context.setCurrentUserId(new LazyResource<>(() -> userId));
 
     StockEventDto eventDto = createStockEventDto();
     eventDto.setContext(context);
+
+    UUID unitOfOrderableId = randomUUID();
 
     StockEventLineItemDto eventLineItemDto = eventDto.getLineItems().get(0);
     eventLineItemDto.setStockAdjustments(singletonList(createStockAdjustment()));
@@ -89,7 +90,8 @@ public class StockCardLineItemTest {
 
     //then
     assertThat(cardLineItem.getSourceFreeText(), is(eventLineItemDto.getSourceFreeText()));
-    assertThat(cardLineItem.getDestinationFreeText(), is(eventLineItemDto.getDestinationFreeText()));
+    assertThat(cardLineItem.getDestinationFreeText(),
+        is(eventLineItemDto.getDestinationFreeText()));
     assertThat(cardLineItem.getReasonFreeText(), is(eventLineItemDto.getReasonFreeText()));
     assertThat(cardLineItem.getDocumentNumber(), is(eventDto.getDocumentNumber()));
     assertThat(cardLineItem.getSignature(), is(eventDto.getSignature()));
