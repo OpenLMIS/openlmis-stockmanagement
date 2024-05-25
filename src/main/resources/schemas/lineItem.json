@@ -56,7 +56,7 @@
       "format": "date"
     },
     "unitOfOrderableId": {
-      "type": "string",
+      "type": ["string", "null"],
       "description": "Indicates the unit for given orderable."
     },
     "extraData": {

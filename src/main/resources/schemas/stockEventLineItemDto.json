@@ -56,7 +56,7 @@
       "description": "The date when this event occurred"
     },
     "unitOfOrderableId": {
-      "type": "string",
+      "type": ["string", "null"],
       "description": "Indicates the unit for given orderable."
     },
     "extraData": {
