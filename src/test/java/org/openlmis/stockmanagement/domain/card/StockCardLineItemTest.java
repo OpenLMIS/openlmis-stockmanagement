@@ -67,11 +67,14 @@ public class StockCardLineItemTest {
     StockEventDto eventDto = createStockEventDto();
     eventDto.setContext(context);
 
-    StockEventLineItemDto eventLineItem = eventDto.getLineItems().get(0);
-    eventLineItem.setStockAdjustments(singletonList(createStockAdjustment()));
+    UUID unitOfOrderableId = randomUUID();
+
+    StockEventLineItemDto eventLineItemDto = eventDto.getLineItems().get(0);
+    eventLineItemDto.setStockAdjustments(singletonList(createStockAdjustment()));
+    eventLineItemDto.setUnitOfOrderableId(unitOfOrderableId);
 
     StockCardLineItemReason reason = new StockCardLineItemReasonDataBuilder()
-        .withId(eventLineItem.getReasonId())
+        .withId(eventLineItemDto.getReasonId())
         .build();
     Supplier<List<StockCardLineItemReason>> eventReasonsSupplier = () -> singletonList(reason);
     LazyList<StockCardLineItemReason> eventReasons = new LazyList<>(eventReasonsSupplier);
@@ -83,29 +86,31 @@ public class StockCardLineItemTest {
     UUID eventId = randomUUID();
 
     StockCardLineItem cardLineItem =
-        createLineItemFrom(eventDto, eventLineItem, stockCard, eventId, now());
+        createLineItemFrom(eventDto, eventLineItemDto, stockCard, eventId, now());
 
     //then
-    assertThat(cardLineItem.getSourceFreeText(), is(eventLineItem.getSourceFreeText()));
-    assertThat(cardLineItem.getDestinationFreeText(), is(eventLineItem.getDestinationFreeText()));
-    assertThat(cardLineItem.getReasonFreeText(), is(eventLineItem.getReasonFreeText()));
+    assertThat(cardLineItem.getSourceFreeText(), is(eventLineItemDto.getSourceFreeText()));
+    assertThat(cardLineItem.getDestinationFreeText(),
+        is(eventLineItemDto.getDestinationFreeText()));
+    assertThat(cardLineItem.getReasonFreeText(), is(eventLineItemDto.getReasonFreeText()));
     assertThat(cardLineItem.getDocumentNumber(), is(eventDto.getDocumentNumber()));
     assertThat(cardLineItem.getSignature(), is(eventDto.getSignature()));
 
-    assertThat(cardLineItem.getQuantity(), is(eventLineItem.getQuantity()));
-    assertThat(cardLineItem.getReason().getId(), is(eventLineItem.getReasonId()));
+    assertThat(cardLineItem.getQuantity(), is(eventLineItemDto.getQuantity()));
+    assertThat(cardLineItem.getReason().getId(), is(eventLineItemDto.getReasonId()));
 
-    assertThat(cardLineItem.getSource().getId(), is(eventLineItem.getSourceId()));
-    assertThat(cardLineItem.getDestination().getId(), is(eventLineItem.getDestinationId()));
+    assertThat(cardLineItem.getSource().getId(), is(eventLineItemDto.getSourceId()));
+    assertThat(cardLineItem.getDestination().getId(), is(eventLineItemDto.getDestinationId()));
 
-    assertThat(cardLineItem.getOccurredDate(), is(eventLineItem.getOccurredDate()));
+    assertThat(cardLineItem.getOccurredDate(), is(eventLineItemDto.getOccurredDate()));
 
     assertThat(cardLineItem.getStockCard(), is(stockCard));
     assertThat(cardLineItem.getOriginEvent().getId(), is(eventId));
 
     assertThat(cardLineItem.getUserId(), is(userId));
+    assertThat(cardLineItem.getUnitOfOrderableId(), is(unitOfOrderableId));
 
-    assertEquals(cardLineItem.getStockAdjustments(), eventLineItem.stockAdjustments());
+    assertEquals(cardLineItem.getStockAdjustments(), eventLineItemDto.stockAdjustments());
 
     ZonedDateTime processedDate = cardLineItem.getProcessedDate();
     long between = SECONDS.between(processedDate, now());

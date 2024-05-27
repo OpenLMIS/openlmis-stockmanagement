@@ -112,6 +112,8 @@ public class StockCardLineItem extends BaseEntity {
   @Column(nullable = false)
   private UUID userId;
 
+  private UUID unitOfOrderableId;
+
   @Transient
   private Integer stockOnHand;
 
@@ -128,10 +130,11 @@ public class StockCardLineItem extends BaseEntity {
    * @param eventDto     stock eventDto.
    * @param stockCard    the card that this line item belongs to.
    * @param savedEventId saved event id.
+   * @param processedDate processed date
    * @return created line item.
    */
   public static StockCardLineItem createLineItemFrom(
-      StockEventDto eventDto, StockEventLineItemDto eventLineItem,
+      StockEventDto eventDto, StockEventLineItemDto eventLineItemDto,
       StockCard stockCard, UUID savedEventId, ZonedDateTime processedDate) {
     StockCardLineItemBuilder builder = StockCardLineItem.builder();
 
@@ -141,40 +144,43 @@ public class StockCardLineItem extends BaseEntity {
       builder = builder.originEvent(event);
     }
 
-    if (null != eventLineItem.getReasonId()) {
-      builder = builder.reason(eventDto.getContext().findEventReason(eventLineItem.getReasonId()));
+    if (null != eventLineItemDto.getReasonId()) {
+      builder = builder.reason(eventDto.getContext().findEventReason(
+          eventLineItemDto.getReasonId()
+      ));
     }
 
-    if (null != eventLineItem.getSourceId()) {
+    if (null != eventLineItemDto.getSourceId()) {
       Node source = new Node();
-      source.setId(eventLineItem.getSourceId());
+      source.setId(eventLineItemDto.getSourceId());
       builder = builder.source(source);
     }
 
-    if (null != eventLineItem.getDestinationId()) {
+    if (null != eventLineItemDto.getDestinationId()) {
       Node destination = new Node();
-      destination.setId(eventLineItem.getDestinationId());
+      destination.setId(eventLineItemDto.getDestinationId());
       builder = builder.destination(destination);
     }
 
     StockCardLineItem cardLineItem = builder
         .stockCard(stockCard)
 
-        .quantity(eventLineItem.getQuantity())
-        .stockAdjustments(eventLineItem.stockAdjustments())
+        .quantity(eventLineItemDto.getQuantity())
+        .stockAdjustments(eventLineItemDto.stockAdjustments())
 
-        .occurredDate(eventLineItem.getOccurredDate())
+        .occurredDate(eventLineItemDto.getOccurredDate())
         .processedDate(processedDate)
 
-        .reasonFreeText(eventLineItem.getReasonFreeText())
-        .sourceFreeText(eventLineItem.getSourceFreeText())
-        .destinationFreeText(eventLineItem.getDestinationFreeText())
+        .reasonFreeText(eventLineItemDto.getReasonFreeText())
+        .sourceFreeText(eventLineItemDto.getSourceFreeText())
+        .destinationFreeText(eventLineItemDto.getDestinationFreeText())
 
         .documentNumber(eventDto.getDocumentNumber())
         .signature(eventDto.getSignature())
         .userId(eventDto.getContext().getCurrentUserId())
 
-        .extraData(eventLineItem.getExtraData())
+        .unitOfOrderableId(eventLineItemDto.getUnitOfOrderableId())
+        .extraData(eventLineItemDto.getExtraData())
         .build();
 
     stockCard.getLineItems().add(cardLineItem);

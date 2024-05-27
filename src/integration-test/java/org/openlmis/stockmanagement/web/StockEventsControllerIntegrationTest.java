@@ -138,6 +138,7 @@ public class StockEventsControllerIntegrationTest extends BaseWebIntegrationTest
     item.setOccurredDate(LocalDate.now());
     item.setExtraData(new HashMap<>());
     item.setStockAdjustments(new ArrayList<>());
+    item.setUnitOfOrderableId(UUID.randomUUID());
 
     return item;
   }

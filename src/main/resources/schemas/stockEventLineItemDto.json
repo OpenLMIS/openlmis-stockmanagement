@@ -55,6 +55,10 @@
       "format": "date",
       "description": "The date when this event occurred"
     },
+    "unitOfOrderableId": {
+      "type": ["string", "null"],
+      "description": "Indicates the unit for given orderable."
+    },
     "extraData": {
       "type": "object",
       "description": "Can be used to save additional data for line item.",

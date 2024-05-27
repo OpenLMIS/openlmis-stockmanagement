@@ -49,7 +49,7 @@ schemas:
   - stockEventLineItemDto: !include schemas/stockEventLineItemDto.json
 
   - stockCard: !include schemas/stockCard.json
-  - stockCardPage: !include schemas/stockCard.json
+  - stockCardPage: !include schemas/stockCardPage.json
   - stockCardSummariesPage: !include schemas/stockCardSummaryV2Page.json
   - stockCardSummaries: !include schemas/stockCardSummaries.json
   - stockCardReasonSummaryPage: !include schemas/stockCardRangeSummaryPage.json
@@ -248,7 +248,9 @@ traits:
 
         responses:
           201:
-            description: Stock event has been processed with no validatoin error or persistence error.
+            description: >
+              Stock event has been processed with no validation error or persistence
+              error.
             headers:
               Keep-Alive:
             body:

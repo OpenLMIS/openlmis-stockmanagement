@@ -1,0 +1,1 @@
+ALTER TABLE stock_event_line_items ADD COLUMN unitoforderableid UUID;
