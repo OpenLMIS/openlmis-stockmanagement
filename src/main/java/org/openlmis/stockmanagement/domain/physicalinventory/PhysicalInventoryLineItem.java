@@ -48,7 +48,10 @@ public class PhysicalInventoryLineItem
     implements VvmApplicable, IdentifiableByOrderableLot {
   @Column(nullable = false)
   private UUID orderableId;
+  @Column
   private UUID lotId;
+  @Column
+  private UUID unitOfOrderableId;
 
   //when saving draft quantity is allowed to be null
   //do NOT annotate this field as nullable = false
