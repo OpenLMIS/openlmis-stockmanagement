@@ -90,8 +90,12 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
 
   @Column(nullable = false)
   private UUID orderableId;
+
   @Column
   private UUID lotId;
+
+  @Column
+  private UUID unitOfOrderableId;
 
   @LazyCollection(FALSE)
   @OneToMany(cascade = ALL, mappedBy = "stockCard")
@@ -134,6 +138,7 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
         .facilityId(stockEventDto.getFacilityId())
         .orderableId(eventLineItem.getOrderableId())
         .lotId(eventLineItem.getLotId())
+        .unitOfOrderableId(eventLineItem.getUnitOfOrderableId())
 
         .lineItems(new ArrayList<>())
         .stockOnHand(0)
@@ -149,6 +154,7 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
     StockCard clone = new StockCard();
     clone.setId(getId());
     clone.setLotId(lotId);
+    clone.setUnitOfOrderableId(unitOfOrderableId);
     clone.setStockOnHand(stockOnHand);
     clone.setOrderableId(orderableId);
     clone.setProgramId(programId);

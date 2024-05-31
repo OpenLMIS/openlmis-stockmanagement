@@ -156,7 +156,7 @@ public class StockCardLineItemDataBuilder {
     StockCardLineItem lineItem = new StockCardLineItem(
         stockCard, originEvent, quantity, extraData, reason, sourceFreeText, destinationFreeText,
         documentNumber, reasonFreeText, signature, source, destination, occurredDate,
-        processedDateTime, userId, unitOfOrderableId, stockOnHand, stockAdjustments
+        processedDateTime, userId, stockOnHand, stockAdjustments
     );
     lineItem.setId(id);
 

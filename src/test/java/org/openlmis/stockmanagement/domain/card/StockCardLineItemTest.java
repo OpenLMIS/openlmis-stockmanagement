@@ -108,7 +108,6 @@ public class StockCardLineItemTest {
     assertThat(cardLineItem.getOriginEvent().getId(), is(eventId));
 
     assertThat(cardLineItem.getUserId(), is(userId));
-    assertThat(cardLineItem.getUnitOfOrderableId(), is(unitOfOrderableId));
 
     assertEquals(cardLineItem.getStockAdjustments(), eventLineItemDto.stockAdjustments());
 

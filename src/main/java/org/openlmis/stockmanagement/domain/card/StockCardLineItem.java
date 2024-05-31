@@ -112,8 +112,6 @@ public class StockCardLineItem extends BaseEntity {
   @Column(nullable = false)
   private UUID userId;
 
-  private UUID unitOfOrderableId;
-
   @Transient
   private Integer stockOnHand;
 
@@ -179,7 +177,6 @@ public class StockCardLineItem extends BaseEntity {
         .signature(eventDto.getSignature())
         .userId(eventDto.getContext().getCurrentUserId())
 
-        .unitOfOrderableId(eventLineItemDto.getUnitOfOrderableId())
         .extraData(eventLineItemDto.getExtraData())
         .build();
 
