@@ -31,6 +31,7 @@ public class StockCardDataBuilder {
   private UUID id = UUID.randomUUID();
   private UUID orderableId = UUID.randomUUID();
   private UUID lotId = UUID.randomUUID();
+  private UUID unitOfOrderableId = UUID.randomUUID();
   private List<StockCardLineItem> lineItems = Lists.newArrayList();
   private Integer stockOnHand = 0;
   private LocalDate occurredDate = getBaseDate();
@@ -50,13 +51,18 @@ public class StockCardDataBuilder {
     return this;
   }
 
-  public StockCardDataBuilder withOrderable(UUID orderable) {
-    orderableId = orderable;
+  public StockCardDataBuilder withOrderableId(UUID orderableId) {
+    this.orderableId = orderableId;
     return this;
   }
 
-  public StockCardDataBuilder withLot(UUID lot) {
-    lotId = lot;
+  public StockCardDataBuilder withLotId(UUID lotId) {
+    this.lotId = lotId;
+    return this;
+  }
+
+  public StockCardDataBuilder withUnitOfOrderableId(UUID unitOfOrderableId) {
+    this.unitOfOrderableId = unitOfOrderableId;
     return this;
   }
 
@@ -92,7 +98,7 @@ public class StockCardDataBuilder {
                                                                  StockCardLineItem lineItem,
                                                                  UUID orderableId) {
     return this
-        .withOrderable(orderableId)
+        .withOrderableId(orderableId)
         .withStockOnHand(stockOnHand)
         .withLineItem(lineItem)
         .build();
@@ -104,7 +110,7 @@ public class StockCardDataBuilder {
   public StockCard build() {
     StockCard card = new StockCard(
         originalEvent, originalEvent.getFacilityId(), originalEvent.getProgramId(), orderableId,
-        lotId, lineItems, stockOnHand, occurredDate, processedDate, isActive
+        lotId, unitOfOrderableId, lineItems, stockOnHand, occurredDate, processedDate, isActive
     );
     card.setId(id);
 

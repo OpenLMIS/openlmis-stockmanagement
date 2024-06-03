@@ -25,7 +25,6 @@ import static org.junit.Assert.assertTrue;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
@@ -70,8 +69,8 @@ public class CalculatedStockOnHandRepositoryIntegrationTest
 
     StockCard stockCard = new StockCardDataBuilder(event)
             .withoutId()
-            .withOrderable(product)
-            .withLot(lot)
+        .withOrderableId(product)
+        .withLotId(lot)
             .build();
 
     stockCard = stockCardRepository.save(stockCard);
