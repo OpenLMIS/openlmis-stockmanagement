@@ -27,6 +27,7 @@ import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 
+@SuppressWarnings("PMD.TooManyMethods")
 public class StockCardDataBuilder {
   private UUID id = UUID.randomUUID();
   private UUID orderableId = UUID.randomUUID();
@@ -89,19 +90,6 @@ public class StockCardDataBuilder {
   public StockCardDataBuilder withIsActive(boolean isActive) {
     this.isActive = isActive;
     return this;
-  }
-
-  /**
-   * Creates stock card based on parameters from the builder.
-   */
-  public StockCard buildWithStockOnHandAndLineItemAndOrderableId(Integer stockOnHand,
-                                                                 StockCardLineItem lineItem,
-                                                                 UUID orderableId) {
-    return this
-        .withOrderableId(orderableId)
-        .withStockOnHand(stockOnHand)
-        .withLineItem(lineItem)
-        .build();
   }
 
   /**
