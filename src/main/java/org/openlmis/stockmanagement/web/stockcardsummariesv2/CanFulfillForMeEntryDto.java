@@ -48,10 +48,6 @@ public final class CanFulfillForMeEntryDto {
 
   @Getter
   @Setter
-  private ObjectReferenceDto unitOfOrderable;
-
-  @Getter
-  @Setter
   private Integer stockOnHand;
 
   @Getter

@@ -94,8 +94,8 @@ public class StockCardRepositoryIntegrationTest
 
     StockCard stockCard = new StockCardDataBuilder(event)
         .withoutId()
-        .withOrderableId(product)
-        .withLotId(lot)
+        .withOrderable(product)
+        .withLot(lot)
         .withLineItem(lineItem)
         .withIsActive(true)
         .build();

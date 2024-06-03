@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -248,12 +249,12 @@ public class StockCardSummariesServiceTest {
         .build();
 
     StockCard stockCard = new StockCardDataBuilder(event)
-        .withOrderableId(orderable.getId())
+        .withOrderable(orderable.getId())
         .withStockOnHand(12)
         .build();
 
     StockCard stockCard1 = new StockCardDataBuilder(event)
-        .withOrderableId(orderable3.getId())
+        .withOrderable(orderable3.getId())
         .withStockOnHand(26)
         .build();
 
@@ -305,27 +306,27 @@ public class StockCardSummariesServiceTest {
         .build();
 
     StockCard stockCard1 = new StockCardDataBuilder(event)
-        .withOrderableId(orderableId2)
+        .withOrderable(orderableId2)
         .withStockOnHand(12)
         .build();
 
     StockCard stockCard2 = new StockCardDataBuilder(event)
-        .withOrderableId(orderableId3)
+        .withOrderable(orderableId3)
         .withStockOnHand(26)
         .build();
 
     StockCard stockCard3 = new StockCardDataBuilder(event)
-        .withOrderableId(orderableId5)
+        .withOrderable(orderableId5)
         .withStockOnHand(36)
         .build();
 
     StockCard stockCard4 = new StockCardDataBuilder(event)
-        .withOrderableId(orderableId6)
+        .withOrderable(orderableId6)
         .withStockOnHand(46)
         .build();
 
     StockCard stockCard5 = new StockCardDataBuilder(event)
-        .withOrderableId(orderableId7)
+        .withOrderable(orderableId7)
         .withStockOnHand(56)
         .build();
 
@@ -398,27 +399,27 @@ public class StockCardSummariesServiceTest {
         .build();
 
     StockCard stockCard1 = new StockCardDataBuilder(event)
-        .withOrderableId(orderableId2)
+        .withOrderable(orderableId2)
         .withStockOnHand(12)
         .build();
 
     StockCard stockCard2 = new StockCardDataBuilder(event)
-        .withOrderableId(orderableId3)
+        .withOrderable(orderableId3)
         .withStockOnHand(26)
         .build();
 
     StockCard stockCard3 = new StockCardDataBuilder(event)
-        .withOrderableId(orderableId5)
+        .withOrderable(orderableId5)
         .withStockOnHand(36)
         .build();
 
     StockCard stockCard4 = new StockCardDataBuilder(event)
-        .withOrderableId(orderableId6)
+        .withOrderable(orderableId6)
         .withStockOnHand(46)
         .build();
 
     StockCard stockCard5 = new StockCardDataBuilder(event)
-        .withOrderableId(orderableId7)
+        .withOrderable(orderableId7)
         .withStockOnHand(56)
         .build();
 

@@ -57,8 +57,6 @@ public final class StockCardDto implements IdentifiableByOrderableLot {
   private ProgramDto program;
   private OrderableDto orderable;
   private LotDto lot;
-  private UUID unitOfOrderableId;
-
   private Map<String, String> extraData;
   private boolean isActive;
 
@@ -104,7 +102,6 @@ public final class StockCardDto implements IdentifiableByOrderableLot {
             .map(StockCardLineItemDto::createFrom).collect(toList()))
         .stockOnHand(stockCard.getStockOnHand())
         .isActive(stockCard.isActive())
-        .unitOfOrderableId(stockCard.getUnitOfOrderableId())
         .build();
   }
 }

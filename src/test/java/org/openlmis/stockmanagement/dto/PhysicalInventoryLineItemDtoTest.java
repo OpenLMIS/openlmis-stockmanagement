@@ -35,7 +35,6 @@ public class PhysicalInventoryLineItemDtoTest {
         .quantity(123)
         .orderableId(UUID.randomUUID())
         .lotId(UUID.randomUUID())
-        .unitOfOrderableId(UUID.randomUUID())
         .stockAdjustments(singletonList(createStockAdjustment()))
         .build();
 
@@ -46,7 +45,6 @@ public class PhysicalInventoryLineItemDtoTest {
     assertThat(lineItemDto.getQuantity(), is(lineItem.getQuantity()));
     assertThat(lineItemDto.getOrderableId(), is(lineItem.getOrderableId()));
     assertThat(lineItemDto.getLotId(), is(lineItem.getLotId()));
-    assertThat(lineItemDto.getUnitOfOrderableId(), is(lineItem.getUnitOfOrderableId()));
     assertThat(lineItemDto.getStockAdjustments(), is(lineItem.getStockAdjustments()));
   }
 

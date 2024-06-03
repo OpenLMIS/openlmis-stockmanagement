@@ -81,22 +81,18 @@ public class StockCardSummariesV2DtoBuilderTest {
         .withProgram(programId)
         .build();
     stockCard1 = new StockCardDataBuilder(event)
-        .withStockOnHand(16)
-        .withLineItem(new StockCardLineItemDataBuilder().buildWithStockOnHand(16))
-        .withOrderableId(orderable1.getId())
-        .build();
+        .buildWithStockOnHandAndLineItemAndOrderableId(16,
+            new StockCardLineItemDataBuilder().buildWithStockOnHand(16),
+            orderable1.getId());
     stockCard3a = new StockCardDataBuilder(event)
-        .withStockOnHand(30)
-        .withLineItem(new StockCardLineItemDataBuilder().buildWithStockOnHand(30))
-        .withOrderableId(orderable3.getId())
-        .build();
+        .buildWithStockOnHandAndLineItemAndOrderableId(30,
+            new StockCardLineItemDataBuilder().buildWithStockOnHand(30),
+            orderable3.getId());
     stockCard3b = new StockCardDataBuilder(event)
-        .withLotId(UUID.randomUUID())
-        .withUnitOfOrderableId(UUID.randomUUID())
-        .withStockOnHand(10)
-        .withLineItem(new StockCardLineItemDataBuilder().buildWithStockOnHand(10))
-        .withOrderableId(orderable3.getId())
-        .build();
+        .withLot(UUID.randomUUID())
+        .buildWithStockOnHandAndLineItemAndOrderableId(10,
+            new StockCardLineItemDataBuilder().buildWithStockOnHand(10),
+            orderable3.getId());
 
     orderableFulfill1 = new OrderableFulfillDtoDataBuilder()
         .withCanFulfillForMe(asList(orderable2.getId(), orderable3.getId())).build();

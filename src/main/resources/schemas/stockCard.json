@@ -22,11 +22,6 @@
       "title": "Lot",
       "$ref": "lot.json"
     },
-    "unitOfOrderableId": {
-      "type": ["string", "null"],
-      "title": "UnitOfOrderableId",
-      "description": "Indicates the unit for given orderable."
-    },
     "extraData": {
       "type": "object",
       "title": "extraData"

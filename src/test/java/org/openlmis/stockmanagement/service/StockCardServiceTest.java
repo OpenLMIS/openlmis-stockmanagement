@@ -89,7 +89,7 @@ public class StockCardServiceTest {
 
   @Mock
   private PermissionStrings.Handler permissionStringsHandler;
-
+  
   @Mock
   private CalculatedStockOnHandService calculatedStockOnHandService;
 
@@ -134,9 +134,7 @@ public class StockCardServiceTest {
         .thenReturn(ProgramDto.builder().id(programId).build());
 
     StockEvent originalEvent = new StockEventDataBuilder()
-        .withFacility(facilityId)
-        .withProgram(programId)
-        .build();
+        .withFacility(facilityId).withProgram(programId).build();
     stockCard = new StockCardDataBuilder(originalEvent).build();
 
     SecurityContextHolder.setContext(securityContext);
@@ -166,14 +164,9 @@ public class StockCardServiceTest {
 
     assertThat(card.getOrderableId(), equalTo(event.getLineItems().get(0).getOrderableId()));
     assertThat(card.getLotId(), equalTo(event.getLineItems().get(0).getLotId()));
-    assertThat(card.getUnitOfOrderableId(),
-        equalTo(event.getLineItems().get(0).getUnitOfOrderableId()));
 
     assertThat(card.getOrderableId(), equalTo(event.getLineItems().get(1).getOrderableId()));
     assertThat(card.getLotId(), equalTo(event.getLineItems().get(1).getLotId()));
-    assertThat(card.getUnitOfOrderableId(),
-        equalTo(event.getLineItems().get(1).getUnitOfOrderableId()));
-
     assertThat(card.getLineItems(), hasSize(2));
   }
 

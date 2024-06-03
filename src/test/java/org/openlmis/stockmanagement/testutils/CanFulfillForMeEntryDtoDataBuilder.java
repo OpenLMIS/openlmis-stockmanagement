@@ -27,7 +27,6 @@ public class CanFulfillForMeEntryDtoDataBuilder {
   private ObjectReferenceDto stockCard;
   private ObjectReferenceDto orderable;
   private ObjectReferenceDto lot;
-  private ObjectReferenceDto unitOfOrderable;
   private Integer stockOnHand;
   private LocalDate occurredDate;
   private ZonedDateTime processedDate;
@@ -40,7 +39,6 @@ public class CanFulfillForMeEntryDtoDataBuilder {
     stockCard = new ObjectReferenceDtoDataBuilder().withPath("api/stockCards").build();
     orderable = new ObjectReferenceDtoDataBuilder().withPath("api/orderables").build();
     lot = new ObjectReferenceDtoDataBuilder().withPath("api/lots").build();
-    unitOfOrderable = new ObjectReferenceDtoDataBuilder().withPath("api/unitOfOrderables").build();
     stockOnHand = 10;
     occurredDate = LocalDate.now();
     active = true;
@@ -48,49 +46,41 @@ public class CanFulfillForMeEntryDtoDataBuilder {
 
   /**
    * Creates new instance of {@link CanFulfillForMeEntryDto} with properties.
-   *
    * @return created can fulfill for me entry
    */
   public CanFulfillForMeEntryDto build() {
-    return new CanFulfillForMeEntryDto(stockCard, orderable, lot, unitOfOrderable, stockOnHand,
+    return new CanFulfillForMeEntryDto(stockCard, orderable, lot, stockOnHand,
         occurredDate, processedDate, active);
   }
 
   /**
    * Creates new instance of {@link CanFulfillForMeEntryDto} based on stock card and orderable.
-   *
    * @return created can fulfill for me entry
    */
   public CanFulfillForMeEntryDto buildWithStockCardAndOrderable(StockCard stockCard,
                                                                 OrderableDto orderable) {
-    this
+    return this
+        .withStockOnHand(stockCard != null ? stockCard.getStockOnHand() : 0)
         .withOrderable(new ObjectReferenceDtoDataBuilder()
             .withPath("orderables")
             .withId(orderable.getId())
-            .build());
-    if (stockCard != null) {
-      this
-          .withStockOnHand(stockCard.getStockOnHand())
-          .withStockCard(new ObjectReferenceDtoDataBuilder()
-              .withPath("stockCards")
-              .withId(stockCard.getId())
-              .build())
-          .withLot(new ObjectReferenceDtoDataBuilder()
-              .withPath("lots")
-              .withId(stockCard.getLotId())
-              .build())
-          .withUnitOfOrderable(new ObjectReferenceDtoDataBuilder()
-              .withPath("unitOfOrderables")
-              .withId(stockCard.getUnitOfOrderableId())
-              .build())
-          .withActive(stockCard.isActive())
-          .withOccurredDate(stockCard.getOccurredDate())
-          .withProcessedDate(stockCard.getProcessedDate());
-    } else {
-      this
-          .withStockOnHand(0);
-    }
-    return build();
+            .build())
+        .withStockCard(stockCard != null
+            ? new ObjectReferenceDtoDataBuilder()
+            .withPath("stockCards")
+            .withId(stockCard.getId())
+            .build()
+            : null)
+        .withLot(stockCard != null
+            ? new ObjectReferenceDtoDataBuilder()
+            .withPath("lots")
+            .withId(stockCard.getLotId())
+            .build()
+            : null)
+        .withActive(stockCard != null ? stockCard.isActive() : null)
+        .withOccurredDate(stockCard != null ? stockCard.getOccurredDate() : null)
+        .withProcessedDate(stockCard != null ? stockCard.getProcessedDate() : null)
+        .build();
   }
 
   public CanFulfillForMeEntryDtoDataBuilder withStockOnHand(Integer stockOnHand) {
@@ -113,17 +103,11 @@ public class CanFulfillForMeEntryDtoDataBuilder {
     return this;
   }
 
-  public CanFulfillForMeEntryDtoDataBuilder withUnitOfOrderable(
-      ObjectReferenceDto unitOfOrderable) {
-    this.unitOfOrderable = unitOfOrderable;
-    return this;
-  }
-
   public CanFulfillForMeEntryDtoDataBuilder withOccurredDate(LocalDate occurredDate) {
     this.occurredDate = occurredDate;
     return this;
   }
-
+  
   public CanFulfillForMeEntryDtoDataBuilder withProcessedDate(ZonedDateTime processedDate) {
     this.processedDate = processedDate;
     return this;
@@ -133,5 +117,5 @@ public class CanFulfillForMeEntryDtoDataBuilder {
     this.active = active;
     return this;
   }
-
+  
 }

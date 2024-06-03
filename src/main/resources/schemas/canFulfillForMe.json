@@ -18,11 +18,6 @@
       "title": "Lot",
       "$ref": "referenceObjectDto.json"
     },
-    "unitOfOrderable": {
-      "type": "object",
-      "title": "UnitOfOrderable",
-      "$ref": "referenceObjectDto.json"
-    },
     "stockOnHand": {
       "type": "integer"
     },

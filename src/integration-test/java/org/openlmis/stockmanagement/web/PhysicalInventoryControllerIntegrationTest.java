@@ -385,9 +385,8 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
     item.setQuantity(10);
     item.setStockOnHand(5);
     item.setOrderableId(UUID.randomUUID());
-    item.setLotId(UUID.randomUUID());
-    item.setUnitOfOrderableId(UUID.randomUUID());
     item.setStockAdjustments(new ArrayList<>());
+    item.setLotId(UUID.randomUUID());
     item.setExtraData(new HashMap<>());
 
     return item;

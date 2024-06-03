@@ -43,7 +43,6 @@ public class StockCardSummariesV2DtoBuilder {
   static final String ORDERABLES = "orderables";
   static final String STOCK_CARDS = "stockCards";
   static final String LOTS = "lots";
-  static final String UNIT_OF_ORDERABLES = "unitOfOrderables";
 
   @Value("${service.url}")
   private String serviceUrl;
@@ -105,13 +104,10 @@ public class StockCardSummariesV2DtoBuilder {
 
   private CanFulfillForMeEntryDto createCanFulfillForMeEntry(StockCard stockCard, 
                                                               UUID orderableId) {
-    UUID lotId = stockCard.getLotId();
-    UUID unitOfOrderableId = stockCard.getUnitOfOrderableId();
     return new CanFulfillForMeEntryDto(
         createStockCardReference(stockCard.getId()),
         createReference(orderableId, ORDERABLES),
-        lotId == null ? null : createLotReference(lotId),
-        unitOfOrderableId == null ? null : createUnitOfOrderableReference(unitOfOrderableId),
+        stockCard.getLotId() == null ? null : createLotReference(stockCard.getLotId()),
         stockCard.getStockOnHand(),
         stockCard.getOccurredDate(),
         stockCard.getProcessedDate(),
@@ -133,10 +129,6 @@ public class StockCardSummariesV2DtoBuilder {
 
   private ObjectReferenceDto createLotReference(UUID id) {
     return createReference(id, LOTS);
-  }
-
-  private ObjectReferenceDto createUnitOfOrderableReference(UUID id) {
-    return createReference(id, UNIT_OF_ORDERABLES);
   }
 
   private ObjectReferenceDto createReference(UUID id, String resourceName) {

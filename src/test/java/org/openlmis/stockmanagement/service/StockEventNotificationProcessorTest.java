@@ -64,7 +64,6 @@ public class StockEventNotificationProcessorTest {
   private UUID facilityId = UUID.randomUUID();
   private UUID orderableId = UUID.randomUUID();
   private UUID lotId = UUID.randomUUID();
-  private UUID unitOfOrderableId = UUID.randomUUID();
   private UUID rightId = UUID.randomUUID();
 
   private RightDto right = mock(RightDto.class);
@@ -75,8 +74,7 @@ public class StockEventNotificationProcessorTest {
 
   @Before
   public void setUp() {
-    stockCard = new StockCard(null, facilityId, programId, orderableId, lotId,
-        unitOfOrderableId, null, 0,
+    stockCard = new StockCard(null, facilityId, programId, orderableId, lotId, null, 0,
         getBaseDate(), getBaseDateTime(), true);
     stockCard.setId(stockCardId);
 
@@ -125,7 +123,7 @@ public class StockEventNotificationProcessorTest {
     UUID anotherLotId = UUID.randomUUID();
 
     StockCard anotherStockCard = new StockCard(null, facilityId, programId, orderableId, lotId,
-        unitOfOrderableId, null, 0, getBaseDate(), getBaseDateTime(), true);
+        null, 0, getBaseDate(), getBaseDateTime(), true);
     anotherStockCard.setId(anotherStockCardId);
 
     StockEventLineItemDto secondLineItem = createStockEventLineItem();

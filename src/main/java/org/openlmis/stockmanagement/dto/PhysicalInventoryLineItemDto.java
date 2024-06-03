@@ -36,7 +36,6 @@ import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLi
 public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot, VvmApplicable {
   private UUID orderableId;
   private UUID lotId;
-  private UUID unitOfOrderableId;
   private Integer stockOnHand;
   private Integer quantity;
   private List<PhysicalInventoryLineItemAdjustment> stockAdjustments;
@@ -50,9 +49,8 @@ public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot,
    */
   public PhysicalInventoryLineItem toPhysicalInventoryLineItem(PhysicalInventory inventory) {
     return PhysicalInventoryLineItem.builder()
-        .orderableId(orderableId)
-        .lotId(lotId)
-        .unitOfOrderableId(unitOfOrderableId)
+        .orderableId(getOrderableId())
+        .lotId(getLotId())
         .quantity(quantity)
         .stockAdjustments(stockAdjustments)
         .extraData(extraData)
@@ -73,7 +71,6 @@ public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot,
         .extraData(lineItem.getExtraData())
         .orderableId(lineItem.getOrderableId())
         .lotId(lineItem.getLotId())
-        .unitOfOrderableId(lineItem.getUnitOfOrderableId())
         .build();
   }
 
@@ -93,7 +90,6 @@ public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot,
             .extraData(lineItem.getExtraData())
             .orderableId(lineItem.getOrderableId())
             .lotId(lineItem.getLotId())
-            .unitOfOrderableId(lineItem.getUnitOfOrderableId())
             .build())
         .collect(Collectors.toList());
   }
