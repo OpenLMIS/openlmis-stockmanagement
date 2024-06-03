@@ -108,8 +108,6 @@ public class StockCardServiceTest {
   private UUID id = UUID.randomUUID();
   private UUID facilityId = UUID.randomUUID();
   private UUID programId = UUID.randomUUID();
-  private UUID orderableId = UUID.randomUUID();
-  private UUID unitOfOrderableId = UUID.randomUUID();
   private Set<UUID> ids = Collections.singleton(id);
   private Set<UUID> facilityIds = Collections.singleton(facilityId);
   private Set<UUID> programIds = Collections.singleton(programId);
