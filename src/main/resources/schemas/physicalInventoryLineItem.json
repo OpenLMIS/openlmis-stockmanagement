@@ -13,6 +13,11 @@
       "title": "LotId",
       "description": "Indicates which lot this physical inventory line item is for."
     },
+    "unitOfOrderableId": {
+      "type": ["string", "null"],
+      "title": "UnitOfOrderableId",
+      "description": "Indicates the unit for given orderable."
+    },
     "stockOnHand": {
       "type": ["integer", "null"],
       "description": "Indicates previous stock on hand for an orderable."

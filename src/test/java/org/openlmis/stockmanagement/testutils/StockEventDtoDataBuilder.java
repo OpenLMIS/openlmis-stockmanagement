@@ -51,19 +51,22 @@ public class StockEventDtoDataBuilder {
     stockEventDto.setProgramId(UUID.randomUUID());
     stockEventDto.setFacilityId(UUID.randomUUID());
 
-    UUID orderable = UUID.randomUUID();
-    UUID lot = UUID.randomUUID();
+    UUID orderableId = UUID.randomUUID();
+    UUID lotId = UUID.randomUUID();
+    UUID unitOfOrderableId = UUID.randomUUID();
 
     StockEventLineItemDto lineItem1 = new StockEventLineItemDto();
-    lineItem1.setOrderableId(orderable);
-    lineItem1.setLotId(lot);
+    lineItem1.setOrderableId(orderableId);
+    lineItem1.setLotId(lotId);
+    lineItem1.setUnitOfOrderableId(unitOfOrderableId);
     lineItem1.setQuantity(20);
     lineItem1.setOccurredDate(getBaseDate());
     lineItem1.setReasonId(UUID.fromString("279d55bd-42e3-438c-a63d-9c021b185dae"));
 
     StockEventLineItemDto lineItem2 = new StockEventLineItemDto();
-    lineItem2.setOrderableId(orderable);
-    lineItem2.setLotId(lot);
+    lineItem2.setOrderableId(orderableId);
+    lineItem2.setLotId(lotId);
+    lineItem2.setUnitOfOrderableId(unitOfOrderableId);
     lineItem2.setQuantity(10);
     lineItem2.setOccurredDate(getBaseDate());
     lineItem2.setReasonId(UUID.fromString("b7e99f5b-af04-433d-9c30-d4f90c60c47b"));
