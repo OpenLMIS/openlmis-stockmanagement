@@ -17,7 +17,11 @@ package org.openlmis.stockmanagement.domain.identity;
 
 import java.util.UUID;
 
-public interface IdentifiableByOrderableLotUnit extends IdentifiableByOrderableLot {
+public interface IdentifiableByOrderableLotUnit {
+
+  UUID getOrderableId();
+
+  UUID getLotId();
 
   UUID getUnitOfOrderableId();
 }
