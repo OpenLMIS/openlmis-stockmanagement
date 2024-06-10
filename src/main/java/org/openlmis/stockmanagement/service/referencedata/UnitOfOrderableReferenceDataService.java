@@ -16,7 +16,9 @@
 package org.openlmis.stockmanagement.service.referencedata;
 
 import org.openlmis.stockmanagement.dto.referencedata.UnitOfOrderableDto;
+import org.springframework.stereotype.Service;
 
+@Service
 public class UnitOfOrderableReferenceDataService
     extends BaseReferenceDataService<UnitOfOrderableDto> {
 
