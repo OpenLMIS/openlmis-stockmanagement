@@ -25,7 +25,6 @@ import org.openlmis.stockmanagement.extension.ExtensionManager;
 import org.openlmis.stockmanagement.extension.point.ExtensionPointId;
 import org.openlmis.stockmanagement.extension.point.StockEventPostProcessor;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
-import org.openlmis.stockmanagement.service.referencedata.UnitOfOrderableReferenceDataService;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,9 +52,6 @@ public class StockEventProcessor {
 
   @Autowired
   private PhysicalInventoryService physicalInventoryService;
-
-  @Autowired
-  private UnitOfOrderableReferenceDataService unitOfOrderableReferenceDataService;
 
   @Autowired
   private StockCardService stockCardService;
