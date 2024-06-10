@@ -95,6 +95,7 @@ public abstract class MessageKeys {
       + ".lineItem.reason.id.notFound";
   public static final String ERROR_LINE_ITEM_REASON_TAGS_INVALID = ERROR_PREFIX
       + ".tags.invalid";
+
   //source destination configuration
   public static final String ERROR_ORGANIZATION_NAME_MISSING = ERROR_PREFIX
       + ".organization.name.missing";
@@ -217,6 +218,10 @@ public abstract class MessageKeys {
   public static final String ERROR_EVENT_CANNOT_UNPACK_WHEN_EXTRA_CONSTITUENTS_CREDITED =
       EVENT_ERROR_PREFIX + ".cannot.unpack.when.extra.constituents.credited";
   private static final String PHYSICAL_INVENTORY_ERROR_PREFIX = ERROR_PREFIX + ".physicalInventory";
+  //stock event line item unit of orderable id check
+  public static final String ERROR_LINE_ITEM_UNIT_OF_ORDERABLE_DOES_NOT_EXIST = ERROR_PREFIX
+      + ".lineItem.unitOfOrderable.not.exist";
+
   //physical inventory
   public static final String ERROR_PHYSICAL_INVENTORY_LINE_ITEMS_MISSING =
       PHYSICAL_INVENTORY_ERROR_PREFIX + ".lineItems.missing";
