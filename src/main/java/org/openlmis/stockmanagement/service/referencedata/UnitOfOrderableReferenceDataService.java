@@ -17,7 +17,8 @@ package org.openlmis.stockmanagement.service.referencedata;
 
 import org.openlmis.stockmanagement.dto.referencedata.UnitOfOrderableDto;
 
-public class UnitOfOrderableReferenceDataService extends BaseReferenceDataService<UnitOfOrderableDto> {
+public class UnitOfOrderableReferenceDataService
+    extends BaseReferenceDataService<UnitOfOrderableDto> {
 
   @Override
   protected String getUrl() {
