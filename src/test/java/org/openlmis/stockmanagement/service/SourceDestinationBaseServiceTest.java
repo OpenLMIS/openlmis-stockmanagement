@@ -397,13 +397,7 @@ public class SourceDestinationBaseServiceTest {
     assertThat(facility.getName(), is(FACILITY_NODE_NAME));
     assertThat(facility.getIsFreeTextAllowed(), is(false));
   }
-/*
-*
-*
-*
-*
-*
-* */
+
   @Test
   public void
         shouldReturnListOfAllDestinationDtosWhenFindValidDestinationAssignmentWithParams()
