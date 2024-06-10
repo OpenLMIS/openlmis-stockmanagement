@@ -25,14 +25,17 @@ import java.util.UUID;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.referencedata.UnitOfOrderableDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.referencedata.UnitOfOrderableReferenceDataService;
 import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
 
+@RunWith(MockitoJUnitRunner.class)
 public class UnitOfOrderableValidatorTest {
 
   @Rule
