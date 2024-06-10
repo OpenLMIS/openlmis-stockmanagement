@@ -397,7 +397,13 @@ public class SourceDestinationBaseServiceTest {
     assertThat(facility.getName(), is(FACILITY_NODE_NAME));
     assertThat(facility.getIsFreeTextAllowed(), is(false));
   }
-
+/*
+*
+*
+*
+*
+*
+* */
   @Test
   public void
         shouldReturnListOfAllDestinationDtosWhenFindValidDestinationAssignmentWithParams()
@@ -780,6 +786,7 @@ public class SourceDestinationBaseServiceTest {
   private FacilityDto createFacilityDtoWithFacilityType(UUID facilityId, UUID facilityTypeId) {
     FacilityTypeDto facilityDto = new FacilityTypeDto();
     facilityDto.setId(facilityTypeId);
+    facilityDto.setCode("TEST");
     return FacilityDto.builder()
         .id(facilityId)
         .type(facilityDto)
