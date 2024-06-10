@@ -20,7 +20,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ORDERABL
 
 import java.util.HashSet;
 import java.util.Set;
-import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
+import org.openlmis.stockmanagement.domain.identity.OrderableLotUnitIdentity;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.util.Message;
@@ -33,8 +33,8 @@ import org.springframework.stereotype.Component;
  * orderable/lot combo.
  * Such rule is NOT applied to adjustment, issue, receive.
  */
-@Component(value = "OrderableLotDuplicationValidator")
-public class OrderableLotDuplicationValidator implements StockEventValidator {
+@Component(value = "OrderableLotUnitDuplicationValidator")
+public class OrderableLotUnitDuplicationValidator implements StockEventValidator {
   @Override
   public void validate(StockEventDto stockEventDto) {
     XLOGGER.entry(stockEventDto);
@@ -46,12 +46,12 @@ public class OrderableLotDuplicationValidator implements StockEventValidator {
       return;
     }
 
-    Set<OrderableLotIdentity> nonDuplicates = new HashSet<>();
+    Set<OrderableLotUnitIdentity> nonDuplicates = new HashSet<>();
 
     profiler.start("GET_DUPLICATES");
-    Set<OrderableLotIdentity> duplicates = stockEventDto.getLineItems()
-        .stream().map(OrderableLotIdentity::identityOf)
-        .filter(lotIdentity -> !nonDuplicates.add(lotIdentity))
+    Set<OrderableLotUnitIdentity> duplicates = stockEventDto.getLineItems()
+        .stream().map(OrderableLotUnitIdentity::identityOf)
+        .filter(orderableLotUnitIdentity -> !nonDuplicates.add(orderableLotUnitIdentity))
         .collect(toSet());
 
     if (duplicates.size() > 0) {

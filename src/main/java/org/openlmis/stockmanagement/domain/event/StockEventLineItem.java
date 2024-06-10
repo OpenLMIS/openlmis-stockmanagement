@@ -37,7 +37,7 @@ import lombok.NoArgsConstructor;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.ExtraDataConverter;
 import org.openlmis.stockmanagement.domain.common.VvmApplicable;
-import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
+import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLotUnit;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
 
 @Data
@@ -47,7 +47,7 @@ import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLi
 @Entity
 @Table(name = "stock_event_line_items", schema = "stockmanagement")
 public class StockEventLineItem extends BaseEntity
-    implements IdentifiableByOrderableLot, VvmApplicable {
+    implements IdentifiableByOrderableLotUnit, VvmApplicable {
 
   @Column(nullable = false)
   private UUID orderableId;

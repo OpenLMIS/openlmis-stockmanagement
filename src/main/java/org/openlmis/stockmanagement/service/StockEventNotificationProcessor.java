@@ -19,7 +19,7 @@ import static org.openlmis.stockmanagement.service.PermissionService.STOCK_INVEN
 
 import java.util.UUID;
 import org.openlmis.stockmanagement.domain.card.StockCard;
-import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
+import org.openlmis.stockmanagement.domain.identity.OrderableLotUnitIdentity;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.dto.referencedata.RightDto;
@@ -66,7 +66,7 @@ public class StockEventNotificationProcessor {
     profiler.setLogger(XLOGGER);
 
     profiler.start("COPY_STOCK_CARD");
-    OrderableLotIdentity identity = OrderableLotIdentity.identityOf(eventLine);
+    OrderableLotUnitIdentity identity = OrderableLotUnitIdentity.identityOf(eventLine);
     StockCard stockCard = event.getContext().findCard(identity);
 
     if (stockCard.getStockOnHand() == 0) {

@@ -34,7 +34,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.openlmis.stockmanagement.domain.card.StockCard;
-import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
+import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLotUnit;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
@@ -47,7 +47,7 @@ import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 @Setter
 @ToString
 @EqualsAndHashCode
-public final class StockCardDto implements IdentifiableByOrderableLot {
+public final class StockCardDto implements IdentifiableByOrderableLotUnit {
 
   @JsonInclude(NON_NULL)
   private UUID id;

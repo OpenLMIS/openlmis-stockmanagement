@@ -21,7 +21,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ADJUSTME
 
 import java.util.List;
 import java.util.Map;
-import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
+import org.openlmis.stockmanagement.domain.identity.OrderableLotUnitIdentity;
 import org.openlmis.stockmanagement.dto.StockEventAdjustmentDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
@@ -51,10 +51,10 @@ public class QuantityValidator implements StockEventValidator {
     }
 
     profiler.start("GET_ORDERABLE_GROUPS");
-    Map<OrderableLotIdentity, List<StockEventLineItemDto>> sameOrderableGroups = stockEventDto
+    Map<OrderableLotUnitIdentity, List<StockEventLineItemDto>> sameOrderableGroups = stockEventDto
         .getLineItems()
         .stream()
-        .collect(groupingBy(OrderableLotIdentity::identityOf));
+        .collect(groupingBy(OrderableLotUnitIdentity::identityOf));
 
     for (List<StockEventLineItemDto> group : sameOrderableGroups.values()) {
       // increase may cause int overflow, decrease may cause below zero

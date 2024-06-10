@@ -28,7 +28,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
-import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
+import org.openlmis.stockmanagement.domain.identity.OrderableLotUnitIdentity;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
@@ -167,13 +167,13 @@ public class PhysicalInventoryService {
       inventory.setStockEvent(event);
     }
 
-    Map<OrderableLotIdentity, StockCard> cards = calculatedStockOnHandService
+    Map<OrderableLotUnitIdentity, StockCard> cards = calculatedStockOnHandService
         .getStockCardsWithStockOnHand(inventory.getProgramId(), inventory.getFacilityId())
         .stream()
-        .collect(toMap(OrderableLotIdentity::identityOf, card -> card));
+        .collect(toMap(OrderableLotUnitIdentity::identityOf, card -> card));
 
     for (PhysicalInventoryLineItem line : inventory.getLineItems()) {
-      StockCard stockCard = cards.get(OrderableLotIdentity.identityOf(line));
+      StockCard stockCard = cards.get(OrderableLotUnitIdentity.identityOf(line));
       if (stockCard != null) {
         line.setPreviousStockOnHandWhenSubmitted(stockCard.getStockOnHand());
       }

@@ -32,13 +32,13 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OrderableLotDuplicationValidatorTest {
+public class OrderableLotUnitDuplicationValidatorTest {
 
   @Rule
   public ExpectedException expectedEx = none();
 
   @InjectMocks
-  private OrderableLotDuplicationValidator orderableLotDuplicationValidator;
+  private OrderableLotUnitDuplicationValidator orderableLotUnitDuplicationValidator;
 
   @Test
   public void adjustmentEventWithSameOrderableAndLotAppearTwiceShouldPass()
@@ -46,7 +46,7 @@ public class OrderableLotDuplicationValidatorTest {
     StockEventDto eventDto = createStockEventDtoWithDuplicateOrderableLot(randomUUID());
 
     //when
-    orderableLotDuplicationValidator.validate(eventDto);
+    orderableLotUnitDuplicationValidator.validate(eventDto);
   }
 
   @Test
@@ -57,7 +57,7 @@ public class OrderableLotDuplicationValidatorTest {
     StockEventDto eventDto = createStockEventDtoWithDuplicateOrderableLot(null);
 
     //when
-    orderableLotDuplicationValidator.validate(eventDto);
+    orderableLotUnitDuplicationValidator.validate(eventDto);
   }
 
   private StockEventDto createStockEventDtoWithDuplicateOrderableLot(UUID reasonId) {

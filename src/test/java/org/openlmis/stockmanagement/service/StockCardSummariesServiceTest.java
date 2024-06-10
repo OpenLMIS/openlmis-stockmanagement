@@ -49,7 +49,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
-import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
+import org.openlmis.stockmanagement.domain.identity.OrderableLotUnitIdentity;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.referencedata.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
@@ -131,6 +131,9 @@ public class StockCardSummariesServiceTest {
     UUID orderable2Id = randomUUID();
     UUID orderable3Id = randomUUID();
     UUID orderable4Id = randomUUID();
+    UUID unitOfOrderable1 = randomUUID();
+    UUID unitOfOrderable3 = randomUUID();
+
 
     OrderableDto orderable1 = createOrderableDto(orderable1Id, "1");
     OrderableDto orderable2 = createOrderableDto(orderable2Id, "2");
@@ -149,8 +152,8 @@ public class StockCardSummariesServiceTest {
     //but only 1, 3 have cards. 2, 4 don't have cards.
     when(cardRepository.getIdentitiesBy(programId, facilityId))
         .thenReturn(asList(
-            new OrderableLotIdentity(orderable1Id, null),
-            new OrderableLotIdentity(orderable3Id, null)));
+            new OrderableLotUnitIdentity(orderable1Id, null, unitOfOrderable1),
+            new OrderableLotUnitIdentity(orderable3Id, null, unitOfOrderable3)));
 
     LotDto lotDto = new LotDto();
     lotDto.setId(randomUUID());

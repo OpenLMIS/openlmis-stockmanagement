@@ -42,7 +42,7 @@ import org.openlmis.stockmanagement.validators.DefaultFreeTextValidator;
 import org.openlmis.stockmanagement.validators.DefaultUnpackKitValidator;
 import org.openlmis.stockmanagement.validators.LotValidator;
 import org.openlmis.stockmanagement.validators.MandatoryFieldsValidator;
-import org.openlmis.stockmanagement.validators.OrderableLotDuplicationValidator;
+import org.openlmis.stockmanagement.validators.OrderableLotUnitDuplicationValidator;
 import org.openlmis.stockmanagement.validators.PhysicalInventoryAdjustmentReasonsValidator;
 import org.openlmis.stockmanagement.validators.QuantityValidator;
 import org.openlmis.stockmanagement.validators.ReasonExistenceValidator;
@@ -93,7 +93,7 @@ public class StockEventValidationsServiceIntegrationTest extends BaseIntegration
   private ReasonExistenceValidator reasonExistenceValidator;
 
   @MockBean
-  private OrderableLotDuplicationValidator orderableLotDuplicationValidator;
+  private OrderableLotUnitDuplicationValidator orderableLotUnitDuplicationValidator;
 
   @MockBean
   private PhysicalInventoryAdjustmentReasonsValidator physicalInventoryReasonsValidator;
@@ -121,7 +121,7 @@ public class StockEventValidationsServiceIntegrationTest extends BaseIntegration
     doNothing().when(adjustmentReasonValidator).validate(any(StockEventDto.class));
     doNothing().when(quantityValidator).validate(any(StockEventDto.class));
     doNothing().when(lotValidator).validate(any(StockEventDto.class));
-    doNothing().when(orderableLotDuplicationValidator).validate(any(StockEventDto.class));
+    doNothing().when(orderableLotUnitDuplicationValidator).validate(any(StockEventDto.class));
     doNothing().when(reasonExistenceValidator).validate(any(StockEventDto.class));
     doNothing().when(physicalInventoryReasonsValidator).validate(any(StockEventDto.class));
     doNothing().when(unpackKitValidator).validate(any(StockEventDto.class));
@@ -153,7 +153,7 @@ public class StockEventValidationsServiceIntegrationTest extends BaseIntegration
     verify(receiveIssueReasonValidator, times(1)).validate(stockEventDto);
     verify(quantityValidator, times(1)).validate(stockEventDto);
     verify(lotValidator, times(1)).validate(stockEventDto);
-    verify(orderableLotDuplicationValidator, times(1)).validate(stockEventDto);
+    verify(orderableLotUnitDuplicationValidator, times(1)).validate(stockEventDto);
     verify(reasonExistenceValidator, times(1)).validate(stockEventDto);
     verify(physicalInventoryReasonsValidator, times(1)).validate(stockEventDto);
     verify(adjustmentReasonValidator, times(1)).validate(stockEventDto);

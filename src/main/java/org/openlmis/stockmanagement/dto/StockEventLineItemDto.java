@@ -30,14 +30,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.openlmis.stockmanagement.domain.common.VvmApplicable;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
-import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
+import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLotUnit;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
 
 @Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class StockEventLineItemDto implements IdentifiableByOrderableLot, VvmApplicable {
+public class StockEventLineItemDto implements IdentifiableByOrderableLotUnit, VvmApplicable {
   private UUID orderableId;
   private UUID lotId;
   private Integer quantity;

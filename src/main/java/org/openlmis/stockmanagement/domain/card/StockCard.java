@@ -47,7 +47,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.LazyCollection;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
-import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
+import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLotUnit;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
     indexes = @Index(columnList = "facilityId,programId,orderableId"))
 //the above line creates an index, it'll make select statements faster
 //especially for getStockCardIdBy method of StockCardRepository
-public class StockCard extends BaseEntity implements IdentifiableByOrderableLot {
+public class StockCard extends BaseEntity implements IdentifiableByOrderableLotUnit {
   public static final String QUERY_FIND_LOT_IDENT_BY_PROG_FACILITY = "StockCard"
       + ".findLotIdentByProgFacility";
   public static final String PARAM_PROGRAM_ID = "programId";

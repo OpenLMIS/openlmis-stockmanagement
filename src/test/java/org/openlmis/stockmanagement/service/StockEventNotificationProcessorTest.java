@@ -38,7 +38,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
-import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
+import org.openlmis.stockmanagement.domain.identity.OrderableLotUnitIdentity;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.dto.referencedata.RightDto;
@@ -90,6 +90,7 @@ public class StockEventNotificationProcessorTest {
     firstLineItem = stockEventDto.getLineItems().get(0);
     firstLineItem.setOrderableId(orderableId);
     firstLineItem.setLotId(lotId);
+    firstLineItem.setUnitOfOrderableId(unitOfOrderableId);
     firstLineItem.setQuantity(0);
 
     stockEventDto.setContext(context);
@@ -101,7 +102,7 @@ public class StockEventNotificationProcessorTest {
   @Test
   public void shouldCallStockoutNotifierWhenStockOnHandIsZero() throws Exception {
     //given
-    when(context.findCard(any(OrderableLotIdentity.class))).thenReturn(stockCard);
+    when(context.findCard(any(OrderableLotUnitIdentity.class))).thenReturn(stockCard);
 
     //when
     stockEventNotificationProcessor.callAllNotifications(stockEventDto);
@@ -123,6 +124,7 @@ public class StockEventNotificationProcessorTest {
     UUID anotherStockCardId = UUID.randomUUID();
     UUID anotherOrderableId = UUID.randomUUID();
     UUID anotherLotId = UUID.randomUUID();
+    UUID anotherUnitOfOrderableId = UUID.randomUUID();
 
     StockCard anotherStockCard = new StockCard(null, facilityId, programId, orderableId, lotId,
         unitOfOrderableId, null, 0, getBaseDate(), getBaseDateTime(), true);
@@ -134,8 +136,8 @@ public class StockEventNotificationProcessorTest {
     secondLineItem.setQuantity(0);
     stockEventDto.setLineItems(Arrays.asList(firstLineItem, secondLineItem));
 
-    when(context.findCard(new OrderableLotIdentity(orderableId, lotId))).thenReturn(stockCard);
-    when(context.findCard(new OrderableLotIdentity(anotherOrderableId, anotherLotId)))
+    when(context.findCard(new OrderableLotUnitIdentity(orderableId, lotId, unitOfOrderableId))).thenReturn(stockCard);
+    when(context.findCard(new OrderableLotUnitIdentity(anotherOrderableId, anotherLotId, anotherUnitOfOrderableId)))
         .thenReturn(anotherStockCard);
 
     //when

@@ -21,7 +21,7 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 import org.openlmis.stockmanagement.domain.card.StockCard;
-import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
+import org.openlmis.stockmanagement.domain.identity.OrderableLotUnitIdentity;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAssignment;
@@ -52,7 +52,7 @@ public class StockEventProcessContext {
   private LazyGrouping<UUID, StockCardLineItemReason> cardReasons;
   private LazyGrouping<UUID, StockCardLineItemReason> eventReasons;
   private LazyGrouping<UUID, Node> nodes;
-  private LazyGrouping<OrderableLotIdentity, StockCard> cards;
+  private LazyGrouping<OrderableLotUnitIdentity, StockCard> cards;
 
   @Getter
   private UUID unpackReasonId;
@@ -102,7 +102,7 @@ public class StockEventProcessContext {
     return nodes.get().get(nodeId);
   }
 
-  public StockCard findCard(OrderableLotIdentity identity) {
+  public StockCard findCard(OrderableLotUnitIdentity identity) {
     return cards.get().get(identity);
   }
 

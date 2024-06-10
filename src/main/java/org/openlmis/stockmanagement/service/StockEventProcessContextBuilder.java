@@ -29,7 +29,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
-import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
+import org.openlmis.stockmanagement.domain.identity.OrderableLotUnitIdentity;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAssignment;
@@ -199,8 +199,8 @@ public class StockEventProcessContextBuilder {
         .getStockCardsWithStockOnHandByOrderableIds(eventDto.getProgramId(),
             eventDto.getFacilityId(), orderableIds);
     LazyList<StockCard> cards = new LazyList<>(cardsSupplier);
-    LazyGrouping<OrderableLotIdentity, StockCard> cardsGroupedByIdentity = new LazyGrouping<>(
-        cards, OrderableLotIdentity::identityOf
+    LazyGrouping<OrderableLotUnitIdentity, StockCard> cardsGroupedByIdentity = new LazyGrouping<>(
+        cards, OrderableLotUnitIdentity::identityOf
     );
     context.setCards(cardsGroupedByIdentity);
 

@@ -21,17 +21,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
+import org.openlmis.stockmanagement.domain.identity.OrderableLotUnitIdentity;
 
-public class OrderableLotIdentityTest {
+public class OrderableLotUnitIdentityTest {
   @Test
   public void sameOrderableAndLotIdShouldEqualAndHaveSameHash() throws Exception {
     //given
-    OrderableLotIdentity identity1 = new OrderableLotIdentity(randomUUID(), randomUUID());
+    OrderableLotUnitIdentity identity1 = new OrderableLotUnitIdentity(randomUUID(), randomUUID(),
+        randomUUID());
 
-    OrderableLotIdentity identity2 = new OrderableLotIdentity(
+    OrderableLotUnitIdentity identity2 = new OrderableLotUnitIdentity(
         fromString(identity1.getOrderableId().toString()),
-        fromString(identity1.getLotId().toString()));
+        fromString(identity1.getLotId().toString()),
+        fromString(identity1.getUnitOfOrderableId().toString()));
 
     //when
     boolean equals = identity1.equals(identity2);

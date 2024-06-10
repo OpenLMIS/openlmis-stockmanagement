@@ -21,13 +21,20 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class OrderableLotIdentity {
+public class OrderableLotUnitIdentity {
   private UUID orderableId;
   private UUID lotId;
+  private UUID unitOfOrderableId;
 
-  public OrderableLotIdentity(UUID orderableId, UUID lotId) {
+  public OrderableLotUnitIdentity(UUID orderableId, UUID lotId, UUID unitOfOrderableId) {
     this.orderableId = orderableId;
     this.lotId = lotId;
+    this.unitOfOrderableId = unitOfOrderableId;
+  }
+
+  public static OrderableLotUnitIdentity identityOf(IdentifiableByOrderableLotUnit identifiable) {
+    return new OrderableLotUnitIdentity(identifiable.getOrderableId(), identifiable.getLotId(),
+        identifiable.getUnitOfOrderableId());
   }
 
   @Override
@@ -39,22 +46,23 @@ public class OrderableLotIdentity {
       return false;
     }
 
-    OrderableLotIdentity that = (OrderableLotIdentity) object;
+    OrderableLotUnitIdentity that = (OrderableLotUnitIdentity) object;
 
     if (orderableId != null ? !orderableId.equals(that.orderableId) : that.orderableId != null) {
       return false;
     }
-    return lotId != null ? lotId.equals(that.lotId) : that.lotId == null;
+    if (lotId != null ? !lotId.equals(that.lotId) : that.lotId != null) {
+      return false;
+    }
+    return unitOfOrderableId == null ? unitOfOrderableId.equals(that.unitOfOrderableId) :
+        that.unitOfOrderableId == null;
   }
 
   @Override
   public int hashCode() {
     int result = orderableId != null ? orderableId.hashCode() : 0;
     result = 31 * result + (lotId != null ? lotId.hashCode() : 0);
+    result = 31 * result + (unitOfOrderableId != null ? unitOfOrderableId.hashCode() : 0);
     return result;
-  }
-
-  public static OrderableLotIdentity identityOf(IdentifiableByOrderableLot identifiable) {
-    return new OrderableLotIdentity(identifiable.getOrderableId(), identifiable.getLotId());
   }
 }

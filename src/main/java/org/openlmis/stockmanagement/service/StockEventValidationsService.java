@@ -24,7 +24,7 @@ import org.openlmis.stockmanagement.extension.point.UnpackKitValidator;
 import org.openlmis.stockmanagement.validators.ApprovedOrderableValidator;
 import org.openlmis.stockmanagement.validators.LotValidator;
 import org.openlmis.stockmanagement.validators.MandatoryFieldsValidator;
-import org.openlmis.stockmanagement.validators.OrderableLotDuplicationValidator;
+import org.openlmis.stockmanagement.validators.OrderableLotUnitDuplicationValidator;
 import org.openlmis.stockmanagement.validators.PhysicalInventoryAdjustmentReasonsValidator;
 import org.openlmis.stockmanagement.validators.QuantityValidator;
 import org.openlmis.stockmanagement.validators.ReasonExistenceValidator;
@@ -53,7 +53,7 @@ public class StockEventValidationsService {
   private MandatoryFieldsValidator mandatoryFieldsValidator;
 
   @Autowired
-  private OrderableLotDuplicationValidator orderableLotDuplicationValidator;
+  private OrderableLotUnitDuplicationValidator orderableLotUnitDuplicationValidator;
 
   @Autowired
   private PhysicalInventoryAdjustmentReasonsValidator physicalInventoryAdjustmentReasonsValidator;
@@ -88,7 +88,7 @@ public class StockEventValidationsService {
     approvedOrderableValidator.validate(stockEventDto);
     lotValidator.validate(stockEventDto);
     mandatoryFieldsValidator.validate(stockEventDto);
-    orderableLotDuplicationValidator.validate(stockEventDto);
+    orderableLotUnitDuplicationValidator.validate(stockEventDto);
     physicalInventoryAdjustmentReasonsValidator.validate(stockEventDto);
     quantityValidator.validate(stockEventDto);
     existenceValidator.validate(stockEventDto);
