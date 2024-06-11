@@ -105,7 +105,9 @@ public class StockCardSummariesService extends StockCardBaseService {
    * @return map of stock cards assigned to orderable ids
    */
   public Map<UUID, StockCardAggregate> getGroupedStockCards(UUID programId, UUID facilityId,
-                                                            Set<UUID> orderableIds, LocalDate startDate, LocalDate endDate) {
+                                                            Set<UUID> orderableIds,
+                                                            LocalDate startDate,
+                                                            LocalDate endDate) {
     List<StockCard> stockCards = calculatedStockOnHandService
         .getStockCardsWithStockOnHand(programId, facilityId);
 
@@ -240,7 +242,8 @@ public class StockCardSummariesService extends StockCardBaseService {
         orderableReferenceDataService.findAll());
 
     //create dummy(fake/not persisted) cards for approved orderables that don't have cards yet
-    List<StockCard> dummyCards = createDummyCards(programId, facilityId, orderableLotUnitsMap.values(),
+    List<StockCard> dummyCards = createDummyCards(programId, facilityId,
+        orderableLotUnitsMap.values(),
         existingCardIdentities).collect(toList());
     return assignOrderableLotUnitAndRemoveLineItems(createDtos(dummyCards), orderableLotUnitsMap);
   }
@@ -281,7 +284,8 @@ public class StockCardSummariesService extends StockCardBaseService {
   }
 
   private List<OrderableLotUnit> filterOrderableLotUnitsWithoutCards(
-      Collection<OrderableLotUnit> orderableLotUnits, List<OrderableLotUnitIdentity> cardIdentities) {
+      Collection<OrderableLotUnit> orderableLotUnits,
+      List<OrderableLotUnitIdentity> cardIdentities) {
     return orderableLotUnits.stream()
         .filter(orderableLotUnit -> cardIdentities.stream()
             .noneMatch(cardIdentity -> cardIdentity.equals(identityOf(orderableLotUnit))))
@@ -290,13 +294,15 @@ public class StockCardSummariesService extends StockCardBaseService {
 
   private Map<OrderableLotUnitIdentity, OrderableLotUnit> createOrderableLotUnits(
       List<OrderableDto> orderableDtos) {
-    Stream<OrderableLotUnit> orderableLots = orderableDtos.stream().flatMap(this::lotsOfOrderable);
+    Stream<OrderableLotUnit> orderableLotUnits = orderableDtos
+        .stream()
+        .flatMap(this::lotsOfOrderable);
 
     Stream<OrderableLotUnit> orderablesOnly = orderableDtos.stream()
         .map(orderableDto -> new OrderableLotUnit(orderableDto, null, null
         ));
 
-    return concat(orderableLots, orderablesOnly)
+    return concat(orderableLotUnits, orderablesOnly)
         .collect(toMap(OrderableLotUnitIdentity::identityOf, orderableLotUnit -> orderableLotUnit));
   }
 

@@ -56,8 +56,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @NamedQuery(name = StockCard.QUERY_FIND_LOT_IDENT_BY_PROG_FACILITY,
-    query = "SELECT new org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity("
-      + "s.orderableId, s.lotId)"
+    query = "SELECT new org.openlmis.stockmanagement.domain.identity.OrderableLotUnitIdentity("
+        + "s.orderableId, s.lotId, s.unitOfOrderableId)"
       + " FROM StockCard s"
       + " WHERE s.programId = :" + StockCard.PARAM_PROGRAM_ID
       + " AND s.facilityId = :" + StockCard.PARAM_FACILITY_ID)

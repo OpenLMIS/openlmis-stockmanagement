@@ -19,6 +19,9 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Class acting as identity where triple (orderableId, lotId, unitOfOrderableId) is unique.
+ */
 @Getter
 @Setter
 public class OrderableLotUnitIdentity {
@@ -26,6 +29,13 @@ public class OrderableLotUnitIdentity {
   private UUID lotId;
   private UUID unitOfOrderableId;
 
+  /**
+   * Constructor for OrderableLotUnitIdentity.
+   *
+   * @param orderableId       orderable id
+   * @param lotId             lot id
+   * @param unitOfOrderableId unit of orderable id
+   */
   public OrderableLotUnitIdentity(UUID orderableId, UUID lotId, UUID unitOfOrderableId) {
     this.orderableId = orderableId;
     this.lotId = lotId;
