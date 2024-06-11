@@ -50,6 +50,7 @@ import org.openlmis.stockmanagement.validators.ReceiveIssueReasonValidator;
 import org.openlmis.stockmanagement.validators.SourceDestinationAssignmentValidator;
 import org.openlmis.stockmanagement.validators.SourceDestinationGeoLevelAffinityValidator;
 import org.openlmis.stockmanagement.validators.StockEventVvmValidator;
+import org.openlmis.stockmanagement.validators.UnitOfOrderableValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -107,6 +108,9 @@ public class StockEventValidationsServiceIntegrationTest extends BaseIntegration
   @MockBean
   private ExtensionManager extensionManager;
 
+  @MockBean
+  private UnitOfOrderableValidator unitOfOrderableValidator;
+
   @Before
   public void setUp() throws Exception {
     //make real validators do nothing because
@@ -125,6 +129,7 @@ public class StockEventValidationsServiceIntegrationTest extends BaseIntegration
     doNothing().when(reasonExistenceValidator).validate(any(StockEventDto.class));
     doNothing().when(physicalInventoryReasonsValidator).validate(any(StockEventDto.class));
     doNothing().when(unpackKitValidator).validate(any(StockEventDto.class));
+    doNothing().when(unitOfOrderableValidator).validate(any(StockEventDto.class));
     when(extensionManager
         .getExtension(ExtensionPointId.ADJUSTMENT_REASON_POINT_ID, AdjustmentReasonValidator.class))
         .thenReturn(adjustmentReasonValidator);
@@ -159,6 +164,8 @@ public class StockEventValidationsServiceIntegrationTest extends BaseIntegration
     verify(adjustmentReasonValidator, times(1)).validate(stockEventDto);
     verify(freeTextValidator, times(1)).validate(stockEventDto);
     verify(unpackKitValidator, times(1)).validate(stockEventDto);
+    verify(unpackKitValidator, times(1)).validate(stockEventDto);
+    verify(unitOfOrderableValidator, times(1)).validate(stockEventDto);
   }
 
   @Test

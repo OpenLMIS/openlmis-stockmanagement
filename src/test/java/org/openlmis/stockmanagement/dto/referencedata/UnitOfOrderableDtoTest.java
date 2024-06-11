@@ -15,20 +15,26 @@
 
 package org.openlmis.stockmanagement.dto.referencedata;
 
-import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
+import org.junit.Test;
+import org.openlmis.stockmanagement.testutils.ToStringTestUtils;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public final class UnitOfOrderableDto {
-  private UUID id;
-  private String name;
-  private String description;
-  private Integer displayOrder;
-  private Integer factor;
+public class UnitOfOrderableDtoTest {
+
+  @Test
+  public void equalsContract() {
+    EqualsVerifier
+        .forClass(UnitOfOrderableDto.class)
+        .withRedefinedSuperclass()
+        .suppress(Warning.NONFINAL_FIELDS) // DTO fields cannot be final
+        .verify();
+  }
+
+  @Test
+  public void shouldImplementToString() {
+    UnitOfOrderableDto unitOfOrderableDto = new UnitOfOrderableDto();
+    ToStringTestUtils.verify(UnitOfOrderableDto.class, unitOfOrderableDto);
+  }
+
 }

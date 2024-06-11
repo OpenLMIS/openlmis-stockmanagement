@@ -17,7 +17,6 @@ package org.openlmis.stockmanagement.validators;
 
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.rules.ExpectedException.none;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_UNIT_OF_ORDERABLE_DOES_NOT_EXIST;
 
@@ -47,13 +46,14 @@ public class UnitOfOrderableValidatorTest {
   @InjectMocks
   private UnitOfOrderableValidator unitOfOrderableValidator;
 
+  private final UnitOfOrderableDto unitOfOrderableDto = new UnitOfOrderableDto();
+
   @Test
   public void shouldPassWhenUnitOfOrderableExists() {
     //given
     UUID unitOfOrderableId = UUID.randomUUID();
-
     when(unitOfOrderableReferenceDataService.findOne(unitOfOrderableId))
-        .thenReturn(mock(UnitOfOrderableDto.class));
+        .thenReturn(unitOfOrderableDto);
 
     StockEventDto eventDto = StockEventDtoDataBuilder.createStockEventDtoWithTwoLineItems();
     eventDto.getLineItems().forEach(
