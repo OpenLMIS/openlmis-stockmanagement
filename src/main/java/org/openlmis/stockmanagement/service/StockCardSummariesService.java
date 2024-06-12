@@ -245,7 +245,7 @@ public class StockCardSummariesService extends StockCardBaseService {
     List<StockCard> dummyCards = createDummyCards(programId, facilityId,
         orderableLotMap.values(),
         existingCardIdentities).collect(toList());
-    return assignOrderableLotUnitAndRemoveLineItems(createDtos(dummyCards), orderableLotMap);
+    return loadOrderableLotUnitAndRemoveLineItems(createDtos(dummyCards), orderableLotMap);
   }
 
   private List<StockCardDto> cardsToDtos(List<StockCard> cards) {
@@ -253,10 +253,10 @@ public class StockCardSummariesService extends StockCardBaseService {
     Map<OrderableLotIdentity, OrderableLot> orderableLotsMap = createOrderableLotMap(
         orderableReferenceDataService.findAll());
 
-    return assignOrderableLotUnitAndRemoveLineItems(createDtos(cards), orderableLotsMap);
+    return loadOrderableLotUnitAndRemoveLineItems(createDtos(cards), orderableLotsMap);
   }
 
-  private List<StockCardDto> assignOrderableLotUnitAndRemoveLineItems(
+  private List<StockCardDto> loadOrderableLotUnitAndRemoveLineItems(
       List<StockCardDto> stockCardDtos,
       Map<OrderableLotIdentity, OrderableLot> orderableLotMap) {
     stockCardDtos.forEach(stockCardDto -> {
@@ -277,7 +277,7 @@ public class StockCardSummariesService extends StockCardBaseService {
         .map(orderableLot -> StockCard.builder()
             .programId(programId)
             .facilityId(facilityId)
-            .orderableId(orderableLot.getOrderable().getId())
+            .orderableId(orderableLot.getOrderableId())
             .lotId(orderableLot.getLotId())
             .lineItems(emptyList())//dummy cards don't have line items
             .build());
@@ -371,6 +371,10 @@ public class StockCardSummariesService extends StockCardBaseService {
     public UUID getLotId() {
       return lot == null ? null : lot.getId();
     }
+
+    public UUID getOrderableId() {
+      return orderable == null ? null : orderable.getId();
+    }
   }
 
   @AllArgsConstructor
@@ -382,7 +386,7 @@ public class StockCardSummariesService extends StockCardBaseService {
     private UUID lotId;
 
     static OrderableLotIdentity identityOf(OrderableLot orderableLot) {
-      return new OrderableLotIdentity(orderableLot.getOrderable().getId(), orderableLot.getLotId());
+      return new OrderableLotIdentity(orderableLot.getOrderableId(), orderableLot.getLotId());
     }
 
     static OrderableLotIdentity identityOf(StockCardDto stockCardDto) {
@@ -390,7 +394,14 @@ public class StockCardSummariesService extends StockCardBaseService {
     }
 
     boolean equalsOrderableLotUnitIdentity(OrderableLotUnitIdentity identity) {
-      return orderableId == identity.getOrderableId() && lotId == identity.getLotId();
+      if (identity == null) {
+        return false;
+      }
+
+      if (orderableId != null ? !orderableId.equals(identity.getOrderableId()) :
+          identity.getOrderableId() != null) {
+      }
+      return lotId == null ? identity.getLotId() == null : lotId.equals(identity.getLotId());
     }
   }
 }
