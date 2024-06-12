@@ -400,6 +400,7 @@ public class StockCardSummariesService extends StockCardBaseService {
 
       if (orderableId != null ? !orderableId.equals(identity.getOrderableId()) :
           identity.getOrderableId() != null) {
+        return false;
       }
       return lotId == null ? identity.getLotId() == null : lotId.equals(identity.getLotId());
     }
