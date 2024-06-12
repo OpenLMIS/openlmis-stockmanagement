@@ -78,6 +78,11 @@ public class StockCardRepositoryIntegrationTest
   }
 
   private StockCard generateInstance(UUID facility, UUID program, UUID product, UUID lot) {
+    return generateInstance(facility, program, product, lot, null);
+  }
+
+  private StockCard generateInstance(UUID facility, UUID program, UUID product, UUID lot,
+                                     UUID unitId) {
     StockEvent event = new StockEventDataBuilder()
         .withoutId()
         .withFacility(facility)
@@ -96,12 +101,26 @@ public class StockCardRepositoryIntegrationTest
         .withoutId()
         .withOrderableId(product)
         .withLotId(lot)
+        .withUnitOfOrderableId(unitId)
         .withLineItem(lineItem)
         .withIsActive(true)
         .build();
     lineItem.setStockCard(stockCard);
 
     return stockCard;
+  }
+
+  @Test(expected = PersistenceException.class)
+  public void shouldNotAllowCreatingCardForTheSameFacilityProgramProductAndLotAndUnit()
+      throws Exception {
+    stockCard1 = generateInstance();
+    stockCard2 = generateInstance(stockCard1.getFacilityId(), stockCard1.getProgramId(),
+        stockCard1.getOrderableId(), stockCard1.getLotId(), stockCard1.getUnitOfOrderableId());
+
+    stockCardRepository.save(stockCard1);
+    stockCardRepository.save(stockCard2);
+
+    entityManager.flush();
   }
 
   @Test(expected = PersistenceException.class)
