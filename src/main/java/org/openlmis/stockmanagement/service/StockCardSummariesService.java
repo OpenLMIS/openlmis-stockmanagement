@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -283,13 +284,10 @@ public class StockCardSummariesService extends StockCardBaseService {
   }
 
   private List<OrderableLot> filterOrderableLotUnitsWithoutCards(
-      Collection<OrderableLot> orderableLots,
-      List<OrderableLotUnitIdentity> cardIdentities) {
-    return orderableLots.stream()
-        .filter(orderableLot -> cardIdentities.stream()
-            .noneMatch(cardIdentity -> cardIdentity.equals(
-                OrderableLotIdentity.identityOf(orderableLot))))
-        .collect(toList());
+      Collection<OrderableLot> orderableLots, List<OrderableLotUnitIdentity> cardIdentities) {
+    return orderableLots.stream().filter(orderableLot -> cardIdentities.stream().noneMatch(
+        cardIdentity -> OrderableLotIdentity.identityOf(orderableLot)
+            .equalsOrderableLotUnitIdentity(cardIdentity))).collect(toList());
   }
 
   private Map<OrderableLotIdentity, OrderableLot> createOrderableLotMap(
@@ -377,17 +375,22 @@ public class StockCardSummariesService extends StockCardBaseService {
 
   @AllArgsConstructor
   @Getter
+  @EqualsAndHashCode
   static class OrderableLotIdentity {
 
     private UUID orderableId;
     private UUID lotId;
 
-    public static OrderableLotIdentity identityOf(OrderableLot orderableLot) {
+    static OrderableLotIdentity identityOf(OrderableLot orderableLot) {
       return new OrderableLotIdentity(orderableLot.getOrderable().getId(), orderableLot.getLotId());
     }
 
-    public static OrderableLotIdentity identityOf(StockCardDto stockCardDto) {
+    static OrderableLotIdentity identityOf(StockCardDto stockCardDto) {
       return new OrderableLotIdentity(stockCardDto.getOrderableId(), stockCardDto.getLotId());
+    }
+
+    boolean equalsOrderableLotUnitIdentity(OrderableLotUnitIdentity identity) {
+      return orderableId == identity.getOrderableId() && lotId == identity.getLotId();
     }
   }
 }
