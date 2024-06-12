@@ -121,29 +121,36 @@ public class StockEventNotificationProcessorTest {
   @Test
   public void shouldCallStockoutNotifierForEveryCard() throws Exception {
     //given
-    UUID anotherStockCardId = UUID.randomUUID();
-    UUID anotherOrderableId = UUID.randomUUID();
-    UUID anotherLotId = UUID.randomUUID();
-    UUID anotherUnitOfOrderableId = UUID.randomUUID();
+    final UUID anotherStockCardId = UUID.randomUUID();
+    final UUID anotherOrderableId = UUID.randomUUID();
+    final UUID anotherLotId = UUID.randomUUID();
+    final UUID anotherUnitOfOrderableId = UUID.randomUUID();
 
-    StockCard anotherStockCard = new StockCard(null, facilityId, programId, orderableId, lotId,
-        unitOfOrderableId, null, 0, getBaseDate(), getBaseDateTime(), true);
+    StockCard anotherStockCard = new StockCard(null, facilityId, programId, orderableId,
+        lotId, unitOfOrderableId,
+        null, 0, getBaseDate(), getBaseDateTime(), true);
     anotherStockCard.setId(anotherStockCardId);
 
     StockEventLineItemDto secondLineItem = createStockEventLineItem();
     secondLineItem.setOrderableId(anotherOrderableId);
     secondLineItem.setLotId(anotherLotId);
+    secondLineItem.setUnitOfOrderableId(anotherUnitOfOrderableId);
     secondLineItem.setQuantity(0);
     stockEventDto.setLineItems(Arrays.asList(firstLineItem, secondLineItem));
 
-    when(context.findCard(new OrderableLotUnitIdentity(orderableId, lotId, unitOfOrderableId))).thenReturn(stockCard);
-    when(context.findCard(new OrderableLotUnitIdentity(anotherOrderableId, anotherLotId, anotherUnitOfOrderableId)))
+    when(context.findCard(new OrderableLotUnitIdentity(orderableId, lotId, unitOfOrderableId)))
+        .thenReturn(stockCard);
+    when(context.findCard(
+        new OrderableLotUnitIdentity(anotherOrderableId, anotherLotId, anotherUnitOfOrderableId)
+    ))
         .thenReturn(anotherStockCard);
 
     //when
     stockEventNotificationProcessor.callAllNotifications(stockEventDto);
 
     //then
-    verify(stockoutNotifier, times(2)).notifyStockEditors(any(StockCard.class), eq((rightId)));
+    verify(stockoutNotifier, times(2)).notifyStockEditors(
+        any(StockCard.class), eq((rightId))
+    );
   }
 }

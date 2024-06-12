@@ -64,8 +64,8 @@ public class OrderableLotUnitIdentity {
     if (lotId != null ? !lotId.equals(that.lotId) : that.lotId != null) {
       return false;
     }
-    return unitOfOrderableId == null ? unitOfOrderableId.equals(that.unitOfOrderableId) :
-        that.unitOfOrderableId == null;
+    return unitOfOrderableId == null ? that.unitOfOrderableId == null :
+        unitOfOrderableId.equals(that.unitOfOrderableId);
   }
 
   @Override
