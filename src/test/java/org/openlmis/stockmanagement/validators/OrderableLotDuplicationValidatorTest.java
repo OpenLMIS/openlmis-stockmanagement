@@ -32,7 +32,7 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OrderableLotUnitDuplicationValidatorTest {
+public class OrderableLotDuplicationValidatorTest {
 
   @Rule
   public ExpectedException expectedEx = none();

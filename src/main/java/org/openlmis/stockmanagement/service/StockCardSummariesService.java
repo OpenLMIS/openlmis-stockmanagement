@@ -22,7 +22,6 @@ import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.empty;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
-import static org.openlmis.stockmanagement.domain.identity.OrderableLotUnitIdentity.identityOf;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -34,12 +33,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
-import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLotUnit;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotUnitIdentity;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
@@ -238,19 +237,19 @@ public class StockCardSummariesService extends StockCardBaseService {
         stockCardRepository.getIdentitiesBy(programId, facilityId);
 
     LOGGER.info("Calling ref data to get all approved orderables");
-    Map<OrderableLotUnitIdentity, OrderableLotUnit> orderableLotUnitsMap = createOrderableLotUnits(
+    Map<OrderableLotIdentity, OrderableLot> orderableLotMap = createOrderableLotMap(
         orderableReferenceDataService.findAll());
 
     //create dummy(fake/not persisted) cards for approved orderables that don't have cards yet
     List<StockCard> dummyCards = createDummyCards(programId, facilityId,
-        orderableLotUnitsMap.values(),
+        orderableLotMap.values(),
         existingCardIdentities).collect(toList());
-    return assignOrderableLotUnitAndRemoveLineItems(createDtos(dummyCards), orderableLotUnitsMap);
+    return assignOrderableLotUnitAndRemoveLineItems(createDtos(dummyCards), orderableLotMap);
   }
 
   private List<StockCardDto> cardsToDtos(List<StockCard> cards) {
     LOGGER.info("Calling ref data to get all approved orderables");
-    Map<OrderableLotUnitIdentity, OrderableLotUnit> orderableLotsMap = createOrderableLotUnits(
+    Map<OrderableLotIdentity, OrderableLot> orderableLotsMap = createOrderableLotMap(
         orderableReferenceDataService.findAll());
 
     return assignOrderableLotUnitAndRemoveLineItems(createDtos(cards), orderableLotsMap);
@@ -258,59 +257,59 @@ public class StockCardSummariesService extends StockCardBaseService {
 
   private List<StockCardDto> assignOrderableLotUnitAndRemoveLineItems(
       List<StockCardDto> stockCardDtos,
-      Map<OrderableLotUnitIdentity, OrderableLotUnit> orderableLotUnitsMap) {
+      Map<OrderableLotIdentity, OrderableLot> orderableLotMap) {
     stockCardDtos.forEach(stockCardDto -> {
-      OrderableLotUnit orderableLotUnit = orderableLotUnitsMap.get(identityOf(stockCardDto));
-      stockCardDto.setOrderable(orderableLotUnit.getOrderable());
-      stockCardDto.setLot(orderableLotUnit.getLot());
-      stockCardDto.setUnitOfOrderableId(orderableLotUnit.getUnitOfOrderableId());
+      OrderableLot orderableLot =
+          orderableLotMap.get(OrderableLotIdentity.identityOf(stockCardDto));
+      stockCardDto.setOrderable(orderableLot.getOrderable());
+      stockCardDto.setLot(orderableLot.getLot());
       stockCardDto.setLineItems(null);//line items are not needed in summary
     });
     return stockCardDtos;
   }
 
   private Stream<StockCard> createDummyCards(UUID programId, UUID facilityId,
-                                             Collection<OrderableLotUnit> orderableLotUnits,
+                                             Collection<OrderableLot> orderableLots,
                                              List<OrderableLotUnitIdentity> cardIdentities) {
-    return filterOrderableLotUnitsWithoutCards(orderableLotUnits, cardIdentities)
+    return filterOrderableLotUnitsWithoutCards(orderableLots, cardIdentities)
         .stream()
-        .map(orderableLotUnit -> StockCard.builder()
+        .map(orderableLot -> StockCard.builder()
             .programId(programId)
             .facilityId(facilityId)
-            .orderableId(orderableLotUnit.getOrderable().getId())
-            .lotId(orderableLotUnit.getLotId())
+            .orderableId(orderableLot.getOrderable().getId())
+            .lotId(orderableLot.getLotId())
             .lineItems(emptyList())//dummy cards don't have line items
             .build());
   }
 
-  private List<OrderableLotUnit> filterOrderableLotUnitsWithoutCards(
-      Collection<OrderableLotUnit> orderableLotUnits,
+  private List<OrderableLot> filterOrderableLotUnitsWithoutCards(
+      Collection<OrderableLot> orderableLots,
       List<OrderableLotUnitIdentity> cardIdentities) {
-    return orderableLotUnits.stream()
-        .filter(orderableLotUnit -> cardIdentities.stream()
-            .noneMatch(cardIdentity -> cardIdentity.equals(identityOf(orderableLotUnit))))
+    return orderableLots.stream()
+        .filter(orderableLot -> cardIdentities.stream()
+            .noneMatch(cardIdentity -> cardIdentity.equals(
+                OrderableLotIdentity.identityOf(orderableLot))))
         .collect(toList());
   }
 
-  private Map<OrderableLotUnitIdentity, OrderableLotUnit> createOrderableLotUnits(
+  private Map<OrderableLotIdentity, OrderableLot> createOrderableLotMap(
       List<OrderableDto> orderableDtos) {
-    Stream<OrderableLotUnit> orderableLotUnits = orderableDtos
+    Stream<OrderableLot> orderableLots = orderableDtos
         .stream()
         .flatMap(this::lotsOfOrderable);
 
-    Stream<OrderableLotUnit> orderablesOnly = orderableDtos.stream()
-        .map(orderableDto -> new OrderableLotUnit(orderableDto, null, null
-        ));
+    Stream<OrderableLot> orderablesOnly = orderableDtos.stream()
+        .map(orderableDto -> new OrderableLot(orderableDto, null));
 
-    return concat(orderableLotUnits, orderablesOnly)
-        .collect(toMap(OrderableLotUnitIdentity::identityOf, orderableLotUnit -> orderableLotUnit));
+    return concat(orderableLots, orderablesOnly)
+        .collect(toMap(OrderableLotIdentity::identityOf, orderableLot -> orderableLot));
   }
 
-  private Stream<OrderableLotUnit> lotsOfOrderable(OrderableDto orderableDto) {
+  private Stream<OrderableLot> lotsOfOrderable(OrderableDto orderableDto) {
     String tradeItemId = orderableDto.getIdentifiers().get("tradeItem");
     if (tradeItemId != null) {
       return lotReferenceDataService.getAllLotsOf(UUID.fromString(tradeItemId)).stream()
-          .map(lot -> new OrderableLotUnit(orderableDto, lot, null));
+          .map(lot -> new OrderableLot(orderableDto, lot));
     } else {
       return empty();
     }
@@ -364,29 +363,31 @@ public class StockCardSummariesService extends StockCardBaseService {
         new StockCardAggregate(stockCards, calculatedStockOnHands));
   }
 
+  @AllArgsConstructor
   @Getter
-  private static class OrderableLotUnit implements IdentifiableByOrderableLotUnit {
+  private static class OrderableLot {
+
     private OrderableDto orderable;
     private LotDto lot;
-    private UUID unitOfOrderableId;
-
-    OrderableLotUnit(OrderableDto orderable, LotDto lot, UUID unitOfOrderableId) {
-      this.orderable = orderable;
-      this.lot = lot;
-      this.unitOfOrderableId = unitOfOrderableId;
-    }
 
     public UUID getLotId() {
       return lot == null ? null : lot.getId();
     }
+  }
 
-    public UUID getOrderableId() {
-      return orderable.getId();
+  @AllArgsConstructor
+  @Getter
+  static class OrderableLotIdentity {
+
+    private UUID orderableId;
+    private UUID lotId;
+
+    public static OrderableLotIdentity identityOf(OrderableLot orderableLot) {
+      return new OrderableLotIdentity(orderableLot.getOrderable().getId(), orderableLot.getLotId());
     }
 
-    @Override
-    public UUID getUnitOfOrderableId() {
-      return unitOfOrderableId;
+    public static OrderableLotIdentity identityOf(StockCardDto stockCardDto) {
+      return new OrderableLotIdentity(stockCardDto.getOrderableId(), stockCardDto.getLotId());
     }
   }
 }
