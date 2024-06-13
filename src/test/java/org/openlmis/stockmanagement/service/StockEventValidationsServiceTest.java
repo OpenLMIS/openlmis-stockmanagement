@@ -53,10 +53,7 @@ import org.openlmis.stockmanagement.validators.SourceDestinationAssignmentValida
 import org.openlmis.stockmanagement.validators.SourceDestinationGeoLevelAffinityValidator;
 import org.openlmis.stockmanagement.validators.StockEventVvmValidator;
 import org.openlmis.stockmanagement.validators.UnitOfOrderableValidator;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StockEventValidationsServiceTest {
