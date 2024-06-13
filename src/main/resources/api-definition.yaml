@@ -265,6 +265,8 @@ traits:
 
           403:
             description: User does not have permission to create stock events for given facility and program.
+            headers:
+              Keep-Alive:
             body:
               application/json:
                   schema: localizedMessage

@@ -780,6 +780,7 @@ public class SourceDestinationBaseServiceTest {
   private FacilityDto createFacilityDtoWithFacilityType(UUID facilityId, UUID facilityTypeId) {
     FacilityTypeDto facilityDto = new FacilityTypeDto();
     facilityDto.setId(facilityTypeId);
+    facilityDto.setCode("TEST");
     return FacilityDto.builder()
         .id(facilityId)
         .type(facilityDto)

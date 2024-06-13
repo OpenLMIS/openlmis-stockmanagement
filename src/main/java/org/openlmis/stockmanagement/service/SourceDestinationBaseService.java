@@ -332,6 +332,21 @@ public abstract class SourceDestinationBaseService {
             return true;
           }
         })
+        .filter(assignment -> {
+          // check if assignment facility is type Ward/Service AND is in the same zone as facility
+          if (assignment.getNode().isRefDataFacility()) {
+            FacilityDto assignmentFacility =
+                facilitiesById.get(assignment.getNode().getReferenceId());
+            if (assignmentFacility.getType().getCode().equals("WS")) {
+              return assignmentFacility.getGeographicZone().getId()
+                  .equals(facility.getGeographicZone().getId());
+            } else {
+              return true;
+            }
+          } else {
+            return true;
+          }
+        })
         .filter(assignment -> !assignment.getNode().isRefDataFacility()
             || hasGeoAffinity(assignment, facility, facilitiesById))
         .collect(Collectors.toList());

@@ -22,6 +22,7 @@ import org.openlmis.stockmanagement.extension.point.ExtensionPointId;
 import org.openlmis.stockmanagement.extension.point.FreeTextValidator;
 import org.openlmis.stockmanagement.extension.point.UnpackKitValidator;
 import org.openlmis.stockmanagement.validators.ApprovedOrderableValidator;
+import org.openlmis.stockmanagement.validators.FacilityValidator;
 import org.openlmis.stockmanagement.validators.LotValidator;
 import org.openlmis.stockmanagement.validators.MandatoryFieldsValidator;
 import org.openlmis.stockmanagement.validators.OrderableLotUnitDuplicationValidator;
@@ -83,6 +84,9 @@ public class StockEventValidationsService {
   @Autowired
   private UnitOfOrderableValidator unitOfOrderableValidator;
 
+  @Autowired
+  private FacilityValidator facilityValidator;
+
   /**
    * Validate stock event with permission service and all validators.
    *
@@ -101,6 +105,7 @@ public class StockEventValidationsService {
     destinationGeoLevelAffinityValidator.validate(stockEventDto);
     stockEventVvmValidator.validate(stockEventDto);
     unitOfOrderableValidator.validate(stockEventDto);
+    facilityValidator.validate(stockEventDto);
 
     AdjustmentReasonValidator adjustmentReasonValidator = extensionManager.getExtension(
         ExtensionPointId.ADJUSTMENT_REASON_POINT_ID, AdjustmentReasonValidator.class);

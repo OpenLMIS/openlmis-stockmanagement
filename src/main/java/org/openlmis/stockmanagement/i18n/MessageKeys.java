@@ -161,6 +161,8 @@ public abstract class MessageKeys {
       EVENT_ERROR_PREFIX + ".reasonFreeText.notAllowed";
   public static final String ERROR_STOCK_EVENT_ORDERABLE_DISABLED_VVM =
       EVENT_ERROR_PREFIX + ".orderable.disabled.vvm";
+  public static final String ERROR_DESTINATION_MUST_BE_WARD_SERVICE_OF_FACILITY =
+      EVENT_ERROR_PREFIX + ".destination.must.be.wardService.of.facility";
   //stock events creation: mandatory fields
   public static final String ERROR_EVENT_OCCURRED_DATE_INVALID = EVENT_ERROR_PREFIX
       + ".occurredDate.invalid";
@@ -249,7 +251,10 @@ public abstract class MessageKeys {
       PHYSICAL_INVENTORY_ERROR_PREFIX + ".draft.exists";
   public static final String ERROR_PHYSICAL_INVENTORY_DRAFT_SUBMIT =
       PHYSICAL_INVENTORY_ERROR_PREFIX + ".draft.submit";
-
+  private static final String NODE_ERROR_PREFIX = ERROR_PREFIX + ".node";
+  //node
+  public static final String ERROR_NODE_NOT_FOUND =
+      NODE_ERROR_PREFIX + ".notFound";
   public static final String ERROR_SIZE_NULL
           = ERROR_PREFIX + ".pageable.size.null";
   public static final String ERROR_SIZE_NOT_POSITIVE
