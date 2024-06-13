@@ -35,7 +35,7 @@ import lombok.NoArgsConstructor;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.ExtraDataConverter;
 import org.openlmis.stockmanagement.domain.common.VvmApplicable;
-import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
+import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLotUnit;
 
 @Entity
 @Data
@@ -45,7 +45,7 @@ import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 @Table(name = "physical_inventory_line_items", schema = "stockmanagement")
 public class PhysicalInventoryLineItem
     extends BaseEntity
-    implements VvmApplicable, IdentifiableByOrderableLot {
+    implements VvmApplicable, IdentifiableByOrderableLotUnit {
   @Column(nullable = false)
   private UUID orderableId;
   @Column

@@ -20,7 +20,7 @@ import static java.util.Collections.singletonList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.domain.card.StockCard.createStockCardFrom;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createLineItemFrom;
-import static org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity.identityOf;
+import static org.openlmis.stockmanagement.domain.identity.OrderableLotUnitIdentity.identityOf;
 import static org.openlmis.stockmanagement.domain.reason.ReasonCategory.PHYSICAL_INVENTORY;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARDS_VIEW;
 
@@ -36,7 +36,7 @@ import javax.transaction.Transactional;
 import javax.validation.constraints.NotNull;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
-import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
+import org.openlmis.stockmanagement.domain.identity.OrderableLotUnitIdentity;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.domain.sourcedestination.Organization;
 import org.openlmis.stockmanagement.dto.StockCardDto;
@@ -238,7 +238,7 @@ public class StockCardService extends StockCardBaseService {
 
   private StockCard findOrCreateCard(StockEventDto eventDto, StockEventLineItemDto eventLineItem,
       UUID savedEventId, List<StockCard> cardsToUpdate) {
-    OrderableLotIdentity identity = identityOf(eventLineItem);
+    OrderableLotUnitIdentity identity = identityOf(eventLineItem);
     StockCard card = eventDto.getContext().findCard(identity);
 
     if (null == card) {

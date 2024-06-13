@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.UUID;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
-import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
+import org.openlmis.stockmanagement.domain.identity.OrderableLotUnitIdentity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -50,8 +50,9 @@ public interface StockCardRepository extends JpaRepository<StockCard, UUID> {
   StockCard findByOriginEvent(@Param("originEventId") StockEvent stockEvent);
 
   @Query(name = StockCard.QUERY_FIND_LOT_IDENT_BY_PROG_FACILITY)
-  List<OrderableLotIdentity> getIdentitiesBy(@Param(StockCard.PARAM_PROGRAM_ID) UUID programId,
-                                             @Param(StockCard.PARAM_FACILITY_ID) UUID facilityId);
+  List<OrderableLotUnitIdentity> getIdentitiesBy(@Param(StockCard.PARAM_PROGRAM_ID) UUID programId,
+                                                 @Param(StockCard.PARAM_FACILITY_ID)
+                                                 UUID facilityId);
 
   Page<StockCard> findByFacilityIdInAndProgramIdInAndIdIn(Collection<UUID> facilityIds,
       Collection<UUID> programIds, Collection<UUID> ids, Pageable pageable);

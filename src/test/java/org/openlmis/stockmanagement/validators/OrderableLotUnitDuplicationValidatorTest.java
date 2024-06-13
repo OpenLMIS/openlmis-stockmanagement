@@ -20,6 +20,7 @@ import static java.util.UUID.randomUUID;
 import static org.junit.rules.ExpectedException.none;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ORDERABLE_LOT_DUPLICATION;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.UUID;
 import org.junit.Rule;
@@ -30,15 +31,17 @@ import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
+import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
+import org.openlmis.stockmanagement.testutils.StockEventLineItemDtoDataBuilder;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OrderableLotDuplicationValidatorTest {
+public class OrderableLotUnitDuplicationValidatorTest {
 
   @Rule
   public ExpectedException expectedEx = none();
 
   @InjectMocks
-  private OrderableLotDuplicationValidator orderableLotDuplicationValidator;
+  private OrderableLotUnitDuplicationValidator orderableLotUnitDuplicationValidator;
 
   @Test
   public void adjustmentEventWithSameOrderableAndLotAppearTwiceShouldPass()
@@ -46,7 +49,7 @@ public class OrderableLotDuplicationValidatorTest {
     StockEventDto eventDto = createStockEventDtoWithDuplicateOrderableLot(randomUUID());
 
     //when
-    orderableLotDuplicationValidator.validate(eventDto);
+    orderableLotUnitDuplicationValidator.validate(eventDto);
   }
 
   @Test
@@ -57,7 +60,29 @@ public class OrderableLotDuplicationValidatorTest {
     StockEventDto eventDto = createStockEventDtoWithDuplicateOrderableLot(null);
 
     //when
-    orderableLotDuplicationValidator.validate(eventDto);
+    orderableLotUnitDuplicationValidator.validate(eventDto);
+  }
+
+  @Test
+  public void shouldValidateCorrectlyWhenNoDuplicates() {
+    //given
+    StockEventDto eventDto = createEventDto();
+
+    //when
+    orderableLotUnitDuplicationValidator.validate(eventDto);
+
+    //then
+    //no exception - ok
+  }
+
+  private StockEventDto createEventDto() {
+    return new StockEventDtoDataBuilder()
+        .addLineItem(new StockEventLineItemDtoDataBuilder()
+            .withReasonId(UUID.randomUUID())
+            .withQuantity(10)
+            .withOccurredDate(LocalDate.now())
+            .buildForAdjustment())
+        .build();
   }
 
   private StockEventDto createStockEventDtoWithDuplicateOrderableLot(UUID reasonId) {

@@ -28,7 +28,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
+import org.openlmis.stockmanagement.domain.identity.OrderableLotUnitIdentity;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 
@@ -54,7 +54,8 @@ public class ActiveStockCardsValidatorTest {
 
     when(stockCardRepository
         .getIdentitiesBy(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
-        .thenReturn(singletonList(new OrderableLotIdentity(randomUUID(), randomUUID())));
+        .thenReturn(singletonList(new OrderableLotUnitIdentity(randomUUID(), randomUUID(),
+            randomUUID())));
 
     //when
     activeStockCardsValidator.validate(stockEventDto);
@@ -71,7 +72,8 @@ public class ActiveStockCardsValidatorTest {
 
     when(stockCardRepository
         .getIdentitiesBy(stockEventDto.getProgramId(), stockEventDto.getFacilityId()))
-        .thenReturn(singletonList(new OrderableLotIdentity(randomUUID(), randomUUID())));
+        .thenReturn(singletonList(new OrderableLotUnitIdentity(randomUUID(), randomUUID(),
+            randomUUID())));
 
     //when
     activeStockCardsValidator.validate(stockEventDto);

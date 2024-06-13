@@ -26,7 +26,9 @@ import static org.mockito.Mockito.when;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openlmis.stockmanagement.BaseIntegrationTest;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.extension.ExtensionManager;
@@ -42,7 +44,7 @@ import org.openlmis.stockmanagement.validators.DefaultFreeTextValidator;
 import org.openlmis.stockmanagement.validators.DefaultUnpackKitValidator;
 import org.openlmis.stockmanagement.validators.LotValidator;
 import org.openlmis.stockmanagement.validators.MandatoryFieldsValidator;
-import org.openlmis.stockmanagement.validators.OrderableLotDuplicationValidator;
+import org.openlmis.stockmanagement.validators.OrderableLotUnitDuplicationValidator;
 import org.openlmis.stockmanagement.validators.PhysicalInventoryAdjustmentReasonsValidator;
 import org.openlmis.stockmanagement.validators.QuantityValidator;
 import org.openlmis.stockmanagement.validators.ReasonExistenceValidator;
@@ -51,64 +53,59 @@ import org.openlmis.stockmanagement.validators.SourceDestinationAssignmentValida
 import org.openlmis.stockmanagement.validators.SourceDestinationGeoLevelAffinityValidator;
 import org.openlmis.stockmanagement.validators.StockEventVvmValidator;
 import org.openlmis.stockmanagement.validators.UnitOfOrderableValidator;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class StockEventValidationsServiceIntegrationTest extends BaseIntegrationTest {
+@RunWith(MockitoJUnitRunner.class)
+public class StockEventValidationsServiceTest {
 
-  @Autowired
+  @InjectMocks
   private StockEventValidationsService stockEventValidationsService;
 
-  @MockBean
+  @Mock
   private StockEventVvmValidator stockEventVvmValidator;
 
-  @MockBean
+  @Mock
   private ApprovedOrderableValidator approvedOrderableValidator;
 
-  @MockBean
+  @Mock
   private SourceDestinationAssignmentValidator sourceDestinationAssignmentValidator;
 
-  @MockBean
+  @Mock
   private MandatoryFieldsValidator mandatoryFieldsValidator;
 
-  @MockBean
+  @Mock
   private ReceiveIssueReasonValidator receiveIssueReasonValidator;
 
-  @MockBean
+  @Mock
   private DefaultAdjustmentReasonValidator adjustmentReasonValidator;
 
-  @MockBean
+  @Mock
   private DefaultFreeTextValidator freeTextValidator;
 
-  @MockBean
+  @Mock
   private QuantityValidator quantityValidator;
 
-  @MockBean
+  @Mock
   private LotValidator lotValidator;
 
-  @MockBean
+  @Mock
   private ReasonExistenceValidator reasonExistenceValidator;
 
-  @MockBean
-  private OrderableLotDuplicationValidator orderableLotDuplicationValidator;
+  @Mock
+  private OrderableLotUnitDuplicationValidator orderableLotUnitDuplicationValidator;
 
-  @MockBean
+  @Mock
   private PhysicalInventoryAdjustmentReasonsValidator physicalInventoryReasonsValidator;
 
-  @MockBean
+  @Mock
   private DefaultUnpackKitValidator unpackKitValidator;
 
-  @MockBean
+  @Mock
   private SourceDestinationGeoLevelAffinityValidator sourceDestinationGeoLeveLAffinityValidator;
 
-  @MockBean
+  @Mock
   private ExtensionManager extensionManager;
 
-  @MockBean
+  @Mock
   private UnitOfOrderableValidator unitOfOrderableValidator;
 
   @Before
@@ -125,7 +122,7 @@ public class StockEventValidationsServiceIntegrationTest extends BaseIntegration
     doNothing().when(adjustmentReasonValidator).validate(any(StockEventDto.class));
     doNothing().when(quantityValidator).validate(any(StockEventDto.class));
     doNothing().when(lotValidator).validate(any(StockEventDto.class));
-    doNothing().when(orderableLotDuplicationValidator).validate(any(StockEventDto.class));
+    doNothing().when(orderableLotUnitDuplicationValidator).validate(any(StockEventDto.class));
     doNothing().when(reasonExistenceValidator).validate(any(StockEventDto.class));
     doNothing().when(physicalInventoryReasonsValidator).validate(any(StockEventDto.class));
     doNothing().when(unpackKitValidator).validate(any(StockEventDto.class));
@@ -158,7 +155,7 @@ public class StockEventValidationsServiceIntegrationTest extends BaseIntegration
     verify(receiveIssueReasonValidator, times(1)).validate(stockEventDto);
     verify(quantityValidator, times(1)).validate(stockEventDto);
     verify(lotValidator, times(1)).validate(stockEventDto);
-    verify(orderableLotDuplicationValidator, times(1)).validate(stockEventDto);
+    verify(orderableLotUnitDuplicationValidator, times(1)).validate(stockEventDto);
     verify(reasonExistenceValidator, times(1)).validate(stockEventDto);
     verify(physicalInventoryReasonsValidator, times(1)).validate(stockEventDto);
     verify(adjustmentReasonValidator, times(1)).validate(stockEventDto);

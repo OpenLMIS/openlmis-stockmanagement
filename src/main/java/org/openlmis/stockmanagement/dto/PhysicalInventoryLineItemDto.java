@@ -24,7 +24,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.openlmis.stockmanagement.domain.common.VvmApplicable;
-import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
+import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLotUnit;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
@@ -33,7 +33,7 @@ import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLi
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot, VvmApplicable {
+public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLotUnit, VvmApplicable {
   private UUID orderableId;
   private UUID lotId;
   private UUID unitOfOrderableId;
