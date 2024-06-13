@@ -262,8 +262,10 @@ public class StockCardSummariesService extends StockCardBaseService {
     stockCardDtos.forEach(stockCardDto -> {
       OrderableLot orderableLot =
           orderableLotMap.get(OrderableLotIdentity.identityOf(stockCardDto));
-      stockCardDto.setOrderable(orderableLot.getOrderable());
-      stockCardDto.setLot(orderableLot.getLot());
+      if (orderableLot != null) {
+        stockCardDto.setOrderable(orderableLot.getOrderable());
+        stockCardDto.setLot(orderableLot.getLot());
+      }
       stockCardDto.setLineItems(null);//line items are not needed in summary
     });
     return stockCardDtos;
