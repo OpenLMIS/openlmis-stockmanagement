@@ -32,6 +32,7 @@ import org.openlmis.stockmanagement.validators.ReceiveIssueReasonValidator;
 import org.openlmis.stockmanagement.validators.SourceDestinationAssignmentValidator;
 import org.openlmis.stockmanagement.validators.SourceDestinationGeoLevelAffinityValidator;
 import org.openlmis.stockmanagement.validators.StockEventVvmValidator;
+import org.openlmis.stockmanagement.validators.UnitOfOrderableValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -79,6 +80,9 @@ public class StockEventValidationsService {
   @Autowired
   private ExtensionManager extensionManager;
 
+  @Autowired
+  private UnitOfOrderableValidator unitOfOrderableValidator;
+
   /**
    * Validate stock event with permission service and all validators.
    *
@@ -96,6 +100,7 @@ public class StockEventValidationsService {
     destinationAssignmentValidator.validate(stockEventDto);
     destinationGeoLevelAffinityValidator.validate(stockEventDto);
     stockEventVvmValidator.validate(stockEventDto);
+    unitOfOrderableValidator.validate(stockEventDto);
 
     AdjustmentReasonValidator adjustmentReasonValidator = extensionManager.getExtension(
         ExtensionPointId.ADJUSTMENT_REASON_POINT_ID, AdjustmentReasonValidator.class);
