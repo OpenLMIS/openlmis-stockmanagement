@@ -587,6 +587,53 @@ public class StockCardSummariesServiceTest {
     assertThat(areEqual, is(false));
   }
 
+  @Test
+  public void shouldOrderableLotIdentityIsNotEqualToNull() {
+    //given
+    UUID orderableId = UUID.randomUUID();
+    UUID lotId = UUID.randomUUID();
+    StockCardSummariesService.OrderableLotIdentity orderableLotIdentity =
+        new StockCardSummariesService.OrderableLotIdentity(
+            orderableId,
+            lotId
+        );
+    OrderableLotUnitIdentity orderableLotUnitIdentity = null;
+
+    //when
+    boolean areEqual =
+        orderableLotIdentity.equalsOrderableLotUnitIdentity(orderableLotUnitIdentity);
+
+    //then
+    assertThat(areEqual, is(false));
+  }
+
+  @Test
+  public void shouldOrderableLotIdentityIsNotEqualDueToNullOrderableId() {
+    //given
+    UUID orderableId2 = UUID.randomUUID();
+    UUID lotId1 = UUID.randomUUID();
+    UUID lotId2 = UUID.randomUUID();
+    UUID unitOfOrderableId = UUID.randomUUID();
+    StockCardSummariesService.OrderableLotIdentity orderableLotIdentity =
+        new StockCardSummariesService.OrderableLotIdentity(
+            null,
+            lotId1
+        );
+    OrderableLotUnitIdentity orderableLotUnitIdentity =
+        new OrderableLotUnitIdentity(
+            orderableId2,
+            lotId2,
+            unitOfOrderableId
+        );
+
+    //when
+    boolean areEqual =
+        orderableLotIdentity.equalsOrderableLotUnitIdentity(orderableLotUnitIdentity);
+
+    //then
+    assertThat(areEqual, is(false));
+  }
+
   private void checkStockCardDto(
       List<StockCardDto> stockCardsDtos,
       UUID orderableId1,

@@ -18,8 +18,10 @@ package org.openlmis.stockmanagement.util;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.UUID;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotUnitIdentity;
 
@@ -43,5 +45,118 @@ public class OrderableLotUnitIdentityTest {
     //then
     assertTrue(equals);
     assertEquals(identity1Hash, identity2Hash);
+  }
+
+  @Test
+  public void shouldNotBeEqualDueToOrderableId() {
+    //given
+    UUID orderableId1 = UUID.randomUUID();
+    UUID orderableId2 = UUID.randomUUID();
+
+    UUID lotId = UUID.randomUUID();
+    UUID unitOfOrderableId = UUID.randomUUID();
+
+    OrderableLotUnitIdentity orderableLotUnitIdentity1 =
+        new OrderableLotUnitIdentity(
+            orderableId1,
+            lotId,
+            unitOfOrderableId
+        );
+    OrderableLotUnitIdentity orderableLotUnitIdentity2 =
+        new OrderableLotUnitIdentity(
+            orderableId2,
+            lotId,
+            unitOfOrderableId
+        );
+
+    //when
+    boolean areEqual =
+        orderableLotUnitIdentity1.equals(orderableLotUnitIdentity2);
+
+    //then
+    assertFalse(areEqual);
+  }
+
+  @Test
+  public void shouldNotBeEqualDueToLotId() {
+    //given
+    UUID orderableId = UUID.randomUUID();
+
+    UUID lotId1 = UUID.randomUUID();
+    UUID lotId2 = UUID.randomUUID();
+
+    UUID unitOfOrderableId = UUID.randomUUID();
+
+    OrderableLotUnitIdentity orderableLotUnitIdentity1 =
+        new OrderableLotUnitIdentity(
+            orderableId,
+            lotId1,
+            unitOfOrderableId
+        );
+    OrderableLotUnitIdentity orderableLotUnitIdentity2 =
+        new OrderableLotUnitIdentity(
+            orderableId,
+            lotId2,
+            unitOfOrderableId
+        );
+
+    //when
+    boolean areEqual =
+        orderableLotUnitIdentity1.equals(orderableLotUnitIdentity2);
+
+    //then
+    assertFalse(areEqual);
+  }
+
+  @Test
+  public void shouldNotBeEqualDueToUnitOfOrderableId() {
+    //given
+    UUID orderableId = UUID.randomUUID();
+    UUID lotId = UUID.randomUUID();
+    UUID unitOfOrderableId1 = UUID.randomUUID();
+    UUID unitOfOrderableId2 = UUID.randomUUID();
+
+    OrderableLotUnitIdentity orderableLotUnitIdentity1 =
+        new OrderableLotUnitIdentity(
+            orderableId,
+            lotId,
+            unitOfOrderableId1
+        );
+    OrderableLotUnitIdentity orderableLotUnitIdentity2 =
+        new OrderableLotUnitIdentity(
+            orderableId,
+            lotId,
+            unitOfOrderableId2
+        );
+
+    //when
+    boolean areEqual =
+        orderableLotUnitIdentity1.equals(orderableLotUnitIdentity2);
+
+    //then
+    assertFalse(areEqual);
+  }
+
+  @Test
+  public void shouldNotBeEqualDueToSecondIdentityIsNull() {
+    //given
+    UUID orderableId = UUID.randomUUID();
+    UUID lotId = UUID.randomUUID();
+    UUID unitOfOrderableId = UUID.randomUUID();
+
+    OrderableLotUnitIdentity orderableLotUnitIdentity1 =
+        new OrderableLotUnitIdentity(
+            orderableId,
+            lotId,
+            unitOfOrderableId
+        );
+    OrderableLotUnitIdentity orderableLotUnitIdentity2 = null;
+
+    //when
+    boolean areEqual =
+        orderableLotUnitIdentity1.equals(orderableLotUnitIdentity2);
+
+    //then
+    assertFalse(areEqual);
   }
 }
