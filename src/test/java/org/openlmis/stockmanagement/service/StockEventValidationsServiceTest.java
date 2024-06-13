@@ -53,7 +53,6 @@ import org.openlmis.stockmanagement.validators.SourceDestinationAssignmentValida
 import org.openlmis.stockmanagement.validators.SourceDestinationGeoLevelAffinityValidator;
 import org.openlmis.stockmanagement.validators.StockEventVvmValidator;
 import org.openlmis.stockmanagement.validators.UnitOfOrderableValidator;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StockEventValidationsServiceTest {
@@ -106,7 +105,7 @@ public class StockEventValidationsServiceTest {
   @Mock
   private ExtensionManager extensionManager;
 
-  @MockBean
+  @Mock
   private UnitOfOrderableValidator unitOfOrderableValidator;
 
   @Before
