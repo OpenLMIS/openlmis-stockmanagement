@@ -112,7 +112,6 @@ public class StockEventDtoDataBuilder {
     eventLineItemDto.setDestinationId(UUID.fromString("0bd28568-43f1-4836-934d-ec5fb11398e8"));
     eventLineItemDto.setSourceFreeText("a");
     eventLineItemDto.setDestinationFreeText("b");
-    eventLineItemDto.setUnitOfOrderableId(UUID.randomUUID());
     return eventLineItemDto;
   }
 

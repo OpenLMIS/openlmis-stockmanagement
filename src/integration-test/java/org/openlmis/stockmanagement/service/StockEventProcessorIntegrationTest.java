@@ -18,7 +18,7 @@ package org.openlmis.stockmanagement.service;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.isNotNull;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -249,7 +249,7 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
         eventLineItemDto.getOrderableId(),
         eventLineItemDto.getLotId()
     );
-    assertThat(card, isNotNull());
+    assertThat(card, notNullValue());
     assertThat(card.getUnitOfOrderableId(), is(unitOfOrderableId));
   }
 
