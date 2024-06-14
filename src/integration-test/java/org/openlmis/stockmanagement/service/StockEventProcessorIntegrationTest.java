@@ -17,12 +17,16 @@ package org.openlmis.stockmanagement.service;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import javax.transaction.Transactional;
 import org.junit.After;
@@ -33,6 +37,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.openlmis.stockmanagement.BaseIntegrationTest;
+import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
@@ -40,6 +47,7 @@ import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.domain.sourcedestination.Organization;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.NodeRepository;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
@@ -62,13 +70,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
 
   @MockBean
+  StockEventNotificationProcessor stockEventNotificationProcessor;
+  @MockBean
   private StockEventValidationsService stockEventValidationsService;
-
   @MockBean
   private PhysicalInventoryService physicalInventoryService;
-  
-  @MockBean StockEventNotificationProcessor stockEventNotificationProcessor;
-  
   @Autowired
   private StockEventProcessor stockEventProcessor;
 
@@ -175,7 +181,7 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  public void shouldSaveEventAndLineItemsAndCallNotificationsWhenValidationServicePasses() 
+  public void shouldSaveEventAndLineItemsAndCallNotificationsWhenValidationServicePasses()
       throws Exception {
     StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
@@ -211,6 +217,40 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
     //then
     verify(physicalInventoryService)
         .submitPhysicalInventory(any(PhysicalInventoryDto.class), any(UUID.class));
+  }
+
+  @Test
+  public void shouldSaveUnitOfOrderableIdOnProcessingStockEvent() {
+    //given
+    StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.setUserId(userId);
+    stockEventDto.setActive(true);
+    StockEventLineItemDto eventLineItemDto = stockEventDto.getLineItems().get(0);
+    eventLineItemDto.setReasonId(null);
+    eventLineItemDto.setSourceId(null);
+    eventLineItemDto.setDestinationId(null);
+    UUID unitOfOrderableId = eventLineItemDto.getUnitOfOrderableId();
+
+    //when
+    UUID eventId = stockEventProcessor.process(stockEventDto);
+
+    //then
+    Optional<StockEvent> stockEventOptional = stockEventsRepository.findById(eventId);
+    assertThat(stockEventOptional.isPresent(), is(true));
+    StockEvent stockEvent = stockEventOptional.get();
+    List<StockEventLineItem> lineItems = stockEvent.getLineItems();
+    assertThat(lineItems, hasSize(1));
+    assertThat(lineItems.get(0).getUnitOfOrderableId(),
+        is(unitOfOrderableId));
+
+    StockCard card = stockCardRepository.findByProgramIdAndFacilityIdAndOrderableIdAndLotId(
+        stockEventDto.getProgramId(),
+        stockEventDto.getFacilityId(),
+        eventLineItemDto.getOrderableId(),
+        eventLineItemDto.getLotId()
+    );
+    assertThat(card, notNullValue());
+    assertThat(card.getUnitOfOrderableId(), is(unitOfOrderableId));
   }
 
   private void assertSize(long cardSize, long eventSize, long lineItemSize) {
