@@ -91,10 +91,12 @@ public class StockEventsController extends BaseController {
         profiler.start("CAN_EDIT_PHYSICAL_INVENTORY");
         permissionService.canEditPhysicalInventory(programId, facilityId);
       } else {
-        //we check STOCK_ADJUST permission for both adjustment and issue/receive
-        //this may change in the future
-        profiler.start("CAN_ADJUST_STOCK");
-        permissionService.canAdjustStock(programId, facilityId);
+        if (!homeFacilityPermissionService.checkFacilityAndHomeFacilityLinkage(facilityId)) {
+          //we check STOCK_ADJUST permission for both adjustment and issue/receive
+          //this may change in the future
+          profiler.start("CAN_ADJUST_STOCK");
+          permissionService.canAdjustStock(programId, facilityId);
+        }
       }
     }
   }

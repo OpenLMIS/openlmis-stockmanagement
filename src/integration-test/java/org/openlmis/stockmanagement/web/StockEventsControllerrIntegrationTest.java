@@ -84,6 +84,8 @@ public class StockEventsControllerrIntegrationTest extends BaseWebTest {
   @Test
   public void shouldReturn403WhenUserHasNoPermissionToAdjustStock() throws Exception {
     //given
+    when(homeFacilityPermissionService.checkFacilityAndHomeFacilityLinkage(any(UUID.class)))
+        .thenReturn(false);
     Mockito.doThrow(new PermissionMessageException(
         new Message(ERROR_NO_FOLLOWING_PERMISSION, STOCK_ADJUST)))
         .when(permissionService).canAdjustStock(any(UUID.class), any(UUID.class));
