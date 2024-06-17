@@ -94,6 +94,9 @@ public class StockCardSummariesService extends StockCardBaseService {
   @Autowired
   private PermissionService permissionService;
 
+  @Autowired
+  private HomeFacilityPermissionService homeFacilityPermissionService;
+
   /**
    * Get a map of stock cards assigned to orderable ids.
    * Stock cards are grouped using orderable fulfills endpoint.
@@ -139,8 +142,11 @@ public class StockCardSummariesService extends StockCardBaseService {
     Profiler profiler = new Profiler("FIND_STOCK_CARD_SUMMARIES_FOR_PARAMS");
     profiler.setLogger(LOGGER);
 
-    profiler.start("VALIDATE_VIEW_RIGHTS");
-    permissionService.canViewStockCard(params.getProgramId(), params.getFacilityId());
+    if (!homeFacilityPermissionService
+        .checkFacilityAndHomeFacilityLinkage(params.getFacilityId())) {
+      profiler.start("VALIDATE_VIEW_RIGHTS");
+      permissionService.canViewStockCard(params.getProgramId(), params.getFacilityId());
+    }
 
     profiler.start("GET_APPROVED_PRODUCTS");
     OrderablesAggregator approvedProducts = approvedProductReferenceDataService

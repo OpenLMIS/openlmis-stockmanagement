@@ -111,6 +111,8 @@ public class StockCardSummariesServiceTest {
   private PermissionService permissionService;
   @Mock
   private CalculatedStockOnHandRepository calculatedStockOnHandRepository;
+  @Mock
+  private HomeFacilityPermissionService homeFacilityPermissionService;
   @InjectMocks
   private StockCardSummariesService stockCardSummariesService;
 
@@ -235,6 +237,9 @@ public class StockCardSummariesServiceTest {
     when(orderableReferenceDataService.getPage(any(RequestParameters.class)))
         .thenReturn(new PageImpl<>(Collections.emptyList()));
 
+    when(homeFacilityPermissionService.checkFacilityAndHomeFacilityLinkage(any(UUID.class)))
+        .thenReturn(false);
+
     StockEvent event = new StockEventDataBuilder()
         .withFacility(params.getFacilityId())
         .withProgram(params.getProgramId())
@@ -266,6 +271,9 @@ public class StockCardSummariesServiceTest {
   public void shouldThrowExceptionIfNoPermission() {
     StockCardSummariesV2SearchParams params =
         new StockCardSummariesV2SearchParamsDataBuilder().build();
+
+    when(homeFacilityPermissionService.checkFacilityAndHomeFacilityLinkage(any(UUID.class)))
+        .thenReturn(false);
 
     doThrow(new
         PermissionMessageException(new Message("no permission")))
