@@ -50,12 +50,12 @@ public class StockCardDataBuilder {
     return this;
   }
 
-  public StockCardDataBuilder withOrderable(UUID orderable) {
+  public StockCardDataBuilder withOrderableId(UUID orderable) {
     orderableId = orderable;
     return this;
   }
 
-  public StockCardDataBuilder withLot(UUID lot) {
+  public StockCardDataBuilder withLotId(UUID lot) {
     lotId = lot;
     return this;
   }
@@ -92,7 +92,7 @@ public class StockCardDataBuilder {
                                                                  StockCardLineItem lineItem,
                                                                  UUID orderableId) {
     return this
-        .withOrderable(orderableId)
+        .withOrderableId(orderableId)
         .withStockOnHand(stockOnHand)
         .withLineItem(lineItem)
         .build();

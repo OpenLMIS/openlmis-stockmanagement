@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.web;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -32,7 +33,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.google.common.collect.ImmutableSet;
 import java.util.UUID;
-
 import org.junit.Test;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
@@ -42,6 +42,7 @@ import org.openlmis.stockmanagement.service.StockCardService;
 import org.openlmis.stockmanagement.service.StockCardSummariesService;
 import org.openlmis.stockmanagement.testutils.StockCardDtoDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
+import org.slf4j.profiler.Profiler;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -146,7 +147,7 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
 
     PageRequest pageable = PageRequest.of(0, 20);
     when(stockCardSummariesService
-        .findStockCards(programId, facilityId, pageable))
+        .findStockCards(eq(programId), eq(facilityId), eq(pageable), any(Profiler.class)))
         .thenReturn(new PageImpl<>(singletonList(StockCardDtoDataBuilder.createStockCardDto())));
 
     ResultActions resultActions = mvc.perform(

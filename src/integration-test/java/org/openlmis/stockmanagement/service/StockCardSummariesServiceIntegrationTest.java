@@ -57,6 +57,7 @@ import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataServic
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
+import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -115,11 +116,9 @@ public class StockCardSummariesServiceIntegrationTest extends BaseIntegrationTes
     OrderableDto orderable3 = createOrderableDto(orderable3Id, "");
     OrderableDto orderable4 = createOrderableDto(orderable4Id, "");
 
-    when(orderableReferenceDataService
-        .findAll())
+    when(orderableReferenceDataService.findByIds(any()))
         .thenReturn(asList(orderable1, orderable2, orderable3, orderable4));
-    when(lotReferenceDataService.getAllLotsOf(any(UUID.class)))
-        .thenReturn(emptyList());
+    when(lotReferenceDataService.findByIds(any())).thenReturn(emptyList());
     when(facilityReferenceDataService.findOne(any(UUID.class)))
         .thenReturn(new FacilityDto());
     when(programReferenceDataService.findOne(any(UUID.class)))
@@ -169,7 +168,7 @@ public class StockCardSummariesServiceIntegrationTest extends BaseIntegrationTes
     PageRequest pageRequest = PageRequest.of(0, 1);
     //when
     Page<StockCardDto> stockCards = stockCardSummariesService
-        .findStockCards(programId, facilityId, pageRequest);
+        .findStockCards(programId, facilityId, pageRequest, new Profiler("TEST"));
 
     //then
     assertThat(stockCards.getContent().size(), is(1));

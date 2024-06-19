@@ -23,6 +23,7 @@ import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
@@ -35,13 +36,14 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.ImmutableSet;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -76,47 +78,12 @@ import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.util.RequestParameters;
 import org.springframework.data.domain.PageImpl;
 
+@SuppressWarnings("PMD.TooManyMethods")
 @RunWith(MockitoJUnitRunner.class)
 public class StockCardSummariesServiceTest {
 
-  @Mock
-  private ApprovedProductReferenceDataService approvedProductReferenceDataService;
-
-  @Mock
-  private OrderableFulfillReferenceDataService orderableFulfillReferenceDataService;
-
-  @Mock
-  private OrderableReferenceDataService orderableReferenceDataService;
-
-  @Mock
-  @SuppressWarnings("PMD")
-  private FacilityReferenceDataService facilityRefDataService;
-
-  @Mock
-  @SuppressWarnings("PMD")
-  private ProgramReferenceDataService programRefDataService;
-
-  @Mock
-  private LotReferenceDataService lotReferenceDataService;
-
-  @Mock
-  private CalculatedStockOnHandService calculatedStockOnHandService;
-
-  @Mock
-  private StockCardRepository cardRepository;
-
-  @Mock
-  private PermissionService permissionService;
-
-  @Mock
-  private CalculatedStockOnHandRepository calculatedStockOnHandRepository;
-
-  @InjectMocks
-  private StockCardSummariesService stockCardSummariesService;
-
   private final UUID facilityId = randomUUID();
   private final UUID programId = randomUUID();
-
   private final UUID orderableId1 = randomUUID();
   private final UUID orderableId2 = randomUUID();
   private final UUID orderableId3 = randomUUID();
@@ -124,6 +91,32 @@ public class StockCardSummariesServiceTest {
   private final UUID orderableId5 = randomUUID();
   private final UUID orderableId6 = randomUUID();
   private final UUID orderableId7 = randomUUID();
+  @Mock
+  private ApprovedProductReferenceDataService approvedProductReferenceDataService;
+  @Mock
+  private OrderableFulfillReferenceDataService orderableFulfillReferenceDataService;
+  @Mock
+  private OrderableReferenceDataService orderableReferenceDataService;
+  @Mock
+  @SuppressWarnings("PMD")
+  private FacilityReferenceDataService facilityRefDataService;
+  @Mock
+  @SuppressWarnings("PMD")
+  private ProgramReferenceDataService programRefDataService;
+  @Mock
+  private LotReferenceDataService lotReferenceDataService;
+  @Mock
+  private CalculatedStockOnHandService calculatedStockOnHandService;
+  @Mock
+  private StockCardRepository cardRepository;
+  @Mock
+  private PermissionService permissionService;
+  @Mock
+  private CalculatedStockOnHandRepository calculatedStockOnHandRepository;
+  @Mock
+  private HomeFacilityPermissionService homeFacilityPermissionService;
+  @InjectMocks
+  private StockCardSummariesService stockCardSummariesService;
 
   @Test
   public void shouldCreateDummyCards() {
@@ -208,9 +201,9 @@ public class StockCardSummariesServiceTest {
     OrderableDto orderable3 = new OrderableDtoDataBuilder().build();
 
     OrderablesAggregator orderablesAggregator = new OrderablesAggregator(asList(
-            new ApprovedProductDto(orderable),
-            new ApprovedProductDto(orderable2),
-            new ApprovedProductDto(orderable3)
+        new ApprovedProductDto(orderable),
+        new ApprovedProductDto(orderable2),
+        new ApprovedProductDto(orderable3)
     ));
 
     StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParamsDataBuilder()
@@ -243,18 +236,21 @@ public class StockCardSummariesServiceTest {
     when(orderableReferenceDataService.getPage(any(RequestParameters.class)))
         .thenReturn(new PageImpl<>(Collections.emptyList()));
 
+    when(homeFacilityPermissionService.checkFacilityAndHomeFacilityLinkage(any(UUID.class)))
+        .thenReturn(false);
+
     StockEvent event = new StockEventDataBuilder()
         .withFacility(params.getFacilityId())
         .withProgram(params.getProgramId())
         .build();
 
     StockCard stockCard = new StockCardDataBuilder(event)
-        .withOrderable(orderable.getId())
+        .withOrderableId(orderable.getId())
         .withStockOnHand(12)
         .build();
 
     StockCard stockCard1 = new StockCardDataBuilder(event)
-        .withOrderable(orderable3.getId())
+        .withOrderableId(orderable3.getId())
         .withStockOnHand(26)
         .build();
 
@@ -274,6 +270,9 @@ public class StockCardSummariesServiceTest {
   public void shouldThrowExceptionIfNoPermission() {
     StockCardSummariesV2SearchParams params =
         new StockCardSummariesV2SearchParamsDataBuilder().build();
+
+    when(homeFacilityPermissionService.checkFacilityAndHomeFacilityLinkage(any(UUID.class)))
+        .thenReturn(false);
 
     doThrow(new
         PermissionMessageException(new Message("no permission")))
@@ -297,7 +296,7 @@ public class StockCardSummariesServiceTest {
     when(orderableFulfillReferenceDataService
         .findByIds(
             ImmutableSet.of(orderableId2, orderableId3,
-            orderableId5, orderableId6, orderableId7)))
+                orderableId5, orderableId6, orderableId7)))
         .thenReturn(fulfillMap);
 
     StockEvent event = new StockEventDataBuilder()
@@ -306,27 +305,27 @@ public class StockCardSummariesServiceTest {
         .build();
 
     StockCard stockCard1 = new StockCardDataBuilder(event)
-        .withOrderable(orderableId2)
+        .withOrderableId(orderableId2)
         .withStockOnHand(12)
         .build();
 
     StockCard stockCard2 = new StockCardDataBuilder(event)
-        .withOrderable(orderableId3)
+        .withOrderableId(orderableId3)
         .withStockOnHand(26)
         .build();
 
     StockCard stockCard3 = new StockCardDataBuilder(event)
-        .withOrderable(orderableId5)
+        .withOrderableId(orderableId5)
         .withStockOnHand(36)
         .build();
 
     StockCard stockCard4 = new StockCardDataBuilder(event)
-        .withOrderable(orderableId6)
+        .withOrderableId(orderableId6)
         .withStockOnHand(46)
         .build();
 
     StockCard stockCard5 = new StockCardDataBuilder(event)
-        .withOrderable(orderableId7)
+        .withOrderableId(orderableId7)
         .withStockOnHand(56)
         .build();
 
@@ -354,7 +353,8 @@ public class StockCardSummariesServiceTest {
 
     Map<UUID, StockCardAggregate> cardMap =
         stockCardSummariesService.getGroupedStockCards(programId, facilityId, null,
-            LocalDate.of(2017, 3, 16), LocalDate.of(2017, 3, 19));
+            LocalDate.of(2017, 3, 16),
+            LocalDate.of(2017, 3, 19));
 
     assertThat(cardMap.keySet(), hasItems(orderableId1, orderableId4,
         orderableId6, orderableId7));
@@ -390,7 +390,7 @@ public class StockCardSummariesServiceTest {
     when(orderableFulfillReferenceDataService
         .findByIds(
             ImmutableSet.of(orderableId2, orderableId3, orderableId5,
-            orderableId6, orderableId7)))
+                orderableId6, orderableId7)))
         .thenReturn(fulfillMap);
 
     StockEvent event = new StockEventDataBuilder()
@@ -399,27 +399,27 @@ public class StockCardSummariesServiceTest {
         .build();
 
     StockCard stockCard1 = new StockCardDataBuilder(event)
-        .withOrderable(orderableId2)
+        .withOrderableId(orderableId2)
         .withStockOnHand(12)
         .build();
 
     StockCard stockCard2 = new StockCardDataBuilder(event)
-        .withOrderable(orderableId3)
+        .withOrderableId(orderableId3)
         .withStockOnHand(26)
         .build();
 
     StockCard stockCard3 = new StockCardDataBuilder(event)
-        .withOrderable(orderableId5)
+        .withOrderableId(orderableId5)
         .withStockOnHand(36)
         .build();
 
     StockCard stockCard4 = new StockCardDataBuilder(event)
-        .withOrderable(orderableId6)
+        .withOrderableId(orderableId6)
         .withStockOnHand(46)
         .build();
 
     StockCard stockCard5 = new StockCardDataBuilder(event)
-        .withOrderable(orderableId7)
+        .withOrderableId(orderableId7)
         .withStockOnHand(56)
         .build();
 
@@ -436,15 +436,15 @@ public class StockCardSummariesServiceTest {
         .thenReturn(calculatedStockOnHands);
 
     final CalculatedStockOnHand calculatedStockOnHand1 =
-            generateCalculatedStockOnHandWithEndDate(stockCard1);
+        generateCalculatedStockOnHandWithEndDate(stockCard1);
     final CalculatedStockOnHand calculatedStockOnHand2 =
-            generateCalculatedStockOnHandWithEndDate(stockCard2);
+        generateCalculatedStockOnHandWithEndDate(stockCard2);
     final CalculatedStockOnHand calculatedStockOnHand3 =
-            generateCalculatedStockOnHandWithEndDate(stockCard3);
+        generateCalculatedStockOnHandWithEndDate(stockCard3);
     final CalculatedStockOnHand calculatedStockOnHand4 =
-            generateCalculatedStockOnHandWithEndDate(stockCard4);
+        generateCalculatedStockOnHandWithEndDate(stockCard4);
     final CalculatedStockOnHand calculatedStockOnHand5 =
-            generateCalculatedStockOnHandWithEndDate(stockCard5);
+        generateCalculatedStockOnHandWithEndDate(stockCard5);
 
     Map<UUID, StockCardAggregate> cardMap =
         stockCardSummariesService.getGroupedStockCards(programId, facilityId, null,
@@ -470,6 +470,70 @@ public class StockCardSummariesServiceTest {
         hasItems(calculatedStockOnHand, calculatedStockOnHand5));
   }
 
+  @Test
+  public void shouldFindStockCardsForProgramAndFacilityIds() {
+    //given
+    UUID programId = UUID.randomUUID();
+    UUID facilityId = UUID.randomUUID();
+    UUID lotId1 = UUID.randomUUID();
+    UUID lotId2 = UUID.randomUUID();
+
+    OrderableDto orderable1 = createOrderableDto(orderableId1, "1");
+    OrderableDto orderable2 = createOrderableDto(orderableId2, "2");
+
+    LotDto lot1 = LotDto.builder().id(lotId1).build();
+    LotDto lot2 = LotDto.builder().id(lotId2).build();
+
+    StockEvent event = new StockEventDataBuilder()
+        .withFacility(facilityId)
+        .withProgram(programId)
+        .build();
+
+    StockCard stockCard1 = new StockCardDataBuilder(event)
+        .withOrderableId(orderableId1)
+        .withStockOnHand(12)
+        .withLotId(lotId1)
+        .build();
+
+    StockCard stockCard2 = new StockCardDataBuilder(event)
+        .withOrderableId(orderableId2)
+        .withStockOnHand(26)
+        .withLotId(lotId2)
+        .build();
+
+    List<StockCard> stockCards = asList(stockCard1, stockCard2);
+
+    when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId))
+        .thenReturn(stockCards);
+
+    when(orderableReferenceDataService
+        .findByIds(new HashSet<>(Arrays.asList(orderableId1, orderableId2))))
+        .thenReturn(Arrays.asList(orderable1, orderable2));
+    when(lotReferenceDataService.findByIds(new HashSet<>(Arrays.asList(lotId1, lotId2))))
+        .thenReturn(Arrays.asList(lot1, lot2));
+
+    //when
+    List<StockCardDto> stockCardsDtos =
+        stockCardSummariesService.findStockCards(programId, facilityId);
+
+    //then
+    assertThat(stockCardsDtos, hasSize(2));
+    checkStockCardDto(stockCardsDtos, orderableId1, lotId1);
+    checkStockCardDto(stockCardsDtos, orderableId2, lotId2);
+  }
+
+  private void checkStockCardDto(
+      List<StockCardDto> stockCardsDtos,
+      UUID orderableId,
+      UUID lotId) {
+    Optional<StockCardDto> stockCardDtoOptional = stockCardsDtos.stream()
+        .filter(stockCardDto -> stockCardDto.getOrderableId().equals(orderableId))
+        .findFirst();
+    assertThat(stockCardDtoOptional.isPresent(), is(true));
+    StockCardDto stockCardDto = stockCardDtoOptional.get();
+    assertThat(stockCardDto.getLotId(), is(lotId));
+  }
+
   private OrderableDto createOrderableDto(UUID orderableId, String productName) {
     return OrderableDto.builder()
         .id(orderableId)
@@ -490,9 +554,9 @@ public class StockCardSummariesServiceTest {
   private CalculatedStockOnHand generateCalculatedStockOnHandWithEndDate(StockCard stockCard) {
     CalculatedStockOnHand calculatedStockOnHand = new CalculatedStockOnHandDataBuilder().build();
     when(calculatedStockOnHandRepository
-          .findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(
-                  stockCard.getId(), LocalDate.of(2017, 3, 19)))
-          .thenReturn(Optional.ofNullable(calculatedStockOnHand));
+        .findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(
+            stockCard.getId(), LocalDate.of(2017, 3, 19)))
+        .thenReturn(Optional.ofNullable(calculatedStockOnHand));
     return calculatedStockOnHand;
   }
 

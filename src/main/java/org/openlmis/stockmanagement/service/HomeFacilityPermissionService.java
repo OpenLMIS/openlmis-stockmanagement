@@ -54,6 +54,27 @@ public class HomeFacilityPermissionService {
     }
   }
 
+  /**
+   * Returns true if facility is within the same geographic zone as the home facility.
+   * Returns false otherwise.
+   *
+   * @param facilityId UUID of facility
+   * @return boolean flag indicating linkage between facility and home facility
+   */
+  public boolean checkFacilityAndHomeFacilityLinkage(UUID facilityId) {
+    UUID homeFacilityId = authenticationHelper.getCurrentUser().getHomeFacilityId();
+    if (facilityId.equals(homeFacilityId)) {
+      return false;
+    }
+    FacilityDto facility = facilityService.findOne(facilityId);
+    if (facility.getType().getCode().equals("WS")) {
+      FacilityDto homeFacility = facilityService.findOne(homeFacilityId);
+      return homeFacility.getGeographicZone().getId().equals(facility.getGeographicZone().getId());
+    } else {
+      return false;
+    }
+  }
+
   private void throwException(String errorKey, String... params) {
     throw new PermissionMessageException(new Message(errorKey, (Object)params));
   }
