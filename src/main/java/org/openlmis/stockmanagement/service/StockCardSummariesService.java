@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.util.Collections.emptyList;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
@@ -29,9 +30,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -223,10 +226,13 @@ public class StockCardSummariesService extends StockCardBaseService {
    * @param pageable   page object.
    * @return page of stock cards.
    */
-  public Page<StockCardDto> findStockCards(UUID programId, UUID facilityId, Pageable pageable) {
+  public Page<StockCardDto> findStockCards(UUID programId, UUID facilityId, Pageable pageable,
+                                           Profiler profiler) {
+    profiler.start("FIND_BY_PROGRAM_AND_FACILITY");
     Page<StockCard> pageOfCards = stockCardRepository
         .findByProgramIdAndFacilityId(programId, facilityId, pageable);
 
+    profiler.start("CARDS_TO_DTO");
     List<StockCardDto> cardDtos = cardsToDtos(pageOfCards.getContent());
     return new PageImpl<>(cardDtos, pageable, pageOfCards.getTotalElements());
   }
@@ -256,10 +262,23 @@ public class StockCardSummariesService extends StockCardBaseService {
 
   private List<StockCardDto> cardsToDtos(List<StockCard> cards) {
     LOGGER.info("Calling ref data to get all approved orderables");
-    Map<OrderableLotIdentity, OrderableLot> orderableLotsMap = createOrderableLotMap(
-        orderableReferenceDataService.findAll());
+    final Set<OrderableLotIdentity> orderableLotsMapIds = cards.stream().map(
+        stockCard -> new OrderableLotIdentity(stockCard.getOrderableId(), stockCard.getLotId()))
+        .collect(Collectors.toSet());
 
-    return loadOrderableLotUnitAndRemoveLineItems(createDtos(cards), orderableLotsMap);
+    final Map<UUID, OrderableDto> orderables = orderableReferenceDataService.findByIds(
+        orderableLotsMapIds.stream().map(OrderableLotIdentity::getOrderableId).collect(toSet()))
+        .stream().collect(toMap(OrderableDto::getId, identity()));
+    final Map<UUID, LotDto> lots = lotReferenceDataService.findByIds(
+        orderableLotsMapIds.stream().map(OrderableLotIdentity::getLotId).filter(Objects::nonNull)
+            .collect(toSet())).stream().collect(toMap(LotDto::getId, identity()));
+
+    return createDtos(cards).stream().map(cardDto -> {
+      cardDto.setOrderable(orderables.get(cardDto.getOrderableId()));
+      cardDto.setLot(cardDto.getLotId() != null ? lots.get(cardDto.getLotId()) : null);
+      cardDto.setLineItems(null);
+      return cardDto;
+    }).collect(Collectors.toList());
   }
 
   private List<StockCardDto> loadOrderableLotUnitAndRemoveLineItems(
