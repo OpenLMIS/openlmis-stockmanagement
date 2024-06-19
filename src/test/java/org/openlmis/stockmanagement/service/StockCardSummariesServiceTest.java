@@ -36,8 +36,10 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.ImmutableSet;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -480,6 +482,13 @@ public class StockCardSummariesServiceTest {
     UUID lotId2 = UUID.randomUUID();
     UUID unitOfOrderable1 = UUID.randomUUID();
     UUID unitOfOrderable2 = UUID.randomUUID();
+
+    OrderableDto orderable1 = createOrderableDto(orderableId1, "1");
+    OrderableDto orderable2 = createOrderableDto(orderableId2, "2");
+
+    LotDto lot1 = LotDto.builder().id(lotId1).build();
+    LotDto lot2 = LotDto.builder().id(lotId2).build();
+
     StockEvent event = new StockEventDataBuilder()
         .withFacility(facilityId)
         .withProgram(programId)
@@ -503,6 +512,12 @@ public class StockCardSummariesServiceTest {
 
     when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId))
         .thenReturn(stockCards);
+
+    when(orderableReferenceDataService
+        .findByIds(new HashSet<>(Arrays.asList(orderableId1, orderableId2))))
+        .thenReturn(Arrays.asList(orderable1, orderable2));
+    when(lotReferenceDataService.findByIds(new HashSet<>(Arrays.asList(lotId1, lotId2))))
+        .thenReturn(Arrays.asList(lot1, lot2));
 
     //when
     List<StockCardDto> stockCardsDtos =

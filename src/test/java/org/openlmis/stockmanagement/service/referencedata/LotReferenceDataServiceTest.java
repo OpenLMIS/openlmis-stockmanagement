@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
+import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
@@ -95,6 +96,27 @@ public class LotReferenceDataServiceTest extends BaseReferenceDataServiceTest<Lo
     URI uri = uriCaptor.getValue();
     assertEquals(serviceUrl + service.getUrl()
             + "?expirationDate=" + expirationDate.toString(),
+        uri.toString());
+
+    assertAuthHeader(entityCaptor.getValue());
+    assertNull(entityCaptor.getValue().getBody());
+  }
+
+  @Test
+  public void findByIdsShouldReturnMatchingLots() {
+    LotDto lot = mockPageResponseEntityAndGetDto();
+
+    List<LotDto> response = service.findByIds(singletonList(lot.getId()));
+
+    assertThat(response, hasSize(1));
+    assertThat(response, hasItem(lot));
+
+    verify(restTemplate).exchange(
+        uriCaptor.capture(), eq(HttpMethod.GET), entityCaptor.capture(),
+        refEq(new DynamicPageTypeReference<>(LotDto.class)));
+
+    URI uri = uriCaptor.getValue();
+    assertEquals(serviceUrl + service.getUrl() + "?id=" + lot.getId().toString(),
         uri.toString());
 
     assertAuthHeader(entityCaptor.getValue());
