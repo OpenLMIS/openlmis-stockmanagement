@@ -19,6 +19,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_AS
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_NOT_FOUND;
 import static org.slf4j.ext.XLoggerFactory.getXLogger;
 
+import java.util.Set;
 import java.util.UUID;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
@@ -47,7 +48,7 @@ public class ValidDestinationService extends SourceDestinationBaseService {
    * @param pageable pagination and sorting parameters
    * @return valid source assignment DTOs
    */
-  public Page<ValidSourceDestinationDto> findDestinations(UUID programId,
+  public Page<ValidSourceDestinationDto> findDestinations(Set<UUID> programId,
                                                           UUID facilityId,
                                                           boolean includeDisabled,
                                                           Pageable pageable) {

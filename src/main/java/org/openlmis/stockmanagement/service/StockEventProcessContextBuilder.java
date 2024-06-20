@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static java.util.Collections.singleton;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.slf4j.ext.XLoggerFactory.getXLogger;
 
@@ -214,16 +215,16 @@ public class StockEventProcessContextBuilder {
 
     profiler.start("CREATE_LAZY_SOURCES");
     Supplier<List<ValidSourceAssignment>> sourcesSupplier = () -> validSourceAssignmentRepository
-        .findByProgramIdAndFacilityTypeId(
-                eventDto.getProgramId(), context.getFacilityTypeId(), Pageable.unpaged());
+        .findByProgramIdInAndFacilityTypeId(singleton(eventDto.getProgramId()),
+            context.getFacilityTypeId(), Pageable.unpaged());
     LazyList<ValidSourceAssignment> sources = new LazyList<>(sourcesSupplier);
     context.setSources(sources);
 
     profiler.start("CREATE_LAZY_DESTINATIONS");
-    Supplier<List<ValidDestinationAssignment>> destinationsSupplier = () ->
-        validDestinationAssignmentRepository
-        .findByProgramIdAndFacilityTypeId(
-                eventDto.getProgramId(), context.getFacilityTypeId(), Pageable.unpaged());
+    Supplier<List<ValidDestinationAssignment>> destinationsSupplier =
+        () -> validDestinationAssignmentRepository
+            .findByProgramIdInAndFacilityTypeId(singleton(eventDto.getProgramId()),
+                context.getFacilityTypeId(), Pageable.unpaged());
     LazyList<ValidDestinationAssignment> destinations = new LazyList<>(destinationsSupplier);
     context.setDestinations(destinations);
 

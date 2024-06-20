@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static java.util.Collections.singleton;
 import static org.openlmis.stockmanagement.dto.ValidSourceDestinationDto.createFrom;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_ORGANIZATION_ID_NOT_FOUND;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
@@ -114,8 +116,8 @@ public abstract class SourceDestinationBaseService {
     Node foundNode = findExistingNode(assignment, programId, facilityTypeId);
     if (foundNode != null) {
       SourceDestinationAssignment foundAssignment = repository
-          .findByProgramIdAndFacilityTypeIdAndNodeId(
-              programId, facilityTypeId, foundNode.getId());
+          .findByProgramIdInAndFacilityTypeIdAndNodeId(
+              singleton(programId), facilityTypeId, foundNode.getId());
 
       if (foundAssignment != null) {
         return createAssignmentDto(foundAssignment, null);
@@ -129,20 +131,20 @@ public abstract class SourceDestinationBaseService {
    * This method will return only those assignments that match the geo level affinity
    * or all possible assignments (when filtering params are not provided).
    *
-   * @param programId program id
+   * @param programIds program id
    * @param facilityId facility id
    * @param repository assignment repository
    * @param <T> assignment type
    * @return a list of assignment dto or empty list if not found.
    */
   protected <T extends SourceDestinationAssignment> Page<ValidSourceDestinationDto> findAssignments(
-      UUID programId, UUID facilityId, boolean includeDisabled,
+      Set<UUID> programIds, UUID facilityId, boolean includeDisabled,
       SourceDestinationAssignmentRepository<T> repository,
       Profiler profiler, Pageable pageable) {
 
     profiler.start("FIND_ASSIGNMENTS");
-    if (programId != null && facilityId != null) {
-      return findFilteredAssignments(programId, facilityId, includeDisabled,
+    if (programIds != null && facilityId != null) {
+      return findFilteredAssignments(programIds, facilityId, includeDisabled,
           repository, profiler, pageable);
     } else if (includeDisabled) {
       return findAllAssignments(repository, profiler, pageable);
@@ -296,7 +298,7 @@ public abstract class SourceDestinationBaseService {
   }
 
   private <T extends SourceDestinationAssignment> Page<ValidSourceDestinationDto>
-      findFilteredAssignments(UUID programId, UUID facilityId, boolean includeDisabled,
+      findFilteredAssignments(Set<UUID> programIds, UUID facilityId, boolean includeDisabled,
       SourceDestinationAssignmentRepository<T> repository, Profiler profiler, Pageable pageable) {
     profiler.start("FIND_FACILITY_BY_ID");
     FacilityDto facility = facilityRefDataService.findOne(facilityId);
@@ -308,11 +310,14 @@ public abstract class SourceDestinationBaseService {
 
     profiler.start("CHECK_PROGRAM_AND_FACILITY_TYPE_EXIST");
     UUID facilityTypeId = facility.getType().getId();
-    programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(programId, facilityTypeId);
+    for (UUID programId : programIds) {
+      programFacilityTypeExistenceService
+          .checkProgramAndFacilityTypeExist(programId, facilityTypeId);
+    }
 
     profiler.start("FIND_ASSIGNMENTS_BY_PROGRAM_AND_FACILITY_TYPE");
     List<T> assignments = repository
-            .findByProgramIdAndFacilityTypeId(programId, facilityTypeId, Pageable.unpaged());
+            .findByProgramIdInAndFacilityTypeId(programIds, facilityTypeId, Pageable.unpaged());
 
     profiler.start("FIND_FACILITY_IDS");
     List<UUID> facilitiesIds = assignments.stream()
