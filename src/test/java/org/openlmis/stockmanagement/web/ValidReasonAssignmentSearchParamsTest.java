@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.web;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.openlmis.stockmanagement.web.ValidReasonAssignmentSearchParams.FACILITY_TYPE;
 import static org.openlmis.stockmanagement.web.ValidReasonAssignmentSearchParams.PROGRAM;
 import static org.openlmis.stockmanagement.web.ValidReasonAssignmentSearchParams.REASON;
@@ -41,7 +42,7 @@ public class ValidReasonAssignmentSearchParamsTest {
     queryMap.add(PROGRAM, VALUE.toString());
     ValidReasonAssignmentSearchParams params = new ValidReasonAssignmentSearchParams(queryMap);
 
-    assertEquals(VALUE, params.getProgram());
+    assertTrue(params.getProgram().contains(VALUE));
   }
 
   @Test

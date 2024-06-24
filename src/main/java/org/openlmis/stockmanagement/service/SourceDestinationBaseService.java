@@ -15,7 +15,6 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static java.util.Collections.singleton;
 import static org.openlmis.stockmanagement.dto.ValidSourceDestinationDto.createFrom;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_ORGANIZATION_ID_NOT_FOUND;
@@ -116,8 +115,8 @@ public abstract class SourceDestinationBaseService {
     Node foundNode = findExistingNode(assignment, programId, facilityTypeId);
     if (foundNode != null) {
       SourceDestinationAssignment foundAssignment = repository
-          .findByProgramIdInAndFacilityTypeIdAndNodeId(
-              singleton(programId), facilityTypeId, foundNode.getId());
+          .findByProgramIdAndFacilityTypeIdAndNodeId(
+              programId, facilityTypeId, foundNode.getId());
 
       if (foundAssignment != null) {
         return createAssignmentDto(foundAssignment, null);

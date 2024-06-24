@@ -338,8 +338,8 @@ traits:
           type: string
         programId:
           required: true
-          description: Program id, indicates the program that the queries stock card summaries is under.
-          repeat: false
+          description: Program id, indicates the program that the queries stock card summaries is under, can specify multiple program ids.
+          repeat: true
           type: string
         orderableId:
           required: false
@@ -543,6 +543,7 @@ traits:
           programId:
             required: false
             description: Program ID, indicates the program that the valid destinations are under.
+            repeat: true
           facilityId:
             required: false
             description: Facility ID, indicates the facility that the valid destinations are under.
@@ -622,6 +623,7 @@ traits:
             programId:
               required: false
               description: Program ID, indicates the program that the valid sources are under.
+              repeat: true
             facilityId:
               required: false
               description: Facility ID, indicates the facility that the valid sources are under.
@@ -736,6 +738,7 @@ traits:
             description: Program id
             type: string
             required: false
+            repeat: true
           facilityType:
             description: Facility type id
             type: string

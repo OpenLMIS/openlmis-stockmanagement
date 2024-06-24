@@ -28,7 +28,6 @@ import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationDtoDa
 import java.util.List;
 import java.util.UUID;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -72,7 +71,6 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
     super.setUp();
   }
 
-  @Ignore
   @Test
   public void shouldNotRejectSourceWhenGeoAffinityMatch() {
     UUID sourceId = UUID.randomUUID();
@@ -91,7 +89,6 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
     sourceDestinationGeoLeveLAffinityValidator.validate(stockEventDto);
   }
 
-  @Ignore
   @Test
   public void shouldNotRejectDestinationWhenGeoAffinityMatch() {
     UUID destinationId = UUID.randomUUID();
@@ -110,7 +107,6 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
     sourceDestinationGeoLeveLAffinityValidator.validate(stockEventDto);
   }
 
-  @Ignore
   @Test
   public void shouldRejectSourceWhenGeoAffinityNotMatch() {
     UUID sourceId = UUID.randomUUID();
@@ -136,7 +132,6 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
     sourceDestinationGeoLeveLAffinityValidator.validate(stockEventDto);
   }
 
-  @Ignore
   @Test
   public void shouldRejectSourceWhenValidDestinationAssignmentsIsEmpty() {
     UUID sourceId = UUID.randomUUID();
@@ -159,7 +154,6 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
     sourceDestinationGeoLeveLAffinityValidator.validate(stockEventDto);
   }
 
-  @Ignore
   @Test
   public void shouldRejectSourceWithMessageWhenGeoAffinityNotMatch() {
     UUID sourceId = UUID.randomUUID();
@@ -183,7 +177,6 @@ public class SourceDestinationGeoLevelAffinityValidatorTest extends BaseValidato
     sourceDestinationGeoLeveLAffinityValidator.validate(stockEventDto);
   }
 
-  @Ignore
   @Test
   public void shouldRejectDestinationWhenGeoAffinityNotMatch() {
     UUID destinationId = UUID.randomUUID();

@@ -148,7 +148,9 @@ public class StockCardSummariesService extends StockCardBaseService {
     if (!homeFacilityPermissionService
         .checkFacilityAndHomeFacilityLinkage(params.getFacilityId())) {
       profiler.start("VALIDATE_VIEW_RIGHTS");
-      permissionService.canViewStockCard(params.getProgramId(), params.getFacilityId());
+      for (UUID id : params.getProgramId()) {
+        permissionService.canViewStockCard(id, params.getFacilityId());
+      }
     }
 
     profiler.start("GET_APPROVED_PRODUCTS");

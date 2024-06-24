@@ -19,6 +19,7 @@ import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.UUID;
 
 import org.openlmis.stockmanagement.dto.referencedata.ApprovedProductDto;
@@ -56,7 +57,8 @@ public class ApprovedProductReferenceDataService extends
    */
   public OrderablesAggregator getApprovedProducts(UUID facilityId, UUID programId,
                                                   Collection<UUID> orderableIds) {
-    return this.getApprovedProducts(facilityId, programId, orderableIds, null, null);
+    return this.getApprovedProducts(facilityId, Collections.singleton(programId), orderableIds,
+        null, null);
   }
 
   /**
@@ -74,14 +76,14 @@ public class ApprovedProductReferenceDataService extends
    */
   public OrderablesAggregator getApprovedProducts(
       UUID facilityId,
-      UUID programId,
+      Collection<UUID> programId,
       Collection<UUID> orderableIds,
       String orderableCode,
       String orderableName
   ) {
     RequestParameters params = RequestParameters.init();
 
-    params.set("programId", programId);
+    programId.forEach(id -> params.set("programId", id));
 
     if (!isEmpty(orderableIds)) {
       params.set("orderableId", orderableIds);

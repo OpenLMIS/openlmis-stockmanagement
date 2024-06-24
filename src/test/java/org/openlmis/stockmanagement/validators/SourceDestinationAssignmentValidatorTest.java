@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -96,7 +95,6 @@ public class SourceDestinationAssignmentValidatorTest extends BaseValidatorTest 
     sourceDestinationAssignmentValidator.validate(eventDto);
   }
 
-  @Ignore
   @Test
   public void shouldNotPassWhenEventHasSourceThatNotExist() throws Exception {
     //given
@@ -117,7 +115,6 @@ public class SourceDestinationAssignmentValidatorTest extends BaseValidatorTest 
     sourceDestinationAssignmentValidator.validate(eventDto);
   }
 
-  @Ignore
   @Test
   public void shouldNotPassWhenEventHasDestinationThatNotExist() throws Exception {
     //given

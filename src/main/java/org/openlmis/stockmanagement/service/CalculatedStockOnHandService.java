@@ -68,12 +68,12 @@ public class CalculatedStockOnHandService {
    * @return List of stock cards with SOH values, empty list if no stock cards were found.
    */
   public List<StockCard> getStockCardsWithStockOnHand(
-          UUID programId, UUID facilityId, LocalDate asOfDate, List<UUID> orderableIds,
+      List<UUID> programId, UUID facilityId, LocalDate asOfDate, List<UUID> orderableIds,
           Set<UUID> lotCodeIds) {
 
     List<StockCard> stockCards = orderableIds.isEmpty()
-        ? stockCardRepository.findByProgramIdAndFacilityId(programId, facilityId)
-        : stockCardRepository.findByOrderableIdInAndProgramIdAndFacilityId(
+        ? stockCardRepository.findByProgramIdInAndFacilityId(programId, facilityId)
+        : stockCardRepository.findByOrderableIdInAndProgramIdInAndFacilityId(
         orderableIds, programId, facilityId);
 
     stockCards.forEach(stockCard ->
@@ -122,7 +122,7 @@ public class CalculatedStockOnHandService {
   public List<StockCard> getStockCardsWithStockOnHand(
           UUID programId, UUID facilityId, LocalDate asOfDate, List<UUID> orderableIds) {
 
-    return getStockCardsWithStockOnHand(programId, facilityId,
+    return getStockCardsWithStockOnHand(Collections.singletonList(programId), facilityId,
             asOfDate, orderableIds, Collections.emptySet());
   }
 

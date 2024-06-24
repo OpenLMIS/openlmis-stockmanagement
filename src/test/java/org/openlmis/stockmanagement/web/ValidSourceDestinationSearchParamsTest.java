@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.web;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.openlmis.stockmanagement.web.ValidSourceDestinationSearchParams.FACILITY_ID;
 import static org.openlmis.stockmanagement.web.ValidSourceDestinationSearchParams.INCLUDE_DISABLED;
 import static org.openlmis.stockmanagement.web.ValidSourceDestinationSearchParams.PROGRAM_ID;
@@ -35,7 +36,6 @@ public class ValidSourceDestinationSearchParamsTest {
   private static final UUID FACILITY_ID_VALUE = UUID.randomUUID();
   private static final Boolean INCLUDE_DISABLED_VALUE = Boolean.TRUE;
 
-  @Ignore
   @Test
   public void shouldGetProgramIdValueFromParameters() {
     LinkedMultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>();
@@ -43,7 +43,8 @@ public class ValidSourceDestinationSearchParamsTest {
     queryMap.add(FACILITY_ID, FACILITY_ID_VALUE.toString());
     ValidSourceDestinationSearchParams params = new ValidSourceDestinationSearchParams(queryMap);
 
-    assertEquals(PROGRAM_ID_VALUE, params.getProgramId());
+    //assertEquals(PROGRAM_ID_VALUE, params.getProgramId());
+    assertTrue(params.getProgramId().contains(PROGRAM_ID_VALUE));
   }
 
   @Ignore

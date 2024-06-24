@@ -215,7 +215,7 @@ public class StockEventProcessContextBuilder {
 
     profiler.start("CREATE_LAZY_SOURCES");
     Supplier<List<ValidSourceAssignment>> sourcesSupplier = () -> validSourceAssignmentRepository
-        .findByProgramIdInAndFacilityTypeId(singleton(eventDto.getProgramId()),
+        .findByProgramIdAndFacilityTypeId(eventDto.getProgramId(),
             context.getFacilityTypeId(), Pageable.unpaged());
     LazyList<ValidSourceAssignment> sources = new LazyList<>(sourcesSupplier);
     context.setSources(sources);
@@ -223,7 +223,7 @@ public class StockEventProcessContextBuilder {
     profiler.start("CREATE_LAZY_DESTINATIONS");
     Supplier<List<ValidDestinationAssignment>> destinationsSupplier =
         () -> validDestinationAssignmentRepository
-            .findByProgramIdInAndFacilityTypeId(singleton(eventDto.getProgramId()),
+            .findByProgramIdAndFacilityTypeId(eventDto.getProgramId(),
                 context.getFacilityTypeId(), Pageable.unpaged());
     LazyList<ValidDestinationAssignment> destinations = new LazyList<>(destinationsSupplier);
     context.setDestinations(destinations);

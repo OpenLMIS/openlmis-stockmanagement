@@ -32,7 +32,15 @@ public interface SourceDestinationAssignmentRepository<T extends SourceDestinati
       @Param("programId") Set<UUID> programId, @Param("facilityTypeId") UUID facilityTypeId,
       Pageable pageable);
 
+  List<T> findByProgramIdAndFacilityTypeId(
+      @Param("programId") UUID programId, @Param("facilityTypeId") UUID facilityTypeId,
+      Pageable pageable);
+
   T findByProgramIdInAndFacilityTypeIdAndNodeId(
       @Param("programId") Set<UUID> programId, @Param("facilityTypeId") UUID facilityTypeId,
+      @Param("nodeId") UUID nodeId);
+
+  T findByProgramIdAndFacilityTypeIdAndNodeId(
+      @Param("programId") UUID programId, @Param("facilityTypeId") UUID facilityTypeId,
       @Param("nodeId") UUID nodeId);
 }

@@ -73,7 +73,8 @@ public class ValidSourceDestinationController {
     ValidSourceDestinationSearchParams params = new ValidSourceDestinationSearchParams(parameters);
 
     LOGGER.info(format("Try to find valid destinations with program %s and facility %s",
-        params.getProgramId(), params.getFacilityId()));
+        params.getFacilityId(),
+        params.getProgramId()));
     return validDestinationService.findDestinations(
             params.getProgramId(), params.getFacilityId(), params.getIncludeDisabled(), pageable);
   }

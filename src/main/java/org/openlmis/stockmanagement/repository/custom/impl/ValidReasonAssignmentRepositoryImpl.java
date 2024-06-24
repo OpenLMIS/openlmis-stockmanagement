@@ -51,7 +51,7 @@ public class ValidReasonAssignmentRepositoryImpl implements ValidReasonAssignmen
    * @param reasonId  Valid Reason Assignment stock card line item reason id
    * @return List of Valid Reason Assignments matching the parameters.
    */
-  public List<ValidReasonAssignment> search(UUID programId, UUID facilityTypeId,
+  public List<ValidReasonAssignment> search(Collection<UUID> programId, UUID facilityTypeId,
       Collection<ReasonType> reasonTypes, UUID reasonId) {
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 
@@ -62,7 +62,7 @@ public class ValidReasonAssignmentRepositoryImpl implements ValidReasonAssignmen
     Predicate predicate = builder.conjunction();
 
     if (null != programId) {
-      predicate = builder.and(predicate, builder.equal(root.get(PROGRAM_ID), programId));
+      predicate = builder.and(predicate, root.get(PROGRAM_ID).in(programId));
     }
 
     if (null != facilityTypeId) {

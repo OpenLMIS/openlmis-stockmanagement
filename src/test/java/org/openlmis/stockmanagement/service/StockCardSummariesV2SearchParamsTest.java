@@ -113,7 +113,7 @@ public class StockCardSummariesV2SearchParamsTest {
 
     StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParams(parameters);
 
-    assertEquals(programId, params.getProgramId());
+    assertEquals(programId, params.getProgramId().get(0));
     assertEquals(facilityId, params.getFacilityId());
     assertEquals(asOfDate, params.getAsOfDate());
     assertEquals(asList(orderableId1, orderableId2), params.getOrderableIds());

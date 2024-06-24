@@ -20,6 +20,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.Sets;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import javax.persistence.EntityManager;
@@ -93,7 +95,7 @@ public class ValidReasonAssignmentRepositoryIntegrationTest
     repository.save(newAssignment);
 
     List<ValidReasonAssignment> validReasonAssignments = repository.search(
-        PROGRAM_ID, FACILITY_TYPE_ID, Sets.newHashSet(
+        Collections.singleton(PROGRAM_ID), FACILITY_TYPE_ID, Sets.newHashSet(
             validReasonAssignment.getReason().getReasonType(),
             stockCardLineItemReason.getReasonType()),
         stockCardLineItemReason.getId());

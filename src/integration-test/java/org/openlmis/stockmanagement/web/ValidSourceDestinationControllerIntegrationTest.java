@@ -31,7 +31,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.UUID;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidSourceAssignment;
@@ -95,7 +94,7 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
     performSourcesOrDestinations(program, facility, false, sourceDestination, API_VALID_SOURCES);
   }
 
-  @Ignore
+  // Good
   @Test
   public void shouldGeAllValidSourcesOrDestinationsWhenProgramAndFacilityAreNotProvided()
           throws Exception {

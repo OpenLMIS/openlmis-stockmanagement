@@ -375,8 +375,8 @@ public class SourceDestinationBaseServiceTest {
         createFacilityDestination(mockedFacilityNode(facilityId, FACILITY_NODE_NAME))
     );
 
-    when(destinationRepository.findByProgramIdInAndFacilityTypeId(
-        singleton(programId), facilityTypeId, Pageable.unpaged()))
+    when(destinationRepository.findByProgramIdAndFacilityTypeId(
+        programId, facilityTypeId, Pageable.unpaged()))
         .thenReturn(validDestinationAssignments);
 
     when(facilityReferenceDataService.findByIds(anyListOf(UUID.class))).thenReturn(
@@ -423,8 +423,8 @@ public class SourceDestinationBaseServiceTest {
         createFacilityDestination(mockedFacilityNode(facilityId, FACILITY_NODE_NAME))
     );
 
-    when(destinationRepository.findByProgramIdInAndFacilityTypeId(
-        singleton(programId), facilityTypeId, Pageable.unpaged()))
+    when(destinationRepository.findByProgramIdAndFacilityTypeId(
+        programId, facilityTypeId, Pageable.unpaged()))
         .thenReturn(validDestinationAssignments);
 
     when(facilityReferenceDataService.findByIds(anyListOf(UUID.class))).thenReturn(
