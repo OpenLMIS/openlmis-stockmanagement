@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.web;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.openlmis.stockmanagement.web.ValidReasonAssignmentSearchParams.FACILITY_TYPE;
@@ -39,10 +40,13 @@ public class ValidReasonAssignmentSearchParamsTest {
   @Test
   public void shouldGetProgramIdValueFromParameters() {
     LinkedMultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>();
+    final UUID typeId = UUID.randomUUID();
     queryMap.add(PROGRAM, VALUE.toString());
+    queryMap.add(FACILITY_TYPE, typeId.toString());
     ValidReasonAssignmentSearchParams params = new ValidReasonAssignmentSearchParams(queryMap);
 
     assertTrue(params.getProgram().contains(VALUE));
+    assertFalse(params.getProgram().contains(typeId));
   }
 
   @Test

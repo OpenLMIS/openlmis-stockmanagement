@@ -15,6 +15,8 @@
 
 package org.openlmis.stockmanagement.repository;
 
+import static org.openlmis.stockmanagement.web.ValidSourceDestinationSearchParams.PROGRAM_ID;
+
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -28,7 +30,6 @@ import org.springframework.data.repository.query.Param;
 public interface SourceDestinationAssignmentRepository<T extends SourceDestinationAssignment>
     extends JpaRepository<T, UUID> {
 
-  String PROGRAM_ID = "programId";
   String FACILITY_TYPE_ID = "facilityTypeId";
   String NODE_ID = "nodeId";
 
