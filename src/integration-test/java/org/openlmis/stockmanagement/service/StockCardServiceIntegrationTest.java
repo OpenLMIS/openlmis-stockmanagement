@@ -19,6 +19,7 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
@@ -116,6 +117,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
   @MockBean
   private PermissionService permissionService;
 
+  @MockBean
+  private HomeFacilityPermissionService homeFacilityPermissionService;
+
   private Node node;
 
   private StockCardLineItemReason reason;
@@ -136,6 +140,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     reason = new StockCardLineItemReason("reason", null, ReasonType.CREDIT,
         ReasonCategory.ADJUSTMENT, false, Collections.emptyList());
     stockCardLineItemReasonRepository.save(reason);
+
+    when(homeFacilityPermissionService.checkFacilityAndHomeFacilityLinkage(any(UUID.class)))
+        .thenReturn(false);
   }
 
   @After

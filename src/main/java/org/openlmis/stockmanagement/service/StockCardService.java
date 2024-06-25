@@ -105,6 +105,9 @@ public class StockCardService extends StockCardBaseService {
   @Autowired
   private StockOnHandCalculationService calculationSoHService;
 
+  @Autowired
+  private HomeFacilityPermissionService homeFacilityPermissionService;
+
   /**
    * Generate stock card line items and stock cards based on event, and persist them.
    *
@@ -151,7 +154,11 @@ public class StockCardService extends StockCardBaseService {
     StockCard foundCard = card.shallowCopy();
 
     LOGGER.debug("Stock card found");
-    permissionService.canViewStockCard(foundCard.getProgramId(), foundCard.getFacilityId());
+
+    if (!homeFacilityPermissionService
+        .checkFacilityAndHomeFacilityLinkage(foundCard.getFacilityId())) {
+      permissionService.canViewStockCard(foundCard.getProgramId(), foundCard.getFacilityId());
+    }
 
     calculationSoHService.calculateStockOnHand(foundCard);
 
