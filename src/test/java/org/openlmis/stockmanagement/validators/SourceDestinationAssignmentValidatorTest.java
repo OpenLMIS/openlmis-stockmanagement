@@ -26,7 +26,6 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_FOU
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 
 import java.util.ArrayList;
-import java.util.Set;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Rule;
@@ -71,11 +70,11 @@ public class SourceDestinationAssignmentValidatorTest extends BaseValidatorTest 
     when(node.getId()).thenReturn(UUID.randomUUID());
 
     lenient().when(validSourceAssignmentRepository
-        .findByProgramIdInAndFacilityTypeId(any(Set.class), any(UUID.class), any(Pageable.class)))
+        .findByProgramIdAndFacilityTypeId(any(UUID.class), any(UUID.class), any(Pageable.class)))
         .thenReturn(singletonList(validSourceAssignment));
 
     when(validDestinationAssignmentRepository
-        .findByProgramIdInAndFacilityTypeId(any(Set.class), any(UUID.class), any(Pageable.class)))
+        .findByProgramIdAndFacilityTypeId(any(UUID.class), any(UUID.class), any(Pageable.class)))
         .thenReturn(singletonList(validDestinationAssignment));
   }
 
@@ -105,7 +104,7 @@ public class SourceDestinationAssignmentValidatorTest extends BaseValidatorTest 
     eventDto.getLineItems().get(0).setDestinationId(null);
 
     when(validSourceAssignmentRepository
-        .findByProgramIdInAndFacilityTypeId(any(Set.class), any(UUID.class), any(Pageable.class)))
+        .findByProgramIdAndFacilityTypeId(any(UUID.class), any(UUID.class), any(Pageable.class)))
         .thenReturn(new ArrayList<>());
 
     expectedEx.expect(ValidationMessageException.class);
@@ -125,7 +124,7 @@ public class SourceDestinationAssignmentValidatorTest extends BaseValidatorTest 
     eventDto.getLineItems().get(0).setSourceId(null);
 
     when(validDestinationAssignmentRepository
-        .findByProgramIdInAndFacilityTypeId(any(Set.class), any(UUID.class), any(Pageable.class)))
+        .findByProgramIdAndFacilityTypeId(any(UUID.class), any(UUID.class), any(Pageable.class)))
         .thenReturn(new ArrayList<>());
 
     expectedEx.expect(ValidationMessageException.class);

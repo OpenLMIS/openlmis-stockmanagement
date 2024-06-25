@@ -45,7 +45,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.domain.sourcedestination.Organization;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAssignment;
@@ -131,8 +131,8 @@ public class SourceDestinationBaseServiceTest {
     when(nodeRepository.findByReferenceId(sourceId)).thenReturn(node);
     when(facilityReferenceDataService.findOne(sourceId)).thenReturn(new FacilityDto());
 
-    when(sourceRepository.findByProgramIdInAndFacilityTypeIdAndNodeId(
-        singleton(programId), facilityTypeId, node.getId()))
+    when(sourceRepository.findByProgramIdAndFacilityTypeIdAndNodeId(
+        programId, facilityTypeId, node.getId()))
         .thenReturn(createSourceAssignment(programId, facilityTypeId, node));
 
     //when
@@ -226,8 +226,8 @@ public class SourceDestinationBaseServiceTest {
     when(nodeRepository.findByReferenceId(destinationId)).thenReturn(node);
     when(facilityReferenceDataService.findOne(destinationId)).thenReturn(new FacilityDto());
 
-    when(destinationRepository.findByProgramIdInAndFacilityTypeIdAndNodeId(
-        singleton(programId), facilityTypeId, node.getId()))
+    when(destinationRepository.findByProgramIdAndFacilityTypeIdAndNodeId(
+        programId, facilityTypeId, node.getId()))
         .thenReturn(createDestinationAssignment(programId, facilityTypeId, node));
 
     //when
@@ -375,8 +375,8 @@ public class SourceDestinationBaseServiceTest {
         createFacilityDestination(mockedFacilityNode(facilityId, FACILITY_NODE_NAME))
     );
 
-    when(destinationRepository.findByProgramIdAndFacilityTypeId(
-        programId, facilityTypeId, Pageable.unpaged()))
+    when(destinationRepository.findByProgramIdInAndFacilityTypeId(
+        singleton(programId), facilityTypeId, Pageable.unpaged()))
         .thenReturn(validDestinationAssignments);
 
     when(facilityReferenceDataService.findByIds(anyListOf(UUID.class))).thenReturn(
@@ -423,8 +423,8 @@ public class SourceDestinationBaseServiceTest {
         createFacilityDestination(mockedFacilityNode(facilityId, FACILITY_NODE_NAME))
     );
 
-    when(destinationRepository.findByProgramIdAndFacilityTypeId(
-        programId, facilityTypeId, Pageable.unpaged()))
+    when(destinationRepository.findByProgramIdInAndFacilityTypeId(
+        singleton(programId), facilityTypeId, Pageable.unpaged()))
         .thenReturn(validDestinationAssignments);
 
     when(facilityReferenceDataService.findByIds(anyListOf(UUID.class))).thenReturn(
