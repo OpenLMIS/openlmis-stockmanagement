@@ -28,19 +28,23 @@ import org.springframework.data.repository.query.Param;
 public interface SourceDestinationAssignmentRepository<T extends SourceDestinationAssignment>
     extends JpaRepository<T, UUID> {
 
+  String PROGRAM_ID = "programId";
+  String FACILITY_TYPE_ID = "facilityTypeId";
+  String NODE_ID = "nodeId";
+
   List<T> findByProgramIdInAndFacilityTypeId(
-      @Param("programId") Set<UUID> programId, @Param("facilityTypeId") UUID facilityTypeId,
+      @Param(PROGRAM_ID) Set<UUID> programId, @Param(FACILITY_TYPE_ID) UUID facilityTypeId,
       Pageable pageable);
 
   List<T> findByProgramIdAndFacilityTypeId(
-      @Param("programId") UUID programId, @Param("facilityTypeId") UUID facilityTypeId,
+      @Param(PROGRAM_ID) UUID programId, @Param(FACILITY_TYPE_ID) UUID facilityTypeId,
       Pageable pageable);
 
   T findByProgramIdInAndFacilityTypeIdAndNodeId(
-      @Param("programId") Set<UUID> programId, @Param("facilityTypeId") UUID facilityTypeId,
-      @Param("nodeId") UUID nodeId);
+      @Param(PROGRAM_ID) Set<UUID> programId, @Param(FACILITY_TYPE_ID) UUID facilityTypeId,
+      @Param(NODE_ID) UUID nodeId);
 
   T findByProgramIdAndFacilityTypeIdAndNodeId(
-      @Param("programId") UUID programId, @Param("facilityTypeId") UUID facilityTypeId,
-      @Param("nodeId") UUID nodeId);
+      @Param(PROGRAM_ID) UUID programId, @Param(FACILITY_TYPE_ID) UUID facilityTypeId,
+      @Param(NODE_ID) UUID nodeId);
 }
