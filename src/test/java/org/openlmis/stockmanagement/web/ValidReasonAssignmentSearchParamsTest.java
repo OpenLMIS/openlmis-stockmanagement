@@ -25,6 +25,7 @@ import static org.openlmis.stockmanagement.web.ValidReasonAssignmentSearchParams
 import static org.openlmis.stockmanagement.web.ValidReasonAssignmentSearchParams.REASON_TYPE;
 
 import com.google.common.collect.Sets;
+import java.util.Collection;
 import java.util.UUID;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
@@ -42,11 +43,15 @@ public class ValidReasonAssignmentSearchParamsTest {
     LinkedMultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>();
     final UUID typeId = UUID.randomUUID();
     queryMap.add(PROGRAM, VALUE.toString());
+    queryMap.add(PROGRAM, "");
     queryMap.add(FACILITY_TYPE, typeId.toString());
     ValidReasonAssignmentSearchParams params = new ValidReasonAssignmentSearchParams(queryMap);
 
-    assertTrue(params.getProgramIds().contains(VALUE));
-    assertFalse(params.getProgramIds().contains(typeId));
+    Collection<UUID> programIds = params.getProgramIds();
+
+    assertTrue(programIds.contains(VALUE));
+    assertFalse(programIds.contains(typeId));
+    assertFalse(programIds.contains(""));
   }
 
   @Test
@@ -103,10 +108,13 @@ public class ValidReasonAssignmentSearchParamsTest {
     LinkedMultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>();
     queryMap.add(REASON_TYPE, DEBIT);
     queryMap.add(REASON_TYPE, CREDIT);
+    queryMap.add(REASON, VALUE.toString());
     ValidReasonAssignmentSearchParams params = new ValidReasonAssignmentSearchParams(queryMap);
 
+    Collection<ReasonType> reasonTypes = params.getReasonType();
+
     assertEquals(Sets.newHashSet(ReasonType.fromString(CREDIT), ReasonType.fromString(DEBIT)),
-        params.getReasonType());
+        reasonTypes);
   }
 
   @Test
