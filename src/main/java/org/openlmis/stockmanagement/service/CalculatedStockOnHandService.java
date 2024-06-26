@@ -60,7 +60,7 @@ public class CalculatedStockOnHandService {
   /**
    * Returns list of stock cards with fetched Stock on Hand values.
    *
-   * @param programId  program id to find stock cards
+   * @param programIds  program ids to find stock cards
    * @param facilityId facility id to find stock cards
    * @param asOfDate   date used to get latest stock on hand before or equal specific date
    * @param orderableIds  orderable ids to find stock card
@@ -68,13 +68,13 @@ public class CalculatedStockOnHandService {
    * @return List of stock cards with SOH values, empty list if no stock cards were found.
    */
   public List<StockCard> getStockCardsWithStockOnHand(
-          UUID programId, UUID facilityId, LocalDate asOfDate, List<UUID> orderableIds,
+      List<UUID> programIds, UUID facilityId, LocalDate asOfDate, List<UUID> orderableIds,
           Set<UUID> lotCodeIds) {
 
     List<StockCard> stockCards = orderableIds.isEmpty()
-        ? stockCardRepository.findByProgramIdAndFacilityId(programId, facilityId)
-        : stockCardRepository.findByOrderableIdInAndProgramIdAndFacilityId(
-        orderableIds, programId, facilityId);
+        ? stockCardRepository.findByProgramIdInAndFacilityId(programIds, facilityId)
+        : stockCardRepository.findByOrderableIdInAndProgramIdInAndFacilityId(
+        orderableIds, programIds, facilityId);
 
     stockCards.forEach(stockCard ->
         fetchStockOnHand(stockCard, asOfDate != null ? asOfDate : LocalDate.now()));
@@ -122,7 +122,7 @@ public class CalculatedStockOnHandService {
   public List<StockCard> getStockCardsWithStockOnHand(
           UUID programId, UUID facilityId, LocalDate asOfDate, List<UUID> orderableIds) {
 
-    return getStockCardsWithStockOnHand(programId, facilityId,
+    return getStockCardsWithStockOnHand(Collections.singletonList(programId), facilityId,
             asOfDate, orderableIds, Collections.emptySet());
   }
 

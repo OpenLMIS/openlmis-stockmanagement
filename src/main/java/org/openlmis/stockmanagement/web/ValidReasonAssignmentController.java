@@ -86,7 +86,7 @@ public class ValidReasonAssignmentController {
     ValidReasonAssignmentSearchParams params = new ValidReasonAssignmentSearchParams(queryParams);
 
     profiler.start("SEARCH_VALID_REASONS_IN_SERVICE");
-    List<ValidReasonAssignment> reasons =  reasonAssignmentRepository.search(params.getProgram(),
+    List<ValidReasonAssignment> reasons =  reasonAssignmentRepository.search(params.getProgramIds(),
         params.getFacilityType(),
         params.getReasonType(), params.getReason());
 

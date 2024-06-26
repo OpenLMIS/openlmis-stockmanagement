@@ -100,7 +100,7 @@ public class ValidReasonAssignmentControllerIntegrationTest extends BaseWebInteg
 
   @Test
   public void getValidReasonAssignmentsByAllParameters() {
-    when(reasonAssignmentRepository.search(programId, facilityTypeId,
+    when(reasonAssignmentRepository.search(Collections.singleton(programId), facilityTypeId,
         Sets.newHashSet(ReasonType.CREDIT, ReasonType.DEBIT), reasonId)).thenReturn(
         Collections.singletonList(reasonAssignment));
 

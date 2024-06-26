@@ -24,7 +24,7 @@ import org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams;
 
 public class StockCardSummariesV2SearchParamsDataBuilder {
 
-  private UUID programId;
+  private List<UUID> programIds;
   private UUID facilityId;
   private List<UUID> orderableId;
   private LocalDate asOfDate;
@@ -37,7 +37,7 @@ public class StockCardSummariesV2SearchParamsDataBuilder {
    * Creates builder for creating new instance of {@link StockCardSummariesV2SearchParams}.
    */
   public StockCardSummariesV2SearchParamsDataBuilder() {
-    programId = UUID.randomUUID();
+    programIds = asList(UUID.randomUUID(), UUID.randomUUID());
     facilityId = UUID.randomUUID();
     orderableId = asList(UUID.randomUUID(), UUID.randomUUID());
     asOfDate = LocalDate.now();
@@ -52,7 +52,7 @@ public class StockCardSummariesV2SearchParamsDataBuilder {
    * @return created stock card line item reason.
    */
   public StockCardSummariesV2SearchParams build() {
-    return new StockCardSummariesV2SearchParams(programId, facilityId,
+    return new StockCardSummariesV2SearchParams(programIds, facilityId,
         orderableId, asOfDate, nonEmptyOnly, orderableCode, orderabletName, lotCode);
   }
 
@@ -62,7 +62,7 @@ public class StockCardSummariesV2SearchParamsDataBuilder {
   }
 
   public StockCardSummariesV2SearchParamsDataBuilder withoutProgramId() {
-    this.programId = null;
+    this.programIds = null;
     return this;
   }
 

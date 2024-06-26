@@ -56,7 +56,7 @@ public final class StockCardSummariesV2SearchParams {
   static final String ORDERABLE_NAME = "orderableName";
   static final String LOT_CODE = "lotCode";
 
-  private UUID programId;
+  private List<UUID> programIds;
   private UUID facilityId;
   private List<UUID> orderableIds;
   private LocalDate asOfDate;
@@ -71,14 +71,14 @@ public final class StockCardSummariesV2SearchParams {
    */
   public StockCardSummariesV2SearchParams(MultiValueMap<String, String> parameters) {
     if (!MapUtils.isEmpty(parameters)) {
-      this.programId = getId(PROGRAM_ID, parameters);
+      this.programIds = getIds(PROGRAM_ID, parameters);
       this.facilityId = getId(FACILITY_ID, parameters);
 
       if (null == facilityId) {
         throw new ValidationMessageException(ERROR_FACILITY_ID_MISSING);
       }
 
-      if (null == programId) {
+      if (programIds.isEmpty()) {
         throw new ValidationMessageException(ERROR_PROGRAM_ID_MISSING);
       }
 

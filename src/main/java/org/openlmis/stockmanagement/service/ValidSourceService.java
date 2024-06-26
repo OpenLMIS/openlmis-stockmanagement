@@ -19,6 +19,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_ASSIGNM
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_NOT_FOUND;
 import static org.slf4j.ext.XLoggerFactory.getXLogger;
 
+import java.util.Set;
 import java.util.UUID;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidSourceAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
@@ -42,12 +43,12 @@ public class ValidSourceService extends SourceDestinationBaseService {
   /**
    * Find valid destinations page by program ID and facility ID.
    *
-   * @param programId      program ID
+   * @param programIds program IDs
    * @param facilityId facility ID
    * @param pageable pagination and sorting parameters
    * @return page of valid destination assignment DTOs
    */
-  public Page<ValidSourceDestinationDto> findSources(UUID programId,
+  public Page<ValidSourceDestinationDto> findSources(Set<UUID> programIds,
                                                      UUID facilityId,
                                                      boolean includeDisabled,
                                                      Pageable pageable) {
@@ -56,7 +57,7 @@ public class ValidSourceService extends SourceDestinationBaseService {
     profiler.setLogger(XLOGGER);
 
     Page<ValidSourceDestinationDto> sourceAssignments =
-            findAssignments(programId, facilityId, includeDisabled,
+            findAssignments(programIds, facilityId, includeDisabled,
                 validSourceRepository, profiler, pageable);
     profiler.stop().log();
     XLOGGER.exit();

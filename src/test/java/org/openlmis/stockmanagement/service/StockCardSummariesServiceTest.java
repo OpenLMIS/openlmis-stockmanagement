@@ -48,7 +48,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
@@ -216,7 +216,7 @@ public class StockCardSummariesServiceTest {
     when(approvedProductReferenceDataService
         .getApprovedProducts(
             eq(params.getFacilityId()),
-            eq(params.getProgramId()),
+            eq(params.getProgramIds()),
             eq(params.getOrderableIds()),
             eq(params.getOrderableCode()),
             eq(params.getOrderableName())
@@ -244,7 +244,7 @@ public class StockCardSummariesServiceTest {
 
     StockEvent event = new StockEventDataBuilder()
         .withFacility(params.getFacilityId())
-        .withProgram(params.getProgramId())
+        .withProgram(params.getProgramIds().get(0))
         .build();
 
     StockCard stockCard = new StockCardDataBuilder(event)
@@ -260,7 +260,7 @@ public class StockCardSummariesServiceTest {
     List<StockCard> stockCards = asList(stockCard, stockCard1);
 
     when(calculatedStockOnHandService
-        .getStockCardsWithStockOnHand(params.getProgramId(), params.getFacilityId(),
+        .getStockCardsWithStockOnHand(params.getProgramIds(), params.getFacilityId(),
             params.getAsOfDate(), Collections.emptyList(), Collections.emptySet()))
         .thenReturn(stockCards);
 
@@ -280,7 +280,7 @@ public class StockCardSummariesServiceTest {
     doThrow(new
         PermissionMessageException(new Message("no permission")))
         .when(permissionService)
-        .canViewStockCard(params.getProgramId(), params.getFacilityId());
+        .canViewStockCard(params.getProgramIds().get(0), params.getFacilityId());
 
     stockCardSummariesService.findStockCards(params);
   }

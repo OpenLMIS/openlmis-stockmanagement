@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.hasSize;
@@ -77,11 +78,11 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
     UUID program = randomUUID();
     UUID facility = randomUUID();
 
-    when(validSourceService.findSources(program, facility, false, pageRequest))
+    when(validSourceService.findSources(singleton(program), facility, false, pageRequest))
         .thenReturn(Pagination.getPage(singletonList(sourceDestination)));
 
-    when(validDestinationService.findDestinations(program, facility, false, pageRequest))
-        .thenReturn(Pagination.getPage(singletonList(sourceDestination)));
+    when(validDestinationService.findDestinations(singleton(program), facility,
+        false, pageRequest)).thenReturn(Pagination.getPage(singletonList(sourceDestination)));
 
     verifyZeroInteractions(permissionService);
 

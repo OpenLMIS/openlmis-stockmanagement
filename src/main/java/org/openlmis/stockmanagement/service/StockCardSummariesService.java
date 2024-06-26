@@ -148,12 +148,14 @@ public class StockCardSummariesService extends StockCardBaseService {
     if (!homeFacilityPermissionService
         .checkFacilityAndHomeFacilityLinkage(params.getFacilityId())) {
       profiler.start("VALIDATE_VIEW_RIGHTS");
-      permissionService.canViewStockCard(params.getProgramId(), params.getFacilityId());
+      for (UUID id : params.getProgramIds()) {
+        permissionService.canViewStockCard(id, params.getFacilityId());
+      }
     }
 
     profiler.start("GET_APPROVED_PRODUCTS");
     OrderablesAggregator approvedProducts = approvedProductReferenceDataService
-        .getApprovedProducts(params.getFacilityId(), params.getProgramId(),
+        .getApprovedProducts(params.getFacilityId(), params.getProgramIds(),
             params.getOrderableIds(), params.getOrderableCode(), params.getOrderableName()
         );
 
@@ -194,7 +196,7 @@ public class StockCardSummariesService extends StockCardBaseService {
     // FIXME: Fix page retrieving/calculation,
     //  page size may be wrong when there are orderables matching not only by lot codes
     List<StockCard> stockCards = calculatedStockOnHandService.getStockCardsWithStockOnHand(
-        params.getProgramId(), params.getFacilityId(), params.getAsOfDate(),
+        params.getProgramIds(), params.getFacilityId(), params.getAsOfDate(),
         orderableIdsForStockCard, lotCodeIds);
 
     Page<OrderableDto> orderablesPage = approvedProducts.getOrderablesPage();

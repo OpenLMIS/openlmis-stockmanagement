@@ -19,6 +19,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_AS
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_NOT_FOUND;
 import static org.slf4j.ext.XLoggerFactory.getXLogger;
 
+import java.util.Set;
 import java.util.UUID;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.dto.ValidSourceDestinationDto;
@@ -42,12 +43,12 @@ public class ValidDestinationService extends SourceDestinationBaseService {
   /**
    * Find valid sources page by program ID and facility type ID.
    *
-   * @param programId program ID
+   * @param programIds program IDs
    * @param facilityId facility ID
    * @param pageable pagination and sorting parameters
    * @return valid source assignment DTOs
    */
-  public Page<ValidSourceDestinationDto> findDestinations(UUID programId,
+  public Page<ValidSourceDestinationDto> findDestinations(Set<UUID> programIds,
                                                           UUID facilityId,
                                                           boolean includeDisabled,
                                                           Pageable pageable) {
@@ -56,7 +57,7 @@ public class ValidDestinationService extends SourceDestinationBaseService {
     profiler.setLogger(XLOGGER);
 
     Page<ValidSourceDestinationDto> assignments =
-            findAssignments(programId, facilityId, includeDisabled,
+            findAssignments(programIds, facilityId, includeDisabled,
                 validDestinationRepository, profiler, pageable);
     profiler.stop().log();
     XLOGGER.exit();

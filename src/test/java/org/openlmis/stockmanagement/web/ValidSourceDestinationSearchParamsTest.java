@@ -18,11 +18,13 @@ package org.openlmis.stockmanagement.web;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.openlmis.stockmanagement.web.ValidSourceDestinationSearchParams.FACILITY_ID;
 import static org.openlmis.stockmanagement.web.ValidSourceDestinationSearchParams.INCLUDE_DISABLED;
 import static org.openlmis.stockmanagement.web.ValidSourceDestinationSearchParams.PROGRAM_ID;
 
 import java.util.UUID;
+
 import org.junit.Test;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.springframework.util.LinkedMultiValueMap;
@@ -41,7 +43,7 @@ public class ValidSourceDestinationSearchParamsTest {
     queryMap.add(FACILITY_ID, FACILITY_ID_VALUE.toString());
     ValidSourceDestinationSearchParams params = new ValidSourceDestinationSearchParams(queryMap);
 
-    assertEquals(PROGRAM_ID_VALUE, params.getProgramId());
+    assertTrue(params.getProgramIds().contains(PROGRAM_ID_VALUE));
   }
 
   @Test
@@ -49,7 +51,18 @@ public class ValidSourceDestinationSearchParamsTest {
     ValidSourceDestinationSearchParams params =
             new ValidSourceDestinationSearchParams(new LinkedMultiValueMap<>());
 
-    assertNull(params.getProgramId());
+    assertNull(params.getProgramIds());
+  }
+
+  @Test
+  public void shouldAssignNullIfProgramIdIsNullAndEmptyStringInParameters() {
+    LinkedMultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>();
+    queryMap.add(PROGRAM_ID, null);
+    queryMap.add(PROGRAM_ID, "");
+    queryMap.add(FACILITY_ID, FACILITY_ID_VALUE.toString());
+    ValidSourceDestinationSearchParams params = new ValidSourceDestinationSearchParams(queryMap);
+
+    assertNull(params.getProgramIds());
   }
 
   @Test
