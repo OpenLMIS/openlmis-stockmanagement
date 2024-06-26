@@ -25,7 +25,6 @@ import static org.openlmis.stockmanagement.web.ValidSourceDestinationSearchParam
 
 import java.util.UUID;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.springframework.util.LinkedMultiValueMap;
@@ -55,7 +54,6 @@ public class ValidSourceDestinationSearchParamsTest {
     assertNull(params.getProgramIds());
   }
 
-  @Ignore
   @Test
   public void shouldAssignNullIfProgramIdIsNullInParameters() {
     LinkedMultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>();
