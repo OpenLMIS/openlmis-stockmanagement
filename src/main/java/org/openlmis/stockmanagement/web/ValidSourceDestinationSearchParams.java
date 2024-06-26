@@ -53,7 +53,6 @@ public class ValidSourceDestinationSearchParams {
    * @return UUID value of program id or null if params doesn't contain this param.
    */
   public Set<UUID> getProgramIds() {
-    //if (!queryParams.containsKey(PROGRAM_ID) || queryParams.getFirst(PROGRAM_ID) == null) {
     if (!queryParams.containsKey(PROGRAM_ID)) {
       return null;
     }

@@ -55,9 +55,10 @@ public class ValidSourceDestinationSearchParamsTest {
   }
 
   @Test
-  public void shouldAssignNullIfProgramIdIsNullInParameters() {
+  public void shouldAssignNullIfProgramIdIsNullAndEmptyStringInParameters() {
     LinkedMultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>();
     queryMap.add(PROGRAM_ID, null);
+    queryMap.add(PROGRAM_ID, "");
     queryMap.add(FACILITY_ID, FACILITY_ID_VALUE.toString());
     ValidSourceDestinationSearchParams params = new ValidSourceDestinationSearchParams(queryMap);
 
