@@ -50,11 +50,10 @@ public class ValidReasonAssignmentSearchParams {
     validate();
   }
 
-
   /**
-   * Gets collection of {@link String} for "program" key from params.
+   * Gets collection of {@link UUID} for "program" key from params.
    */
-  public Collection<UUID> getProgram() {
+  public Collection<UUID> getPrograms() {
     if (!queryParams.containsKey(PROGRAM)) {
       return null;
     }
@@ -62,7 +61,11 @@ public class ValidReasonAssignmentSearchParams {
     Set<UUID> programs = new HashSet<>();
     queryParams.asMultiValueMap().forEach((key, value) -> {
       if (Objects.equals(key, PROGRAM)) {
-        value.forEach(id -> programs.add(UuidUtil.fromString(id).orElse(null)));
+        value.forEach(id -> {
+          if (id != null && !id.isEmpty()) {
+            programs.add(UuidUtil.fromString(id).get());
+          }
+        });
       }
     });
 

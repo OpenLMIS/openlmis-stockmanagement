@@ -52,7 +52,7 @@ public interface StockCardRepository extends JpaRepository<StockCard, UUID> {
       @Param(FACILITY_ID) UUID facilityId);
 
   List<StockCard> findByOrderableIdInAndProgramIdInAndFacilityId(
-      Collection<UUID> orderableIds, Collection<UUID> programId, UUID facilityId);
+      Collection<UUID> orderableIds, Collection<UUID> programIds, UUID facilityId);
 
   StockCard findByOriginEvent(@Param("originEventId") StockEvent stockEvent);
 

@@ -74,9 +74,9 @@ public class ValidSourceDestinationController {
 
     LOGGER.info(format("Try to find valid destinations with program %s and facility %s",
         params.getFacilityId(),
-        params.getProgramId()));
+        params.getProgramIds()));
     return validDestinationService.findDestinations(
-            params.getProgramId(), params.getFacilityId(), params.getIncludeDisabled(), pageable);
+            params.getProgramIds(), params.getFacilityId(), params.getIncludeDisabled(), pageable);
   }
 
   /**
@@ -114,9 +114,9 @@ public class ValidSourceDestinationController {
     ValidSourceDestinationSearchParams params = new ValidSourceDestinationSearchParams(parameters);
 
     LOGGER.debug(format("Try to find valid sources with program %s and facility %s",
-        params.getProgramId(), params.getFacilityId()));
+        params.getProgramIds(), params.getFacilityId()));
     return validSourceService.findSources(
-        params.getProgramId(), params.getFacilityId(), params.getIncludeDisabled(), pageable);
+        params.getProgramIds(), params.getFacilityId(), params.getIncludeDisabled(), pageable);
   }
 
   /**

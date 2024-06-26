@@ -94,7 +94,6 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
     performSourcesOrDestinations(program, facility, false, sourceDestination, API_VALID_SOURCES);
   }
 
-  // Good
   @Test
   public void shouldGeAllValidSourcesOrDestinationsWhenProgramAndFacilityAreNotProvided()
           throws Exception {

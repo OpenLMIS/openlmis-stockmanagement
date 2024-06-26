@@ -130,7 +130,7 @@ public abstract class SourceDestinationBaseService {
    * This method will return only those assignments that match the geo level affinity
    * or all possible assignments (when filtering params are not provided).
    *
-   * @param programIds program id
+   * @param programIds program ids
    * @param facilityId facility id
    * @param repository assignment repository
    * @param <T> assignment type

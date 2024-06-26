@@ -15,8 +15,6 @@
 
 package org.openlmis.stockmanagement.repository;
 
-import static org.openlmis.stockmanagement.web.ValidSourceDestinationSearchParams.PROGRAM_ID;
-
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -24,28 +22,24 @@ import org.openlmis.stockmanagement.domain.sourcedestination.SourceDestinationAs
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
-import org.springframework.data.repository.query.Param;
 
 @NoRepositoryBean
 public interface SourceDestinationAssignmentRepository<T extends SourceDestinationAssignment>
     extends JpaRepository<T, UUID> {
 
-  String FACILITY_TYPE_ID = "facilityTypeId";
-  String NODE_ID = "nodeId";
-
   List<T> findByProgramIdInAndFacilityTypeId(
-      @Param(PROGRAM_ID) Set<UUID> programId, @Param(FACILITY_TYPE_ID) UUID facilityTypeId,
+      Set<UUID> programIds, UUID facilityTypeId,
       Pageable pageable);
 
   List<T> findByProgramIdAndFacilityTypeId(
-      @Param(PROGRAM_ID) UUID programId, @Param(FACILITY_TYPE_ID) UUID facilityTypeId,
+      UUID programId, UUID facilityTypeId,
       Pageable pageable);
 
   T findByProgramIdInAndFacilityTypeIdAndNodeId(
-      @Param(PROGRAM_ID) Set<UUID> programId, @Param(FACILITY_TYPE_ID) UUID facilityTypeId,
-      @Param(NODE_ID) UUID nodeId);
+      Set<UUID> programIds, UUID facilityTypeId,
+      UUID nodeId);
 
   T findByProgramIdAndFacilityTypeIdAndNodeId(
-      @Param(PROGRAM_ID) UUID programId, @Param(FACILITY_TYPE_ID) UUID facilityTypeId,
-      @Param(NODE_ID) UUID nodeId);
+      UUID programId, UUID facilityTypeId,
+      UUID nodeId);
 }

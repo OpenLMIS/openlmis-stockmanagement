@@ -23,7 +23,7 @@ import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
 
 public interface ValidReasonAssignmentRepositoryCustom {
 
-  List<ValidReasonAssignment> search(Collection<UUID> programId, UUID facilityTypeId,
+  List<ValidReasonAssignment> search(Collection<UUID> programIds, UUID facilityTypeId,
       Collection<ReasonType> reasonTypes, UUID reasonId);
 
 }

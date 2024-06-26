@@ -43,7 +43,7 @@ public class ValidSourceService extends SourceDestinationBaseService {
   /**
    * Find valid destinations page by program ID and facility ID.
    *
-   * @param programIds program ID
+   * @param programIds program IDs
    * @param facilityId facility ID
    * @param pageable pagination and sorting parameters
    * @return page of valid destination assignment DTOs
