@@ -732,6 +732,7 @@ traits:
             description: Program id
             type: string
             required: false
+            repeat: true
           facilityType:
             description: Facility type id
             type: string
