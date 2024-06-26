@@ -45,8 +45,8 @@ public class ValidReasonAssignmentSearchParamsTest {
     queryMap.add(FACILITY_TYPE, typeId.toString());
     ValidReasonAssignmentSearchParams params = new ValidReasonAssignmentSearchParams(queryMap);
 
-    assertTrue(params.getPrograms().contains(VALUE));
-    assertFalse(params.getPrograms().contains(typeId));
+    assertTrue(params.getProgramIds().contains(VALUE));
+    assertFalse(params.getProgramIds().contains(typeId));
   }
 
   @Test
@@ -54,7 +54,7 @@ public class ValidReasonAssignmentSearchParamsTest {
     ValidReasonAssignmentSearchParams params =
         new ValidReasonAssignmentSearchParams(new LinkedMultiValueMap<>());
 
-    assertNull(params.getPrograms());
+    assertNull(params.getProgramIds());
   }
 
   @Test

@@ -53,7 +53,7 @@ public class ValidReasonAssignmentSearchParams {
   /**
    * Gets collection of {@link UUID} for "program" key from params.
    */
-  public Collection<UUID> getPrograms() {
+  public Collection<UUID> getProgramIds() {
     if (!queryParams.containsKey(PROGRAM)) {
       return null;
     }
