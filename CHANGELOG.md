@@ -1,5 +1,15 @@
 5.1.10-angola.1 / Ongoing
 ==================
+Improvements:
+* [OAM-65](https://openlmis.atlassian.net/browse/OAM-65): Added disabled field to Organization entity
+* [OAM-91](https://openlmis.atlassian.net/browse/OAM-65): Added unit of orderable uuid to card line item and event line item
+* [OAM-191](https://openlmis.atlassian.net/browse/OAM-191): Implement missing backend for stock management for reference to unit of orderables
+* [OAM-48](https://openlmis.atlassian.net/browse/OAM-48): Added event validation and assignments filter for Wards/Services
+* [OAM-213](https://openlmis.atlassian.net/browse/OAM-213): Added scripts to update unit of orderable id to sample one for stock card, stock event line items and physical inventory line items
+* [OAM-206](https://openlmis.atlassian.net/browse/OAM-206): Added check for ward/services in stock functions
+* [OAM-223](https://openlmis.atlassian.net/browse/OAM-223): Don't read all orderables to crated SockCardSummaries
+* [OAM-228](https://openlmis.atlassian.net/browse/OAM-228): Added special handling for ward/services in StockCardService
+* [OAM-218](https://openlmis.atlassian.net/browse/OAM-218): Updated programId param to repeatable
 
 5.1.9 / 2023-06-26
 ==================
