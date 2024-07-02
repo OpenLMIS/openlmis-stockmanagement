@@ -29,20 +29,23 @@ import org.springframework.data.repository.query.Param;
 
 public interface StockCardRepository extends JpaRepository<StockCard, UUID> {
 
+  String PROGRAM_ID = "programId";
+  String FACILITY_ID = "facilityId";
+
   StockCard findByProgramIdAndFacilityIdAndOrderableIdAndLotId(
-      @Param("programId") UUID programId,
-      @Param("facilityId") UUID facilityId,
+      @Param(PROGRAM_ID) UUID programId,
+      @Param(FACILITY_ID) UUID facilityId,
       @Param("orderableId") UUID orderableId,
       @Param("lotId") UUID lotId);
 
   Page<StockCard> findByProgramIdAndFacilityId(
-      @Param("programId") UUID programId,
-      @Param("facilityId") UUID facilityId,
+      @Param(PROGRAM_ID) UUID programId,
+      @Param(FACILITY_ID) UUID facilityId,
       Pageable pageable);
 
   List<StockCard> findByProgramIdAndFacilityId(
-      @Param("programId") UUID programId,
-      @Param("facilityId") UUID facilityId);
+      @Param(PROGRAM_ID) UUID programId,
+      @Param(FACILITY_ID) UUID facilityId);
 
   List<StockCard> findByOrderableIdInAndProgramIdAndFacilityId(
       Collection<UUID> orderableIds, UUID programId, UUID facilityId);

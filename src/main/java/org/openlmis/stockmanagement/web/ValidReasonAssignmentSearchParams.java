@@ -51,17 +51,25 @@ public class ValidReasonAssignmentSearchParams {
   }
 
   /**
-   * Gets program.
-   *
-   * @return String value of program id or null if params doesn't contain "program" param.
-   *         Empty string for null request param value.
+   * Gets collection of {@link UUID} for "program" key from params.
    */
-  public UUID getProgram() {
+  public Collection<UUID> getProgramIds() {
     if (!queryParams.containsKey(PROGRAM)) {
       return null;
     }
-    String program = queryParams.getFirst(PROGRAM);
-    return UuidUtil.fromString(program).orElse(null);
+
+    Set<UUID> programs = new HashSet<>();
+    queryParams.asMultiValueMap().forEach((key, value) -> {
+      if (Objects.equals(key, PROGRAM)) {
+        value.forEach(id -> {
+          if (id != null && !id.isEmpty()) {
+            programs.add(UuidUtil.fromString(id).get());
+          }
+        });
+      }
+    });
+
+    return programs;
   }
 
   /**

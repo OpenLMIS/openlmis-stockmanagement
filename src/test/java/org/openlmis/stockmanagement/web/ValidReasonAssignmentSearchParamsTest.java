@@ -16,13 +16,16 @@
 package org.openlmis.stockmanagement.web;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.openlmis.stockmanagement.web.ValidReasonAssignmentSearchParams.FACILITY_TYPE;
 import static org.openlmis.stockmanagement.web.ValidReasonAssignmentSearchParams.PROGRAM;
 import static org.openlmis.stockmanagement.web.ValidReasonAssignmentSearchParams.REASON;
 import static org.openlmis.stockmanagement.web.ValidReasonAssignmentSearchParams.REASON_TYPE;
 
 import com.google.common.collect.Sets;
+import java.util.Collection;
 import java.util.UUID;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
@@ -38,10 +41,17 @@ public class ValidReasonAssignmentSearchParamsTest {
   @Test
   public void shouldGetProgramIdValueFromParameters() {
     LinkedMultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>();
+    final UUID typeId = UUID.randomUUID();
     queryMap.add(PROGRAM, VALUE.toString());
+    queryMap.add(PROGRAM, "");
+    queryMap.add(FACILITY_TYPE, typeId.toString());
     ValidReasonAssignmentSearchParams params = new ValidReasonAssignmentSearchParams(queryMap);
 
-    assertEquals(VALUE, params.getProgram());
+    Collection<UUID> programIds = params.getProgramIds();
+
+    assertTrue(programIds.contains(VALUE));
+    assertFalse(programIds.contains(typeId));
+    assertFalse(programIds.contains(""));
   }
 
   @Test
@@ -49,7 +59,7 @@ public class ValidReasonAssignmentSearchParamsTest {
     ValidReasonAssignmentSearchParams params =
         new ValidReasonAssignmentSearchParams(new LinkedMultiValueMap<>());
 
-    assertNull(params.getProgram());
+    assertNull(params.getProgramIds());
   }
 
   @Test
@@ -98,10 +108,13 @@ public class ValidReasonAssignmentSearchParamsTest {
     LinkedMultiValueMap<String, String> queryMap = new LinkedMultiValueMap<>();
     queryMap.add(REASON_TYPE, DEBIT);
     queryMap.add(REASON_TYPE, CREDIT);
+    queryMap.add(REASON, VALUE.toString());
     ValidReasonAssignmentSearchParams params = new ValidReasonAssignmentSearchParams(queryMap);
 
+    Collection<ReasonType> reasonTypes = params.getReasonType();
+
     assertEquals(Sets.newHashSet(ReasonType.fromString(CREDIT), ReasonType.fromString(DEBIT)),
-        params.getReasonType());
+        reasonTypes);
   }
 
   @Test
