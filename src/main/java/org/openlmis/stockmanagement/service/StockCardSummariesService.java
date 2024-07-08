@@ -316,7 +316,6 @@ public class StockCardSummariesService extends StockCardBaseService {
     return orderableLots.stream().filter(orderableLot -> cardIdentities.stream().noneMatch(
         cardIdentity -> OrderableLotIdentity.identityOf(orderableLot)
             .equals(cardIdentity))).collect(toList());
-    //TODO here it was equalsOrderableLotUnitIdentity
   }
 
   private Map<OrderableLotIdentity, OrderableLot> createOrderableLotMap(
