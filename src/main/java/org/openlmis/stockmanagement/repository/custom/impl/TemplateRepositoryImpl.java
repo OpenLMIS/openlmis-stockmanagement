@@ -13,11 +13,12 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.stockmanagement.repository.custom;
+package org.openlmis.stockmanagement.repository.custom.impl;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.openlmis.stockmanagement.domain.JasperTemplate;
+import org.openlmis.stockmanagement.repository.custom.TemplateRepositoryCustom;
 
 public class TemplateRepositoryImpl implements TemplateRepositoryCustom {
 

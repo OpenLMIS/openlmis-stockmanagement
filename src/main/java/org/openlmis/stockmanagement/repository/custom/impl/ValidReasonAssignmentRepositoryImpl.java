@@ -13,7 +13,7 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.stockmanagement.repository.custom;
+package org.openlmis.stockmanagement.repository.custom.impl;
 
 import java.util.Collection;
 import java.util.List;
@@ -29,6 +29,7 @@ import javax.persistence.criteria.Root;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
+import org.openlmis.stockmanagement.repository.custom.ValidReasonAssignmentRepositoryCustom;
 
 public class ValidReasonAssignmentRepositoryImpl implements ValidReasonAssignmentRepositoryCustom {
 

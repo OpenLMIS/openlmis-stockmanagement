@@ -13,13 +13,13 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.stockmanagement.repository.custom;
+package org.openlmis.stockmanagement.repository.custom.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.openlmis.stockmanagement.repository.custom.ValidReasonAssignmentRepositoryImpl.PROGRAM_ID;
+import static org.openlmis.stockmanagement.repository.custom.impl.ValidReasonAssignmentRepositoryImpl.PROGRAM_ID;
 
 import java.util.ArrayList;
 import java.util.Collection;
