@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.repository.custom.impl.ValidReasonAssignmentRepositoryImpl.FACILITY_TYPE_ID;
 import static org.openlmis.stockmanagement.repository.custom.impl.ValidReasonAssignmentRepositoryImpl.PROGRAM_ID;
 
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ public class ValidReasonAssignmentRepositoryImplTest {
   private EntityManager entityManager;
 
   @Test
-  public void shouldSearch() {
+  public void shouldSearchForProgramIdsOnly() {
     //given
     UUID programId1 = UUID.randomUUID();
     UUID programId2 = UUID.randomUUID();
@@ -88,6 +89,49 @@ public class ValidReasonAssignmentRepositoryImplTest {
     //when
     List<ValidReasonAssignment> searchResults =
         repository.search(programIds, null, null, null);
+
+    //then
+    verify(entityManager).createQuery(query);
+    verify(query).where(wherePredicate);
+    assertThat(searchResults).isEqualTo(validReasonAssignmentList);
+  }
+
+  @Test
+  public void shouldSearchForFacilityTypeIdOnly() {
+    //given
+    UUID facilityTypeId = UUID.randomUUID();
+
+    List<ValidReasonAssignment> validReasonAssignmentList = mock(List.class);
+    TypedQuery typedQuery = mock(TypedQuery.class);
+    when(typedQuery.getResultList())
+        .thenReturn(validReasonAssignmentList);
+
+    CriteriaQuery query = mock(CriteriaQuery.class);
+    Predicate conjunctionPredicate = mock(Predicate.class);
+
+    Predicate equalPredicate = mock(Predicate.class);
+    Path facilityTypeIdPath = mock(Path.class);
+
+    Root root = mock(Root.class);
+    when(root.get(FACILITY_TYPE_ID)).thenReturn(facilityTypeIdPath);
+    Predicate wherePredicate = mock(Predicate.class);
+
+    CriteriaBuilder criteriaBuilder = mock(CriteriaBuilder.class);
+    when(criteriaBuilder.createQuery(ValidReasonAssignment.class))
+        .thenReturn(query);
+    when(criteriaBuilder.conjunction()).thenReturn(conjunctionPredicate);
+    when(criteriaBuilder.equal(facilityTypeIdPath, facilityTypeId)).thenReturn(equalPredicate);
+    when(criteriaBuilder.and(conjunctionPredicate, equalPredicate)).thenReturn(wherePredicate);
+
+    when(query.from(ValidReasonAssignment.class)).thenReturn(root);
+
+    when(entityManager.getCriteriaBuilder()).thenReturn(criteriaBuilder);
+    when(entityManager.createQuery(query))
+        .thenReturn(typedQuery);
+
+    //when
+    List<ValidReasonAssignment> searchResults =
+        repository.search(null, facilityTypeId, null, null);
 
     //then
     verify(entityManager).createQuery(query);

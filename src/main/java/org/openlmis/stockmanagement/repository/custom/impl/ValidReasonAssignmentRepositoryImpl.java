@@ -34,7 +34,7 @@ import org.openlmis.stockmanagement.repository.custom.ValidReasonAssignmentRepos
 public class ValidReasonAssignmentRepositoryImpl implements ValidReasonAssignmentRepositoryCustom {
 
   static final String PROGRAM_ID = "programId";
-  private static final String FACILITY_TYPE_ID = "facilityTypeId";
+  static final String FACILITY_TYPE_ID = "facilityTypeId";
   private static final String ID = "id";
   private static final String REASON_TYPE = "reasonType";
   private static final String REASON = "reason";
