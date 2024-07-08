@@ -264,7 +264,7 @@ public class StockCardSummariesService extends StockCardBaseService {
   private List<StockCardDto> cardsToDtos(List<StockCard> cards) {
     LOGGER.info("Calling ref data to get all approved orderables");
     final Set<OrderableLotIdentity> orderableLotsMapIds = cards.stream().map(
-            stockCard -> new OrderableLotIdentity(stockCard.getOrderableId(), stockCard.getLotId()))
+        stockCard -> new OrderableLotIdentity(stockCard.getOrderableId(), stockCard.getLotId()))
         .collect(Collectors.toSet());
 
     final Map<UUID, OrderableDto> orderables = orderableReferenceDataService.findByIds(
