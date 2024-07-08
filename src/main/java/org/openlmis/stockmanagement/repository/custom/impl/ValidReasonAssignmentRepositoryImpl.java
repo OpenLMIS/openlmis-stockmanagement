@@ -69,14 +69,14 @@ public class ValidReasonAssignmentRepositoryImpl implements ValidReasonAssignmen
     }
 
     if (null != reasonId) {
-      Join<ValidReasonAssignment, StockCardLineItemReason> stockReason =
-          root.join(REASON, JoinType.LEFT);
+      Join<ValidReasonAssignment, StockCardLineItemReason> stockReason = root.join(
+          REASON, JoinType.LEFT);
       predicate = builder.and(predicate, builder.equal(stockReason.get(ID), reasonId));
     }
 
     if (null != reasonTypes) {
-      Join<ValidReasonAssignment, StockCardLineItemReason> stockReason =
-          root.join(REASON, JoinType.LEFT);
+      Join<ValidReasonAssignment, StockCardLineItemReason> stockReason = root.join(
+          REASON, JoinType.LEFT);
       predicate = builder.and(predicate, stockReason.get(REASON_TYPE).in(reasonTypes));
     }
 
