@@ -13,7 +13,7 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.stockmanagement.repository.custom.impl;
+package org.openlmis.stockmanagement.repository.custom;
 
 import java.util.Collection;
 import java.util.List;
@@ -29,30 +29,28 @@ import javax.persistence.criteria.Root;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
-import org.openlmis.stockmanagement.repository.custom.ValidReasonAssignmentRepositoryCustom;
 
 public class ValidReasonAssignmentRepositoryImpl implements ValidReasonAssignmentRepositoryCustom {
 
-  private static final String PROGRAM_ID = "programId";
+  static final String PROGRAM_ID = "programId";
   private static final String FACILITY_TYPE_ID = "facilityTypeId";
   private static final String ID = "id";
   private static final String REASON_TYPE = "reasonType";
   private static final String REASON = "reason";
-
   @PersistenceContext
   private EntityManager entityManager;
 
   /**
    * This method is supposed to retrieve all Valid Reason Assignments with matched parameters.
    *
-   * @param programIds  Valid Reason Assignment program ids
+   * @param programIds     Valid Reason Assignment program ids
    * @param facilityTypeId Valid Reason Assignment facility type id
-   * @param reasonTypes   Valid Reason Assignment stock card line item reason types
-   * @param reasonId  Valid Reason Assignment stock card line item reason id
+   * @param reasonTypes    Valid Reason Assignment stock card line item reason types
+   * @param reasonId       Valid Reason Assignment stock card line item reason id
    * @return List of Valid Reason Assignments matching the parameters.
    */
   public List<ValidReasonAssignment> search(Collection<UUID> programIds, UUID facilityTypeId,
-      Collection<ReasonType> reasonTypes, UUID reasonId) {
+                                            Collection<ReasonType> reasonTypes, UUID reasonId) {
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 
     CriteriaQuery<ValidReasonAssignment> query = builder.createQuery(ValidReasonAssignment.class);
@@ -70,20 +68,19 @@ public class ValidReasonAssignmentRepositoryImpl implements ValidReasonAssignmen
     }
 
     if (null != reasonId) {
-      Join<ValidReasonAssignment, StockCardLineItemReason> stockReason = root.join(
-          REASON, JoinType.LEFT);
+      Join<ValidReasonAssignment, StockCardLineItemReason> stockReason =
+          root.join(REASON, JoinType.LEFT);
       predicate = builder.and(predicate, builder.equal(stockReason.get(ID), reasonId));
     }
 
     if (null != reasonTypes) {
-      Join<ValidReasonAssignment, StockCardLineItemReason> stockReason = root.join(
-          REASON, JoinType.LEFT);
+      Join<ValidReasonAssignment, StockCardLineItemReason> stockReason =
+          root.join(REASON, JoinType.LEFT);
       predicate = builder.and(predicate, stockReason.get(REASON_TYPE).in(reasonTypes));
     }
 
     query.where(predicate);
 
-    return entityManager.createQuery(query)
-        .getResultList();
+    return entityManager.createQuery(query).getResultList();
   }
 }
