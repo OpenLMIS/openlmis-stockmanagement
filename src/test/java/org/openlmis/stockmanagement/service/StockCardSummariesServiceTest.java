@@ -31,6 +31,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableSet;
@@ -44,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -76,7 +78,10 @@ import org.openlmis.stockmanagement.testutils.StockCardSummariesV2SearchParamsDa
 import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.util.RequestParameters;
+import org.slf4j.profiler.Profiler;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 @SuppressWarnings("PMD.TooManyMethods")
 @RunWith(MockitoJUnitRunner.class)
@@ -91,6 +96,9 @@ public class StockCardSummariesServiceTest {
   private final UUID orderableId5 = randomUUID();
   private final UUID orderableId6 = randomUUID();
   private final UUID orderableId7 = randomUUID();
+  private final UUID lotId1 = randomUUID();
+  private final UUID lotId2 = randomUUID();
+
   @Mock
   private ApprovedProductReferenceDataService approvedProductReferenceDataService;
   @Mock
@@ -473,11 +481,37 @@ public class StockCardSummariesServiceTest {
   @Test
   public void shouldFindStockCardsForProgramAndFacilityIds() {
     //given
-    UUID programId = UUID.randomUUID();
-    UUID facilityId = UUID.randomUUID();
-    UUID lotId1 = UUID.randomUUID();
-    UUID lotId2 = UUID.randomUUID();
+    prepareForFindStockCards(null);
 
+    //when
+    List<StockCardDto> stockCardsDtos =
+        stockCardSummariesService.findStockCards(programId, facilityId);
+
+    //then
+    assertThat(stockCardsDtos, hasSize(2));
+    checkStockCardDto(stockCardsDtos, orderableId1, lotId1);
+    checkStockCardDto(stockCardsDtos, orderableId2, lotId2);
+  }
+
+  @Test
+  public void shouldFindStockCardsForProgramAndFacilityIdsAndPageableAndProfiler() {
+    //given
+    Pageable pageable = mock(Pageable.class);
+    Profiler profiler = mock(Profiler.class);
+    prepareForFindStockCards(pageable);
+
+    //when
+    Page<StockCardDto> stockCardsPage =
+        stockCardSummariesService.findStockCards(programId, facilityId, pageable, profiler);
+
+    //then
+    assertEquals(2L, stockCardsPage.getTotalElements());
+    List<StockCardDto> stockCardDtos = stockCardsPage.get().collect(Collectors.toList());
+    checkStockCardDto(stockCardDtos, orderableId1, lotId1);
+    checkStockCardDto(stockCardDtos, orderableId2, lotId2);
+  }
+
+  private void prepareForFindStockCards(Pageable pageable) {
     OrderableDto orderable1 = createOrderableDto(orderableId1, "1");
     OrderableDto orderable2 = createOrderableDto(orderableId2, "2");
 
@@ -503,23 +537,20 @@ public class StockCardSummariesServiceTest {
 
     List<StockCard> stockCards = asList(stockCard1, stockCard2);
 
-    when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId))
-        .thenReturn(stockCards);
+    if (pageable != null) {
+      Page<StockCard> stockCardPage = new PageImpl<>(stockCards, pageable, stockCards.size());
+      when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId, pageable))
+          .thenReturn(stockCardPage);
+    } else {
+      when(cardRepository.findByProgramIdAndFacilityId(programId, facilityId))
+          .thenReturn(stockCards);
+    }
 
     when(orderableReferenceDataService
         .findByIds(new HashSet<>(Arrays.asList(orderableId1, orderableId2))))
         .thenReturn(Arrays.asList(orderable1, orderable2));
     when(lotReferenceDataService.findByIds(new HashSet<>(Arrays.asList(lotId1, lotId2))))
         .thenReturn(Arrays.asList(lot1, lot2));
-
-    //when
-    List<StockCardDto> stockCardsDtos =
-        stockCardSummariesService.findStockCards(programId, facilityId);
-
-    //then
-    assertThat(stockCardsDtos, hasSize(2));
-    checkStockCardDto(stockCardsDtos, orderableId1, lotId1);
-    checkStockCardDto(stockCardsDtos, orderableId2, lotId2);
   }
 
   private void checkStockCardDto(
