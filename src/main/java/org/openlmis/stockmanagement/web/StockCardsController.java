@@ -107,7 +107,8 @@ public class StockCardsController {
     profiler.start("FIND_STOCK_CARDS");
     try {
       return stockCardSummariesService
-          .findStockCards(program, facility, pageable, profiler.startNested("FIND_STOCK_CARDS"));
+          .findStockCards(program, facility, pageable,
+              profiler.startNested("FIND_STOCK_CARDS"));
     } finally {
       profiler.stop().log();
     }

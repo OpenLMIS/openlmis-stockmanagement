@@ -16,9 +16,12 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.util.UUID.randomUUID;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.service.HomeFacilityPermissionService.WS_TYPE_CODE;
 
@@ -49,6 +52,8 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 @PrepareForTest(SecurityContextHolder.class)
 @PowerMockIgnore("javax.security.auth.*")
 public class HomeFacilityPermissionServiceTest {
+
+  private static final String OTHER_TYPE_CODE = "otherTypeCode";
 
   @InjectMocks
   private HomeFacilityPermissionService homeFacilityPermissionService;
@@ -117,6 +122,42 @@ public class HomeFacilityPermissionServiceTest {
     assertTrue(result);
     verify(facilityService).findOne(facilityId);
     verify(facilityService).findOne(homeFacilityId);
+  }
+
+  @Test
+  public void shouldFailCheckIfFacilityHasOtherTypeCodeThanWs() {
+    //given
+    FacilityDto facilityDto = mock(FacilityDto.class);
+    FacilityTypeDto facilityTypeDto = new FacilityTypeDto();
+    facilityTypeDto.setCode(OTHER_TYPE_CODE);
+    when(facilityDto.getType()).thenReturn(facilityTypeDto);
+    UUID geographicZoneId = randomUUID();
+
+    mockGeographicZoneId(facilityDto, geographicZoneId);
+    mockGeographicZoneId(homeFacilityDto, geographicZoneId);
+    UUID facilityId = UUID.randomUUID();
+    when(facilityService.findOne(facilityId)).thenReturn(facilityDto);
+
+    //when
+    boolean result = homeFacilityPermissionService.checkFacilityAndHomeFacilityLinkage(facilityId);
+
+    //then
+    assertFalse(result);
+    verify(facilityService).findOne(facilityId);
+    verify(facilityService, times(0)).findOne(homeFacilityId);
+  }
+
+  @Test
+  public void shouldFailCheckIfFacilityIdIsEqualToHomeFacilityId() {
+    //given
+
+    //when
+    boolean result =
+        homeFacilityPermissionService.checkFacilityAndHomeFacilityLinkage(homeFacilityId);
+
+    //then
+    assertFalse(result);
+    verifyNoInteractions(facilityService);
   }
 
   private void mockGeographicZoneId(FacilityDto facilityDto, UUID geographicZoneId) {
