@@ -770,8 +770,8 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
   private StockCard prepareStockCard(StockEvent event, UUID product, UUID lot) {
     StockCard result = new StockCardDataBuilder(event)
         .withoutId()
-        .withOrderable(product)
-        .withLot(lot)
+        .withOrderableId(product)
+        .withLotId(lot)
         .build();
     return stockCardRepository.save(result);
   }

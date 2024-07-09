@@ -28,6 +28,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class HomeFacilityPermissionService {
+
+  static final String WS_TYPE_CODE = "WS";
+
   @Autowired
   private AuthenticationHelper authenticationHelper;
   
@@ -51,6 +54,27 @@ public class HomeFacilityPermissionService {
         .anyMatch(supportedProgram -> programId.equals(supportedProgram.getId()));
     if (!isSupported) {
       throwException(ERROR_PROGRAM_NOT_SUPPORTED, programId.toString());
+    }
+  }
+
+  /**
+   * Returns true if facility is within the same geographic zone as the home facility.
+   * Returns false otherwise or in case facility id is equal to home facility id.
+   *
+   * @param facilityId UUID of facility
+   * @return boolean flag indicating linkage between facility and home facility
+   */
+  public boolean checkFacilityAndHomeFacilityLinkage(UUID facilityId) {
+    UUID homeFacilityId = authenticationHelper.getCurrentUser().getHomeFacilityId();
+    if (facilityId.equals(homeFacilityId)) {
+      return false;
+    }
+    FacilityDto facility = facilityService.findOne(facilityId);
+    if (facility.getType().getCode().equals(WS_TYPE_CODE)) {
+      FacilityDto homeFacility = facilityService.findOne(homeFacilityId);
+      return homeFacility.getGeographicZone().getId().equals(facility.getGeographicZone().getId());
+    } else {
+      return false;
     }
   }
 

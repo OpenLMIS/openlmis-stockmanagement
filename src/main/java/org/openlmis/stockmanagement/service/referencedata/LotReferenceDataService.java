@@ -16,11 +16,15 @@
 package org.openlmis.stockmanagement.service.referencedata;
 
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
+import org.openlmis.stockmanagement.util.RequestParameters;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class LotReferenceDataService extends BaseReferenceDataService<LotDto> {
@@ -70,5 +74,17 @@ public class LotReferenceDataService extends BaseReferenceDataService<LotDto> {
     }
 
     return getPage(params).getContent();
+  }
+
+  /**
+   * Find Lot by IDs.
+   *
+   * @param ids the ids, not null
+   * @return the list of lots, never null
+   */
+  public List<LotDto> findByIds(Collection<UUID> ids) {
+    return CollectionUtils.isEmpty(ids)
+        ? Collections.emptyList()
+        : getPage(RequestParameters.init().set("id", ids)).getContent();
   }
 }

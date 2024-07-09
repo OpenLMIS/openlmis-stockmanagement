@@ -20,7 +20,6 @@ import static org.springframework.http.HttpStatus.OK;
 
 import java.util.List;
 import java.util.UUID;
-
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.StockCardService;
@@ -28,6 +27,7 @@ import org.openlmis.stockmanagement.service.StockCardSummariesService;
 import org.openlmis.stockmanagement.util.UuidUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -100,9 +100,18 @@ public class StockCardsController {
       @RequestParam() UUID facility,
       Pageable pageable
   ) {
-    LOGGER.debug("Try to find stock card summaries");
+    Profiler profiler = new Profiler("GET_STOCK_CARDS_SUMMARIES");
+    profiler.setLogger(LOGGER);
+    profiler.start("CAN_VIEW_STOCK_CARD");
     permissionService.canViewStockCard(program, facility);
-    return stockCardSummariesService.findStockCards(program, facility, pageable);
+    profiler.start("FIND_STOCK_CARDS");
+    try {
+      return stockCardSummariesService
+          .findStockCards(program, facility, pageable,
+              profiler.startNested("FIND_STOCK_CARDS"));
+    } finally {
+      profiler.stop().log();
+    }
   }
 
   /**

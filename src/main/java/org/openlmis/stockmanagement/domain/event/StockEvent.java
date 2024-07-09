@@ -27,6 +27,7 @@ import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 
 @Entity
@@ -54,6 +55,7 @@ public class StockEvent extends BaseEntity {
 
   private String documentNumber;
 
+  @ToString.Exclude
   @OneToMany(cascade = ALL, mappedBy = "stockEvent")
   private List<StockEventLineItem> lineItems;
 }

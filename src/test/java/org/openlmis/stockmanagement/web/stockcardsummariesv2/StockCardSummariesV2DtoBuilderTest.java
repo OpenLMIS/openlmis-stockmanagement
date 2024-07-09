@@ -89,7 +89,7 @@ public class StockCardSummariesV2DtoBuilderTest {
             new StockCardLineItemDataBuilder().buildWithStockOnHand(30),
             orderable3.getId());
     stockCard3b = new StockCardDataBuilder(event)
-        .withLot(UUID.randomUUID())
+        .withLotId(UUID.randomUUID())
         .buildWithStockOnHandAndLineItemAndOrderableId(10,
             new StockCardLineItemDataBuilder().buildWithStockOnHand(10),
             orderable3.getId());
