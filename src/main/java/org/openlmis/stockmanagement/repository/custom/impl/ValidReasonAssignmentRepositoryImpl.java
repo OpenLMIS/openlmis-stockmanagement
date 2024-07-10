@@ -33,26 +33,25 @@ import org.openlmis.stockmanagement.repository.custom.ValidReasonAssignmentRepos
 
 public class ValidReasonAssignmentRepositoryImpl implements ValidReasonAssignmentRepositoryCustom {
 
-  private static final String PROGRAM_ID = "programId";
-  private static final String FACILITY_TYPE_ID = "facilityTypeId";
+  static final String PROGRAM_ID = "programId";
+  static final String FACILITY_TYPE_ID = "facilityTypeId";
   private static final String ID = "id";
   private static final String REASON_TYPE = "reasonType";
   private static final String REASON = "reason";
-
   @PersistenceContext
   private EntityManager entityManager;
 
   /**
    * This method is supposed to retrieve all Valid Reason Assignments with matched parameters.
    *
-   * @param programId  Valid Reason Assignment program id
+   * @param programIds     Valid Reason Assignment program ids
    * @param facilityTypeId Valid Reason Assignment facility type id
-   * @param reasonTypes   Valid Reason Assignment stock card line item reason types
-   * @param reasonId  Valid Reason Assignment stock card line item reason id
+   * @param reasonTypes    Valid Reason Assignment stock card line item reason types
+   * @param reasonId       Valid Reason Assignment stock card line item reason id
    * @return List of Valid Reason Assignments matching the parameters.
    */
-  public List<ValidReasonAssignment> search(UUID programId, UUID facilityTypeId,
-      Collection<ReasonType> reasonTypes, UUID reasonId) {
+  public List<ValidReasonAssignment> search(Collection<UUID> programIds, UUID facilityTypeId,
+                                            Collection<ReasonType> reasonTypes, UUID reasonId) {
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 
     CriteriaQuery<ValidReasonAssignment> query = builder.createQuery(ValidReasonAssignment.class);
@@ -61,8 +60,8 @@ public class ValidReasonAssignmentRepositoryImpl implements ValidReasonAssignmen
 
     Predicate predicate = builder.conjunction();
 
-    if (null != programId) {
-      predicate = builder.and(predicate, builder.equal(root.get(PROGRAM_ID), programId));
+    if (null != programIds) {
+      predicate = builder.and(predicate, root.get(PROGRAM_ID).in(programIds));
     }
 
     if (null != facilityTypeId) {
@@ -83,7 +82,6 @@ public class ValidReasonAssignmentRepositoryImpl implements ValidReasonAssignmen
 
     query.where(predicate);
 
-    return entityManager.createQuery(query)
-        .getResultList();
+    return entityManager.createQuery(query).getResultList();
   }
 }
