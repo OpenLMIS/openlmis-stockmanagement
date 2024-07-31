@@ -63,6 +63,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 
 /**
@@ -144,13 +146,17 @@ public class StockCardSummariesService extends StockCardBaseService {
   public StockCardSummaries findStockCards(StockCardSummariesV2SearchParams params) {
     Profiler profiler = new Profiler("FIND_STOCK_CARD_SUMMARIES_FOR_PARAMS");
     profiler.setLogger(LOGGER);
+    OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder
+        .getContext()
+        .getAuthentication();
 
-    if (!homeFacilityPermissionService
-        .checkFacilityAndHomeFacilityLinkage(params.getFacilityId())) {
+    if (!authentication.isClientOnly() && (!homeFacilityPermissionService
+          .checkFacilityAndHomeFacilityLinkage(params.getFacilityId()))) {
       profiler.start("VALIDATE_VIEW_RIGHTS");
       for (UUID id : params.getProgramIds()) {
         permissionService.canViewStockCard(id, params.getFacilityId());
       }
+
     }
 
     profiler.start("GET_APPROVED_PRODUCTS");

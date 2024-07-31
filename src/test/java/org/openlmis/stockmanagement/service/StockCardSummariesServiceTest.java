@@ -31,6 +31,8 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableSet;
@@ -44,6 +46,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -77,6 +81,9 @@ import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.util.RequestParameters;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 @SuppressWarnings("PMD.TooManyMethods")
 @RunWith(MockitoJUnitRunner.class)
@@ -117,6 +124,18 @@ public class StockCardSummariesServiceTest {
   private HomeFacilityPermissionService homeFacilityPermissionService;
   @InjectMocks
   private StockCardSummariesService stockCardSummariesService;
+
+  @Mock
+  private SecurityContext securityContext;
+  @Mock
+  private OAuth2Authentication authentication;
+
+  @Before
+  public void setUp() {
+    SecurityContextHolder.setContext(securityContext);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.isClientOnly()).thenReturn(false);
+  }
 
   @Test
   public void shouldCreateDummyCards() {
@@ -267,6 +286,8 @@ public class StockCardSummariesServiceTest {
     StockCardSummaries result = stockCardSummariesService.findStockCards(params);
 
     assertEquals(3, result.getPageOfApprovedProducts().size());
+    verify(permissionService, times(params.getProgramIds().size()))
+        .canViewStockCard(any(UUID.class), any(UUID.class));
   }
 
   @Test(expected = PermissionMessageException.class)
