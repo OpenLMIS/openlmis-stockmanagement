@@ -112,6 +112,7 @@ public class StockEventDtoDataBuilder {
     eventLineItemDto.setDestinationId(UUID.fromString("0bd28568-43f1-4836-934d-ec5fb11398e8"));
     eventLineItemDto.setSourceFreeText("a");
     eventLineItemDto.setDestinationFreeText("b");
+    eventLineItemDto.setUnitOfOrderableId(UUID.fromString("cefd305c-dfa7-411d-8b3d-74847713440c"));
     return eventLineItemDto;
   }
 

@@ -74,7 +74,7 @@ public class StockCardRepositoryIntegrationTest
 
   @Override
   StockCard generateInstance() throws Exception {
-    return generateInstance(randomUUID(), randomUUID(), randomUUID(), randomUUID());
+    return generateInstance(randomUUID(), randomUUID(), randomUUID(), randomUUID(), randomUUID());
   }
 
   private StockCard generateInstance(UUID facility, UUID program, UUID product, UUID lot) {
@@ -221,9 +221,9 @@ public class StockCardRepositoryIntegrationTest
   public void findByLotIdInShouldOnlyFindMatchingStockCards() throws Exception {
     UUID matchingLotId = UUID.randomUUID();
     stockCard1 = stockCardRepository.save(generateInstance(randomUUID(), randomUUID(), randomUUID(),
-        matchingLotId));
+        matchingLotId, randomUUID()));
     stockCard2 = stockCardRepository.save(generateInstance(randomUUID(), randomUUID(), randomUUID(),
-        matchingLotId));
+        matchingLotId, randomUUID()));
     stockCard3 = stockCardRepository.save(generateInstance());
     stockCard4 = stockCardRepository.save(generateInstance());
 
@@ -236,22 +236,28 @@ public class StockCardRepositoryIntegrationTest
   
   private void initializeStockCardsForMultipleFacilitiesAndPrograms() {
     stockCard1 = stockCardRepository
-        .save(generateInstance(facilityId1, programId1, randomUUID(), randomUUID()));
+        .save(generateInstance(facilityId1, programId1, randomUUID(), randomUUID(), randomUUID()));
     stockCard2 = stockCardRepository
-        .save(generateInstance(facilityId2, programId2, randomUUID(), randomUUID()));
+        .save(generateInstance(facilityId2, programId2, randomUUID(), randomUUID(), randomUUID()));
     stockCard3 = stockCardRepository
-        .save(generateInstance(facilityId2, programId1, randomUUID(), randomUUID()));
+        .save(generateInstance(facilityId2, programId1, randomUUID(), randomUUID(), randomUUID()));
     stockCard4 = stockCardRepository
-        .save(generateInstance(facilityId1, programId2, randomUUID(), randomUUID()));
+        .save(generateInstance(facilityId1, programId2, randomUUID(), randomUUID(), randomUUID()));
     stockCard5 = stockCardRepository
-        .save(generateInstance(randomUUID(), randomUUID(), randomUUID(), randomUUID()));
+        .save(generateInstance(randomUUID(), randomUUID(), randomUUID(), randomUUID(),
+            randomUUID()));
 
-    stockCardRepository.save(generateInstance(facilityId1, programId1, randomUUID(), randomUUID()));
-    stockCardRepository.save(generateInstance(facilityId2, programId2, randomUUID(), randomUUID()));
-    stockCardRepository.save(generateInstance(facilityId1, programId2, randomUUID(), randomUUID()));
+    stockCardRepository.save(generateInstance(facilityId1, programId1, randomUUID(), randomUUID(),
+        randomUUID()));
+    stockCardRepository.save(generateInstance(facilityId2, programId2, randomUUID(), randomUUID(),
+        randomUUID()));
+    stockCardRepository.save(generateInstance(facilityId1, programId2, randomUUID(), randomUUID(),
+        randomUUID()));
     stockCardRepository
-        .save(generateInstance(facilityId2, randomUUID(), randomUUID(), randomUUID()));
+        .save(generateInstance(facilityId2, randomUUID(), randomUUID(), randomUUID(),
+            randomUUID()));
     stockCardRepository
-        .save(generateInstance(randomUUID(), programId1, randomUUID(), randomUUID()));
+        .save(generateInstance(randomUUID(), programId1, randomUUID(), randomUUID(),
+            randomUUID()));
   }
 }
