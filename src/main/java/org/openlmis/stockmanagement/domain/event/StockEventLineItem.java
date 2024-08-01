@@ -84,6 +84,7 @@ public class StockEventLineItem extends BaseEntity
   @JoinColumn(name = "stockEventLineItemId")
   private List<PhysicalInventoryLineItemAdjustment> stockAdjustments;
 
+  @Column(nullable = false)
   private UUID unitOfOrderableId;
 
   /**

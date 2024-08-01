@@ -94,7 +94,7 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLotU
   @Column
   private UUID lotId;
 
-  @Column
+  @Column(nullable = false)
   private UUID unitOfOrderableId;
 
   @LazyCollection(FALSE)
