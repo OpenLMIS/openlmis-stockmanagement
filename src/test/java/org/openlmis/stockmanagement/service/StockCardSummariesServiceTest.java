@@ -31,6 +31,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -287,6 +288,72 @@ public class StockCardSummariesServiceTest {
 
     assertEquals(3, result.getPageOfApprovedProducts().size());
     verify(permissionService, times(params.getProgramIds().size()))
+        .canViewStockCard(any(UUID.class), any(UUID.class));
+  }
+
+  @Test
+  public void shouldNotCallPermissionServiceWhenApplicationClientOnly() {
+    OrderableDto orderable = new OrderableDtoDataBuilder().build();
+    OrderableDto orderable2 = new OrderableDtoDataBuilder().build();
+
+    OrderablesAggregator orderablesAggregator = new OrderablesAggregator(asList(
+        new ApprovedProductDto(orderable),
+        new ApprovedProductDto(orderable2)
+    ));
+
+    StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParamsDataBuilder()
+        .withOrderableIds(asList(orderable.getId(), orderable2.getId()))
+        .build();
+
+    when(approvedProductReferenceDataService
+        .getApprovedProducts(
+            eq(params.getFacilityId()),
+            eq(params.getProgramIds()),
+            eq(params.getOrderableIds()),
+            eq(params.getOrderableCode()),
+            eq(params.getOrderableName())
+        ))
+        .thenReturn(orderablesAggregator);
+
+    Map<UUID, OrderableFulfillDto> fulfillMap = new HashMap<>();
+    fulfillMap.put(orderable.getId(), new OrderableFulfillDtoDataBuilder()
+        .withCanFulfillForMe(singletonList(orderable2.getId())).build());
+    fulfillMap.put(orderable2.getId(), new OrderableFulfillDtoDataBuilder()
+        .withCanFulfillForMe(singletonList(orderable.getId())).build());
+
+    when(orderableFulfillReferenceDataService
+        .findByIds(asList(orderable.getId(), orderable2.getId())))
+        .thenReturn(fulfillMap);
+
+    when(lotReferenceDataService.getPage(any(RequestParameters.class)))
+        .thenReturn(new PageImpl<>(Collections.emptyList()));
+
+    when(orderableReferenceDataService.getPage(any(RequestParameters.class)))
+        .thenReturn(new PageImpl<>(Collections.emptyList()));
+
+    when(authentication.isClientOnly()).thenReturn(true);
+
+    StockEvent event = new StockEventDataBuilder()
+        .withFacility(params.getFacilityId())
+        .withProgram(params.getProgramIds().get(0))
+        .build();
+
+    StockCard stockCard = new StockCardDataBuilder(event)
+        .withOrderableId(orderable.getId())
+        .withStockOnHand(12)
+        .build();
+
+    List<StockCard> stockCards = singletonList(stockCard);
+
+    when(calculatedStockOnHandService
+        .getStockCardsWithStockOnHand(params.getProgramIds(), params.getFacilityId(),
+            params.getAsOfDate(), Collections.emptyList(), Collections.emptySet()))
+        .thenReturn(stockCards);
+
+    StockCardSummaries result = stockCardSummariesService.findStockCards(params);
+
+    assertEquals(2, result.getPageOfApprovedProducts().size());
+    verify(permissionService, never())
         .canViewStockCard(any(UUID.class), any(UUID.class));
   }
 
