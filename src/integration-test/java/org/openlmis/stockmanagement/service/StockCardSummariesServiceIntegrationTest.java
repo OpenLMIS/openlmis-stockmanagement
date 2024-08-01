@@ -124,8 +124,8 @@ public class StockCardSummariesServiceIntegrationTest extends BaseIntegrationTes
     when(programReferenceDataService.findOne(any(UUID.class)))
         .thenReturn(new ProgramDto());
 
-    createStockCard(orderable1Id, randomUUID());
-    createStockCard(orderable3Id, randomUUID());
+    createStockCard(orderable1Id, randomUUID(), randomUUID());
+    createStockCard(orderable3Id, randomUUID(), randomUUID());
     
     //when
     List<StockCardDto> cardDtos = stockCardSummariesService
@@ -159,7 +159,7 @@ public class StockCardSummariesServiceIntegrationTest extends BaseIntegrationTes
     UUID orderableId = randomUUID();
     OrderableDto orderable = createOrderableDto(orderableId, "");
 
-    createStockCard(orderableId, randomUUID());
+    createStockCard(orderableId, randomUUID(), randomUUID());
 
     doReturn(singletonList(orderable)).when(orderableReferenceDataService).findAll();
 
@@ -183,7 +183,7 @@ public class StockCardSummariesServiceIntegrationTest extends BaseIntegrationTes
         .build();
   }
 
-  private StockCard createStockCard(UUID orderableId, UUID cardId) {
+  private StockCard createStockCard(UUID orderableId, UUID cardId, UUID unitId) {
     StockEvent stockEvent = stockEventsRepository.save(new StockEventDataBuilder()
         .withoutId().build());
     
@@ -192,6 +192,7 @@ public class StockCardSummariesServiceIntegrationTest extends BaseIntegrationTes
     stockCard.setFacilityId(facilityId);
     stockCard.setProgramId(programId);
     stockCard.setOriginEvent(stockEvent);
+    stockCard.setUnitOfOrderableId(unitId);
     stockCard.setId(cardId);
     Map<String, String> oldExtraData = new HashMap<>();
     oldExtraData.put("vvmStatus", "STAGE_1");
