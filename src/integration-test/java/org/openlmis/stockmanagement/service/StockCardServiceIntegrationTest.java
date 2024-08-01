@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 
@@ -69,6 +70,8 @@ import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -291,6 +294,10 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     stockEventDto.getLineItems().get(0).setSourceId(node.getId());
     stockEventDto.getLineItems().get(0).setDestinationId(node.getId());
     StockEvent savedEvent = save(stockEventDto, randomUUID());
+
+    OAuth2Authentication authentication = mock(OAuth2Authentication.class);
+    when(authentication.isClientOnly()).thenReturn(false);
+    when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(authentication);
     doThrow(new PermissionMessageException(new Message("some error")))
         .when(permissionService)
         .canViewStockCard(savedEvent.getProgramId(), savedEvent.getFacilityId());

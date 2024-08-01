@@ -146,17 +146,15 @@ public class StockCardSummariesService extends StockCardBaseService {
   public StockCardSummaries findStockCards(StockCardSummariesV2SearchParams params) {
     Profiler profiler = new Profiler("FIND_STOCK_CARD_SUMMARIES_FOR_PARAMS");
     profiler.setLogger(LOGGER);
-    OAuth2Authentication authentication = (OAuth2Authentication) SecurityContextHolder
-        .getContext()
-        .getAuthentication();
+    OAuth2Authentication authentication =
+        (OAuth2Authentication) SecurityContextHolder.getContext().getAuthentication();
 
-    if (!authentication.isClientOnly() && (!homeFacilityPermissionService
-          .checkFacilityAndHomeFacilityLinkage(params.getFacilityId()))) {
+    if (!authentication.isClientOnly() && !homeFacilityPermissionService
+        .checkFacilityAndHomeFacilityLinkage(params.getFacilityId())) {
       profiler.start("VALIDATE_VIEW_RIGHTS");
       for (UUID id : params.getProgramIds()) {
         permissionService.canViewStockCard(id, params.getFacilityId());
       }
-
     }
 
     profiler.start("GET_APPROVED_PRODUCTS");
