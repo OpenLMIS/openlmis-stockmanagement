@@ -18,8 +18,12 @@ package org.openlmis.stockmanagement.service;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 
@@ -68,6 +72,8 @@ import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -284,12 +290,41 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     stockEventDto.getLineItems().get(0).setSourceId(node.getId());
     stockEventDto.getLineItems().get(0).setDestinationId(node.getId());
     StockEvent savedEvent = save(stockEventDto, randomUUID());
+
+    OAuth2Authentication authentication = mock(OAuth2Authentication.class);
+    when(authentication.isClientOnly()).thenReturn(false);
+    when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(authentication);
     doThrow(new PermissionMessageException(new Message("some error")))
         .when(permissionService)
         .canViewStockCard(savedEvent.getProgramId(), savedEvent.getFacilityId());
 
     UUID savedCardId = stockCardRepository.findByOriginEvent(savedEvent).getId();
     stockCardService.findStockCardById(savedCardId);
+  }
+
+  @Test
+  public void findStockCardByIdShouldReturnNullForUnknownId() {
+    final UUID unknownId = UUID.fromString("356e199a-29b9-40f7-ab92-4ab089470b55");
+
+    final StockCardDto found = stockCardService.findStockCardById(unknownId);
+
+    assertNull(found);
+  }
+
+  @Test
+  public void findStockCardByIdShouldNotCheckPermissionsForClientAuthentication() {
+    final StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
+    stockEventDto.getLineItems().get(0).setSourceId(node.getId());
+    stockEventDto.getLineItems().get(0).setDestinationId(node.getId());
+    final StockEvent savedEvent = save(stockEventDto, randomUUID());
+
+    final UUID cardId = stockCardRepository.findByOriginEvent(savedEvent).getId();
+    final StockCardDto found = stockCardService.findStockCardById(cardId);
+
+    assertNotNull(found);
+    verify(permissionService, never())
+        .canViewStockCard(savedEvent.getProgramId(), savedEvent.getFacilityId());
   }
 
   private StockEvent save(StockEventDto eventDto, UUID userId) {
