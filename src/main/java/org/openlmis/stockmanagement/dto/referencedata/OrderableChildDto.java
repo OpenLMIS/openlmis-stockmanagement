@@ -31,5 +31,9 @@ public class OrderableChildDto {
 
   @Getter
   @Setter
+  private UnitOfOrderableDto unit;
+
+  @Getter
+  @Setter
   private ObjectReferenceDto orderable;
 }

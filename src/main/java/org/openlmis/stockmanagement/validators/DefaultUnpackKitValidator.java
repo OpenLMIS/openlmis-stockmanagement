@@ -21,12 +21,13 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_CANNOT_U
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_CANNOT_UNPACK_WHEN_EXTRA_CONSTITUENTS_CREDITED;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
+import org.openlmis.stockmanagement.domain.identity.OrderableUnitIdentity;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableChildDto;
@@ -59,35 +60,25 @@ public class DefaultUnpackKitValidator implements UnpackKitValidator {
 
     StockEventProcessContext context = stockEventDto.getContext();
 
-    profiler.start("GET_ORDERABLE_IDS");
-    List<UUID> orderableIds = stockEventDto
-        .getLineItems()
-        .stream()
-        .map(StockEventLineItemDto::getOrderableId)
-        .collect(Collectors.toList());
-
-    profiler.start("SEARCH_FOR_ORDERABLES");
-    Map<UUID, OrderableDto> orderables = orderableReferenceDataService
-        .findByIds(orderableIds)
-        .stream()
-        .collect(Collectors.toMap(OrderableDto::getId, Function.identity()));
+    Map<UUID, OrderableDto> orderables = loadOrderables(stockEventDto, profiler);
 
     profiler.start("GET_NON_UNPACK_QUANTITIES");
-    Map<UUID, Integer> nonUnpackQuantities = stockEventDto
+    Map<OrderableUnitIdentity, Integer> nonUnpackQuantities = stockEventDto
         .getLineItems()
         .stream()
         .filter(l -> !context.getUnpackReasonId().equals(l.getReasonId()))
         .collect(Collectors
             .groupingBy(
-                StockEventLineItemDto::getOrderableId,
+                OrderableUnitIdentity::new,
                 summingInt(StockEventLineItemDto::getQuantity)));
 
     profiler.start("VALIDATE_UNPACK_KITS");
     stockEventDto.getLineItems()
         .stream()
         .filter(item -> context.getUnpackReasonId().equals(item.getReasonId()))
-        .forEach(line -> validateUnpackedKit(line, orderables.get(line.getOrderableId()),
-            nonUnpackQuantities));
+        .forEach(unpackedKitLine ->
+            validateUnpackedKit(unpackedKitLine,
+                orderables.get(unpackedKitLine.getOrderableId()), nonUnpackQuantities));
 
     if (nonUnpackQuantities.values().stream().anyMatch(i -> i > 0)) {
       throw new ValidationMessageException(
@@ -98,31 +89,44 @@ public class DefaultUnpackKitValidator implements UnpackKitValidator {
     XLOGGER.exit(stockEventDto);
   }
 
-  private void validateUnpackedKit(StockEventLineItemDto lineItem,
-      @NotNull OrderableDto orderable, Map<UUID, Integer> orderableCredits) {
+  private Map<UUID, OrderableDto> loadOrderables(StockEventDto stockEventDto, Profiler profiler) {
+    profiler.start("GET_ORDERABLE_IDS");
+    Set<UUID> orderableIds =
+        stockEventDto.getLineItems().stream().map(StockEventLineItemDto::getOrderableId)
+            .collect(Collectors.toSet());
+
+    profiler.start("SEARCH_FOR_ORDERABLES");
+    return orderableReferenceDataService.findByIds(orderableIds).stream()
+        .collect(Collectors.toMap(OrderableDto::getId, Function.identity()));
+  }
+
+  private void validateUnpackedKit(StockEventLineItemDto unpackedKitLine,
+      @NotNull OrderableDto orderable, Map<OrderableUnitIdentity, Integer> orderableCredits) {
 
     // check if the orderable is a kit. if not throw exception.
     if (isEmpty(orderable.getChildren())) {
-      throw new ValidationMessageException(
-          new Message(ERROR_EVENT_CANNOT_UNPACK_REGULAR_ORDERABLE, lineItem.getOrderableId()));
+      throw new ValidationMessageException(new Message(ERROR_EVENT_CANNOT_UNPACK_REGULAR_ORDERABLE,
+          unpackedKitLine.getOrderableId()));
     }
 
     // check if the constituent products are all accounted for.
     orderable.getChildren().forEach(
-        orderableChild -> validateKitConstituents(lineItem, orderableCredits, orderableChild));
-
+        orderableChild -> validateKitConstituents(unpackedKitLine, orderableCredits,
+            orderableChild));
   }
 
-  private void validateKitConstituents(StockEventLineItemDto lineItem,
-      Map<UUID, Integer> orderableCredits, OrderableChildDto orderableChild) {
-    Integer quantityToAccountFor = lineItem.getQuantity() * orderableChild.getQuantity();
-    Integer constituentCredits = orderableCredits.get(orderableChild.getOrderable().getId());
+  private void validateKitConstituents(StockEventLineItemDto unpackedKitLine,
+      Map<OrderableUnitIdentity, Integer> orderableCredits, OrderableChildDto orderableChild) {
+    int childAbsoluteQuantity =
+        orderableChild.getQuantity() * orderableChild.getUnit().getFactor();
+    Integer quantityToAccountFor = unpackedKitLine.getQuantity() * childAbsoluteQuantity;
+    Integer constituentCredits = orderableCredits.get(new OrderableUnitIdentity(orderableChild));
     if (constituentCredits == null || quantityToAccountFor > constituentCredits) {
       throw new ValidationMessageException(
           new Message(ERROR_EVENT_CANNOT_UNPACK_CONSTITUENT_NOT_ACCOUNTED_FOR,
-              lineItem.getOrderableId()));
+              unpackedKitLine.getOrderableId()));
     } else {
-      orderableCredits.replace(orderableChild.getOrderable().getId(),
+      orderableCredits.replace(new OrderableUnitIdentity(orderableChild),
           constituentCredits - quantityToAccountFor);
     }
   }

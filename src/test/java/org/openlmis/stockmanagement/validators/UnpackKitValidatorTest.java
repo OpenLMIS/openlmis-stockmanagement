@@ -38,6 +38,7 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableChildDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
+import org.openlmis.stockmanagement.dto.referencedata.UnitOfOrderableDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
@@ -62,12 +63,16 @@ public class UnpackKitValidatorTest {
   private DefaultUnpackKitValidator validator;
 
 
+  private UnitOfOrderableDto testUnitKit;
+  private UnitOfOrderableDto testUnitChild;
   private OrderableDto kitDto;
   private OrderableDto constituentDto1;
   private OrderableDto constituentDto2;
 
   @Before
   public void setup() {
+    testUnitKit = UnitOfOrderableDto.builder().id(UUID.randomUUID()).factor(1).build();
+    testUnitChild = UnitOfOrderableDto.builder().id(UUID.randomUUID()).factor(3).build();
     kitDto = OrderableDto.builder().id(UUID.randomUUID()).build();
     constituentDto1 = OrderableDto.builder().id(UUID.randomUUID())
         .children(Collections.emptySet())
@@ -75,17 +80,17 @@ public class UnpackKitValidatorTest {
     constituentDto2 = OrderableDto.builder().id(UUID.randomUUID())
         .children(Collections.emptySet())
         .build();
-    kitDto.setChildren(Stream.of(
-        new OrderableChildDto(5, new ObjectReferenceDto(null, null, constituentDto1.getId())),
-        new OrderableChildDto(10, new ObjectReferenceDto(null, null, constituentDto2.getId()))
-    ).collect(Collectors.toSet()));
+    kitDto.setChildren(Stream.of(new OrderableChildDto(5, testUnitChild,
+            new ObjectReferenceDto(null, null, constituentDto1.getId())),
+        new OrderableChildDto(10, testUnitChild,
+            new ObjectReferenceDto(null, null, constituentDto2.getId())))
+        .collect(Collectors.toSet()));
     List<OrderableDto> orderableDtos = asList(kitDto, constituentDto1, constituentDto2);
     when(orderableReferenceDataService.findByIds(any()))
         .thenReturn(orderableDtos);
 
     when(context.getUnpackReasonId())
         .thenReturn(UNPACK_REASON_ID);
-
   }
 
   @Test
@@ -100,7 +105,7 @@ public class UnpackKitValidatorTest {
   @Test(expected = ValidationMessageException.class)
   public void shouldThrowExceptionWhenUnpackReasonIsUsedForOrderableThatIsNotKit() {
     StockEventLineItemDto lineItemDto = createStockEventLineItem(UNPACK_REASON_ID,
-        constituentDto1.getId(), 2);
+        constituentDto1.getId(), 2, testUnitKit.getId());
     StockEventDto stockEventDto = createStockEvent(lineItemDto);
 
     validator.validate(stockEventDto);
@@ -109,12 +114,12 @@ public class UnpackKitValidatorTest {
   @Test
   public void shouldNotThrowExceptionWhenUnpackingWithRightAmounts() {
     StockEventLineItemDto kitLineItem = createStockEventLineItem(UNPACK_REASON_ID,
-        kitDto.getId(), 2);
+        kitDto.getId(), 2, testUnitKit.getId());
     StockEventLineItemDto lineItem1 = createStockEventLineItem(UUID.randomUUID(),
-        constituentDto1.getId(), 10);
+        constituentDto1.getId(), 10 * testUnitChild.getFactor(), testUnitChild.getId());
 
     StockEventLineItemDto lineItem2 = createStockEventLineItem(UUID.randomUUID(),
-        constituentDto2.getId(), 20);
+        constituentDto2.getId(), 20 * testUnitChild.getFactor(), testUnitChild.getId());
 
     StockEventDto stockEventDto = createStockEvent(kitLineItem, lineItem1, lineItem2);
 
@@ -124,12 +129,12 @@ public class UnpackKitValidatorTest {
   @Test(expected = ValidationMessageException.class)
   public void shouldThrowExceptionWhenUnpackingWithLessQuantityThanUnpackList() {
     StockEventLineItemDto kitLineItem = createStockEventLineItem(UNPACK_REASON_ID,
-        kitDto.getId(), 2);
+        kitDto.getId(), 2, testUnitKit.getId());
     StockEventLineItemDto lineItem1 = createStockEventLineItem(UUID.randomUUID(),
-        constituentDto1.getId(), 5);
+        constituentDto1.getId(), 5 * testUnitChild.getFactor(), testUnitChild.getId());
 
     StockEventLineItemDto lineItem2 = createStockEventLineItem(UUID.randomUUID(),
-        constituentDto2.getId(), 2);
+        constituentDto2.getId(), 2 * testUnitChild.getFactor(), testUnitChild.getId());
 
     StockEventDto stockEventDto = createStockEvent(kitLineItem, lineItem1, lineItem2);
 
@@ -139,12 +144,12 @@ public class UnpackKitValidatorTest {
   @Test(expected = ValidationMessageException.class)
   public void shouldThrowExceptionWhenUnpackingWithMoreQuantityThanUnpackList() {
     StockEventLineItemDto kitLineItem = createStockEventLineItem(UNPACK_REASON_ID,
-        kitDto.getId(), 2);
+        kitDto.getId(), 2, testUnitKit.getId());
     StockEventLineItemDto lineItem1 = createStockEventLineItem(UUID.randomUUID(),
-        constituentDto1.getId(), 50);
+        constituentDto1.getId(), 50 * testUnitChild.getFactor(), testUnitChild.getId());
 
     StockEventLineItemDto lineItem2 = createStockEventLineItem(UUID.randomUUID(),
-        constituentDto2.getId(), 20);
+        constituentDto2.getId(), 20 * testUnitChild.getFactor(), testUnitChild.getId());
 
     StockEventDto stockEventDto = createStockEvent(kitLineItem, lineItem1, lineItem2);
 
@@ -154,9 +159,9 @@ public class UnpackKitValidatorTest {
   @Test(expected = ValidationMessageException.class)
   public void shouldThrowExceptionWhenUnpackingWithMissingConstituentLineItem() {
     StockEventLineItemDto kitLineItem = createStockEventLineItem(UNPACK_REASON_ID,
-        kitDto.getId(), 2);
+        kitDto.getId(), 2, testUnitKit.getId());
     StockEventLineItemDto lineItem1 = createStockEventLineItem(UUID.randomUUID(),
-        constituentDto1.getId(), 10);
+        constituentDto1.getId(), 10 * testUnitChild.getFactor(), testUnitChild.getId());
 
     StockEventDto stockEventDto = createStockEvent(kitLineItem, lineItem1);
 
@@ -164,11 +169,12 @@ public class UnpackKitValidatorTest {
   }
 
   private StockEventLineItemDto createStockEventLineItem(UUID reasonId, UUID orderableId,
-      int quantity) {
+                                                         int quantity, UUID unitId) {
     return new StockEventLineItemDtoDataBuilder()
         .withReasonId(reasonId)
         .withOrderableId(orderableId)
         .withQuantity(quantity)
+        .withUnitOfOrderableId(unitId)
         .build();
   }
 
