@@ -50,6 +50,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
@@ -140,6 +141,8 @@ public abstract class BaseCommunicationService<T> {
       } else {
         throw buildDataRetrievalException(ex);
       }
+    } catch (RestClientException ex) {
+      throw buildDataRetrievalException(ex);
     }
   }
 
@@ -160,7 +163,7 @@ public abstract class BaseCommunicationService<T> {
           () -> doListRequest(url, params, HttpMethod.GET, getArrayResultClass())
       );
       return new ArrayList<>(Arrays.asList(responseEntity.getBody()));
-    } catch (HttpStatusCodeException ex) {
+    } catch (RestClientException ex) {
       throw buildDataRetrievalException(ex);
     }
   }
@@ -183,7 +186,7 @@ public abstract class BaseCommunicationService<T> {
         List<P> list = Stream.of(response.getBody()).collect(Collectors.toList());
         return new ServiceResponse<>(list, response.getHeaders(), true);
       }
-    } catch (HttpStatusCodeException ex) {
+    } catch (RestClientException ex) {
       throw buildDataRetrievalException(ex);
     }
   }
@@ -247,7 +250,7 @@ public abstract class BaseCommunicationService<T> {
       );
       return response.getBody();
 
-    } catch (HttpStatusCodeException ex) {
+    } catch (RestClientException ex) {
       throw buildDataRetrievalException(ex);
     }
   }
@@ -326,7 +329,7 @@ public abstract class BaseCommunicationService<T> {
     return new ResponseEntity<>(body, HttpStatus.OK);
   }
 
-  private DataRetrievalException buildDataRetrievalException(HttpStatusCodeException ex) {
+  private DataRetrievalException buildDataRetrievalException(RestClientException ex) {
     return new DataRetrievalException(getResultClass().getSimpleName(), ex);
   }
 
