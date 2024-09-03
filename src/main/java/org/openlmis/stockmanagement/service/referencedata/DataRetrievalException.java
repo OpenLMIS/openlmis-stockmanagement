@@ -17,7 +17,8 @@ package org.openlmis.stockmanagement.service.referencedata;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 
 /**
  * Signals we were unable to retrieve reference data
@@ -38,10 +39,15 @@ public class DataRetrievalException extends RuntimeException {
    * Constructs the exception.
    *
    * @param resource the resource that we were trying to retrieve
-   * @param ex       exception with status code and response body from server
+   * @param ex       rest client exception, may contain response from server with code and body
    */
-  public DataRetrievalException(String resource, HttpStatusCodeException ex) {
-    this(resource, ex.getStatusCode(), ex.getResponseBodyAsString());
+  public DataRetrievalException(String resource, RestClientException ex) {
+    this(resource, ex instanceof RestClientResponseException
+            ? HttpStatus.resolve(((RestClientResponseException) ex).getRawStatusCode())
+            : null,
+        ex instanceof RestClientResponseException
+            ? ((RestClientResponseException) ex).getResponseBodyAsString()
+            : ex.getLocalizedMessage());
   }
 
   /**
@@ -53,7 +59,7 @@ public class DataRetrievalException extends RuntimeException {
    */
   public DataRetrievalException(String resource, HttpStatus status, String response) {
     super(String.format("Unable to retrieve %s. Error code: %d, response message: %s",
-        resource, status.value(), response));
+        resource, status != null ? status.value() : 0, response));
     this.resource = resource;
     this.status = status;
     this.response = response;
