@@ -23,7 +23,7 @@ services:
     depends_on: [consul]
 
   stockmanagement:
-    image: openlmis/dev:9
+    image: openlmis/dev:10
     ports:
       - "5005:5005"
       - "8080:8080"
@@ -54,7 +54,7 @@ services:
     env_file: .manual-api-test-env
 
   log:
-    image: openlmis/rsyslog:1
+    image: openlmis/rsyslog:3
 
 volumes:
   gradlecache:
