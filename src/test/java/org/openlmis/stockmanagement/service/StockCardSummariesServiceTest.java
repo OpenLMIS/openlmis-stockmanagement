@@ -33,7 +33,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -292,8 +291,6 @@ public class StockCardSummariesServiceTest {
     StockCardSummaries result = stockCardSummariesService.findStockCards(params);
 
     assertEquals(3, result.getPageOfApprovedProducts().size());
-    verify(permissionService, times(params.getProgramIds().size()))
-        .canViewStockCard(any(UUID.class), any(UUID.class));
   }
 
   @Test
@@ -313,7 +310,7 @@ public class StockCardSummariesServiceTest {
     when(approvedProductReferenceDataService
         .getApprovedProducts(
             eq(params.getFacilityId()),
-            eq(params.getProgramIds()),
+            eq(params.getProgramId()),
             eq(params.getOrderableIds()),
             eq(params.getOrderableCode()),
             eq(params.getOrderableName())
@@ -340,7 +337,7 @@ public class StockCardSummariesServiceTest {
 
     StockEvent event = new StockEventDataBuilder()
         .withFacility(params.getFacilityId())
-        .withProgram(params.getProgramIds().get(0))
+        .withProgram(params.getProgramId())
         .build();
 
     StockCard stockCard = new StockCardDataBuilder(event)
@@ -351,7 +348,7 @@ public class StockCardSummariesServiceTest {
     List<StockCard> stockCards = singletonList(stockCard);
 
     when(calculatedStockOnHandService
-        .getStockCardsWithStockOnHand(params.getProgramIds(), params.getFacilityId(),
+        .getStockCardsWithStockOnHand(params.getProgramId(), params.getFacilityId(),
             params.getAsOfDate(), Collections.emptyList(), Collections.emptySet()))
         .thenReturn(stockCards);
 

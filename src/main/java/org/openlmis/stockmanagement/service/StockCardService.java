@@ -105,6 +105,9 @@ public class StockCardService extends StockCardBaseService {
   @Autowired
   private StockOnHandCalculationService calculationSoHService;
 
+  @Autowired
+  private HomeFacilityPermissionService homeFacilityPermissionService;
+
   /**
    * Generate stock card line items and stock cards based on event, and persist them.
    *
