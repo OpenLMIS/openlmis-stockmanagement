@@ -183,13 +183,13 @@ configure(checkApiIsRaml) {
 jacocoTestReport {
     group = "reporting"
     description = "Generate Jacoco coverage reports after running tests."
+    executionData integrationTest
     reports {
         xml.enabled true
         html.enabled true
         csv.enabled false
     }
-
-    additionalSourceDirs(files(sourceSets.main.allJava.srcDirs))
+    dependsOn test, integrationTest
 }
 
 checkstyle {
