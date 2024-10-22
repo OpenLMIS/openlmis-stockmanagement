@@ -1,15 +1,32 @@
+5.1.11 / WIP
+==================
+
+Bug fixes:
+* [OLMIS-8020](https://openlmis.atlassian.net/browse/OLMIS-8020): Fix issue where it was not possible to create a requisition 
+when a program had `Enable Stock on Hand to populate from stock cards` flag checked
+
+Improvements:
+* [OLMIS-7895](https://openlmis.atlassian.net/browse/OLMIS-7895): Add demo data for BUQ and TB Monthly
+* [OLMIS-7953](https://openlmis.atlassian.net/browse/OLMIS-7953): Improve some API calls performance
+* [OIS-14](https://openlmis.atlassian.net/browse/OIS-14): Upgrade Transifex API version
+* [OIS-48](https://openlmis.atlassian.net/browse/OIS-48): Update service base images to versions without known vulnerabilities
+* [SELV3-718](https://openlmis.atlassian.net/browse/SELV3-718): Add filtering by geographic zone for valid sources and destinations
+
 5.1.10 / 2024-04-19
 ==================
+
 Bug fixes:
 * [OLMIS-7910](https://openlmis.atlassian.net/browse/OLMIS-7910): Fixed wrong stock on hand on first Receive
 
 5.1.9 / 2023-06-26
 ==================
+
 Bug fixes:
 * [OD-37](https://openlmis.atlassian.net/browse/OD-37): Fixed wrong stockout days calculation
 
 5.1.8 / 2023-04-05
 ==================
+
 Bug fixes:
 * [OLMIS-7373](https://openlmis.atlassian.net/browse/OLMIS-7373): Fixed filtering by lot code in stock on hand
 * [OLMIS-7711](https://openlmis.atlassian.net/browse/OLMIS-7711): Fixed wrong stockout days calculation
