@@ -1,4 +1,4 @@
-5.1.10-angola.1 / Ongoing
+5.1.10-angola.r2 / 2024-11-08
 ==================
 Improvements:
 * [OAM-65](https://openlmis.atlassian.net/browse/OAM-65): Added disabled field to Organization entity
