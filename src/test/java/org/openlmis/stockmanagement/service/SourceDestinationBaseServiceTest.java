@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -34,6 +35,7 @@ import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationDataB
 import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationDataBuilder.createOrganizationDestination;
 import static org.openlmis.stockmanagement.testutils.ValidSourceDestinationDataBuilder.createOrganizationSourceAssignment;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -63,6 +65,7 @@ import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataS
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
 import org.openlmis.stockmanagement.testutils.GeographicLevelDtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.GeographicZoneDtoDataBuilder;
+import org.openlmis.stockmanagement.util.RequestParameters;
 import org.openlmis.stockmanagement.web.Pagination;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -326,7 +329,7 @@ public class SourceDestinationBaseServiceTest {
     Map<UUID, FacilityDto> facilityMap = new HashMap<>();
     facilityMap.put(facilityId, facilityDto);
 
-    when(facilityReferenceDataService.findByIds(Collections.singletonList(facilityId)))
+    when(facilityReferenceDataService.findByIds(singletonList(facilityId)))
             .thenReturn(facilityMap);
 
     List<ValidDestinationAssignment> validDestinationAssignments = asList(
@@ -410,7 +413,7 @@ public class SourceDestinationBaseServiceTest {
     Map<UUID, FacilityDto> facilityMap = new HashMap<>();
     facilityMap.put(facilityId, facilityDto);
 
-    when(facilityReferenceDataService.findByIds(Collections.singletonList(facilityId)))
+    when(facilityReferenceDataService.findByIds(singletonList(facilityId)))
             .thenReturn(facilityMap);
 
     List<ValidSourceAssignment> validSourceAssignments = asList(
@@ -463,19 +466,14 @@ public class SourceDestinationBaseServiceTest {
     facilityMap.put(facility1Id, facility1);
     facilityMap.put(facility2Id, facility2);
 
-    when(facilityReferenceDataService.findByIds(asList(facility1Id, facility2Id)))
-        .thenReturn(facilityMap);
-    when(facilityReferenceDataService.findByIds(Collections.singletonList(facility1Id)))
-        .thenReturn(Collections.singletonMap(facility1Id, facility1));
+    when(facilityReferenceDataService.getPage(any(RequestParameters.class)))
+        .thenReturn(Pagination.getPage(new ArrayList<>(facilityMap.values())));
 
-    List<ValidSourceAssignment> validSourceAssignments = asList(
-        createOrganizationSourceAssignment(mockedOrganizationNode(ORGANIZATION_NODE_NAME)),
-        createFacilitySourceAssignment(mockedFacilityNode(facility1Id, FACILITY_NODE_NAME)),
-        createFacilitySourceAssignment(mockedFacilityNode(facility2Id, otherFacilityNodeName))
-    );
+    List<ValidSourceAssignment> validSourceAssignments = singletonList(
+        createFacilitySourceAssignment(mockedFacilityNode(facility1Id, FACILITY_NODE_NAME)));
 
-    when(sourceRepository.findAll())
-        .thenReturn(validSourceAssignments);
+    when(sourceRepository.findByNodeReferenceIdIn(any(), any()))
+        .thenReturn(Pagination.getPage(validSourceAssignments));
 
     //when
     Page<ValidSourceDestinationDto> validSources =

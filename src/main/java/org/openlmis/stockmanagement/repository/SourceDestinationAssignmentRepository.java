@@ -15,9 +15,11 @@
 
 package org.openlmis.stockmanagement.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import org.openlmis.stockmanagement.domain.sourcedestination.SourceDestinationAssignment;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
@@ -31,8 +33,14 @@ public interface SourceDestinationAssignmentRepository<T extends SourceDestinati
           @Param("programId") UUID programId, @Param("facilityTypeId") UUID facilityTypeId,
           Pageable pageable);
 
+  List<T> findByProgramIdAndFacilityTypeIdAndNodeReferenceIdIn(
+      @Param("programId") UUID programId, @Param("facilityTypeId") UUID facilityTypeId,
+      @Param("referenceIds") Collection<UUID> referenceIds, Pageable pageable);
+
   T findByProgramIdAndFacilityTypeIdAndNodeId(
       @Param("programId") UUID programId, @Param("facilityTypeId") UUID facilityTypeId,
       @Param("nodeId") UUID nodeId);
 
+  Page<T> findByNodeReferenceIdIn(@Param("referenceIds") Collection<UUID> referenceIds,
+                                  Pageable pageable);
 }

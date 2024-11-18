@@ -23,7 +23,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.domain.sourcedestination.Organization;
@@ -38,6 +40,7 @@ import org.openlmis.stockmanagement.repository.SourceDestinationAssignmentReposi
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
 import org.openlmis.stockmanagement.util.Message;
+import org.openlmis.stockmanagement.util.RequestParameters;
 import org.openlmis.stockmanagement.web.Pagination;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -311,8 +314,19 @@ public abstract class SourceDestinationBaseService {
     programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(programId, facilityTypeId);
 
     profiler.start("FIND_ASSIGNMENTS_BY_PROGRAM_AND_FACILITY_TYPE");
-    List<T> assignments = repository
-            .findByProgramIdAndFacilityTypeId(programId, facilityTypeId, Pageable.unpaged());
+    final List<T> assignments;
+
+    if (geographicZoneId == null) {
+      assignments = repository
+          .findByProgramIdAndFacilityTypeId(programId, facilityTypeId, Pageable.unpaged());
+    } else {
+      final Set<UUID> geoZoneFacilityIds =
+          facilityRefDataService.getPage(RequestParameters.init().set("zoneId", geographicZoneId))
+              .get().map(FacilityDto::getId).collect(Collectors.toSet());
+      assignments = repository
+          .findByProgramIdAndFacilityTypeIdAndNodeReferenceIdIn(programId, facilityTypeId,
+              geoZoneFacilityIds, Pageable.unpaged());
+    }
 
     profiler.start("FIND_FACILITY_IDS");
     List<UUID> facilitiesIds = getFacilitiesIds(assignments);
@@ -324,13 +338,7 @@ public abstract class SourceDestinationBaseService {
     List<SourceDestinationAssignment> geoAssigment = assignments.stream()
             .filter(assignment -> !assignment.getNode().isRefDataFacility()
                     || hasGeoAffinity(assignment, facility, facilitiesById))
-        .filter(assignment -> {
-          if (geographicZoneId != null) {
-            return checkIfAssignmentInGeographicZone(geographicZoneId, assignment, facilitiesById);
-          } else {
-            return true;
-          }
-        }).collect(Collectors.toList());
+        .collect(Collectors.toList());
 
     List<ValidSourceDestinationDto> result = geoAssigment.stream()
             .map(assignment -> createAssignmentDto(assignment, facilitiesById))
@@ -357,38 +365,26 @@ public abstract class SourceDestinationBaseService {
       findAssignmentsByGeographicZone(UUID geographicZoneId,
                                       SourceDestinationAssignmentRepository<T> repository,
                                       Profiler profiler, Pageable pageable) {
-    profiler.start("FIND_ASSIGNMENTS_BY_GEOGRAPHIC_ZONE");
+    profiler.start("GET_FACILITY_FOR_GEO_ZONE");
+    final Map<UUID, FacilityDto> geoZoneFacilities =
+        facilityRefDataService.getPage(RequestParameters.init().set("zoneId", geographicZoneId))
+            .get().distinct().collect(Collectors.toMap(FacilityDto::getId, Function.identity()));
+    final Set<UUID> geoZoneFacilityIds =
+        geoZoneFacilities.values().stream().map(FacilityDto::getId).collect(Collectors.toSet());
 
-    List<? extends SourceDestinationAssignment> assignments = repository.findAll();
+    profiler.start("GET_ASSIGNMENTS_PAGE");
+    final Page<T> assignments =
+        repository.findByNodeReferenceIdIn(geoZoneFacilityIds, pageable);
 
-    profiler.start("FIND_FACILITY_IDS");
-    List<UUID> facilitiesIds = getFacilitiesIds(assignments);
-
-    profiler.start("FIND_FACILITIES_BY_ID_MAP");
-    Map<UUID, FacilityDto> facilitiesById = facilityRefDataService.findByIds(facilitiesIds);
-
-    assignments = assignments.stream()
-        .filter(assignment -> checkIfAssignmentInGeographicZone(geographicZoneId,
-            assignment, facilitiesById))
+    profiler.start("BUILD_DTOS");
+    final List<ValidSourceDestinationDto> validAssignments = assignments.get().map(
+        assignment -> ValidSourceDestinationDto.createFrom(assignment,
+            geoZoneFacilities.get(assignment.getNode().getReferenceId()).getName()))
         .collect(Collectors.toList());
 
-    List<ValidSourceDestinationDto> validDestinations = createAssignmentDto(assignments);
-
     return pageable.isUnpaged()
-        ? Pagination.getPage(validDestinations)
-        : Pagination.getPage(validDestinations, pageable);
-  }
-
-  private <T extends SourceDestinationAssignment> boolean
-      checkIfAssignmentInGeographicZone(UUID geographicZoneId, T assignment,
-                                        Map<UUID, FacilityDto> facilitiesById) {
-    Node node = assignment.getNode();
-    if (node.isRefDataFacility()) {
-      FacilityDto facilityDto = facilitiesById.get(node.getReferenceId());
-      return facilityDto.getGeographicZone().getId().equals(geographicZoneId);
-    } else {
-      return false;
-    }
+        ? Pagination.getPage(validAssignments)
+        : Pagination.getPage(validAssignments, pageable, assignments.getTotalElements());
   }
 
   private <T extends SourceDestinationAssignment> List<UUID> getFacilitiesIds(List<T> assignments) {
@@ -397,5 +393,4 @@ public abstract class SourceDestinationBaseService {
         .map(assignment -> assignment.getNode().getReferenceId())
         .collect(Collectors.toList());
   }
-
 }
