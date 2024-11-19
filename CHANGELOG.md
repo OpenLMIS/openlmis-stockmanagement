@@ -1,5 +1,11 @@
-5.1.12 / wip
+5.1.12 / 19.11.2024
 ==================
+
+Patch release with performance improvements.
+
+Improvements:
+* [SELV3-770](https://openlmis.atlassian.net/browse/SELV3-770): Improve performance of filtering for Valid Sources and
+ Valid Destinations
 
 5.1.11 / 31.10.2024
 ==================
