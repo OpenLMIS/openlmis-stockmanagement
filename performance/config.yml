@@ -1,4 +1,6 @@
 modules:
+  local:
+    sequential: true
   jmeter:
     properties:
       base-uri: http://localhost

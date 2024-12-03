@@ -1,6 +1,8 @@
 execution:
-  - concurrency: 1
-    hold-for: 2m
+  - concurrency: 10
+    iterations: 10
+    ramp-up: 1m
+    hold-for: 10m
     scenario: get-tags
 
 scenarios:
@@ -14,6 +16,8 @@ scenarios:
           Authorization: Bearer ${access_token}
 
 reporting:
-    - module: passfail
-      criteria:
-        Get Tags too slow: p90 of GetTags>200ms
+  - module: passfail
+    criteria:
+      - 'GetTags too high error rate: failures>1%, continue as failed, label=GetTags, title="GetTags error rate too high"'
+      - 'GetTags is too slow: p90>2500ms, stop as failed, label=GetTags, title="GetTags response time too high"'
+      - 'GetTags needs improvement: p90>1500ms and p90<=2500ms, continue as passed, label=GetTags, title="GetTags needs improvement"'

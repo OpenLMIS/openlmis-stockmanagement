@@ -1,15 +1,23 @@
 execution:
-  - concurrency: 1
-    hold-for: 2m
+  - concurrency: 10
+    iterations: 10
+    ramp-up: 1m
+    hold-for: 10m
     scenario: create-reason
-  - concurrency: 1
-    hold-for: 2m
+  - concurrency: 10
+    iterations: 10
+    ramp-up: 1m
+    hold-for: 10m
     scenario: update-reason
-  - concurrency: 1
-    hold-for: 2m
+  - concurrency: 10
+    iterations: 10
+    ramp-up: 1m
+    hold-for: 10m
     scenario: get-reason
-  - concurrency: 1
-    hold-for: 2m
+  - concurrency: 10
+    iterations: 10
+    ramp-up: 1m
+    hold-for: 10m
     scenario: get-reasons
 
 scenarios:
@@ -81,9 +89,17 @@ scenarios:
         body: ${reason}
 
 reporting:
-    - module: passfail
-      criteria:
-        Get Reason too slow: p90 of GetReason>200ms
-        Get Reasons too slow: p90 of GetReasons>15000ms
-        Create Reason too slow: p90 of CreateReason>500ms
-        Update Reason too slow: p90 of UpdateReason>500ms
+  - module: passfail
+    criteria:
+      - 'CreateReason too high error rate: failures>1%, continue as failed, label=CreateReason, title="CreateReason error rate too high"'
+      - 'CreateReason is too slow: p90>2000ms, stop as failed, label=CreateReason, title="CreateReason response time too high"'
+      - 'CreateReason needs improvement: p90>1500ms and p90<=2000ms, continue as passed, label=CreateReason, title="CreateReason needs improvement"'
+      - 'GetReason too high error rate: failures>1%, continue as failed, label=GetReason, title="GetReason error rate too high"'
+      - 'GetReason is too slow: p90>2500ms, stop as failed, label=GetReason, title="GetReason response time too high"'
+      - 'GetReason needs improvement: p90>1500ms and p90<=2500ms, continue as passed, label=GetReason, title="GetReason needs improvement"'
+      - 'GetReasons too high error rate: failures>1%, continue as failed, label=GetReasons, title="GetReasons error rate too high"'
+      - 'GetReasons is too slow: p90>2500ms, stop as failed, label=GetReasons, title="GetReasons response time too high"'
+      - 'GetReasons needs improvement: p90>1500ms and p90<=2500ms, continue as passed, label=GetReasons, title="GetReasons needs improvement"'
+      - 'UpdateReason too high error rate: failures>1%, continue as failed, label=UpdateReason, title="UpdateReason error rate too high"'
+      - 'UpdateReason is too slow: p90>4000ms, stop as failed, label=UpdateReason, title="UpdateReason response time too high"'
+      - 'UpdateReason needs improvement: p90>2500ms and p90<=4000ms, continue as passed, label=UpdateReason, title="UpdateReason needs improvement"'
