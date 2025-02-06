@@ -15,12 +15,12 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
+import static java.util.Collections.singletonList;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
-
 import org.openlmis.stockmanagement.dto.referencedata.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderablesAggregator;
 import org.openlmis.stockmanagement.util.RequestParameters;
@@ -56,7 +56,7 @@ public class ApprovedProductReferenceDataService extends
    */
   public OrderablesAggregator getApprovedProducts(UUID facilityId, UUID programId,
                                                   Collection<UUID> orderableIds) {
-    return this.getApprovedProducts(facilityId, programId, orderableIds, null, null);
+    return this.getApprovedProducts(facilityId, singletonList(programId), orderableIds, null, null);
   }
 
   /**
@@ -65,8 +65,8 @@ public class ApprovedProductReferenceDataService extends
    * The result is wrapped to a separate class to improve the performance
    *
    * @param facilityId id of the facility
-   * @param programId  id of the program
-   * @param orderableIds Id of orderables
+   * @param programIds  ids of the program
+   * @param orderableIds ids of orderables
    * @param orderableCode Code of the orderables
    * @param orderableName Name of the orderables
    *
@@ -74,14 +74,16 @@ public class ApprovedProductReferenceDataService extends
    */
   public OrderablesAggregator getApprovedProducts(
       UUID facilityId,
-      UUID programId,
+      Collection<UUID> programIds,
       Collection<UUID> orderableIds,
       String orderableCode,
       String orderableName
   ) {
     RequestParameters params = RequestParameters.init();
 
-    params.set("programId", programId);
+    if (!isEmpty(programIds)) {
+      params.set("programId", programIds);
+    }
 
     if (!isEmpty(orderableIds)) {
       params.set("orderableId", orderableIds);

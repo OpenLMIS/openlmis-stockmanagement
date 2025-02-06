@@ -15,6 +15,8 @@
 
 package org.openlmis.stockmanagement.util;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -24,6 +26,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.data.domain.Pageable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -68,6 +71,20 @@ public final class RequestParameters {
       params.add(key, String.valueOf(value));
     }
 
+    return this;
+  }
+
+  /**
+   * Set paging parameters from {@code pageable}.
+   *
+   * @param pageable the object to get pagination parameters from, not null
+   * @return this
+   */
+  public RequestParameters set(Pageable pageable) {
+    requireNonNull(pageable);
+    params.set("size", String.valueOf(pageable.getPageSize()));
+    params.set("page", String.valueOf(pageable.getPageNumber()));
+    params.set("sort", pageable.getSort().toString());
     return this;
   }
 

@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.service.referencedata;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -57,6 +58,21 @@ public class FacilityReferenceDataService extends BaseReferenceDataService<Facil
     Page<FacilityDto> facilityDtos =  getPage(parameters);
     return facilityDtos.getContent().stream()
             .collect(Collectors.toMap(FacilityDto::getId, Function.identity()));
+  }
+
+  /**
+   * Find facility by unique code.
+   *
+   * @param facilityCode the facility code, not null
+   * @return an optional with found facility, never null
+   */
+  public Optional<FacilityDto> findByCode(String facilityCode) {
+    final RequestParameters parameters = RequestParameters
+        .init()
+        .set("code", facilityCode);
+
+    final Page<FacilityDto> facilityDtos =  getPage(parameters);
+    return facilityDtos.stream().findFirst();
   }
 
   public boolean exists(UUID id) {

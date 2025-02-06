@@ -13,35 +13,29 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.stockmanagement.service;
+package org.openlmis.stockmanagement.util.deferredloading;
 
-import static java.util.stream.Collectors.toList;
-
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.openlmis.stockmanagement.domain.card.StockCard;
-import org.openlmis.stockmanagement.dto.referencedata.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
-import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
+import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
-public class StockCardSummaries {
-  private List<ApprovedProductDto> approvedProducts;
-  private List<StockCard> stockCardsForFulfillOrderables;
-  private Map<UUID, OrderableFulfillDto> orderableFulfillMap;
-  private LocalDate asOfDate;
-  private Long totalElements;
+public class OrderableDeferredLoader extends DeferredLoader<OrderableDto, UUID> {
+  private OrderableReferenceDataService orderableReferenceDataService;
 
-  public List<OrderableDto> getPageOfApprovedProducts() {
-    return approvedProducts.stream().map(ApprovedProductDto::getOrderable).collect(toList());
+  public OrderableDeferredLoader(OrderableReferenceDataService orderableReferenceDataService) {
+    this.orderableReferenceDataService = orderableReferenceDataService;
+  }
+
+  @Override
+  public void loadDeferredObjects() {
+    final List<OrderableDto> allDeferredOrderables =
+        orderableReferenceDataService.findByIds(deferredObjects.keySet());
+
+    for (OrderableDto orderable : allDeferredOrderables) {
+      deferredObjects.get(orderable.getId()).set(orderable);
+    }
+
+    deferredObjects.clear();
   }
 }

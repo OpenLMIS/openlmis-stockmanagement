@@ -13,24 +13,30 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.stockmanagement.dto.referencedata;
+package org.openlmis.stockmanagement.util.deferredloading;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-import org.openlmis.stockmanagement.dto.BaseDto;
+import java.util.List;
+import java.util.UUID;
+import org.openlmis.stockmanagement.dto.referencedata.LotDto;
+import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-@ToString
-public final class ApprovedProductDto extends BaseDto {
-  private OrderableDto orderable;
-  private ProgramDto program;
-  private FacilityTypeDto facilityType;
+public class LotDeferredLoader extends DeferredLoader<LotDto, UUID> {
+
+  private final LotReferenceDataService lotReferenceDataService;
+
+  public LotDeferredLoader(LotReferenceDataService lotReferenceDataService) {
+    this.lotReferenceDataService = lotReferenceDataService;
+  }
+
+  @Override
+  public void loadDeferredObjects() {
+    final List<LotDto> allDeferredLots =
+        lotReferenceDataService.findByIds(deferredObjects.keySet());
+
+    for (LotDto lot : allDeferredLots) {
+      deferredObjects.get(lot.getId()).set(lot);
+    }
+
+    deferredObjects.clear();
+  }
 }

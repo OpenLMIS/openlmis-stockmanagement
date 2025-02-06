@@ -24,11 +24,17 @@ import org.springframework.data.domain.Page;
 
 public class OrderablesAggregator {
 
+  private final List<ApprovedProductDto> approvedProducts;
   private List<OrderableDto> orderables = new ArrayList<>();
   private List<UUID> identifiers = new ArrayList<>();
 
   public OrderablesAggregator(List<ApprovedProductDto> approvedProducts) {
-    approvedProducts.forEach(this::addEntry);
+    this.approvedProducts = approvedProducts;
+    this.approvedProducts.forEach(this::addEntry);
+  }
+
+  public Page<ApprovedProductDto> getApprovedProducts() {
+    return Pagination.getPage(approvedProducts);
   }
 
   public Page<OrderableDto> getOrderablesPage() {

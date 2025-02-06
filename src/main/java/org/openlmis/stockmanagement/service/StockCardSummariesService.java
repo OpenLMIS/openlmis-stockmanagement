@@ -45,10 +45,12 @@ import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
 import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.dto.StockCardDto;
+import org.openlmis.stockmanagement.dto.referencedata.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderablesAggregator;
+import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.referencedata.ApprovedProductReferenceDataService;
@@ -150,17 +152,18 @@ public class StockCardSummariesService extends StockCardBaseService {
     OAuth2Authentication authentication =
         (OAuth2Authentication) SecurityContextHolder.getContext().getAuthentication();
 
+    profiler.start("GET_APPROVED_PRODUCTS");
+    OrderablesAggregator approvedProducts = approvedProductReferenceDataService
+        .getApprovedProducts(params.getFacilityId(), params.getProgramIds(),
+            params.getOrderableIds(), params.getOrderableCode(), params.getOrderableName());
+
     if (!authentication.isClientOnly() && !homeFacilityPermissionService
         .checkFacilityAndHomeFacilityLinkage(params.getFacilityId())) {
       profiler.start("VALIDATE_VIEW_RIGHTS");
-      permissionService.canViewStockCard(params.getProgramId(), params.getFacilityId());
+      approvedProducts.getApprovedProducts().stream().map(ApprovedProductDto::getProgram)
+          .map(ProgramDto::getId).distinct().forEach(
+              programId -> permissionService.canViewStockCard(programId, params.getFacilityId()));
     }
-
-    profiler.start("GET_APPROVED_PRODUCTS");
-    OrderablesAggregator approvedProducts = approvedProductReferenceDataService
-        .getApprovedProducts(params.getFacilityId(), params.getProgramId(),
-            params.getOrderableIds(), params.getOrderableCode(), params.getOrderableName()
-        );
 
     profiler.start("FIND_ORDERABLE_FULFILL_BY_ID");
     Map<UUID, OrderableFulfillDto> orderableFulfillMap = orderableFulfillService.findByIds(
@@ -193,19 +196,19 @@ public class StockCardSummariesService extends StockCardBaseService {
       orderableIdsForStockCard = orderableReferenceDataService.getPage(searchParams)
           .stream()
           .map(OrderableDto::getId)
-          .collect(toList());
+              .collect(toList());
     }
 
     // FIXME: Fix page retrieving/calculation,
     //  page size may be wrong when there are orderables matching not only by lot codes
-    List<StockCard> stockCards = calculatedStockOnHandService.getStockCardsWithStockOnHand(
-        params.getProgramId(), params.getFacilityId(), params.getAsOfDate(),
-        orderableIdsForStockCard, lotCodeIds);
+    List<StockCard> stockCards = calculatedStockOnHandService
+        .getStockCardsWithStockOnHand(params.getProgramIds(), params.getFacilityId(),
+            params.getAsOfDate(), orderableIdsForStockCard, lotCodeIds);
 
-    Page<OrderableDto> orderablesPage = approvedProducts.getOrderablesPage();
+    Page<ApprovedProductDto> orderablesPage = approvedProducts.getApprovedProducts();
     StockCardSummaries result = new StockCardSummaries(
         orderablesPage.getContent(), stockCards, orderableFulfillMap,
-        params.getAsOfDate(), orderablesPage.getTotalElements());
+            params.getAsOfDate(), orderablesPage.getTotalElements());
 
     profiler.stop().log();
     return result;
@@ -272,7 +275,7 @@ public class StockCardSummariesService extends StockCardBaseService {
         .collect(Collectors.toSet());
 
     final Map<UUID, OrderableDto> orderables = orderableReferenceDataService.findByIds(
-            orderableLotsMapIds.stream().map(OrderableLotIdentity::getOrderableId).collect(toSet()))
+        orderableLotsMapIds.stream().map(OrderableLotIdentity::getOrderableId).collect(toSet()))
         .stream().collect(toMap(OrderableDto::getId, identity()));
     final Map<UUID, LotDto> lots = lotReferenceDataService.findByIds(
         orderableLotsMapIds.stream().map(OrderableLotIdentity::getLotId).filter(Objects::nonNull)
@@ -348,9 +351,9 @@ public class StockCardSummariesService extends StockCardBaseService {
   private ImmutablePair<UUID, StockCardAggregate> assignOrderableToStockCard(
       StockCard stockCard,
       Map<UUID, OrderableFulfillDto> orderableFulfillMap,
-      Set<UUID> orderableIds,
-      LocalDate startDate,
-      LocalDate endDate) {
+                                                                             Set<UUID> orderableIds,
+                                                                             LocalDate startDate,
+                                                                             LocalDate endDate) {
 
     OrderableFulfillDto fulfills = orderableFulfillMap.get(stockCard.getOrderableId());
 

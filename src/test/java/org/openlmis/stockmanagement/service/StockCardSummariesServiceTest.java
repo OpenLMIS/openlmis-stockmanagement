@@ -48,7 +48,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,6 +64,7 @@ import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderablesAggregator;
+import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
@@ -223,14 +223,16 @@ public class StockCardSummariesServiceTest {
 
   @Test
   public void shouldFindStockCards() {
+    ProgramDto program =
+        ProgramDto.builder().id(UUID.fromString("6af5c325-990d-4af0-af46-699ebe3dc38a")).build();
     OrderableDto orderable = new OrderableDtoDataBuilder().build();
     OrderableDto orderable2 = new OrderableDtoDataBuilder().build();
     OrderableDto orderable3 = new OrderableDtoDataBuilder().build();
 
     OrderablesAggregator orderablesAggregator = new OrderablesAggregator(asList(
-        new ApprovedProductDto(orderable),
-        new ApprovedProductDto(orderable2),
-        new ApprovedProductDto(orderable3)
+        new ApprovedProductDto(orderable, program, null),
+        new ApprovedProductDto(orderable2, program, null),
+        new ApprovedProductDto(orderable3, program, null)
     ));
 
     StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParamsDataBuilder()
@@ -240,7 +242,7 @@ public class StockCardSummariesServiceTest {
     when(approvedProductReferenceDataService
         .getApprovedProducts(
             eq(params.getFacilityId()),
-            eq(params.getProgramId()),
+            eq(params.getProgramIds()),
             eq(params.getOrderableIds()),
             eq(params.getOrderableCode()),
             eq(params.getOrderableName())
@@ -268,7 +270,7 @@ public class StockCardSummariesServiceTest {
 
     StockEvent event = new StockEventDataBuilder()
         .withFacility(params.getFacilityId())
-        .withProgram(params.getProgramId())
+        .withProgram(params.getProgramIds().get(0))
         .build();
 
     StockCard stockCard = new StockCardDataBuilder(event)
@@ -284,7 +286,7 @@ public class StockCardSummariesServiceTest {
     List<StockCard> stockCards = asList(stockCard, stockCard1);
 
     when(calculatedStockOnHandService
-        .getStockCardsWithStockOnHand(params.getProgramId(), params.getFacilityId(),
+        .getStockCardsWithStockOnHand(params.getProgramIds(), params.getFacilityId(),
             params.getAsOfDate(), Collections.emptyList(), Collections.emptySet()))
         .thenReturn(stockCards);
 
@@ -299,8 +301,8 @@ public class StockCardSummariesServiceTest {
     OrderableDto orderable2 = new OrderableDtoDataBuilder().build();
 
     OrderablesAggregator orderablesAggregator = new OrderablesAggregator(asList(
-        new ApprovedProductDto(orderable),
-        new ApprovedProductDto(orderable2)
+        new ApprovedProductDto(orderable, null, null),
+        new ApprovedProductDto(orderable2, null, null)
     ));
 
     StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParamsDataBuilder()
@@ -310,7 +312,7 @@ public class StockCardSummariesServiceTest {
     when(approvedProductReferenceDataService
         .getApprovedProducts(
             eq(params.getFacilityId()),
-            eq(params.getProgramId()),
+            eq(params.getProgramIds()),
             eq(params.getOrderableIds()),
             eq(params.getOrderableCode()),
             eq(params.getOrderableName())
@@ -337,7 +339,7 @@ public class StockCardSummariesServiceTest {
 
     StockEvent event = new StockEventDataBuilder()
         .withFacility(params.getFacilityId())
-        .withProgram(params.getProgramId())
+        .withProgram(params.getProgramIds().get(0))
         .build();
 
     StockCard stockCard = new StockCardDataBuilder(event)
@@ -348,7 +350,7 @@ public class StockCardSummariesServiceTest {
     List<StockCard> stockCards = singletonList(stockCard);
 
     when(calculatedStockOnHandService
-        .getStockCardsWithStockOnHand(params.getProgramId(), params.getFacilityId(),
+        .getStockCardsWithStockOnHand(params.getProgramIds(), params.getFacilityId(),
             params.getAsOfDate(), Collections.emptyList(), Collections.emptySet()))
         .thenReturn(stockCards);
 
@@ -361,8 +363,30 @@ public class StockCardSummariesServiceTest {
 
   @Test(expected = PermissionMessageException.class)
   public void shouldThrowExceptionIfNoPermission() {
+    ProgramDto program =
+        ProgramDto.builder().id(UUID.fromString("6af5c325-990d-4af0-af46-699ebe3dc38b")).build();
+    OrderableDto orderable = new OrderableDtoDataBuilder().build();
+    OrderableDto orderable2 = new OrderableDtoDataBuilder().build();
+    OrderableDto orderable3 = new OrderableDtoDataBuilder().build();
+
+    OrderablesAggregator orderablesAggregator = new OrderablesAggregator(asList(
+        new ApprovedProductDto(orderable, program, null),
+        new ApprovedProductDto(orderable2, program, null),
+        new ApprovedProductDto(orderable3, program, null)
+    ));
+
     StockCardSummariesV2SearchParams params =
         new StockCardSummariesV2SearchParamsDataBuilder().build();
+
+    when(approvedProductReferenceDataService
+        .getApprovedProducts(
+            eq(params.getFacilityId()),
+            eq(params.getProgramIds()),
+            eq(params.getOrderableIds()),
+            eq(params.getOrderableCode()),
+            eq(params.getOrderableName())
+        ))
+        .thenReturn(orderablesAggregator);
 
     when(homeFacilityPermissionService.checkFacilityAndHomeFacilityLinkage(any(UUID.class)))
         .thenReturn(false);
@@ -370,7 +394,7 @@ public class StockCardSummariesServiceTest {
     doThrow(new
         PermissionMessageException(new Message("no permission")))
         .when(permissionService)
-        .canViewStockCard(params.getProgramId(), params.getFacilityId());
+        .canViewStockCard(any(UUID.class), any(UUID.class));
 
     stockCardSummariesService.findStockCards(params);
   }
