@@ -29,7 +29,7 @@ import lombok.ToString;
 @EqualsAndHashCode
 @Getter
 @Setter
-public class StockCardSummaryItemExternalDto {
+public final class StockCardSummaryItemExternalDto {
   private String lot;
   private String orderable;
   private Integer stockOnHand;

@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.Maps;
@@ -36,6 +37,9 @@ import java.util.Set;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @SuppressWarnings("PMD.TooManyMethods")
 public class RequestParametersTest {
@@ -164,6 +168,20 @@ public class RequestParametersTest {
     assertThat(split.getRight(), is(nullValue()));
   }
 
+  @Test
+  public void shouldReadPageable() {
+    final Pageable pageable = PageRequest.of(7, 17, Sort.by("test"));
+    final RequestParameters parameters = RequestParameters.init();
+
+    parameters.set(pageable);
+
+    final Map<String, List<String>> paramsMap = new HashMap<>();
+    parameters.forEach(e -> paramsMap.put(e.getKey(), e.getValue()));
+
+    assertEquals(Integer.toString(pageable.getPageSize()), paramsMap.get("size").get(0));
+    assertEquals(Integer.toString(pageable.getPageNumber()), paramsMap.get("page").get(0));
+    assertEquals(pageable.getSort().toString(), paramsMap.get("sort").get(0));
+  }
 
   private Map<String, List<String>> toMap(RequestParameters parameters) {
     Map<String, List<String>> map = Maps.newHashMap();

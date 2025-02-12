@@ -15,6 +15,8 @@
 
 package org.openlmis.stockmanagement.util.deferredloading;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -29,11 +31,11 @@ import java.util.function.Supplier;
 public class DeferredObject<D, K> implements Supplier<D> {
   private boolean initiated;
   private D value;
-  private K objectKey;
+  private final K objectKey;
 
   DeferredObject(K objectKey) {
     this.initiated = false;
-    this.objectKey = objectKey;
+    this.objectKey = requireNonNull(objectKey);
   }
 
   @Override

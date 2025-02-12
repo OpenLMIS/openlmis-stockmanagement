@@ -15,6 +15,8 @@
 
 package org.openlmis.stockmanagement.util.deferredloading;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,7 +35,7 @@ public abstract class DeferredLoader<D, K> {
   }
 
   DeferredLoader(Map<K, DeferredObject<D, K>> deferredObjects) {
-    this.deferredObjects = deferredObjects;
+    this.deferredObjects = requireNonNull(deferredObjects);
   }
 
   /**

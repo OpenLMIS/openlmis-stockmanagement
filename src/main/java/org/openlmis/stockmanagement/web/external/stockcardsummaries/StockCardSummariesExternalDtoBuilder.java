@@ -80,14 +80,14 @@ public class StockCardSummariesExternalDtoBuilder {
    *
    * @param approvedProducts      approved products, not null
    * @param stockCards            stock cards, not null
-   * @param orderables            orderablses, not null
+   * @param orderableFulfills     orderablses, not null
    * @param nonEmptySummariesOnly whether products without stock cards should be included
    * @param profiler              profiler logs
    * @return the list of stock card summaries, never null
    */
   public List<StockCardSummaryExternalDto> build(List<ApprovedProductDto> approvedProducts,
       List<StockCard> stockCards,
-      Map<UUID, OrderableFulfillDto> orderables,
+      Map<UUID, OrderableFulfillDto> orderableFulfills,
       boolean nonEmptySummariesOnly,
       Profiler profiler) {
 
@@ -96,7 +96,7 @@ public class StockCardSummariesExternalDtoBuilder {
     profiler.start("GET_DEFERRED_STOCK_SUMMARIES");
     final List<DeferredStockCardsSummary> deferredStockCardsSummaries = approvedProducts.stream()
         .map(approvedProduct -> fromApprovedProduct(
-            new ProductBuildContext(approvedProduct, stockCards, orderables, deferredLoaders,
+            new ProductBuildContext(approvedProduct, stockCards, orderableFulfills, deferredLoaders,
                 nonEmptySummariesOnly))).filter(Optional::isPresent).map(Optional::get).sorted(
             comparing(
                 deferredStockCardsSummary -> deferredStockCardsSummary.getStockCards().size()))

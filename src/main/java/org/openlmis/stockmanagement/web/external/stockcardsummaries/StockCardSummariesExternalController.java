@@ -54,9 +54,9 @@ public class StockCardSummariesExternalController {
   private static final Logger LOGGER =
       LoggerFactory.getLogger(StockCardSummariesExternalController.class);
 
-  private static final String FACILITY_CODE_PARAM_NAME = "facility";
-  private static final String PROGRAM_CODE_PARAM_NAME = "program";
-  private static final String ORDERABLE_CODE_PARAM_NAME = "code";
+  static final String FACILITY_CODE_PARAM_NAME = "facility";
+  static final String PROGRAM_CODE_PARAM_NAME = "program";
+  static final String ORDERABLE_CODE_PARAM_NAME = "code";
 
   @Autowired
   private StockCardSummariesService stockCardSummariesService;

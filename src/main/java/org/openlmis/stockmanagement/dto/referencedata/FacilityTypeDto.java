@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.dto.referencedata;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,6 +30,7 @@ import org.openlmis.stockmanagement.dto.BaseDto;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Builder
 public final class FacilityTypeDto extends BaseDto {
   private String code;
   private String name;
