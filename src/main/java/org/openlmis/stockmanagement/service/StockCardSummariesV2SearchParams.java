@@ -19,7 +19,6 @@ import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DATE_WRONG_FORMAT;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_ID_MISSING;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_ID_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_UUID_WRONG_FORMAT;
 
 import java.time.LocalDate;
@@ -56,7 +55,7 @@ public final class StockCardSummariesV2SearchParams {
   static final String ORDERABLE_NAME = "orderableName";
   static final String LOT_CODE = "lotCode";
 
-  private UUID programId;
+  private List<UUID> programIds;
   private UUID facilityId;
   private List<UUID> orderableIds;
   private LocalDate asOfDate;
@@ -71,17 +70,13 @@ public final class StockCardSummariesV2SearchParams {
    */
   public StockCardSummariesV2SearchParams(MultiValueMap<String, String> parameters) {
     if (!MapUtils.isEmpty(parameters)) {
-      this.programId = getId(PROGRAM_ID, parameters);
       this.facilityId = getId(FACILITY_ID, parameters);
 
       if (null == facilityId) {
         throw new ValidationMessageException(ERROR_FACILITY_ID_MISSING);
       }
 
-      if (null == programId) {
-        throw new ValidationMessageException(ERROR_PROGRAM_ID_MISSING);
-      }
-
+      this.programIds = getIds(PROGRAM_ID, parameters);
       this.asOfDate = getDate(AS_OF_DATE, parameters);
       this.orderableIds = getIds(ORDERABLE_ID, parameters);
       this.nonEmptyOnly = Boolean.valueOf(parameters.getFirst(NON_EMPTY_ONLY));

@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.dto.referencedata;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,6 +30,9 @@ import org.openlmis.stockmanagement.dto.BaseDto;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @ToString
+@Builder
 public final class ApprovedProductDto extends BaseDto {
   private OrderableDto orderable;
+  private ProgramDto program;
+  private FacilityTypeDto facilityType;
 }

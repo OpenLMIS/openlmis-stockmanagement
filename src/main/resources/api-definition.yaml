@@ -52,6 +52,7 @@ schemas:
   - stockCardPage: !include schemas/stockCard.json
   - stockCardSummariesPage: !include schemas/stockCardSummaryV2Page.json
   - stockCardSummaries: !include schemas/stockCardSummaries.json
+  - stockCardSummariesExternalPage: !include schemas/stockCardSummariesExternalPage.json
   - stockCardReasonSummaryPage: !include schemas/stockCardRangeSummaryPage.json
   - validSourceDestination: !include schemas/validSourceDestination.json
   - validSourceDestinations: |
@@ -1180,3 +1181,32 @@ traits:
                 404:
                     body:
                       application/json:
+
+  /public:
+
+    /stockCardSummaries:
+      get:
+        is: [ secured, paginated ]
+        description: Get summaries of stock cards, which contains SOH, product name, lot and other essential information.
+        queryParameters:
+          facility:
+            required: true
+            description: Facility Code, indicates the facility.
+          program:
+            required: false
+            repeat: true
+            description: Program Code, indicates the program.
+          code:
+            required: false
+            repeat: false
+            description: Orderable Code, indicates the orderable.
+        responses:
+          200:
+            body:
+              application/json:
+                schema: stockCardSummariesExternalPage
+          403:
+            description: User does not have permission to view stock cards of given facility and program.
+            body:
+              application/json:
+                schema: localizedMessage

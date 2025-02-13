@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Stock card summary for external systems.",
+  "properties": {
+    "program": {
+      "type": "string"
+    },
+    "orderable": {
+      "type": "string"
+    },
+    "totalStockOnHand": {
+      "type": "integer"
+    },
+    "stockCards": {
+      "type": "array",
+      "title": "Stock cards",
+      "items": {
+        "type": "object",
+        "$ref": "stockCardSummaryItemExternal.json"
+      }
+    }
+  }
+}

@@ -16,13 +16,13 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DATE_WRONG_FORMAT;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_ID_MISSING;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_ID_MISSING;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_UUID_WRONG_FORMAT;
 import static org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams.AS_OF_DATE;
 import static org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams.FACILITY_ID;
@@ -59,17 +59,6 @@ public class StockCardSummariesV2SearchParamsTest {
 
     MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
     parameters.add(PROGRAM_ID, UUID.randomUUID().toString());
-
-    new StockCardSummariesV2SearchParams(parameters);
-  }
-
-  @Test
-  public void shouldThrowExceptionIfProgramIdIsNotSet() {
-    exception.expect(ValidationMessageException.class);
-    exception.expectMessage(ERROR_PROGRAM_ID_MISSING);
-
-    MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
-    parameters.add(FACILITY_ID, UUID.randomUUID().toString());
 
     new StockCardSummariesV2SearchParams(parameters);
   }
@@ -113,7 +102,7 @@ public class StockCardSummariesV2SearchParamsTest {
 
     StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParams(parameters);
 
-    assertEquals(programId, params.getProgramId());
+    assertEquals(singletonList(programId), params.getProgramIds());
     assertEquals(facilityId, params.getFacilityId());
     assertEquals(asOfDate, params.getAsOfDate());
     assertEquals(asList(orderableId1, orderableId2), params.getOrderableIds());
@@ -126,7 +115,7 @@ public class StockCardSummariesV2SearchParamsTest {
 
     StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParams(parameters);
 
-    assertEquals(params.getProgramId(), null);
+    assertEquals(params.getProgramIds(), null);
     assertEquals(params.getFacilityId(), null);
     assertEquals(params.getAsOfDate(), null);
     assertTrue(isEmpty(params.getOrderableIds()));
@@ -134,9 +123,9 @@ public class StockCardSummariesV2SearchParamsTest {
   }
 
   @Test
-  public void shouldThrowExceptionWhenProgramIdHasWrongFormat() {
+  public void shouldThrowExceptionWhenProgramWasNotFoundForAnyId() {
     exception.expect(ValidationMessageException.class);
-    exception.expectMessage(ERROR_UUID_WRONG_FORMAT);
+    exception.expectMessage(ERROR_FACILITY_ID_MISSING);
 
     MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
     parameters.add(PROGRAM_ID, INCORRECTLY_FORMATTED_ID);

@@ -151,13 +151,22 @@ public abstract class BaseCommunicationService<T> {
    * @return all reference data T objects.
    */
   protected Collection<T> findAll(String resourceUrl, Map<String, Object> parameters) {
-    String url = getServiceUrl() + getUrl() + resourceUrl;
+    return findAll(resourceUrl, RequestParameters.of(parameters));
+  }
 
-    RequestParameters params = RequestParameters.of(parameters);
+  /**
+   * Return all reference data T objects.
+   *
+   * @param resourceUrl Endpoint url.
+   * @param parameters  request parameters
+   * @return all reference data T objects.
+   */
+  protected Collection<T> findAll(String resourceUrl, RequestParameters parameters) {
+    String url = getServiceUrl() + getUrl() + resourceUrl;
 
     try {
       ResponseEntity<T[]> responseEntity = runWithTokenRetry(
-          () -> doListRequest(url, params, HttpMethod.GET, getArrayResultClass())
+          () -> doListRequest(url, parameters, HttpMethod.GET, getArrayResultClass())
       );
       return new ArrayList<>(Arrays.asList(responseEntity.getBody()));
     } catch (HttpStatusCodeException ex) {

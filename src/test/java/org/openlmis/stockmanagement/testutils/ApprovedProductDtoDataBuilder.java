@@ -31,7 +31,7 @@ public class ApprovedProductDtoDataBuilder {
    * @return created approved product dto
    */
   public ApprovedProductDto build() {
-    ApprovedProductDto approvedProductDto = new ApprovedProductDto(orderable);
+    ApprovedProductDto approvedProductDto = new ApprovedProductDto(orderable, null, null);
     approvedProductDto.setId(orderable.getId());
     return approvedProductDto;
   }

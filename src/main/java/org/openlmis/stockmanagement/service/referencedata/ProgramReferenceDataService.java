@@ -15,8 +15,17 @@
 
 package org.openlmis.stockmanagement.service.referencedata;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import org.apache.commons.lang3.StringUtils;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
+import org.openlmis.stockmanagement.util.RequestParameters;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class ProgramReferenceDataService extends BaseReferenceDataService<ProgramDto> {
@@ -34,5 +43,33 @@ public class ProgramReferenceDataService extends BaseReferenceDataService<Progra
   @Override
   protected Class<ProgramDto[]> getArrayResultClass() {
     return ProgramDto[].class;
+  }
+
+  /**
+   * Find program by unique code.
+   *
+   * @param programCode the program code, not null
+   * @return an optional with found program, never null
+   */
+  public Optional<ProgramDto> findByCode(String programCode) {
+    if (StringUtils.isBlank(programCode)) {
+      return Optional.empty();
+    }
+
+    final RequestParameters parameters = RequestParameters.init().set("code", programCode);
+
+    final Collection<ProgramDto> programDtos = findAll("", parameters);
+    return programDtos.stream().findFirst();
+  }
+
+  /**
+   * Find Program by IDs.
+   *
+   * @param ids the ids, not null
+   * @return the list of lots, never null
+   */
+  public List<ProgramDto> findByIds(Collection<UUID> ids) {
+    return CollectionUtils.isEmpty(ids) ? Collections.emptyList() :
+        new ArrayList<>(findAll("", RequestParameters.init().set("id", ids)));
   }
 }

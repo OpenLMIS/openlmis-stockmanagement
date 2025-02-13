@@ -27,16 +27,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+@SuppressWarnings("PMD.TooManyMethods")
 public interface StockCardRepository extends JpaRepository<StockCard, UUID> {
 
   String PROGRAM_ID = "programId";
   String FACILITY_ID = "facilityId";
-
-  StockCard findByProgramIdAndFacilityIdAndOrderableIdAndLotId(
-      @Param(PROGRAM_ID) UUID programId,
-      @Param(FACILITY_ID) UUID facilityId,
-      @Param("orderableId") UUID orderableId,
-      @Param("lotId") UUID lotId);
 
   Page<StockCard> findByProgramIdAndFacilityId(
       @Param(PROGRAM_ID) UUID programId,
@@ -47,8 +42,14 @@ public interface StockCardRepository extends JpaRepository<StockCard, UUID> {
       @Param(PROGRAM_ID) UUID programId,
       @Param(FACILITY_ID) UUID facilityId);
 
-  List<StockCard> findByOrderableIdInAndProgramIdAndFacilityId(
-      Collection<UUID> orderableIds, UUID programId, UUID facilityId);
+  List<StockCard> findByFacilityId(UUID facilityId);
+
+  List<StockCard> findByFacilityIdAndOrderableIdIn(UUID facilityId, Collection<UUID> orderableIds);
+
+  List<StockCard> findByFacilityIdAndProgramIdIn(UUID facilityId, Collection<UUID> programIds);
+
+  List<StockCard> findByFacilityIdAndOrderableIdInAndProgramIdIn(UUID facilityId,
+      Collection<UUID> orderableIds, Collection<UUID> programIds);
 
   StockCard findByOriginEvent(@Param("originEventId") StockEvent stockEvent);
 
@@ -63,6 +64,6 @@ public interface StockCardRepository extends JpaRepository<StockCard, UUID> {
       Collection<UUID> programIds, Pageable pageable);
 
   Page<StockCard> findByIdIn(Collection<UUID> ids, Pageable pageable);
-  
+
   List<StockCard> findByLotIdIn(Collection<UUID> lotIds);
 }

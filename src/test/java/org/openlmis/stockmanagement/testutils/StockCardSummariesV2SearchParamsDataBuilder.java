@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.testutils;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -24,7 +25,7 @@ import org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams;
 
 public class StockCardSummariesV2SearchParamsDataBuilder {
 
-  private UUID programId;
+  private List<UUID> programId;
   private UUID facilityId;
   private List<UUID> orderableId;
   private LocalDate asOfDate;
@@ -37,7 +38,7 @@ public class StockCardSummariesV2SearchParamsDataBuilder {
    * Creates builder for creating new instance of {@link StockCardSummariesV2SearchParams}.
    */
   public StockCardSummariesV2SearchParamsDataBuilder() {
-    programId = UUID.randomUUID();
+    programId = singletonList(UUID.randomUUID());
     facilityId = UUID.randomUUID();
     orderableId = asList(UUID.randomUUID(), UUID.randomUUID());
     asOfDate = LocalDate.now();
