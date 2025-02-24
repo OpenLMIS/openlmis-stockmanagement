@@ -58,4 +58,15 @@ public class OrderableReferenceDataService
   public List<OrderableDto> findAll() {
     return getPage(Collections.emptyMap()).getContent();
   }
+
+  /**
+   * Finds orderables by their exact codes.
+   *
+   * @param exactCodes exact codes to look for.
+   * @return a page of orderables
+   */
+  public List<OrderableDto> findByExactCodes(Collection<String> exactCodes) {
+    return CollectionUtils.isEmpty(exactCodes) ? Collections.emptyList() :
+        getPage(RequestParameters.init().set("exactCode", exactCodes)).getContent();
+  }
 }

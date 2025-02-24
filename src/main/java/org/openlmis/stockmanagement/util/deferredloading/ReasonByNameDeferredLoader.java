@@ -16,37 +16,38 @@
 package org.openlmis.stockmanagement.util.deferredloading;
 
 import java.util.List;
-import java.util.UUID;
-import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
-import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
+import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
+import org.openlmis.stockmanagement.dto.StockCardLineItemReasonDto;
+import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 
-public class OrderableDeferredLoader
-    extends DeferredLoader<OrderableDto, UUID, OrderableDeferredLoader.Handle> {
-  private OrderableReferenceDataService orderableReferenceDataService;
+public class ReasonByNameDeferredLoader
+    extends DeferredLoader<StockCardLineItemReasonDto, String, ReasonByNameDeferredLoader.Handle> {
 
-  public OrderableDeferredLoader(OrderableReferenceDataService orderableReferenceDataService) {
-    this.orderableReferenceDataService = orderableReferenceDataService;
+  private final StockCardLineItemReasonRepository reasonRepository;
+
+  public ReasonByNameDeferredLoader(StockCardLineItemReasonRepository reasonRepository) {
+    this.reasonRepository = reasonRepository;
   }
 
   @Override
-  protected Handle newHandle(UUID key) {
+  protected Handle newHandle(String key) {
     return new Handle(key);
   }
 
   @Override
   public void loadDeferredObjects() {
-    final List<OrderableDto> allDeferredOrderables =
-        orderableReferenceDataService.findByIds(deferredObjects.keySet());
+    final List<StockCardLineItemReason> allDeferredReasons =
+        reasonRepository.findByNameIn(deferredObjects.keySet());
 
-    for (OrderableDto orderable : allDeferredOrderables) {
-      deferredObjects.get(orderable.getId()).set(orderable);
+    for (StockCardLineItemReason reason : allDeferredReasons) {
+      deferredObjects.get(reason.getName()).set(StockCardLineItemReasonDto.newInstance(reason));
     }
 
     deferredObjects.clear();
   }
 
-  public static class Handle extends DeferredObject<OrderableDto, UUID> {
-    public Handle(UUID objectKey) {
+  public static class Handle extends DeferredObject<StockCardLineItemReasonDto, String> {
+    public Handle(String objectKey) {
       super(objectKey);
     }
   }

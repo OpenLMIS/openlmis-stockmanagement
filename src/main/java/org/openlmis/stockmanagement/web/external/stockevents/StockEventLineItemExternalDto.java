@@ -13,29 +13,26 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.stockmanagement.web;
+package org.openlmis.stockmanagement.web.external.stockevents;
 
-import org.slf4j.ext.XLogger;
-import org.slf4j.ext.XLoggerFactory;
-import org.slf4j.profiler.Profiler;
+import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-public abstract class BaseController {
-  private final XLogger extLogger = XLoggerFactory.getXLogger(getClass());
-
-  protected Profiler getProfiler(String name, Object... entryArgs) {
-    extLogger.entry(entryArgs);
-
-    Profiler profiler = new Profiler(name);
-    profiler.setLogger(extLogger);
-
-    return profiler;
-  }
-
-  protected <T> T stopProfiler(Profiler profiler, T exitArg) {
-    profiler.stop().log();
-    extLogger.exit(exitArg);
-
-    return exitArg;
-  }
-
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+@EqualsAndHashCode
+@Getter
+@Setter
+public final class StockEventLineItemExternalDto {
+  private String orderable;
+  private String lot;
+  private LocalDate occurredDate;
+  private Integer quantity;
+  private String reason;
 }
