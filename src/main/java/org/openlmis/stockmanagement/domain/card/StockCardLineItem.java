@@ -109,7 +109,7 @@ public class StockCardLineItem extends BaseEntity {
   @Column(nullable = false, columnDefinition = "timestamp")
   private ZonedDateTime processedDate;
 
-  @Column(nullable = false)
+  @Column
   private UUID userId;
 
   @Transient

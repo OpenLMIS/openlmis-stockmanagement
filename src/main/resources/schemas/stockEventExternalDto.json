@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "facility": {
+      "type": "string",
+      "description": "A Facility code. Indicates in which facility this event occurred."
+    },
+    "signature": {
+      "type": "string",
+      "description": "The signature of the operator."
+    },
+    "documentNumber": {
+      "type": "string",
+      "description": ""
+    },
+    "program": {
+      "type": "string",
+      "description": "A Program code. Indicates under which program the target stock card is."
+    },
+    "items": {
+      "type": "array",
+      "title": "Line items of stock event, each of a different orderable.",
+      "items": {
+        "type": "object",
+        "title": "Stock event line item",
+        "$ref": "stockEventLineItemExternalDto.json"
+      }
+    }
+  },
+  "required": [
+    "facility",
+    "program",
+    "items"
+  ]
+}

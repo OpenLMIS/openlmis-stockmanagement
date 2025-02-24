@@ -27,14 +27,14 @@ import java.util.Map;
  * @param <D> the type of DTO
  * @param <K> the type of key, usually UUID
  */
-public abstract class DeferredLoader<D, K> {
-  protected final Map<K, DeferredObject<D, K>> deferredObjects;
+public abstract class DeferredLoader<D, K, H extends DeferredObject<D, K>> {
+  final Map<K, H> deferredObjects;
 
   DeferredLoader() {
     this(new HashMap<>());
   }
 
-  DeferredLoader(Map<K, DeferredObject<D, K>> deferredObjects) {
+  DeferredLoader(Map<K, H> deferredObjects) {
     this.deferredObjects = requireNonNull(deferredObjects);
   }
 
@@ -45,13 +45,15 @@ public abstract class DeferredLoader<D, K> {
    * @param key the key, not null
    * @return a handle for object to be loaded later, never null
    */
-  public DeferredObject<D, K> deferredLoad(K key) {
+  public H deferredLoad(K key) {
     if (key == null) {
       return null;
     }
 
-    return deferredObjects.computeIfAbsent(key, k -> new DeferredObject<>(key));
+    return deferredObjects.computeIfAbsent(key, k -> newHandle(key));
   }
+
+  protected abstract H newHandle(K key);
 
   public abstract void loadDeferredObjects();
 }

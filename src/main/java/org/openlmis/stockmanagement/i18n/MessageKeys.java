@@ -260,6 +260,12 @@ public abstract class MessageKeys {
   public static final String ERROR_PROGRAM_CODE_NOT_FOUND =
       ERROR_PREFIX + ".program.code.notFound";
 
+  public static final String ERROR_LOTS_NOT_FOUND = ERROR_PREFIX + ".lot.codes.notFound";
+  public static final String ERROR_ORDERABLES_NOT_FOUND =
+      ERROR_PREFIX + ".orderable.codes.notFound";
+  public static final String ERROR_REASONS_NOT_FOUND =
+      ERROR_PREFIX + ".reason.names.notFound";
+
   private MessageKeys() {
     throw new UnsupportedOperationException();
   }

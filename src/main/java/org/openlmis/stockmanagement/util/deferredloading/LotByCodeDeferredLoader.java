@@ -16,37 +16,43 @@
 package org.openlmis.stockmanagement.util.deferredloading;
 
 import java.util.List;
-import java.util.UUID;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.i18n.MessageKeys;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
+import org.openlmis.stockmanagement.util.Message;
 
-public class LotDeferredLoader extends DeferredLoader<LotDto, UUID, LotDeferredLoader.Handle> {
+public class LotByCodeDeferredLoader
+    extends DeferredLoader<LotDto, String, LotByCodeDeferredLoader.Handle> {
 
   private final LotReferenceDataService lotReferenceDataService;
 
-  public LotDeferredLoader(LotReferenceDataService lotReferenceDataService) {
+  public LotByCodeDeferredLoader(LotReferenceDataService lotReferenceDataService) {
     this.lotReferenceDataService = lotReferenceDataService;
   }
 
   @Override
-  protected Handle newHandle(UUID key) {
+  protected Handle newHandle(String key) {
     return new Handle(key);
   }
 
   @Override
   public void loadDeferredObjects() {
     final List<LotDto> allDeferredLots =
-        lotReferenceDataService.findByIds(deferredObjects.keySet());
+        lotReferenceDataService.findByExactCodes(deferredObjects.keySet());
 
     for (LotDto lot : allDeferredLots) {
-      deferredObjects.get(lot.getId()).set(lot);
+      deferredObjects.remove(lot.getLotCode()).set(lot);
     }
 
-    deferredObjects.clear();
+    if (deferredObjects.size() > 0) {
+      throw new ValidationMessageException(new Message(MessageKeys.ERROR_LOTS_NOT_FOUND,
+          String.join(", ", deferredObjects.keySet())));
+    }
   }
 
-  public static class Handle extends DeferredObject<LotDto, UUID> {
-    public Handle(UUID objectKey) {
+  public static class Handle extends DeferredObject<LotDto, String> {
+    public Handle(String objectKey) {
       super(objectKey);
     }
   }

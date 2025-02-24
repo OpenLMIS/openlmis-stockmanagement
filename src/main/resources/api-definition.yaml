@@ -47,6 +47,8 @@ schemas:
   - stockCardTemplate: !include schemas/stockCardTemplate.json
   - stockEventDto: !include schemas/stockEventDto.json
   - stockEventLineItemDto: !include schemas/stockEventLineItemDto.json
+  - stockEventExternalDto: !include schemas/stockEventExternalDto.json
+  - stockEventLineItemExternalDto: !include schemas/stockEventLineItemExternalDto.json
 
   - stockCard: !include schemas/stockCard.json
   - stockCardPage: !include schemas/stockCard.json
@@ -1207,6 +1209,35 @@ traits:
                 schema: stockCardSummariesExternalPage
           403:
             description: User does not have permission to view stock cards of given facility and program.
+            body:
+              application/json:
+                schema: localizedMessage
+
+    /stockEvents:
+      post:
+        is: [ secured ]
+        description: Create a new stock event with one or more orderables - for external integrators use.
+        body:
+          application/json:
+            schema: stockEventExternalDto
+
+        responses:
+          201:
+            description: Stock event has been processed with no validatoin error or persistence error.
+            headers:
+              Keep-Alive:
+            body:
+              application/json:
+                schema: uuid
+
+          400:
+            description: Failed to process stock event due to validation error.
+            body:
+              application/json:
+                schema: localizedMessage
+
+          403:
+            description: User does not have permission to create stock events for given facility and program.
             body:
               application/json:
                 schema: localizedMessage
