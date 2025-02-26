@@ -185,7 +185,7 @@ public class CalculatedStockOnHandService {
    * @param stockCard stock card for which the value will be calculated.
    * @param lineItem  first line item to consider in recalculation.
    */
-  private void recalculateStockOnHand(StockCard stockCard, StockCardLineItem lineItem) {
+  public void recalculateStockOnHand(StockCard stockCard, StockCardLineItem lineItem) {
     Profiler profiler = new Profiler("RECALCULATE_STOCK_ON_HAND");
     profiler.setLogger(LOGGER);
 
@@ -233,7 +233,7 @@ public class CalculatedStockOnHandService {
 
   private List<StockCardLineItem> getFollowingLineItems(StockCard stockCard,
       StockCardLineItem lineItem) {
-    return stockCard.getLineItems()
+    return stockCard.getSortedLineItems()
         .stream()
         .filter(item -> !item.getOccurredDate().isBefore(lineItem.getOccurredDate())
             && item.getId() != lineItem.getId()).sorted(StockCard.getLineItemsComparator())

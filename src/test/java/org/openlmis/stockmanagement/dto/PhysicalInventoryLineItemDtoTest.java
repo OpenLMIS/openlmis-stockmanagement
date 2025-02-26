@@ -20,12 +20,14 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
 import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
+import org.openlmis.stockmanagement.dto.physicalinventory.PhysicalInventoryLineItemAdjustmentDto;
 
 public class PhysicalInventoryLineItemDtoTest {
   @Test
@@ -45,7 +47,9 @@ public class PhysicalInventoryLineItemDtoTest {
     assertThat(lineItemDto.getQuantity(), is(lineItem.getQuantity()));
     assertThat(lineItemDto.getOrderableId(), is(lineItem.getOrderableId()));
     assertThat(lineItemDto.getLotId(), is(lineItem.getLotId()));
-    assertThat(lineItemDto.getStockAdjustments(), is(lineItem.getStockAdjustments()));
+    assertThat(lineItemDto.getStockAdjustments(),
+        is(lineItem.getStockAdjustments().stream().map(PhysicalInventoryLineItemAdjustmentDto::new)
+            .collect(Collectors.toList())));
   }
 
   private PhysicalInventoryLineItemAdjustment createStockAdjustment() {

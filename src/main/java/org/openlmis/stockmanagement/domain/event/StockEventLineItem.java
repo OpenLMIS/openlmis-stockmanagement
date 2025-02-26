@@ -79,10 +79,10 @@ public class StockEventLineItem extends BaseEntity
 
   @OneToMany(
       cascade = ALL,
-      fetch = FetchType.EAGER,
-      orphanRemoval = true)
-  @JoinColumn(name = "stockEventLineItemId")
-  private List<PhysicalInventoryLineItemAdjustment> stockAdjustments;
+      fetch = FetchType.LAZY,
+      orphanRemoval = true,
+      mappedBy = "stockEventLineItem")
+  private List<PhysicalInventoryLineItemAdjustment> stockAdjustments = new ArrayList<>();
 
   /**
    * Returns clean copy of stock adjustments.

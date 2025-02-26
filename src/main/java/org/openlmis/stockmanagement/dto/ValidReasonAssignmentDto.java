@@ -24,13 +24,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
 
 @AllArgsConstructor
 @NoArgsConstructor
-public class ValidReasonAssignmentDto
-    implements ValidReasonAssignment.Exporter, ValidReasonAssignment.Importer {
+public class ValidReasonAssignmentDto {
 
   @Setter
   private String serviceUrl;
@@ -53,27 +51,23 @@ public class ValidReasonAssignmentDto
 
   @Getter
   @Setter
-  private StockCardLineItemReason reason;
+  private StockCardLineItemReasonDto reason;
 
-  @Override
   @JsonIgnore
   public UUID getProgramId() {
     return null == program ? null : program.getId();
   }
 
-  @Override
   @JsonIgnore
   public void setProgramId(UUID programId) {
     this.program = new ObjectReferenceDto(serviceUrl, PROGRAMS, programId);
   }
 
-  @Override
   @JsonIgnore
   public UUID getFacilityTypeId() {
     return null == facilityType ? null : facilityType.getId();
   }
 
-  @Override
   @JsonIgnore
   public void setFacilityTypeId(UUID facilityTypeId) {
     this.facilityType = new ObjectReferenceDto(serviceUrl, FACILITY_TYPES, facilityTypeId);
@@ -87,7 +81,11 @@ public class ValidReasonAssignmentDto
    */
   public static ValidReasonAssignmentDto newInstance(ValidReasonAssignment validReason) {
     ValidReasonAssignmentDto validReasonDto = new ValidReasonAssignmentDto();
-    validReason.export(validReasonDto);
+    validReasonDto.setId(validReason.getId());
+    validReasonDto.setProgramId(validReason.getProgramId());
+    validReasonDto.setFacilityTypeId(validReason.getFacilityTypeId());
+    validReasonDto.setHidden(validReason.getHidden());
+    validReasonDto.setReason(StockCardLineItemReasonDto.newInstance(validReason.getReason()));
     return validReasonDto;
   }
 

@@ -90,7 +90,7 @@ public class StockoutNotifierTest {
     when(stockCard.getProgramId()).thenReturn(programId);
     when(stockCard.getOrderableId()).thenReturn(orderableId);
     when(stockCard.getLotId()).thenReturn(lotId);
-    when(stockCard.getLineItems()).thenReturn(Collections.singletonList(stockCardLineItem));
+    when(stockCard.getSortedLineItems()).thenReturn(Collections.singletonList(stockCardLineItem));
     when(stockCardLineItem.getOccurredDate()).thenReturn(stockoutDate);
 
     when(stockCardNotifier.getFacilityName(facilityId)).thenReturn(FACILITY_NAME);

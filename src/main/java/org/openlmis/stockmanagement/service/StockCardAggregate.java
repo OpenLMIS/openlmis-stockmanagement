@@ -16,7 +16,7 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.time.temporal.ChronoUnit.DAYS;
-import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeMap;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -192,8 +193,8 @@ public class StockCardAggregate {
       StockCardLineItem lineItem) {
 
     int value = lineItem.getQuantityWithSign();
-    List<String> tags = null == lineItem.getReason()
-        ? emptyList()
+    Set<String> tags = null == lineItem.getReason()
+        ? emptySet()
         : lineItem.getReason().getTags();
 
     return tags.stream()
@@ -205,7 +206,7 @@ public class StockCardAggregate {
       LocalDate endDate, String tag) {
 
     return stockCards.stream()
-        .flatMap(stockCard -> stockCard.getLineItems().stream())
+        .flatMap(stockCard -> stockCard.getSortedLineItems().stream())
         .filter(lineItem ->
             isBeforeOrEqual(lineItem.getOccurredDate(), startDate)
                 && isAfterOrEqual(lineItem.getOccurredDate(), endDate)

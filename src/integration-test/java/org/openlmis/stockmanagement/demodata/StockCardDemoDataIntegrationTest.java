@@ -39,11 +39,13 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test,demo-data")
 @SpringBootTest
 @DirtiesContext
+@Transactional
 public class StockCardDemoDataIntegrationTest extends BaseIntegrationTest {
 
   @Autowired
@@ -81,7 +83,7 @@ public class StockCardDemoDataIntegrationTest extends BaseIntegrationTest {
       // we verify that stock card line items contain valid data and the stock on hand will be
       // calculated correctly.
       page.forEach(card ->
-          calculatedStockOnHandService.recalculateStockOnHand(card.getLineItems()));
+          calculatedStockOnHandService.recalculateStockOnHand(card.getSortedLineItems()));
       pageable = pageable.next();
     }
   }

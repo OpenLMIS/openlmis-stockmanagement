@@ -37,6 +37,7 @@ import org.junit.Test;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
+import org.openlmis.stockmanagement.dto.StockCardLineItemReasonDto;
 import org.openlmis.stockmanagement.dto.ValidReasonAssignmentDto;
 import org.openlmis.stockmanagement.repository.ValidReasonAssignmentRepository;
 import org.openlmis.stockmanagement.service.referencedata.ProgramFacilityTypeExistenceService;
@@ -74,6 +75,8 @@ public class ValidReasonAssignmentControllerIntegrationTest extends BaseWebInteg
 
     when(reasonAssignmentRepository.save(any(ValidReasonAssignment.class)))
         .thenAnswer(new SaveAnswer<ValidReasonAssignment>());
+    when(stockCardLineItemReasonRepository.findById(reasonAssignment.getReason().getId()))
+        .thenReturn(Optional.of(reasonAssignment.getReason()));
   }
 
   @Test
@@ -244,14 +247,15 @@ public class ValidReasonAssignmentControllerIntegrationTest extends BaseWebInteg
     reason.setId(reasonId);
 
     ValidReasonAssignmentDto assignment = new ValidReasonAssignmentDto();
-    assignment.setReason(reason);
+    assignment.setReason(StockCardLineItemReasonDto.newInstance(reason));
     assignment.setProgramId(UUID.randomUUID());
     assignment.setFacilityTypeId(UUID.randomUUID());
 
     when(stockCardLineItemReasonRepository.existsById(reasonId)).thenReturn(true);
-    when(reasonAssignmentRepository.findByProgramIdAndFacilityTypeIdAndReasonId(
-        assignment.getProgramId(), assignment.getFacilityTypeId(), reasonId))
-        .thenReturn(new ValidReasonAssignment());
+    when(reasonAssignmentRepository
+        .findByProgramIdAndFacilityTypeIdAndReasonId(assignment.getProgramId(),
+            assignment.getFacilityTypeId(), reasonId)).thenReturn(new ValidReasonAssignment());
+    when(stockCardLineItemReasonRepository.findById(reasonId)).thenReturn(Optional.of(reason));
 
     restAssured.given()
         .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
@@ -336,13 +340,15 @@ public class ValidReasonAssignmentControllerIntegrationTest extends BaseWebInteg
     StockCardLineItemReason reason = new StockCardLineItemReasonDataBuilder().build();
 
     ValidReasonAssignmentDto assignment = new ValidReasonAssignmentDto();
-    assignment.setReason(reason);
+    assignment.setReason(StockCardLineItemReasonDto.newInstance(reason));
     assignment.setProgramId(reasonId);
-    assignment.setFacilityTypeId(reasonId);
+    assignment.setFacilityTypeId(facilityTypeId);
     assignment.setHidden(isHidden);
 
     when(stockCardLineItemReasonRepository.existsById(assignment.getReason().getId()))
         .thenReturn(true);
+    when(stockCardLineItemReasonRepository.findById(assignment.getReason().getId()))
+        .thenReturn(Optional.of(reason));
     return assignment;
   }
 }

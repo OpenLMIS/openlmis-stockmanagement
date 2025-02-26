@@ -34,6 +34,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -63,9 +64,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Transactional
 public class StockCardSummariesServiceIntegrationTest extends BaseIntegrationTest {
 
 
@@ -219,7 +222,7 @@ public class StockCardSummariesServiceIntegrationTest extends BaseIntegrationTes
         .extraData(newExtraData)
         .build();
     
-    stockCard.setLineItems(asList(lineItem1, lineItem2, lineItem1));
+    stockCard.setLineItems(new HashSet<>(asList(lineItem1, lineItem2, lineItem1)));
     cardRepository.save(stockCard);
     calculatedStockOnHandRepository
         .save(new CalculatedStockOnHand(1, stockCard, 

@@ -26,6 +26,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -202,7 +203,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     final StockCardLineItem lineItem = createBaseLineItem(15, creditReason);
 
     lineItemlist = createStockCardLineItemsList(lineItem, creditReason);
-    stockCard.setLineItems(lineItemlist);
+    stockCard.setLineItems(new HashSet<>(lineItemlist));
     stockCardRepository.save(stockCard);
 
     calculatedStockOnHandRepository.save(
@@ -239,7 +240,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     final StockCardLineItem lineItem = createBaseLineItem(5, debitReason);
 
     lineItemlist = createStockCardLineItemsList(lineItem, creditReason);
-    stockCard.setLineItems(lineItemlist);
+    stockCard.setLineItems(new HashSet<>(lineItemlist));
     stockCardRepository.save(stockCard);
 
     calculatedStockOnHandRepository.save(
@@ -276,7 +277,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     final StockCardLineItem lineItem = createBaseLineItem(50);
 
     lineItemlist = createStockCardLineItemsList(lineItem, creditReason);
-    stockCard.setLineItems(lineItemlist);
+    stockCard.setLineItems(new HashSet<>(lineItemlist));
     stockCardRepository.save(stockCard);
 
     calculatedStockOnHandRepository.save(
@@ -321,7 +322,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     final StockCardLineItem lineItem = createBaseLineItem(physicalInventoryQuantity);
 
     lineItemlist = createStockCardLineItemsList(lineItem, creditReason);
-    stockCard.setLineItems(lineItemlist);
+    stockCard.setLineItems(new HashSet<>(lineItemlist));
     stockCardRepository.save(stockCard);
 
     calculatedStockOnHandRepository.save(
@@ -381,7 +382,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     final StockCardLineItem lineItem = createBaseLineItem(15, creditReason);
 
     lineItemlist = createStockCardLineItemsList(lineItem, creditReason);
-    stockCard.setLineItems(lineItemlist);
+    stockCard.setLineItems(new HashSet<>(lineItemlist));
     stockCardRepository.save(stockCard);
 
     calculatedStockOnHandRepository.save(
@@ -409,7 +410,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     lineItemlist.get(0).setProcessedDate(lineItem.getProcessedDate().plusHours(1));
     lineItemlist.get(1).setOccurredDate(lineItem.getOccurredDate().plusDays(1));
     lineItemlist.get(1).setProcessedDate(lineItem.getProcessedDate().plusHours(2));
-    stockCard.setLineItems(lineItemlist);
+    stockCard.setLineItems(new HashSet<>(lineItemlist));
     stockCardRepository.save(stockCard);
 
     calculatedStockOnHandRepository.save(
@@ -440,7 +441,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     final StockCardLineItem lineItem = createBaseLineItem(150);
 
     lineItemlist = createStockCardLineItemsList(lineItem, creditReason);
-    stockCard.setLineItems(lineItemlist);
+    stockCard.setLineItems(new HashSet<>(lineItemlist));
     stockCardRepository.save(stockCard);
 
     calculatedStockOnHandRepository.save(
@@ -484,7 +485,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
         stockCardLineItemRepository.save(createDebitLineItem(1, firstDate)),
         stockCardLineItemRepository.save(createDebitLineItem(1, firstDate.plusDays(1)))
     );
-    stockCard.setLineItems(lineItemlist);
+    stockCard.setLineItems(new HashSet<>(lineItemlist));
     calculatedStockOnHandService.recalculateStockOnHand(lineItemlist);
 
     calculatedStockOnHandService.fetchStockOnHandForSpecificDate(stockCard, firstDate.plusDays(1));
@@ -503,7 +504,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
         stockCardLineItemRepository.save(createDebitLineItem(1, firstDate)),
         stockCardLineItemRepository.save(createDebitLineItem(1, firstDate.plusDays(1)))
     );
-    stockCard.setLineItems(firstLineItemsList);
+    stockCard.setLineItems(new HashSet<>(firstLineItemsList));
     calculatedStockOnHandService.recalculateStockOnHand(firstLineItemsList);
 
     List<StockCardLineItem> secondLineItemsList = Arrays.asList(
@@ -512,7 +513,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     );
     lineItemlist = Stream.concat(firstLineItemsList.stream(), secondLineItemsList.stream())
         .collect(Collectors.toList());
-    stockCard.setLineItems(lineItemlist);
+    stockCard.setLineItems(new HashSet<>(lineItemlist));
     calculatedStockOnHandService.recalculateStockOnHand(secondLineItemsList);
 
     calculatedStockOnHandService.fetchStockOnHandForSpecificDate(stockCard, firstDate.plusDays(1));
@@ -530,7 +531,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     List<StockCardLineItem> firstEventItems = Collections.singletonList(
         stockCardLineItemRepository.save(createDebitLineItem(5, firstDate))
     );
-    stockCard.setLineItems(firstEventItems);
+    stockCard.setLineItems(new HashSet<>(firstEventItems));
     calculatedStockOnHandService.recalculateStockOnHand(firstEventItems);
 
     List<StockCardLineItem> secondEventItems = Collections.singletonList(
@@ -538,7 +539,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     );
     lineItemlist = Stream.concat(firstEventItems.stream(), secondEventItems.stream())
         .collect(Collectors.toList());
-    stockCard.setLineItems(lineItemlist);
+    stockCard.setLineItems(new HashSet<>(lineItemlist));
     calculatedStockOnHandService.recalculateStockOnHand(secondEventItems);
 
     List<StockCardLineItem> thirdEventItems = Arrays.asList(
@@ -547,7 +548,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     );
     lineItemlist = Stream.concat(lineItemlist.stream(), thirdEventItems.stream())
         .collect(Collectors.toList());
-    stockCard.setLineItems(lineItemlist);
+    stockCard.setLineItems(new HashSet<>(lineItemlist));
     calculatedStockOnHandService.recalculateStockOnHand(thirdEventItems);
 
     calculatedStockOnHandService.fetchStockOnHandForSpecificDate(stockCard, firstDate);
@@ -569,7 +570,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     List<StockCardLineItem> firstEventItems = Collections.singletonList(
         stockCardLineItemRepository.save(createDebitLineItem(60, firstDate))
     );
-    stockCard.setLineItems(firstEventItems);
+    stockCard.setLineItems(new HashSet<>(firstEventItems));
     calculatedStockOnHandService.recalculateStockOnHand(firstEventItems);
 
     List<StockCardLineItem> secondEventItems = Collections.singletonList(
@@ -577,7 +578,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     );
     lineItemlist = Stream.concat(firstEventItems.stream(), secondEventItems.stream())
         .collect(Collectors.toList());
-    stockCard.setLineItems(lineItemlist);
+    stockCard.setLineItems(new HashSet<>(lineItemlist));
     calculatedStockOnHandService.recalculateStockOnHand(secondEventItems);
 
     calculatedStockOnHandService.fetchStockOnHandForSpecificDate(stockCard, firstDate);
@@ -596,7 +597,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
         stockCardLineItemRepository.save(createDebitLineItem(2, firstDate.plusDays(1))),
         stockCardLineItemRepository.save(createDebitLineItem(2, firstDate))
     );
-    stockCard.setLineItems(lineItemlist);
+    stockCard.setLineItems(new HashSet<>(lineItemlist));
     calculatedStockOnHandService.recalculateStockOnHand(lineItemlist);
 
     calculatedStockOnHandService.fetchStockOnHandForSpecificDate(stockCard, firstDate.plusDays(1));
@@ -615,7 +616,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
         stockCardLineItemRepository.save(createDebitLineItem(1, date)),
         stockCardLineItemRepository.save(createDebitLineItem(2, date))
     );
-    stockCard.setLineItems(lineItemlist);
+    stockCard.setLineItems(new HashSet<>(lineItemlist));
     calculatedStockOnHandService.recalculateStockOnHand(lineItemlist);
 
     calculatedStockOnHandService.fetchStockOnHandForSpecificDate(stockCard, date);
@@ -632,7 +633,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     StockCardLineItem baseLineItem = stockCardLineItemRepository
         .save(createDebitLineItem(1, date, stockCard));
     stockCardRepository.save(stockCard);
-    stockCard.setLineItems(Collections.singletonList(baseLineItem));
+    stockCard.setLineItems(Collections.singleton(baseLineItem));
 
     StockEvent alternateEvent = prepareEvent(randomUUID(), randomUUID());
     StockCard alternateStockCard = prepareStockCard(alternateEvent, randomUUID(), randomUUID());
@@ -641,7 +642,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     StockCardLineItem alternateLineItem = stockCardLineItemRepository
         .save(createDebitLineItem(3, date, alternateStockCard));
     stockCardRepository.save(alternateStockCard);
-    alternateStockCard.setLineItems(Collections.singletonList(alternateLineItem));
+    alternateStockCard.setLineItems(Collections.singleton(alternateLineItem));
 
     calculatedStockOnHandService.recalculateStockOnHand(
         Arrays.asList(baseLineItem, alternateLineItem));
@@ -660,7 +661,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     lineItemlist = createStockCardLineItemsList(lineItem, null);
     lineItemlist.get(0).setOccurredDate(lineItem.getOccurredDate().minusDays(3));
     lineItemlist.get(1).setOccurredDate(lineItem.getOccurredDate().minusDays(2));
-    stockCard.setLineItems(lineItemlist);
+    stockCard.setLineItems(new HashSet<>(lineItemlist));
     stockCardRepository.save(stockCard);
 
     calculatedStockOnHandRepository.save(
@@ -698,7 +699,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
 
     lineItemlist = createStockCardLineItemsList(lineItem, creditReason);
     lineItemlist.get(0).setOccurredDate(lineItem.getOccurredDate().plusDays(1));
-    stockCard.setLineItems(lineItemlist);
+    stockCard.setLineItems(new HashSet<>(lineItemlist));
     stockCardRepository.save(stockCard);
 
     calculatedStockOnHandRepository.save(
@@ -735,7 +736,7 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     final StockCardLineItem lineItem = createBaseLineItem(15, debitReason);
 
     lineItemlist = createStockCardLineItemsList(lineItem, creditReason);
-    stockCard.setLineItems(lineItemlist);
+    stockCard.setLineItems(new HashSet<>(lineItemlist));
     lineItem.setStockCard(stockCard);
     stockCardRepository.save(stockCard);
 

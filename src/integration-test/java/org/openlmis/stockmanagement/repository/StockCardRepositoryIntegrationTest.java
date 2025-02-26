@@ -133,7 +133,7 @@ public class StockCardRepositoryIntegrationTest
   @Test
   public void shouldPersistWithNullExtraData() throws Exception {
     stockCard1 = generateInstance();
-    stockCard1.getLineItems().get(0).setExtraData(null);
+    stockCard1.getSortedLineItems().get(0).setExtraData(null);
 
     stockCardRepository.save(stockCard1);
 
@@ -143,7 +143,7 @@ public class StockCardRepositoryIntegrationTest
   @Test
   public void shouldPersistWithEmptyExtraData() throws Exception {
     stockCard1 = generateInstance();
-    stockCard1.getLineItems().get(0).setExtraData(Maps.newHashMap());
+    stockCard1.getSortedLineItems().get(0).setExtraData(Maps.newHashMap());
 
     stockCardRepository.save(stockCard1);
 

@@ -20,6 +20,7 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -45,7 +46,7 @@ public class CalculatedStockOnHand extends BaseEntity {
   @Column(nullable = false)
   private Integer stockOnHand;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "stockcardid", nullable = false)
   private StockCard stockCard;
 

@@ -15,7 +15,7 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
@@ -34,7 +34,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
-
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -276,7 +275,7 @@ public class StockCardSummariesService extends StockCardBaseService {
             .facilityId(facilityId)
             .orderableId(orderableLot.getOrderable().getId())
             .lotId(orderableLot.getLotId())
-            .lineItems(emptyList())//dummy cards don't have line items
+            .lineItems(emptySet())//dummy cards don't have line items
             .build());
   }
 

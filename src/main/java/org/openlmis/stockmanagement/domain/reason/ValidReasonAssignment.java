@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.domain.reason;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -44,7 +45,7 @@ public class ValidReasonAssignment extends BaseEntity {
   @Column(nullable = false)
   private Boolean hidden;
 
-  @ManyToOne()
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(nullable = false)
   private StockCardLineItemReason reason;
 

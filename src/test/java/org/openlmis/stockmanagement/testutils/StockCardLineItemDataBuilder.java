@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
@@ -126,7 +127,7 @@ public class StockCardLineItemDataBuilder {
    * @return created line item.
    */
   public StockCardLineItem buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
-      ReasonType reasonType, List<String> tags, Integer quantity, LocalDate occurredDate) {
+      ReasonType reasonType, Set<String> tags, Integer quantity, LocalDate occurredDate) {
     return this
         .withReason(new StockCardLineItemReasonDataBuilder()
             .withReasonType(reasonType)
