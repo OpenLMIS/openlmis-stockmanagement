@@ -19,6 +19,7 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -30,9 +31,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import javax.transaction.Transactional;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.BaseIntegrationTest;
@@ -73,9 +74,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@Ignore("Hotfix")
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Transactional
 public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
   @Autowired
@@ -162,7 +163,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     stockEventDto.getLineItems().get(0).setDestinationId(node.getId());
     StockEvent savedEvent = save(stockEventDto, userId);
 
-    stockCardService.saveFromEvent(stockEventDto, savedEvent.getId(), mock(Profiler.class));
+    Profiler profilerMock = mock(Profiler.class);
+    when(profilerMock.startNested(anyString())).thenReturn(profilerMock);
+    stockCardService.saveFromEvent(stockEventDto, savedEvent.getId(), profilerMock);
 
     StockCard savedCard = stockCardRepository.findByOriginEvent(savedEvent);
     StockCardLineItem firstLineItem = savedCard.getSortedLineItems().get(0);
@@ -302,7 +305,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
     StockEvent event = eventDto.toEvent();
     StockEvent savedEvent = stockEventsRepository.save(event);
-    stockCardService.saveFromEvent(eventDto, savedEvent.getId(), mock(Profiler.class));
+    Profiler profiler = mock(Profiler.class);
+    when(profiler.startNested(anyString())).thenReturn(profiler);
+    stockCardService.saveFromEvent(eventDto, savedEvent.getId(), profiler);
 
     List<StockCard> stockCards = stockCardRepository
         .findByProgramIdAndFacilityId(savedEvent.getProgramId(), savedEvent.getFacilityId());

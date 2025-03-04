@@ -26,7 +26,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
@@ -36,7 +35,6 @@ import org.openlmis.stockmanagement.testutils.ValidReasonAssignmentDataBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
 
-@Ignore("Hotfix")
 public class ValidReasonAssignmentRepositoryIntegrationTest
     extends BaseCrudRepositoryIntegrationTest<ValidReasonAssignment> {
 

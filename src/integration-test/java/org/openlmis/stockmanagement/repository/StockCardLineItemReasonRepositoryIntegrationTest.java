@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
@@ -38,7 +37,6 @@ import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
 
-@Ignore("Hotfix")
 public class StockCardLineItemReasonRepositoryIntegrationTest
     extends BaseCrudRepositoryIntegrationTest<StockCardLineItemReason> {
 

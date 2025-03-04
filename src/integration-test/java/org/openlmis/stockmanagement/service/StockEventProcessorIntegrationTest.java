@@ -28,7 +28,6 @@ import javax.transaction.Transactional;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -175,7 +174,6 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
     Assert.fail();
   }
 
-  @Ignore("Hotfix")
   @Test
   public void shouldSaveEventAndLineItemsAndCallNotificationsWhenValidationServicePasses() 
       throws Exception {
@@ -195,7 +193,6 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
     verify(stockEventNotificationProcessor).callAllNotifications(stockEventDto);
   }
 
-  @Ignore("Hotfix")
   @Test
   public void shouldSubmitPhysicalInventoryWhenEventIsAboutPhysicalInventory()
       throws Exception {
