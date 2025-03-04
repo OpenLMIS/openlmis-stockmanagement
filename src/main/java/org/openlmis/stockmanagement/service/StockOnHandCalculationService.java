@@ -59,8 +59,7 @@ public class StockOnHandCalculationService {
     int soh = 0;
 
     if (isNotEmpty(card.getLineItems())) {
-      card.reorderLineItems();
-      for (StockCardLineItem lineItem : card.getLineItems()) {
+      for (StockCardLineItem lineItem : card.getSortedLineItems()) {
         soh = calculateStockOnHand(lineItem, soh);
       }
     }

@@ -13,28 +13,29 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.stockmanagement.dto;
+package org.openlmis.stockmanagement.dto.physicalinventory;
 
-import java.util.UUID;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
+import org.openlmis.stockmanagement.dto.BaseDto;
 
-@Setter
-@Getter
+@EqualsAndHashCode(callSuper = true)
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class StockEventAdjustmentDto {
-  private UUID reasonId;
+@Builder
+public class PhysicalInventoryLineItemAdjustmentDto extends BaseDto {
+  // FIXME: Use DTO here
+  private StockCardLineItemReason reason;
   private Integer quantity;
 
-  PhysicalInventoryLineItemAdjustment toPhysicalInventoryLineItemAdjustment() {
-    StockCardLineItemReason reason = new StockCardLineItemReason();
-    reason.setId(reasonId);
-
-    return new PhysicalInventoryLineItemAdjustment(null, null, null, reason, quantity);
+  public PhysicalInventoryLineItemAdjustmentDto(PhysicalInventoryLineItemAdjustment item) {
+    this.reason = item.getReason();
+    this.quantity = item.getQuantity();
   }
 }

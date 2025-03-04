@@ -17,7 +17,6 @@ package org.openlmis.stockmanagement.domain.card;
 
 import static javax.persistence.CascadeType.ALL;
 import static org.apache.commons.beanutils.BeanUtils.cloneBean;
-import static org.hibernate.annotations.LazyCollectionOption.FALSE;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparators.byOccurredDate;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparators.byProcessedDate;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparators.byReasonPriority;
@@ -28,23 +27,24 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.LazyCollection;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
@@ -78,7 +78,7 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCard.class);
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(nullable = false)
   private StockEvent originEvent;
 
@@ -93,9 +93,8 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
   @Column
   private UUID lotId;
 
-  @LazyCollection(FALSE)
-  @OneToMany(cascade = ALL, mappedBy = "stockCard")
-  private List<StockCardLineItem> lineItems;
+  @OneToMany(cascade = ALL, mappedBy = "stockCard", fetch = FetchType.LAZY)
+  private Set<StockCardLineItem> lineItems = new HashSet<>();
 
   @Transient
   private Integer stockOnHand = null;
@@ -134,8 +133,7 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
         .facilityId(stockEventDto.getFacilityId())
         .orderableId(eventLineItem.getOrderableId())
         .lotId(eventLineItem.getLotId())
-
-        .lineItems(new ArrayList<>())
+        .lineItems(new HashSet<>())
         .stockOnHand(0)
         .isActive(stockEventDto.isActive())
         .build();
@@ -153,7 +151,7 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
     clone.setOrderableId(orderableId);
     clone.setProgramId(programId);
     clone.setFacilityId(facilityId);
-    clone.setLineItems(new ArrayList<>());
+    clone.setLineItems(new HashSet<>());
     clone.setActive(isActive);
     try {
       if (lineItems != null) {
@@ -172,11 +170,14 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
   }
 
   /**
-   * Reorders stock card's line items basing on line items comparator.
+   * Return sorted stock card line items.
+   *
+   * @return the list of sorted line items, never null
    */
-  @PostLoad
-  public void reorderLineItems() {
-    lineItems.sort(getLineItemsComparator());
+  public List<StockCardLineItem> getSortedLineItems() {
+    final List<StockCardLineItem> result = new ArrayList<>(lineItems);
+    result.sort(getLineItemsComparator());
+    return result;
   }
 
   /**

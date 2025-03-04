@@ -128,7 +128,7 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
     nodeRepository.save(node);
 
     reason = new StockCardLineItemReason("reason", null, ReasonType.CREDIT,
-        ReasonCategory.ADJUSTMENT, false, Collections.emptyList());
+        ReasonCategory.ADJUSTMENT, false, Collections.emptySet());
     stockCardLineItemReasonRepository.save(reason);
 
     SecurityContextHolder.setContext(securityContext);

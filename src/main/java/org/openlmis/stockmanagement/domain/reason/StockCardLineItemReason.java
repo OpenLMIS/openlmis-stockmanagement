@@ -16,8 +16,8 @@
 package org.openlmis.stockmanagement.domain.reason;
 
 import com.google.common.base.Strings;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -64,7 +64,7 @@ public class StockCardLineItemReason extends BaseEntity {
       name = "stock_card_line_item_reason_tags",
       joinColumns = @JoinColumn(name = "reasonId"))
   @Column(name = "tag")
-  private List<String> tags = new ArrayList<>();
+  private Set<String> tags = new HashSet<>();
 
   /**
    * Creates new instance from importer.
@@ -90,7 +90,7 @@ public class StockCardLineItemReason extends BaseEntity {
         .reasonType(ReasonType.CREDIT)
         .reasonCategory(ReasonCategory.PHYSICAL_INVENTORY)
         .name("Overstock(will be replaced by messages_lang.properties)")
-        .tags(new ArrayList<>())
+        .tags(new HashSet<>())
         .build();
   }
 
@@ -104,7 +104,7 @@ public class StockCardLineItemReason extends BaseEntity {
         .reasonType(ReasonType.DEBIT)
         .reasonCategory(ReasonCategory.PHYSICAL_INVENTORY)
         .name("Understock(will be replaced by messages_lang.properties)")
-        .tags(new ArrayList<>())
+        .tags(new HashSet<>())
         .build();
   }
 
@@ -118,7 +118,7 @@ public class StockCardLineItemReason extends BaseEntity {
         .reasonType(ReasonType.BALANCE_ADJUSTMENT)
         .reasonCategory(ReasonCategory.PHYSICAL_INVENTORY)
         .name("Balance adjustment(will be replaced by messages_lang.properties)")
-        .tags(new ArrayList<>())
+        .tags(new HashSet<>())
         .build();
   }
 
@@ -177,7 +177,7 @@ public class StockCardLineItemReason extends BaseEntity {
 
     void setIsFreeTextAllowed(Boolean isFreeTextAllowed);
 
-    void setTags(List<String> tags);
+    void setTags(Set<String> tags);
   }
 
   public interface Importer {
@@ -194,7 +194,7 @@ public class StockCardLineItemReason extends BaseEntity {
 
     Boolean getIsFreeTextAllowed();
 
-    List<String> getTags();
+    Set<String> getTags();
 
   }
 }

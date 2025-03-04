@@ -16,10 +16,11 @@
 package org.openlmis.stockmanagement.domain.card;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
+import static java.util.Collections.singleton;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
+import java.util.HashSet;
 import org.junit.Test;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemDataBuilder;
 
@@ -54,17 +55,14 @@ public class StockCardTest {
 
     StockCard stockCard = StockCard
         .builder()
-        .lineItems(asList(lineItem1, lineItem2, lineItem3, lineItem4))
+        .lineItems(new HashSet<>(asList(lineItem1, lineItem2, lineItem3, lineItem4)))
         .build();
 
-    //when
-    stockCard.reorderLineItems();
-
     //then
-    assertThat(stockCard.getLineItems().get(0), is(lineItem4));
-    assertThat(stockCard.getLineItems().get(1), is(lineItem3));
-    assertThat(stockCard.getLineItems().get(2), is(lineItem2));
-    assertThat(stockCard.getLineItems().get(3), is(lineItem1));
+    assertThat(stockCard.getSortedLineItems().get(0), is(lineItem4));
+    assertThat(stockCard.getSortedLineItems().get(1), is(lineItem3));
+    assertThat(stockCard.getSortedLineItems().get(2), is(lineItem2));
+    assertThat(stockCard.getSortedLineItems().get(3), is(lineItem1));
   }
 
   @Test
@@ -73,18 +71,18 @@ public class StockCardTest {
     StockCardLineItem lineItem = new StockCardLineItemDataBuilder().withQuantity(5).build();
 
     StockCard stockCard = new StockCard();
-    stockCard.setLineItems(singletonList(lineItem));
+    stockCard.setLineItems(singleton(lineItem));
 
     //when
     StockCard copy = stockCard.shallowCopy();
 
     //then
-    assertThat(copy.getLineItems().get(0).getQuantity(), is(5));
+    assertThat(copy.getSortedLineItems().get(0).getQuantity(), is(5));
 
     //when
-    copy.getLineItems().get(0).setQuantity(6);
+    copy.getSortedLineItems().get(0).setQuantity(6);
 
     //then
-    assertThat(stockCard.getLineItems().get(0).getQuantity(), is(5));
+    assertThat(stockCard.getSortedLineItems().get(0).getQuantity(), is(5));
   }
 }

@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.domain.sourcedestination;
 
 import java.util.UUID;
 import javax.persistence.Column;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
@@ -35,7 +36,7 @@ public class SourceDestinationAssignment extends BaseEntity {
   @Type(type = PG_UUID)
   UUID facilityTypeId;
 
-  @ManyToOne()
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(nullable = false)
   Node node;
   

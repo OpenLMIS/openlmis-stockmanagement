@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.domain.physicalinventory;
 
 import static javax.persistence.CascadeType.ALL;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -58,16 +59,16 @@ public class PhysicalInventoryLineItem
   @Convert(converter = ExtraDataConverter.class)
   private Map<String, String> extraData;
 
-  @ManyToOne()
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(nullable = false)
   private PhysicalInventory physicalInventory;
 
   @OneToMany(
           cascade = ALL,
           fetch = FetchType.LAZY,
-          orphanRemoval = true)
-  @JoinColumn(name = "physicalInventoryLineItemId")
-  private List<PhysicalInventoryLineItemAdjustment> stockAdjustments;
+          orphanRemoval = true,
+          mappedBy = "physicalInventoryLineItem")
+  private List<PhysicalInventoryLineItemAdjustment> stockAdjustments = new ArrayList<>();
 
   private Integer previousStockOnHandWhenSubmitted;
 }
