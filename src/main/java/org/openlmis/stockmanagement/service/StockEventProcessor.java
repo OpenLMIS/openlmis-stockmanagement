@@ -18,6 +18,8 @@ package org.openlmis.stockmanagement.service;
 import static org.openlmis.stockmanagement.dto.PhysicalInventoryDto.fromEventDto;
 
 import java.util.UUID;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
@@ -64,6 +66,9 @@ public class StockEventProcessor {
 
   @Autowired
   private ExtensionManager extensionManager;
+
+  @PersistenceContext
+  private EntityManager entityManager;
 
   /**
    * Validate and persist event and create stock card and line items from it.
@@ -112,12 +117,15 @@ public class StockEventProcessor {
 
       profiler.start("SUBMIT_PHYSICAL_INVENTORY");
       physicalInventoryService.submitPhysicalInventory(inventoryDto, savedEventId);
+
+      profiler.start("FLUSH");
+      entityManager.flush();
+      entityManager.clear();
     }
     profiler.start("SORT_EVENT_LINE_ITEMS");
     sortEventDtos(eventDto);
 
-    profiler.start("SAVE_FROM_EVENT");
-    stockCardService.saveFromEvent(eventDto, savedEventId);
+    stockCardService.saveFromEvent(eventDto, savedEventId, profiler.startNested("SAVE_FROM_EVENT"));
 
     profiler.start("CALL_NOTIFICATIONS");
     stockEventNotificationProcessor.callAllNotifications(eventDto);

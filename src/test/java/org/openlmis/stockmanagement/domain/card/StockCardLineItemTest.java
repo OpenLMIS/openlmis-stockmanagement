@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.domain.card;
 
 import static java.time.ZonedDateTime.now;
 import static java.time.temporal.ChronoUnit.SECONDS;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.is;
@@ -29,7 +30,7 @@ import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createL
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -56,7 +57,7 @@ public class StockCardLineItemTest {
   public void shouldCreateLineItemFromStockEvent() {
     //given
     StockCard stockCard = new StockCard();
-    stockCard.setLineItems(new ArrayList<>());
+    stockCard.setLineItems(new HashSet<>());
 
     //when
     UUID userId = randomUUID();
@@ -156,7 +157,7 @@ public class StockCardLineItemTest {
   public void shouldReturnFalseIfListDoesNotContainTag() {
     StockCardLineItem lineItem = StockCardLineItem.builder()
         .reason(new StockCardLineItemReasonDataBuilder()
-            .withTags(singletonList("tag"))
+            .withTags(singleton("tag"))
             .build())
         .build();
 
@@ -167,7 +168,7 @@ public class StockCardLineItemTest {
   public void shouldReturnTrueIfListDoesContainTag() {
     StockCardLineItem lineItem = StockCardLineItem.builder()
         .reason(new StockCardLineItemReasonDataBuilder()
-            .withTags(singletonList("tag"))
+            .withTags(singleton("tag"))
             .build())
         .build();
 

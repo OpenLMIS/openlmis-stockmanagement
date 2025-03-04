@@ -17,12 +17,14 @@ package org.openlmis.stockmanagement.service;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -57,13 +59,13 @@ public class StockCardAggregateTest {
         .withLineItem(new StockCardLineItemDataBuilder()
             .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
                 ReasonType.CREDIT,
-                singletonList(tag1),
+                singleton(tag1),
                 10,
                 LocalDate.of(2018, 5, 10)))
         .withLineItem(new StockCardLineItemDataBuilder()
             .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
                 ReasonType.DEBIT,
-                singletonList(tag2),
+                singleton(tag2),
                 10,
                 LocalDate.of(2018, 5, 11)))
         .build();
@@ -71,7 +73,7 @@ public class StockCardAggregateTest {
         .withLineItem(new StockCardLineItemDataBuilder()
             .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
                 ReasonType.CREDIT,
-                singletonList(tag1),
+                singleton(tag1),
                 20,
                 LocalDate.of(2018, 5, 12)))
         .build();
@@ -79,7 +81,7 @@ public class StockCardAggregateTest {
         .withLineItem(new StockCardLineItemDataBuilder()
             .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
                 ReasonType.CREDIT,
-                asList(tag3, tag1),
+                new HashSet<>(asList(tag3, tag1)),
                 30,
                 LocalDate.of(2018, 5, 13)))
         .build();
@@ -87,7 +89,7 @@ public class StockCardAggregateTest {
         .withLineItem(new StockCardLineItemDataBuilder()
             .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
                 ReasonType.CREDIT,
-                singletonList(tag4),
+                singleton(tag4),
                 30,
                 LocalDate.of(2018, 6, 15)))
         .build();
@@ -95,7 +97,7 @@ public class StockCardAggregateTest {
         .withLineItem(new StockCardLineItemDataBuilder()
             .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
                 ReasonType.CREDIT,
-                singletonList(tag4),
+                singleton(tag4),
                 30,
                 LocalDate.of(2018, 7, 1)))
         .build();
@@ -103,13 +105,13 @@ public class StockCardAggregateTest {
         .withLineItem(new StockCardLineItemDataBuilder()
             .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
                 ReasonType.CREDIT,
-                singletonList(tag4),
+                singleton(tag4),
                 10,
                 LocalDate.of(2018, 8, 1)))
         .withLineItem(new StockCardLineItemDataBuilder()
             .buildWithReasonTypeAndTagsAndQuantityAndOccuredDate(
                 ReasonType.DEBIT,
-                singletonList(tag4),
+                singleton(tag4),
                 10,
                 LocalDate.of(2018, 8, 31)))
         .build();

@@ -27,6 +27,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Rule;
@@ -89,12 +91,12 @@ public class StockOnHandCalculationServiceTest {
 
     StockCard card = new StockCard();
     card.setOrderableId(orderableId);
-    card.setLineItems(newArrayList(
+    card.setLineItems(new HashSet<>(newArrayList(
         createCreditLineItem(firstDate.plusDays(1), 5, card),
         createDebitLineItem(firstDate.plusDays(3), 1, card),
         createDebitLineItem(firstDate.plusDays(2), 5, card),
         createCreditLineItem(firstDate.plusDays(4), 2, card)
-    ));
+    )));
 
     stockOnHandCalculationService.calculateStockOnHand(card);
   }
@@ -102,10 +104,10 @@ public class StockOnHandCalculationServiceTest {
   @Test
   public void shouldReturnWhenStockOnHandIsNotBelowZero() {
     StockCard card = new StockCard();
-    card.setLineItems(newArrayList(
+    card.setLineItems(new HashSet<>(newArrayList(
         createCreditLineItem(firstDate.plusDays(1), 10, card),
         createDebitLineItem(firstDate.plusDays(2), 5, card)
-    ));
+    )));
     card = stockOnHandCalculationService.calculateStockOnHand(card);
 
     assertEquals(Integer.valueOf(5), card.getStockOnHand());
@@ -114,7 +116,7 @@ public class StockOnHandCalculationServiceTest {
   @Test
   public void shouldCalculateSohOfLineItemWithCreditReason() {
     StockCard card = new StockCard();
-    card.setLineItems(newArrayList(
+    card.setLineItems(Collections.singleton(
         createCreditLineItem(firstDate, 10, card)
     ));
 
@@ -130,10 +132,10 @@ public class StockOnHandCalculationServiceTest {
 
     int quantityToAdd = 10;
     StockCard card = new StockCard();
-    card.setLineItems(newArrayList(
+    card.setLineItems(new HashSet<>(newArrayList(
         createCreditLineItem(firstDate, MAX_VALUE - quantityToAdd + 1, card),
         createCreditLineItem(firstDate.plusDays(1), quantityToAdd, card)
-    ));
+    )));
 
     stockOnHandCalculationService.calculateStockOnHand(card);
   }
@@ -141,10 +143,10 @@ public class StockOnHandCalculationServiceTest {
   @Test
   public void shouldDecreaseSoHOfLineItemWithDebitReason() {
     StockCard card = new StockCard();
-    card.setLineItems(newArrayList(
+    card.setLineItems(new HashSet<>(newArrayList(
         createCreditLineItem(firstDate, 15, card),
         createDebitLineItem(firstDate.plusDays(1), 5, card)
-    ));
+    )));
 
     card = stockOnHandCalculationService.calculateStockOnHand(card);
 
@@ -159,9 +161,9 @@ public class StockOnHandCalculationServiceTest {
         .quantity(15).build();
 
     StockCard card = new StockCard();
-    card.setLineItems(newArrayList(
+    card.setLineItems(new HashSet<>(newArrayList(
         createCreditLineItem(firstDate, 15, card),
-        lineItem));
+        lineItem)));
 
     card = stockOnHandCalculationService.calculateStockOnHand(card);
 
@@ -176,9 +178,9 @@ public class StockOnHandCalculationServiceTest {
         .quantity(15).build();
 
     StockCard card = new StockCard();
-    card.setLineItems(newArrayList(
+    card.setLineItems(new HashSet<>(newArrayList(
         createCreditLineItem(firstDate, 15, card),
-        lineItem));
+        lineItem)));
 
     card = stockOnHandCalculationService.calculateStockOnHand(card);
 
@@ -191,9 +193,9 @@ public class StockOnHandCalculationServiceTest {
         .occurredDate(firstDate.plusDays(1))
         .quantity(15).build();
     StockCard card = new StockCard();
-    card.setLineItems(newArrayList(
+    card.setLineItems(new HashSet<>(newArrayList(
         createCreditLineItem(firstDate, 10, card),
-        lineItem));
+        lineItem)));
 
     card = stockOnHandCalculationService.calculateStockOnHand(card);
 
@@ -209,9 +211,9 @@ public class StockOnHandCalculationServiceTest {
         .occurredDate(firstDate.plusDays(1))
         .quantity(15).build();
     StockCard card = new StockCard();
-    card.setLineItems(newArrayList(
+    card.setLineItems(new HashSet<>(newArrayList(
         createCreditLineItem(firstDate, 20, card),
-        lineItem));
+        lineItem)));
 
     card = stockOnHandCalculationService.calculateStockOnHand(card);
 
@@ -227,9 +229,9 @@ public class StockOnHandCalculationServiceTest {
         .occurredDate(firstDate.plusDays(1))
         .quantity(15).build();
     StockCard card = new StockCard();
-    card.setLineItems(newArrayList(
+    card.setLineItems(new HashSet<>(newArrayList(
         createCreditLineItem(firstDate, 15, card),
-        lineItem));
+        lineItem)));
 
     card = stockOnHandCalculationService.calculateStockOnHand(card);
 

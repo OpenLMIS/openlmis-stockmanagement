@@ -248,7 +248,7 @@ public class StockEventProcessContextBuilder {
     Set<UUID> reasonIds = stockCardRepository
         .findByProgramIdAndFacilityId(eventDto.getProgramId(), eventDto.getFacilityId())
         .stream()
-        .map(StockCard::getLineItems)
+        .map(StockCard::getSortedLineItems)
         .flatMap(Collection::stream)
         .map(StockCardLineItem::getReason)
         .filter(Objects::nonNull)

@@ -106,6 +106,10 @@ public class StockEventProcessContext {
     return cards.get().get(identity);
   }
 
+  public StockCard removeCard(OrderableLotIdentity identity) {
+    return cards.get().remove(identity);
+  }
+
   public void refreshCards() {
     cards.refresh();
   }

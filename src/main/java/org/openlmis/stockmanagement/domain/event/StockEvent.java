@@ -18,10 +18,12 @@ package org.openlmis.stockmanagement.domain.event;
 import static javax.persistence.CascadeType.ALL;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -56,6 +58,6 @@ public class StockEvent extends BaseEntity {
   private String documentNumber;
 
   @ToString.Exclude
-  @OneToMany(cascade = ALL, mappedBy = "stockEvent")
-  private List<StockEventLineItem> lineItems;
+  @OneToMany(cascade = ALL, mappedBy = "stockEvent", fetch = FetchType.LAZY)
+  private List<StockEventLineItem> lineItems = new ArrayList<>();
 }
