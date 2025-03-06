@@ -99,6 +99,27 @@ public class OrderableReferenceDataServiceTest extends BaseReferenceDataServiceT
   }
 
   @Test
+  public void shouldReturnOrderablesByExactCode() {
+    OrderableDto product = mockPageResponseEntityAndGetDto();
+
+    String productCode = "TestCode";
+    List<OrderableDto> response = service.findByExactCodes(Collections.singleton(productCode));
+
+    assertThat(response, hasSize(1));
+    assertThat(response, hasItem(product));
+
+    verify(restTemplate).exchange(
+        uriCaptor.capture(), eq(HttpMethod.GET), entityCaptor.capture(),
+        refEq(new DynamicPageTypeReference<>(OrderableDto.class)));
+
+    URI uri = uriCaptor.getValue();
+    assertEquals(serviceUrl + service.getUrl() + "?exactCode=" + productCode, uri.toString());
+
+    assertAuthHeader(entityCaptor.getValue());
+    assertNull(entityCaptor.getValue().getBody());
+  }
+
+  @Test
   public void shouldReturnEmptyListIfEmptyParamProvided() {
     checkAuth = false;
     List<OrderableDto> response = service.findByIds(Collections.emptyList());

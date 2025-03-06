@@ -122,4 +122,24 @@ public class LotReferenceDataServiceTest extends BaseReferenceDataServiceTest<Lo
     assertAuthHeader(entityCaptor.getValue());
     assertNull(entityCaptor.getValue().getBody());
   }
+
+  @Test
+  public void findByExactCodesShouldReturnMatchingLots() {
+    LotDto lot = mockPageResponseEntityAndGetDto();
+
+    List<LotDto> response = service.findByExactCodes(singletonList(lot.getLotCode()));
+
+    assertThat(response, hasSize(1));
+    assertThat(response, hasItem(lot));
+
+    verify(restTemplate).exchange(
+        uriCaptor.capture(), eq(HttpMethod.GET), entityCaptor.capture(),
+        refEq(new DynamicPageTypeReference<>(LotDto.class)));
+
+    URI uri = uriCaptor.getValue();
+    assertEquals(serviceUrl + service.getUrl() + "?exactCode=" + lot.getLotCode(), uri.toString());
+
+    assertAuthHeader(entityCaptor.getValue());
+    assertNull(entityCaptor.getValue().getBody());
+  }
 }
