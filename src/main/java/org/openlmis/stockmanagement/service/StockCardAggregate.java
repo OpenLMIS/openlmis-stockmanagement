@@ -22,6 +22,8 @@ import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 import java.time.LocalDate;
+import java.time.Month;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -171,12 +173,29 @@ public class StockCardAggregate {
   }
 
   private long getDaysBetween(LocalDate startDate, LocalDate endDate) {
-    long daysBetween = DAYS.between(startDate, endDate) + 1;
-    // According to OLMIS project specification month length can be maximum 30 days.
-    if (daysBetween >= 28) {
-      daysBetween -= 1;
+    // According to OLMIS project specification, months are counted as a maximum of 30 days.
+    long totalDays = 0;
+    LocalDate current = startDate;
+
+    while (!current.isAfter(endDate)) {
+      LocalDate nextMonth = current.plusMonths(1);
+
+      if (nextMonth.isAfter(endDate)) {
+        long daysBetween = ChronoUnit.DAYS.between(current, endDate) + 1;
+        totalDays += daysBetween <= 30 ? daysBetween : 30; // Cap at 30 days
+        break;
+      }
+
+      if (current.getMonth() == Month.FEBRUARY) {
+        totalDays += current.lengthOfMonth();
+      } else {
+        totalDays += 30;
+      }
+
+      current = nextMonth;
     }
-    return daysBetween;
+
+    return totalDays;
   }
 
   private List<ImmutablePair<String, Integer>> calculateTagValuesForStockAdjustments(

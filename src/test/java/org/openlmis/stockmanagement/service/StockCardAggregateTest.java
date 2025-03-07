@@ -233,24 +233,28 @@ public class StockCardAggregateTest {
 
     assertEquals(new Long(16), stockCardAggregate.getStockoutDays(
         LocalDate.of(2018, 6, 1), LocalDate.of(2018, 6, 30)));
-
     assertEquals(new Long(30), stockCardAggregate.getStockoutDays(
         LocalDate.of(2018, 7, 1), LocalDate.of(2018, 7, 31)));
-
     assertEquals(new Long(30), stockCardAggregate.getStockoutDays(
         LocalDate.of(2018, 8, 1), LocalDate.of(2018, 8, 31)));
-
-    assertEquals(new Long(29), stockCardAggregate.getStockoutDays(
+    assertEquals(new Long(30), stockCardAggregate.getStockoutDays(
         LocalDate.of(2018, 9, 1), LocalDate.of(2018, 9, 30)));
 
     assertEquals(new Long(0), stockCardAggregate.getStockoutDays(
-            LocalDate.of(2018, 11, 1), LocalDate.of(2018, 11, 30)));
-
+        LocalDate.of(2018, 11, 1), LocalDate.of(2018, 11, 30)));
     assertEquals(new Long(16), stockCardAggregate.getStockoutDays(
-            LocalDate.of(2018, 12, 1), LocalDate.of(2018, 12, 31)));
-
+        LocalDate.of(2018, 12, 1), LocalDate.of(2018, 12, 31)));
     assertEquals(new Long(30), stockCardAggregate.getStockoutDays(
-            LocalDate.of(2019, 3, 1), LocalDate.of(2019, 3, 31)));
+        LocalDate.of(2019, 3, 1), LocalDate.of(2019, 3, 31)));
+
+    assertEquals(new Long(28), stockCardAggregate.getStockoutDays(
+        LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 28)));
+    assertEquals(new Long(29), stockCardAggregate.getStockoutDays(
+        LocalDate.of(2019, 2, 1), LocalDate.of(2019, 3, 1)));
+    assertEquals(new Long(29), stockCardAggregate.getStockoutDays(
+        LocalDate.of(2020, 2, 1), LocalDate.of(2020, 2, 29)));
+    assertEquals(new Long(60), stockCardAggregate.getStockoutDays(
+        LocalDate.of(2020, 7, 1), LocalDate.of(2020, 8, 31)));
   }
 
   @Test
