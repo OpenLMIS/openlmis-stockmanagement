@@ -45,7 +45,7 @@ public class LotByCodeDeferredLoader
       deferredObjects.remove(lot.getLotCode()).set(lot);
     }
 
-    if (deferredObjects.size() > 0) {
+    if (!deferredObjects.isEmpty()) {
       throw new ValidationMessageException(new Message(MessageKeys.ERROR_LOTS_NOT_FOUND,
           String.join(", ", deferredObjects.keySet())));
     }

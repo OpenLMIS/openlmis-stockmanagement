@@ -44,7 +44,7 @@ public class OrderableByCodeDeferredLoader
       deferredObjects.remove(orderable.getProductCode()).set(orderable);
     }
 
-    if (deferredObjects.size() > 0) {
+    if (!deferredObjects.isEmpty()) {
       throw new ValidationMessageException(new Message(MessageKeys.ERROR_ORDERABLES_NOT_FOUND,
           String.join(", ", deferredObjects.keySet())));
     }

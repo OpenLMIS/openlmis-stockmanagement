@@ -46,7 +46,7 @@ public class ReasonByNameDeferredLoader
       deferredObjects.remove(reason.getName()).set(StockCardLineItemReasonDto.newInstance(reason));
     }
 
-    if (deferredObjects.size() > 0) {
+    if (!deferredObjects.isEmpty()) {
       throw new ValidationMessageException(new Message(MessageKeys.ERROR_REASONS_NOT_FOUND,
           String.join(", ", deferredObjects.keySet())));
     }
