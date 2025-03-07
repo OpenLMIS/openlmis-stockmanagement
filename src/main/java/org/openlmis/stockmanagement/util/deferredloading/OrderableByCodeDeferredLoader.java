@@ -16,37 +16,42 @@
 package org.openlmis.stockmanagement.util.deferredloading;
 
 import java.util.List;
-import java.util.UUID;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.i18n.MessageKeys;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
+import org.openlmis.stockmanagement.util.Message;
 
-public class OrderableDeferredLoader
-    extends DeferredLoader<OrderableDto, UUID, OrderableDeferredLoader.Handle> {
+public class OrderableByCodeDeferredLoader
+    extends DeferredLoader<OrderableDto, String, OrderableByCodeDeferredLoader.Handle> {
   private OrderableReferenceDataService orderableReferenceDataService;
 
-  public OrderableDeferredLoader(OrderableReferenceDataService orderableReferenceDataService) {
-    this.orderableReferenceDataService = orderableReferenceDataService;
+  public OrderableByCodeDeferredLoader(OrderableReferenceDataService orderableReferenceService) {
+    this.orderableReferenceDataService = orderableReferenceService;
   }
 
   @Override
-  protected Handle newHandle(UUID key) {
+  protected Handle newHandle(String key) {
     return new Handle(key);
   }
 
   @Override
   public void loadDeferredObjects() {
     final List<OrderableDto> allDeferredOrderables =
-        orderableReferenceDataService.findByIds(deferredObjects.keySet());
+        orderableReferenceDataService.findByExactCodes(deferredObjects.keySet());
 
     for (OrderableDto orderable : allDeferredOrderables) {
-      deferredObjects.get(orderable.getId()).set(orderable);
+      deferredObjects.remove(orderable.getProductCode()).set(orderable);
     }
 
-    deferredObjects.clear();
+    if (!deferredObjects.isEmpty()) {
+      throw new ValidationMessageException(new Message(MessageKeys.ERROR_ORDERABLES_NOT_FOUND,
+          String.join(", ", deferredObjects.keySet())));
+    }
   }
 
-  public static class Handle extends DeferredObject<OrderableDto, UUID> {
-    public Handle(UUID objectKey) {
+  public static class Handle extends DeferredObject<OrderableDto, String> {
+    public Handle(String objectKey) {
       super(objectKey);
     }
   }

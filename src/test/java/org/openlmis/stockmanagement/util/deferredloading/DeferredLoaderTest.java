@@ -29,19 +29,22 @@ public class DeferredLoaderTest {
 
   @Test
   public void shouldReturnNullIfNullKey() {
-    final DeferredLoader<String, String> loader = new TestDeferredLoader();
+    final DeferredLoader<String, String, DeferredObject<String, String>> loader =
+        new TestDeferredLoader();
     assertNull(loader.deferredLoad(null));
   }
 
   @Test
   public void shouldReturnTheSameHandlerForTheSameKey() {
-    final DeferredLoader<String, String> loader = new TestDeferredLoader();
+    final DeferredLoader<String, String, DeferredObject<String, String>> loader =
+        new TestDeferredLoader();
     final String sameKey = "abc321";
 
     assertSame(loader.deferredLoad(sameKey), loader.deferredLoad(sameKey));
   }
 
-  private static final class TestDeferredLoader extends DeferredLoader<String, String> {
+  private static final class TestDeferredLoader
+      extends DeferredLoader<String, String, DeferredObject<String, String>> {
 
     TestDeferredLoader() {
       super();
@@ -49,6 +52,12 @@ public class DeferredLoaderTest {
 
     TestDeferredLoader(Map<String, DeferredObject<String, String>> deferredObjects) {
       super(deferredObjects);
+    }
+
+    @Override
+    protected DeferredObject<String, String> newHandle(String key) {
+      return new DeferredObject<String, String>(key) {
+      };
     }
 
     @Override

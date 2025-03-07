@@ -4,8 +4,10 @@
 **Requires referencedata:15.3.0 or later**
 
 Improvements:
-* [OE-86](https://openlmis.atlassian.net/browse/OE-86): Added /api/public/stockCardSummaries endpoint which is an
- an equivalent of /api/v2/stockCardSummaries service tailored for external integrations
+* [OE-86](https://openlmis.atlassian.net/browse/OE-86): Added /api/public/stockCardSummaries endpoint which is
+ an equivalent of /api/v2/stockCardSummaries endpoint tailored for external integrations
+* [OE-87](https://openlmis.atlassian.net/browse/OE-87): Added /api/public/stockEvents endpoint which is 
+ an equivalent of /api/stockEvents endpoint tailored for external integrations
 
 5.1.12 / 19.11.2024
 ==================

@@ -87,4 +87,16 @@ public class LotReferenceDataService extends BaseReferenceDataService<LotDto> {
         ? Collections.emptyList()
         : getPage(RequestParameters.init().set("id", ids)).getContent();
   }
+
+  /**
+   * Finds lot by their exact codes.
+   *
+   * @param exactCodes exact codes to look for.
+   * @return a page of lots
+   */
+  public List<LotDto> findByExactCodes(Collection<String> exactCodes) {
+    return CollectionUtils.isEmpty(exactCodes)
+        ? Collections.emptyList()
+        : getPage(RequestParameters.init().set("exactCode", exactCodes)).getContent();
+  }
 }

@@ -13,49 +13,26 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.stockmanagement.domain.event;
+package org.openlmis.stockmanagement.web.external.stockevents;
 
-import static javax.persistence.CascadeType.ALL;
-
-import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.UUID;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
-import org.openlmis.stockmanagement.domain.BaseEntity;
 
-@Entity
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "stock_events", schema = "stockmanagement")
-public class StockEvent extends BaseEntity {
-
-  @Column(nullable = false)
-  private UUID facilityId;
-  @Column(nullable = false)
-  private UUID programId;
-
-  @Column
-  private UUID userId;
-
-  @Column(nullable = false, columnDefinition = "timestamp")
-  private ZonedDateTime processedDate;
-
-  @Column(nullable = true, columnDefinition = "boolean default true")
-  private boolean isActive;
-
+@ToString
+@EqualsAndHashCode
+@Getter
+@Setter
+public final class StockEventExternalDto {
+  private String facility;
+  private String program;
   private String signature;
-
   private String documentNumber;
-
-  @ToString.Exclude
-  @OneToMany(cascade = ALL, mappedBy = "stockEvent")
-  private List<StockEventLineItem> lineItems;
+  private List<StockEventLineItemExternalDto> items;
 }

@@ -40,11 +40,9 @@ import org.openlmis.stockmanagement.dto.referencedata.ApprovedProductDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableFulfillDto;
-import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
-import org.openlmis.stockmanagement.util.deferredloading.DeferredObject;
 import org.openlmis.stockmanagement.util.deferredloading.LotDeferredLoader;
 import org.openlmis.stockmanagement.util.deferredloading.OrderableDeferredLoader;
 import org.openlmis.stockmanagement.util.deferredloading.ProgramDeferredLoader;
@@ -177,8 +175,8 @@ public class StockCardSummariesExternalDtoBuilder {
 
   @AllArgsConstructor
   private static class DeferredSummary {
-    private final DeferredObject<LotDto, UUID> lot;
-    private final DeferredObject<OrderableDto, UUID> orderable;
+    private final LotDeferredLoader.Handle lot;
+    private final OrderableDeferredLoader.Handle orderable;
     @Getter
     private final StockCard stockCard;
 
@@ -194,8 +192,8 @@ public class StockCardSummariesExternalDtoBuilder {
   @AllArgsConstructor
   @Getter
   private static class DeferredStockCardsSummary {
-    private final DeferredObject<ProgramDto, UUID> program;
-    private final DeferredObject<OrderableDto, UUID> orderable;
+    private final ProgramDeferredLoader.Handle program;
+    private final OrderableDeferredLoader.Handle orderable;
     private final Set<DeferredSummary> stockCards;
   }
 
@@ -250,15 +248,15 @@ public class StockCardSummariesExternalDtoBuilder {
       return stockCardByProduct.get(id);
     }
 
-    DeferredObject<LotDto, UUID> deferredLot(UUID id) {
+    LotDeferredLoader.Handle deferredLot(UUID id) {
       return deferredLoaders.getLotLoader().deferredLoad(id);
     }
 
-    DeferredObject<OrderableDto, UUID> deferredOrderable(UUID id) {
+    OrderableDeferredLoader.Handle deferredOrderable(UUID id) {
       return deferredLoaders.getOrderableLoader().deferredLoad(id);
     }
 
-    DeferredObject<ProgramDto, UUID> deferredProgram(UUID id) {
+    ProgramDeferredLoader.Handle deferredProgram(UUID id) {
       return deferredLoaders.getProgramLoader().deferredLoad(id);
     }
   }

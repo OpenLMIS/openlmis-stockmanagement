@@ -28,7 +28,7 @@ import java.util.function.Supplier;
  * @param <D> the type of deferred object
  * @param <K> the unique object key
  */
-public class DeferredObject<D, K> implements Supplier<D> {
+class DeferredObject<D, K> implements Supplier<D> {
   private boolean initiated;
   private D value;
   private final K objectKey;
