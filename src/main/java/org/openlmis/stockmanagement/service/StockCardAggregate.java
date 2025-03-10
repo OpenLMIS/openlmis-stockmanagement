@@ -15,15 +15,12 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 import java.time.LocalDate;
-import java.time.Month;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -43,6 +40,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
+import org.openlmis.stockmanagement.util.Year360Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,7 +136,7 @@ public class StockCardAggregate {
         stockOutDays = 0L;
       } else if (!result.getValue()
               || (result.getKey() == 0 && beginningBalance == 0)) {
-        stockOutDays = getDaysBetween(startDate, endDate);
+        stockOutDays = Year360Utils.getDaysBetweenUs(startDate, endDate.plusDays(1));
       } else {
         Map<LocalDate, LocalDate> stockoutPeriods = getStockoutPeriods(stockOnHands, endDate);
         stockOutDays = calculateStockoutDays(stockoutPeriods,
@@ -170,32 +168,6 @@ public class StockCardAggregate {
       }
     }
     return new ImmutablePair<>(sumOfStockOnHandDuringPeriod, wasAnySohChangesInPeriod);
-  }
-
-  private long getDaysBetween(LocalDate startDate, LocalDate endDate) {
-    // According to OLMIS project specification, months are counted as a maximum of 30 days.
-    long totalDays = 0;
-    LocalDate current = startDate;
-
-    while (!current.isAfter(endDate)) {
-      LocalDate nextMonth = current.plusMonths(1);
-
-      if (nextMonth.isAfter(endDate)) {
-        long daysBetween = ChronoUnit.DAYS.between(current, endDate) + 1;
-        totalDays += daysBetween <= 30 ? daysBetween : 30; // Cap at 30 days
-        break;
-      }
-
-      if (current.getMonth() == Month.FEBRUARY) {
-        totalDays += current.lengthOfMonth();
-      } else {
-        totalDays += 30;
-      }
-
-      current = nextMonth;
-    }
-
-    return totalDays;
   }
 
   private List<ImmutablePair<String, Integer>> calculateTagValuesForStockAdjustments(
@@ -266,13 +238,12 @@ public class StockCardAggregate {
         .filter(key -> isBeforeOrEqual(stockOutDaysMap.get(key), startDate))
         .peek(key ->
             LOGGER.debug("filtered stock out days from {} to {}", key, stockOutDaysMap.get(key)))
-        .mapToLong(key -> DAYS.between(
-            !isBeforeOrEqual(key, startDate)
-                ? startDate
-                : key,
-            !isAfterOrEqual(stockOutDaysMap.get(key), endDate)
-                ? endDate.plusDays(1)
-                : stockOutDaysMap.get(key)))
+        .mapToLong(key ->
+                Year360Utils.getDaysBetweenUs(!isBeforeOrEqual(key, startDate)
+                    ? startDate
+                    : key, !isAfterOrEqual(stockOutDaysMap.get(key), endDate)
+                    ? endDate.plusDays(1)
+                    : stockOutDaysMap.get(key)))
         .sum();
   }
 
