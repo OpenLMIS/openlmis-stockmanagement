@@ -15,7 +15,6 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
@@ -38,6 +37,7 @@ import org.openlmis.stockmanagement.testutils.StockCardDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
 import org.openlmis.stockmanagement.testutils.ToStringTestUtils;
+import org.openlmis.stockmanagement.util.Year360Utils;
 
 @SuppressWarnings("PMD.TooManyMethods")
 public class StockCardAggregateTest {
@@ -233,24 +233,34 @@ public class StockCardAggregateTest {
 
     assertEquals(new Long(16), stockCardAggregate.getStockoutDays(
         LocalDate.of(2018, 6, 1), LocalDate.of(2018, 6, 30)));
-
     assertEquals(new Long(30), stockCardAggregate.getStockoutDays(
         LocalDate.of(2018, 7, 1), LocalDate.of(2018, 7, 31)));
-
     assertEquals(new Long(30), stockCardAggregate.getStockoutDays(
         LocalDate.of(2018, 8, 1), LocalDate.of(2018, 8, 31)));
-
-    assertEquals(new Long(29), stockCardAggregate.getStockoutDays(
+    assertEquals(new Long(30), stockCardAggregate.getStockoutDays(
         LocalDate.of(2018, 9, 1), LocalDate.of(2018, 9, 30)));
 
     assertEquals(new Long(0), stockCardAggregate.getStockoutDays(
-            LocalDate.of(2018, 11, 1), LocalDate.of(2018, 11, 30)));
-
+        LocalDate.of(2018, 11, 1), LocalDate.of(2018, 11, 30)));
     assertEquals(new Long(16), stockCardAggregate.getStockoutDays(
-            LocalDate.of(2018, 12, 1), LocalDate.of(2018, 12, 31)));
-
+        LocalDate.of(2018, 12, 1), LocalDate.of(2018, 12, 31)));
     assertEquals(new Long(30), stockCardAggregate.getStockoutDays(
-            LocalDate.of(2019, 3, 1), LocalDate.of(2019, 3, 31)));
+        LocalDate.of(2019, 3, 1), LocalDate.of(2019, 3, 31)));
+
+    // Day in month to specific not last day in month
+    assertEquals(new Long(27), stockCardAggregate.getStockoutDays(
+        LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 27)));
+    // Day in month to the last day in month
+    assertEquals(new Long(30), stockCardAggregate.getStockoutDays(
+        LocalDate.of(2019, 2, 1), LocalDate.of(2019, 2, 28)));
+    // Day in month to the first day on the next month (inclusive!)
+    assertEquals(new Long(31), stockCardAggregate.getStockoutDays(
+        LocalDate.of(2019, 2, 1), LocalDate.of(2019, 3, 1)));
+    // Day in month to the last day in month with leap year
+    assertEquals(new Long(30), stockCardAggregate.getStockoutDays(
+        LocalDate.of(2020, 2, 1), LocalDate.of(2020, 2, 29)));
+    assertEquals(new Long(60), stockCardAggregate.getStockoutDays(
+        LocalDate.of(2020, 7, 1), LocalDate.of(2020, 8, 31)));
   }
 
   @Test
@@ -264,10 +274,10 @@ public class StockCardAggregateTest {
         .build());
 
     // calculated stockout days from first stockCard 2018-05-10 to the last one 2019-11-15
-    long stockoutDaysBeforeDate = 474;
+    long stockoutDaysBeforeDate = 467;
 
     assertEquals(
-        new Long(stockoutDaysBeforeDate + DAYS.between(date, LocalDate.now())),
+        new Long(stockoutDaysBeforeDate + Year360Utils.getDaysBetweenUs(date, LocalDate.now())),
         stockCardAggregate.getStockoutDays(null, null));
   }
 
