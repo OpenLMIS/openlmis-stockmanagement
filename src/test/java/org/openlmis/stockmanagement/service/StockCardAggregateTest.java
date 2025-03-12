@@ -165,6 +165,26 @@ public class StockCardAggregateTest {
             .withStockCard(stockCard6)
             .withOccurredDate(LocalDate.of(2018, 12, 15))
             .withStockOnHand(0)
+            .build(),
+        new CalculatedStockOnHandDataBuilder()
+            .withStockCard(stockCard6)
+            .withOccurredDate(LocalDate.of(2024, 1, 13))
+            .withStockOnHand(100)
+            .build(),
+        new CalculatedStockOnHandDataBuilder()
+            .withStockCard(stockCard6)
+            .withOccurredDate(LocalDate.of(2024, 1, 19))
+            .withStockOnHand(0)
+            .build(),
+        new CalculatedStockOnHandDataBuilder()
+            .withStockCard(stockCard6)
+            .withOccurredDate(LocalDate.of(2024, 4, 13))
+            .withStockOnHand(100)
+            .build(),
+        new CalculatedStockOnHandDataBuilder()
+            .withStockCard(stockCard6)
+            .withOccurredDate(LocalDate.of(2024, 4, 19))
+            .withStockOnHand(0)
             .build()
     ));
 
@@ -261,6 +281,13 @@ public class StockCardAggregateTest {
         LocalDate.of(2020, 2, 1), LocalDate.of(2020, 2, 29)));
     assertEquals(new Long(60), stockCardAggregate.getStockoutDays(
         LocalDate.of(2020, 7, 1), LocalDate.of(2020, 8, 31)));
+
+    // Received at 13th - 13th the first day with stock, Issued at 19th - 18th the last day with
+    // stock. [1st,13th) = 12 day of stock out, [19th, 1st) = 12
+    assertEquals(new Long(24), stockCardAggregate.getStockoutDays(
+            LocalDate.of(2024, 4, 1), LocalDate.of(2024, 4, 30)));
+    assertEquals(new Long(24), stockCardAggregate.getStockoutDays(
+            LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31)));
   }
 
   @Test
@@ -274,7 +301,7 @@ public class StockCardAggregateTest {
         .build());
 
     // calculated stockout days from first stockCard 2018-05-10 to the last one 2019-11-15
-    long stockoutDaysBeforeDate = 467;
+    long stockoutDaysBeforeDate = 456;
 
     assertEquals(
         new Long(stockoutDaysBeforeDate + Year360Utils.getDaysBetweenUs(date, LocalDate.now())),
