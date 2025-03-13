@@ -22,6 +22,7 @@ import org.openlmis.stockmanagement.extension.point.ExtensionPointId;
 import org.openlmis.stockmanagement.extension.point.FreeTextValidator;
 import org.openlmis.stockmanagement.extension.point.UnpackKitValidator;
 import org.openlmis.stockmanagement.validators.ApprovedOrderableValidator;
+import org.openlmis.stockmanagement.validators.DuplicateTransactionValidator;
 import org.openlmis.stockmanagement.validators.LotValidator;
 import org.openlmis.stockmanagement.validators.MandatoryFieldsValidator;
 import org.openlmis.stockmanagement.validators.OrderableLotDuplicationValidator;
@@ -43,6 +44,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class StockEventValidationsService {
 
+  @Autowired
+  private DuplicateTransactionValidator duplicateTransactionValidator;
   @Autowired
   private ApprovedOrderableValidator approvedOrderableValidator;
 
@@ -85,6 +88,7 @@ public class StockEventValidationsService {
    * @param stockEventDto the event to be validated.
    */
   public void validate(StockEventDto stockEventDto) {
+    duplicateTransactionValidator.validate(stockEventDto);
     approvedOrderableValidator.validate(stockEventDto);
     lotValidator.validate(stockEventDto);
     mandatoryFieldsValidator.validate(stockEventDto);
