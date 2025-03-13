@@ -223,8 +223,9 @@ public class StockCardAggregate {
     }
 
     if (null != stockOutStartDate) {
-      LOGGER.debug("stock out days from {} to {}", null == endDate ? LocalDate.now() : endDate);
-      stockOutDaysMap.put(stockOutStartDate, null == endDate ? LocalDate.now() : endDate);
+      // Converts inclusiveEndDate to exclusiveEndDate
+      stockOutDaysMap.put(stockOutStartDate,
+          null == endDate ? LocalDate.now().plusDays(1) : endDate.plusDays(1));
     }
 
     return stockOutDaysMap;
