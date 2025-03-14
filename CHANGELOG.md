@@ -4,10 +4,22 @@
 **Requires referencedata:15.3.0 or later**
 
 Improvements:
-* [OE-86](https://openlmis.atlassian.net/browse/OE-86): Added /api/public/stockCardSummaries endpoint which is
- an equivalent of /api/v2/stockCardSummaries endpoint tailored for external integrations
-* [OE-87](https://openlmis.atlassian.net/browse/OE-87): Added /api/public/stockEvents endpoint which is 
- an equivalent of /api/stockEvents endpoint tailored for external integrations
+* [OE-86](https://openlmis.atlassian.net/browse/OE-86): Added `/api/public/stockCardSummaries` endpoint
+  * Equivalent to `/api/v2/stockCardSummaries`, tailored for external integrations
+* [OE-87](https://openlmis.atlassian.net/browse/OE-87): Added `/api/public/stockEvents` endpoint
+  * Equivalent to `/api/stockEvents`, tailored for external integrations
+
+Bug Fixes:
+* [OLMIS-8071](https://openlmis.atlassian.net/browse/OLMIS-8071): Stock-out days calculations (360-day calendar)
+  * Fixed issue where a full month of stock-out was incorrectly counted as 29 days instead of 30
+  * `endDate` taken from the period is now converted to an exclusive limit
+    * Months with 31 days return **30** stock-out days when no stock is available
+    * Months with 30 days return **30** stock-out days when no stock is available
+    * Stock movements within a period:
+      * Receiving stock on the **13th** and issuing on the **19th** in a **31-day month** results in **24** stock-out days
+      * Receiving stock on the **13th** and issuing on the **19th** in a **30-day month** results in **24** stock-out days
+    * A full **February** without stock is now counted as **30** days
+
 
 5.1.12 / 19.11.2024
 ==================
