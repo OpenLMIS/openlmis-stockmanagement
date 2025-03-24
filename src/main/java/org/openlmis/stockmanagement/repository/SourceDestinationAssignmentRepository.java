@@ -29,17 +29,17 @@ import org.springframework.data.repository.query.Param;
 public interface SourceDestinationAssignmentRepository<T extends SourceDestinationAssignment>
     extends JpaRepository<T, UUID> {
 
-  List<T> findByProgramIdAndFacilityTypeId(
-          @Param("programId") UUID programId, @Param("facilityTypeId") UUID facilityTypeId,
-          Pageable pageable);
-
-  List<T> findByProgramIdAndFacilityTypeIdAndNodeReferenceIdIn(
-      @Param("programId") UUID programId, @Param("facilityTypeId") UUID facilityTypeId,
-      @Param("referenceIds") Collection<UUID> referenceIds, Pageable pageable);
-
   T findByProgramIdAndFacilityTypeIdAndNodeId(
       @Param("programId") UUID programId, @Param("facilityTypeId") UUID facilityTypeId,
       @Param("nodeId") UUID nodeId);
+
+  List<T> findByProgramIdInAndFacilityTypeId(
+      @Param("programIds") List<UUID> programIds, @Param("facilityTypeId") UUID facilityTypeId,
+      Pageable pageable);
+
+  List<T> findByProgramIdInAndFacilityTypeIdAndNodeReferenceIdIn(
+      @Param("programIds") List<UUID> programIds, @Param("facilityTypeId") UUID facilityTypeId,
+      @Param("referenceIds") Collection<UUID> referenceIds, Pageable pageable);
 
   Page<T> findByNodeReferenceIdIn(@Param("referenceIds") Collection<UUID> referenceIds,
                                   Pageable pageable);

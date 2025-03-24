@@ -19,6 +19,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import static org.slf4j.ext.XLoggerFactory.getXLogger;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -214,16 +215,16 @@ public class StockEventProcessContextBuilder {
 
     profiler.start("CREATE_LAZY_SOURCES");
     Supplier<List<ValidSourceAssignment>> sourcesSupplier = () -> validSourceAssignmentRepository
-        .findByProgramIdAndFacilityTypeId(
-                eventDto.getProgramId(), context.getFacilityTypeId(), Pageable.unpaged());
+        .findByProgramIdInAndFacilityTypeId(Collections.singletonList(eventDto.getProgramId()),
+            context.getFacilityTypeId(), Pageable.unpaged());
     LazyList<ValidSourceAssignment> sources = new LazyList<>(sourcesSupplier);
     context.setSources(sources);
 
     profiler.start("CREATE_LAZY_DESTINATIONS");
     Supplier<List<ValidDestinationAssignment>> destinationsSupplier = () ->
         validDestinationAssignmentRepository
-        .findByProgramIdAndFacilityTypeId(
-                eventDto.getProgramId(), context.getFacilityTypeId(), Pageable.unpaged());
+        .findByProgramIdInAndFacilityTypeId(Collections.singletonList(eventDto.getProgramId()),
+            context.getFacilityTypeId(), Pageable.unpaged());
     LazyList<ValidDestinationAssignment> destinations = new LazyList<>(destinationsSupplier);
     context.setDestinations(destinations);
 
