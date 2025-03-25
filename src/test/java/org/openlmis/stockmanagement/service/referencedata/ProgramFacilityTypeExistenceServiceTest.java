@@ -17,8 +17,12 @@ package org.openlmis.stockmanagement.service.referencedata;
 
 import static java.util.UUID.randomUUID;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
@@ -74,5 +78,17 @@ public class ProgramFacilityTypeExistenceServiceTest {
     UUID programId = randomUUID();
 
     programFacilityTypeExistenceService.checkProgramAndFacilityTypeExist(programId, facilityTypeId);
+  }
+
+  @Test
+  public void shouldCheckProgramsAndFacilityTypeExistenceThreeTimes() {
+    List<UUID> programIds = Arrays.asList(randomUUID(), randomUUID(), randomUUID());
+    UUID facilityTypeId = randomUUID();
+
+    programFacilityTypeExistenceService.checkProgramsAndFacilityTypeExist(
+        programIds, facilityTypeId);
+
+    verify(programRefDataService, times(3)).findOne(any(UUID.class));
+    verify(facilityTypeRefDataService, times(3)).findOne(any(UUID.class));
   }
 }

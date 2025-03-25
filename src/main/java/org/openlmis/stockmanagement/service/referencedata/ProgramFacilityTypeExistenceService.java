@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.service.referencedata;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_FACILITY_TYPE_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROGRAM_NOT_FOUND;
 
+import java.util.List;
 import java.util.UUID;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityTypeDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
@@ -38,7 +39,7 @@ public class ProgramFacilityTypeExistenceService {
   /**
    * Check program and facility type existence.
    *
-   * @param programId      program id.
+   * @param programId program id.
    * @param facilityTypeId facility type id.
    */
   public void checkProgramAndFacilityTypeExist(UUID programId, UUID facilityTypeId) {
@@ -51,6 +52,18 @@ public class ProgramFacilityTypeExistenceService {
     if (facilityTypeDto == null) {
       throw new ValidationMessageException(
           new Message(ERROR_FACILITY_TYPE_NOT_FOUND, facilityTypeId.toString()));
+    }
+  }
+
+  /**
+   * Check programs and facility type existence.
+   *
+   * @param programIds program ids.
+   * @param facilityTypeId facility type id.
+   */
+  public void checkProgramsAndFacilityTypeExist(List<UUID> programIds, UUID facilityTypeId) {
+    for (UUID programId : programIds) {
+      checkProgramAndFacilityTypeExist(programId, facilityTypeId);
     }
   }
 }
