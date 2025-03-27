@@ -8,6 +8,7 @@ Improvements:
   * Equivalent to `/api/v2/stockCardSummaries`, tailored for external integrations
 * [OE-87](https://openlmis.atlassian.net/browse/OE-87): Added `/api/public/stockEvents` endpoint
   * Equivalent to `/api/stockEvents`, tailored for external integrations
+* [OLMIS-8135](https://openlmis.atlassian.net/browse/OLMIS-8135): Fetching valid sources and destinations now supports a list of programs as a parameter
 
 Bug Fixes:
 * [OLMIS-8071](https://openlmis.atlassian.net/browse/OLMIS-8071): Stock-out days calculations (360-day calendar)
