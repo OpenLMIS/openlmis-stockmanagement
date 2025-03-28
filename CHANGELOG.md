@@ -1,4 +1,4 @@
-5.2.0 / wip
+5.2.0 / 2025-03-31
 ==================
 
 **Requires referencedata:15.3.0 or later**
@@ -9,6 +9,7 @@ Improvements:
 * [OE-87](https://openlmis.atlassian.net/browse/OE-87): Added `/api/public/stockEvents` endpoint
   * Equivalent to `/api/stockEvents`, tailored for external integrations
 * [OLMIS-8135](https://openlmis.atlassian.net/browse/OLMIS-8135): Fetching valid sources and destinations now supports a list of programs as a parameter
+* Minor coverage updates and code analysis improvements.
 
 Bug Fixes:
 * [OLMIS-8071](https://openlmis.atlassian.net/browse/OLMIS-8071): Stock-out days calculations (360-day calendar)
@@ -20,7 +21,6 @@ Bug Fixes:
       * Receiving stock on the **13th** and issuing on the **19th** in a **31-day month** results in **24** stock-out days
       * Receiving stock on the **13th** and issuing on the **19th** in a **30-day month** results in **24** stock-out days
     * A full **February** without stock is now counted as **30** days
-
 
 5.1.12 / 19.11.2024
 ==================
