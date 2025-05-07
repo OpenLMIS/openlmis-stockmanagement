@@ -15,7 +15,7 @@
 
 package org.openlmis.stockmanagement;
 
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;

@@ -19,7 +19,7 @@ import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.ValidDestinationAssignmentDataBuilder.createDestination;
 import static org.openlmis.stockmanagement.testutils.ValidSourceAssignmentDataBuilder.createSource;
@@ -87,7 +87,7 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
         Collections.singletonList(program), facility, null, pageRequest))
         .thenReturn(Pagination.getPage(singletonList(sourceDestination)));
 
-    verifyZeroInteractions(permissionService);
+    verifyNoInteractions(permissionService);
 
     //1. perform valid destinations
     performSourcesOrDestinations(
@@ -116,7 +116,7 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
         Collections.singletonList(null), null, null, pageRequest))
             .thenReturn(Pagination.getPage(singletonList(destinationAssignmentDto)));
 
-    verifyZeroInteractions(permissionService);
+    verifyNoInteractions(permissionService);
 
     //1. perform valid destinations
     performSourcesOrDestinations(

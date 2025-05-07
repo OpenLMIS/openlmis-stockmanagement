@@ -21,8 +21,8 @@ import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyListOf;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -48,7 +48,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.domain.sourcedestination.Organization;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAssignment;
@@ -384,7 +384,7 @@ public class SourceDestinationBaseServiceTest {
             Collections.singletonList(programId), facilityTypeId, Pageable.unpaged()))
         .thenReturn(validDestinationAssignments);
 
-    when(facilityReferenceDataService.findByIds(anyListOf(UUID.class))).thenReturn(
+    when(facilityReferenceDataService.findByIds(anyList())).thenReturn(
         Collections.singletonMap(facilityId, facilityDto));
 
     //when
@@ -514,7 +514,7 @@ public class SourceDestinationBaseServiceTest {
             Collections.singletonList(programId), facilityTypeId, Pageable.unpaged()))
         .thenReturn(validSourceAssignments);
 
-    when(facilityReferenceDataService.findByIds(anyListOf(UUID.class))).thenReturn(
+    when(facilityReferenceDataService.findByIds(anyList())).thenReturn(
         Collections.singletonMap(facilityId, facilityDto));
 
     //when
@@ -646,7 +646,7 @@ public class SourceDestinationBaseServiceTest {
     refDataFacilityDto.setGeographicZone(generateGeographicZone(randomUUID(), regionGeoLevelId,
         randomUUID(), randomUUID(), regionGeoZoneId, randomUUID()));
 
-    when(facilityReferenceDataService.findByIds(anyListOf(UUID.class))).thenReturn(
+    when(facilityReferenceDataService.findByIds(anyList())).thenReturn(
         Collections.singletonMap(refDataFacilityId, refDataFacilityDto));
   }
 

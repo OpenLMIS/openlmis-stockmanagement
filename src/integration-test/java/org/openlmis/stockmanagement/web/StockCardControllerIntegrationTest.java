@@ -17,8 +17,8 @@ package org.openlmis.stockmanagement.web;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -49,7 +49,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.ResultActions;
 
-
 //the name of this controller test is intentional wrong: cardz insteads of cards
 //because there is a problem with "spring security test" that seems to be relates
 //with test execution order, naming it cardz will put it behind and solve the problem
@@ -78,9 +77,8 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
     when(stockCardService.findStockCardById(any(UUID.class))).thenReturn(null);
 
     //when
-    ResultActions resultActions = mvc.perform(
-        get(API_STOCK_CARDS + UUID.randomUUID().toString())
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
+    ResultActions resultActions = mvc.perform(get(API_STOCK_CARDS + UUID.randomUUID().toString())
+        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
 
     //then
     resultActions.andExpect(status().isNotFound());
@@ -96,44 +94,29 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
 
     //when
     ResultActions resultActions = mvc.perform(
-        get(API_STOCK_CARDS + stockCardId.toString())
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
+        get(API_STOCK_CARDS + stockCardId.toString()).param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
 
     //then
-    resultActions
-        .andDo(print())
-        .andExpect(status().isOk())
-        .andExpect(content()
-            .json("{"
-                + "'stockOnHand':1,"
-                + "'facility':{'name':'HC01'},"
-                + "'program':{'name':'HIV'},"
-                + "'orderable':{'productCode':'ABC01'},"
-                + "'lineItems':["
-                + "{'occurredDate':'2017-02-13',"
-                + "'source':{'name':'HF1'},"
-                + "'destination':null,"
-                + "'reason':{'name':'Transfer In','reasonCategory':'ADJUSTMENT',"
-                + "'reasonType':'CREDIT'},"
-                + "'quantity':1, 'stockOnHand':1}]}"));
+    resultActions.andDo(print()).andExpect(status().isOk()).andExpect(content().json(
+        "{" + "'stockOnHand':1," + "'facility':{'name':'HC01'}," + "'program':{'name':'HIV'},"
+            + "'orderable':{'productCode':'ABC01'}," + "'lineItems':["
+            + "{'occurredDate':'2017-02-13'," + "'source':{'name':'HF1'}," + "'destination':null,"
+            + "'reason':{'name':'Transfer In','reasonCategory':'ADJUSTMENT',"
+            + "'reasonType':'CREDIT'}," + "'quantity':1, 'stockOnHand':1}]}"));
   }
 
   @Test
-  public void shouldReturn403WhenUserDoesNotHavePermissionToViewCardSummaries()
-      throws Exception {
+  public void shouldReturn403WhenUserDoesNotHavePermissionToViewCardSummaries() throws Exception {
     //given
     UUID programId = UUID.randomUUID();
     UUID facilityId = UUID.randomUUID();
-    doThrow(new
-        PermissionMessageException(new Message("no permission"))).when(permissionService)
+    doThrow(new PermissionMessageException(new Message("no permission"))).when(permissionService)
         .canViewStockCard(programId, facilityId);
 
     //when
     ResultActions resultActions = mvc.perform(
-        get(API_STOCK_CARD_SUMMARIES)
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param("program", programId.toString())
-            .param("facility", facilityId.toString()));
+        get(API_STOCK_CARD_SUMMARIES).param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+            .param("program", programId.toString()).param("facility", facilityId.toString()));
 
     //then
     resultActions.andExpect(status().isForbidden());
@@ -151,15 +134,11 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
         .thenReturn(new PageImpl<>(singletonList(StockCardDtoDataBuilder.createStockCardDto())));
 
     ResultActions resultActions = mvc.perform(
-        get(API_STOCK_CARD_SUMMARIES)
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param("page", "0")
-            .param("size", "20")
-            .param("program", programId.toString())
+        get(API_STOCK_CARD_SUMMARIES).param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE).param("page", "0")
+            .param("size", "20").param("program", programId.toString())
             .param("facility", facilityId.toString()));
 
-    resultActions.andExpect(status().isOk())
-        .andDo(print())
+    resultActions.andExpect(status().isOk()).andDo(print())
         .andExpect(jsonPath("$.content", hasSize(1)));
   }
 
@@ -173,15 +152,12 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
     doReturn(new PageImpl<>(singletonList(StockCardDtoDataBuilder.createStockCardDto())))
         .when(stockCardService).search(ImmutableSet.of(stockCardId1, stockCardId2), pageable);
     ResultActions resultActions = mvc.perform(
-        get(API_STOCK_CARDS)
-            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-            .param(ID, stockCardId1.toString())
-            .param(ID, stockCardId2.toString())
+        get(API_STOCK_CARDS).param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
+            .param(ID, stockCardId1.toString()).param(ID, stockCardId2.toString())
             .param(PAGE, String.valueOf(pageable.getPageNumber()))
             .param(SIZE, String.valueOf(pageable.getPageSize())));
 
-    resultActions.andExpect(status().isOk())
-        .andDo(print())
+    resultActions.andExpect(status().isOk()).andDo(print())
         .andExpect(jsonPath("$.content", hasSize(1)));
   }
 
@@ -197,8 +173,7 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
 
     // then
-    resultActions.andExpect(status().isOk())
-        .andDo(print());
+    resultActions.andExpect(status().isOk()).andDo(print());
   }
 
   @Test

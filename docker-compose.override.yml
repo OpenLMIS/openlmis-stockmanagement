@@ -1,7 +1,7 @@
 version: "2"
 services:
   stockmanagement:
-    image: openlmis/dev:10
+    image: openlmis/dev:11
     ports:
       - "5005:5005"
       - "8080:8080"

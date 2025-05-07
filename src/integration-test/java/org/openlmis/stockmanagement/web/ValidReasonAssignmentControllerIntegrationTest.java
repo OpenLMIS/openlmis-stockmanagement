@@ -18,11 +18,11 @@ package org.openlmis.stockmanagement.web;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Sets;
@@ -91,7 +91,7 @@ public class ValidReasonAssignmentControllerIntegrationTest extends BaseWebInteg
         .extract()
         .as(List.class);
 
-    verifyZeroInteractions(permissionService);
+    verifyNoInteractions(permissionService);
 
     assertThat(response.get(0).get("id"), is(reasonAssignment.getId().toString()));
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(),
@@ -120,7 +120,7 @@ public class ValidReasonAssignmentControllerIntegrationTest extends BaseWebInteg
         .as(List.class);
 
     //then
-    verifyZeroInteractions(permissionService);
+    verifyNoInteractions(permissionService);
 
     assertThat(response.get(0).get("id"), is(reasonAssignment.getId().toString()));
     assertThat(RAML_ASSERT_MESSAGE,
@@ -143,7 +143,7 @@ public class ValidReasonAssignmentControllerIntegrationTest extends BaseWebInteg
         .extract()
         .as(List.class);
 
-    verifyZeroInteractions(permissionService);
+    verifyNoInteractions(permissionService);
 
     assertThat(response.get(0).get("id"), is(reasonAssignment.getId().toString()));
     assertThat(RAML_ASSERT_MESSAGE,

@@ -18,12 +18,13 @@ package org.openlmis.stockmanagement.web.stockcardsummariesv2;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.hasItems;
-import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.openlmis.stockmanagement.web.stockcardsummariesv2.StockCardSummariesV2DtoBuilder.ORDERABLES;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
@@ -120,11 +121,11 @@ public class StockCardSummariesV2DtoBuilderTest {
             .withPath(ORDERABLES)
             .withId(orderable1.getId())
             .build(),
-        asSet(
+        new HashSet<>(Arrays.asList(
             new CanFulfillForMeEntryDtoDataBuilder()
                 .buildWithStockCardAndOrderable(stockCard3a, orderable3),
             new CanFulfillForMeEntryDtoDataBuilder()
-                .buildWithStockCardAndOrderable(stockCard1, orderable1))
+                .buildWithStockCardAndOrderable(stockCard1, orderable1)))
     );
 
     StockCardSummaryV2Dto summary2 = new StockCardSummaryV2Dto(
@@ -132,7 +133,7 @@ public class StockCardSummariesV2DtoBuilderTest {
             .withPath(ORDERABLES)
             .withId(orderable2.getId())
             .build(),
-        asSet(
+        Collections.singleton(
             new CanFulfillForMeEntryDtoDataBuilder()
                 .buildWithStockCardAndOrderable(stockCard1, orderable1))
     );
@@ -142,7 +143,7 @@ public class StockCardSummariesV2DtoBuilderTest {
             .withPath(ORDERABLES)
             .withId(orderable3.getId())
             .build(),
-        asSet(new CanFulfillForMeEntryDtoDataBuilder()
+        Collections.singleton(new CanFulfillForMeEntryDtoDataBuilder()
             .buildWithStockCardAndOrderable(stockCard3a, orderable3))
     );
 
@@ -166,13 +167,13 @@ public class StockCardSummariesV2DtoBuilderTest {
             .withPath(ORDERABLES)
             .withId(orderable1.getId())
             .build(),
-        asSet(
+        new HashSet<>(Arrays.asList(
             new CanFulfillForMeEntryDtoDataBuilder()
                 .buildWithStockCardAndOrderable(stockCard3a, orderable3),
             new CanFulfillForMeEntryDtoDataBuilder()
                 .buildWithStockCardAndOrderable(stockCard3b, orderable3),
             new CanFulfillForMeEntryDtoDataBuilder()
-                .buildWithStockCardAndOrderable(stockCard1, orderable1))
+                .buildWithStockCardAndOrderable(stockCard1, orderable1)))
     );
 
     StockCardSummaryV2Dto summary2 = new StockCardSummaryV2Dto(
@@ -180,7 +181,7 @@ public class StockCardSummariesV2DtoBuilderTest {
             .withPath(ORDERABLES)
             .withId(orderable2.getId())
             .build(),
-        asSet(
+        Collections.singleton(
             new CanFulfillForMeEntryDtoDataBuilder()
                 .buildWithStockCardAndOrderable(stockCard1, orderable1))
     );
@@ -190,11 +191,11 @@ public class StockCardSummariesV2DtoBuilderTest {
             .withPath(ORDERABLES)
             .withId(orderable3.getId())
             .build(),
-        asSet(
+        new HashSet<>(Arrays.asList(
             new CanFulfillForMeEntryDtoDataBuilder()
                 .buildWithStockCardAndOrderable(stockCard3a, orderable3),
             new CanFulfillForMeEntryDtoDataBuilder()
-                .buildWithStockCardAndOrderable(stockCard3b, orderable3)
+                .buildWithStockCardAndOrderable(stockCard3b, orderable3))
         )
     );
 
@@ -217,7 +218,7 @@ public class StockCardSummariesV2DtoBuilderTest {
             .withPath(ORDERABLES)
             .withId(orderable2.getId())
             .build(),
-        asSet(
+        Collections.singleton(
             new CanFulfillForMeEntryDtoDataBuilder()
                 .buildWithStockCardAndOrderable(stockCard1, orderable1))
     );
@@ -227,11 +228,11 @@ public class StockCardSummariesV2DtoBuilderTest {
             .withPath(ORDERABLES)
             .withId(orderable3.getId())
             .build(),
-        asSet(
+        new HashSet<>(Arrays.asList(
             new CanFulfillForMeEntryDtoDataBuilder()
                 .buildWithStockCardAndOrderable(stockCard3a, orderable3),
             new CanFulfillForMeEntryDtoDataBuilder()
-                .buildWithStockCardAndOrderable(stockCard3b, orderable3)
+                .buildWithStockCardAndOrderable(stockCard3b, orderable3))
         )
     );
 
@@ -255,7 +256,7 @@ public class StockCardSummariesV2DtoBuilderTest {
             .withPath(ORDERABLES)
             .withId(orderable3.getId())
             .build(),
-        asSet(new CanFulfillForMeEntryDtoDataBuilder()
+        Collections.singleton(new CanFulfillForMeEntryDtoDataBuilder()
             .buildWithStockCardAndOrderable(stockCard3a, orderable3))
     );
 
@@ -278,7 +279,7 @@ public class StockCardSummariesV2DtoBuilderTest {
             .withPath(ORDERABLES)
             .withId(orderable3.getId())
             .build(),
-        asSet(new CanFulfillForMeEntryDtoDataBuilder()
+        Collections.singleton(new CanFulfillForMeEntryDtoDataBuilder()
             .buildWithStockCardAndOrderable(stockCard3a, orderable3))
     );
 
@@ -287,7 +288,7 @@ public class StockCardSummariesV2DtoBuilderTest {
             .withPath(ORDERABLES)
             .withId(orderable4.getId())
             .build(),
-        asSet()
+        Collections.emptySet()
     );
 
     assertEquals(2, result.size());

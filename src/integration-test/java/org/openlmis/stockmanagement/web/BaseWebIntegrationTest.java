@@ -19,8 +19,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
 import static org.openlmis.stockmanagement.web.utils.WireMockResponses.MOCK_CHECK_RESULT;
 import static org.openlmis.stockmanagement.web.utils.WireMockResponses.MOCK_TOKEN_REQUEST_RESPONSE;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -50,7 +50,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -101,12 +100,11 @@ public abstract class BaseWebIntegrationTest {
     RestAssured.baseURI = BASE_URL;
     RestAssured.port = serverPort;
     RestAssured.config = RestAssuredConfig.config().objectMapperConfig(
-        new ObjectMapperConfig().jackson2ObjectMapperFactory((clazz, charset) -> objectMapper)
-    );
+        new ObjectMapperConfig().jackson2ObjectMapperFactory((clazz, charset) -> objectMapper));
     RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
 
-    RamlDefinition ramlDefinition = RamlLoaders.fromClasspath()
-        .load("api-definition-raml.yaml").ignoringXheaders();
+    RamlDefinition ramlDefinition =
+        RamlLoaders.fromClasspath().load("api-definition-raml.yaml").ignoringXheaders();
 
     restAssured = ramlDefinition.createRestAssured();
   }
@@ -131,15 +129,12 @@ public abstract class BaseWebIntegrationTest {
 
   protected void mockExternalAuthorization() {
     // This mocks the auth check to always return valid admin credentials.
-    wireMockRule.stubFor(post(urlEqualTo("/api/oauth/check_token"))
-        .willReturn(aResponse()
-            .withHeader(CONTENT_TYPE, APPLICATION_JSON)
-            .withBody(MOCK_CHECK_RESULT)));
+    wireMockRule.stubFor(post(urlEqualTo("/api/oauth/check_token")).willReturn(
+        aResponse().withHeader(CONTENT_TYPE, APPLICATION_JSON).withBody(MOCK_CHECK_RESULT)));
 
     // This mocks the auth token request response
     wireMockRule.stubFor(post(urlPathEqualTo("/api/oauth/token?grant_type=client_credentials"))
-        .willReturn(aResponse()
-            .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+        .willReturn(aResponse().withHeader(CONTENT_TYPE, APPLICATION_JSON)
             .withBody(MOCK_TOKEN_REQUEST_RESPONSE)));
 
   }
