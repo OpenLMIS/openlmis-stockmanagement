@@ -205,7 +205,7 @@ sonarqube {
         property "sonar.projectKey", "OpenLMIS_openlmis-stockmanagement"
         property "sonar.organization", "openlmis"
         property "sonar.host.url", "https://sonarcloud.io"
-        property "sonar.java.source", "15"
+        property "sonar.java.source", "17"
         property "sonar.coverage.jacoco.xmlReportPaths", "./report.xml"
     }
 }
