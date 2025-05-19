@@ -56,7 +56,7 @@ dependencies {
     compile 'org.openlmis:openlmis-service-util:3.0.0'
 
     compile "org.projectlombok:lombok"
-    compile "org.postgresql:postgresql:42.0.0"
+    compile "org.postgresql:postgresql:42.6.2"
     compile "com.google.guava:guava:18.0"
     compile 'org.webjars.npm:api-console:3.0.17'
     compile 'org.apache.commons:commons-lang3'
