@@ -5,88 +5,100 @@ buildscript {
 }
 
 plugins {
+    id 'java'
+    id 'idea'
+    id 'checkstyle'
+    id 'jacoco'
+    id 'pmd'
+    id 'maven-publish'
+    id 'signing'
     id 'org.springframework.boot' version '2.4.13'
     id "org.flywaydb.flyway" version "8.0.5"
     id "org.sonarqube" version "3.3"
-    id "com.moowork.node" version "0.12"
+    id "com.moowork.node" version "1.0.0"
 }
 
-apply plugin: 'java'
-apply plugin: 'idea'
-apply plugin: 'io.spring.dependency-management'
-apply plugin: 'checkstyle'
-apply plugin: 'jacoco'
-apply plugin: 'pmd'
-apply plugin: 'maven'
-apply plugin: 'maven-publish'
-apply plugin: 'signing'
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 8
+}
 
 ext {
     ossrhUsername = System.getenv("OSSRH_USERNAME")
     ossrhPassword = System.getenv("OSSRH_PASSWORD")
+    set('springBootVersion', '2.4.13')
+    set("signing.secretKeyRingFile", ".signing/secring.gpg")
+    set("signing.keyId", System.getenv("SIGNING_KEYID"))
+    set("signing.password", System.getenv("SIGNING_PASSWORD"))
 }
-ext.set("signing.secretKeyRingFile", ".signing/secring.gpg")
-ext.set("signing.keyId", System.getenv("SIGNING_KEYID"))
-ext.set("signing.password", System.getenv("SIGNING_PASSWORD"))
 
 group = serviceGroup
 version = serviceVersion
 archivesBaseName = rootProject.name
 project.ext.buildTime = java.time.Instant.now().toString() // for versioning
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
 
 repositories {
     mavenCentral()
     jcenter()
-    maven { url "http://jasperreports.sourceforge.net/maven2/" }
+    maven { url "https://jasperreports.sourceforge.net/maven2/" }
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
     maven { url "https://jaspersoft.jfrog.io/artifactory/third-party-ce-artifacts"}
 }
 
 dependencies {
-    compile "org.springframework.boot:spring-boot-starter-web"
-    compile "org.springframework.boot:spring-boot-starter-data-rest"
-    compile "org.springframework.boot:spring-boot-starter-data-jpa"
-    compile "org.springframework.boot:spring-boot-starter-security"
-    compile "org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.6.8"
-    compile 'org.springframework:spring-context-support'
-    compile 'org.hibernate:hibernate-java8'
-    compile 'org.flywaydb:flyway-core:8.0.5'
-    compile 'org.openlmis:openlmis-service-util:3.0.0'
+    implementation "org.springframework.boot:spring-boot-starter-web:2.4.13"
+    implementation "org.springframework.boot:spring-boot-starter-data-rest:2.4.13"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa:2.4.13"
+    implementation "org.springframework.boot:spring-boot-starter-security:2.4.13"
+    implementation "org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.6.8"
+    implementation 'org.springframework:spring-context-support:5.3.13'
+    implementation 'org.hibernate:hibernate-java8:5.4.9.Final'
+    implementation 'org.flywaydb:flyway-core:8.0.5'
+    implementation 'org.openlmis:openlmis-service-util:3.0.0'
 
-    compile "org.projectlombok:lombok"
-    compile "org.postgresql:postgresql:42.6.2"
-    compile "com.google.guava:guava:18.0"
-    compile 'org.webjars.npm:api-console:3.0.17'
-    compile 'org.apache.commons:commons-lang3'
-    compile 'org.apache.commons:commons-csv:1.4'
-    compile 'org.apache.commons:commons-collections4:4.1'
-    compile 'commons-io:commons-io:2.5'
-    compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
-    compile "net.sf.jasperreports:jasperreports:6.5.1"
-    compile "org.slf4j:slf4j-ext"
-    compile "com.github.tomakehurst:wiremock:1.58"
+    implementation "org.projectlombok:lombok:1.18.22"
+    implementation "org.postgresql:postgresql:42.6.2"
+    implementation "com.google.guava:guava:18.0"
+    implementation 'org.webjars.npm:api-console:3.0.17'
+    implementation 'org.apache.commons:commons-lang3:3.9'
+    implementation 'org.apache.commons:commons-csv:1.4'
+    implementation 'org.apache.commons:commons-collections4:4.1'
+    implementation 'commons-io:commons-io:2.5'
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
+    implementation "net.sf.jasperreports:jasperreports:6.5.1"
+    implementation "org.slf4j:slf4j-ext:1.7.29"
+    implementation "com.github.tomakehurst:wiremock:1.58"
 
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
-    compile group: 'javax.interceptor', name: 'javax.interceptor-api', version: '1.2'
+    implementation group: 'javax.interceptor', name: 'javax.interceptor-api', version: '1.2'
 
-    testCompile "junit:junit"
-    testCompile "org.powermock:powermock-api-mockito2:2.0.9"
-    testCompile "org.powermock:powermock-module-junit4:2.0.9"
-    testCompile "org.springframework.boot:spring-boot-starter-test"
-    testCompile 'org.flywaydb.flyway-test-extensions:flyway-spring-test:9.5.0'
-    testCompile 'org.springframework.security:spring-security-test'
-    testCompile "org.springframework:spring-test"
+    testImplementation "junit:junit:4.13.2"
+    testImplementation "org.mockito:mockito-core:3.6.28"
+    testImplementation "org.hamcrest:hamcrest:2.2"
+    testImplementation "org.powermock:powermock-api-mockito2:2.0.9"
+    testImplementation "org.powermock:powermock-module-junit4:2.0.9"
+    testImplementation "org.springframework.boot:spring-boot-starter-test:2.4.13"
+    testImplementation 'org.springframework.security:spring-security-test:5.3.9.RELEASE'
+    testImplementation "org.springframework:spring-test:5.3.13"
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
 
-    testCompile "com.jayway.restassured:rest-assured:2.7.0"
-    testCompile "guru.nidi.raml:raml-tester:0.8.15"
-    testCompile "org.raml:raml-parser:0.8.37"
-    testCompile "nl.jqno.equalsverifier:equalsverifier:2.4"
-    testCompile "be.joengenduvel.java.verifiers:to-string:1.0.2"
+    testImplementation "com.jayway.restassured:rest-assured:2.7.0"
+    testImplementation ("guru.nidi.raml:raml-tester:0.8.15") {
+        exclude group: "org.apache.logging.log4j", module: "log4j-slf4j-impl"
+    }
+    testImplementation ("org.raml:raml-parser:0.8.37") {
+        exclude group: "org.apache.logging.log4j", module: "log4j-slf4j-impl"
+    }
+    testImplementation "nl.jqno.equalsverifier:equalsverifier:3.10.1"
+    testImplementation "be.joengenduvel.java.verifiers:to-string:1.0.2"
 
-    runtime fileTree(dir: '/extensions/', include: '*.jar')
+
+    implementation(fileTree(dir: '/extensions/', include: ['*.jar']))
 }
 
 idea {
@@ -131,8 +143,8 @@ sourceSets {
 }
 
 configurations {
-    integrationTestCompile.extendsFrom testCompile
-    integrationTestRuntime.extendsFrom testRuntime
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
 }
 
 task integrationTest(type: Test) {
@@ -266,27 +278,23 @@ artifacts {
 
 signArchives.onlyIf {project.findProperty("signing.keyId") && project.findProperty("signing.password")}
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-            pom.project {
-                name project.name
-                packaging 'jar'
-                description project.description()
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            pom {
+                name = project.name
+                description = project.description
                 url = 'https://openlmis.org'
+
                 licenses {
                     license {
-                        name 'GNU Affero General Public License, Version 3'
-                        url 'https://www.gnu.org/licenses/agpl-3.0.txt'
+                        name = 'GNU Affero General Public License, Version 3'
+                        url = 'https://www.gnu.org/licenses/agpl-3.0.txt'
                     }
                 }
+
                 developers {
                     developer {
                         id = 'techcommittee'
@@ -295,6 +303,7 @@ uploadArchives {
                         organizationUrl = 'https://villagereach.org'
                     }
                 }
+
                 scm {
                     connection = 'scm:git:git://github.com/OpenLMIS/openlmis-stockmanagement.git'
                     developerConnection = 'scm:git:ssh://github.com/OpenLMIS/openlmis-stockmanagement.git'
@@ -303,9 +312,30 @@ uploadArchives {
             }
         }
     }
+
+    repositories {
+        maven {
+            name = "OSSRH"
+            url = version.endsWith("SNAPSHOT") ?
+                    uri("https://oss.sonatype.org/content/repositories/snapshots/") :
+                    uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+            credentials {
+                username = ossrhUsername
+                password = ossrhPassword
+            }
+        }
+    }
 }
 
-uploadArchives.onlyIf { project.getProperty("ossrhUsername") && project.getProperty("ossrhPassword") }
+signing {
+    sign publishing.publications.mavenJava
+}
+
+tasks.withType(PublishToMavenRepository).configureEach {
+    onlyIf {
+        project.hasProperty("ossrhUsername") && project.hasProperty("ossrhPassword")
+    }
+}
 
 apply from: "documentation.gradle"
 integrationTest {
@@ -325,7 +355,7 @@ processResources {
 check {
     dependsOn checkApiIsRaml
     dependsOn integrationTest
-    finalizedBy uploadArchives
+    finalizedBy publish
 }
 
 apply from: "registration.gradle"
