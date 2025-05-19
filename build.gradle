@@ -7,7 +7,7 @@ buildscript {
 plugins {
     id 'org.springframework.boot' version '2.4.13'
     id "org.flywaydb.flyway" version "8.0.5"
-    id "org.sonarqube" version "3.3"
+    id "org.sonarqube" version "3.2.0"
     id "com.moowork.node" version "0.12"
 }
 
@@ -205,7 +205,7 @@ sonarqube {
         property "sonar.projectKey", "OpenLMIS_openlmis-stockmanagement"
         property "sonar.organization", "openlmis"
         property "sonar.host.url", "https://sonarcloud.io"
-        property "sonar.java.source", "17"
+        property "sonar.java.source", "15"
         property "sonar.coverage.jacoco.xmlReportPaths", "./report.xml"
     }
 }
