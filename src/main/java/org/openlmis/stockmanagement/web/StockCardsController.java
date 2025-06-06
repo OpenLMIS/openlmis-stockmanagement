@@ -35,6 +35,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -141,5 +142,18 @@ public class StockCardsController {
     LOGGER.debug("Try to make stock card with id: {} inactive", stockCardId);
     stockCardService.setInactive(stockCardId);
     LOGGER.debug("Stock card with id: {} made inactive", stockCardId);
+  }
+
+  /**
+   * Makes stock cards inactive.
+   *
+   * @param stockCardIds stock card ids.
+   */
+  @RequestMapping(value = "/stockCards/deactivate", method = RequestMethod.PUT)
+  @ResponseStatus(HttpStatus.OK)
+  public void batchDeactivate(@RequestBody List<UUID> stockCardIds) {
+    LOGGER.debug("Try to make stock cards with ids: {} inactive", stockCardIds);
+    stockCardService.setInactiveBatch(stockCardIds);
+    LOGGER.debug("Stock cards with ids: {} made inactive", stockCardIds);
   }
 }
