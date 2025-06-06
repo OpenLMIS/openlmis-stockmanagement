@@ -152,8 +152,8 @@ public class StockCardsController {
   @RequestMapping(value = "/stockCards/deactivate", method = RequestMethod.PUT)
   @ResponseStatus(HttpStatus.OK)
   public void batchDeactivate(@RequestBody List<UUID> stockCardIds) {
-    LOGGER.debug("Try to make stock cards with ids: {} inactive", stockCardIds);
+    LOGGER.debug("Attempting to deactivate {} stock cards.", stockCardIds.size());
     stockCardService.setInactiveBatch(stockCardIds);
-    LOGGER.debug("Stock cards with ids: {} made inactive", stockCardIds);
+    LOGGER.debug("Successfully deactivated {} stock cards.", stockCardIds.size());
   }
 }
