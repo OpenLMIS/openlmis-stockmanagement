@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -27,10 +28,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARDS_VIEW;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,6 +49,7 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
+import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.PermissionStringDto;
@@ -233,5 +237,50 @@ public class StockCardServiceTest {
     assertEquals(stockCard.getLotId(), stockCardDto.getLotId());
     verify(calculatedStockOnHandService, times(1))
         .fetchCurrentStockOnHand(any(StockCard.class));
+  }
+
+  @Test
+  public void setInactiveBatch_success_allFound() {
+    UUID id1 = UUID.randomUUID();
+    StockCard card1 = new StockCard();
+    card1.setId(id1);
+    card1.setActive(true);
+
+    UUID id2 = UUID.randomUUID();
+    StockCard card2 = new StockCard();
+    card2.setId(id2);
+    card2.setActive(true);
+
+    List<UUID> ids = Arrays.asList(id1, id2);
+
+    when(cardRepository.findAllById(ids)).thenReturn(Arrays.asList(card1, card2));
+
+    stockCardService.setInactiveBatch(ids);
+
+    verify(cardRepository).saveAll(argThat(arg -> {
+      if (!(arg instanceof List)) {
+        return false;
+      }
+      List<?> list = (List<?>) arg;
+      return list.size() == 2 && list.stream().noneMatch(c -> ((StockCard)c).isActive());
+    }));
+  }
+
+  @Test(expected = ResourceNotFoundException.class)
+  public void setInactiveBatch_throwsException_ifAnyNotFound() {
+    UUID id1 = UUID.randomUUID();
+    StockCard card1 = new StockCard();
+    card1.setId(id1);
+    card1.setActive(true);
+
+    UUID id2 = UUID.randomUUID();
+
+    List<UUID> ids = Arrays.asList(id1, id2);
+
+    when(cardRepository.findAllById(ids)).thenReturn(Collections.singletonList(card1));
+
+    stockCardService.setInactiveBatch(ids);
+
+    verify(cardRepository).findAllById(ids);
   }
 }

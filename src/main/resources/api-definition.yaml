@@ -478,6 +478,18 @@ traits:
                   body:
                       application/json:
                           schema: stockCardPage
+      /deactivate:
+        put:
+          is: [ secured ]
+          description: Set stock cards as inactive.
+          responses:
+            200:
+              body:
+                application/json:
+            404:
+              description: At least one stock card with given id does not exist, can not make inactive.
+              body:
+                application/json:
       /{id}:
           get:
             is: [ secured ]
