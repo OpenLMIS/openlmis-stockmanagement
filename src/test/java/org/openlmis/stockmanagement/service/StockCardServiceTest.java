@@ -255,7 +255,7 @@ public class StockCardServiceTest {
 
     when(cardRepository.findAllById(ids)).thenReturn(Arrays.asList(card1, card2));
 
-    stockCardService.setInactiveBatch(ids);
+    stockCardService.setInactive(ids);
 
     verify(cardRepository).saveAll(argThat(arg -> {
       if (!(arg instanceof List)) {
@@ -279,7 +279,7 @@ public class StockCardServiceTest {
 
     when(cardRepository.findAllById(ids)).thenReturn(Collections.singletonList(card1));
 
-    stockCardService.setInactiveBatch(ids);
+    stockCardService.setInactive(ids);
 
     verify(cardRepository).findAllById(ids);
   }

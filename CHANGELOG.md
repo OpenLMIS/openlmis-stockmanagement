@@ -1,6 +1,10 @@
 Upcoming Version (WIP)
 ==================
 
+Improvements:
+* [SELV3-814](https://openlmis.atlassian.net/browse/SELV3-814): Added `POST /api/stockCards/deactivate` endpoint
+  * Allows to deactivate a batch of stock cards
+
 5.2.0 / 2025-03-31
 ==================
 

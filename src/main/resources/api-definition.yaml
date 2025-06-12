@@ -479,7 +479,7 @@ traits:
                       application/json:
                           schema: stockCardPage
       /deactivate:
-        put:
+        post:
           is: [ secured ]
           description: Set stock cards as inactive.
           responses:
