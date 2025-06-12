@@ -32,6 +32,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.google.common.collect.ImmutableSet;
+
+import java.util.Collections;
 import java.util.UUID;
 import org.junit.Test;
 import org.openlmis.stockmanagement.dto.StockCardDto;
@@ -189,7 +191,7 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
   public void shouldMakeStockCardInactive() throws Exception {
     // given
     UUID stockCardId = UUID.randomUUID();
-    doNothing().when(stockCardService).setInactive(stockCardId);
+    doNothing().when(stockCardService).setInactive(Collections.singletonList(stockCardId));
 
     // when
     ResultActions resultActions = mvc.perform(
@@ -206,7 +208,7 @@ public class StockCardControllerIntegrationTest extends BaseWebTest {
     // given
     UUID stockCardId = UUID.randomUUID();
     doThrow(new ResourceNotFoundException("Not found stock card with id: " + stockCardId))
-        .when(stockCardService).setInactive(stockCardId);
+        .when(stockCardService).setInactive(Collections.singletonList(stockCardId));
 
     // when
     ResultActions resultActions = mvc.perform(

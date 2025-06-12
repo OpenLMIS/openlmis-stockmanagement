@@ -225,16 +225,32 @@ public class StockCardService extends StockCardBaseService {
   }
 
   /**
-   * Set stock card to inactive.
+   * Set stock cards to inactive.
    *
-   * @param stockCardId      id of stockCard to update
+   * @param stockCardIds stock card ids.
    */
   @Transactional
-  public void setInactive(UUID stockCardId) {
-    StockCard stockCard = cardRepository.findById(stockCardId).orElseThrow(() ->
-        new ResourceNotFoundException("Not found stock card with id: " + stockCardId));
-    stockCard.setActive(false);
-    cardRepository.saveAndFlush(stockCard);
+  public void setInactive(List<UUID> stockCardIds) {
+    List<StockCard> stockCards = cardRepository.findAllById(stockCardIds);
+
+    Set<UUID> foundIds = stockCards.stream()
+        .map(StockCard::getId)
+        .collect(Collectors.toSet());
+
+    List<UUID> notFound = stockCardIds.stream()
+        .filter(id -> !foundIds.contains(id))
+        .collect(Collectors.toList());
+
+    if (!notFound.isEmpty()) {
+      throw new ResourceNotFoundException("Stock cards not found for IDs: " + notFound);
+    }
+
+    for (StockCard card : stockCards) {
+      card.setActive(false);
+    }
+
+    cardRepository.saveAll(stockCards);
+    cardRepository.flush();
   }
 
   private List<StockCardLineItem> getSavedButNewLineItems(List<StockCard> cardsToUpdate,
