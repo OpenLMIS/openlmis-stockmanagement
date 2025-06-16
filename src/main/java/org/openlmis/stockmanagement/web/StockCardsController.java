@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.web;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import org.openlmis.stockmanagement.dto.StockCardDto;
@@ -35,6 +36,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -139,7 +141,20 @@ public class StockCardsController {
   public void deactivate(
       @PathVariable("stockCardId") UUID stockCardId) {
     LOGGER.debug("Try to make stock card with id: {} inactive", stockCardId);
-    stockCardService.setInactive(stockCardId);
+    stockCardService.setInactive(Collections.singletonList(stockCardId));
     LOGGER.debug("Stock card with id: {} made inactive", stockCardId);
+  }
+
+  /**
+   * Makes stock cards inactive.
+   *
+   * @param stockCardIds stock card ids.
+   */
+  @RequestMapping(value = "/stockCards/deactivate", method = RequestMethod.POST)
+  @ResponseStatus(HttpStatus.OK)
+  public void deactivate(@RequestBody List<UUID> stockCardIds) {
+    LOGGER.debug("Attempting to deactivate {} stock cards.", stockCardIds.size());
+    stockCardService.setInactive(stockCardIds);
+    LOGGER.debug("Successfully deactivated {} stock cards.", stockCardIds.size());
   }
 }
