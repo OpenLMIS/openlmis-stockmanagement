@@ -273,9 +273,9 @@ uploadArchives {
             repository(url: "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/") {
                 authentication(userName: ossrhUsername, password: ossrhPassword)
             }
-            snapshotRepository(url: "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
+            //snapshotRepository(url: "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/") {
+            //    authentication(userName: ossrhUsername, password: ossrhPassword)
+            //}
             pom.project {
                 name project.name
                 packaging 'jar'
