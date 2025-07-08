@@ -270,21 +270,24 @@ uploadArchives {
     repositories {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            snapshotRepository(url: "https://central.sonatype.com/repository/maven-snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
             repository(url: "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/") {
                 authentication(userName: ossrhUsername, password: ossrhPassword)
             }
-            //snapshotRepository(url: "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/") {
-            //    authentication(userName: ossrhUsername, password: ossrhPassword)
-            //}
+
             pom.project {
-                name project.name
-                packaging 'jar'
-                description project.description()
+                name = project.name
+                packaging = 'jar'
+                description = project.description
                 url = 'https://openlmis.org'
                 licenses {
                     license {
-                        name 'GNU Affero General Public License, Version 3'
-                        url 'https://www.gnu.org/licenses/agpl-3.0.txt'
+                        name = 'GNU Affero General Public License, Version 3'
+                        url = 'https://www.gnu.org/licenses/agpl-3.0.txt'
                     }
                 }
                 developers {
