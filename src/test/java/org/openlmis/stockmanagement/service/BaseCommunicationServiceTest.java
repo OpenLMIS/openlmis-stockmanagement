@@ -80,6 +80,8 @@ public abstract class BaseCommunicationServiceTest<T> {
 
   private BaseCommunicationService<T> service;
 
+  protected boolean skipAfter = false;
+
   @Before
   public void setUp() throws Exception {
     mockAuth();
@@ -88,6 +90,10 @@ public abstract class BaseCommunicationServiceTest<T> {
 
   @After
   public void tearDown() throws Exception {
+    if (skipAfter) {
+      return;
+    }
+
     checkAuth();
   }
 

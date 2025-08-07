@@ -19,19 +19,33 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.mockito.Mock;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.service.BaseCommunicationService;
 import org.openlmis.stockmanagement.service.RequestHeaders;
 import org.openlmis.stockmanagement.service.ServiceResponse;
 import org.openlmis.stockmanagement.testutils.ObjectGenerator;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -99,4 +113,58 @@ public class UserReferenceDataServiceTest extends BaseReferenceDataServiceTest<U
     assertFalse(serviceResponse.isModified());
   }
 
+  @Test
+  public void testFindUsersByIds_withResults() {
+    prepareTestsForUsersSearch();
+
+    Set<UUID> ids = new HashSet<>(Arrays.asList(UUID.randomUUID(), UUID.randomUUID()));
+
+    List<UserDto> usersList = Arrays.asList(new UserDto(), new UserDto());
+    Page<UserDto> page = mock(Page.class);
+    when(page.getContent()).thenReturn(usersList);
+
+    doReturn(page).when(service).getPage(eq("search"), eq(Collections.emptyMap()), anyMap());
+
+    Collection<UserDto> result = service.findUsersByIds(ids);
+
+    assertNotNull(result);
+    Assertions.assertEquals(usersList.size(), result.size());
+    Assertions.assertTrue(result.containsAll(usersList));
+  }
+
+  @Test
+  public void testFindUsersByIds_nullPage() {
+    prepareTestsForUsersSearch();
+
+    Set<UUID> ids = Collections.singleton(UUID.randomUUID());
+
+    doReturn(null).when(service).getPage(eq("search"), eq(Collections.emptyMap()), anyMap());
+
+    Collection<UserDto> result = service.findUsersByIds(ids);
+
+    assertNotNull(result);
+    Assertions.assertTrue(result.isEmpty());
+  }
+
+  @Test
+  public void testFindUsersByIds_emptyResults() {
+    prepareTestsForUsersSearch();
+
+    Set<UUID> ids = Collections.singleton(UUID.randomUUID());
+
+    Page<UserDto> page = mock(Page.class);
+    when(page.getContent()).thenReturn(Collections.emptyList());
+
+    doReturn(page).when(service).getPage(eq("search"), eq(Collections.emptyMap()), anyMap());
+
+    Collection<UserDto> result = service.findUsersByIds(ids);
+
+    assertNotNull(result);
+    Assertions.assertTrue(result.isEmpty());
+  }
+
+  private void prepareTestsForUsersSearch() {
+    service = spy(new UserReferenceDataService());
+    skipAfter = true;
+  }
 }
