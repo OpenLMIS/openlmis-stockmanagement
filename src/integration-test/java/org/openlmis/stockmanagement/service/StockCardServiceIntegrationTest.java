@@ -68,6 +68,7 @@ import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataS
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,6 +126,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
   @MockBean
   private HomeFacilityPermissionService homeFacilityPermissionService;
+
+  @MockBean(name = "userReferenceDataService")
+  private UserReferenceDataService userReferenceDataService;
 
   private Node node;
 
@@ -224,6 +228,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
   @Test
   public void shouldGetRefdataAndConvertOrganizationsWhenFindStockCard() {
+    when(userReferenceDataService.findUsersByIds(any()))
+        .thenReturn(Collections.emptyList());
+
     StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.getLineItems().get(0).setLotId(randomUUID());
     stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
@@ -269,6 +276,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
   @Test
   public void shouldReassignPhysicalInventoryReasonNames() {
+    when(userReferenceDataService.findUsersByIds(any()))
+        .thenReturn(Collections.emptyList());
+
     StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
     stockEventDto.getLineItems().get(0).setSourceId(null);
     stockEventDto.getLineItems().get(0).setDestinationId(null);
@@ -320,6 +330,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
   @Test
   public void findStockCardByIdShouldNotCheckPermissionsForClientAuthentication() {
+    when(userReferenceDataService.findUsersByIds(any()))
+        .thenReturn(Collections.emptyList());
+
     final StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
     stockEventDto.getLineItems().get(0).setSourceId(node.getId());
