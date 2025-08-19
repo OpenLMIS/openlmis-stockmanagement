@@ -27,7 +27,6 @@ import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARDS
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -358,16 +357,26 @@ public class StockCardService extends StockCardBaseService {
     }
 
     Collection<UserDto> users = userReferenceDataService.findUsersByIds(userIds);
-    if (users == null) {
-      users = Collections.emptyList();
+    if (users.isEmpty()) {
+      LOGGER.warn("No users found for IDs: {}, when populating usernames for stock cards.",
+          userIds);
+      return;
     }
 
     Map<UUID, String> userIdToUsername = users.stream()
         .collect(Collectors.toMap(UserDto::getId, UserDto::getUsername));
 
+    Set<UUID> missingIds = new HashSet<>(userIds);
+    missingIds.removeAll(userIdToUsername.keySet());
+    if (!missingIds.isEmpty()) {
+      LOGGER.warn("Users not found for IDs: {}, when populating usernames for stock cards.",
+          missingIds);
+    }
+
     for (StockCardLineItem item : lineItems) {
-      if (item.getUserId() != null) {
-        item.setUsername(userIdToUsername.getOrDefault(item.getUserId(), "-"));
+      UUID userId = item.getUserId();
+      if (userId != null) {
+        item.setUsername(userIdToUsername.get(userId));
       }
     }
   }
