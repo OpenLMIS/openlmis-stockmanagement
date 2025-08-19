@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -305,17 +306,17 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
         .thenReturn(Collections.singletonList(userDto));
 
     StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
-    stockEventDto.setUserId(userId);
-    stockEventDto.getLineItems().get(0).setLotId(randomUUID());
     stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
     stockEventDto.getLineItems().get(0).setSourceId(node.getId());
     stockEventDto.getLineItems().get(0).setDestinationId(node.getId());
-    StockEvent savedEvent = save(stockEventDto, randomUUID());
 
+    StockEvent savedEvent = save(stockEventDto, userId);
     UUID cardId = stockCardRepository.findByOriginEvent(savedEvent).getId();
-    stockCardService.findStockCardById(cardId);
+    StockCardDto card = stockCardService.findStockCardById(cardId);
 
-    assertThat("card", is("card"));
+    assertThat(card.getId(), is(cardId));
+    assertThat(card.getLineItems().get(0).getLineItem().getUsername(), is("username"));
+    verify(userReferenceDataService).findUsersByIds(argThat(ids -> ids.contains(userId)));
   }
 
   @Test
