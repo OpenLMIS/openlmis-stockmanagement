@@ -57,6 +57,7 @@ public class UserReferenceDataServiceTest extends BaseReferenceDataServiceTest<U
   private static final String PERMISSION_STRING = "right-name|facility-id";
   private static final String ETAG_FROM_RESPONSE = "new-etag";
   private static final String ETAG = "etag";
+  private static final String SEARCH = "search";
 
   @Mock
   private ResponseEntity<String[]> stringArrayResponse;
@@ -123,7 +124,7 @@ public class UserReferenceDataServiceTest extends BaseReferenceDataServiceTest<U
     Page<UserDto> page = mock(Page.class);
     when(page.getContent()).thenReturn(usersList);
 
-    doReturn(page).when(service).getPage(eq("search"), eq(Collections.emptyMap()), anyMap());
+    doReturn(page).when(service).getPage(eq(SEARCH), eq(Collections.emptyMap()), anyMap());
 
     Collection<UserDto> result = service.findUsersByIds(ids);
 
@@ -138,7 +139,7 @@ public class UserReferenceDataServiceTest extends BaseReferenceDataServiceTest<U
 
     Set<UUID> ids = Collections.singleton(UUID.randomUUID());
 
-    doReturn(null).when(service).getPage(eq("search"), eq(Collections.emptyMap()), anyMap());
+    doReturn(null).when(service).getPage(eq(SEARCH), eq(Collections.emptyMap()), anyMap());
 
     Collection<UserDto> result = service.findUsersByIds(ids);
 
@@ -155,12 +156,35 @@ public class UserReferenceDataServiceTest extends BaseReferenceDataServiceTest<U
     Page<UserDto> page = mock(Page.class);
     when(page.getContent()).thenReturn(Collections.emptyList());
 
-    doReturn(page).when(service).getPage(eq("search"), eq(Collections.emptyMap()), anyMap());
+    doReturn(page).when(service).getPage(eq(SEARCH), eq(Collections.emptyMap()), anyMap());
 
     Collection<UserDto> result = service.findUsersByIds(ids);
 
     assertNotNull(result);
     Assertions.assertTrue(result.isEmpty());
+  }
+
+  @Test
+  public void testFindUsersByIds_partialResults() {
+    prepareTestsForUsersSearch();
+
+    UUID id1 = UUID.randomUUID();
+    UUID id2 = UUID.randomUUID();
+
+    UserDto user = new UserDto();
+    user.setId(id1);
+
+    Set<UUID> ids = new HashSet<>(Arrays.asList(id1, id2));
+
+    Page<UserDto> page = mock(Page.class);
+    when(page.getContent()).thenReturn(Collections.singletonList(user));
+    doReturn(page).when(service).getPage(eq(SEARCH), eq(Collections.emptyMap()), anyMap());
+
+    Collection<UserDto> result = service.findUsersByIds(ids);
+
+    assertNotNull(result);
+    Assertions.assertEquals(1, result.size());
+    Assertions.assertTrue(result.contains(user));
   }
 
   private void prepareTestsForUsersSearch() {

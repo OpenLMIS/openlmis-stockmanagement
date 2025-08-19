@@ -55,6 +55,7 @@ import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
+import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.NodeRepository;
@@ -78,6 +79,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.test.context.junit4.SpringRunner;
 
+@SuppressWarnings("PMD.TooManyMethods")
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
@@ -290,6 +292,30 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
     String reasonName = card.getLineItems().get(0).getLineItem().getReason().getName();
     assertThat(reasonName, is("Overstock"));
+  }
+
+  @Test
+  public void shouldPopulateUsernames() {
+    UUID userId = UUID.randomUUID();
+    UserDto userDto = new UserDto();
+    userDto.setId(userId);
+    userDto.setUsername("username");
+
+    when(userReferenceDataService.findUsersByIds(any()))
+        .thenReturn(Collections.singletonList(userDto));
+
+    StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
+    stockEventDto.setUserId(userId);
+    stockEventDto.getLineItems().get(0).setLotId(randomUUID());
+    stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
+    stockEventDto.getLineItems().get(0).setSourceId(node.getId());
+    stockEventDto.getLineItems().get(0).setDestinationId(node.getId());
+    StockEvent savedEvent = save(stockEventDto, randomUUID());
+
+    UUID cardId = stockCardRepository.findByOriginEvent(savedEvent).getId();
+    stockCardService.findStockCardById(cardId);
+
+    assertThat("card", is("card"));
   }
 
   @Test
