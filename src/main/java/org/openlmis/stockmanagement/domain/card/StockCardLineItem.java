@@ -115,6 +115,9 @@ public class StockCardLineItem extends BaseEntity {
   @Transient
   private Integer stockOnHand;
 
+  @Transient
+  private String username;
+
   @OneToMany(
       cascade = ALL,
       fetch = FetchType.LAZY,

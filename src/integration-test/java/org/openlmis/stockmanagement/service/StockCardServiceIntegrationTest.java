@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -55,6 +56,7 @@ import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
+import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.NodeRepository;
@@ -68,6 +70,7 @@ import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataS
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +80,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.test.context.junit4.SpringRunner;
 
+@SuppressWarnings("PMD.TooManyMethods")
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
@@ -125,6 +129,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
   @MockBean
   private HomeFacilityPermissionService homeFacilityPermissionService;
+
+  @MockBean(name = "userReferenceDataService")
+  private UserReferenceDataService userReferenceDataService;
 
   private Node node;
 
@@ -224,6 +231,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
   @Test
   public void shouldGetRefdataAndConvertOrganizationsWhenFindStockCard() {
+    when(userReferenceDataService.findUsersByIds(any()))
+        .thenReturn(Collections.emptyList());
+
     StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.getLineItems().get(0).setLotId(randomUUID());
     stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
@@ -269,6 +279,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
   @Test
   public void shouldReassignPhysicalInventoryReasonNames() {
+    when(userReferenceDataService.findUsersByIds(any()))
+        .thenReturn(Collections.emptyList());
+
     StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
     stockEventDto.getLineItems().get(0).setSourceId(null);
     stockEventDto.getLineItems().get(0).setDestinationId(null);
@@ -280,6 +293,30 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
     String reasonName = card.getLineItems().get(0).getLineItem().getReason().getName();
     assertThat(reasonName, is("Overstock"));
+  }
+
+  @Test
+  public void shouldPopulateUsernames() {
+    UUID userId = UUID.randomUUID();
+    UserDto userDto = new UserDto();
+    userDto.setId(userId);
+    userDto.setUsername("username");
+
+    when(userReferenceDataService.findUsersByIds(any()))
+        .thenReturn(Collections.singletonList(userDto));
+
+    StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
+    stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
+    stockEventDto.getLineItems().get(0).setSourceId(node.getId());
+    stockEventDto.getLineItems().get(0).setDestinationId(node.getId());
+
+    StockEvent savedEvent = save(stockEventDto, userId);
+    UUID cardId = stockCardRepository.findByOriginEvent(savedEvent).getId();
+    StockCardDto card = stockCardService.findStockCardById(cardId);
+
+    assertThat(card.getId(), is(cardId));
+    assertThat(card.getLineItems().get(0).getLineItem().getUsername(), is("username"));
+    verify(userReferenceDataService).findUsersByIds(argThat(ids -> ids.contains(userId)));
   }
 
   @Test
@@ -320,6 +357,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
   @Test
   public void findStockCardByIdShouldNotCheckPermissionsForClientAuthentication() {
+    when(userReferenceDataService.findUsersByIds(any()))
+        .thenReturn(Collections.emptyList());
+
     final StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
     stockEventDto.getLineItems().get(0).setSourceId(node.getId());

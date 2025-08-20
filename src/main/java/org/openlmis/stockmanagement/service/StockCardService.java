@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -53,6 +55,7 @@ import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataServic
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.PermissionStringDto;
 import org.openlmis.stockmanagement.service.referencedata.PermissionStrings;
+import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.web.Pagination;
@@ -101,6 +104,9 @@ public class StockCardService extends StockCardBaseService {
 
   @Autowired
   private AuthenticationHelper authenticationHelper;
+
+  @Autowired
+  private UserReferenceDataService userReferenceDataService;
 
   @Autowired
   private StockOnHandCalculationService calculationSoHService;
@@ -163,6 +169,8 @@ public class StockCardService extends StockCardBaseService {
     }
 
     calculationSoHService.calculateStockOnHand(foundCard);
+
+    populateUsernames(foundCard);
 
     StockCardDto cardDto = createDtos(singletonList(foundCard)).get(0);
     cardDto.setOrderable(orderableRefDataService.findOne(foundCard.getOrderableId()));
@@ -324,6 +332,51 @@ public class StockCardService extends StockCardBaseService {
       } else {
         LOGGER.warn("Could not find any organization matching node id {}", node.getReferenceId());
         return FacilityDto.createFrom(new Organization());
+      }
+    }
+  }
+
+  /**
+   * Set usernames for line items.
+   *
+   * @param card stock card.
+   */
+  public void populateUsernames(StockCard card) {
+    List<StockCardLineItem> lineItems = card.getLineItems();
+    if (lineItems == null || lineItems.isEmpty()) {
+      return;
+    }
+
+    Set<UUID> userIds = lineItems.stream()
+        .map(StockCardLineItem::getUserId)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toSet());
+
+    if (userIds.isEmpty()) {
+      return;
+    }
+
+    Collection<UserDto> users = userReferenceDataService.findUsersByIds(userIds);
+    if (users.isEmpty()) {
+      LOGGER.warn("No users found for IDs: {}, when populating usernames for stock cards.",
+          userIds);
+      return;
+    }
+
+    Map<UUID, String> userIdToUsername = users.stream()
+        .collect(Collectors.toMap(UserDto::getId, UserDto::getUsername));
+
+    Set<UUID> missingIds = new HashSet<>(userIds);
+    missingIds.removeAll(userIdToUsername.keySet());
+    if (!missingIds.isEmpty()) {
+      LOGGER.warn("Users not found for IDs: {}, when populating usernames for stock cards.",
+          missingIds);
+    }
+
+    for (StockCardLineItem item : lineItems) {
+      UUID userId = item.getUserId();
+      if (userId != null) {
+        item.setUsername(userIdToUsername.get(userId));
       }
     }
   }
