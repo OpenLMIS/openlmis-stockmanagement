@@ -200,7 +200,7 @@
 				</textElement>
 				<text><![CDATA[Itemized reasons]]></text>
 			</staticText>
-			<textField textAdjust="StretchHeight">
+			<textField isStretchWithOverflow="true">
 				<reportElement mode="Opaque" x="610" y="0" width="92" height="25" backcolor="#CCCCCC" uuid="10ff459c-97ad-48f1-b414-6158967a3b95"/>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -213,7 +213,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$P{showInDoses} ? "Current Stock\n(Doses)" : "Current Stock\n(Packs)"]]></textFieldExpression>
 			</textField>
-			<textField textAdjust="StretchHeight">
+			<textField isStretchWithOverflow="true">
 				<reportElement mode="Opaque" x="520" y="0" width="90" height="25" backcolor="#CCCCCC" uuid="8d4d1ea9-e98c-43b5-a4e2-64a13ad5ab50"/>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
