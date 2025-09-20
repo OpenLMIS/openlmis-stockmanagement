@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.20.5.final using JasperReports Library version 6.20.5-3efcf2e67f959db3888d79f73dde2dbd7acb4f8e  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="physicaInventoryLines" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="BlankPage" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isFloatColumnFooter="true" whenResourceMissingType="Empty" uuid="8eeca41d-cefe-475b-b89b-f898f69a4087">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OpenLMIS Core UAT"/>
 	<import value="java.time.LocalDate"/>
 	<import value="java.time.format.DateTimeFormatter"/>
 	<import value="java.text.*"/>
-	<parameter name="pi_id" class="java.lang.String"/>
+	<parameter name="pi_id" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="dateFormat" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="decimalFormat" class="java.text.DecimalFormat" isForPrompting="false"/>
-	<parameter name="showInDoses" class="java.lang.Boolean"/>
+	<parameter name="showInDoses" class="java.lang.Boolean" isForPrompting="false"/>
 	<queryString language="plsql">
 		<![CDATA[with temp as (
 				select row_number() over () as rownum
@@ -87,7 +88,7 @@
 		<groupExpression><![CDATA[$F{productcode} + $F{productname}]]></groupExpression>
 		<groupHeader>
 			<band height="25" splitType="Stretch">
-				<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<textField isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Opaque" x="700" y="0" width="132" height="25" uuid="dc09a9f2-acf7-4dab-84ef-a500845dde6d"/>
 					<box padding="3">
 						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -96,7 +97,7 @@
 						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					</box>
 				</textField>
-				<textField textAdjust="StretchHeight" evaluationTime="Group" evaluationGroup="productGroup" isBlankWhenNull="true">
+				<textField evaluationTime="Group" evaluationGroup="productGroup" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Opaque" x="610" y="0" width="90" height="25" uuid="1dd698e8-9aae-4cd6-94b9-708523090dec"/>
 					<box padding="3">
 						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -109,7 +110,7 @@
 					</textElement>
 					<textFieldExpression><![CDATA[$V{quantitySumValue} != null ? $P{decimalFormat}.format($V{quantitySumValue}).toString() : ""]]></textFieldExpression>
 				</textField>
-				<textField textAdjust="StretchHeight" evaluationTime="Group" evaluationGroup="productGroup" isBlankWhenNull="true">
+				<textField evaluationTime="Group" evaluationGroup="productGroup" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Opaque" x="520" y="0" width="90" height="25" forecolor="#848484" uuid="d2a96208-ada5-4412-bdc6-3ab766acbf7e"/>
 					<box padding="3">
 						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -122,7 +123,7 @@
 					</textElement>
 					<textFieldExpression><![CDATA[$V{sohSumValue} != null ? $P{decimalFormat}.format($V{sohSumValue}).toString() : ""]]></textFieldExpression>
 				</textField>
-				<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<textField isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Opaque" x="418" y="0" width="102" height="25" uuid="d07d08b5-df52-43b1-b3d0-d571623c8b02"/>
 					<box padding="3">
 						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -131,7 +132,7 @@
 						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					</box>
 				</textField>
-				<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<textField isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Opaque" x="316" y="0" width="102" height="25" uuid="dc2ac7c8-1086-49d9-90fb-9acd95271092"/>
 					<box padding="3">
 						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -140,7 +141,7 @@
 						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					</box>
 				</textField>
-				<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<textField isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Opaque" x="244" y="0" width="72" height="25" uuid="93bc4e67-36dd-4077-95db-0db852108a30"/>
 					<box padding="3">
 						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -149,7 +150,7 @@
 						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					</box>
 				</textField>
-				<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<textField isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Opaque" x="82" y="0" width="162" height="25" uuid="f75fae81-e6b8-4993-898d-632ddf29d1e8"/>
 					<box padding="3">
 						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -162,7 +163,7 @@
 					</textElement>
 					<textFieldExpression><![CDATA[$F{productname}]]></textFieldExpression>
 				</textField>
-				<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+				<textField isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Opaque" x="10" y="0" width="72" height="25" uuid="06a9370e-dcaa-4b03-9d18-aca8abaa56bd"/>
 					<box padding="3">
 						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -385,7 +386,7 @@
                             )
                     )]]></textFieldExpression>
 			</textField>
-			<textField textAdjust="StretchHeight" isBlankWhenNull="true">
+			<textField isBlankWhenNull="true">
 				<reportElement x="700" y="0" width="132" height="25" uuid="86886d4d-e188-4bbf-bfc7-113325f40773"/>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>

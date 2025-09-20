@@ -154,6 +154,7 @@ public class JasperReportServiceTest {
     params.put("dateFormat", DATE_FORMAT);
     params.put("format", "pdf");
     params.put("decimalFormat", createDecimalFormat());
+    params.put("showInDoses", false);
 
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     ObjectOutputStream out = new ObjectOutputStream(bos);
