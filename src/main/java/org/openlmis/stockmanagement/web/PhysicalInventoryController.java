@@ -190,7 +190,11 @@ public class PhysicalInventoryController {
    */
   @GetMapping(value = ID_PATH_VARIABLE, params = "format")
   @ResponseBody
-  public ResponseEntity<byte[]> print(@PathVariable("id") UUID id, @RequestParam String format) {
+  public ResponseEntity<byte[]> print(
+      @PathVariable("id") UUID id,
+      @RequestParam String format,
+      @RequestParam(required = false, defaultValue = "true") Boolean showInDoses
+  ) {
     checkPermission(id);
     checkFormat(format.toLowerCase());
 
@@ -200,7 +204,7 @@ public class PhysicalInventoryController {
           new Message(ERROR_REPORTING_TEMPLATE_NOT_FOUND_WITH_NAME, PRINT_PI));
     }
 
-    byte[] bytes = jasperReportService.generateReport(printTemplate, getParams(id, format));
+    byte[] bytes = jasperReportService.generateReport(printTemplate, getParams(id, format, showInDoses));
 
     MediaType mediaType;
     if ("csv".equals(format)) {
@@ -238,7 +242,7 @@ public class PhysicalInventoryController {
     }
   }
 
-  private Map<String, Object> getParams(UUID eventId, String format) {
+  private Map<String, Object> getParams(UUID eventId, String format, Boolean showInDoses) {   
     Map<String, Object> params = ReportUtils.createParametersMap();
     String formatId = "'" + eventId + "'";
     DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols();
@@ -251,6 +255,7 @@ public class PhysicalInventoryController {
     params.put("timeZoneId", timeZoneId);
     params.put("format", format);
     params.put("decimalFormat", decimalFormat);
+    params.put("showInDoses", showInDoses);
     params.put("subreport",
         jasperReportService.createCustomizedPhysicalInventoryLineSubreport());
 
