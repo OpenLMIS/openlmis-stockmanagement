@@ -204,7 +204,10 @@ public class PhysicalInventoryController {
           new Message(ERROR_REPORTING_TEMPLATE_NOT_FOUND_WITH_NAME, PRINT_PI));
     }
 
-    byte[] bytes = jasperReportService.generateReport(printTemplate, getParams(id, format, showInDoses));
+    byte[] bytes = jasperReportService.generateReport(
+        printTemplate,
+        getParams(id, format, showInDoses)
+    );
 
     MediaType mediaType;
     if ("csv".equals(format)) {
