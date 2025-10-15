@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.4.0.final using JasperReports Library version 6.4.1  -->
+<!-- Created with Jaspersoft Studio version 6.20.5.final using JasperReports Library version 6.20.5-3efcf2e67f959db3888d79f73dde2dbd7acb4f8e  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="physicaInventory" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="BlankPage" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="20" bottomMargin="0" isFloatColumnFooter="true" whenResourceMissingType="Empty" uuid="a0a4e861-0726-422f-b3d5-54b1aefe96ce">
 	<import value="java.util.*"/>
-	<import value="java.text.*"/>
 	<import value="java.time.LocalDate"/>
 	<import value="java.time.format.DateTimeFormatter"/>
 	<import value="java.time.ZonedDateTime"/>
+	<import value="java.text.*"/>
 	<import value="java.time.ZoneId"/>
 	<parameter name="subreport" class="net.sf.jasperreports.engine.design.JasperDesign" isForPrompting="false"/>
 	<parameter name="pi_id" class="java.lang.String" isForPrompting="false"/>
@@ -13,6 +13,7 @@
 	<parameter name="dateTimeFormat" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="timeZoneId" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="decimalFormat" class="java.text.DecimalFormat" isForPrompting="false"/>
+	<parameter name="showInDoses" class="java.lang.Boolean" isForPrompting="false"/>
 	<queryString>
 		<![CDATA[select f.name as facility, p.name as program, u.username as username, sel.occurreddate, se.processeddate, se.id as event_id
 			from stockmanagement.physical_inventories pi
@@ -23,8 +24,7 @@
 			INNER JOIN stockmanagement.stock_event_line_items sel on se.id = sel.stockeventid
 			WHERE pi.id = $P!{pi_id}
 			ORDER BY sel.occurreddate DESC
-			FETCH FIRST 1 ROWS ONLY
-		]]>
+			FETCH FIRST 1 ROWS ONLY]]>
 	</queryString>
 	<field name="event_id" class="java.lang.String"/>
 	<field name="facility" class="java.lang.String"/>
@@ -40,14 +40,14 @@
 			<staticText>
 				<reportElement x="20" y="10" width="800" height="20" uuid="8b895ad8-e565-41e4-87f4-fe70fea7b9f1"/>
 				<textElement verticalAlignment="Middle">
-					<font size="16" pdfFontName="Helvetica-Bold" isBold="true"/>
+					<font size="16" isBold="true" pdfFontName="Helvetica-Bold"/>
 				</textElement>
 				<text><![CDATA[Submitted Physical Inventory]]></text>
 			</staticText>
 			<textField>
 				<reportElement x="20" y="40" width="800" height="20" uuid="ec47a93b-983c-447f-85cf-4775e800330a"/>
 				<textElement>
-					<font size="13" pdfFontName="Helvetica-Bold" isBold="true"/>
+					<font size="13" isBold="true" pdfFontName="Helvetica-Bold"/>
 				</textElement>
 				<textFieldExpression><![CDATA[MessageFormat.format("Physical inventory for date: {0}",
 					DateTimeFormatter.ofPattern($P{dateFormat}).format(LocalDate.parse($F{occurreddate})))]]></textFieldExpression>
@@ -66,8 +66,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[MessageFormat.format("Submitted into system on {0} by {1}",
 				 DateTimeFormatter.ofPattern($P{dateTimeFormat}).format(ZonedDateTime.ofInstant(
-				 $F{processeddate}.toInstant(), ZoneId.of($P{timeZoneId}))),$F{username})]]>
-				</textFieldExpression>
+				 $F{processeddate}.toInstant(), ZoneId.of($P{timeZoneId}))),$F{username})]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>
@@ -83,6 +82,9 @@
 				</subreportParameter>
 				<subreportParameter name="decimalFormat">
 					<subreportParameterExpression><![CDATA[$P{decimalFormat}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="showInDoses">
+					<subreportParameterExpression><![CDATA[$P{showInDoses}]]></subreportParameterExpression>
 				</subreportParameter>
 				<subreportParameter name="REPORT_LOCALE">
 					<subreportParameterExpression><![CDATA[$P{REPORT_LOCALE}]]></subreportParameterExpression>
