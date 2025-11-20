@@ -1,6 +1,14 @@
 Upcoming Version
 ==================
 
+Improvements:
+* [OLMIS-8163](https://openlmis.atlassian.net/browse/OLMIS-8163): Stock card details now include user information
+* [OE-99](https://openlmis.atlassian.net/browse/OE-99): Physical Inventory print now displays quantities in doses or packs
+  * Added new optional parameter `showInDoses` to `/api/physicalInventories/print` (boolean, default: `true`)
+
+Changes:
+* Upgrade PostgreSQL JDBC driver to 42.6.2 for PostgreSQL 14 compatibility
+
 5.2.1 / 2025-07-09
 ==================
 
