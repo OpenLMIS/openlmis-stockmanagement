@@ -107,7 +107,17 @@
 					<textElement textAlignment="Right">
 						<font size="8" isBold="true" pdfFontName="Helvetica-Bold"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$V{quantitySumValue} != null ? $P{decimalFormat}.format($V{quantitySumValue}).toString() : ""]]></textFieldExpression>
+          <textFieldExpression>
+            <![CDATA[$V{quantitySumValue} == null ? "" :
+              (
+                $P{showInDoses}
+                  ? $P{decimalFormat}.format($V{quantitySumValue}).toString()
+                  : (
+                    ($V{quantitySumValue} / ($F{netContent} == null ? 1 : $F{netContent}))
+                    + " (+" + ($V{quantitySumValue} % ($F{netContent} == null ? 1 : $F{netContent})) + ")"
+                  )
+              )]]>
+          </textFieldExpression>
 				</textField>
 				<textField evaluationTime="Group" evaluationGroup="productGroup" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Opaque" x="520" y="0" width="90" height="25" forecolor="#848484" uuid="d2a96208-ada5-4412-bdc6-3ab766acbf7e"/>
@@ -120,7 +130,17 @@
 					<textElement textAlignment="Right">
 						<font size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$V{sohSumValue} != null ? $P{decimalFormat}.format($V{sohSumValue}).toString() : ""]]></textFieldExpression>
+          <textFieldExpression>
+            <![CDATA[$V{sohSumValue} == null ? "" :
+              (
+                $P{showInDoses}
+                  ? $P{decimalFormat}.format($V{sohSumValue}).toString()
+                  : (
+                    ($V{sohSumValue} / ($F{netContent} == null ? 1 : $F{netContent}))
+                    + " (+" + ($V{sohSumValue} % ($F{netContent} == null ? 1 : $F{netContent})) + ")"
+                  )
+              )]]>
+          </textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Opaque" x="418" y="0" width="102" height="25" uuid="d07d08b5-df52-43b1-b3d0-d571623c8b02"/>
