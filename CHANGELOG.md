@@ -1,4 +1,4 @@
-Upcoming Version
+5.3.0 / 2025-11-27
 ==================
 
 Improvements:
