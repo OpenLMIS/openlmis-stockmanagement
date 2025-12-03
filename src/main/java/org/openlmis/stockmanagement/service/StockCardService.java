@@ -109,7 +109,7 @@ public class StockCardService extends StockCardBaseService {
   private UserReferenceDataService userReferenceDataService;
 
   @Autowired
-  private StockOnHandCalculationService calculationSoHService;
+  private StockCardLineItemService stockCardLineItemService;
 
   @Autowired
   private HomeFacilityPermissionService homeFacilityPermissionService;
@@ -168,7 +168,7 @@ public class StockCardService extends StockCardBaseService {
       permissionService.canViewStockCard(foundCard.getProgramId(), foundCard.getFacilityId());
     }
 
-    calculationSoHService.calculateStockOnHand(foundCard);
+    stockCardLineItemService.populateStockOnHandLineItems(foundCard);
 
     populateUsernames(foundCard);
 
