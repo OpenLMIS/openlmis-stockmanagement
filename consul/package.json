@@ -1,14 +1,16 @@
 {
   "name": "openlmis-consul-registration",
-  "version": "0.0.1",
-
-  "devDependencies":
-  {
-    "uuid": "~3.0.0",
-    "raml-parser": "~0.8.0",
-    "command-line-args": "~3.0.0",
-    "system-sleep": "~1.0.0",
-    "deasync": "~0.1.9",
-    "ip": "~1.1.0"
+  "version": "1.0.0",
+  "description": "Registration script for OpenLMIS Service",
+  "main": "registration.js",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "command-line-args": "^5.2.1",
+    "ip": "^1.1.8",
+    "raml-parser": "~0.8.18",
+    "uuid": "^9.0.0"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

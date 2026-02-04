@@ -1,10 +1,11 @@
 {
   "name": "openlmis-stockmanagement",
-  "version": "0.0.1",
+  "version": "1.0.0",
+  "description": "Root package for documentation and build tools",
   "devDependencies": {
-    "raml2html": "~3.0.0"
+    "raml2html": "^3.0.1"
   },
   "scripts": {
-    "runApiHtmlConverter": "raml2html --input ./build/resources/main/api-definition-raml.yaml --output ./build/resources/main/api-definition.html"
+    "runApiHtmlConverter": "raml2html --input src/main/resources/api-definition.yaml --output build/resources/main/api-definition.html"
   }
 }
