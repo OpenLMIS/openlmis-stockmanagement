@@ -22,21 +22,32 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_IO;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REPORT_ID_NOT_FOUND;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.sql.Connection;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.MissingResourceException;
+import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.UUID;
 import java.util.function.Function;
 import javax.sql.DataSource;
 import net.sf.jasperreports.engine.JREmptyDataSource;
 import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -44,6 +55,7 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.design.JasperDesign;
+import net.sf.jasperreports.engine.type.OrientationEnum;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.openlmis.stockmanagement.domain.JasperTemplate;
 import org.openlmis.stockmanagement.dto.StockCardDto;
@@ -62,6 +74,7 @@ public class JasperReportService {
   static final String PI_LINES_REPORT_URL = "/jasperTemplates/physicalinventoryLines.jrxml";
 
   private static final String PARAM_DATASOURCE = "datasource";
+  private static final String configPath = "/config/reports/";
   
   @Autowired
   private StockCardService stockCardService;
@@ -90,7 +103,7 @@ public class JasperReportService {
    * @param stockCardId stock card id
    * @return generated stock card report.
    */
-  public byte[] generateStockCardReport(UUID stockCardId) {
+  public byte[] generateStockCardReport(UUID stockCardId, String lang) {
     StockCardDto stockCardDto = stockCardService.findStockCardById(stockCardId);
     if (stockCardDto == null) {
       throw new ResourceNotFoundException(new Message(ERROR_REPORT_ID_NOT_FOUND));
@@ -103,6 +116,14 @@ public class JasperReportService {
     params.put("dateFormat", dateFormat);
     params.put("decimalFormat", createDecimalFormat());
 
+    JasperReport compiledReport = compileReportFromTemplateUrl(CARD_SUMMARY_REPORT_URL);
+    try {
+      params.putAll(getLocaleBundleParameters(compiledReport, lang));
+      params.putAll(getMapSubreportGlobalHeaderParameters(compiledReport));
+    } catch (JRException | IOException ex) {
+      throw new JasperReportViewException(new Message((ERROR_IO), ex.getMessage()), ex);
+    }
+
     return fillAndExportReport(compileReportFromTemplateUrl(CARD_REPORT_URL), params);
   }
 
@@ -113,7 +134,7 @@ public class JasperReportService {
    * @param facility facility id
    * @return generated stock card summary report.
    */
-  public byte[] generateStockCardSummariesReport(UUID program, UUID facility) {
+  public byte[] generateStockCardSummariesReport(UUID program, UUID facility, String lang) {
     List<StockCardDto> cards = stockCardSummariesService
         .findStockCards(program, facility);
     StockCardDto firstCard = cards.get(0);
@@ -131,7 +152,35 @@ public class JasperReportService {
     params.put("dateTimeFormat", dateTimeFormat);
     params.put("decimalFormat", createDecimalFormat());
 
-    return fillAndExportReport(compileReportFromTemplateUrl(CARD_SUMMARY_REPORT_URL), params);
+    JasperReport compiledReport = compileReportFromTemplateUrl(CARD_SUMMARY_REPORT_URL);
+    try {
+      params.putAll(getLocaleBundleParameters(compiledReport, lang));
+      params.putAll(getMapSubreportGlobalHeaderParameters(compiledReport));
+    } catch (JRException | IOException ex) {
+      throw new JasperReportViewException(new Message((ERROR_IO), ex.getMessage()), ex);
+    }
+
+    return fillAndExportReport(compiledReport, params);
+  }
+
+  /**
+   * Generate report with custom header byte [ ].
+   *
+   * @param jasperTemplate the jasper template
+   * @param params         the params
+   * @param lang           the lang
+   * @return the byte [ ]
+   */
+  public byte[] generateReportWithCustomHeader(JasperTemplate jasperTemplate,
+      Map<String, Object> params, String lang) {
+    JasperReport compiledReport = getReportFromTemplateData(jasperTemplate);
+    try {
+      params.putAll(getLocaleBundleParameters(compiledReport, lang));
+      params.putAll(getMapSubreportGlobalHeaderParameters(compiledReport));
+    } catch (JRException | IOException ex) {
+      throw new JasperReportViewException(new Message((ERROR_IO), ex.getMessage()), ex);
+    }
+    return fillAndExportReport(compiledReport, params);
   }
 
   /**
@@ -189,6 +238,145 @@ public class JasperReportService {
     }
 
     return bytes;
+  }
+
+  /**
+   * Gets locale for translation resource bundle parameters.
+   *
+   * @param userLocaleString the user locale string
+   * @return the locale bundle parameters
+   * @throws MalformedURLException the malformed url exception
+   */
+  public Map<String, Object> getLocaleBundleParameters(JasperReport parentReport,
+                                                       String userLocaleString)
+      throws MalformedURLException {
+    String resourceBundleName = parentReport != null ? parentReport.getResourceBundle() : null;
+    if (resourceBundleName == null || resourceBundleName.trim().isEmpty()) {
+      return Collections.emptyMap();
+    }
+
+    Locale userLocale;
+    try {
+      userLocale = new Locale.Builder().setLanguageTag(userLocaleString).build();
+    } catch (Exception e) {
+      userLocale = Locale.ENGLISH;
+    }
+
+    Map<String, Object> parameters = new HashMap<>();
+    ResourceBundle bundle = loadResourceBundle(userLocale);
+    
+    if (bundle != null) {
+      parameters.put(JRParameter.REPORT_RESOURCE_BUNDLE, bundle);
+      parameters.put(JRParameter.REPORT_LOCALE, userLocale);
+    }
+    
+    return parameters;
+  }
+
+  private ResourceBundle loadResourceBundle(Locale locale) {
+    File resourceBundleDir = new File(configPath + "resourceBundles");
+
+    // Attempt to load from the config
+    if (resourceBundleDir.exists() && resourceBundleDir.isDirectory()) {
+      try {
+        URL[] urls = {resourceBundleDir.toURI().toURL()};
+        try (URLClassLoader externalLoader = new URLClassLoader(urls)) {
+          return ResourceBundle.getBundle("report_translations", locale, externalLoader);
+        }
+      } catch (IOException | MissingResourceException e) {
+        resourceBundleDir = null;
+      }
+    }
+
+    // Fallback to the internal Classpath
+    try {
+      return ResourceBundle.getBundle("report_translations", locale);
+    } catch (MissingResourceException e) {
+      return null;
+    }
+  }
+
+  /**
+   * Gets map subreport global header parameters.
+   *
+   * @param parentReport the parent report
+   * @return the map subreport global header parameters
+   * @throws JRException the jr exception
+   * @throws IOException the io exception
+   */
+  public Map<String, Object> getMapSubreportGlobalHeaderParameters(JasperReport parentReport)
+      throws JRException, IOException {
+    // validate if report requires header or not
+    boolean needsHeader = parentReport != null && parentReport.getParameters() != null
+            && Arrays.stream(parentReport.getParameters())
+        .anyMatch(param -> "headerTemplate".equals(param.getName()));
+    if (!needsHeader) {
+      return Collections.emptyMap();
+    }
+
+    File configDir = new File(configPath);
+    if (!configDir.exists() || !configDir.isDirectory()) {
+      // config directory does not exist
+      return Collections.emptyMap();
+    }
+
+    String headerName;
+    if (OrientationEnum.LANDSCAPE.equals(parentReport.getOrientationValue())) {
+      headerName = "GlobalHeaderLandscape";
+    } else if (OrientationEnum.PORTRAIT.equals(parentReport.getOrientationValue())) {
+      headerName = "GlobalHeaderPortrait";
+    } else {
+      // no orientation recognized
+      return Collections.emptyMap();
+    }
+
+    Map<String, Object> parameters = new HashMap<>();
+    File headerFile = new File(configPath + headerName + ".jrxml");
+    if (headerFile.exists()) {
+      try (InputStream is = Files.newInputStream(headerFile.toPath())) {
+        JasperReport globalHeader = JasperCompileManager.compileReport(is);
+        parameters.put("headerTemplate", globalHeader);
+      } catch (JRException | IOException e) {
+        throw new JasperReportViewException(new Message(ERROR_GENERATE_REPORT_FAILED), e);
+      }
+    } else {
+      return Collections.emptyMap();
+    }
+
+    parameters.putAll(injectDynamicHeaderParams());
+    return parameters;
+  }
+
+  /**
+   * Inject dynamic header params map.
+   *
+   * @return the map
+   * @throws IOException the io exception
+   */
+  private Map<String, Object> injectDynamicHeaderParams() throws IOException {
+    Map<String, Object> parameters = new HashMap<>();
+    File configFile = new File(configPath + "header_config.properties");
+
+    if (configFile.exists()) {
+      Properties dynamicProps = new Properties();
+      try (InputStream is = Files.newInputStream(configFile.toPath())) {
+        dynamicProps.load(is);
+      }
+
+      for (String key : dynamicProps.stringPropertyNames()) {
+        String value = dynamicProps.getProperty(key);
+
+        if (key.endsWith("Image")) {
+          File imageFile = new File(configPath + value);
+          if (imageFile.exists()) {
+            parameters.put(key, imageFile.getAbsolutePath());
+          }
+        } else {
+          parameters.put(key, value);
+        }
+      }
+    }
+    return parameters;
   }
 
   JasperReport compileReportFromTemplateUrl(String templateUrl) {

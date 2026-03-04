@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.service;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.mock;
@@ -26,18 +27,23 @@ import static org.openlmis.stockmanagement.service.JasperReportService.CARD_REPO
 import static org.openlmis.stockmanagement.service.JasperReportService.CARD_SUMMARY_REPORT_URL;
 import static org.openlmis.stockmanagement.service.JasperReportService.PI_LINES_REPORT_URL;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.ObjectOutputStream;
+import java.net.MalformedURLException;
 import java.sql.Connection;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.UUID;
 import javax.sql.DataSource;
 import net.sf.jasperreports.engine.JREmptyDataSource;
 import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -60,13 +66,18 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({JasperFillManager.class,JasperExportManager.class})
+@PrepareForTest({JasperFillManager.class, JasperExportManager.class, 
+    JasperCompileManager.class, ResourceBundle.class, java.nio.file.Files.class})
 public class JasperReportServiceTest {
 
   private static final String DATE_FORMAT = "dd/MM/yyyy";
   private static final String DATE_TIME_FORMAT = "dd/MM/yyyy HH:mm:ss";
   private static final String GROUPING_SEPARATOR = ",";
   private static final String GROUPING_SIZE = "3";
+
+  private static final String RESOURCE_BUNDLE_NAME = "report_translations";
+  private static final String RESOURCE_BUNDLE_PATH = "/config/reports/resourceBundles";
+  private static final String CONFIG_PATH = "/config/reports/";
 
   @InjectMocks
   private JasperReportService jasperReportService;
@@ -100,7 +111,7 @@ public class JasperReportServiceTest {
     UUID stockCardId = UUID.randomUUID();
     when(stockCardService.findStockCardById(stockCardId)).thenReturn(null);
 
-    jasperReportService.generateStockCardReport(stockCardId);
+    jasperReportService.generateStockCardReport(stockCardId, "en");
   }
 
   @Test
@@ -118,7 +129,7 @@ public class JasperReportServiceTest {
     PowerMockito.when(JasperExportManager.exportReportToPdf(jasperPrint))
         .thenReturn(testReportData);
 
-    byte[] reportData = jasperReportService.generateStockCardReport(stockCard.getId());
+    byte[] reportData = jasperReportService.generateStockCardReport(stockCard.getId(), "en");
 
     assertEquals(testReportData, reportData);
   }
@@ -142,7 +153,8 @@ public class JasperReportServiceTest {
     PowerMockito.when(JasperExportManager.exportReportToPdf(jasperPrint))
         .thenReturn(testReportData);
 
-    byte[] reportData = jasperReportService.generateStockCardSummariesReport(programId, facilityId);
+    byte[] reportData =
+        jasperReportService.generateStockCardSummariesReport(programId, facilityId, "en");
 
     assertEquals(testReportData, reportData);
   }
@@ -170,9 +182,152 @@ public class JasperReportServiceTest {
     PowerMockito.when(JasperExportManager.exportReportToPdf(jasperPrint))
         .thenReturn(testReportData);
 
-    byte[] reportData = jasperReportService.generateReport(jasperTemplate, params);
+    byte[] reportData =
+        jasperReportService.generateReportWithCustomHeader(jasperTemplate, params, "en");
 
     assertEquals(testReportData, reportData);
+  }
+
+  @Test
+  public void getLocaleBundleShouldReturnEmptyMapWhenReportIsNull() throws MalformedURLException {
+    Map<String, Object> result = jasperReportService.getLocaleBundleParameters(null, "en");
+    assertEquals(0, result.size());
+  }
+
+  @Test
+  public void getLocaleBundleShouldReturnEmptyMapWhenResourceBundleIsNull()
+      throws MalformedURLException {
+    JasperReport parentReport = mock(JasperReport.class);
+    when(parentReport.getResourceBundle()).thenReturn(null);
+
+    Map<String, Object> result = jasperReportService.getLocaleBundleParameters(parentReport, "en");
+    assertEquals(0, result.size());
+  }
+
+  @Test
+  public void getLocaleBundleShouldReturnEmptyMapWhenResourceBundleIsEmpty()
+      throws MalformedURLException {
+    JasperReport parentReport = mock(JasperReport.class);
+    when(parentReport.getResourceBundle()).thenReturn("");
+
+    Map<String, Object> result = jasperReportService.getLocaleBundleParameters(parentReport, "en");
+    assertEquals(0, result.size());
+  }
+
+  @Test
+  public void getLocaleBundleShouldReturnEmptyMapWhenResourceBundleIsBlank()
+      throws MalformedURLException {
+    JasperReport parentReport = mock(JasperReport.class);
+    when(parentReport.getResourceBundle()).thenReturn("   ");
+
+    Map<String, Object> result = jasperReportService.getLocaleBundleParameters(parentReport, "en");
+    assertEquals(0, result.size());
+  }
+
+  @Test
+  public void getLocaleBundleShouldReturnEmptyMapWhenDirectoryDoesNotExist() throws Exception {
+    JasperReport parentReport = mock(JasperReport.class);
+    when(parentReport.getResourceBundle()).thenReturn(RESOURCE_BUNDLE_NAME);
+
+    File mockDir = mock(File.class);
+    whenNew(File.class).withArguments(RESOURCE_BUNDLE_PATH).thenReturn(mockDir);
+    when(mockDir.exists()).thenReturn(false);
+
+    Map<String, Object> result = jasperReportService.getLocaleBundleParameters(parentReport, "en");
+    assertEquals(2, result.size());
+    assertTrue(result.containsKey(JRParameter.REPORT_RESOURCE_BUNDLE));
+    assertTrue(result.containsKey(JRParameter.REPORT_LOCALE));
+  }
+
+  @Test
+  public void getLocaleBundleShouldReturnEmptyMapWhenPathIsNotDirectory() throws Exception {
+    JasperReport parentReport = mock(JasperReport.class);
+    when(parentReport.getResourceBundle()).thenReturn(RESOURCE_BUNDLE_NAME);
+
+    File mockDir = mock(File.class);
+    whenNew(File.class).withArguments(RESOURCE_BUNDLE_PATH).thenReturn(mockDir);
+    when(mockDir.exists()).thenReturn(true);
+    when(mockDir.isDirectory()).thenReturn(false);
+
+    Map<String, Object> result = jasperReportService.getLocaleBundleParameters(parentReport, "en");
+    assertEquals(2, result.size());
+    assertTrue(result.containsKey(JRParameter.REPORT_RESOURCE_BUNDLE));
+    assertTrue(result.containsKey(JRParameter.REPORT_LOCALE));
+  }
+
+  @Test
+  public void getMapSubreportGlobalHeaderShouldReturnEmptyMapWhenReportIsNull() throws Exception {
+    Map<String, Object> result = jasperReportService.getMapSubreportGlobalHeaderParameters(null);
+    assertEquals(0, result.size());
+  }
+
+  @Test
+  public void getMapSubreportGlobalHeaderShouldReturnEmptyMapWhenParametersAreNull() 
+      throws Exception {
+    JasperReport parentReport = mock(JasperReport.class);
+    when(parentReport.getParameters()).thenReturn(null);
+
+    Map<String, Object> result =
+        jasperReportService.getMapSubreportGlobalHeaderParameters(parentReport);
+    assertEquals(0, result.size());
+  }
+
+  @Test
+  public void getMapSubreportGlobalHeaderShouldReturnEmptyMapWhenNoHeaderParam() 
+      throws Exception {
+    JasperReport parentReport = mock(JasperReport.class);
+    when(parentReport.getParameters()).thenReturn(new net.sf.jasperreports.engine.JRParameter[0]);
+
+    Map<String, Object> result =
+        jasperReportService.getMapSubreportGlobalHeaderParameters(parentReport);
+    assertEquals(0, result.size());
+  }
+
+  @Test
+  public void getMapSubreportGlobalHeaderShouldReturnEmptyMapWhenConfigDirNotExists() 
+      throws Exception {
+    JasperReport parentReport = mock(JasperReport.class);
+    net.sf.jasperreports.engine.JRParameter headerParam = 
+        mock(net.sf.jasperreports.engine.JRParameter.class);
+    when(headerParam.getName()).thenReturn("headerTemplate");
+    when(parentReport.getParameters()).thenReturn(new net.sf.jasperreports.engine.JRParameter[] {
+        headerParam });
+
+    File mockDir = mock(File.class);
+    whenNew(File.class).withArguments(CONFIG_PATH).thenReturn(mockDir);
+    when(mockDir.exists()).thenReturn(false);
+
+    Map<String, Object> result =
+        jasperReportService.getMapSubreportGlobalHeaderParameters(parentReport);
+    assertEquals(0, result.size());
+  }
+
+  @Test
+  public void getMapSubreportGlobalHeaderShouldReturnEmptyMapWhenHeaderFileNotExists() 
+      throws Exception {
+    JasperReport parentReport = mock(JasperReport.class);
+    when(parentReport.getOrientationValue()).thenReturn(
+        net.sf.jasperreports.engine.type.OrientationEnum.LANDSCAPE);
+    
+    net.sf.jasperreports.engine.JRParameter headerParam = 
+        mock(net.sf.jasperreports.engine.JRParameter.class);
+    when(headerParam.getName()).thenReturn("headerTemplate");
+    when(parentReport.getParameters()).thenReturn(new net.sf.jasperreports.engine.JRParameter[] {
+        headerParam });
+
+    File mockConfigDir = mock(File.class);
+    whenNew(File.class).withArguments(CONFIG_PATH).thenReturn(mockConfigDir);
+    when(mockConfigDir.exists()).thenReturn(true);
+    when(mockConfigDir.isDirectory()).thenReturn(true);
+
+    File mockHeaderFile = mock(File.class);
+    whenNew(File.class).withArguments(CONFIG_PATH + "GlobalHeaderLandscape.jrxml")
+        .thenReturn(mockHeaderFile);
+    when(mockHeaderFile.exists()).thenReturn(false);
+
+    Map<String, Object> result =
+        jasperReportService.getMapSubreportGlobalHeaderParameters(parentReport);
+    assertEquals(0, result.size());
   }
 
   private DecimalFormat createDecimalFormat() {

@@ -3,6 +3,7 @@ Upcoming Version / (WIP)
 
 Improvements:
 * Stabilized consul registration and health checks
+* [ODRC-24](https://openlmis.atlassian.net/browse/ODRC-24) Global header and translations implemented for reports
 
 5.3.0 / 2025-11-27
 ==================
