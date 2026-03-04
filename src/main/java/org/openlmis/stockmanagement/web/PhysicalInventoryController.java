@@ -183,8 +183,10 @@ public class PhysicalInventoryController {
   /**
    * Print out physical inventory as a PDF file.
    *
-   * @param id The UUID of the stock event to print
-   * @param format The report format
+   * @param id          The UUID of the stock event to print
+   * @param format      The report format
+   * @param showInDoses the show in doses
+   * @param lang        the lang
    * @return ResponseEntity with the "#200 OK" HTTP response status and PDF file on success, or
    *     ResponseEntity containing the error description status.
    */
@@ -193,7 +195,8 @@ public class PhysicalInventoryController {
   public ResponseEntity<byte[]> print(
       @PathVariable("id") UUID id,
       @RequestParam String format,
-      @RequestParam(required = false, defaultValue = "true") Boolean showInDoses
+      @RequestParam(required = false, defaultValue = "true") Boolean showInDoses,
+      @RequestParam(defaultValue = "en") String lang
   ) {
     checkPermission(id);
     checkFormat(format.toLowerCase());
@@ -204,9 +207,10 @@ public class PhysicalInventoryController {
           new Message(ERROR_REPORTING_TEMPLATE_NOT_FOUND_WITH_NAME, PRINT_PI));
     }
 
-    byte[] bytes = jasperReportService.generateReport(
+    byte[] bytes = jasperReportService.generateReportWithCustomHeader(
         printTemplate,
-        getParams(id, format, showInDoses)
+        getParams(id, format, showInDoses),
+        lang
     );
 
     MediaType mediaType;

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.20.5.final using JasperReports Library version 6.20.5-3efcf2e67f959db3888d79f73dde2dbd7acb4f8e  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="physicaInventory" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="BlankPage" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="20" bottomMargin="0" isFloatColumnFooter="true" whenResourceMissingType="Empty" uuid="a0a4e861-0726-422f-b3d5-54b1aefe96ce">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="physicaInventory" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="BlankPage" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="20" bottomMargin="0" isFloatColumnFooter="true" resourceBundle="reports/resourceBundles/report_translations" whenResourceMissingType="Empty" uuid="a0a4e861-0726-422f-b3d5-54b1aefe96ce">
 	<import value="java.util.*"/>
 	<import value="java.time.LocalDate"/>
 	<import value="java.time.format.DateTimeFormatter"/>
@@ -14,6 +14,7 @@
 	<parameter name="timeZoneId" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="decimalFormat" class="java.text.DecimalFormat" isForPrompting="false"/>
 	<parameter name="showInDoses" class="java.lang.Boolean" isForPrompting="false"/>
+    <parameter name="headerTemplate" class="net.sf.jasperreports.engine.JasperReport"/>
 	<queryString>
 		<![CDATA[select f.name as facility, p.name as program, u.username as username, sel.occurreddate, se.processeddate, se.id as event_id
 			from stockmanagement.physical_inventories pi
@@ -36,35 +37,51 @@
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="115">
-			<staticText>
-				<reportElement x="20" y="10" width="800" height="20" uuid="8b895ad8-e565-41e4-87f4-fe70fea7b9f1"/>
+		<band height="205">
+            <property name="com.jaspersoft.studio.unit.height" value="px"/>
+            <subreport overflowType="Stretch">
+                <reportElement positionType="Float" mode="Transparent" x="0" y="0" width="842"
+                               height="90" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="57924a28-dd0b-4ed5-8b5c-8867c356fb34">
+                    <property name="com.jaspersoft.studio.unit.height" value="px"/>
+                    <property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+                    <property name="com.jaspersoft.studio.unit.width" value="px"/>
+                </reportElement>
+                <parametersMapExpression><![CDATA[$P{REPORT_PARAMETERS_MAP}]]></parametersMapExpression>
+                <connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+                <subreportExpression><![CDATA[$P{headerTemplate}]]></subreportExpression>
+            </subreport>
+			<textField>
+				<reportElement positionType="Float" x="20" y="100" width="800" height="20"
+                               uuid="8b895ad8-e565-41e4-87f4-fe70fea7b9f1"/>
 				<textElement verticalAlignment="Middle">
 					<font size="16" isBold="true" pdfFontName="Helvetica-Bold"/>
 				</textElement>
-				<text><![CDATA[Submitted Physical Inventory]]></text>
-			</staticText>
+				<textFieldExpression><![CDATA[$R{report.title.submittedPhysicalInventory}]]></textFieldExpression>
+			</textField>
 			<textField>
-				<reportElement x="20" y="40" width="800" height="20" uuid="ec47a93b-983c-447f-85cf-4775e800330a"/>
+				<reportElement positionType="Float" x="20" y="130" width="800" height="20"
+                               uuid="ec47a93b-983c-447f-85cf-4775e800330a"/>
 				<textElement>
 					<font size="13" isBold="true" pdfFontName="Helvetica-Bold"/>
 				</textElement>
-				<textFieldExpression><![CDATA[MessageFormat.format("Physical inventory for date: {0}",
+				<textFieldExpression><![CDATA[MessageFormat.format($R{report.header.physicalInventoryDate},
 					DateTimeFormatter.ofPattern($P{dateFormat}).format(LocalDate.parse($F{occurreddate})))]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="20" y="65" width="800" height="15" uuid="a035b2b6-8c32-4db2-89fd-6444a109b1d7"/>
+				<reportElement positionType="Float" x="20" y="155" width="800" height="15"
+                               uuid="a035b2b6-8c32-4db2-89fd-6444a109b1d7"/>
 				<textElement>
 					<font size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[MessageFormat.format("Facility: {0}; Program: {1}", $F{facility}, $F{program})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[MessageFormat.format($R{report.header.facilityProgram}, $F{facility}, $F{program})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="20" y="80" width="800" height="15" uuid="08e7b43c-4f44-4e33-88f6-92324585772e"/>
+				<reportElement positionType="Float" x="20" y="170" width="800" height="15"
+                               uuid="08e7b43c-4f44-4e33-88f6-92324585772e"/>
 				<textElement>
 					<font size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[MessageFormat.format("Submitted into system on {0} by {1}",
+				<textFieldExpression><![CDATA[MessageFormat.format($R{report.header.submittedIntoSystem},
 				 DateTimeFormatter.ofPattern($P{dateTimeFormat}).format(ZonedDateTime.ofInstant(
 				 $F{processeddate}.toInstant(), ZoneId.of($P{timeZoneId}))),$F{username})]]></textFieldExpression>
 			</textField>
@@ -104,14 +121,14 @@
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$R{report.controls.page} + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
 				<reportElement x="800" y="10" width="30" height="10" uuid="5ded44a2-6687-46fd-b29e-205ba278ca50"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA["of " + $V{PAGE_NUMBER}]]></textFieldExpression>
+                <textFieldExpression><![CDATA[" " + $R{report.controls.pageOf} +  $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement positionType="Float" x="10" y="10" width="80" height="10" uuid="2dd094dc-e4b5-43c0-89ab-02f2dda79bb5"/>
