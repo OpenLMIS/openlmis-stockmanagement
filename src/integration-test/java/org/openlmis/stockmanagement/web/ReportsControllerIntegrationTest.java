@@ -47,7 +47,7 @@ public class ReportsControllerIntegrationTest extends BaseWebTest {
   public void return200WhenStockCardReportGenerated() throws Exception {
     //given
     UUID stockCardId = UUID.randomUUID();
-    when(reportService.generateStockCardReport(stockCardId))
+    when(reportService.generateStockCardReport(stockCardId, "en"))
         .thenReturn(new byte[1]);
 
     //when
@@ -63,7 +63,7 @@ public class ReportsControllerIntegrationTest extends BaseWebTest {
     //given
     UUID program = UUID.randomUUID();
     UUID facility = UUID.randomUUID();
-    when(reportService.generateStockCardSummariesReport(program, facility))
+    when(reportService.generateStockCardSummariesReport(program, facility, "en"))
         .thenReturn(new byte[1]);
 
     //when

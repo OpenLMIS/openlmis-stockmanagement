@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -41,8 +42,8 @@ import org.openlmis.stockmanagement.service.JasperReportService;
 import org.openlmis.stockmanagement.service.JasperTemplateService;
 import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.PhysicalInventoryService;
+import org.openlmis.stockmanagement.service.report.ReportService;
 import org.openlmis.stockmanagement.util.Message;
-import org.openlmis.stockmanagement.util.ReportUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -72,6 +73,9 @@ public class PhysicalInventoryController {
 
   @Autowired
   private JasperReportService jasperReportService;
+
+  @Autowired
+  private ReportService reportService;
 
   @Autowired
   private JasperTemplateService templateService;
@@ -193,7 +197,8 @@ public class PhysicalInventoryController {
   public ResponseEntity<byte[]> print(
       @PathVariable("id") UUID id,
       @RequestParam String format,
-      @RequestParam(required = false, defaultValue = "true") Boolean showInDoses
+      @RequestParam(required = false, defaultValue = "true") Boolean showInDoses,
+      @RequestParam(defaultValue = "en") String lang
   ) {
     checkPermission(id);
     checkFormat(format.toLowerCase());
@@ -204,9 +209,11 @@ public class PhysicalInventoryController {
           new Message(ERROR_REPORTING_TEMPLATE_NOT_FOUND_WITH_NAME, PRINT_PI));
     }
 
-    byte[] bytes = jasperReportService.generateReport(
+    Map<String, Object> params = getParams(id, format, showInDoses);
+    params.put("lang", lang);
+    byte[] bytes = reportService.generateReport(
         printTemplate,
-        getParams(id, format, showInDoses)
+        params
     );
 
     MediaType mediaType;
@@ -246,7 +253,7 @@ public class PhysicalInventoryController {
   }
 
   private Map<String, Object> getParams(UUID eventId, String format, Boolean showInDoses) {   
-    Map<String, Object> params = ReportUtils.createParametersMap();
+    Map<String, Object> params = new HashMap<>();
     String formatId = "'" + eventId + "'";
     DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols();
     decimalFormatSymbols.setGroupingSeparator(groupingSeparator.charAt(0));
@@ -259,8 +266,8 @@ public class PhysicalInventoryController {
     params.put("format", format);
     params.put("decimalFormat", decimalFormat);
     params.put("showInDoses", showInDoses);
-    params.put("subreport",
-        jasperReportService.createCustomizedPhysicalInventoryLineSubreport());
+    params.put("subreport_bytes",
+        jasperReportService.getCompiledPhysicalInventoryLineSubreportBytes());
 
     return params;
   }
