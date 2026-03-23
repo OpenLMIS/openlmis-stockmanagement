@@ -31,6 +31,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import net.sf.jasperreports.engine.JRParameter;
 import org.openlmis.stockmanagement.domain.JasperTemplate;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
@@ -99,6 +101,9 @@ public class PhysicalInventoryController {
 
   @Value("${groupingSize}")
   private String groupingSize;
+
+  @Value("${defaultLocale}")
+  private String locale;
 
   /**
    * Get a draft physical inventory.
@@ -259,8 +264,8 @@ public class PhysicalInventoryController {
     params.put("format", format);
     params.put("decimalFormat", decimalFormat);
     params.put("showInDoses", showInDoses);
-    params.put("subreport",
-        jasperReportService.createCustomizedPhysicalInventoryLineSubreport());
+    params.put(JRParameter.REPORT_LOCALE, locale);
+    params.put("subreport", jasperReportService.createCustomizedPhysicalInventoryLineSubreport());
 
     return params;
   }

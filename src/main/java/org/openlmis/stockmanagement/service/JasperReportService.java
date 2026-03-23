@@ -35,13 +35,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import javax.sql.DataSource;
-import net.sf.jasperreports.engine.JREmptyDataSource;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperCompileManager;
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReport;
+
+import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
@@ -84,6 +79,8 @@ public class JasperReportService {
   @Value("${groupingSize}")
   private String groupingSize;
 
+  @Value("${defaultLocale}")
+  private String locale;
   /**
    * Generate stock card report in PDF format.
    *
@@ -102,6 +99,7 @@ public class JasperReportService {
     params.put("hasLot", stockCardDto.hasLot());
     params.put("dateFormat", dateFormat);
     params.put("decimalFormat", createDecimalFormat());
+    params.put(JRParameter.REPORT_LOCALE, locale);
 
     return fillAndExportReport(compileReportFromTemplateUrl(CARD_REPORT_URL), params);
   }
@@ -130,6 +128,7 @@ public class JasperReportService {
     params.put("dateFormat", dateFormat);
     params.put("dateTimeFormat", dateTimeFormat);
     params.put("decimalFormat", createDecimalFormat());
+    params.put(JRParameter.REPORT_LOCALE, locale);
 
     return fillAndExportReport(compileReportFromTemplateUrl(CARD_SUMMARY_REPORT_URL), params);
   }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.20.5.final using JasperReports Library version 6.20.5-3efcf2e67f959db3888d79f73dde2dbd7acb4f8e  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="physicaInventoryLines" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="BlankPage" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isFloatColumnFooter="true" whenResourceMissingType="Empty" uuid="8eeca41d-cefe-475b-b89b-f898f69a4087">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="physicaInventoryLines" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="BlankPage" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isFloatColumnFooter="true" whenResourceMissingType="Empty" uuid="8eeca41d-cefe-475b-b89b-f898f69a4087"
+			  resourceBundle="physicalinventoryLines">
 	<import value="java.time.LocalDate"/>
 	<import value="java.time.format.DateTimeFormatter"/>
 	<import value="java.text.*"/>
@@ -114,7 +114,7 @@
                   ? $P{decimalFormat}.format($V{quantitySumValue}).toString()
                   : (
                     ($V{quantitySumValue} / ($F{netContent} == null ? 1 : $F{netContent}))
-                    + " (+" + ($V{quantitySumValue} % ($F{netContent} == null ? 1 : $F{netContent})) + ")"
+                    + " (" + $R{label.quantity.prefix} + ($V{quantitySumValue} % ($F{netContent} == null ? 1 : $F{netContent})) + ")"
                   )
               )]]>
           </textFieldExpression>
@@ -137,7 +137,7 @@
                   ? $P{decimalFormat}.format($V{sohSumValue}).toString()
                   : (
                     ($V{sohSumValue} / ($F{netContent} == null ? 1 : $F{netContent}))
-                    + " (+" + ($V{sohSumValue} % ($F{netContent} == null ? 1 : $F{netContent})) + ")"
+                    + " (" + $R{label.quantity.prefix} + ($V{sohSumValue} % ($F{netContent} == null ? 1 : $F{netContent})) + ")"
                   )
               )]]>
           </textFieldExpression>
@@ -217,7 +217,7 @@
 				<textElement>
 					<font size="9"/>
 				</textElement>
-				<text><![CDATA[Itemized reasons]]></text>
+				<text><![CDATA[$R{label.itemizedReasons}]]></text>
 			</staticText>
 			<textField isStretchWithOverflow="true">
 				<reportElement mode="Opaque" x="610" y="0" width="92" height="25" backcolor="#CCCCCC" uuid="10ff459c-97ad-48f1-b414-6158967a3b95"/>
@@ -230,7 +230,7 @@
 				<textElement>
 					<font size="9"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{showInDoses} ? "Current Stock\n(Doses)" : "Current Stock\n(Packs)"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{showInDoses} ? $R{label.currentStock.doses} : $R{label.currentStock.packs}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement mode="Opaque" x="520" y="0" width="90" height="25" backcolor="#CCCCCC" uuid="8d4d1ea9-e98c-43b5-a4e2-64a13ad5ab50"/>
@@ -243,7 +243,7 @@
 				<textElement>
 					<font size="9"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{showInDoses} ? "Stock On Hand\n(Doses)" : "Stock On Hand\n(Packs)"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{showInDoses} ? $R{label.soh.doses} : $R{label.soh.packs}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement mode="Opaque" x="418" y="0" width="102" height="25" backcolor="#CCCCCC" uuid="d07d08b5-df52-43b1-b3d0-d571623c8b02"/>
@@ -256,7 +256,7 @@
 				<textElement>
 					<font size="9"/>
 				</textElement>
-				<text><![CDATA[VVM Status]]></text>
+				<text><![CDATA[$R{label.vvmStatus}]]></text>
 			</staticText>
 			<staticText>
 				<reportElement mode="Opaque" x="316" y="0" width="102" height="25" backcolor="#CCCCCC" uuid="dc2ac7c8-1086-49d9-90fb-9acd95271092"/>
@@ -269,7 +269,7 @@
 				<textElement>
 					<font size="9"/>
 				</textElement>
-				<text><![CDATA[Expiry date]]></text>
+				<text><![CDATA[$R{label.expiryDate}]]></text>
 			</staticText>
 			<staticText>
 				<reportElement mode="Opaque" x="244" y="0" width="72" height="25" backcolor="#CCCCCC" uuid="93bc4e67-36dd-4077-95db-0db852108a30"/>
@@ -282,7 +282,7 @@
 				<textElement>
 					<font size="9"/>
 				</textElement>
-				<text><![CDATA[Lot code]]></text>
+				<text><![CDATA[$R{label.lotCode}]]></text>
 			</staticText>
 			<staticText>
 				<reportElement mode="Opaque" x="82" y="0" width="162" height="25" backcolor="#CCCCCC" uuid="f75fae81-e6b8-4993-898d-632ddf29d1e8"/>
@@ -295,7 +295,7 @@
 				<textElement>
 					<font size="9"/>
 				</textElement>
-				<text><![CDATA[Product Name]]></text>
+				<text><![CDATA[$R{label.productName}]]></text>
 			</staticText>
 			<staticText>
 				<reportElement mode="Opaque" x="10" y="0" width="72" height="25" backcolor="#CCCCCC" uuid="06a9370e-dcaa-4b03-9d18-aca8abaa56bd"/>
@@ -308,7 +308,7 @@
 				<textElement>
 					<font size="9"/>
 				</textElement>
-				<text><![CDATA[Product Code]]></text>
+				<text><![CDATA[$R{label.productCode}]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
@@ -327,7 +327,7 @@
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($F{lotcode} == null) ? "No lot defined" : $F{lotcode}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{lotcode} == null) ? $R{label.noLotDefined} : $F{lotcode}]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Group" evaluationGroup="lineItemGroup" isBlankWhenNull="true">
 				<reportElement x="316" y="0" width="102" height="25" printWhenGroupChanges="lineItemGroup" uuid="0e217f2e-f7ca-4c05-b9d2-f13ec6cf38db">
@@ -378,7 +378,7 @@
                           ? $P{decimalFormat}.format($F{soh}).toString()
                           : (
                               ($F{soh} / ($F{netContent} == null ? 1 : $F{netContent}))
-                              + " (+" + ($F{soh} % ($F{netContent} == null ? 1 : $F{netContent})) + ")"
+                              + " (" + $R{label.quantity.prefix} + ($F{soh} % ($F{netContent} == null ? 1 : $F{netContent})) + ")"
                             )
                     )]]></textFieldExpression>
 			</textField>
@@ -401,7 +401,7 @@
                           ? $P{decimalFormat}.format($F{quantity}).toString()
                           : (
                               ($F{quantity} / ($F{netContent} == null ? 1 : $F{netContent}))
-                              + " (+" + ($F{quantity} % ($F{netContent} == null ? 1 : $F{netContent})) + ")"
+                              + " (" + $R{label.quantity.prefix} + ($F{quantity} % ($F{netContent} == null ? 1 : $F{netContent})) + ")"
                             )
                     )]]></textFieldExpression>
 			</textField>
