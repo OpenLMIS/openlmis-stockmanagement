@@ -32,5 +32,5 @@ import lombok.ToString;
 public final class GenerateReportDto {
   private String name;
   private byte[] template;
-  Map<String, Object> params;
+  private Map<String, Object> params;
 }

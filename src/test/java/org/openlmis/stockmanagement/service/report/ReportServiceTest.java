@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.service.report;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -33,7 +34,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.JasperTemplate;
 import org.openlmis.stockmanagement.service.AuthService;
 import org.springframework.http.HttpEntity;
@@ -138,7 +139,7 @@ public class ReportServiceTest {
   }
 
   @Test
-  public void shouldReturnNullOnHttpError() {
+  public void shouldReturnEmptyArrayOnHttpError() {
     String reportName = "report";
     byte[] reportData = "data".getBytes();
     Map<String, Object> params = new HashMap<>();
@@ -153,6 +154,6 @@ public class ReportServiceTest {
 
     byte[] result = reportService.fillAndExportReport(reportName, reportData, params);
 
-    assertThat(result, is(org.hamcrest.Matchers.nullValue()));
+    assertArrayEquals(new byte[0], result);
   }
 }

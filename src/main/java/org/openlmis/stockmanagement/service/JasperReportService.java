@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import javax.sql.DataSource;
+import lombok.RequiredArgsConstructor;
 import net.sf.jasperreports.engine.JREmptyDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
@@ -53,11 +54,11 @@ import org.openlmis.stockmanagement.exception.JasperReportViewException;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.service.report.ReportService;
 import org.openlmis.stockmanagement.util.Message;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class JasperReportService {
 
   static final String CARD_REPORT_URL = "/jasperTemplates/stockCard.jrxml";
@@ -66,17 +67,10 @@ public class JasperReportService {
 
   private static final String PARAM_DATASOURCE = "datasource";
   
-  @Autowired
-  private StockCardService stockCardService;
-
-  @Autowired
-  private StockCardSummariesService stockCardSummariesService;
-
-  @Autowired
-  private ReportService reportService;
-
-  @Autowired
-  private DataSource replicationDataSource;
+  private final StockCardService stockCardService;
+  private final StockCardSummariesService stockCardSummariesService;
+  private final ReportService reportService;
+  private final DataSource replicationDataSource;
 
   @Value("${dateFormat}")
   private String dateFormat;

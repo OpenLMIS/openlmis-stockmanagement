@@ -17,13 +17,14 @@ package org.openlmis.stockmanagement.service.report;
 
 import java.net.URI;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang.ArrayUtils;
 import org.openlmis.stockmanagement.domain.JasperTemplate;
 import org.openlmis.stockmanagement.service.AuthService;
 import org.openlmis.stockmanagement.service.RequestHeaders;
 import org.openlmis.stockmanagement.util.RequestHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -34,17 +35,17 @@ import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * The type Report service.
+ * The Report service delegates the jasper report filling and generation to the report module.
  */
 @Service
+@RequiredArgsConstructor
 public class ReportService {
   private final Logger logger = LoggerFactory.getLogger(getClass());
 
   @Value("${report.url}")
   private String reportUrl;
 
-  @Autowired
-  private AuthService authService;
+  private final AuthService authService;
 
   private final RestOperations restTemplate = new RestTemplate();
 
@@ -88,7 +89,7 @@ public class ReportService {
           ex.getStatusCode(), ex.getResponseBodyAsString()
       );
     }
-    return null;
+    return ArrayUtils.EMPTY_BYTE_ARRAY;
   }
 
   private GenerateReportDto buildGenerateReportRequest(String name, byte[] data, Map<String,

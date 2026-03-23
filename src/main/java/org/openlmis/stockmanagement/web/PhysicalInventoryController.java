@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.openlmis.stockmanagement.domain.JasperTemplate;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
@@ -44,7 +45,6 @@ import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.service.PhysicalInventoryService;
 import org.openlmis.stockmanagement.service.report.ReportService;
 import org.openlmis.stockmanagement.util.Message;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -63,31 +63,19 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
 @RequestMapping("/api/physicalInventories")
+@RequiredArgsConstructor
 public class PhysicalInventoryController {
 
   public static final String PRINT_PI = "Print PI";
   public static final String ID_PATH_VARIABLE = "/{id}";
 
-  @Autowired
-  private PhysicalInventoriesRepository repository;
-
-  @Autowired
-  private JasperReportService jasperReportService;
-
-  @Autowired
-  private ReportService reportService;
-
-  @Autowired
-  private JasperTemplateService templateService;
-
-  @Autowired
-  private PermissionService permissionService;
-
-  @Autowired
-  private PhysicalInventoryService physicalInventoryService;
-
-  @Autowired
-  private PhysicalInventoriesRepository physicalInventoryRepository;
+  private final PhysicalInventoriesRepository repository;
+  private final JasperReportService jasperReportService;
+  private final ReportService reportService;
+  private final JasperTemplateService templateService;
+  private final PermissionService permissionService;
+  private final PhysicalInventoryService physicalInventoryService;
+  private final PhysicalInventoriesRepository physicalInventoryRepository;
 
   @Value("${dateTimeFormat}")
   private String dateTimeFormat;
@@ -134,7 +122,7 @@ public class PhysicalInventoryController {
   @ResponseBody
   public PhysicalInventoryDto getPhysicalInventory(@PathVariable UUID id) {
     PhysicalInventory foundInventory = physicalInventoryRepository.findById(id)
-        .orElseThrow(() -> 
+        .orElseThrow(() ->
             new ResourceNotFoundException(new Message(ERROR_PHYSICAL_INVENTORY_NOT_FOUND, id)));
 
     physicalInventoryService.checkPermission(
@@ -252,7 +240,7 @@ public class PhysicalInventoryController {
     }
   }
 
-  private Map<String, Object> getParams(UUID eventId, String format, Boolean showInDoses) {   
+  private Map<String, Object> getParams(UUID eventId, String format, Boolean showInDoses) {
     Map<String, Object> params = new HashMap<>();
     String formatId = "'" + eventId + "'";
     DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols();

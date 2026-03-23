@@ -34,7 +34,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import javax.sql.DataSource;
-import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -43,7 +42,6 @@ import net.sf.jasperreports.engine.JasperReport;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.openlmis.stockmanagement.domain.JasperTemplate;
@@ -65,7 +63,6 @@ public class JasperReportServiceTest {
   private static final String GROUPING_SEPARATOR = ",";
   private static final String GROUPING_SIZE = "3";
 
-  @InjectMocks
   private JasperReportService jasperReportService;
 
   @Mock
@@ -84,12 +81,13 @@ public class JasperReportServiceTest {
   
   @Before
   public void setUp() {
-    jasperReportService = spy(new JasperReportService());
+    MockitoAnnotations.initMocks(this);
+    jasperReportService = spy(new JasperReportService(stockCardService, stockCardSummariesService,
+        reportService, dataSource));
     ReflectionTestUtils.setField(jasperReportService, "dateFormat", DATE_FORMAT);
     ReflectionTestUtils.setField(jasperReportService, "dateTimeFormat", DATE_TIME_FORMAT);
     ReflectionTestUtils.setField(jasperReportService, "groupingSeparator", GROUPING_SEPARATOR);
     ReflectionTestUtils.setField(jasperReportService, "groupingSize", GROUPING_SIZE);
-    MockitoAnnotations.initMocks(this);
     mockStatic(JasperFillManager.class);
     mockStatic(JasperExportManager.class);
     testReportData = new byte[]{0x1};
@@ -104,7 +102,7 @@ public class JasperReportServiceTest {
   }
 
   @Test
-  public void shouldGenerateReportWithProperParamsIfStockCardExists() throws JRException {
+  public void shouldGenerateReportWithProperParamsIfStockCardExists() {
     StockCardDto stockCard = StockCardDtoDataBuilder.createStockCardDto();
 
     when(stockCardService.findStockCardById(stockCard.getId())).thenReturn(stockCard);
@@ -118,7 +116,7 @@ public class JasperReportServiceTest {
   }
 
   @Test
-  public void shouldGenerateReportWithProperParamsIfStockCardSummaryExists() throws JRException {
+  public void shouldGenerateReportWithProperParamsIfStockCardSummaryExists() {
     StockCardDto stockCard = StockCardDtoDataBuilder.createStockCardDto();
 
     UUID programId = UUID.randomUUID();
