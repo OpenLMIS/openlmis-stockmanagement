@@ -28,11 +28,7 @@ import java.io.ObjectInputStream;
 import java.sql.Connection;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import javax.sql.DataSource;
 
@@ -99,7 +95,7 @@ public class JasperReportService {
     params.put("hasLot", stockCardDto.hasLot());
     params.put("dateFormat", dateFormat);
     params.put("decimalFormat", createDecimalFormat());
-    params.put(JRParameter.REPORT_LOCALE, locale);
+    params.put(JRParameter.REPORT_LOCALE, new Locale(locale));
 
     return fillAndExportReport(compileReportFromTemplateUrl(CARD_REPORT_URL), params);
   }
