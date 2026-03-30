@@ -89,6 +89,7 @@ public class JasperReportServiceTest {
     ReflectionTestUtils.setField(jasperReportService, "dateTimeFormat", DATE_TIME_FORMAT);
     ReflectionTestUtils.setField(jasperReportService, "groupingSeparator", GROUPING_SEPARATOR);
     ReflectionTestUtils.setField(jasperReportService, "groupingSize", GROUPING_SIZE);
+    ReflectionTestUtils.setField(jasperReportService, "locale", "en");
     MockitoAnnotations.initMocks(this);
     mockStatic(JasperFillManager.class);
     mockStatic(JasperExportManager.class);

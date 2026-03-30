@@ -73,6 +73,11 @@
 		<variableExpression><![CDATA[($V{lineItemGroup_COUNT} == 1) ? $F{soh} : 0]]></variableExpression>
 	</variable>
 
+	<!-- Group by product+lot (line item) -->
+	<group name="lineItemGroup">
+		<groupExpression><![CDATA[$F{productcode} + ($F{lotcode} == null ? "" : $F{lotcode})]]></groupExpression>
+	</group>
+
 	<!-- Group by program -->
 	<group name="product_program_group">
 		<groupExpression><![CDATA[$F{displayname}]]></groupExpression>
