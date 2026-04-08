@@ -24,7 +24,9 @@ import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
 import org.openlmis.stockmanagement.dto.referencedata.RightDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
+import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.PermissionStrings;
+import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.util.Message;
@@ -60,6 +62,12 @@ public class PermissionService {
 
   @Autowired
   private PermissionStrings permissionStrings;
+
+  @Autowired
+  private ProgramReferenceDataService programService;
+
+  @Autowired
+  private FacilityReferenceDataService facilityService;
 
   @Value("${auth.server.clientId}")
   private String serviceTokenClientId;
@@ -136,11 +144,19 @@ public class PermissionService {
     return permissionStrings.forUser(userId);
   }
 
-  private void hasPermission(String rightName, UUID program, UUID facility, UUID warehouse) {
-    ResultDto<Boolean> result = getRightResult(rightName, program, facility, warehouse, false);
+  private void hasPermission(String rightName, UUID programId, UUID facilityId, UUID warehouse) {
+    ResultDto<Boolean> result = getRightResult(rightName, programId, facilityId, warehouse, false);
     if (null == result || !result.getResult()) {
+      String programName = null;
+      String facilityName = null;
+      if(programId != null) {
+        programName = programService.findOne(programId).getName();
+      }
+      if(facilityId != null) {
+        facilityName = facilityService.findOne(facilityId).getName();
+      }
       throw new PermissionMessageException(
-          new Message(ERROR_NO_FOLLOWING_PERMISSION, rightName, program, facility));
+          new Message(ERROR_NO_FOLLOWING_PERMISSION, rightName, programName, facilityName));
     }
   }
 
