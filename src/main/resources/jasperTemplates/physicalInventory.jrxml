@@ -14,6 +14,7 @@
 	<import value="java.text.*"/>
 	<import value="java.time.ZoneId"/>
 	<parameter name="subreport" class="net.sf.jasperreports.engine.design.JasperDesign" isForPrompting="false"/>
+	<parameter name="subReportResourceBundle" class="java.util.ResourceBundle" isForPrompting="false"/>
 	<parameter name="pi_id" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="dateFormat" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="dateTimeFormat" class="java.lang.String" isForPrompting="false"/>

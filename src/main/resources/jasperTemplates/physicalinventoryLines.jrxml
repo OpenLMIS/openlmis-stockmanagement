@@ -73,6 +73,11 @@
 		<variableExpression><![CDATA[($V{lineItemGroup_COUNT} == 1) ? $F{soh} : 0]]></variableExpression>
 	</variable>
 
+	<!-- Group by product+lot (line item) -->
+	<group name="lineItemGroup">
+		<groupExpression><![CDATA[$F{productcode} + ($F{lotcode} == null ? "" : $F{lotcode})]]></groupExpression>
+	</group>
+
 	<!-- Group by program -->
 	<group name="product_program_group">
 		<groupExpression><![CDATA[$F{displayname}]]></groupExpression>
@@ -94,6 +99,20 @@
 		<groupExpression><![CDATA[$F{productcode} + $F{productname}]]></groupExpression>
 		<groupHeader>
 			<band height="25">
+				<textField evaluationTime="Group" evaluationGroup="productGroup">
+					<reportElement x="10" y="0" width="72" height="25"/>
+					<textElement>
+						<font size="8" isBold="true" fontName="DejaVu Sans" pdfFontName="DejaVuSans.ttf"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{productcode}]]></textFieldExpression>
+				</textField>
+				<textField evaluationTime="Group" evaluationGroup="productGroup" isStretchWithOverflow="true">
+					<reportElement x="82" y="0" width="162" height="25"/>
+					<textElement>
+						<font size="8" isBold="true" fontName="DejaVu Sans" pdfFontName="DejaVuSans.ttf"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{productname}]]></textFieldExpression>
+				</textField>
 				<textField evaluationTime="Group" evaluationGroup="productGroup">
 					<reportElement x="610" y="0" width="90" height="25"/>
 					<textElement textAlignment="Right">
@@ -120,7 +139,7 @@
                         ($P{showInDoses}
                             ? $P{decimalFormat}.format($V{sohSumValue}).toString()
                             : ($V{sohSumValue} / ($F{netContent} == null ? 1 : $F{netContent}))
-                              + " (" + $R{label.quantity.prefix, fontName=DejaVu Sans, pdfFontName=DejaVuSans.ttf}
+                              + " (" + $R{label.quantity.prefix}
                               + ($V{sohSumValue} % ($F{netContent} == null ? 1 : $F{netContent})) + ")"
                         )
                     ]]></textFieldExpression>
@@ -132,13 +151,48 @@
 	<!-- Column header -->
 	<columnHeader>
 		<band height="25">
-			<staticText>
+			<textField>
+				<reportElement x="10" y="0" width="72" height="25" backcolor="#CCCCCC"/>
+				<textElement>
+					<font size="9" fontName="DejaVu Sans" pdfFontName="DejaVuSans.ttf"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{label.productCode}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="82" y="0" width="162" height="25" backcolor="#CCCCCC"/>
+				<textElement>
+					<font size="9" fontName="DejaVu Sans" pdfFontName="DejaVuSans.ttf"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{label.productName}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="244" y="0" width="72" height="25" backcolor="#CCCCCC"/>
+				<textElement>
+					<font size="9" fontName="DejaVu Sans" pdfFontName="DejaVuSans.ttf"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{label.lotCode}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="316" y="0" width="102" height="25" backcolor="#CCCCCC"/>
+				<textElement>
+					<font size="9" fontName="DejaVu Sans" pdfFontName="DejaVuSans.ttf"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{label.expiryDate}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="418" y="0" width="102" height="25" backcolor="#CCCCCC"/>
+				<textElement>
+					<font size="9" fontName="DejaVu Sans" pdfFontName="DejaVuSans.ttf"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{label.vvmStatus}]]></textFieldExpression>
+			</textField>
+			<textField>
 				<reportElement x="700" y="0" width="132" height="25" backcolor="#CCCCCC"/>
 				<textElement>
 					<font size="9" fontName="DejaVu Sans" pdfFontName="DejaVuSans.ttf"/>
 				</textElement>
-				<text><![CDATA[$R{label.itemizedReasons, fontName=DejaVu Sans, pdfFontName=DejaVuSans.ttf}]]></text>
-			</staticText>
+				<textFieldExpression><![CDATA[$R{label.itemizedReasons, fontName=DejaVu Sans, pdfFontName=DejaVuSans.ttf}]]></textFieldExpression>
+			</textField>
 
 			<textField>
 				<reportElement x="610" y="0" width="92" height="25" backcolor="#CCCCCC"/>
