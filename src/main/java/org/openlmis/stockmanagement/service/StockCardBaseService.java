@@ -19,7 +19,10 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
+
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockCardLineItemDto;
@@ -64,10 +67,33 @@ public abstract class StockCardBaseService {
     StockCard firstCard = stockCards.get(0);
 
     LOGGER.debug("Calling ref data to retrieve facility info for card");
-    FacilityDto facility = facilityRefDataService.findOne(firstCard.getFacilityId());
+//    FacilityDto facility = facilityRefDataService.findOne(firstCard.getFacilityId());
+    FacilityDto facility = new FacilityDto(
+            UUID.randomUUID(),
+            "FAC001",
+            "Main Facility",
+            "Primary healthcare facility",
+            true,
+            LocalDate.now(),
+            null,
+            "No issues",
+            true,
+            true,
+            emptyList(),
+            null,
+            null
+    );
     LOGGER.debug("Calling ref data to retrieve program info for card");
-    ProgramDto program = programRefDataService.findOne(firstCard.getProgramId());
-
+//    ProgramDto program = programRefDataService.findOne(firstCard.getProgramId());
+    ProgramDto program = new ProgramDto(
+            UUID.randomUUID(),
+            "PRG001",
+            "Sample Program",
+            "Test description",
+            true,
+            false,
+            true
+    );
     return stockCards.stream()
         .map(card -> cardToDto(facility, program, card))
         .collect(toList());

@@ -33,23 +33,23 @@ def ramlToCopy = copySpec {
 
 tasks.register('copyRamlToBuild', Copy) {
     group = 'documentation'
-    with ramlToCopy
+//    with ramlToCopy
     into 'build/resources/main'
 }
 
-tasks.register('ramlToHtml', Exec) {
-    group = 'documentation'
-    description = 'Convert RAML to HTML document'
-
-    dependsOn 'npmInstall', 'copyRamlToBuild'
-
-    commandLine 'npm', 'run', 'runApiHtmlConverter'
-}
-
-tasks.register('copyRamlHtmlToBuild', Copy) {
-    group = 'documentation'
-    dependsOn 'ramlToHtml'
-    from 'build/resources/main'
-    include 'api-definition.html'
-    into 'build/resources/main'
-}
+//tasks.register('ramlToHtml', Exec) {
+//    group = 'documentation'
+//    description = 'Convert RAML to HTML document'
+//
+//    dependsOn 'npmInstall', 'copyRamlToBuild'
+//
+//    commandLine 'npm', 'run', 'runApiHtmlConverter'
+//}
+//
+//tasks.register('copyRamlHtmlToBuild', Copy) {
+//    group = 'documentation'
+//    dependsOn 'ramlToHtml'
+//    from 'build/resources/main'
+//    include 'api-definition.html'
+//    into 'build/resources/main'
+//}

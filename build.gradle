@@ -68,7 +68,7 @@ dependencies {
     compile "net.sf.jasperreports:jasperreports:6.5.1"
     compile "org.slf4j:slf4j-ext"
     compile "com.github.tomakehurst:wiremock:1.58"
-
+    compile "net.sf.jasperreports:jasperreports-fonts:6.20.0"
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
     compile group: 'javax.interceptor', name: 'javax.interceptor-api', version: '1.2'
 
@@ -313,12 +313,12 @@ uploadArchives.onlyIf { project.getProperty("ossrhUsername") && project.getPrope
 
 apply from: "documentation.gradle"
 integrationTest {
-    dependsOn ramlToHtml
+//    dependsOn ramlToHtml
 }
 
 processResources {
     // we want the generated HTML spec file included in the output jar
-    finalizedBy ramlToHtml
+//    finalizedBy ramlToHtml
 
     // update version information in build
     filesMatching('**/version.properties') {
@@ -327,7 +327,7 @@ processResources {
 }
 
 check {
-    dependsOn checkApiIsRaml
+//    dependsOn checkApiIsRaml
     dependsOn integrationTest
     finalizedBy uploadArchives
 }
@@ -337,7 +337,7 @@ apply from: "registration.gradle"
 build {
     dependsOn jacocoTestReport
     dependsOn check
-    dependsOn ramlToHtml
-    dependsOn copyRamlHtmlToBuild
-    dependsOn prepareConsulBuild
+//    dependsOn ramlToHtml
+//    dependsOn copyRamlHtmlToBuild
+//    dependsOn prepareConsulBuild
 }

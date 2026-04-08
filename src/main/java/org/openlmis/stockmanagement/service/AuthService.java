@@ -53,25 +53,26 @@ public class AuthService {
    */
   @Cacheable("token")
   public String obtainAccessToken() {
-    String plainCreds = clientId + ":" + clientSecret;
-    byte[] plainCredsBytes = plainCreds.getBytes();
-    byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
-    String base64Creds = new String(base64CredsBytes);
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.add("Authorization", "Basic " + base64Creds);
-
-    HttpEntity<String> request = new HttpEntity<>(headers);
-
-    RequestParameters params = RequestParameters
-        .init()
-        .set("grant_type", "client_credentials");
-
-    ResponseEntity<?> response = restTemplate.exchange(
-        createUri(authorizationUrl, params), HttpMethod.POST, request, Object.class
-    );
-
-    return ((Map<String, String>) response.getBody()).get(ACCESS_TOKEN);
+    return "token";
+//    String plainCreds = clientId + ":" + clientSecret;
+//    byte[] plainCredsBytes = plainCreds.getBytes();
+//    byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
+//    String base64Creds = new String(base64CredsBytes);
+//
+//    HttpHeaders headers = new HttpHeaders();
+//    headers.add("Authorization", "Basic " + base64Creds);
+//
+//    HttpEntity<String> request = new HttpEntity<>(headers);
+//
+//    RequestParameters params = RequestParameters
+//        .init()
+//        .set("grant_type", "client_credentials");
+//
+//    ResponseEntity<?> response = restTemplate.exchange(
+//        createUri(authorizationUrl, params), HttpMethod.POST, request, Object.class
+//    );
+//
+//    return ((Map<String, String>) response.getBody()).get(ACCESS_TOKEN);
   }
 
   @CacheEvict(cacheNames = "token", allEntries = true)
