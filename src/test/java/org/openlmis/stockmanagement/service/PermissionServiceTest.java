@@ -52,7 +52,9 @@ import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
 import org.openlmis.stockmanagement.dto.referencedata.RightDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
+import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.PermissionStrings;
+import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.springframework.http.HttpStatus;
@@ -80,6 +82,12 @@ public class PermissionServiceTest {
 
   @InjectMocks
   private PermissionService permissionService;
+
+  @Mock
+  private ProgramReferenceDataService programService;
+
+  @Mock
+  private FacilityReferenceDataService facilityService;
 
   @Mock
   private UserDto user;
@@ -118,6 +126,8 @@ public class PermissionServiceTest {
 
     ReflectionTestUtils.setField(permissionService, "serviceTokenClientId", SERVICE_CLIENT_ID);
     ReflectionTestUtils.setField(permissionService, "apiKeyPrefix", API_KEY_PREFIX);
+    ReflectionTestUtils.setField(permissionService, "programService", programService);
+    ReflectionTestUtils.setField(permissionService, "facilityService", facilityService);
   }
 
   @Test
