@@ -19,7 +19,11 @@ import static org.apache.commons.lang3.StringUtils.startsWith;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PERMISSION_CHECK_FAILED;
 
+import java.util.Optional;
 import java.util.UUID;
+
+import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
+import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
 import org.openlmis.stockmanagement.dto.referencedata.RightDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
@@ -149,11 +153,15 @@ public class PermissionService {
     if (null == result || !result.getResult()) {
       String programName = null;
       String facilityName = null;
-      if(programId != null) {
-        programName = programService.findOne(programId).getName();
+      if (programId != null) {
+        programName = Optional.ofNullable(programService.findOne(programId))
+                .map(ProgramDto::getName)
+                .orElse(null);
       }
-      if(facilityId != null) {
-        facilityName = facilityService.findOne(facilityId).getName();
+      if (facilityId != null) {
+        facilityName = Optional.ofNullable(facilityService.findOne(facilityId))
+                .map(FacilityDto::getName)
+                .orElse(null);
       }
       throw new PermissionMessageException(
           new Message(ERROR_NO_FOLLOWING_PERMISSION, rightName, programName, facilityName));
