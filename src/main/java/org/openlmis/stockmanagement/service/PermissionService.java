@@ -22,8 +22,8 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PERMISSION_CHE
 import java.util.Optional;
 import java.util.UUID;
 
-import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
+import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
 import org.openlmis.stockmanagement.dto.referencedata.RightDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
