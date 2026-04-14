@@ -59,11 +59,11 @@ public class PermissionService {
 
   static final String SYSTEM_SETTINGS_MANAGE = "SYSTEM_SETTINGS_MANAGE";
 
-  private AuthenticationHelper authenticationHelper;
-  private UserReferenceDataService userReferenceDataService;
-  private PermissionStrings permissionStrings;
-  private ProgramReferenceDataService programService;
-  private FacilityReferenceDataService facilityService;
+  private final AuthenticationHelper authenticationHelper;
+  private final UserReferenceDataService userReferenceDataService;
+  private final PermissionStrings permissionStrings;
+  private final ProgramReferenceDataService programService;
+  private final FacilityReferenceDataService facilityService;
 
   @Value("${auth.server.clientId}")
   private String serviceTokenClientId;
