@@ -22,6 +22,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PERMISSION_CHE
 import java.util.Optional;
 import java.util.UUID;
 
+import lombok.RequiredArgsConstructor;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
@@ -34,7 +35,6 @@ import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataSe
 import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.util.Message;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -42,6 +42,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
 @Service
+@RequiredArgsConstructor
 @SuppressWarnings("PMD.TooManyMethods")
 public class PermissionService {
 
@@ -58,19 +59,10 @@ public class PermissionService {
 
   static final String SYSTEM_SETTINGS_MANAGE = "SYSTEM_SETTINGS_MANAGE";
 
-  @Autowired
   private AuthenticationHelper authenticationHelper;
-
-  @Autowired
   private UserReferenceDataService userReferenceDataService;
-
-  @Autowired
   private PermissionStrings permissionStrings;
-
-  @Autowired
   private ProgramReferenceDataService programService;
-
-  @Autowired
   private FacilityReferenceDataService facilityService;
 
   @Value("${auth.server.clientId}")
@@ -156,12 +148,12 @@ public class PermissionService {
       if (programId != null) {
         programName = Optional.ofNullable(programService.findOne(programId))
                 .map(ProgramDto::getName)
-                .orElse(null);
+                .orElse(programId.toString());
       }
       if (facilityId != null) {
         facilityName = Optional.ofNullable(facilityService.findOne(facilityId))
                 .map(FacilityDto::getName)
-                .orElse(null);
+                .orElse(facilityId.toString());
       }
       throw new PermissionMessageException(
           new Message(ERROR_NO_FOLLOWING_PERMISSION, rightName, programName, facilityName));

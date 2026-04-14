@@ -21,6 +21,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -48,6 +49,8 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
+import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
 import org.openlmis.stockmanagement.dto.referencedata.RightDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
@@ -328,6 +331,48 @@ public class PermissionServiceTest {
 
     assertEquals(handler, response);
     verify(permissionStrings).forUser(userId);
+  }
+
+  @Test
+  public void shouldShowProgramAndFacilityNameInErrorMessage() {
+    ProgramDto program = ProgramDto.builder().name("Program").build();
+    FacilityDto facility = FacilityDto.builder().name("Facility").build();
+    when(programService.findOne(programId)).thenReturn(program);
+    when(facilityService.findOne(facilityId)).thenReturn(facility);
+
+    hasRight(rightId, programId, facilityId, false);
+
+    exception.expect(PermissionMessageException.class);
+    exception.expectMessage("Program");
+    exception.expectMessage("Facility");
+
+    permissionService.canViewStockCard(programId, facilityId);
+  }
+
+  @Test
+  public void shouldShowProgramIdAndFacilityIdInErrorMessageIfNotFound() {
+    when(programService.findOne(programId)).thenReturn(null);
+    when(facilityService.findOne(facilityId)).thenReturn(null);
+
+    hasRight(rightId, programId, facilityId, false);
+
+    exception.expect(PermissionMessageException.class);
+    exception.expectMessage(programId.toString());
+    exception.expectMessage(facilityId.toString());
+
+    permissionService.canViewStockCard(programId, facilityId);
+  }
+
+  @Test
+  public void shouldNotCallServicesWhenProgramIdAndFacilityIdAreNull() {
+    hasRight(rightId, null, null, false);
+
+    exception.expect(PermissionMessageException.class);
+
+    permissionService.canCreateStockCardTemplate();
+
+    verify(programService, never()).findOne(any(UUID.class));
+    verify(facilityService, never()).findOne(any(UUID.class));
   }
 
   private void hasRight(UUID rightId, boolean hasRight) {

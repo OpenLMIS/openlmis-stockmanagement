@@ -3,6 +3,7 @@ Upcoming Version / (WIP)
 
 Improvements:
 * Stabilized consul registration and health checks
+* [SELV3-748](https://openlmis.atlassian.net/browse/SELV3-748) Improved 'no permission' warning message
 
 5.3.0 / 2025-11-27
 ==================
