@@ -46,9 +46,9 @@ import org.openlmis.stockmanagement.dto.PhysicalInventoryLineItemDto;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
-import org.openlmis.stockmanagement.service.JasperReportService;
 import org.openlmis.stockmanagement.service.JasperTemplateService;
 import org.openlmis.stockmanagement.service.PhysicalInventoryService;
+import org.openlmis.stockmanagement.service.report.ReportService;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 
@@ -71,7 +71,7 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
   private JasperTemplateService jasperTemplateService;
 
   @MockBean
-  private JasperReportService jasperReportService;
+  private ReportService reportService;
 
   @Before
   public void setUp() {
@@ -344,7 +344,7 @@ public class PhysicalInventoryControllerIntegrationTest extends BaseWebIntegrati
     when(physicalInventoriesRepository.findById(physicalInventory.getId()))
         .thenReturn(Optional.of(physicalInventory));
 
-    when(jasperReportService.generateReport(any(JasperTemplate.class), anyMap()))
+    when(reportService.generateReport(any(JasperTemplate.class), anyMap()))
         .thenReturn(new byte[1]);
 
     restAssured.given()

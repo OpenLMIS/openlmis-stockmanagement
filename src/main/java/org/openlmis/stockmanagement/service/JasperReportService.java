@@ -22,9 +22,11 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_IO;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REPORT_ID_NOT_FOUND;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.sql.Connection;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -35,6 +37,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import javax.sql.DataSource;
+import lombok.RequiredArgsConstructor;
 import net.sf.jasperreports.engine.JREmptyDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
@@ -49,12 +52,13 @@ import org.openlmis.stockmanagement.domain.JasperTemplate;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.exception.JasperReportViewException;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
+import org.openlmis.stockmanagement.service.report.ReportService;
 import org.openlmis.stockmanagement.util.Message;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class JasperReportService {
 
   static final String CARD_REPORT_URL = "/jasperTemplates/stockCard.jrxml";
@@ -63,14 +67,10 @@ public class JasperReportService {
 
   private static final String PARAM_DATASOURCE = "datasource";
   
-  @Autowired
-  private StockCardService stockCardService;
-
-  @Autowired
-  private StockCardSummariesService stockCardSummariesService;
-
-  @Autowired
-  private DataSource replicationDataSource;
+  private final StockCardService stockCardService;
+  private final StockCardSummariesService stockCardSummariesService;
+  private final ReportService reportService;
+  private final DataSource replicationDataSource;
 
   @Value("${dateFormat}")
   private String dateFormat;
@@ -90,7 +90,7 @@ public class JasperReportService {
    * @param stockCardId stock card id
    * @return generated stock card report.
    */
-  public byte[] generateStockCardReport(UUID stockCardId) {
+  public byte[] generateStockCardReport(UUID stockCardId, String lang) {
     StockCardDto stockCardDto = stockCardService.findStockCardById(stockCardId);
     if (stockCardDto == null) {
       throw new ResourceNotFoundException(new Message(ERROR_REPORT_ID_NOT_FOUND));
@@ -102,8 +102,11 @@ public class JasperReportService {
     params.put("hasLot", stockCardDto.hasLot());
     params.put("dateFormat", dateFormat);
     params.put("decimalFormat", createDecimalFormat());
+    params.put("lang", lang);
 
-    return fillAndExportReport(compileReportFromTemplateUrl(CARD_REPORT_URL), params);
+    JasperReport compiledReport = compileReportFromTemplateUrl(CARD_REPORT_URL);
+    return reportService.fillAndExportReport("stockCard",
+        serializeReport(compiledReport), params);
   }
 
   /**
@@ -111,9 +114,10 @@ public class JasperReportService {
    *
    * @param program  program id
    * @param facility facility id
+   * @param lang     the lang
    * @return generated stock card summary report.
    */
-  public byte[] generateStockCardSummariesReport(UUID program, UUID facility) {
+  public byte[] generateStockCardSummariesReport(UUID program, UUID facility, String lang) {
     List<StockCardDto> cards = stockCardSummariesService
         .findStockCards(program, facility);
     StockCardDto firstCard = cards.get(0);
@@ -130,8 +134,11 @@ public class JasperReportService {
     params.put("dateFormat", dateFormat);
     params.put("dateTimeFormat", dateTimeFormat);
     params.put("decimalFormat", createDecimalFormat());
+    params.put("lang", lang);
 
-    return fillAndExportReport(compileReportFromTemplateUrl(CARD_SUMMARY_REPORT_URL), params);
+    JasperReport compiledReport = compileReportFromTemplateUrl(CARD_SUMMARY_REPORT_URL);
+    return reportService.fillAndExportReport("stockCardSummary",
+        serializeReport(compiledReport), params);
   }
 
   /**
@@ -160,8 +167,27 @@ public class JasperReportService {
     }
   }
 
+  /**
+   * Gets compiled physical inventory line subreport bytes.
+   *
+   * @return the compiled physical inventory line subreport bytes
+   */
+  public byte[] getCompiledPhysicalInventoryLineSubreportBytes() {
+    return serializeReport(compileReportFromTemplateUrl(PI_LINES_REPORT_URL));
+  }
+
   private long getCount(List<StockCardDto> stockCards, Function<StockCardDto, String> mapper) {
     return stockCards.stream().map(mapper).distinct().count();
+  }
+
+  private byte[] serializeReport(JasperReport report) {
+    try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+         ObjectOutputStream out = new ObjectOutputStream(bos)) {
+      out.writeObject(report);
+      return bos.toByteArray();
+    } catch (IOException ex) {
+      throw new JasperReportViewException(new Message(ERROR_IO, ex.getMessage()), ex);
+    }
   }
 
   byte[] fillAndExportReport(JasperReport compiledReport, Map<String, Object> params) {

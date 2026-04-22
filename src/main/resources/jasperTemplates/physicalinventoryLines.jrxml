@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.20.5.final using JasperReports Library version 6.20.5-3efcf2e67f959db3888d79f73dde2dbd7acb4f8e  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="physicaInventoryLines" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="BlankPage" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isFloatColumnFooter="true" whenResourceMissingType="Empty" uuid="8eeca41d-cefe-475b-b89b-f898f69a4087">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="physicaInventoryLines" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="BlankPage" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isFloatColumnFooter="true" resourceBundle="reports/resourceBundles/report_translations" whenResourceMissingType="Empty" uuid="8eeca41d-cefe-475b-b89b-f898f69a4087">
 	<import value="java.time.LocalDate"/>
 	<import value="java.time.format.DateTimeFormatter"/>
 	<import value="java.text.*"/>
@@ -107,17 +107,17 @@
 					<textElement textAlignment="Right">
 						<font size="8" isBold="true" pdfFontName="Helvetica-Bold"/>
 					</textElement>
-          <textFieldExpression>
-            <![CDATA[$V{quantitySumValue} == null ? "" :
-              (
-                $P{showInDoses}
-                  ? $P{decimalFormat}.format($V{quantitySumValue}).toString()
-                  : (
-                    ($V{quantitySumValue} / ($F{netContent} == null ? 1 : $F{netContent}))
-                    + " (+" + ($V{quantitySumValue} % ($F{netContent} == null ? 1 : $F{netContent})) + ")"
-                  )
-              )]]>
-          </textFieldExpression>
+		  <textFieldExpression>
+			<![CDATA[$V{quantitySumValue} == null ? "" :
+			  (
+				$P{showInDoses}
+				  ? $P{decimalFormat}.format($V{quantitySumValue}).toString()
+				  : (
+					($V{quantitySumValue} / ($F{netContent} == null ? 1 : $F{netContent}))
+					+ " (+" + ($V{quantitySumValue} % ($F{netContent} == null ? 1 : $F{netContent})) + ")"
+				  )
+			  )]]>
+		  </textFieldExpression>
 				</textField>
 				<textField evaluationTime="Group" evaluationGroup="productGroup" isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Opaque" x="520" y="0" width="90" height="25" forecolor="#848484" uuid="d2a96208-ada5-4412-bdc6-3ab766acbf7e"/>
@@ -130,17 +130,17 @@
 					<textElement textAlignment="Right">
 						<font size="8"/>
 					</textElement>
-          <textFieldExpression>
-            <![CDATA[$V{sohSumValue} == null ? "" :
-              (
-                $P{showInDoses}
-                  ? $P{decimalFormat}.format($V{sohSumValue}).toString()
-                  : (
-                    ($V{sohSumValue} / ($F{netContent} == null ? 1 : $F{netContent}))
-                    + " (+" + ($V{sohSumValue} % ($F{netContent} == null ? 1 : $F{netContent})) + ")"
-                  )
-              )]]>
-          </textFieldExpression>
+		  <textFieldExpression>
+			<![CDATA[$V{sohSumValue} == null ? "" :
+			  (
+				$P{showInDoses}
+				  ? $P{decimalFormat}.format($V{sohSumValue}).toString()
+				  : (
+					($V{sohSumValue} / ($F{netContent} == null ? 1 : $F{netContent}))
+					+ " (+" + ($V{sohSumValue} % ($F{netContent} == null ? 1 : $F{netContent})) + ")"
+				  )
+			  )]]>
+		  </textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Opaque" x="418" y="0" width="102" height="25" uuid="d07d08b5-df52-43b1-b3d0-d571623c8b02"/>
@@ -206,7 +206,7 @@
 	</background>
 	<columnHeader>
 		<band height="25" splitType="Stretch">
-			<staticText>
+			<textField>
 				<reportElement mode="Opaque" x="700" y="0" width="132" height="25" backcolor="#CCCCCC" uuid="dc09a9f2-acf7-4dab-84ef-a500845dde6d"/>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -217,8 +217,8 @@
 				<textElement>
 					<font size="9"/>
 				</textElement>
-				<text><![CDATA[Itemized reasons]]></text>
-			</staticText>
+				<textFieldExpression><![CDATA[$R{report.column.itemizedReasons}]]></textFieldExpression>
+			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement mode="Opaque" x="610" y="0" width="92" height="25" backcolor="#CCCCCC" uuid="10ff459c-97ad-48f1-b414-6158967a3b95"/>
 				<box padding="3">
@@ -230,7 +230,7 @@
 				<textElement>
 					<font size="9"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{showInDoses} ? "Current Stock\n(Doses)" : "Current Stock\n(Packs)"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{showInDoses} ? $R{report.column.currentStockDoses} : $R{report.column.currentStockPacks}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement mode="Opaque" x="520" y="0" width="90" height="25" backcolor="#CCCCCC" uuid="8d4d1ea9-e98c-43b5-a4e2-64a13ad5ab50"/>
@@ -243,9 +243,9 @@
 				<textElement>
 					<font size="9"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{showInDoses} ? "Stock On Hand\n(Doses)" : "Stock On Hand\n(Packs)"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{showInDoses} ? $R{report.column.stockOnHandDoses} : $R{report.column.stockOnHandPacks}]]></textFieldExpression>
 			</textField>
-			<staticText>
+			<textField>
 				<reportElement mode="Opaque" x="418" y="0" width="102" height="25" backcolor="#CCCCCC" uuid="d07d08b5-df52-43b1-b3d0-d571623c8b02"/>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -256,9 +256,9 @@
 				<textElement>
 					<font size="9"/>
 				</textElement>
-				<text><![CDATA[VVM Status]]></text>
-			</staticText>
-			<staticText>
+				<textFieldExpression><![CDATA[$R{report.column.vvmStatus}]]></textFieldExpression>
+			</textField>
+			<textField>
 				<reportElement mode="Opaque" x="316" y="0" width="102" height="25" backcolor="#CCCCCC" uuid="dc2ac7c8-1086-49d9-90fb-9acd95271092"/>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -269,9 +269,9 @@
 				<textElement>
 					<font size="9"/>
 				</textElement>
-				<text><![CDATA[Expiry date]]></text>
-			</staticText>
-			<staticText>
+				<textFieldExpression><![CDATA[$R{report.column.expiryDate}]]></textFieldExpression>
+			</textField>
+			<textField>
 				<reportElement mode="Opaque" x="244" y="0" width="72" height="25" backcolor="#CCCCCC" uuid="93bc4e67-36dd-4077-95db-0db852108a30"/>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -282,9 +282,9 @@
 				<textElement>
 					<font size="9"/>
 				</textElement>
-				<text><![CDATA[Lot code]]></text>
-			</staticText>
-			<staticText>
+				<textFieldExpression><![CDATA[$R{report.column.lotCode}]]></textFieldExpression>
+			</textField>
+			<textField>
 				<reportElement mode="Opaque" x="82" y="0" width="162" height="25" backcolor="#CCCCCC" uuid="f75fae81-e6b8-4993-898d-632ddf29d1e8"/>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -295,9 +295,9 @@
 				<textElement>
 					<font size="9"/>
 				</textElement>
-				<text><![CDATA[Product Name]]></text>
-			</staticText>
-			<staticText>
+				<textFieldExpression><![CDATA[$R{report.column.productName}]]></textFieldExpression>
+			</textField>
+			<textField>
 				<reportElement mode="Opaque" x="10" y="0" width="72" height="25" backcolor="#CCCCCC" uuid="06a9370e-dcaa-4b03-9d18-aca8abaa56bd"/>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -308,8 +308,8 @@
 				<textElement>
 					<font size="9"/>
 				</textElement>
-				<text><![CDATA[Product Code]]></text>
-			</staticText>
+				<textFieldExpression><![CDATA[$R{report.column.productCode}]]></textFieldExpression>
+			</textField>
 		</band>
 	</columnHeader>
 	<detail>
@@ -327,7 +327,7 @@
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($F{lotcode} == null) ? "No lot defined" : $F{lotcode}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{lotcode} == null) ? $R{report.value.noLotDefined} : $F{lotcode}]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Group" evaluationGroup="lineItemGroup" isBlankWhenNull="true">
 				<reportElement x="316" y="0" width="102" height="25" printWhenGroupChanges="lineItemGroup" uuid="0e217f2e-f7ca-4c05-b9d2-f13ec6cf38db">
@@ -342,7 +342,7 @@
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[DateTimeFormatter.ofPattern($P{dateFormat}).format(LocalDate.parse($F{expirationdate}))]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{expirationdate} != null ? java.time.format.DateTimeFormatter.ofPattern($P{dateFormat}).format(java.time.LocalDate.parse($F{expirationdate})) : ""]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Group" evaluationGroup="lineItemGroup" isBlankWhenNull="true">
 				<reportElement x="418" y="0" width="102" height="25" printWhenGroupChanges="lineItemGroup" uuid="a7672f9a-30bd-4bf9-96af-324baa7e2280">
@@ -357,9 +357,12 @@
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new org.json.JSONObject($F{extradata}).optString("vvmStatus", "")]]></textFieldExpression>
+				<textFieldExpression><![CDATA[
+					$F{extradata} != null && $F{extradata}.contains("\"vvmStatus\"") && !$F{extradata}.contains("\"vvmStatus\": null") && !$F{extradata}.contains("\"vvmStatus\":null") ?
+					$F{extradata}.replaceAll(".*\"vvmStatus\"\\s*:\\s*\"([^\"]+)\".*", "$1") : ""
+				]]></textFieldExpression>
 			</textField>
-			<textField evaluationTime="Group" evaluationGroup="lineItemGroup">
+			<textField evaluationTime="Group" evaluationGroup="lineItemGroup" isBlankWhenNull="true">
 				<reportElement x="520" y="0" width="90" height="25" printWhenGroupChanges="lineItemGroup" forecolor="#848484" uuid="547fa08c-24e6-4617-aa94-09384a952a19">
 					<printWhenExpression><![CDATA[$V{lineItemGroup_COUNT} == 1]]></printWhenExpression>
 				</reportElement>
@@ -373,16 +376,16 @@
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{soh} == null ? "" :
-                    (
-                        $P{showInDoses}
-                          ? $P{decimalFormat}.format($F{soh}).toString()
-                          : (
-                              ($F{soh} / ($F{netContent} == null ? 1 : $F{netContent}))
-                              + " (+" + ($F{soh} % ($F{netContent} == null ? 1 : $F{netContent})) + ")"
-                            )
-                    )]]></textFieldExpression>
+					(
+						$P{showInDoses}
+						  ? $P{decimalFormat}.format($F{soh}).toString()
+						  : (
+							  ($F{soh} / ($F{netContent} == null ? 1 : $F{netContent}))
+							  + " (+" + ($F{soh} % ($F{netContent} == null ? 1 : $F{netContent})) + ")"
+							)
+					)]]></textFieldExpression>
 			</textField>
-			<textField evaluationTime="Group" evaluationGroup="lineItemGroup">
+			<textField evaluationTime="Group" evaluationGroup="lineItemGroup" isBlankWhenNull="true">
 				<reportElement x="610" y="0" width="90" height="25" printWhenGroupChanges="lineItemGroup" uuid="a2c8fc54-7cdc-442a-9ced-608a01ef270b">
 					<printWhenExpression><![CDATA[$V{lineItemGroup_COUNT} == 1]]></printWhenExpression>
 				</reportElement>
@@ -396,14 +399,14 @@
 					<font size="8" isBold="true" pdfFontName="Helvetica-Bold"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{quantity} == null ? "" :
-                    (
-                        $P{showInDoses}
-                          ? $P{decimalFormat}.format($F{quantity}).toString()
-                          : (
-                              ($F{quantity} / ($F{netContent} == null ? 1 : $F{netContent}))
-                              + " (+" + ($F{quantity} % ($F{netContent} == null ? 1 : $F{netContent})) + ")"
-                            )
-                    )]]></textFieldExpression>
+					(
+						$P{showInDoses}
+						  ? $P{decimalFormat}.format($F{quantity}).toString()
+						  : (
+							  ($F{quantity} / ($F{netContent} == null ? 1 : $F{netContent}))
+							  + " (+" + ($F{quantity} % ($F{netContent} == null ? 1 : $F{netContent})) + ")"
+							)
+					)]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement x="700" y="0" width="132" height="25" uuid="86886d4d-e188-4bbf-bfc7-113325f40773"/>
@@ -418,7 +421,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{reasonquantity} != null ? ($P{decimalFormat}.format($F{reasonquantity}).toString() + " " + $F{reasonname}) : ""]]></textFieldExpression>
 			</textField>
-			<staticText>
+			<textField isBlankWhenNull="true">
 				<reportElement x="82" y="0" width="162" height="25" uuid="fa240131-8b7e-4a65-98df-10999828a02c"/>
 				<box padding="3">
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -426,8 +429,8 @@
 					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-			</staticText>
-			<staticText>
+			</textField>
+			<textField isBlankWhenNull="true">
 				<reportElement x="316" y="0" width="102" height="25" uuid="ebc8760d-d268-41e6-aae9-fb96082fe7bd"/>
 				<box padding="3">
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -435,8 +438,8 @@
 					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-			</staticText>
-			<staticText>
+			</textField>
+			<textField isBlankWhenNull="true">
 				<reportElement x="520" y="0" width="90" height="25" uuid="60e82caa-8c9f-4334-a7ab-e07f3101c1a7"/>
 				<box padding="3">
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -444,8 +447,8 @@
 					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-			</staticText>
-			<staticText>
+			</textField>
+			<textField isBlankWhenNull="true">
 				<reportElement x="10" y="0" width="822" height="25" uuid="2d28b427-6b18-4024-b05d-2e5c03c6b5fb"/>
 				<box padding="3">
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -453,8 +456,8 @@
 					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-			</staticText>
-			<staticText>
+			</textField>
+			<textField isBlankWhenNull="true">
 				<reportElement x="10" y="0" width="822" height="25" uuid="6071707f-3f5f-4ed6-ac1a-a65c8e4d2cb7">
 					<printWhenExpression><![CDATA[$V{REPORT_COUNT} == $F{max_row_num}]]></printWhenExpression>
 				</reportElement>
@@ -464,7 +467,7 @@
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-			</staticText>
+			</textField>
 		</band>
 	</detail>
 </jasperReport>
