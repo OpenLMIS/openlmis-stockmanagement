@@ -19,16 +19,22 @@ import static org.apache.commons.lang3.StringUtils.startsWith;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PERMISSION_CHECK_FAILED;
 
+import java.util.Optional;
 import java.util.UUID;
+
+import lombok.RequiredArgsConstructor;
+import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
+import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
 import org.openlmis.stockmanagement.dto.referencedata.RightDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
+import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.PermissionStrings;
+import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.util.Message;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -36,6 +42,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
 @Service
+@RequiredArgsConstructor
 @SuppressWarnings("PMD.TooManyMethods")
 public class PermissionService {
 
@@ -52,14 +59,11 @@ public class PermissionService {
 
   static final String SYSTEM_SETTINGS_MANAGE = "SYSTEM_SETTINGS_MANAGE";
 
-  @Autowired
-  private AuthenticationHelper authenticationHelper;
-
-  @Autowired
-  private UserReferenceDataService userReferenceDataService;
-
-  @Autowired
-  private PermissionStrings permissionStrings;
+  private final AuthenticationHelper authenticationHelper;
+  private final UserReferenceDataService userReferenceDataService;
+  private final PermissionStrings permissionStrings;
+  private final ProgramReferenceDataService programService;
+  private final FacilityReferenceDataService facilityService;
 
   @Value("${auth.server.clientId}")
   private String serviceTokenClientId;
@@ -136,11 +140,23 @@ public class PermissionService {
     return permissionStrings.forUser(userId);
   }
 
-  private void hasPermission(String rightName, UUID program, UUID facility, UUID warehouse) {
-    ResultDto<Boolean> result = getRightResult(rightName, program, facility, warehouse, false);
+  private void hasPermission(String rightName, UUID programId, UUID facilityId, UUID warehouse) {
+    ResultDto<Boolean> result = getRightResult(rightName, programId, facilityId, warehouse, false);
     if (null == result || !result.getResult()) {
+      String programName = null;
+      String facilityName = null;
+      if (programId != null) {
+        programName = Optional.ofNullable(programService.findOne(programId))
+                .map(ProgramDto::getName)
+                .orElse(programId.toString());
+      }
+      if (facilityId != null) {
+        facilityName = Optional.ofNullable(facilityService.findOne(facilityId))
+                .map(FacilityDto::getName)
+                .orElse(facilityId.toString());
+      }
       throw new PermissionMessageException(
-          new Message(ERROR_NO_FOLLOWING_PERMISSION, rightName, program, facility));
+          new Message(ERROR_NO_FOLLOWING_PERMISSION, rightName, programName, facilityName));
     }
   }
 
