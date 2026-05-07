@@ -15,6 +15,7 @@
 	<import value="java.time.ZonedDateTime"/>
 	<import value="java.text.DecimalFormat"/>
 	<import value="net.sf.jasperreports.engine.data.*"/>
+    <style name="BaseStyle" isDefault="true" fontName="DejaVu Sans"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF"><box><pen lineWidth="0.5" lineColor="#000000"/><topPen lineWidth="0.5" lineColor="#000000"/><leftPen lineWidth="0.5" lineColor="#000000"/><bottomPen lineWidth="0.5" lineColor="#000000"/><rightPen lineWidth="0.5" lineColor="#000000"/></box></style>
 	<style name="Table_CH" mode="Opaque" backcolor="#BFE1FF"><box><pen lineWidth="0.5" lineColor="#000000"/><topPen lineWidth="0.5" lineColor="#000000"/><leftPen lineWidth="0.5" lineColor="#000000"/><bottomPen lineWidth="0.5" lineColor="#000000"/><rightPen lineWidth="0.5" lineColor="#000000"/></box></style>
 	<style name="Table_TD" mode="Opaque" backcolor="#FFFFFF"><box><pen lineWidth="0.5" lineColor="#000000"/><topPen lineWidth="0.5" lineColor="#000000"/><leftPen lineWidth="0.5" lineColor="#000000"/><bottomPen lineWidth="0.5" lineColor="#000000"/><rightPen lineWidth="0.5" lineColor="#000000"/></box></style>
@@ -143,7 +144,7 @@
 	</pageFooter>
 
 	<summary>
-		<band height="64">
+		<band height="64" splitType="Stretch">
 			<componentElement>
 				<reportElement x="10" y="4" width="580" height="60" uuid="0a547141-8154-45c5-9011-aca83001f1c9"/>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
@@ -157,8 +158,8 @@
 
 					<jr:column width="93" uuid="72fd2aee-eded-4f91-b865-2eed6c1f45c2">
 						<jr:columnHeader style="Table 1_CH" height="30">
-                            <textField>
-                                <reportElement x="0" y="0" width="93" height="30" uuid="11a54a5c-e198-4880-93c0-d2788f0e5ccd"/>
+                            <textField isStretchWithOverflow="true">
+                                <reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="93" height="30" uuid="11a54a5c-e198-4880-93c0-d2788f0e5ccd"/>
                                 <box padding="2"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle"><font size="12"/></textElement>
                                 <textFieldExpression><![CDATA[$R{report.column.productCode}]]></textFieldExpression>
@@ -169,8 +170,8 @@
 
 					<jr:column width="77" uuid="33bce733-51fc-4690-ae7e-a70995d90963">
 						<jr:columnHeader style="Table 1_CH" height="30">
-                            <textField>
-                                <reportElement x="0" y="0" width="77" height="30" uuid="1a695eef-6fde-43a4-9db7-9e660d907a5e"/>
+                            <textField isStretchWithOverflow="true">
+                                <reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="77" height="30" uuid="1a695eef-6fde-43a4-9db7-9e660d907a5e"/>
                                 <box padding="2"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle">
                                     <font size="12"/>
@@ -184,8 +185,8 @@
 					<jr:column width="67" uuid="aece0ada-49f5-4a52-95f6-4567a7d8c9dd">
 						<printWhenExpression><![CDATA[$P{showProgram}]]></printWhenExpression>
 						<jr:columnHeader style="Table 1_CH" height="30">
-                            <textField>
-                                <reportElement x="0" y="0" width="67" height="30" uuid="5fbf1451-a327-4c6c-a502-e8275a01fb5b"/>
+                            <textField isStretchWithOverflow="true">
+                                <reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="67" height="30" uuid="5fbf1451-a327-4c6c-a502-e8275a01fb5b"/>
                                 <box padding="2"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle">
                                     <font size="12"/>
@@ -199,8 +200,8 @@
 					<jr:column width="50" uuid="6d50f71d-da27-4166-bb53-b518393a48ee">
 						<printWhenExpression><![CDATA[$P{showFacility}]]></printWhenExpression>
 						<jr:columnHeader style="Table 1_CH" height="30">
-                            <textField>
-                                <reportElement x="0" y="0" width="50" height="30" uuid="d38235ca-700b-46cc-904a-b3e6a45faf60"/>
+                            <textField isStretchWithOverflow="true">
+                                <reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="50" height="30" uuid="d38235ca-700b-46cc-904a-b3e6a45faf60"/>
                                 <box padding="2"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle">
                                     <font size="12"/>
@@ -214,8 +215,8 @@
 					<jr:column width="80" uuid="a7bee396-1a71-4dc5-a7c7-5a795da02240">
 						<printWhenExpression><![CDATA[$P{showLot}]]></printWhenExpression>
 						<jr:columnHeader style="Table 1_CH" height="30">
-                            <textField>
-                                <reportElement x="0" y="0" width="80" height="30" uuid="f3af19dd-e960-4808-8702-7afdbc4b9503"/>
+                            <textField isStretchWithOverflow="true">
+                                <reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="80" height="30" uuid="f3af19dd-e960-4808-8702-7afdbc4b9503"/>
                                 <box padding="2"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle">
                                     <font size="12"/>
@@ -225,7 +226,7 @@
                         </jr:columnHeader>
 						<jr:detailCell style="Table 1_TD" height="30">
                             <textField isStretchWithOverflow="true" isBlankWhenNull="false">
-                                <reportElement x="0" y="0" width="80" height="30" uuid="6680122f-b158-4277-afff-29f8eae11525"/>
+                                <reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="80" height="30" uuid="6680122f-b158-4277-afff-29f8eae11525"/>
                                 <box padding="2"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle"/>
                                 <textFieldExpression><![CDATA[$F{lot} != null && ((java.util.Map)$F{lot}).get("lotCode") != null ? ((java.util.Map)$F{lot}).get("lotCode") : $R{report.value.noLotDefined}]]></textFieldExpression>
@@ -233,11 +234,11 @@
                         </jr:detailCell>
 					</jr:column>
 
-					<jr:column width="73" uuid="c76adfba-b4ff-40fd-bfd9-9ddd6ad743ff">
+					<jr:column width="80" uuid="c76adfba-b4ff-40fd-bfd9-9ddd6ad743ff">
 						<printWhenExpression><![CDATA[$P{showLot}]]></printWhenExpression>
 						<jr:columnHeader style="Table 1_CH" height="30">
-                            <textField>
-                                <reportElement x="0" y="0" width="73" height="30" uuid="803a20bf-c364-417a-8139-12a4609bf70a"/>
+                            <textField isStretchWithOverflow="true">
+                                <reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="80" height="30" uuid="803a20bf-c364-417a-8139-12a4609bf70a"/>
                                 <box padding="2"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle">
                                     <font size="12"/>
@@ -247,7 +248,7 @@
                         </jr:columnHeader>
 						<jr:detailCell style="Table 1_TD" height="30">
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="73" height="30" uuid="32fea3a9-1db4-4e09-90d0-49c214525ec5"/>
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="80" height="30" uuid="32fea3a9-1db4-4e09-90d0-49c214525ec5"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{lot} != null && ((java.util.Map)$F{lot}).get("expirationDate") != null ? ( String.valueOf(((java.util.Map)$F{lot}).get("expirationDate")).startsWith("[") ? java.time.LocalDate.of(Integer.parseInt(String.valueOf(((java.util.Map)$F{lot}).get("expirationDate")).replaceAll("\\[|\\]|\\s", "").split(",")[0]), Integer.parseInt(String.valueOf(((java.util.Map)$F{lot}).get("expirationDate")).replaceAll("\\[|\\]|\\s", "").split(",")[1]), Integer.parseInt(String.valueOf(((java.util.Map)$F{lot}).get("expirationDate")).replaceAll("\\[|\\]|\\s", "").split(",")[2])).format(java.time.format.DateTimeFormatter.ofPattern($P{dateFormat} != null ? $P{dateFormat} : "yyyy-MM-dd")) : java.time.format.DateTimeFormatter.ofPattern($P{dateFormat} != null ? $P{dateFormat} : "yyyy-MM-dd").format(java.time.LocalDate.parse(String.valueOf(((java.util.Map)$F{lot}).get("expirationDate")))) ) : ""]]></textFieldExpression>
@@ -257,8 +258,8 @@
 
 					<jr:column width="102" uuid="7309737e-e6a7-44ba-bf6d-92b7cc64ef12">
 						<jr:columnHeader style="Table 1_CH" height="30">
-                            <textField>
-                                <reportElement x="0" y="0" width="102" height="30" uuid="2ef9a1d3-3722-44c7-b38a-08b1d7e06bc6"/>
+                            <textField isStretchWithOverflow="true">
+                                <reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="102" height="30" uuid="2ef9a1d3-3722-44c7-b38a-08b1d7e06bc6"/>
                                 <box padding="2"/><textElement textAlignment="Center" verticalAlignment="Middle"><font size="12"/>
                                 </textElement>
                                 <textFieldExpression><![CDATA[$R{report.column.lastUpdate}]]></textFieldExpression>
@@ -266,7 +267,7 @@
                         </jr:columnHeader>
 						<jr:detailCell style="Table 1_TD" height="30">
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="102" height="30" uuid="e8a313ec-9db5-4892-9671-fc221c5e6abd"/>
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="102" height="30" uuid="e8a313ec-9db5-4892-9671-fc221c5e6abd"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{lastUpdate} == null ? "" : ( String.valueOf($F{lastUpdate}).startsWith("[") ? java.time.LocalDate.of(Integer.parseInt(String.valueOf($F{lastUpdate}).replaceAll("\\[|\\]|\\s", "").split(",")[0]), Integer.parseInt(String.valueOf($F{lastUpdate}).replaceAll("\\[|\\]|\\s", "").split(",")[1]), Integer.parseInt(String.valueOf($F{lastUpdate}).replaceAll("\\[|\\]|\\s", "").split(",")[2])).format(java.time.format.DateTimeFormatter.ofPattern($P{dateFormat} != null ? $P{dateFormat} : "yyyy-MM-dd")) : java.time.format.DateTimeFormatter.ofPattern($P{dateFormat} != null ? $P{dateFormat} : "yyyy-MM-dd").format(java.time.LocalDate.parse(String.valueOf($F{lastUpdate}))) )]]></textFieldExpression>
@@ -274,10 +275,10 @@
 						</jr:detailCell>
 					</jr:column>
 
-					<jr:column width="65" uuid="c844b425-61d2-4c3b-b580-7c907854ec8d">
+					<jr:column width="70" uuid="c844b425-61d2-4c3b-b580-7c907854ec8d">
 						<jr:columnHeader style="Table 1_CH" height="30">
-                            <textField>
-                                <reportElement x="0" y="0" width="65" height="30" uuid="7deb2b72-9395-4e87-8da7-a2e576e35820"/>
+                            <textField isStretchWithOverflow="true">
+                                <reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="70" height="30" uuid="7deb2b72-9395-4e87-8da7-a2e576e35820"/>
                                 <box padding="2"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle">
                                     <font size="12"/>
@@ -285,7 +286,7 @@
                                 <textFieldExpression><![CDATA[$R{report.column.soh}]]></textFieldExpression>
                             </textField>
                         </jr:columnHeader>
-						<jr:detailCell style="Table 1_TD" height="30"><textField isStretchWithOverflow="true" isBlankWhenNull="true"><reportElement x="0" y="0" width="65" height="30" uuid="6b7919e9-5946-4ae1-9417-412f5ddc1286"/><box padding="2"/><textElement textAlignment="Center" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$F{stockOnHand} != null ? $P{decimalFormat}.format(((java.lang.Number)$F{stockOnHand})).toString() : ""]]></textFieldExpression></textField></jr:detailCell>
+						<jr:detailCell style="Table 1_TD" height="30"><textField isStretchWithOverflow="true" isBlankWhenNull="true"><reportElement x="0" y="0" width="70" height="30" uuid="6b7919e9-5946-4ae1-9417-412f5ddc1286"/><box padding="2"/><textElement textAlignment="Center" verticalAlignment="Middle"/><textFieldExpression><![CDATA[$F{stockOnHand} != null ? $P{decimalFormat}.format(((java.lang.Number)$F{stockOnHand})).toString() : ""]]></textFieldExpression></textField></jr:detailCell>
 					</jr:column>
 				</jr:table>
 			</componentElement>
