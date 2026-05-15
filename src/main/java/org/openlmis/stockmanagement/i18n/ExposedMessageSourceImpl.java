@@ -15,12 +15,14 @@
 
 package org.openlmis.stockmanagement.i18n;
 
+import java.text.MessageFormat;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -31,6 +33,13 @@ public class ExposedMessageSourceImpl extends ReloadableResourceBundleMessageSou
     clearCacheIncludingAncestors();
     PropertiesHolder propertiesHolder = getMergedProperties(locale);
     return propertiesHolder.getProperties();
+  }
+
+  @Override
+  @NonNull
+  protected MessageFormat createMessageFormat(@NonNull String msg, @NonNull Locale locale) {
+    String safe = msg.replaceAll("(?<!')'(?!')", "''");
+    return super.createMessageFormat(safe, locale);
   }
 
   /**
