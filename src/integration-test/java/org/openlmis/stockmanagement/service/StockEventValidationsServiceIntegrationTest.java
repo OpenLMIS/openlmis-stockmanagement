@@ -40,6 +40,7 @@ import org.openlmis.stockmanagement.validators.ApprovedOrderableValidator;
 import org.openlmis.stockmanagement.validators.DefaultAdjustmentReasonValidator;
 import org.openlmis.stockmanagement.validators.DefaultFreeTextValidator;
 import org.openlmis.stockmanagement.validators.DefaultUnpackKitValidator;
+import org.openlmis.stockmanagement.validators.DuplicateTransactionValidator;
 import org.openlmis.stockmanagement.validators.LotValidator;
 import org.openlmis.stockmanagement.validators.MandatoryFieldsValidator;
 import org.openlmis.stockmanagement.validators.OrderableLotDuplicationValidator;
@@ -105,6 +106,9 @@ public class StockEventValidationsServiceIntegrationTest extends BaseIntegration
   private SourceDestinationGeoLevelAffinityValidator sourceDestinationGeoLeveLAffinityValidator;
 
   @MockBean
+  private DuplicateTransactionValidator duplicateTransactionValidator;
+
+  @MockBean
   private ExtensionManager extensionManager;
 
   @Before
@@ -125,6 +129,7 @@ public class StockEventValidationsServiceIntegrationTest extends BaseIntegration
     doNothing().when(reasonExistenceValidator).validate(any(StockEventDto.class));
     doNothing().when(physicalInventoryReasonsValidator).validate(any(StockEventDto.class));
     doNothing().when(unpackKitValidator).validate(any(StockEventDto.class));
+    doNothing().when(duplicateTransactionValidator).validate(any(StockEventDto.class));
     when(extensionManager
         .getExtension(ExtensionPointId.ADJUSTMENT_REASON_POINT_ID, AdjustmentReasonValidator.class))
         .thenReturn(adjustmentReasonValidator);
@@ -159,6 +164,7 @@ public class StockEventValidationsServiceIntegrationTest extends BaseIntegration
     verify(adjustmentReasonValidator, times(1)).validate(stockEventDto);
     verify(freeTextValidator, times(1)).validate(stockEventDto);
     verify(unpackKitValidator, times(1)).validate(stockEventDto);
+    verify(duplicateTransactionValidator, times(1)).validate(stockEventDto);
   }
 
   @Test

@@ -208,6 +208,7 @@ public abstract class MessageKeys {
       + ".orderable.and.lot.duplication";
   //stock events creation: lot
   public static final String ERROR_EVENT_LOT_NOT_EXIST = EVENT_ERROR_PREFIX + ".lot.not.exist";
+  public static final String ERROR_EVENT_IS_DUPLICATE = EVENT_ERROR_PREFIX + ".is.duplicate";
   public static final String ERROR_EVENT_LOT_ORDERABLE_NOT_MATCH = EVENT_ERROR_PREFIX
       + ".lot.not.match.orderable";
   public static final String ERROR_EVENT_CANNOT_UNPACK_REGULAR_ORDERABLE = EVENT_ERROR_PREFIX
