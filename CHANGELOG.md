@@ -5,6 +5,7 @@ Improvements:
 * Stabilized consul registration and health checks
 * [ODRC-24](https://openlmis.atlassian.net/browse/ODRC-24) Global header and translations implemented for reports
 * [SELV3-748](https://openlmis.atlassian.net/browse/SELV3-748) Improved 'no permission' warning message
+* [SELV3-839](https://openlmis.atlassian.net/browse/SELV3-839) New document number generation for issue and receive
 
 5.3.0 / 2025-11-27
 ==================

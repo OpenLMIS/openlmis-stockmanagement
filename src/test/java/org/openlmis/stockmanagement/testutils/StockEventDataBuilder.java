@@ -58,7 +58,8 @@ public class StockEventDataBuilder {
    */
   public StockEvent build() {
     StockEvent event = new StockEvent(
-        facilityId, programId, userId,processedDate, isActive, signature, documentNumber, lineItems
+        facilityId, programId, userId, processedDate, isActive, signature, documentNumber,
+        null, lineItems
     );
     event.setId(id);
 

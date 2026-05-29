@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.service;
 import static org.openlmis.stockmanagement.dto.PhysicalInventoryDto.fromEventDto;
 
 import java.util.UUID;
+import org.apache.commons.lang3.StringUtils;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
@@ -65,6 +66,9 @@ public class StockEventProcessor {
   @Autowired
   private ExtensionManager extensionManager;
 
+  @Autowired
+  private DocumentNumberGenerator documentNumberGenerator;
+
   /**
    * Validate and persist event and create stock card and line items from it.
    *
@@ -83,6 +87,9 @@ public class StockEventProcessor {
 
     profiler.start("VALIDATE");
     stockEventValidationsService.validate(eventDto);
+
+    profiler.start("ASSIGN_DOCUMENT_NUMBER");
+    assignDocumentNumberIfNeeded(eventDto);
 
     UUID eventId = saveEventAndGenerateLineItems(
         eventDto, profiler.startNested("SAVE_AND_GENERATE_LINE_ITEMS")
@@ -127,5 +134,15 @@ public class StockEventProcessor {
 
   private void sortEventDtos(StockEventDto eventDto) {
     eventDto.sortLineItemsByOccurreddate();
+  }
+
+  private void assignDocumentNumberIfNeeded(StockEventDto eventDto) {
+    if (eventDto.getEventOrigin() != null
+        && StringUtils.isBlank(eventDto.getDocumentNumber())) {
+      String documentNumber = documentNumberGenerator.generate(eventDto.getFacilityId());
+      eventDto.setDocumentNumber(documentNumber);
+      LOGGER.debug("Generated document number {} for event with origin {}",
+          documentNumber, eventDto.getEventOrigin());
+    }
   }
 }

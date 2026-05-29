@@ -108,7 +108,7 @@ public class StockEventsAdapterBuilder {
 
     profiler.stop().log();
     return new StockEventDto(null, facility.getId(), program.getId(), externalDto.getSignature(),
-        externalDto.getDocumentNumber(), null, true, lineItems, null);
+        externalDto.getDocumentNumber(), null, null, true, lineItems, null);
   }
 
   private List<StockEventLineItemDto> createAllStockEventLineItemDtos(
