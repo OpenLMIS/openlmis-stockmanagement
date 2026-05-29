@@ -38,6 +38,7 @@ import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
+@SuppressWarnings("PMD.UnusedPrivateField")
 @RunWith(MockitoJUnitRunner.class)
 public class StockEventProcessorDocumentNumberTest {
 
