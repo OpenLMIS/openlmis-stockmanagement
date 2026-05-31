@@ -17,7 +17,11 @@ package org.openlmis.stockmanagement.service;
 
 import static org.openlmis.stockmanagement.dto.PhysicalInventoryDto.fromEventDto;
 
+import java.sql.PreparedStatement;
 import java.util.UUID;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import org.hibernate.Session;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
@@ -65,6 +69,9 @@ public class StockEventProcessor {
   @Autowired
   private ExtensionManager extensionManager;
 
+  @PersistenceContext
+  private EntityManager entityManager;
+
   /**
    * Validate and persist event and create stock card and line items from it.
    *
@@ -76,6 +83,9 @@ public class StockEventProcessor {
     XLOGGER.entry(eventDto);
     Profiler profiler = new Profiler("PROCESS");
     profiler.setLogger(XLOGGER);
+
+    profiler.start("ACQUIRE_PROCESSING_LOCK");
+    acquireProcessingLock(eventDto);
 
     profiler.start("BUILD_CONTEXT");
     StockEventProcessContext context = contextBuilder.buildContext(eventDto);
@@ -96,6 +106,20 @@ public class StockEventProcessor {
     XLOGGER.exit(eventId);
 
     return eventId;
+  }
+
+  /** Serializes event processing per facility and program so recalculations cannot deadlock. */
+  private void acquireProcessingLock(StockEventDto eventDto) {
+    String lockKey = eventDto.getFacilityId() + ":" + eventDto.getProgramId();
+    // Raw JDBC: pg_advisory_xact_lock returns void (unmappable as a query result) and a "::" cast
+    // would clash with Hibernate's ":" parameters; the lock is transaction scoped via doWork.
+    entityManager.unwrap(Session.class).doWork(connection -> {
+      try (PreparedStatement statement =
+          connection.prepareStatement("SELECT pg_advisory_xact_lock(hashtext(?))")) {
+        statement.setString(1, lockKey);
+        statement.execute();
+      }
+    });
   }
 
   private UUID saveEventAndGenerateLineItems(StockEventDto eventDto, Profiler profiler) {
