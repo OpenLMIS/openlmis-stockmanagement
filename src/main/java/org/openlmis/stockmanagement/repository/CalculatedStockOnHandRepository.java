@@ -32,9 +32,6 @@ public interface CalculatedStockOnHandRepository
           @Param("stockCardId") UUID stockCardId,
           @Param("asOfDate") LocalDate asOfDate);
 
-  Optional<CalculatedStockOnHand> findFirstByStockCardIdAndOccurredDate(
-          UUID stockCardId, LocalDate occurredDate);
-
   List<CalculatedStockOnHand>
       findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
           UUID stockCardId, LocalDate asOfDate);
