@@ -67,28 +67,19 @@ public class DocumentNumberSequenceRepositoryIntegrationTest
   public void shouldKeepSeparateCountersPerMonth() {
     UUID facilityId = randomUUID();
 
-    int may1 = documentNumberSequenceRepository.nextSequenceNumber(facilityId, 2026, 5);
-    int may2 = documentNumberSequenceRepository.nextSequenceNumber(facilityId, 2026, 5);
-    int june1 = documentNumberSequenceRepository.nextSequenceNumber(facilityId, 2026, 6);
-    int june2 = documentNumberSequenceRepository.nextSequenceNumber(facilityId, 2026, 6);
-
-    assertEquals(1, may1);
-    assertEquals(2, may2);
-    assertEquals(1, june1);
-    assertEquals(2, june2);
+    assertEquals(1, documentNumberSequenceRepository.nextSequenceNumber(facilityId, 2026, 5));
+    assertEquals(2, documentNumberSequenceRepository.nextSequenceNumber(facilityId, 2026, 5));
+    assertEquals(1, documentNumberSequenceRepository.nextSequenceNumber(facilityId, 2026, 6));
+    assertEquals(2, documentNumberSequenceRepository.nextSequenceNumber(facilityId, 2026, 6));
   }
 
   @Test
   public void shouldKeepSeparateCountersPerYear() {
     UUID facilityId = randomUUID();
 
-    int year2025 = documentNumberSequenceRepository.nextSequenceNumber(facilityId, 2025, 12);
-    int year2026 = documentNumberSequenceRepository.nextSequenceNumber(facilityId, 2026, 1);
-    int year2027 = documentNumberSequenceRepository.nextSequenceNumber(facilityId, 2027, 1);
-
-    assertEquals(1, year2025);
-    assertEquals(1, year2026);
-    assertEquals(1, year2027);
+    assertEquals(1, documentNumberSequenceRepository.nextSequenceNumber(facilityId, 2025, 12));
+    assertEquals(1, documentNumberSequenceRepository.nextSequenceNumber(facilityId, 2026, 1));
+    assertEquals(1, documentNumberSequenceRepository.nextSequenceNumber(facilityId, 2027, 1));
   }
 
   @Test
@@ -96,13 +87,9 @@ public class DocumentNumberSequenceRepositoryIntegrationTest
     UUID facilityA = randomUUID();
     UUID facilityB = randomUUID();
 
-    int a1 = documentNumberSequenceRepository.nextSequenceNumber(facilityA, 2026, 5);
-    int a2 = documentNumberSequenceRepository.nextSequenceNumber(facilityA, 2026, 5);
-    int b1 = documentNumberSequenceRepository.nextSequenceNumber(facilityB, 2026, 5);
-
-    assertEquals(1, a1);
-    assertEquals(2, a2);
-    assertEquals(1, b1);
+    assertEquals(1, documentNumberSequenceRepository.nextSequenceNumber(facilityA, 2026, 5));
+    assertEquals(2, documentNumberSequenceRepository.nextSequenceNumber(facilityA, 2026, 5));
+    assertEquals(1, documentNumberSequenceRepository.nextSequenceNumber(facilityB, 2026, 5));
   }
 
   @Test
