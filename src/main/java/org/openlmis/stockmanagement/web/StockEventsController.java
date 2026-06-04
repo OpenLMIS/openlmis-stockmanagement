@@ -16,7 +16,6 @@
 package org.openlmis.stockmanagement.web;
 
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.time.LocalDate;
@@ -49,6 +48,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -105,7 +105,7 @@ public class StockEventsController extends BaseController {
    * @return a page of stock event history rows.
    */
   @Transactional(readOnly = true)
-  @RequestMapping(value = "stockEvents", method = GET)
+  @GetMapping("stockEvents")
   @ResponseBody
   public Page<StockEventHistoryDto> getStockEvents(
       @RequestParam UUID facilityId,
@@ -147,7 +147,7 @@ public class StockEventsController extends BaseController {
    * @return a page of the event's stock card line item details.
    */
   @Transactional(readOnly = true)
-  @RequestMapping(value = "stockEvents/{id}", method = GET)
+  @GetMapping("stockEvents/{id}")
   @ResponseBody
   public Page<StockEventLineDetailDto> getStockEventLineItems(
       @PathVariable UUID id, Pageable pageable) {
