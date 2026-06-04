@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -139,15 +140,16 @@ public class StockEventsService {
 
     List<UUID> cardIds = stockCardLineItemRepository.findStockCardIdsByOriginEvent(stockEventId);
 
-    // Cards are resolved in one batch (stock on hand and names); the line items below
-    // are then filtered to those belonging to this event.
+    // Cards are resolved in one batch (stock on hand and names), then ordered by id so the
+    // flattened line items have a stable order before in-memory pagination (findAllById gives no
+    // ordering guarantee). Only the line items belonging to this event are kept.
     List<StockEventLineDetailDto> details = new ArrayList<>();
-    for (StockCardDto card : stockCardService.findStockCardsByIds(cardIds)) {
-      card.getLineItems().stream()
-          .filter(lineItem -> stockEventId.equals(lineItem.getOriginEventId()))
-          .forEach(lineItem ->
-              details.add(StockEventLineDetailDto.newInstance(card, lineItem)));
-    }
+    stockCardService.findStockCardsByIds(cardIds).stream()
+        .sorted(Comparator.comparing(StockCardDto::getId))
+        .forEach(card -> card.getLineItems().stream()
+            .filter(lineItem -> stockEventId.equals(lineItem.getOriginEventId()))
+            .forEach(lineItem ->
+                details.add(StockEventLineDetailDto.newInstance(card, lineItem))));
 
     return Pagination.getPage(details, pageable);
   }
