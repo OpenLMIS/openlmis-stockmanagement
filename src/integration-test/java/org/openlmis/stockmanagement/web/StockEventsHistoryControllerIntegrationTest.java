@@ -147,7 +147,7 @@ public class StockEventsHistoryControllerIntegrationTest extends BaseWebTest {
         .when(stockEventsService).findStockEventLineItems(eq(eventId), any(Pageable.class));
 
     ResultActions resultActions = mvc.perform(
-        get(STOCK_EVENTS_URL + "/" + eventId)
+        get(STOCK_EVENTS_URL + "/" + eventId + "/lineItems")
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
 
     resultActions.andExpect(status().isForbidden());
@@ -165,7 +165,7 @@ public class StockEventsHistoryControllerIntegrationTest extends BaseWebTest {
         .thenReturn(new PageImpl<>(singletonList(line)));
 
     ResultActions resultActions = mvc.perform(
-        get(STOCK_EVENTS_URL + "/" + eventId)
+        get(STOCK_EVENTS_URL + "/" + eventId + "/lineItems")
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
 
     resultActions.andExpect(status().isOk())
@@ -180,7 +180,7 @@ public class StockEventsHistoryControllerIntegrationTest extends BaseWebTest {
         .when(stockEventsService).findStockEventLineItems(eq(eventId), any(Pageable.class));
 
     ResultActions resultActions = mvc.perform(
-        get(STOCK_EVENTS_URL + "/" + eventId)
+        get(STOCK_EVENTS_URL + "/" + eventId + "/lineItems")
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
 
     resultActions.andExpect(status().isNotFound());

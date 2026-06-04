@@ -147,7 +147,7 @@ public class StockEventsController extends BaseController {
    * @return a page of the event's stock card line item details.
    */
   @Transactional(readOnly = true)
-  @GetMapping("stockEvents/{id}")
+  @GetMapping("stockEvents/{id}/lineItems")
   @ResponseBody
   public Page<StockEventLineDetailDto> getStockEventLineItems(
       @PathVariable UUID id, Pageable pageable) {

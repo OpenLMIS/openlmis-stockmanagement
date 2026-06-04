@@ -318,25 +318,26 @@ traits:
             type: string
             required: true
             repeat: false
-        get:
-          is: [ secured, paginated ]
-          description: Get the line items (transaction detail) of a single stock event.
-          responses:
-            200:
-              description: A page of the stock event's line item details.
-              body:
-                application/json:
-                  schema: stockEventLineDetailDtoPage
-            403:
-              description: User does not have permission to view stock cards.
-              body:
-                application/json:
-                  schema: localizedMessage
-            404:
-              description: Stock event with the given id does not exist.
-              body:
-                application/json:
-                  schema: localizedMessage
+        /lineItems:
+          get:
+            is: [ secured, paginated ]
+            description: Get the line items (transaction detail) of a single stock event.
+            responses:
+              200:
+                description: A page of the stock event's line item details.
+                body:
+                  application/json:
+                    schema: stockEventLineDetailDtoPage
+              403:
+                description: User does not have permission to view stock cards.
+                body:
+                  application/json:
+                    schema: localizedMessage
+              404:
+                description: Stock event with the given id does not exist.
+                body:
+                  application/json:
+                    schema: localizedMessage
 
   /stockCardSummaries:
       get:
