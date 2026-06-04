@@ -49,6 +49,8 @@ schemas:
   - stockEventLineItemDto: !include schemas/stockEventLineItemDto.json
   - stockEventExternalDto: !include schemas/stockEventExternalDto.json
   - stockEventLineItemExternalDto: !include schemas/stockEventLineItemExternalDto.json
+  - stockEventHistoryDtoPage: !include schemas/stockEventHistoryDto.json
+  - stockEventLineDetailDtoPage: !include schemas/stockEventLineDetailDto.json
 
   - stockCard: !include schemas/stockCard.json
   - stockCardPage: !include schemas/stockCard.json
@@ -295,6 +297,9 @@ traits:
         responses:
           200:
             description: A page of stock event history rows.
+            body:
+              application/json:
+                schema: stockEventHistoryDtoPage
           400:
             description: The transaction type filter is not a valid value.
             body:
@@ -319,6 +324,9 @@ traits:
           responses:
             200:
               description: A page of the stock event's line item details.
+              body:
+                application/json:
+                  schema: stockEventLineDetailDtoPage
             403:
               description: User does not have permission to view stock cards.
               body:
