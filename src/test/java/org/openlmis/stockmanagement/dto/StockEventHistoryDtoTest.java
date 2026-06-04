@@ -19,10 +19,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.event.EventOrigin;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
+import org.openlmis.stockmanagement.testutils.ToStringTestUtils;
 
 public class StockEventHistoryDtoTest {
 
@@ -53,5 +56,18 @@ public class StockEventHistoryDtoTest {
 
     assertThat(dto.getNumberOfProducts(), is(nullValue()));
     assertThat(dto.getOccurredDate(), is(nullValue()));
+  }
+
+  @Test
+  public void equalsContract() {
+    EqualsVerifier.forClass(StockEventHistoryDto.class)
+        .suppress(Warning.NONFINAL_FIELDS, Warning.STRICT_INHERITANCE)
+        .verify();
+  }
+
+  @Test
+  public void shouldImplementToString() {
+    StockEventHistoryDto dto = new StockEventHistoryDto();
+    ToStringTestUtils.verify(StockEventHistoryDto.class, dto);
   }
 }

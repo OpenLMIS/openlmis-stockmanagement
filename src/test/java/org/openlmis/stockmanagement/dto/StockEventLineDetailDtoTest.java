@@ -19,13 +19,18 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import java.time.LocalDate;
+import java.util.UUID;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
+import org.openlmis.stockmanagement.testutils.OrderableDtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonDataBuilder;
+import org.openlmis.stockmanagement.testutils.ToStringTestUtils;
 
 public class StockEventLineDetailDtoTest {
 
@@ -57,5 +62,23 @@ public class StockEventLineDetailDtoTest {
     assertThat(dto.getOccurredDate(), is(LocalDate.of(2026, 2, 15)));
     assertThat(dto.getReason(), is(reason));
     assertThat(dto.getDocumentNumber(), is("2026-02-FAC001-0001"));
+  }
+
+  @Test
+  public void equalsContract() {
+    EqualsVerifier.forClass(StockEventLineDetailDto.class)
+        .withPrefabValues(OrderableDto.class,
+            new OrderableDtoDataBuilder().build(), new OrderableDtoDataBuilder().build())
+        .withPrefabValues(FacilityDto.class,
+            FacilityDto.builder().id(UUID.randomUUID()).build(),
+            FacilityDto.builder().id(UUID.randomUUID()).build())
+        .suppress(Warning.NONFINAL_FIELDS, Warning.STRICT_INHERITANCE)
+        .verify();
+  }
+
+  @Test
+  public void shouldImplementToString() {
+    StockEventLineDetailDto dto = new StockEventLineDetailDto();
+    ToStringTestUtils.verify(StockEventLineDetailDto.class, dto);
   }
 }
