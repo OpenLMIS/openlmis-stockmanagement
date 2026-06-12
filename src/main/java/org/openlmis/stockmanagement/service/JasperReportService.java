@@ -88,9 +88,11 @@ public class JasperReportService {
    * Generate stock card report in PDF format.
    *
    * @param stockCardId stock card id
+   * @param lang        the lang
+   * @param showInDoses whether values should be shown in doses (true) or packs (false)
    * @return generated stock card report.
    */
-  public byte[] generateStockCardReport(UUID stockCardId, String lang) {
+  public byte[] generateStockCardReport(UUID stockCardId, String lang, Boolean showInDoses) {
     StockCardDto stockCardDto = stockCardService.findStockCardById(stockCardId);
     if (stockCardDto == null) {
       throw new ResourceNotFoundException(new Message(ERROR_REPORT_ID_NOT_FOUND));
@@ -102,6 +104,7 @@ public class JasperReportService {
     params.put("hasLot", stockCardDto.hasLot());
     params.put("dateFormat", dateFormat);
     params.put("decimalFormat", createDecimalFormat());
+    params.put("showInDoses", showInDoses);
     params.put("lang", lang);
 
     JasperReport compiledReport = compileReportFromTemplateUrl(CARD_REPORT_URL);
@@ -115,14 +118,17 @@ public class JasperReportService {
    * @param program  program id
    * @param facility facility id
    * @param lang     the lang
+   * @param showInDoses whether values should be shown in doses (true) or packs (false)
    * @return generated stock card summary report.
    */
-  public byte[] generateStockCardSummariesReport(UUID program, UUID facility, String lang) {
+  public byte[] generateStockCardSummariesReport(UUID program, UUID facility, String lang,
+      Boolean showInDoses) {
     List<StockCardDto> cards = stockCardSummariesService
         .findStockCards(program, facility);
     StockCardDto firstCard = cards.get(0);
     Map<String, Object> params = new HashMap<>();
     params.put("stockCardSummaries", cards);
+    params.put("showInDoses", showInDoses);
 
     params.put("program", firstCard.getProgram());
     params.put("facility", firstCard.getFacility());

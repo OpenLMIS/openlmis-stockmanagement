@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.service.JasperReportService.PI_LINES_REPORT_URL;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -42,6 +43,7 @@ import net.sf.jasperreports.engine.JasperReport;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.openlmis.stockmanagement.domain.JasperTemplate;
@@ -98,7 +100,7 @@ public class JasperReportServiceTest {
     UUID stockCardId = UUID.randomUUID();
     when(stockCardService.findStockCardById(stockCardId)).thenReturn(null);
 
-    jasperReportService.generateStockCardReport(stockCardId, "en");
+    jasperReportService.generateStockCardReport(stockCardId, "en", true);
   }
 
   @Test
@@ -110,9 +112,15 @@ public class JasperReportServiceTest {
     when(reportService.fillAndExportReport(any(String.class), any(byte[].class), anyMap()))
         .thenReturn(testReportData);
 
-    byte[] reportData = jasperReportService.generateStockCardReport(stockCard.getId(), "en");
+    byte[] reportData =
+        jasperReportService.generateStockCardReport(stockCard.getId(), "en", false);
 
     assertEquals(testReportData, reportData);
+
+    ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
+    verify(reportService).fillAndExportReport(any(String.class), any(byte[].class),
+        paramsCaptor.capture());
+    assertEquals(Boolean.FALSE, paramsCaptor.getValue().get("showInDoses"));
   }
 
   @Test
@@ -129,9 +137,14 @@ public class JasperReportServiceTest {
         .thenReturn(testReportData);
 
     byte[] reportData = jasperReportService.generateStockCardSummariesReport(programId,
-        facilityId, "en");
+        facilityId, "en", false);
 
     assertEquals(testReportData, reportData);
+
+    ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
+    verify(reportService).fillAndExportReport(any(String.class), any(byte[].class),
+        paramsCaptor.capture());
+    assertEquals(Boolean.FALSE, paramsCaptor.getValue().get("showInDoses"));
   }
 
   @Test
