@@ -15,11 +15,16 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_STOCK_EVENT_NOT_FOUND;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import java.util.UUID;
+import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
+import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.service.JasperReportService;
 import org.openlmis.stockmanagement.service.PermissionService;
+import org.openlmis.stockmanagement.util.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +47,9 @@ public class ReportsController {
 
   @Autowired
   private PermissionService permissionService;
+
+  @Autowired
+  private StockEventsRepository stockEventsRepository;
 
   /**
    * Get stock card report in PDF format.
@@ -86,6 +94,36 @@ public class ReportsController {
         .contentType(MediaType.APPLICATION_PDF)
         .header("Content-Disposition",
             "inline; filename=stock_card_summaries" + program + "_" + facility + ".pdf")
+        .body(report);
+  }
+
+  /**
+   * Print response entity.
+   *
+   * @param stockEventId the stock event id
+   * @param showInDoses  whether quantities should be presented in doses (otherwise in packs)
+   * @param lang         the lang
+   * @return the response entity
+   */
+  @RequestMapping(value = "/stockEvents/{stockEventId}/print", method = GET)
+  @ResponseBody
+  public ResponseEntity<byte[]> print(
+      @PathVariable("stockEventId") UUID stockEventId,
+      @RequestParam(required = false, defaultValue = "true") Boolean showInDoses,
+      @RequestParam(defaultValue = "en") String lang) {
+    LOGGER.info("Try to generate stock event report with id: {}", stockEventId);
+    StockEvent stockEvent = stockEventsRepository.findById(stockEventId)
+        .orElseThrow(() ->
+            new ResourceNotFoundException(new Message(ERROR_STOCK_EVENT_NOT_FOUND, stockEventId)));
+    permissionService.canViewStockCard(stockEvent.getProgramId(), stockEvent.getFacilityId());
+
+    byte[] report = reportService.generateStockEventReport(stockEventId, lang, showInDoses);
+
+    return ResponseEntity
+        .ok()
+        .contentType(MediaType.APPLICATION_PDF)
+        .header("Content-Disposition",
+            "inline; filename=stock_event_" + stockEventId + ".pdf")
         .body(report);
   }
 }

@@ -63,6 +63,7 @@ public class JasperReportService {
 
   static final String CARD_REPORT_URL = "/jasperTemplates/stockCard.jrxml";
   static final String CARD_SUMMARY_REPORT_URL = "/jasperTemplates/stockCardSummary.jrxml";
+  static final String STOCK_EVENT_REPORT_URL = "/jasperTemplates/stockEvent.jrxml";
   static final String PI_LINES_REPORT_URL = "/jasperTemplates/physicalinventoryLines.jrxml";
 
   private static final String PARAM_DATASOURCE = "datasource";
@@ -77,6 +78,9 @@ public class JasperReportService {
 
   @Value("${dateTimeFormat}")
   private String dateTimeFormat;
+
+  @Value("${time.zoneId}")
+  private String timeZoneId;
 
   @Value("${groupingSeparator}")
   private String groupingSeparator;
@@ -138,6 +142,30 @@ public class JasperReportService {
 
     JasperReport compiledReport = compileReportFromTemplateUrl(CARD_SUMMARY_REPORT_URL);
     return reportService.fillAndExportReport("stockCardSummary",
+        serializeReport(compiledReport), params);
+  }
+
+  /**
+   * Generate stock event report byte [ ].
+   *
+   * @param stockEventId the stock event id
+   * @param lang         the lang
+   * @param showInDoses  whether quantities should be presented in doses (otherwise in packs)
+   * @return the byte [ ]
+   */
+  public byte[] generateStockEventReport(UUID stockEventId, String lang, Boolean showInDoses) {
+    Map<String, Object> params = new HashMap<>();
+
+    params.put("stockEventId", stockEventId);
+    params.put("dateFormat", dateFormat);
+    params.put("dateTimeFormat", dateTimeFormat);
+    params.put("timeZoneId", timeZoneId);
+    params.put("decimalFormat", createDecimalFormat());
+    params.put("lang", lang);
+    params.put("showInDoses", showInDoses);
+
+    JasperReport compiledReport = compileReportFromTemplateUrl(STOCK_EVENT_REPORT_URL);
+    return reportService.fillAndExportReport("stockEvent",
         serializeReport(compiledReport), params);
   }
 

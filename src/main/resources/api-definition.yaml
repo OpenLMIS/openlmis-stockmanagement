@@ -269,6 +269,41 @@ traits:
             body:
               application/json:
                   schema: localizedMessage
+      /{id}:
+        /print:
+          get:
+            is: [ secured ]
+            description: Get stock event report in PDF format to print.
+            queryParameters:
+              showInDoses:
+                displayName: showInDoses
+                description: Whether quantities should be presented in doses (otherwise in packs).
+                type: boolean
+                required: false
+                default: true
+              lang:
+                displayName: lang
+                description: The language of the generated report.
+                type: string
+                required: false
+                default: en
+            responses:
+              200:
+                body:
+                  application/pdf:
+
+              403:
+                description: User does not have permission to get event card report.
+                body:
+                  application/json:
+                    schema: localizedMessage
+
+              404:
+                description: Stock event with given id does not exist, can not get report.
+                body:
+                  application/json:
+                    schema: localizedMessage
+
 
   /stockCardSummaries:
       get:
