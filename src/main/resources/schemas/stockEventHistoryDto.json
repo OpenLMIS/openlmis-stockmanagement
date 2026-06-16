@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "title": "StockEventHistoryDto",
+  "description": "A single transaction history row (issue or receive stock event).",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stock event id."
+    },
+    "documentNumber": {
+      "type": ["string", "null"],
+      "description": "Generated document number of the event."
+    },
+    "type": {
+      "type": "string",
+      "enum": ["ISSUE", "RECEIVE"],
+      "description": "Transaction type, read from the event origin."
+    },
+    "occurredDate": {
+      "type": ["string", "null"],
+      "description": "Earliest occurred date across the event's line items (ISO date)."
+    },
+    "numberOfProducts": {
+      "type": ["integer", "null"],
+      "description": "Count of distinct products in the event."
+    },
+    "userId": {
+      "type": ["string", "null"],
+      "description": "Id of the user who performed the transaction."
+    },
+    "username": {
+      "type": ["string", "null"],
+      "description": "Resolved username of the user who performed the transaction."
+    }
+  },
+  "required": ["id", "type"]
+}

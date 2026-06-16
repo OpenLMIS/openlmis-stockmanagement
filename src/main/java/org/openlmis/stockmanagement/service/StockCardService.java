@@ -16,6 +16,8 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.time.ZonedDateTime.now;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.domain.card.StockCard.createStockCardFrom;
@@ -33,6 +35,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import javax.validation.constraints.NotNull;
@@ -45,6 +48,8 @@ import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
+import org.openlmis.stockmanagement.dto.referencedata.LotDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.i18n.MessageService;
@@ -75,6 +80,7 @@ import org.springframework.stereotype.Service;
  * for users to view one single stock card with full details.
  */
 @Service
+@SuppressWarnings("PMD.TooManyMethods")
 public class StockCardService extends StockCardBaseService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCardService.class);
@@ -179,6 +185,89 @@ public class StockCardService extends StockCardBaseService {
     }
     assignSourceDestinationReasonNameForLineItems(cardDto);
     return cardDto;
+  }
+
+  /**
+   * Resolves a batch of stock cards by id into fully populated DTOs (stock on hand, names),
+   * batching the reference-data lookups instead of per card. Unlike
+   * {@link #findStockCardById(UUID)} it does NOT re-check the view permission - the caller must.
+   *
+   * @param ids the stock card ids.
+   * @return the resolved stock card DTOs.
+   */
+  public List<StockCardDto> findStockCardsByIds(Collection<UUID> ids) {
+    if (isEmpty(ids)) {
+      return emptyList();
+    }
+
+    List<StockCard> cards = cardRepository.findAllById(ids).stream()
+        .map(StockCard::shallowCopy)
+        .collect(Collectors.toList());
+    cards.forEach(stockCardLineItemService::populateStockOnHandLineItems);
+    cards.forEach(this::populateUsernames);
+
+    List<StockCardDto> dtos = createDtos(cards);
+
+    Set<UUID> orderableIds = dtos.stream()
+        .map(dto -> dto.getOrderable().getId())
+        .collect(Collectors.toSet());
+    Map<UUID, OrderableDto> orderables = orderableRefDataService.findByIds(orderableIds).stream()
+        .collect(Collectors.toMap(OrderableDto::getId, Function.identity()));
+
+    Set<UUID> lotIds = dtos.stream()
+        .filter(StockCardDto::hasLot)
+        .map(dto -> dto.getLot().getId())
+        .collect(Collectors.toSet());
+    Map<UUID, LotDto> lots = lotIds.isEmpty()
+        ? emptyMap()
+        : lotReferenceDataService.findByIds(lotIds).stream()
+            .collect(Collectors.toMap(LotDto::getId, Function.identity()));
+
+    Set<UUID> facilityNodeIds = collectFacilityNodeIds(dtos);
+    Map<UUID, FacilityDto> facilities = facilityNodeIds.isEmpty()
+        ? emptyMap()
+        : facilityRefDataService.findByIds(facilityNodeIds);
+
+    dtos.forEach(dto -> {
+      dto.setOrderable(orderables.get(dto.getOrderable().getId()));
+      if (dto.hasLot()) {
+        dto.setLot(lots.get(dto.getLot().getId()));
+      }
+      dto.getLineItems().forEach(lineItemDto -> {
+        StockCardLineItem lineItem = lineItemDto.getLineItem();
+        assignReasonName(lineItem);
+        lineItemDto.setSource(resolveNodeFacility(lineItem.getSource(), facilities));
+        lineItemDto.setDestination(resolveNodeFacility(lineItem.getDestination(), facilities));
+      });
+    });
+
+    return dtos;
+  }
+
+  private Set<UUID> collectFacilityNodeIds(List<StockCardDto> dtos) {
+    Set<UUID> nodeIds = new HashSet<>();
+    dtos.forEach(dto -> dto.getLineItems().forEach(lineItemDto -> {
+      StockCardLineItem lineItem = lineItemDto.getLineItem();
+      addFacilityNodeId(nodeIds, lineItem.getSource());
+      addFacilityNodeId(nodeIds, lineItem.getDestination());
+    }));
+    return nodeIds;
+  }
+
+  private void addFacilityNodeId(Set<UUID> nodeIds, Node node) {
+    if (node != null && node.isRefDataFacility()) {
+      nodeIds.add(node.getReferenceId());
+    }
+  }
+
+  private FacilityDto resolveNodeFacility(Node node, Map<UUID, FacilityDto> facilities) {
+    if (node == null) {
+      return null;
+    }
+    if (node.isRefDataFacility()) {
+      return facilities.get(node.getReferenceId());
+    }
+    return getFromRefDataOrConvertOrg(node);
   }
 
   /**
