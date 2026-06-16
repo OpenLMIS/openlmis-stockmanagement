@@ -23,15 +23,11 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.Test;
-import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
-import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.service.JasperReportService;
 import org.openlmis.stockmanagement.service.PermissionService;
-import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.ResultActions;
@@ -40,16 +36,12 @@ public class ReportsControllerIntegrationTest extends BaseWebTest {
 
   private static final String CARD_REPORT = "/api/stockCards/%s/print";
   private static final String CARD_SUMMARY_REPORT = "/api/stockCardSummaries/print";
-  private static final String STOCK_EVENT_REPORT = "/api/stockEvents/%s/print";
 
   @MockBean
   private JasperReportService reportService;
 
   @MockBean
   private PermissionService permissionService;
-
-  @MockBean
-  private StockEventsRepository stockEventsRepository;
 
   @Test
   public void return200WhenStockCardReportGenerated() throws Exception {
@@ -98,68 +90,6 @@ public class ReportsControllerIntegrationTest extends BaseWebTest {
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
         .param("program", programId.toString())
         .param("facility", facilityId.toString()));
-
-    //then
-    resultActions.andExpect(status().isForbidden());
-  }
-
-  @Test
-  public void return200WhenStockEventReportGenerated() throws Exception {
-    //given
-    UUID stockEventId = UUID.randomUUID();
-    UUID programId = UUID.randomUUID();
-    UUID facilityId = UUID.randomUUID();
-    StockEvent stockEvent = new StockEventDataBuilder()
-        .withProgram(programId)
-        .withFacility(facilityId)
-        .build();
-    when(stockEventsRepository.findById(stockEventId)).thenReturn(Optional.of(stockEvent));
-    when(reportService.generateStockEventReport(stockEventId, "en", true))
-        .thenReturn(new byte[1]);
-
-    //when
-    String reportUrl = format(STOCK_EVENT_REPORT, stockEventId.toString());
-    ResultActions resultActions = mvc.perform(get(reportUrl)
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
-
-    //then
-    resultActions.andExpect(status().isOk());
-    verify(permissionService, times(1)).canViewStockCard(programId, facilityId);
-  }
-
-  @Test
-  public void return404WhenStockEventNotFound() throws Exception {
-    //given
-    UUID stockEventId = UUID.randomUUID();
-    when(stockEventsRepository.findById(stockEventId)).thenReturn(Optional.empty());
-
-    //when
-    String reportUrl = format(STOCK_EVENT_REPORT, stockEventId.toString());
-    ResultActions resultActions = mvc.perform(get(reportUrl)
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
-
-    //then
-    resultActions.andExpect(status().isNotFound());
-  }
-
-  @Test
-  public void return403WhenUserHasNoPermissionToViewStockEvent() throws Exception {
-    //given
-    UUID stockEventId = UUID.randomUUID();
-    UUID programId = UUID.randomUUID();
-    UUID facilityId = UUID.randomUUID();
-    StockEvent stockEvent = new StockEventDataBuilder()
-        .withProgram(programId)
-        .withFacility(facilityId)
-        .build();
-    when(stockEventsRepository.findById(stockEventId)).thenReturn(Optional.of(stockEvent));
-    doThrow(new PermissionMessageException(new Message("key"))).when(permissionService)
-        .canViewStockCard(programId, facilityId);
-
-    //when
-    String reportUrl = format(STOCK_EVENT_REPORT, stockEventId.toString());
-    ResultActions resultActions = mvc.perform(get(reportUrl)
-        .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
 
     //then
     resultActions.andExpect(status().isForbidden());

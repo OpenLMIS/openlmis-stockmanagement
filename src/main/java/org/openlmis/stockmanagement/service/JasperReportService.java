@@ -67,9 +67,7 @@ public class JasperReportService {
   static final String PI_LINES_REPORT_URL = "/jasperTemplates/physicalinventoryLines.jrxml";
 
   private static final String PARAM_DATASOURCE = "datasource";
-  private static final String PARAM_DATE_FORMAT = "dateFormat";
-  private static final String PARAM_DECIMAL_FORMAT = "decimalFormat";
-
+  
   private final StockCardService stockCardService;
   private final StockCardSummariesService stockCardSummariesService;
   private final ReportService reportService;
@@ -106,8 +104,8 @@ public class JasperReportService {
     Map<String, Object> params = new HashMap<>();
     params.put(PARAM_DATASOURCE, singletonList(stockCardDto));
     params.put("hasLot", stockCardDto.hasLot());
-    params.put(PARAM_DATE_FORMAT, dateFormat);
-    params.put(PARAM_DECIMAL_FORMAT, createDecimalFormat());
+    params.put("dateFormat", dateFormat);
+    params.put("decimalFormat", createDecimalFormat());
     params.put("lang", lang);
 
     JasperReport compiledReport = compileReportFromTemplateUrl(CARD_REPORT_URL);
@@ -137,9 +135,9 @@ public class JasperReportService {
     params.put("showProgram", getCount(cards, card -> card.getProgram().getId().toString()) > 1);
     params.put("showFacility", getCount(cards, card -> card.getFacility().getId().toString()) > 1);
     params.put("showLot", cards.stream().anyMatch(card -> card.getLotId() != null));
-    params.put(PARAM_DATE_FORMAT, dateFormat);
+    params.put("dateFormat", dateFormat);
     params.put("dateTimeFormat", dateTimeFormat);
-    params.put(PARAM_DECIMAL_FORMAT, createDecimalFormat());
+    params.put("decimalFormat", createDecimalFormat());
     params.put("lang", lang);
 
     JasperReport compiledReport = compileReportFromTemplateUrl(CARD_SUMMARY_REPORT_URL);
@@ -159,10 +157,10 @@ public class JasperReportService {
     Map<String, Object> params = new HashMap<>();
 
     params.put("stockEventId", stockEventId);
-    params.put(PARAM_DATE_FORMAT, dateFormat);
+    params.put("dateFormat", dateFormat);
     params.put("dateTimeFormat", dateTimeFormat);
     params.put("timeZoneId", timeZoneId);
-    params.put(PARAM_DECIMAL_FORMAT, createDecimalFormat());
+    params.put("decimalFormat", createDecimalFormat());
     params.put("lang", lang);
     params.put("showInDoses", showInDoses);
 
