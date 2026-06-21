@@ -110,7 +110,7 @@ public class StockEventsServiceTest {
   }
 
   @Test
-  public void searchShouldPopulateNumberOfProductsAndOccurredDateFromAggregate() {
+  public void searchShouldPopulateEntriesCountAndOccurredDateFromAggregate() {
     StockEvent event = new StockEventDataBuilder()
         .withEventOrigin(EventOrigin.ISSUE).build();
     StockEventSearchParams params = new StockEventSearchParams(randomUUID(), randomUUID(),
@@ -126,12 +126,12 @@ public class StockEventsServiceTest {
 
     StockEventHistoryDto dto = result.getContent().get(0);
 
-    assertThat(dto.getNumberOfProducts(), is(3));
+    assertThat(dto.getEntriesCount(), is(3));
     assertThat(dto.getOccurredDate(), is(LocalDate.of(2026, 2, 10)));
   }
 
   @Test
-  public void searchShouldDefaultNumberOfProductsToZeroWhenEventHasNoAggregate() {
+  public void searchShouldDefaultEntriesCountToZeroWhenEventHasNoAggregate() {
     StockEvent event = new StockEventDataBuilder()
         .withEventOrigin(EventOrigin.ISSUE).build();
     StockEventSearchParams params = new StockEventSearchParams(randomUUID(), randomUUID(),
@@ -144,7 +144,7 @@ public class StockEventsServiceTest {
 
     StockEventHistoryDto dto = result.getContent().get(0);
 
-    assertThat(dto.getNumberOfProducts(), is(0));
+    assertThat(dto.getEntriesCount(), is(0));
     assertThat(dto.getOccurredDate(), is(nullValue()));
   }
 

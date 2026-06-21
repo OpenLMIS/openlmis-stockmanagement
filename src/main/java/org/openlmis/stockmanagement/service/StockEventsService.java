@@ -98,9 +98,9 @@ public class StockEventsService {
       StockEventLineItemAggregate aggregate) {
     StockEventHistoryDto dto = StockEventHistoryDto.newInstance(event);
     if (aggregate == null) {
-      dto.setNumberOfProducts(0);
+      dto.setEntriesCount(0);
     } else {
-      dto.setNumberOfProducts(aggregate.getNumberOfProducts());
+      dto.setEntriesCount(aggregate.getEntriesCount());
       dto.setOccurredDate(aggregate.getOccurredDate());
     }
     return dto;

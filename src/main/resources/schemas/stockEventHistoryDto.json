@@ -21,9 +21,9 @@
       "type": ["string", "null"],
       "description": "Earliest occurred date across the event's line items (ISO date)."
     },
-    "numberOfProducts": {
+    "entriesCount": {
       "type": ["integer", "null"],
-      "description": "Count of distinct products in the event."
+      "description": "Count of stock event line item entries in the event."
     },
     "userId": {
       "type": ["string", "null"],

@@ -54,7 +54,7 @@ public class StockEventHistoryDtoTest {
 
     StockEventHistoryDto dto = StockEventHistoryDto.newInstance(event);
 
-    assertThat(dto.getNumberOfProducts(), is(nullValue()));
+    assertThat(dto.getEntriesCount(), is(nullValue()));
     assertThat(dto.getOccurredDate(), is(nullValue()));
   }
 

@@ -162,7 +162,7 @@ public class StockEventsRepositoryIntegrationTest
   }
 
   @Test
-  public void shouldAggregateDistinctProductsAndEarliestOccurredDate() {
+  public void shouldCountLineItemEntriesAndEarliestOccurredDate() {
     UUID facility = randomUUID();
     UUID program = randomUUID();
     UUID orderableA = randomUUID();
@@ -184,7 +184,7 @@ public class StockEventsRepositoryIntegrationTest
     StockEventLineItemAggregate row = rows.get(0);
 
     assertThat(row.getStockEventId(), is(event.getId()));
-    assertThat(row.getNumberOfProducts(), is(2));
+    assertThat(row.getEntriesCount(), is(3));
     assertThat(row.getOccurredDate(), is(LocalDate.of(2026, 2, 10)));
   }
 
