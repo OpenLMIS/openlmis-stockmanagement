@@ -1,0 +1,490 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.5.final using JasperReports Library version 6.20.5-3efcf2e67f959db3888d79f73dde2dbd7acb4f8e  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="stockEvent" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="BlankPage" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="20" bottomMargin="0" isFloatColumnFooter="true" resourceBundle="reports/resourceBundles/report_translations" whenResourceMissingType="Empty" uuid="b1b5f972-1837-533f-c4e6-65c2bff0a7df">
+	<import value="java.util.*"/>
+	<import value="java.time.LocalDate"/>
+	<import value="java.time.format.DateTimeFormatter"/>
+	<import value="java.time.ZonedDateTime"/>
+	<import value="java.text.*"/>
+	<import value="java.time.ZoneId"/>
+    <style name="BaseStyle" isDefault="true" fontName="DejaVu Sans" fontSize="10"/>
+	<parameter name="stockEventId" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="dateFormat" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="dateTimeFormat" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="timeZoneId" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="decimalFormat" class="java.text.DecimalFormat" isForPrompting="false"/>
+	<parameter name="showInDoses" class="java.lang.Boolean" isForPrompting="false"/>
+	<parameter name="headerTemplate" class="net.sf.jasperreports.engine.JasperReport"/>
+	<queryString language="plsql">
+		<![CDATA[
+WITH RECURSIVE
+ordered_items AS (
+    SELECT
+        scli.id,
+        scli.stockcardid,
+        scli.quantity,
+        scli.sourceid,
+        scli.destinationid,
+        scli.reasonid,
+        sclir.reasontype,
+        ROW_NUMBER() OVER (
+            PARTITION BY scli.stockcardid
+            ORDER BY scli.occurreddate, scli.processeddate, scli.id
+        ) AS rn
+    FROM stockmanagement.stock_card_line_items scli
+    LEFT JOIN stockmanagement.stock_card_line_item_reasons sclir
+      ON sclir.id = scli.reasonid
+    WHERE scli.stockcardid IN (
+        SELECT DISTINCT stockcardid
+        FROM stockmanagement.stock_card_line_items
+        WHERE origineventid = $P{stockEventId}::uuid
+    )
+),
+running_soh AS (
+    SELECT oi.*,
+        CASE
+            WHEN oi.reasonid IS NULL AND oi.sourceid IS NULL AND oi.destinationid IS NULL
+                THEN oi.quantity
+            WHEN oi.sourceid IS NOT NULL OR oi.reasontype = 'CREDIT'
+                THEN oi.quantity
+            ELSE -oi.quantity
+        END AS soh
+    FROM ordered_items oi
+    WHERE oi.rn = 1
+
+    UNION ALL
+
+    SELECT oi.*,
+        CASE
+            WHEN oi.reasonid IS NULL AND oi.sourceid IS NULL AND oi.destinationid IS NULL
+                THEN oi.quantity
+            WHEN oi.sourceid IS NOT NULL OR oi.reasontype = 'CREDIT'
+                THEN rs.soh + oi.quantity
+            ELSE rs.soh - oi.quantity
+        END AS soh
+    FROM running_soh rs
+    JOIN ordered_items oi
+      ON oi.stockcardid = rs.stockcardid
+     AND oi.rn = rs.rn + 1
+)
+SELECT
+    se.documentnumber           AS documentnumber,
+    se.processeddate            AS processeddate,
+    se.signature                AS signature,
+    se.eventorigin              AS eventorigin,
+    f.name                      AS facility,
+    p.name                      AS program,
+    u.firstname                 AS firstname,
+    u.lastname                  AS lastname,
+    o.code                      AS productcode,
+    o.fullproductname           AS productname,
+    o.netcontent                AS netcontent,
+    l.lotcode                   AS lotcode,
+    scli.occurreddate           AS occurreddate,
+    COALESCE(source_facility.name, source_org.name)             AS source,
+    scli.sourcefreetext         AS sourcefreetext,
+    COALESCE(destination_facility.name, destination_org.name)   AS destination,
+    scli.destinationfreetext    AS destinationfreetext,
+    sclir.name                  AS reasonname,
+    scli.reasonfreetext         AS reasonfreetext,
+    scli.quantity               AS quantity,
+    rs.soh                      AS stockonhand
+FROM stockmanagement.stock_card_line_items scli
+LEFT JOIN stockmanagement.stock_events se ON se.id = scli.origineventid
+LEFT JOIN stockmanagement.stock_cards sc ON sc.id = scli.stockcardid
+LEFT JOIN referencedata.facilities f ON f.id = se.facilityid
+LEFT JOIN stockmanagement.nodes source_nodes ON source_nodes.id = scli.sourceid
+LEFT JOIN referencedata.facilities source_facility
+    ON source_facility.id = source_nodes.referenceid AND source_nodes.isrefdatafacility = true
+LEFT JOIN stockmanagement.organizations source_org
+    ON source_org.id = source_nodes.referenceid AND source_nodes.isrefdatafacility = false
+LEFT JOIN stockmanagement.nodes destination_nodes ON destination_nodes.id = scli.destinationid
+LEFT JOIN referencedata.facilities destination_facility
+    ON destination_facility.id = destination_nodes.referenceid AND destination_nodes.isrefdatafacility = true
+LEFT JOIN stockmanagement.organizations destination_org
+    ON destination_org.id = destination_nodes.referenceid AND destination_nodes.isrefdatafacility = false
+LEFT JOIN referencedata.programs p ON p.id = se.programid
+LEFT JOIN referencedata.users u ON u.id = se.userid
+LEFT JOIN referencedata.orderables o ON o.id = sc.orderableid
+LEFT JOIN referencedata.lots l ON l.id = sc.lotid
+LEFT JOIN stockmanagement.stock_card_line_item_reasons sclir ON sclir.id = scli.reasonid
+LEFT JOIN running_soh rs ON rs.id = scli.id
+WHERE se.id = $P{stockEventId}::uuid
+ORDER BY o.code, l.lotcode NULLS FIRST, scli.occurreddate, scli.processeddate
+        ]]>
+	</queryString>
+	<field name="documentnumber" class="java.lang.String"/>
+	<field name="processeddate" class="java.sql.Timestamp"/>
+	<field name="signature" class="java.lang.String"/>
+	<field name="eventorigin" class="java.lang.String"/>
+	<field name="facility" class="java.lang.String"/>
+	<field name="program" class="java.lang.String"/>
+	<field name="firstname" class="java.lang.String"/>
+	<field name="lastname" class="java.lang.String"/>
+	<field name="productcode" class="java.lang.String"/>
+	<field name="productname" class="java.lang.String"/>
+	<field name="netcontent" class="java.lang.Integer"/>
+	<field name="lotcode" class="java.lang.String"/>
+	<field name="occurreddate" class="java.lang.Object"/>
+	<field name="source" class="java.lang.String"/>
+	<field name="sourcefreetext" class="java.lang.String"/>
+	<field name="destination" class="java.lang.String"/>
+	<field name="destinationfreetext" class="java.lang.String"/>
+	<field name="reasonname" class="java.lang.String"/>
+	<field name="reasonfreetext" class="java.lang.String"/>
+	<field name="quantity" class="java.lang.Integer"/>
+	<field name="stockonhand" class="java.lang.Integer"/>
+	<group name="productGroup">
+		<groupExpression><![CDATA[$F{productcode} + "|" + $F{productname}]]></groupExpression>
+		<groupHeader>
+			<band height="25" splitType="Stretch">
+				<textField isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="10" y="0" width="120" height="25" backcolor="#F2F2F2" uuid="06a9370e-dcaa-4b03-9d18-aca8abaa56bd"/>
+					<box padding="3">
+						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="10" fontName="DejaVu Sans" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{productcode}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="130" y="0" width="702" height="25" backcolor="#F2F2F2" uuid="f75fae81-e6b8-4993-898d-632ddf29d1e8"/>
+					<box padding="3">
+						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+                        <font size="10" fontName="DejaVu Sans" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{productname}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="195">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<subreport overflowType="Stretch">
+				<reportElement positionType="Float" mode="Transparent" x="0" y="0" width="842"
+				               height="85" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="57924a28-dd0b-4ed5-8b5c-8867c356fb34">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<parametersMapExpression><![CDATA[$P{REPORT_PARAMETERS_MAP}]]></parametersMapExpression>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{headerTemplate}]]></subreportExpression>
+			</subreport>
+			<textField>
+				<reportElement positionType="Float" x="20" y="90" width="500" height="25"
+				               uuid="8b895ad8-e565-41e4-87f4-fe70fea7b9f1"/>
+				<textElement verticalAlignment="Middle">
+                    <font size="16" fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{report.title.stockEvent}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="Float" x="520" y="90" width="302" height="25"
+				               uuid="8b895ad8-e565-41e4-87f4-fe70fea7b9f2"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="16" fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{report.header.transactionType} +
+				    ($F{eventorigin} == null ? "-" :
+				        $F{eventorigin}.equals("ISSUE") ? $R{report.value.transactionType.issue} :
+				        $F{eventorigin}.equals("RECEIVE") ? $R{report.value.transactionType.receive} :
+				        $F{eventorigin})]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="Float" x="20" y="120" width="400" height="16"
+				               uuid="ec47a93b-983c-447f-85cf-4775e800330a"/>
+				<textElement>
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Document Number: " + ($F{documentnumber} == null ? "-" : $F{documentnumber})]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="Float" x="420" y="120" width="402" height="16"
+				               uuid="ec47a93b-983c-447f-85cf-4775e800330b"/>
+				<textElement>
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Processed Date: " + ($F{processeddate} == null ? "-" :
+				    DateTimeFormatter.ofPattern($P{dateTimeFormat}).format(
+				        ZonedDateTime.ofInstant($F{processeddate}.toInstant(), ZoneId.of($P{timeZoneId}))))]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="Float" x="20" y="140" width="802" height="16"
+				               uuid="a035b2b6-8c32-4db2-89fd-6444a109b1d7"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[MessageFormat.format($R{report.header.facilityProgram},
+				    $F{facility} == null ? "-" : $F{facility},
+				    $F{program} == null ? "-" : $F{program})]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="Float" x="20" y="160" width="400" height="16"
+				               uuid="08e7b43c-4f44-4e33-88f6-92324585772e"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA["User: " +
+				    ($F{firstname} == null ? "" : $F{firstname}) + " " +
+				    ($F{lastname}  == null ? "" : $F{lastname})]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="Float" x="420" y="160" width="402" height="16"
+				               uuid="08e7b43c-4f44-4e33-88f6-92324585772f"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Signature: " + ($F{signature} == null || $F{signature}.isEmpty() ? "-" : $F{signature})]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="25" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToBandHeight" mode="Opaque" x="10" y="0" width="80" height="25" backcolor="#CCCCCC" uuid="06a9370e-dcaa-4b03-9d18-aca8abaa56bd"/>
+				<box padding="3">
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{report.column.lotCode}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToBandHeight" mode="Opaque" x="90" y="0" width="80" height="25" backcolor="#CCCCCC" uuid="dc2ac7c8-1086-49d9-90fb-9acd95271092"/>
+				<box padding="3">
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{report.column.operationDate}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToBandHeight" mode="Opaque" x="170" y="0" width="160" height="25" backcolor="#CCCCCC" uuid="93bc4e67-36dd-4077-95db-0db852108a31"/>
+				<box padding="3">
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{report.column.source}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToBandHeight" mode="Opaque" x="330" y="0" width="160" height="25" backcolor="#CCCCCC" uuid="93bc4e67-36dd-4077-95db-0db852108a32"/>
+				<box padding="3">
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{report.column.destination}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToBandHeight" mode="Opaque" x="490" y="0" width="190" height="25" backcolor="#CCCCCC" uuid="d07d08b5-df52-43b1-b3d0-d571623c8b03"/>
+				<box padding="3">
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{report.column.reason}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToBandHeight" mode="Opaque" x="680" y="0" width="70" height="25" backcolor="#CCCCCC" uuid="10ff459c-97ad-48f1-b414-6158967a3b95"/>
+				<box padding="3">
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{report.column.quantity}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToBandHeight" mode="Opaque" x="750" y="0" width="82" height="25" backcolor="#CCCCCC" uuid="8d4d1ea9-e98c-43b5-a4e2-64a13ad5ab51"/>
+				<box padding="3">
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{report.column.stockOnHand}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="22" splitType="Stretch">
+			<textField isBlankWhenNull="true" isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToBandHeight" x="10" y="0" width="80" height="22" uuid="c649aa2d-900a-4d7f-94f7-0d072c516c0a"/>
+				<box padding="3">
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#CCCCCC"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{lotcode} == null ? $R{report.value.noLotDefined} : $F{lotcode}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToBandHeight" x="90" y="0" width="80" height="22" uuid="0e217f2e-f7ca-4c05-b9d2-f13ec6cf38db"/>
+				<box padding="3">
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#CCCCCC"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{occurreddate} != null ? DateTimeFormatter.ofPattern($P{dateFormat}).format(LocalDate.parse(String.valueOf($F{occurreddate}))) : ""]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToBandHeight" x="170" y="0" width="160" height="22" uuid="c649aa2d-900a-4d7f-94f7-0d072c516c1a"/>
+				<box padding="3">
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#CCCCCC"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{source} == null ? "" : $F{source}) +
+				    ($F{sourcefreetext} == null || $F{sourcefreetext}.isEmpty() ? "" : " (" + $F{sourcefreetext} + ")")]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToBandHeight" x="330" y="0" width="160" height="22" uuid="c649aa2d-900a-4d7f-94f7-0d072c516c2a"/>
+				<box padding="3">
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#CCCCCC"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{destination} == null ? "" : $F{destination}) +
+				    ($F{destinationfreetext} == null || $F{destinationfreetext}.isEmpty() ? "" : " (" + $F{destinationfreetext} + ")")]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToBandHeight" x="490" y="0" width="190" height="22" uuid="a7672f9a-30bd-4bf9-96af-324baa7e2280"/>
+				<box padding="3">
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#CCCCCC"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{reasonname} == null ? "" : $F{reasonname}) +
+				    ($F{reasonfreetext} == null || $F{reasonfreetext}.isEmpty() ? "" : " (" + $F{reasonfreetext} + ")")]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToBandHeight" x="680" y="0" width="70" height="22" uuid="a2c8fc54-7cdc-442a-9ced-608a01ef270b"/>
+				<box padding="3">
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#CCCCCC"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{quantity} == null ? "" :
+				    (
+				        $P{showInDoses}
+				            ? $P{decimalFormat}.format($F{quantity}).toString()
+				            : (
+				                ($F{quantity} / ($F{netcontent} == null ? 1 : $F{netcontent}))
+				                + " (+" + ($F{quantity} % ($F{netcontent} == null ? 1 : $F{netcontent})) + ")"
+				              )
+				    )]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true" isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToBandHeight" x="750" y="0" width="82" height="22" uuid="547fa08c-24e6-4617-aa94-09384a952a19"/>
+				<box padding="3">
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#CCCCCC"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="8" fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{stockonhand} == null ? "" :
+				    (
+				        $P{showInDoses}
+				            ? $P{decimalFormat}.format($F{stockonhand}).toString()
+				            : (
+				                ($F{stockonhand} / ($F{netcontent} == null ? 1 : $F{netcontent}))
+				                + " (+" + ($F{stockonhand} % ($F{netcontent} == null ? 1 : $F{netcontent})) + ")"
+				              )
+				    )]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="30">
+			<textField>
+				<reportElement x="750" y="10" width="45" height="10" uuid="7510e277-8abf-4ec0-b306-b88cfd265a15"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{report.controls.page} + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="800" y="10" width="30" height="10" uuid="5ded44a2-6687-46fd-b29e-205ba278ca50"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{report.controls.pageOf} +  $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement positionType="Float" x="10" y="10" width="80" height="10" uuid="2dd094dc-e4b5-43c0-89ab-02f2dda79bb5"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[DateTimeFormatter.ofPattern($P{dateFormat}).format(LocalDate.now())]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

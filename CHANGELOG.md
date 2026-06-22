@@ -1,5 +1,7 @@
 Upcoming Version (WIP)
 ==================
+* [SELV3-841](https://openlmis.atlassian.net/browse/SELV3-841) Added `GET /api/stockEvents/{id}/print` 
+  endpoint for generating PDF report for stock event transactions
 
 5.3.1 / 2026-06-09
 ==================

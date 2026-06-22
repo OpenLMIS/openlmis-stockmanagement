@@ -19,8 +19,10 @@ import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.service.JasperReportService.PI_LINES_REPORT_URL;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -42,6 +44,8 @@ import net.sf.jasperreports.engine.JasperReport;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.openlmis.stockmanagement.domain.JasperTemplate;
@@ -60,10 +64,14 @@ public class JasperReportServiceTest {
 
   private static final String DATE_FORMAT = "dd/MM/yyyy";
   private static final String DATE_TIME_FORMAT = "dd/MM/yyyy HH:mm:ss";
+  private static final String TIME_ZONE_ID = "UTC";
   private static final String GROUPING_SEPARATOR = ",";
   private static final String GROUPING_SIZE = "3";
 
   private JasperReportService jasperReportService;
+
+  @Captor
+  private ArgumentCaptor<Map<String, Object>> paramsCaptor;
 
   @Mock
   private StockCardService stockCardService;
@@ -86,6 +94,7 @@ public class JasperReportServiceTest {
         reportService, dataSource));
     ReflectionTestUtils.setField(jasperReportService, "dateFormat", DATE_FORMAT);
     ReflectionTestUtils.setField(jasperReportService, "dateTimeFormat", DATE_TIME_FORMAT);
+    ReflectionTestUtils.setField(jasperReportService, "timeZoneId", TIME_ZONE_ID);
     ReflectionTestUtils.setField(jasperReportService, "groupingSeparator", GROUPING_SEPARATOR);
     ReflectionTestUtils.setField(jasperReportService, "groupingSize", GROUPING_SIZE);
     mockStatic(JasperFillManager.class);
@@ -132,6 +141,44 @@ public class JasperReportServiceTest {
         facilityId, "en");
 
     assertEquals(testReportData, reportData);
+  }
+
+  @Test
+  public void shouldGenerateStockEventReportWithProperParams() {
+    UUID stockEventId = UUID.randomUUID();
+
+    when(reportService.fillAndExportReport(any(String.class), any(byte[].class), anyMap()))
+        .thenReturn(testReportData);
+
+    byte[] reportData = jasperReportService.generateStockEventReport(stockEventId, "en", true);
+
+    assertEquals(testReportData, reportData);
+
+    verify(reportService).fillAndExportReport(eq("stockEvent"), any(byte[].class),
+        paramsCaptor.capture());
+
+    Map<String, Object> params = paramsCaptor.getValue();
+    assertEquals(stockEventId, params.get("stockEventId"));
+    assertEquals("en", params.get("lang"));
+    assertEquals(TIME_ZONE_ID, params.get("timeZoneId"));
+    assertEquals(DATE_FORMAT, params.get("dateFormat"));
+    assertEquals(DATE_TIME_FORMAT, params.get("dateTimeFormat"));
+    assertEquals(createDecimalFormat(), params.get("decimalFormat"));
+    assertEquals(true, params.get("showInDoses"));
+  }
+
+  @Test
+  public void shouldPassShowInPacksFlagToStockEventReport() {
+    UUID stockEventId = UUID.randomUUID();
+
+    when(reportService.fillAndExportReport(any(String.class), any(byte[].class), anyMap()))
+        .thenReturn(testReportData);
+
+    jasperReportService.generateStockEventReport(stockEventId, "en", false);
+
+    verify(reportService).fillAndExportReport(eq("stockEvent"), any(byte[].class),
+        paramsCaptor.capture());
+    assertEquals(false, paramsCaptor.getValue().get("showInDoses"));
   }
 
   @Test
