@@ -49,6 +49,8 @@ schemas:
   - stockEventLineItemDto: !include schemas/stockEventLineItemDto.json
   - stockEventExternalDto: !include schemas/stockEventExternalDto.json
   - stockEventLineItemExternalDto: !include schemas/stockEventLineItemExternalDto.json
+  - stockEventHistoryDtoPage: !include schemas/stockEventHistoryDto.json
+  - stockEventLineDetailDtoPage: !include schemas/stockEventLineDetailDto.json
 
   - stockCard: !include schemas/stockCard.json
   - stockCardPage: !include schemas/stockCard.json
@@ -304,6 +306,73 @@ traits:
                   application/json:
                     schema: localizedMessage
 
+
+      get:
+        is: [ secured, paginated ]
+        description: Get a page of issue/receive stock events (transaction history) for a facility and program.
+        queryParameters:
+          facilityId:
+            required: true
+            description: Facility id the transactions belong to.
+          programId:
+            required: true
+            description: Program id the transactions belong to.
+          type:
+            required: false
+            description: Transaction type filter - issue, receive or all.
+          startDate:
+            required: false
+            description: Inclusive lower bound of the occurred date range (ISO date).
+          endDate:
+            required: false
+            description: Inclusive upper bound of the occurred date range (ISO date).
+          documentNumber:
+            required: false
+            description: Document number search (partial, case-insensitive).
+        responses:
+          200:
+            description: A page of stock event history rows.
+            body:
+              application/json:
+                schema: stockEventHistoryDtoPage
+          400:
+            description: The transaction type filter is not a valid value.
+            body:
+              application/json:
+                schema: localizedMessage
+          403:
+            description: User does not have permission to view stock cards of given facility and program.
+            body:
+              application/json:
+                schema: localizedMessage
+
+      /{id}:
+        uriParameters:
+          id:
+            displayName: id
+            type: string
+            required: true
+            repeat: false
+        /lineItems:
+          get:
+            is: [ secured, paginated ]
+            description: Get the line items (transaction detail) of a single stock event.
+            responses:
+              200:
+                description: A page of the stock event's line item details.
+                body:
+                  application/json:
+                    schema: stockEventLineDetailDtoPage
+              403:
+                description: User does not have permission to view stock cards.
+                body:
+                  application/json:
+                    schema: localizedMessage
+              404:
+                description: Stock event with the given id does not exist.
+                body:
+                  application/json:
+                    schema: localizedMessage
 
   /stockCardSummaries:
       get:

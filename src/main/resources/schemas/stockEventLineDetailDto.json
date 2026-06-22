@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "title": "StockEventLineDetailDto",
+  "description": "A single transaction detail row - one stock card line item created by the event.",
+  "properties": {
+    "orderable": {
+      "type": "object",
+      "description": "Resolved orderable (product) of the line item."
+    },
+    "lot": {
+      "type": ["object", "null"],
+      "description": "Resolved lot of the line item, when present."
+    },
+    "source": {
+      "type": ["object", "null"],
+      "description": "Resolved source facility or organization, for receive line items."
+    },
+    "destination": {
+      "type": ["object", "null"],
+      "description": "Resolved destination facility or organization, for issue line items."
+    },
+    "quantity": {
+      "type": ["integer", "null"],
+      "description": "Quantity moved by the line item."
+    },
+    "occurredDate": {
+      "type": ["string", "null"],
+      "description": "Occurred date of the line item (ISO date)."
+    },
+    "reason": {
+      "type": ["object", "null"],
+      "description": "Reason of the movement, when present."
+    },
+    "stockOnHand": {
+      "type": ["integer", "null"],
+      "description": "Stock on hand after the operation."
+    },
+    "documentNumber": {
+      "type": ["string", "null"],
+      "description": "Document number of the originating event."
+    }
+  }
+}

@@ -167,6 +167,8 @@ public abstract class MessageKeys {
       + ".occurredDate.invalid";
   public static final String ERROR_EVENT_OCCURRED_DATE_IN_FUTURE = EVENT_ERROR_PREFIX
       + ".occurredDate.in.future";
+  public static final String ERROR_EVENT_TYPE_INVALID = EVENT_ERROR_PREFIX + ".type.invalid";
+  public static final String ERROR_STOCK_EVENT_NOT_FOUND = EVENT_ERROR_PREFIX + ".notFound";
   public static final String ERROR_EVENT_QUANTITIES_INVALID = EVENT_ERROR_PREFIX
       + ".quantities.invalid";
   public static final String ERROR_EVENT_FACILITY_INVALID = EVENT_ERROR_PREFIX

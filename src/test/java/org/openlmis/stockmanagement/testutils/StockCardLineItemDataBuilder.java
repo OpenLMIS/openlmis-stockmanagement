@@ -117,6 +117,11 @@ public class StockCardLineItemDataBuilder {
     return this;
   }
 
+  public StockCardLineItemDataBuilder withDocumentNumber(String documentNumber) {
+    this.documentNumber = documentNumber;
+    return this;
+  }
+
   /**
    * Creates new instance of {@link StockCardLineItem} with properties.
    *
