@@ -139,8 +139,6 @@ public abstract class MessageKeys {
   public static final String ERROR_IO = ERROR_PREFIX + ".io";
   public static final String ERROR_ENCODING = ERROR_PREFIX + ".encoding.notSupported";
   private static final String EVENT_ERROR_PREFIX = ERROR_PREFIX + ".event";
-  //stock events not found
-  public static final String ERROR_STOCK_EVENT_NOT_FOUND = EVENT_ERROR_PREFIX + ".notFound";
   //stock events creation: approved products
   public static final String ERROR_ORDERABLE_NOT_IN_APPROVED_LIST =
       EVENT_ERROR_PREFIX + ".orderable.not.in.approvedList";
