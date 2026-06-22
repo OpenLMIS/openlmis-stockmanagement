@@ -1,5 +1,6 @@
 Upcoming Version (WIP)
 ==================
+* [OLMIS-8198](https://openlmis.atlassian.net/browse/OLMIS-8198): Add packs support to stock card and stock card summary reports.
 
 5.3.1 / 2026-06-09
 ==================
