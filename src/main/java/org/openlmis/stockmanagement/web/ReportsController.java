@@ -16,9 +16,9 @@
 package org.openlmis.stockmanagement.web;
 
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_STOCK_EVENT_NOT_FOUND;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
@@ -27,10 +27,10 @@ import org.openlmis.stockmanagement.service.PermissionService;
 import org.openlmis.stockmanagement.util.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -38,18 +38,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class ReportsController {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ReportsController.class);
 
-  @Autowired
-  private JasperReportService reportService;
+  private static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
 
-  @Autowired
-  private PermissionService permissionService;
-
-  @Autowired
-  private StockEventsRepository stockEventsRepository;
+  private final JasperReportService reportService;
+  private final PermissionService permissionService;
+  private final StockEventsRepository stockEventsRepository;
 
   /**
    * Get stock card report in PDF format.
@@ -57,7 +55,7 @@ public class ReportsController {
    * @param stockCardId stock card id.
    * @return generated PDF report
    */
-  @RequestMapping(value = "/stockCards/{id}/print", method = GET)
+  @GetMapping(value = "/stockCards/{id}/print")
   @ResponseBody
   public ResponseEntity<byte[]> getStockCard(@PathVariable("id") UUID stockCardId,
        @RequestParam(defaultValue = "en") String lang) {
@@ -68,7 +66,7 @@ public class ReportsController {
     return ResponseEntity
         .ok()
         .contentType(MediaType.APPLICATION_PDF)
-        .header("Content-Disposition", "inline; filename=stock_card_" + stockCardId + ".pdf")
+        .header(HEADER_CONTENT_DISPOSITION, "inline; filename=stock_card_" + stockCardId + ".pdf")
         .body(report);
   }
 
@@ -78,7 +76,7 @@ public class ReportsController {
    *
    * @return generated PDF report
    */
-  @RequestMapping(value = "/stockCardSummaries/print", method = GET)
+  @GetMapping(value = "/stockCardSummaries/print")
   @ResponseBody
   public ResponseEntity<byte[]> getStockCardSummaries(
       @RequestParam("program") UUID program,
@@ -92,7 +90,7 @@ public class ReportsController {
     return ResponseEntity
         .ok()
         .contentType(MediaType.APPLICATION_PDF)
-        .header("Content-Disposition",
+        .header(HEADER_CONTENT_DISPOSITION,
             "inline; filename=stock_card_summaries" + program + "_" + facility + ".pdf")
         .body(report);
   }
@@ -105,7 +103,7 @@ public class ReportsController {
    * @param lang         the lang
    * @return the response entity
    */
-  @RequestMapping(value = "/stockEvents/{stockEventId}/print", method = GET)
+  @GetMapping(value = "/stockEvents/{stockEventId}/print")
   @ResponseBody
   public ResponseEntity<byte[]> print(
       @PathVariable("stockEventId") UUID stockEventId,
@@ -122,7 +120,7 @@ public class ReportsController {
     return ResponseEntity
         .ok()
         .contentType(MediaType.APPLICATION_PDF)
-        .header("Content-Disposition",
+        .header(HEADER_CONTENT_DISPOSITION,
             "inline; filename=stock_event_" + stockEventId + ".pdf")
         .body(report);
   }

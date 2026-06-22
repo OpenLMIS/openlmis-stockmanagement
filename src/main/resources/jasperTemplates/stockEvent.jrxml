@@ -81,9 +81,9 @@ SELECT
     o.netcontent                AS netcontent,
     l.lotcode                   AS lotcode,
     scli.occurreddate           AS occurreddate,
-    source_facility.name        AS source,
+    COALESCE(source_facility.name, source_org.name)             AS source,
     scli.sourcefreetext         AS sourcefreetext,
-    destination_facility.name   AS destination,
+    COALESCE(destination_facility.name, destination_org.name)   AS destination,
     scli.destinationfreetext    AS destinationfreetext,
     sclir.name                  AS reasonname,
     scli.reasonfreetext         AS reasonfreetext,
@@ -94,9 +94,15 @@ LEFT JOIN stockmanagement.stock_events se ON se.id = scli.origineventid
 LEFT JOIN stockmanagement.stock_cards sc ON sc.id = scli.stockcardid
 LEFT JOIN referencedata.facilities f ON f.id = se.facilityid
 LEFT JOIN stockmanagement.nodes source_nodes ON source_nodes.id = scli.sourceid
-LEFT JOIN referencedata.facilities source_facility ON source_facility.id = source_nodes.referenceid
+LEFT JOIN referencedata.facilities source_facility
+    ON source_facility.id = source_nodes.referenceid AND source_nodes.isrefdatafacility = true
+LEFT JOIN stockmanagement.organizations source_org
+    ON source_org.id = source_nodes.referenceid AND source_nodes.isrefdatafacility = false
 LEFT JOIN stockmanagement.nodes destination_nodes ON destination_nodes.id = scli.destinationid
-LEFT JOIN referencedata.facilities destination_facility ON destination_facility.id = destination_nodes.referenceid
+LEFT JOIN referencedata.facilities destination_facility
+    ON destination_facility.id = destination_nodes.referenceid AND destination_nodes.isrefdatafacility = true
+LEFT JOIN stockmanagement.organizations destination_org
+    ON destination_org.id = destination_nodes.referenceid AND destination_nodes.isrefdatafacility = false
 LEFT JOIN referencedata.programs p ON p.id = se.programid
 LEFT JOIN referencedata.users u ON u.id = se.userid
 LEFT JOIN referencedata.orderables o ON o.id = sc.orderableid

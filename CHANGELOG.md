@@ -1,5 +1,6 @@
 Upcoming Version (WIP)
 ==================
+* [SELV3-841](https://openlmis.atlassian.net/browse/SELV3-841) Print document after submission
 
 5.3.1 / 2026-06-09
 ==================
