@@ -210,7 +210,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, scli.occurreddate, scli.processeddate
 				<textElement>
 					<font size="11" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Document Number: " + ($F{documentnumber} == null ? "-" : $F{documentnumber})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$R{report.header.documentNumber} + ($F{documentnumber} == null ? "-" : $F{documentnumber})]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement positionType="Float" x="420" y="120" width="402" height="16"
@@ -218,7 +218,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, scli.occurreddate, scli.processeddate
 				<textElement>
 					<font size="11" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Processed Date: " + ($F{processeddate} == null ? "-" :
+				<textFieldExpression><![CDATA[$R{report.header.processedDate} + ($F{processeddate} == null ? "-" :
 				    DateTimeFormatter.ofPattern($P{dateTimeFormat}).format(
 				        ZonedDateTime.ofInstant($F{processeddate}.toInstant(), ZoneId.of($P{timeZoneId}))))]]></textFieldExpression>
 			</textField>
@@ -238,7 +238,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, scli.occurreddate, scli.processeddate
 				<textElement>
 					<font size="11"/>
 				</textElement>
-				<textFieldExpression><![CDATA["User: " +
+				<textFieldExpression><![CDATA[$R{report.header.user} +
 				    ($F{firstname} == null ? "" : $F{firstname}) + " " +
 				    ($F{lastname}  == null ? "" : $F{lastname})]]></textFieldExpression>
 			</textField>
@@ -248,7 +248,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, scli.occurreddate, scli.processeddate
 				<textElement>
 					<font size="11"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Signature: " + ($F{signature} == null || $F{signature}.isEmpty() ? "-" : $F{signature})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$R{report.header.signature} + ($F{signature} == null || $F{signature}.isEmpty() ? "-" : $F{signature})]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>
