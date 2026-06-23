@@ -34,13 +34,13 @@ public class StockEventHistoryDto {
   private String documentNumber;
   private EventOrigin type;
   private LocalDate occurredDate;
-  private Integer numberOfProducts;
+  private Integer entriesCount;
   private UUID userId;
   private String username;
 
   /**
    * Creates a history row DTO from a stock event's scalar fields. The line-item-derived fields
-   * ({@code numberOfProducts}, {@code occurredDate}) and {@code username} are filled in afterwards
+   * ({@code entriesCount}, {@code occurredDate}) and {@code username} are filled in afterwards
    * by the service.
    */
   public static StockEventHistoryDto newInstance(StockEvent event) {

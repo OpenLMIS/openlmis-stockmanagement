@@ -85,6 +85,7 @@ public class StockEventsHistoryControllerIntegrationTest extends BaseWebTest {
         .id(UUID.randomUUID())
         .documentNumber("2026-06-FAC001-0001")
         .type(EventOrigin.ISSUE)
+        .entriesCount(3)
         .build();
 
     when(stockEventsService.search(any(StockEventSearchParams.class), any(Pageable.class)))
@@ -101,7 +102,8 @@ public class StockEventsHistoryControllerIntegrationTest extends BaseWebTest {
 
     resultActions.andExpect(status().isOk())
         .andExpect(jsonPath("$.content", hasSize(1)))
-        .andExpect(jsonPath("$.content[0].documentNumber", is("2026-06-FAC001-0001")));
+        .andExpect(jsonPath("$.content[0].documentNumber", is("2026-06-FAC001-0001")))
+        .andExpect(jsonPath("$.content[0].entriesCount", is(3)));
   }
 
   @Test

@@ -26,17 +26,17 @@ import lombok.Getter;
 public class StockEventLineItemAggregate {
 
   private final UUID stockEventId;
-  private final int numberOfProducts;
+  private final int entriesCount;
   private final LocalDate occurredDate;
 
   /**
-   * Creates an aggregate row; {@code numberOfProducts} comes in as a {@link Long} (from
-   * {@code COUNT(DISTINCT ...)}) and is narrowed to an int.
+   * Creates an aggregate row; {@code entriesCount} comes in as a {@link Long} (from
+   * {@code COUNT(...)}) and is narrowed to an int.
    */
-  public StockEventLineItemAggregate(UUID stockEventId, Long numberOfProducts,
+  public StockEventLineItemAggregate(UUID stockEventId, Long entriesCount,
       LocalDate occurredDate) {
     this.stockEventId = stockEventId;
-    this.numberOfProducts = numberOfProducts == null ? 0 : numberOfProducts.intValue();
+    this.entriesCount = entriesCount == null ? 0 : entriesCount.intValue();
     this.occurredDate = occurredDate;
   }
 }

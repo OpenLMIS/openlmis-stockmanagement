@@ -11,6 +11,7 @@ Improvements:
 * [ODRC-24](https://openlmis.atlassian.net/browse/ODRC-24) Global header and translations implemented for reports
 * [SELV3-748](https://openlmis.atlassian.net/browse/SELV3-748) Improved 'no permission' warning message
 * [SELV3-839](https://openlmis.atlassian.net/browse/SELV3-839) New document number generation for issue and receive
+* [SELV3-842](https://openlmis.atlassian.net/browse/SELV3-842) Added Transaction History view with new endpoints `GET /api/stockEvents` and `GET /api/stockEvents/{id}/lineItems`, plus a document number column on the stock card bin card report
 
 5.3.0 / 2025-11-27
 ==================
