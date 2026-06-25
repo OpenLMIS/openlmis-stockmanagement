@@ -29,7 +29,18 @@ ordered_items AS (
         sclir.reasontype,
         ROW_NUMBER() OVER (
             PARTITION BY scli.stockcardid
-            ORDER BY scli.occurreddate, scli.processeddate, scli.id
+            ORDER BY
+                scli.occurreddate,
+                scli.processeddate,
+                CASE sclir.reasontype
+                    WHEN 'CREDIT' THEN 2
+                    WHEN 'DEBIT' THEN 1
+                    WHEN 'BALANCE_ADJUSTMENT' THEN 0
+                    ELSE -1
+                END DESC,
+                -- NOTE: ctid is physical row location and is only stable because line items are
+                -- never updated. This ordering mirrors order in stockCardSummaries view.
+                scli.ctid
         ) AS rn
     FROM stockmanagement.stock_card_line_items scli
     LEFT JOIN stockmanagement.stock_card_line_item_reasons sclir
@@ -110,7 +121,7 @@ LEFT JOIN referencedata.lots l ON l.id = sc.lotid
 LEFT JOIN stockmanagement.stock_card_line_item_reasons sclir ON sclir.id = scli.reasonid
 LEFT JOIN running_soh rs ON rs.id = scli.id
 WHERE se.id = $P{stockEventId}::uuid
-ORDER BY o.code, l.lotcode NULLS FIRST, scli.occurreddate, scli.processeddate
+ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
         ]]>
 	</queryString>
 	<field name="documentnumber" class="java.lang.String"/>
