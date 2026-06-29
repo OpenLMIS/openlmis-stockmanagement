@@ -27,6 +27,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.StockCardDto;
+import org.openlmis.stockmanagement.dto.StockCardLineItemDto;
 import org.openlmis.stockmanagement.dto.StockEventHistoryDto;
 import org.openlmis.stockmanagement.dto.StockEventLineDetailDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
@@ -146,10 +147,15 @@ public class StockEventsService {
     List<StockEventLineDetailDto> details = new ArrayList<>();
     stockCardService.findStockCardsByIds(cardIds).stream()
         .sorted(Comparator.comparing(StockCardDto::getId))
-        .forEach(card -> card.getLineItems().stream()
-            .filter(lineItem -> stockEventId.equals(lineItem.getOriginEventId()))
-            .forEach(lineItem ->
-                details.add(StockEventLineDetailDto.newInstance(card, lineItem))));
+        .forEach(card -> {
+          List<StockCardLineItemDto> items = card.getLineItems().stream()
+              .filter(lineItem -> stockEventId.equals(lineItem.getOriginEventId()))
+              .collect(Collectors.toList());
+          // Present newest-first to match the stock card view
+          Collections.reverse(items);
+          items.forEach(lineItem ->
+              details.add(StockEventLineDetailDto.newInstance(card, lineItem)));
+        });
 
     return Pagination.getPage(details, pageable);
   }

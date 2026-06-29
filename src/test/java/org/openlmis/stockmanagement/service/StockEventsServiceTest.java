@@ -59,6 +59,10 @@ import org.springframework.data.domain.Pageable;
 @RunWith(MockitoJUnitRunner.class)
 public class StockEventsServiceTest {
 
+  private static final String DOC_1 = "DOC-1";
+  private static final String DOC_2 = "DOC-2";
+  private static final String DOC_3 = "DOC-3";
+
   @Mock
   private StockEventsRepository stockEventsRepository;
 
@@ -85,10 +89,10 @@ public class StockEventsServiceTest {
     UUID userB = randomUUID();
 
     StockEvent event1 = new StockEventDataBuilder()
-        .withEventOrigin(EventOrigin.ISSUE).withDocumentNumber("DOC-1").build();
+        .withEventOrigin(EventOrigin.ISSUE).withDocumentNumber(DOC_1).build();
     event1.setUserId(userA);
     StockEvent event2 = new StockEventDataBuilder()
-        .withEventOrigin(EventOrigin.RECEIVE).withDocumentNumber("DOC-2").build();
+        .withEventOrigin(EventOrigin.RECEIVE).withDocumentNumber(DOC_2).build();
     event2.setUserId(userB);
 
     StockEventSearchParams params = new StockEventSearchParams(randomUUID(), randomUUID(),
@@ -103,9 +107,9 @@ public class StockEventsServiceTest {
 
     assertThat(result.getTotalElements(), is(2L));
     assertThat(result.getContent(), hasSize(2));
-    assertThat(result.getContent().get(0).getDocumentNumber(), is("DOC-1"));
+    assertThat(result.getContent().get(0).getDocumentNumber(), is(DOC_1));
     assertThat(result.getContent().get(0).getUsername(), is("alice"));
-    assertThat(result.getContent().get(1).getDocumentNumber(), is("DOC-2"));
+    assertThat(result.getContent().get(1).getDocumentNumber(), is(DOC_2));
     assertThat(result.getContent().get(1).getUsername(), is("bob"));
   }
 
@@ -193,6 +197,46 @@ public class StockEventsServiceTest {
     assertThat(detail.getStockOnHand(), is(20));
     assertThat(detail.getDocumentNumber(), is("DOC-MATCH"));
     verify(permissionService).canViewStockCard(program, facility);
+  }
+
+  @Test
+  public void findStockEventLineItemsShouldReturnLinesNewestFirst() {
+    UUID facility = randomUUID();
+    UUID program = randomUUID();
+    StockEvent event = new StockEventDataBuilder()
+        .withFacility(facility).withProgram(program).withEventOrigin(EventOrigin.ISSUE).build();
+    UUID eventId = event.getId();
+    UUID cardId = randomUUID();
+
+    when(stockEventsRepository.findById(eventId)).thenReturn(Optional.of(event));
+    when(stockCardLineItemRepository.findStockCardIdsByOriginEvent(eventId))
+        .thenReturn(singletonList(cardId));
+
+    // Provided in the canonical comparator order (as card.getLineItems() yields them); the
+    // service must present them reversed (newest-first) to match the stock card view and
+    // stockEvent.jrxml.
+    StockCardLineItemDto first = StockCardLineItemDto.builder()
+        .lineItem(new StockCardLineItemDataBuilder().withDocumentNumber(DOC_1).build())
+        .originEventId(eventId).build();
+    StockCardLineItemDto second = StockCardLineItemDto.builder()
+        .lineItem(new StockCardLineItemDataBuilder().withDocumentNumber(DOC_2).build())
+        .originEventId(eventId).build();
+    StockCardLineItemDto third = StockCardLineItemDto.builder()
+        .lineItem(new StockCardLineItemDataBuilder().withDocumentNumber(DOC_3).build())
+        .originEventId(eventId).build();
+    StockCardDto cardDto = StockCardDto.builder()
+        .orderable(OrderableDto.builder().productCode("ABC").build())
+        .lineItems(asList(first, second, third)).build();
+    when(stockCardService.findStockCardsByIds(anyCollection()))
+        .thenReturn(singletonList(cardDto));
+
+    Page<StockEventLineDetailDto> result =
+        stockEventsService.findStockEventLineItems(eventId, pageable);
+
+    assertThat(result.getContent(), hasSize(3));
+    assertThat(result.getContent().get(0).getDocumentNumber(), is(DOC_3));
+    assertThat(result.getContent().get(1).getDocumentNumber(), is(DOC_2));
+    assertThat(result.getContent().get(2).getDocumentNumber(), is(DOC_1));
   }
 
   @Test(expected = ResourceNotFoundException.class)
