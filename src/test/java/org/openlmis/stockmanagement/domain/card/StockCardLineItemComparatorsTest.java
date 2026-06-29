@@ -156,7 +156,7 @@ public class StockCardLineItemComparatorsTest {
   }
 
   @Test
-  public void shouldReturnZeroIfIdsAreSame() throws Exception {
+  public void shouldReturnZeroIfIdsAreSame() {
     // when
     UUID id = UUID.randomUUID();
     StockCardLineItem left = new StockCardLineItemDataBuilder().withId(id).build();
@@ -167,7 +167,7 @@ public class StockCardLineItemComparatorsTest {
   }
 
   @Test
-  public void shouldReturnNegativeIfFirstIdIsLowerInCanonicalOrder() throws Exception {
+  public void shouldReturnNegativeIfFirstIdIsLowerInCanonicalOrder() {
     // when
     StockCardLineItem left = new StockCardLineItemDataBuilder()
         .withId(UUID.fromString("00000000-0000-0000-0000-000000000001"))
@@ -181,7 +181,7 @@ public class StockCardLineItemComparatorsTest {
   }
 
   @Test
-  public void shouldReturnPositiveIfFirstIdIsHigherInCanonicalOrder() throws Exception {
+  public void shouldReturnPositiveIfFirstIdIsHigherInCanonicalOrder() {
     // when
     StockCardLineItem left = new StockCardLineItemDataBuilder()
         .withId(UUID.fromString("ffffffff-ffff-ffff-ffff-ffffffffffff"))
@@ -195,7 +195,7 @@ public class StockCardLineItemComparatorsTest {
   }
 
   @Test
-  public void shouldOrderByCanonicalStringNotSignedLongs() throws Exception {
+  public void shouldOrderByCanonicalStringNotSignedLongs() {
     // when
     StockCardLineItem low = new StockCardLineItemDataBuilder()
         .withId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
@@ -209,7 +209,7 @@ public class StockCardLineItemComparatorsTest {
   }
 
   @Test
-  public void shouldOrderNullIdLast() throws Exception {
+  public void shouldOrderNullIdLast() {
     // when
     StockCardLineItem withId = new StockCardLineItemDataBuilder()
         .withId(UUID.randomUUID())

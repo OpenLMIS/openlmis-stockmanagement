@@ -28,6 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.Test;
@@ -124,15 +125,15 @@ public class StockEventsServiceTest {
     when(stockEventsRepository.search(params, pageable))
         .thenReturn(new PageImpl<>(singletonList(event), pageable, 1));
     when(stockEventsRepository.aggregateLineItemsByEventIds(anySet()))
-        .thenReturn(singletonList(
-            new StockEventLineItemAggregate(event.getId(), 3L, LocalDate.of(2026, 2, 10))));
+        .thenReturn(singletonList(new StockEventLineItemAggregate(
+            event.getId(), 3L, LocalDate.of(2026, Month.FEBRUARY, 10))));
 
     Page<StockEventHistoryDto> result = stockEventsService.search(params, pageable);
 
     StockEventHistoryDto dto = result.getContent().get(0);
 
     assertThat(dto.getEntriesCount(), is(3));
-    assertThat(dto.getOccurredDate(), is(LocalDate.of(2026, 2, 10)));
+    assertThat(dto.getOccurredDate(), is(LocalDate.of(2026, Month.FEBRUARY, 10)));
   }
 
   @Test
@@ -262,7 +263,7 @@ public class StockEventsServiceTest {
     when(stockEventsRepository.findById(eventId)).thenReturn(Optional.of(event));
     when(stockEventsRepository.aggregateLineItemsByEventIds(anySet()))
         .thenReturn(singletonList(
-            new StockEventLineItemAggregate(eventId, 3L, LocalDate.of(2026, 2, 10))));
+            new StockEventLineItemAggregate(eventId, 3L, LocalDate.of(2026, Month.FEBRUARY, 10))));
     when(userReferenceDataService.findUsersByIds(anySet()))
         .thenReturn(singletonList(userDto(user, ALICE)));
 
@@ -272,7 +273,7 @@ public class StockEventsServiceTest {
     assertThat(dto.getType(), is(EventOrigin.RECEIVE));
     assertThat(dto.getDocumentNumber(), is(DOC_1));
     assertThat(dto.getEntriesCount(), is(3));
-    assertThat(dto.getOccurredDate(), is(LocalDate.of(2026, 2, 10)));
+    assertThat(dto.getOccurredDate(), is(LocalDate.of(2026, Month.FEBRUARY, 10)));
     assertThat(dto.getUsername(), is(ALICE));
     verify(permissionService).canViewStockCard(program, facility);
   }
