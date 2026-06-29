@@ -112,6 +112,11 @@ public class StockCardLineItemDataBuilder {
     return this;
   }
 
+  public StockCardLineItemDataBuilder withId(UUID id) {
+    this.id = id;
+    return this;
+  }
+
   public StockCardLineItemDataBuilder withOriginEvent(StockEvent event) {
     originEvent = event;
     return this;

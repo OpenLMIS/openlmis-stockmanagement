@@ -38,9 +38,9 @@ ordered_items AS (
                     WHEN 'BALANCE_ADJUSTMENT' THEN 0
                     ELSE -1
                 END DESC,
-                -- NOTE: ctid is physical row location and is only stable because line items are
-                -- never updated. This ordering mirrors order in stockCardSummaries view.
-                scli.ctid
+                -- final tie-break by id so the order is deterministic and matches the stock card
+                -- view, whose StockCard.getLineItemsComparator() ends with byId().
+                scli.id
         ) AS rn
     FROM stockmanagement.stock_card_line_items scli
     LEFT JOIN stockmanagement.stock_card_line_item_reasons sclir
