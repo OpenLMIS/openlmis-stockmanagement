@@ -48,6 +48,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.ResultActions;
 
+@SuppressWarnings("PMD.TooManyMethods")
 public class StockEventsHistoryControllerIntegrationTest extends BaseWebTest {
 
   private static final String STOCK_EVENTS_URL = "/api/stockEvents";
@@ -183,6 +184,53 @@ public class StockEventsHistoryControllerIntegrationTest extends BaseWebTest {
 
     ResultActions resultActions = mvc.perform(
         get(STOCK_EVENTS_URL + "/" + eventId + "/lineItems")
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
+
+    resultActions.andExpect(status().isNotFound());
+  }
+
+  @Test
+  public void shouldReturn403WhenUserCannotViewStockEventHeader() throws Exception {
+    UUID eventId = UUID.randomUUID();
+    doThrow(new PermissionMessageException(new Message("no permission")))
+        .when(stockEventsService).findStockEvent(eq(eventId));
+
+    ResultActions resultActions = mvc.perform(
+        get(STOCK_EVENTS_URL + "/" + eventId)
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
+
+    resultActions.andExpect(status().isForbidden());
+  }
+
+  @Test
+  public void shouldGetStockEventHeader() throws Exception {
+    UUID eventId = UUID.randomUUID();
+    StockEventHistoryDto dto = StockEventHistoryDto.builder()
+        .id(eventId)
+        .documentNumber("DOC-1")
+        .type(EventOrigin.RECEIVE)
+        .build();
+
+    when(stockEventsService.findStockEvent(eq(eventId))).thenReturn(dto);
+
+    ResultActions resultActions = mvc.perform(
+        get(STOCK_EVENTS_URL + "/" + eventId)
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
+
+    resultActions.andExpect(status().isOk())
+        .andExpect(jsonPath("$.id", is(eventId.toString())))
+        .andExpect(jsonPath("$.type", is(EventOrigin.RECEIVE.toString())))
+        .andExpect(jsonPath("$.documentNumber", is("DOC-1")));
+  }
+
+  @Test
+  public void shouldReturnNotFoundWhenStockEventHeaderDoesNotExist() throws Exception {
+    UUID eventId = UUID.randomUUID();
+    doThrow(new ResourceNotFoundException(new Message("stock event not found")))
+        .when(stockEventsService).findStockEvent(eq(eventId));
+
+    ResultActions resultActions = mvc.perform(
+        get(STOCK_EVENTS_URL + "/" + eventId)
             .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
 
     resultActions.andExpect(status().isNotFound());

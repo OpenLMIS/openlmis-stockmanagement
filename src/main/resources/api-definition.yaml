@@ -50,6 +50,7 @@ schemas:
   - stockEventExternalDto: !include schemas/stockEventExternalDto.json
   - stockEventLineItemExternalDto: !include schemas/stockEventLineItemExternalDto.json
   - stockEventHistoryDtoPage: !include schemas/stockEventHistoryDto.json
+  - stockEventHistoryDto: !include schemas/stockEventHistoryDto.json
   - stockEventLineDetailDtoPage: !include schemas/stockEventLineDetailDto.json
 
   - stockCard: !include schemas/stockCard.json
@@ -318,6 +319,25 @@ traits:
             type: string
             required: true
             repeat: false
+        get:
+          is: [ secured ]
+          description: Get the history header (e.g. event type, document number) of a single stock event.
+          responses:
+            200:
+              description: The stock event's history header.
+              body:
+                application/json:
+                  schema: stockEventHistoryDto
+            403:
+              description: User does not have permission to view stock cards.
+              body:
+                application/json:
+                  schema: localizedMessage
+            404:
+              description: Stock event with the given id does not exist.
+              body:
+                application/json:
+                  schema: localizedMessage
         /lineItems:
           get:
             is: [ secured, paginated ]

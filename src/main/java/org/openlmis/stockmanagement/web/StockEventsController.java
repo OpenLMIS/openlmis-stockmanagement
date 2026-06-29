@@ -142,6 +142,18 @@ public class StockEventsController extends BaseController {
   }
 
   /**
+   * Get the history header (e.g. event type, document number) of a single stock event.
+   *
+   * @return the event's history row.
+   */
+  @Transactional(readOnly = true)
+  @GetMapping("stockEvents/{id}")
+  @ResponseBody
+  public StockEventHistoryDto getStockEvent(@PathVariable UUID id) {
+    return stockEventsService.findStockEvent(id);
+  }
+
+  /**
    * Get the line items (transaction detail) of a single stock event.
    *
    * @return a page of the event's stock card line item details.

@@ -27,6 +27,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.StockCardDto;
+import org.openlmis.stockmanagement.dto.StockCardLineItemDto;
 import org.openlmis.stockmanagement.dto.StockEventHistoryDto;
 import org.openlmis.stockmanagement.dto.StockEventLineDetailDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
@@ -140,17 +141,52 @@ public class StockEventsService {
 
     List<UUID> cardIds = stockCardLineItemRepository.findStockCardIdsByOriginEvent(stockEventId);
 
-    // Cards are resolved in one batch (stock on hand and names), then ordered by id so the
-    // flattened line items have a stable order before in-memory pagination (findAllById gives no
-    // ordering guarantee). Only the line items belonging to this event are kept.
+    // Cards are resolved in one batch (stock on hand and names), then ordered to match the
+    // stockEvent.jrxml report (ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC): by product
+    // code, then lot code (nulls first), with the card id only as a final deterministic
+    // tiebreaker. Only the line items belonging to this event are kept.
+    Comparator<StockCardDto> byProductThenLot = Comparator
+        .comparing((StockCardDto card) -> card.getOrderable().getProductCode(),
+            Comparator.nullsLast(Comparator.naturalOrder()))
+        .thenComparing(card -> card.getLot() == null ? null : card.getLot().getLotCode(),
+            Comparator.nullsFirst(Comparator.naturalOrder()))
+        .thenComparing(StockCardDto::getId);
     List<StockEventLineDetailDto> details = new ArrayList<>();
     stockCardService.findStockCardsByIds(cardIds).stream()
-        .sorted(Comparator.comparing(StockCardDto::getId))
-        .forEach(card -> card.getLineItems().stream()
-            .filter(lineItem -> stockEventId.equals(lineItem.getOriginEventId()))
-            .forEach(lineItem ->
-                details.add(StockEventLineDetailDto.newInstance(card, lineItem))));
+        .sorted(byProductThenLot)
+        .forEach(card -> {
+          List<StockCardLineItemDto> items = card.getLineItems().stream()
+              .filter(lineItem -> stockEventId.equals(lineItem.getOriginEventId()))
+              .collect(Collectors.toList());
+          // Present newest-first to match the stock card view
+          Collections.reverse(items);
+          items.forEach(lineItem ->
+              details.add(StockEventLineDetailDto.newInstance(card, lineItem)));
+        });
 
     return Pagination.getPage(details, pageable);
+  }
+
+  /**
+   * Returns the history header of a single stock event (the transaction detail header). The DTO
+   * has the same shape as the rows returned by {@link #search}, so the detail header stays
+   * consistent with the list.
+   *
+   * @param stockEventId the stock event id.
+   * @return the history row for the event.
+   */
+  public StockEventHistoryDto findStockEvent(UUID stockEventId) {
+    StockEvent event = stockEventsRepository.findById(stockEventId)
+        .orElseThrow(() -> new ResourceNotFoundException(
+            new Message(MessageKeys.ERROR_STOCK_EVENT_NOT_FOUND, stockEventId)));
+
+    permissionService.canViewStockCard(event.getProgramId(), event.getFacilityId());
+
+    Map<UUID, StockEventLineItemAggregate> aggregates =
+        aggregateLineItems(Collections.singletonList(event));
+    StockEventHistoryDto dto = toHistoryDto(event, aggregates.get(event.getId()));
+    populateUsernames(Collections.singletonList(dto));
+
+    return dto;
   }
 }
