@@ -141,12 +141,19 @@ public class StockEventsService {
 
     List<UUID> cardIds = stockCardLineItemRepository.findStockCardIdsByOriginEvent(stockEventId);
 
-    // Cards are resolved in one batch (stock on hand and names), then ordered by id so the
-    // flattened line items have a stable order before in-memory pagination (findAllById gives no
-    // ordering guarantee). Only the line items belonging to this event are kept.
+    // Cards are resolved in one batch (stock on hand and names), then ordered to match the
+    // stockEvent.jrxml report (ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC): by product
+    // code, then lot code (nulls first), with the card id only as a final deterministic
+    // tiebreaker. Only the line items belonging to this event are kept.
+    Comparator<StockCardDto> byProductThenLot = Comparator
+        .comparing((StockCardDto card) -> card.getOrderable().getProductCode(),
+            Comparator.nullsLast(Comparator.naturalOrder()))
+        .thenComparing(card -> card.getLot() == null ? null : card.getLot().getLotCode(),
+            Comparator.nullsFirst(Comparator.naturalOrder()))
+        .thenComparing(StockCardDto::getId);
     List<StockEventLineDetailDto> details = new ArrayList<>();
     stockCardService.findStockCardsByIds(cardIds).stream()
-        .sorted(Comparator.comparing(StockCardDto::getId))
+        .sorted(byProductThenLot)
         .forEach(card -> {
           List<StockCardLineItemDto> items = card.getLineItems().stream()
               .filter(lineItem -> stockEventId.equals(lineItem.getOriginEventId()))

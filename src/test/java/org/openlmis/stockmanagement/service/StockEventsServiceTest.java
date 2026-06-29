@@ -42,6 +42,7 @@ import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockCardLineItemDto;
 import org.openlmis.stockmanagement.dto.StockEventHistoryDto;
 import org.openlmis.stockmanagement.dto.StockEventLineDetailDto;
+import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
@@ -58,6 +59,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings("PMD.TooManyMethods")
 public class StockEventsServiceTest {
 
   private static final String DOC_1 = "DOC-1";
@@ -239,6 +241,44 @@ public class StockEventsServiceTest {
     assertThat(result.getContent().get(0).getDocumentNumber(), is(DOC_3));
     assertThat(result.getContent().get(1).getDocumentNumber(), is(DOC_2));
     assertThat(result.getContent().get(2).getDocumentNumber(), is(DOC_1));
+  }
+
+  @Test
+  public void findStockEventLineItemsShouldOrderCardsByProductCodeThenLot() {
+    StockEvent event = new StockEventDataBuilder()
+        .withFacility(randomUUID()).withProgram(randomUUID())
+        .withEventOrigin(EventOrigin.ISSUE).build();
+    UUID eventId = event.getId();
+
+    when(stockEventsRepository.findById(eventId)).thenReturn(Optional.of(event));
+    when(stockCardLineItemRepository.findStockCardIdsByOriginEvent(eventId))
+        .thenReturn(asList(randomUUID(), randomUUID(), randomUUID()));
+
+    StockCardDto productAnoLot = cardWithLine("AAA", null, eventId, DOC_1);
+    StockCardDto productALotL2 = cardWithLine("AAA", "L2", eventId, DOC_2);
+    StockCardDto productB = cardWithLine("BBB", null, eventId, DOC_3);
+    when(stockCardService.findStockCardsByIds(anyCollection()))
+        .thenReturn(asList(productB, productALotL2, productAnoLot));
+
+    Page<StockEventLineDetailDto> result =
+        stockEventsService.findStockEventLineItems(eventId, pageable);
+
+    assertThat(result.getContent(), hasSize(3));
+    assertThat(result.getContent().get(0).getDocumentNumber(), is(DOC_1));
+    assertThat(result.getContent().get(1).getDocumentNumber(), is(DOC_2));
+    assertThat(result.getContent().get(2).getDocumentNumber(), is(DOC_3));
+  }
+
+  private StockCardDto cardWithLine(String productCode, String lotCode, UUID eventId,
+      String documentNumber) {
+    StockCardLineItemDto line = StockCardLineItemDto.builder()
+        .lineItem(new StockCardLineItemDataBuilder().withDocumentNumber(documentNumber).build())
+        .originEventId(eventId).build();
+    return StockCardDto.builder()
+        .id(randomUUID())
+        .orderable(OrderableDto.builder().productCode(productCode).build())
+        .lot(lotCode == null ? null : LotDto.builder().lotCode(lotCode).build())
+        .lineItems(singletonList(line)).build();
   }
 
   @Test(expected = ResourceNotFoundException.class)
