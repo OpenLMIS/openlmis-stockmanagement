@@ -159,4 +159,27 @@ public class StockEventsService {
 
     return Pagination.getPage(details, pageable);
   }
+
+  /**
+   * Returns the history header of a single stock event (the transaction detail header). The DTO
+   * has the same shape as the rows returned by {@link #search}, so the detail header stays
+   * consistent with the list.
+   *
+   * @param stockEventId the stock event id.
+   * @return the history row for the event.
+   */
+  public StockEventHistoryDto findStockEvent(UUID stockEventId) {
+    StockEvent event = stockEventsRepository.findById(stockEventId)
+        .orElseThrow(() -> new ResourceNotFoundException(
+            new Message(MessageKeys.ERROR_STOCK_EVENT_NOT_FOUND, stockEventId)));
+
+    permissionService.canViewStockCard(event.getProgramId(), event.getFacilityId());
+
+    Map<UUID, StockEventLineItemAggregate> aggregates =
+        aggregateLineItems(Collections.singletonList(event));
+    StockEventHistoryDto dto = toHistoryDto(event, aggregates.get(event.getId()));
+    populateUsernames(Collections.singletonList(dto));
+
+    return dto;
+  }
 }
