@@ -31,8 +31,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -44,7 +42,6 @@ import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.BaseIntegrationTest;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
-import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
@@ -427,14 +424,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
     StockEvent event = eventDto.toEvent();
     StockEvent savedEvent = stockEventsRepository.save(event);
+    // saveFromEvent already creates the row for this (stockCard, occurredDate); no second insert.
     stockCardService.saveFromEvent(eventDto, savedEvent.getId());
 
-    List<StockCard> stockCards = stockCardRepository
-        .findByProgramIdAndFacilityId(savedEvent.getProgramId(), savedEvent.getFacilityId());
-    
-    calculatedStockOnHandRepository.save(new CalculatedStockOnHand(
-        savedEvent.getLineItems().get(0).getQuantity(), stockCards.get(0), 
-        LocalDate.now(), ZonedDateTime.now()));
     return savedEvent;
   }
 }

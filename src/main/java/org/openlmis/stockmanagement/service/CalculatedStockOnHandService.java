@@ -192,13 +192,14 @@ public class CalculatedStockOnHandService {
     profiler.start("GET_LINE_ITEMS_PREVIOUS_STOCK_ON_HAND");
     int lineItemsPreviousStockOnHand = getPreviousStockOnHand(stockCard, lineItem);
 
+    // Update following entries in place instead of delete + re-insert, which caused the deadlock.
     profiler.start("GET_FOLLOWING_CALCULATED_STOCK_ON_HANDS");
-    List<CalculatedStockOnHand> followingStockOnHands = calculatedStockOnHandRepository
+    Map<LocalDate, CalculatedStockOnHand> existingByDate = calculatedStockOnHandRepository
         .findByStockCardIdAndOccurredDateGreaterThanEqualOrderByOccurredDateAsc(
-            stockCard.getId(), lineItem.getOccurredDate());
-
-    profiler.start("DELETE_FOLLOWING_CALCULATED_STOCK_ON_HANDS");
-    calculatedStockOnHandRepository.deleteAll(followingStockOnHands);
+            stockCard.getId(), lineItem.getOccurredDate())
+        .stream()
+        .collect(Collectors.toMap(CalculatedStockOnHand::getOccurredDate, soh -> soh,
+            (left, right) -> left));
 
     profiler.start("GET_FOLLOWING_STOCK_CARD_LINE_ITEMS");
     List<StockCardLineItem> followingLineItems = getFollowingLineItems(stockCard, lineItem);
@@ -208,9 +209,10 @@ public class CalculatedStockOnHandService {
     profiler.start("SAVE_RECALCULATED_STOCK_ON_HANDS");
     for (StockCardLineItem item : followingLineItems) {
       Integer calculatedStockOnHand = calculateStockOnHand(item, lineItemsPreviousStockOnHand);
-      saveCalculatedStockOnHand(item, calculatedStockOnHand, stockCard);
+      updateOrCreateCalculatedStockOnHand(existingByDate, item, calculatedStockOnHand, stockCard);
       lineItemsPreviousStockOnHand = calculatedStockOnHand;
     }
+    calculatedStockOnHandRepository.saveAll(existingByDate.values());
     profiler.stop().log();
   }
 
@@ -282,19 +284,18 @@ public class CalculatedStockOnHandService {
     }
   }
 
-  private void saveCalculatedStockOnHand(StockCardLineItem lineItem, Integer stockOnHand,
-      StockCard stockCard) {
-    Optional<CalculatedStockOnHand> stockOnHandOfExistingOccurredDate =
-        calculatedStockOnHandRepository.findFirstByStockCardIdAndOccurredDate(
-            stockCard.getId(), lineItem.getOccurredDate());
-
-    stockOnHandOfExistingOccurredDate.ifPresent((soh -> {
-      CalculatedStockOnHand existingStockOnHand = stockOnHandOfExistingOccurredDate.get();
-      calculatedStockOnHandRepository.delete(existingStockOnHand);
-    }));
-
-    calculatedStockOnHandRepository.save(new CalculatedStockOnHand(stockOnHand, stockCard,
-        lineItem.getOccurredDate(), lineItem.getProcessedDate()));
+  // Update the day's entry in place or create it if absent; saved later in one batch.
+  private void updateOrCreateCalculatedStockOnHand(
+      Map<LocalDate, CalculatedStockOnHand> existingByDate, StockCardLineItem lineItem,
+      Integer stockOnHand, StockCard stockCard) {
+    CalculatedStockOnHand existing = existingByDate.get(lineItem.getOccurredDate());
+    if (existing != null) {
+      existing.setStockOnHand(stockOnHand);
+      existing.setProcessedDate(lineItem.getProcessedDate());
+    } else {
+      existingByDate.put(lineItem.getOccurredDate(), new CalculatedStockOnHand(stockOnHand,
+          stockCard, lineItem.getOccurredDate(), lineItem.getProcessedDate()));
+    }
   }
 
   /**
