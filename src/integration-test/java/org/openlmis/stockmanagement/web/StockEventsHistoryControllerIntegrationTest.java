@@ -31,6 +31,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -205,10 +207,12 @@ public class StockEventsHistoryControllerIntegrationTest extends BaseWebTest {
   @Test
   public void shouldGetStockEventHeader() throws Exception {
     UUID eventId = UUID.randomUUID();
+    ZonedDateTime processedDate = ZonedDateTime.of(2026, 6, 30, 8, 0, 0, 0, ZoneOffset.UTC);
     StockEventHistoryDto dto = StockEventHistoryDto.builder()
         .id(eventId)
         .documentNumber("DOC-1")
         .type(EventOrigin.RECEIVE)
+        .processedDate(processedDate)
         .build();
 
     when(stockEventsService.findStockEvent(eq(eventId))).thenReturn(dto);
@@ -220,7 +224,8 @@ public class StockEventsHistoryControllerIntegrationTest extends BaseWebTest {
     resultActions.andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(eventId.toString())))
         .andExpect(jsonPath("$.type", is(EventOrigin.RECEIVE.toString())))
-        .andExpect(jsonPath("$.documentNumber", is("DOC-1")));
+        .andExpect(jsonPath("$.documentNumber", is("DOC-1")))
+        .andExpect(jsonPath("$.processedDate").exists());
   }
 
   @Test
