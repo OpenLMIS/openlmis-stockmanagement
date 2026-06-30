@@ -67,6 +67,7 @@ public class JasperReportServiceTest {
   private static final String TIME_ZONE_ID = "UTC";
   private static final String GROUPING_SEPARATOR = ",";
   private static final String GROUPING_SIZE = "3";
+  private static final String SHOW_IN_DOSES = "showInDoses";
 
   private JasperReportService jasperReportService;
 
@@ -127,7 +128,7 @@ public class JasperReportServiceTest {
     ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
     verify(reportService).fillAndExportReport(any(String.class), any(byte[].class),
         paramsCaptor.capture());
-    assertEquals(Boolean.FALSE, paramsCaptor.getValue().get("showInDoses"));
+    assertEquals(Boolean.FALSE, paramsCaptor.getValue().get(SHOW_IN_DOSES));
     assertEquals(1L, paramsCaptor.getValue().get("orderableNetContent"));
   }
 
@@ -152,7 +153,7 @@ public class JasperReportServiceTest {
     ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
     verify(reportService).fillAndExportReport(any(String.class), any(byte[].class),
         paramsCaptor.capture());
-    assertEquals(Boolean.FALSE, paramsCaptor.getValue().get("showInDoses"));
+    assertEquals(Boolean.FALSE, paramsCaptor.getValue().get(SHOW_IN_DOSES));
   }
 
   @Test
@@ -176,7 +177,7 @@ public class JasperReportServiceTest {
     assertEquals(DATE_FORMAT, params.get("dateFormat"));
     assertEquals(DATE_TIME_FORMAT, params.get("dateTimeFormat"));
     assertEquals(createDecimalFormat(), params.get("decimalFormat"));
-    assertEquals(true, params.get("showInDoses"));
+    assertEquals(true, params.get(SHOW_IN_DOSES));
   }
 
   @Test
@@ -190,7 +191,7 @@ public class JasperReportServiceTest {
 
     verify(reportService).fillAndExportReport(eq("stockEvent"), any(byte[].class),
         paramsCaptor.capture());
-    assertEquals(false, paramsCaptor.getValue().get("showInDoses"));
+    assertEquals(false, paramsCaptor.getValue().get(SHOW_IN_DOSES));
   }
 
   @Test
@@ -200,7 +201,7 @@ public class JasperReportServiceTest {
     params.put("dateFormat", DATE_FORMAT);
     params.put("format", "pdf");
     params.put("decimalFormat", createDecimalFormat());
-    params.put("showInDoses", false);
+    params.put(SHOW_IN_DOSES, false);
 
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     ObjectOutputStream out = new ObjectOutputStream(bos);
