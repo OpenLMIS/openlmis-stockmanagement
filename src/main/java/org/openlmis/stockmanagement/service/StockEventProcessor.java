@@ -21,6 +21,7 @@ import java.sql.PreparedStatement;
 import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
@@ -71,6 +72,9 @@ public class StockEventProcessor {
 
   @PersistenceContext
   private EntityManager entityManager;
+  
+  @Autowired
+  private DocumentNumberGenerator documentNumberGenerator;
 
   /**
    * Validate and persist event and create stock card and line items from it.
@@ -93,6 +97,9 @@ public class StockEventProcessor {
 
     profiler.start("VALIDATE");
     stockEventValidationsService.validate(eventDto);
+
+    profiler.start("ASSIGN_DOCUMENT_NUMBER");
+    assignDocumentNumberIfNeeded(eventDto);
 
     UUID eventId = saveEventAndGenerateLineItems(
         eventDto, profiler.startNested("SAVE_AND_GENERATE_LINE_ITEMS")
@@ -151,5 +158,15 @@ public class StockEventProcessor {
 
   private void sortEventDtos(StockEventDto eventDto) {
     eventDto.sortLineItemsByOccurreddate();
+  }
+
+  private void assignDocumentNumberIfNeeded(StockEventDto eventDto) {
+    if (eventDto.getEventOrigin() != null
+        && StringUtils.isBlank(eventDto.getDocumentNumber())) {
+      String documentNumber = documentNumberGenerator.generate(eventDto.getFacilityId());
+      eventDto.setDocumentNumber(documentNumber);
+      LOGGER.debug("Generated document number {} for event with origin {}",
+          documentNumber, eventDto.getEventOrigin());
+    }
   }
 }

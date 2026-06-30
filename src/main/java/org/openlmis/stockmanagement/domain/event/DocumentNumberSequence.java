@@ -15,53 +15,37 @@
 
 package org.openlmis.stockmanagement.domain.event;
 
-import static javax.persistence.CascadeType.ALL;
-
-import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "stock_events", schema = "stockmanagement")
-public class StockEvent extends BaseEntity {
+@Table(
+    name = "document_number_sequences",
+    schema = "stockmanagement",
+    uniqueConstraints = @UniqueConstraint(
+        name = "document_number_sequences_facility_year_month_unique",
+        columnNames = {"facilityid", "year", "month"}))
+public class DocumentNumberSequence extends BaseEntity {
 
   @Column(nullable = false)
   private UUID facilityId;
+
   @Column(nullable = false)
-  private UUID programId;
+  private Integer year;
 
-  @Column
-  private UUID userId;
+  @Column(nullable = false)
+  private Integer month;
 
-  @Column(nullable = false, columnDefinition = "timestamp")
-  private ZonedDateTime processedDate;
-
-  @Column(nullable = true, columnDefinition = "boolean default true")
-  private boolean isActive;
-
-  private String signature;
-
-  private String documentNumber;
-
-  @Column(columnDefinition = TEXT_COLUMN_DEFINITION)
-  @Enumerated(value = EnumType.STRING)
-  private EventOrigin eventOrigin;
-
-  @ToString.Exclude
-  @OneToMany(cascade = ALL, mappedBy = "stockEvent")
-  private List<StockEventLineItem> lineItems;
+  @Column(nullable = false)
+  private Integer lastSequenceNumber;
 }

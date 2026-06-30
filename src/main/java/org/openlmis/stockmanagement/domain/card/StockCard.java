@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.domain.card;
 import static javax.persistence.CascadeType.ALL;
 import static org.apache.commons.beanutils.BeanUtils.cloneBean;
 import static org.hibernate.annotations.LazyCollectionOption.FALSE;
+import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparators.byId;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparators.byOccurredDate;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparators.byProcessedDate;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparators.byReasonPriority;
@@ -186,6 +187,7 @@ public class StockCard extends BaseEntity implements IdentifiableByOrderableLot 
   public static Comparator<StockCardLineItem> getLineItemsComparator() {
     return byOccurredDate()
         .thenComparing(byProcessedDate())
-        .thenComparing(byReasonPriority());
+        .thenComparing(byReasonPriority())
+        .thenComparing(byId());
   }
 }

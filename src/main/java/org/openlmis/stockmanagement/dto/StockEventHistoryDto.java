@@ -15,40 +15,43 @@
 
 package org.openlmis.stockmanagement.dto;
 
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
+import lombok.NoArgsConstructor;
 import org.openlmis.stockmanagement.domain.event.EventOrigin;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
-import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 
-@Builder
 @Data
-public class StockCardLineItemDto {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class StockEventHistoryDto {
 
-  @JsonUnwrapped
-  private StockCardLineItem lineItem;
-
-  private FacilityDto source;
-  private FacilityDto destination;
-
-  private UUID originEventId;
-  private EventOrigin eventOrigin;
+  private UUID id;
+  private String documentNumber;
+  private EventOrigin type;
+  private LocalDate occurredDate;
+  private ZonedDateTime processedDate;
+  private Integer entriesCount;
+  private UUID userId;
+  private String username;
 
   /**
-   * Create stock card line item dto from stock card line item.
-   *
-   * @param stockCardLineItem stock card line item.
-   * @return the created stock card line item dto.
+   * Creates a history row DTO from a stock event's scalar fields. The line-item-derived fields
+   * ({@code entriesCount}, {@code occurredDate}) and {@code username} are filled in afterwards
+   * by the service.
    */
-  public static StockCardLineItemDto createFrom(StockCardLineItem stockCardLineItem) {
-    StockEvent originEvent = stockCardLineItem.getOriginEvent();
-    return StockCardLineItemDto.builder()
-        .lineItem(stockCardLineItem)
-        .originEventId(originEvent == null ? null : originEvent.getId())
-        .eventOrigin(originEvent == null ? null : originEvent.getEventOrigin())
+  public static StockEventHistoryDto newInstance(StockEvent event) {
+    return StockEventHistoryDto.builder()
+        .id(event.getId())
+        .documentNumber(event.getDocumentNumber())
+        .type(event.getEventOrigin())
+        .userId(event.getUserId())
+        .processedDate(event.getProcessedDate())
         .build();
   }
 }

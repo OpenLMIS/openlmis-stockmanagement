@@ -15,10 +15,33 @@
 
 package org.openlmis.stockmanagement.repository;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.repository.custom.StockEventLineItemAggregate;
+import org.openlmis.stockmanagement.repository.custom.StockEventsRepositoryCustom;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
 public interface StockEventsRepository extends
-    PagingAndSortingRepository<StockEvent, UUID> {
+    PagingAndSortingRepository<StockEvent, UUID>, StockEventsRepositoryCustom {
+
+  /**
+   * Aggregates the line items of the given events in one query, so building the history rows
+   * does not trigger an N+1 over each event's line items.
+   *
+   * @param eventIds the stock event ids of the current page.
+   * @return one aggregate (event id, line item entry count, earliest occurred date) per event
+   *         that has line items.
+   */
+  @Query("SELECT new org.openlmis.stockmanagement.repository.custom.StockEventLineItemAggregate("
+      + "lineItem.stockEvent.id, COUNT(lineItem),"
+      + " MIN(lineItem.occurredDate))"
+      + " FROM StockEventLineItem lineItem"
+      + " WHERE lineItem.stockEvent.id IN :eventIds"
+      + " GROUP BY lineItem.stockEvent.id")
+  List<StockEventLineItemAggregate> aggregateLineItemsByEventIds(
+      @Param("eventIds") Collection<UUID> eventIds);
 }

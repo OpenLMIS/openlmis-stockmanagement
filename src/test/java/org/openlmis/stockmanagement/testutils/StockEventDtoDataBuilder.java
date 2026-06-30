@@ -143,8 +143,8 @@ public class StockEventDtoDataBuilder {
   }
 
   public StockEventDto build() {
-    return new StockEventDto(resourceId, facilityId, programId, signature, documentNumber, userId,
-        isActive, lineItems, context);
+    return new StockEventDto(resourceId, facilityId, programId, signature, documentNumber, null,
+        userId, isActive, lineItems, context);
   }
 
   public StockEventDtoDataBuilder addLineItem(StockEventLineItemDto... lineItemDtos) {

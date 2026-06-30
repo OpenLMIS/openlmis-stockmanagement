@@ -19,6 +19,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.assertj.core.util.Lists;
+import org.openlmis.stockmanagement.domain.event.EventOrigin;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 
@@ -31,6 +32,7 @@ public class StockEventDataBuilder {
   private boolean isActive = true;
   private String signature;
   private String documentNumber;
+  private EventOrigin eventOrigin;
   private List<StockEventLineItem> lineItems = Lists.newArrayList();
 
   public StockEventDataBuilder withoutId() {
@@ -53,12 +55,33 @@ public class StockEventDataBuilder {
     return this;
   }
 
+  public StockEventDataBuilder withEventOrigin(EventOrigin eventOrigin) {
+    this.eventOrigin = eventOrigin;
+    return this;
+  }
+
+  public StockEventDataBuilder withProcessedDate(ZonedDateTime processedDate) {
+    this.processedDate = processedDate;
+    return this;
+  }
+
+  public StockEventDataBuilder withDocumentNumber(String documentNumber) {
+    this.documentNumber = documentNumber;
+    return this;
+  }
+
+  public StockEventDataBuilder withLineItems(List<StockEventLineItem> lineItems) {
+    this.lineItems = lineItems;
+    return this;
+  }
+
   /**
    * Creates stock event based on parameters from the builder.
    */
   public StockEvent build() {
     StockEvent event = new StockEvent(
-        facilityId, programId, userId,processedDate, isActive, signature, documentNumber, lineItems
+        facilityId, programId, userId, processedDate, isActive, signature, documentNumber,
+        eventOrigin, lineItems
     );
     event.setId(id);
 
