@@ -90,6 +90,13 @@
 		<field name="stockOnHand" class="java.lang.Number"/>
 		<field name="lastUpdate" class="java.lang.Object"/>
 		<field name="lot" class="java.util.Map"/>
+		<variable name="orderableNetContent" class="java.lang.Long" calculation="Nothing">
+			<variableExpression><![CDATA[$F{orderable} == null
+				|| ((java.util.Map) $F{orderable}).get("netContent") == null
+				|| ((java.lang.Number) ((java.util.Map) $F{orderable}).get("netContent")).longValue() <= 0
+				? 1L
+				: ((java.lang.Number) ((java.util.Map) $F{orderable}).get("netContent")).longValue()]]></variableExpression>
+		</variable>
 	</subDataset>
 	<parameter name="program" class="java.util.Map" isForPrompting="false"/>
 	<parameter name="facility" class="java.util.Map" isForPrompting="false"/>
@@ -377,7 +384,11 @@
 								<reportElement x="0" y="0" width="80" height="30" uuid="6b7919e9-5946-4ae1-9417-412f5ddc1286"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{stockOnHand} == null ? "" : ($P{showInDoses} ? $P{decimalFormat}.format(((java.lang.Number)$F{stockOnHand})).toString() : (($F{stockOnHand}.longValue() / ($F{orderable} == null || ((java.util.Map)$F{orderable}).get("netContent") == null || ((java.lang.Number)((java.util.Map)$F{orderable}).get("netContent")).longValue() <= 0 ? 1L : ((java.lang.Number)((java.util.Map)$F{orderable}).get("netContent")).longValue())) + " (+" + ($F{stockOnHand}.longValue() % ($F{orderable} == null || ((java.util.Map)$F{orderable}).get("netContent") == null || ((java.lang.Number)((java.util.Map)$F{orderable}).get("netContent")).longValue() <= 0 ? 1L : ((java.lang.Number)((java.util.Map)$F{orderable}).get("netContent")).longValue())) + ")"))]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{stockOnHand} == null ? "" :
+									( $P{showInDoses}
+										? $P{decimalFormat}.format($F{stockOnHand}).toString()
+										: ( ($F{stockOnHand}.longValue() / $V{orderableNetContent})
+											+ " (+" + ($F{stockOnHand}.longValue() % $V{orderableNetContent}) + ")" ) )]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>

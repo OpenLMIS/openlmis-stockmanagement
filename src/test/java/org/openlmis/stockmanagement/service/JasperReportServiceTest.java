@@ -121,6 +121,7 @@ public class JasperReportServiceTest {
     verify(reportService).fillAndExportReport(any(String.class), any(byte[].class),
         paramsCaptor.capture());
     assertEquals(Boolean.FALSE, paramsCaptor.getValue().get("showInDoses"));
+    assertEquals(1L, paramsCaptor.getValue().get("orderableNetContent"));
   }
 
   @Test

@@ -50,6 +50,7 @@ import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.openlmis.stockmanagement.domain.JasperTemplate;
 import org.openlmis.stockmanagement.dto.StockCardDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.JasperReportViewException;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.service.report.ReportService;
@@ -105,6 +106,7 @@ public class JasperReportService {
     params.put("dateFormat", dateFormat);
     params.put("decimalFormat", createDecimalFormat());
     params.put("showInDoses", showInDoses);
+    params.put("orderableNetContent", guardedNetContent(stockCardDto.getOrderable()));
     params.put("lang", lang);
 
     JasperReport compiledReport = compileReportFromTemplateUrl(CARD_REPORT_URL);
@@ -184,6 +186,21 @@ public class JasperReportService {
 
   private long getCount(List<StockCardDto> stockCards, Function<StockCardDto, String> mapper) {
     return stockCards.stream().map(mapper).distinct().count();
+  }
+
+  /**
+   * Net content used to convert doses to packs, guarded so it is always a safe divisor.
+   * Computed here (not in the template) because the page header needs the value as a
+   * parameter, which - unlike a dataset variable - is available when the header is rendered.
+   *
+   * @param orderable the report's orderable (may be null)
+   * @return the orderable's net content, or 1 when it is missing or not positive
+   */
+  private long guardedNetContent(OrderableDto orderable) {
+    if (orderable == null || orderable.getNetContent() == null || orderable.getNetContent() <= 0) {
+      return 1L;
+    }
+    return orderable.getNetContent();
   }
 
   private byte[] serializeReport(JasperReport report) {

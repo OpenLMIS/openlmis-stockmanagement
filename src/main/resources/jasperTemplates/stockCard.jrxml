@@ -58,11 +58,16 @@
 		<field name="stockOnHand" class="java.lang.Number"/>
 		<field name="username" class="java.lang.String"/>
 		<field name="signature" class="java.lang.String"/>
+		<variable name="paramNetContent" class="java.lang.Long" calculation="Nothing">
+			<variableExpression><![CDATA[$P{netContent} == null || $P{netContent}.longValue() <= 0
+				? 1L : $P{netContent}.longValue()]]></variableExpression>
+		</variable>
 	</subDataset>
 	<parameter name="hasLot" class="java.lang.Boolean" isForPrompting="false"/>
 	<parameter name="dateFormat" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="decimalFormat" class="java.text.DecimalFormat" isForPrompting="false"/>
 	<parameter name="showInDoses" class="java.lang.Boolean" isForPrompting="false"/>
+	<parameter name="orderableNetContent" class="java.lang.Number" isForPrompting="false"/>
 	<parameter name="headerTemplate" class="net.sf.jasperreports.engine.JasperReport"/>
 	<queryString><![CDATA[]]></queryString>
 	<field name="stockOnHand" class="java.lang.Number"/>
@@ -132,7 +137,11 @@
 			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
 				<reportElement x="520" y="0" width="80" height="10" uuid="83ee175f-b7f6-47ab-97d1-e0e47cbd5ba8"/>
 				<textElement><font size="8" isBold="false"/></textElement>
-				<textFieldExpression><![CDATA[$F{stockOnHand} == null ? "" : ($P{showInDoses} ? $P{decimalFormat}.format($F{stockOnHand}).toString() : (($F{stockOnHand}.longValue() / ($F{orderable} == null || ((java.util.Map)$F{orderable}).get("netContent") == null || ((java.lang.Number)((java.util.Map)$F{orderable}).get("netContent")).longValue() <= 0 ? 1L : ((java.lang.Number)((java.util.Map)$F{orderable}).get("netContent")).longValue())) + " (+" + ($F{stockOnHand}.longValue() % ($F{orderable} == null || ((java.util.Map)$F{orderable}).get("netContent") == null || ((java.lang.Number)((java.util.Map)$F{orderable}).get("netContent")).longValue() <= 0 ? 1L : ((java.lang.Number)((java.util.Map)$F{orderable}).get("netContent")).longValue())) + ")"))]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{stockOnHand} == null ? "" :
+					( $P{showInDoses}
+						? $P{decimalFormat}.format($F{stockOnHand}).toString()
+						: ( ($F{stockOnHand}.longValue() / $P{orderableNetContent}.longValue())
+							+ " (+" + ($F{stockOnHand}.longValue() % $P{orderableNetContent}.longValue()) + ")" ) )]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="160" y="20" width="70" height="10" uuid="dbb8c60d-f18c-4662-82a9-1469ba5ee29b"/>
@@ -330,7 +339,11 @@
 								<reportElement x="0" y="0" width="70" height="30" uuid="109c656e-5a92-4ab3-9578-cf1e39ee1e3d"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{quantity} == null ? "" : ($P{showInDoses} ? $P{decimalFormat}.format($F{quantity}).toString() : (($F{quantity}.longValue() / ($P{netContent} == null || $P{netContent}.longValue() <= 0 ? 1L : $P{netContent}.longValue())) + " (+" + ($F{quantity}.longValue() % ($P{netContent} == null || $P{netContent}.longValue() <= 0 ? 1L : $P{netContent}.longValue())) + ")"))]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{quantity} == null ? "" :
+									( $P{showInDoses}
+										? $P{decimalFormat}.format($F{quantity}).toString()
+										: ( ($F{quantity}.longValue() / $V{paramNetContent})
+											+ " (+" + ($F{quantity}.longValue() % $V{paramNetContent}) + ")" ) )]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -349,7 +362,11 @@
 								<reportElement x="0" y="0" width="70" height="30" uuid="2b8cc7f3-6461-4122-b530-cdacfa242a8c"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{stockOnHand} == null ? "" : ($P{showInDoses} ? $P{decimalFormat}.format($F{stockOnHand}).toString() : (($F{stockOnHand}.longValue() / ($P{netContent} == null || $P{netContent}.longValue() <= 0 ? 1L : $P{netContent}.longValue())) + " (+" + ($F{stockOnHand}.longValue() % ($P{netContent} == null || $P{netContent}.longValue() <= 0 ? 1L : $P{netContent}.longValue())) + ")"))]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{stockOnHand} == null ? "" :
+									( $P{showInDoses}
+										? $P{decimalFormat}.format($F{stockOnHand}).toString()
+										: ( ($F{stockOnHand}.longValue() / $V{paramNetContent})
+											+ " (+" + ($F{stockOnHand}.longValue() % $V{paramNetContent}) + ")" ) )]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
