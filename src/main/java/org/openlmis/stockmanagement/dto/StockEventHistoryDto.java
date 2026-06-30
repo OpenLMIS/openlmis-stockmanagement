@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.dto;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,6 +35,7 @@ public class StockEventHistoryDto {
   private String documentNumber;
   private EventOrigin type;
   private LocalDate occurredDate;
+  private ZonedDateTime processedDate;
   private Integer entriesCount;
   private UUID userId;
   private String username;
@@ -49,6 +51,7 @@ public class StockEventHistoryDto {
         .documentNumber(event.getDocumentNumber())
         .type(event.getEventOrigin())
         .userId(event.getUserId())
+        .processedDate(event.getProcessedDate())
         .build();
   }
 }

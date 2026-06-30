@@ -314,6 +314,7 @@ public class StockEventsServiceTest {
     assertThat(dto.getDocumentNumber(), is(DOC_1));
     assertThat(dto.getEntriesCount(), is(3));
     assertThat(dto.getOccurredDate(), is(LocalDate.of(2026, Month.FEBRUARY, 10)));
+    assertThat(dto.getProcessedDate(), is(event.getProcessedDate()));
     assertThat(dto.getUsername(), is(ALICE));
     verify(permissionService).canViewStockCard(program, facility);
   }

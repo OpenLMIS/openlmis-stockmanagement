@@ -19,6 +19,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.junit.Test;
@@ -31,9 +33,11 @@ public class StockEventHistoryDtoTest {
 
   @Test
   public void newInstanceShouldMapScalarEventFields() {
+    ZonedDateTime processedDate = ZonedDateTime.of(2026, 2, 10, 8, 0, 0, 0, ZoneOffset.UTC);
     StockEvent event = new StockEventDataBuilder()
         .withEventOrigin(EventOrigin.ISSUE)
         .withDocumentNumber("2026-02-FAC001-0001")
+        .withProcessedDate(processedDate)
         .build();
 
     StockEventHistoryDto dto = StockEventHistoryDto.newInstance(event);
@@ -42,6 +46,7 @@ public class StockEventHistoryDtoTest {
     assertThat(dto.getDocumentNumber(), is("2026-02-FAC001-0001"));
     assertThat(dto.getType(), is(EventOrigin.ISSUE));
     assertThat(dto.getUserId(), is(event.getUserId()));
+    assertThat(dto.getProcessedDate(), is(processedDate));
     assertThat(dto.getUsername(), is(nullValue()));
   }
 

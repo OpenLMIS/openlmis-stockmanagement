@@ -21,6 +21,10 @@
       "type": ["string", "null"],
       "description": "Earliest occurred date across the event's line items (ISO date)."
     },
+    "processedDate": {
+      "type": ["string", "null"],
+      "description": "Date and time the stock event was processed (ISO date-time with zone)."
+    },
     "entriesCount": {
       "type": ["integer", "null"],
       "description": "Count of stock event line item entries in the event."
