@@ -23,6 +23,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.UUID;
+import javax.persistence.EntityManager;
+import org.hibernate.Session;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,6 +68,12 @@ public class StockEventProcessorDocumentNumberTest {
   @Mock
   private DocumentNumberGenerator documentNumberGenerator;
 
+  @Mock
+  private EntityManager entityManager;
+
+  @Mock
+  private Session session;
+
   @InjectMocks
   private StockEventProcessor processor;
 
@@ -74,6 +82,7 @@ public class StockEventProcessorDocumentNumberTest {
 
   @Before
   public void setUp() {
+    when(entityManager.unwrap(Session.class)).thenReturn(session);
     when(contextBuilder.buildContext(any(StockEventDto.class))).thenReturn(context);
     when(context.getCurrentUserId()).thenReturn(UUID.randomUUID());
     when(extensionManager.getExtension(any(String.class), any()))
