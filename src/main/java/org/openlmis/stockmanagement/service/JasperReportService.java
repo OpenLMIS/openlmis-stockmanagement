@@ -67,6 +67,9 @@ public class JasperReportService {
   static final String PI_LINES_REPORT_URL = "/jasperTemplates/physicalinventoryLines.jrxml";
 
   private static final String PARAM_DATASOURCE = "datasource";
+  // Net content used when an orderable has none: 1 dose per pack, so the packs
+  // conversion stays a safe division and falls back to showing the raw value.
+  private static final long DEFAULT_NET_CONTENT = 1L;
   
   private final StockCardService stockCardService;
   private final StockCardSummariesService stockCardSummariesService;
@@ -198,7 +201,7 @@ public class JasperReportService {
    */
   private long guardedNetContent(OrderableDto orderable) {
     if (orderable == null || orderable.getNetContent() == null || orderable.getNetContent() <= 0) {
-      return 1L;
+      return DEFAULT_NET_CONTENT;
     }
     return orderable.getNetContent();
   }
