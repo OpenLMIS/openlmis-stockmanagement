@@ -1,6 +1,9 @@
 Upcoming Version (WIP)
 ==================
 * [OLMIS-8198](https://openlmis.atlassian.net/browse/OLMIS-8198): Add packs support to stock card and stock card summary reports.
+* [SELV3-849](https://openlmis.atlassian.net/browse/SELV3-849) Unified StockCardLineItem ordering on retrieval
+* [SELV3-842](https://openlmis.atlassian.net/browse/SELV3-842) Added `GET /api/stockEvents/{id}` endpoint
+* [SELV3-841](https://openlmis.atlassian.net/browse/SELV3-841) Added `GET /api/stockEvents/{id}/print` endpoint for generating PDF report for stock event transactions
 
 5.3.1 / 2026-06-09
 ==================
@@ -10,6 +13,7 @@ Improvements:
 * [ODRC-24](https://openlmis.atlassian.net/browse/ODRC-24) Global header and translations implemented for reports
 * [SELV3-748](https://openlmis.atlassian.net/browse/SELV3-748) Improved 'no permission' warning message
 * [SELV3-839](https://openlmis.atlassian.net/browse/SELV3-839) New document number generation for issue and receive
+* [SELV3-842](https://openlmis.atlassian.net/browse/SELV3-842) Added Transaction History view with new endpoints `GET /api/stockEvents` and `GET /api/stockEvents/{id}/lineItems`, plus a document number column on the stock card bin card report
 
 5.3.0 / 2025-11-27
 ==================

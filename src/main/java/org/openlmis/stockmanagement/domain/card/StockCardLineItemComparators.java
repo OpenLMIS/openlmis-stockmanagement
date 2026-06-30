@@ -21,6 +21,7 @@ public final class StockCardLineItemComparators {
   private static final Comparator<StockCardLineItem> BY_OCCURRED_DATE = new ByOccurredDate();
   private static final Comparator<StockCardLineItem> BY_PROCESSED_DATE = new ByProcessedDate();
   private static final Comparator<StockCardLineItem> BY_REASON_PRIORITY = new ByReasonPriority();
+  private static final Comparator<StockCardLineItem> BY_ID = new ById();
 
   private StockCardLineItemComparators() {
     throw new UnsupportedOperationException();
@@ -36,6 +37,10 @@ public final class StockCardLineItemComparators {
 
   public static Comparator<StockCardLineItem> byReasonPriority() {
     return BY_REASON_PRIORITY;
+  }
+
+  public static Comparator<StockCardLineItem> byId() {
+    return BY_ID;
   }
 
   /**
@@ -80,6 +85,29 @@ public final class StockCardLineItemComparators {
 
       // the minus at the beginning is use to reverse the Integer.compare method
       return -Integer.compare(leftPriority, rightPriority);
+    }
+
+  }
+
+  /**
+   * Comparator that orders {@link StockCardLineItem} by their id. Used as the final, deterministic
+   * tie-breaker when occurred date, processed date and reason priority are all equal, so that the
+   * displayed order are stable across requests.
+   */
+  private static final class ById implements Comparator<StockCardLineItem> {
+
+    @Override
+    public int compare(StockCardLineItem left, StockCardLineItem right) {
+      String leftId = null != left.getId() ? left.getId().toString() : null;
+      String rightId = null != right.getId() ? right.getId().toString() : null;
+
+      if (leftId == null) {
+        return rightId == null ? 0 : 1;
+      }
+      if (rightId == null) {
+        return -1;
+      }
+      return leftId.compareTo(rightId);
     }
 
   }

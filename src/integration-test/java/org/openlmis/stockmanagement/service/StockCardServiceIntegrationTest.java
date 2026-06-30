@@ -17,10 +17,12 @@ package org.openlmis.stockmanagement.service;
 
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -268,6 +270,51 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
     assertThat(foundCardDto.getFacility(), is(cardFacility));
     assertThat(foundCardDto.getProgram(), is(programDto));
+    assertThat(foundCardDto.getOrderable(), is(orderableDto));
+    assertThat(foundCardDto.getLot(), is(lotDto));
+
+    StockCardLineItemDto lineItemDto = foundCardDto.getLineItems().get(0);
+    FacilityDto orgFacility = FacilityDto.createFrom(org);
+    assertThat(lineItemDto.getSource(), is(orgFacility));
+    assertThat(lineItemDto.getDestination(), is(orgFacility));
+  }
+
+  @Test
+  public void shouldGetRefdataAndConvertOrganizationsWhenFindStockCardsByIds() {
+    when(userReferenceDataService.findUsersByIds(any()))
+        .thenReturn(Collections.emptyList());
+
+    StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.getLineItems().get(0).setLotId(randomUUID());
+    stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
+    stockEventDto.getLineItems().get(0).setSourceId(node.getId());
+    stockEventDto.getLineItems().get(0).setDestinationId(node.getId());
+
+    Organization org = new Organization();
+    org.setName("org");
+    OrderableDto orderableDto = OrderableDto.builder()
+        .id(stockEventDto.getLineItems().get(0).getOrderableId()).build();
+    LotDto lotDto = LotDto.builder()
+        .id(stockEventDto.getLineItems().get(0).getLotId()).build();
+
+    when(facilityReferenceDataService.findOne(stockEventDto.getFacilityId()))
+        .thenReturn(new FacilityDto());
+    when(programReferenceDataService.findOne(stockEventDto.getProgramId()))
+        .thenReturn(new ProgramDto());
+    when(orderableReferenceDataService.findByIds(anySet()))
+        .thenReturn(Collections.singletonList(orderableDto));
+    when(lotReferenceDataService.findByIds(anySet()))
+        .thenReturn(Collections.singletonList(lotDto));
+
+    StockEvent savedEvent = save(stockEventDto, randomUUID());
+    StockCard savedCard = stockCardRepository.findByOriginEvent(savedEvent);
+
+    List<StockCardDto> foundCards = stockCardService.findStockCardsByIds(
+        Collections.singletonList(savedCard.getId()));
+
+    assertThat(foundCards, hasSize(1));
+
+    StockCardDto foundCardDto = foundCards.get(0);
     assertThat(foundCardDto.getOrderable(), is(orderableDto));
     assertThat(foundCardDto.getLot(), is(lotDto));
 
