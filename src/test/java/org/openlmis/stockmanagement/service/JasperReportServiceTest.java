@@ -125,7 +125,6 @@ public class JasperReportServiceTest {
 
     assertEquals(testReportData, reportData);
 
-    ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
     verify(reportService).fillAndExportReport(any(String.class), any(byte[].class),
         paramsCaptor.capture());
     assertEquals(Boolean.FALSE, paramsCaptor.getValue().get(SHOW_IN_DOSES));
@@ -150,7 +149,6 @@ public class JasperReportServiceTest {
 
     assertEquals(testReportData, reportData);
 
-    ArgumentCaptor<Map> paramsCaptor = ArgumentCaptor.forClass(Map.class);
     verify(reportService).fillAndExportReport(any(String.class), any(byte[].class),
         paramsCaptor.capture());
     assertEquals(Boolean.FALSE, paramsCaptor.getValue().get(SHOW_IN_DOSES));
