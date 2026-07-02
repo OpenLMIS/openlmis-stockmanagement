@@ -58,10 +58,11 @@ public class ReportsController {
   @GetMapping(value = "/stockCards/{id}/print")
   @ResponseBody
   public ResponseEntity<byte[]> getStockCard(@PathVariable("id") UUID stockCardId,
-       @RequestParam(defaultValue = "en") String lang) {
+       @RequestParam(defaultValue = "en") String lang,
+       @RequestParam(required = false, defaultValue = "true") Boolean showInDoses) {
     LOGGER.info("Try to generate stock card report with id: {}", stockCardId);
 
-    byte[] report = reportService.generateStockCardReport(stockCardId, lang);
+    byte[] report = reportService.generateStockCardReport(stockCardId, lang, showInDoses);
 
     return ResponseEntity
         .ok()
@@ -81,11 +82,13 @@ public class ReportsController {
   public ResponseEntity<byte[]> getStockCardSummaries(
       @RequestParam("program") UUID program,
       @RequestParam("facility") UUID facility,
-      @RequestParam(defaultValue = "en") String lang) {
+      @RequestParam(defaultValue = "en") String lang,
+      @RequestParam(required = false, defaultValue = "true") Boolean showInDoses) {
     LOGGER.info("Try to generate stock card summaries report by program %s and facility %s.",
         program.toString(), facility.toString());
     permissionService.canViewStockCard(program, facility);
-    byte[] report = reportService.generateStockCardSummariesReport(program, facility, lang);
+    byte[] report =
+        reportService.generateStockCardSummariesReport(program, facility, lang, showInDoses);
 
     return ResponseEntity
         .ok()

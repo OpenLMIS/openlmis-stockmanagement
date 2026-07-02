@@ -1,5 +1,6 @@
 Upcoming Version (WIP)
 ==================
+* [OLMIS-8198](https://openlmis.atlassian.net/browse/OLMIS-8198): Add packs support to stock card and stock card summary reports.
 * [SELV3-849](https://openlmis.atlassian.net/browse/SELV3-849) Unified StockCardLineItem ordering on retrieval
 * [SELV3-842](https://openlmis.atlassian.net/browse/SELV3-842) Added `GET /api/stockEvents/{id}` endpoint
 * [SELV3-841](https://openlmis.atlassian.net/browse/SELV3-841) Added `GET /api/stockEvents/{id}/print` endpoint for generating PDF report for stock event transactions

@@ -50,6 +50,7 @@ import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.openlmis.stockmanagement.domain.JasperTemplate;
 import org.openlmis.stockmanagement.dto.StockCardDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.JasperReportViewException;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.service.report.ReportService;
@@ -67,6 +68,9 @@ public class JasperReportService {
   static final String PI_LINES_REPORT_URL = "/jasperTemplates/physicalinventoryLines.jrxml";
 
   private static final String PARAM_DATASOURCE = "datasource";
+  // Net content used when an orderable has none: 1 dose per pack, so the packs
+  // conversion stays a safe division and falls back to showing the raw value.
+  private static final long DEFAULT_NET_CONTENT = 1L;
   private static final String PARAM_DATE_FORMAT = "dateFormat";
   private static final String PARAM_DECIMAL_FORMAT = "decimalFormat";
   
@@ -94,9 +98,11 @@ public class JasperReportService {
    * Generate stock card report in PDF format.
    *
    * @param stockCardId stock card id
+   * @param lang        the lang
+   * @param showInDoses whether values should be shown in doses (true) or packs (false)
    * @return generated stock card report.
    */
-  public byte[] generateStockCardReport(UUID stockCardId, String lang) {
+  public byte[] generateStockCardReport(UUID stockCardId, String lang, Boolean showInDoses) {
     StockCardDto stockCardDto = stockCardService.findStockCardById(stockCardId);
     if (stockCardDto == null) {
       throw new ResourceNotFoundException(new Message(ERROR_REPORT_ID_NOT_FOUND));
@@ -106,6 +112,8 @@ public class JasperReportService {
     Map<String, Object> params = new HashMap<>();
     params.put(PARAM_DATASOURCE, singletonList(stockCardDto));
     params.put("hasLot", stockCardDto.hasLot());
+    params.put("showInDoses", showInDoses);
+    params.put("orderableNetContent", guardedNetContent(stockCardDto.getOrderable()));
     params.put(PARAM_DATE_FORMAT, dateFormat);
     params.put(PARAM_DECIMAL_FORMAT, createDecimalFormat());
     params.put("lang", lang);
@@ -121,14 +129,17 @@ public class JasperReportService {
    * @param program  program id
    * @param facility facility id
    * @param lang     the lang
+   * @param showInDoses whether values should be shown in doses (true) or packs (false)
    * @return generated stock card summary report.
    */
-  public byte[] generateStockCardSummariesReport(UUID program, UUID facility, String lang) {
+  public byte[] generateStockCardSummariesReport(UUID program, UUID facility, String lang,
+      Boolean showInDoses) {
     List<StockCardDto> cards = stockCardSummariesService
         .findStockCards(program, facility);
     StockCardDto firstCard = cards.get(0);
     Map<String, Object> params = new HashMap<>();
     params.put("stockCardSummaries", cards);
+    params.put("showInDoses", showInDoses);
 
     params.put("program", firstCard.getProgram());
     params.put("facility", firstCard.getFacility());
@@ -208,6 +219,21 @@ public class JasperReportService {
 
   private long getCount(List<StockCardDto> stockCards, Function<StockCardDto, String> mapper) {
     return stockCards.stream().map(mapper).distinct().count();
+  }
+
+  /**
+   * Net content used to convert doses to packs, guarded so it is always a safe divisor.
+   * Computed here (not in the template) because the page header needs the value as a
+   * parameter, which - unlike a dataset variable - is available when the header is rendered.
+   *
+   * @param orderable the report's orderable (may be null)
+   * @return the orderable's net content, or 1 when it is missing or not positive
+   */
+  private long guardedNetContent(OrderableDto orderable) {
+    if (orderable == null || orderable.getNetContent() == null || orderable.getNetContent() <= 0) {
+      return DEFAULT_NET_CONTENT;
+    }
+    return orderable.getNetContent();
   }
 
   private byte[] serializeReport(JasperReport report) {

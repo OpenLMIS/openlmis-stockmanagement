@@ -44,6 +44,8 @@
 	<subDataset name="LineItemDataset" uuid="d30e7c80-bc48-40f0-98c4-960e82d19e87">
 		<parameter name="dateFormat" class="java.lang.String" isForPrompting="false"/>
 		<parameter name="decimalFormat" class="java.text.DecimalFormat" isForPrompting="false"/>
+		<parameter name="showInDoses" class="java.lang.Boolean" isForPrompting="false"/>
+		<parameter name="netContent" class="java.lang.Number" isForPrompting="false"/>
 		<queryString><![CDATA[]]></queryString>
 		<field name="occurredDate" class="java.lang.Object"/>
 		<field name="sourceFreeText" class="java.lang.String"/>
@@ -57,10 +59,16 @@
 		<field name="username" class="java.lang.String"/>
 		<field name="signature" class="java.lang.String"/>
 		<field name="documentNumber" class="java.lang.String"/>
+		<variable name="paramNetContent" class="java.lang.Long" calculation="Nothing">
+			<variableExpression><![CDATA[$P{netContent} == null || $P{netContent}.longValue() <= 0
+				? 1L : $P{netContent}.longValue()]]></variableExpression>
+		</variable>
 	</subDataset>
 	<parameter name="hasLot" class="java.lang.Boolean" isForPrompting="false"/>
 	<parameter name="dateFormat" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="decimalFormat" class="java.text.DecimalFormat" isForPrompting="false"/>
+	<parameter name="showInDoses" class="java.lang.Boolean" isForPrompting="false"/>
+	<parameter name="orderableNetContent" class="java.lang.Number" isForPrompting="false"/>
 	<parameter name="headerTemplate" class="net.sf.jasperreports.engine.JasperReport"/>
 	<queryString><![CDATA[]]></queryString>
 	<field name="stockOnHand" class="java.lang.Number"/>
@@ -130,7 +138,11 @@
 			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
 				<reportElement x="520" y="0" width="80" height="10" uuid="83ee175f-b7f6-47ab-97d1-e0e47cbd5ba8"/>
 				<textElement><font size="8" isBold="false"/></textElement>
-				<textFieldExpression><![CDATA[$F{stockOnHand} != null ? $P{decimalFormat}.format($F{stockOnHand}).toString() : ""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{stockOnHand} == null ? "" :
+					( $P{showInDoses}
+						? $P{decimalFormat}.format($F{stockOnHand}).toString()
+						: ( ($F{stockOnHand}.longValue() / $P{orderableNetContent}.longValue())
+							+ " (+" + ($F{stockOnHand}.longValue() % $P{orderableNetContent}.longValue()) + ")" ) )]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="160" y="20" width="70" height="10" uuid="dbb8c60d-f18c-4662-82a9-1469ba5ee29b"/>
@@ -229,6 +241,12 @@
 						<datasetParameter name="decimalFormat">
 							<datasetParameterExpression><![CDATA[$P{decimalFormat}]]></datasetParameterExpression>
 						</datasetParameter>
+						<datasetParameter name="showInDoses">
+							<datasetParameterExpression><![CDATA[$P{showInDoses}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="netContent">
+							<datasetParameterExpression><![CDATA[$F{orderable} != null ? ((java.util.Map)$F{orderable}).get("netContent") : null]]></datasetParameterExpression>
+						</datasetParameter>
 						<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRMapCollectionDataSource($F{lineItems})]]></dataSourceExpression>
 					</datasetRun>
 
@@ -314,7 +332,7 @@
 								<reportElement x="0" y="0" width="63" height="30" uuid="cfe0820a-6b1d-4ab5-901f-4bba85be9b3a"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$R{report.column.adjustment}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$P{showInDoses} ? $R{report.column.adjustmentDoses} : $R{report.column.adjustmentPacks}]]></textFieldExpression>
 							</textField>
 						</jr:tableHeader>
 						<jr:detailCell style="Table_TD" height="30">
@@ -322,7 +340,11 @@
 								<reportElement x="0" y="0" width="63" height="30" uuid="109c656e-5a92-4ab3-9578-cf1e39ee1e3d"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{quantity} != null ? $P{decimalFormat}.format($F{quantity}).toString() : ""]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{quantity} == null ? "" :
+									( $P{showInDoses}
+										? $P{decimalFormat}.format($F{quantity}).toString()
+										: ( ($F{quantity}.longValue() / $V{paramNetContent})
+											+ " (+" + ($F{quantity}.longValue() % $V{paramNetContent}) + ")" ) )]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -333,7 +355,7 @@
 								<reportElement x="0" y="0" width="63" height="30" uuid="6c86ff17-9c22-4161-95a4-79bc947fb015"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$R{report.column.stockOnHand}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$P{showInDoses} ? $R{report.column.sohDoses} : $R{report.column.sohPacks}]]></textFieldExpression>
 							</textField>
 						</jr:tableHeader>
 						<jr:detailCell style="Table_TD" height="30">
@@ -341,7 +363,11 @@
 								<reportElement x="0" y="0" width="63" height="30" uuid="2b8cc7f3-6461-4122-b530-cdacfa242a8c"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{stockOnHand} != null ? $P{decimalFormat}.format($F{stockOnHand}).toString() : ""]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{stockOnHand} == null ? "" :
+									( $P{showInDoses}
+										? $P{decimalFormat}.format($F{stockOnHand}).toString()
+										: ( ($F{stockOnHand}.longValue() / $V{paramNetContent})
+											+ " (+" + ($F{stockOnHand}.longValue() % $V{paramNetContent}) + ")" ) )]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
