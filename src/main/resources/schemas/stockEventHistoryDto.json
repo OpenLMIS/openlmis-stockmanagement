@@ -17,6 +17,10 @@
       "enum": ["ISSUE", "RECEIVE"],
       "description": "Transaction type, read from the event origin."
     },
+    "signature": {
+      "type": ["string", "null"],
+      "description": "Signature of the user who performed the event."
+    },
     "occurredDate": {
       "type": ["string", "null"],
       "description": "Earliest occurred date across the event's line items (ISO date)."

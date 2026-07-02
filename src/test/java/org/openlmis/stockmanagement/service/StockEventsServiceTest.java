@@ -296,7 +296,8 @@ public class StockEventsServiceTest {
     UUID user = randomUUID();
     StockEvent event = new StockEventDataBuilder()
         .withFacility(facility).withProgram(program)
-        .withEventOrigin(EventOrigin.RECEIVE).withDocumentNumber(DOC_1).build();
+        .withEventOrigin(EventOrigin.RECEIVE).withDocumentNumber(DOC_1)
+        .withSignature("signature-user").build();
     event.setUserId(user);
     UUID eventId = event.getId();
 
@@ -312,6 +313,7 @@ public class StockEventsServiceTest {
     assertThat(dto.getId(), is(eventId));
     assertThat(dto.getType(), is(EventOrigin.RECEIVE));
     assertThat(dto.getDocumentNumber(), is(DOC_1));
+    assertThat(dto.getSignature(), is("signature-user"));
     assertThat(dto.getEntriesCount(), is(3));
     assertThat(dto.getOccurredDate(), is(LocalDate.of(2026, Month.FEBRUARY, 10)));
     assertThat(dto.getProcessedDate(), is(event.getProcessedDate()));
