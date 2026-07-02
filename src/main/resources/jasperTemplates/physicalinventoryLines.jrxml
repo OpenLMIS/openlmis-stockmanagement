@@ -170,7 +170,7 @@
 					</box>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement stretchType="RelativeToTallestObject" mode="Opaque" x="82" y="0" width="162" height="25" uuid="f75fae81-e6b8-4993-898d-632ddf29d1e8"/>
+					<reportElement stretchType="RelativeToTallestObject" mode="Opaque" x="82" y="0" width="112" height="25" uuid="f75fae81-e6b8-4993-898d-632ddf29d1e8"/>
 					<box padding="3">
 						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -181,6 +181,19 @@
 						<font size="8"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{productname}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToTallestObject" mode="Opaque" x="194" y="0" width="50" height="25" uuid="7d71ffdf-5372-4fce-8254-fc606aaef789"/>
+					<box padding="3">
+						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{netContent}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Opaque" x="10" y="0" width="72" height="25" uuid="06a9370e-dcaa-4b03-9d18-aca8abaa56bd"/>
@@ -285,7 +298,7 @@
 				<textFieldExpression><![CDATA[$R{report.column.lotCode}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement mode="Opaque" x="82" y="0" width="162" height="25" backcolor="#CCCCCC" uuid="f75fae81-e6b8-4993-898d-632ddf29d1e8"/>
+				<reportElement mode="Opaque" x="82" y="0" width="112" height="25" backcolor="#CCCCCC" uuid="f75fae81-e6b8-4993-898d-632ddf29d1e8"/>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -296,6 +309,19 @@
 					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$R{report.column.productName}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="194" y="0" width="50" height="25" backcolor="#CCCCCC" uuid="00ae8f94-4768-40ca-9121-1f4e9c252536"/>
+				<box padding="3">
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{report.column.packSize}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement mode="Opaque" x="10" y="0" width="72" height="25" backcolor="#CCCCCC" uuid="06a9370e-dcaa-4b03-9d18-aca8abaa56bd"/>
@@ -422,7 +448,16 @@
 				<textFieldExpression><![CDATA[$F{reasonquantity} != null ? ($P{decimalFormat}.format($F{reasonquantity}).toString() + " " + $F{reasonname}) : ""]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="82" y="0" width="162" height="25" uuid="fa240131-8b7e-4a65-98df-10999828a02c"/>
+				<reportElement x="82" y="0" width="112" height="25" uuid="fa240131-8b7e-4a65-98df-10999828a02c"/>
+				<box padding="3">
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="194" y="0" width="50" height="25" uuid="fb59a4d2-8fd9-4f59-bcec-3567ff87de46"/>
 				<box padding="3">
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>

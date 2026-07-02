@@ -286,10 +286,10 @@
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="130" uuid="33bce733-51fc-4690-ae7e-a70995d90963">
+					<jr:column width="100" uuid="33bce733-51fc-4690-ae7e-a70995d90963">
 						<jr:columnHeader style="Table 1_CH" height="30">
 							<textField isStretchWithOverflow="true">
-								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="130" height="30" uuid="1a695eef-6fde-43a4-9db7-9e660d907a5e"/>
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="100" height="30" uuid="1a695eef-6fde-43a4-9db7-9e660d907a5e"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="12"/>
@@ -299,10 +299,30 @@
 						</jr:columnHeader>
 						<jr:detailCell style="Table 1_TD" height="30">
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="130" height="30" uuid="469bc4d2-785e-4ac7-81ab-df1bff6c2525"/>
+								<reportElement x="0" y="0" width="100" height="30" uuid="469bc4d2-785e-4ac7-81ab-df1bff6c2525"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{orderable} != null ? ((java.util.Map)$F{orderable}).get("fullProductName") : ""]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="50" uuid="1e1d0235-f5e5-49fd-bf8b-5339a12b90f0">
+						<jr:columnHeader style="Table 1_CH" height="30">
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="50" height="30" uuid="4e05b9e2-97b5-471d-bc48-eb4b4448f916"/>
+								<box padding="2"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="12"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$R{report.column.packSize}]]></textFieldExpression>
+							</textField>
+						</jr:columnHeader>
+						<jr:detailCell style="Table 1_TD" height="30">
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="50" height="30" uuid="e8c2a4e6-baa8-4825-8eae-bb5be4eae323"/>
+								<box padding="2"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{orderable} != null ? ((java.util.Map)$F{orderable}).get("netContent") : ""]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -348,10 +368,10 @@
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="90" uuid="7309737e-e6a7-44ba-bf6d-92b7cc64ef12">
+					<jr:column width="70" uuid="7309737e-e6a7-44ba-bf6d-92b7cc64ef12">
 						<jr:columnHeader style="Table 1_CH" height="30">
 							<textField isStretchWithOverflow="true">
-								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="90" height="30" uuid="2ef9a1d3-3722-44c7-b38a-08b1d7e06bc6"/>
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="70" height="30" uuid="2ef9a1d3-3722-44c7-b38a-08b1d7e06bc6"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="12"/>
@@ -361,7 +381,7 @@
 						</jr:columnHeader>
 						<jr:detailCell style="Table 1_TD" height="30">
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="90" height="30" uuid="e8a313ec-9db5-4892-9671-fc221c5e6abd"/>
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="70" height="30" uuid="e8a313ec-9db5-4892-9671-fc221c5e6abd"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{lastUpdate} == null ? "" : ( String.valueOf($F{lastUpdate}).startsWith("[") ? java.time.LocalDate.of(Integer.parseInt(String.valueOf($F{lastUpdate}).replaceAll("\\[|\\]|\\s", "").split(",")[0]), Integer.parseInt(String.valueOf($F{lastUpdate}).replaceAll("\\[|\\]|\\s", "").split(",")[1]), Integer.parseInt(String.valueOf($F{lastUpdate}).replaceAll("\\[|\\]|\\s", "").split(",")[2])).format(java.time.format.DateTimeFormatter.ofPattern($P{dateFormat} != null ? $P{dateFormat} : "yyyy-MM-dd")) : java.time.format.DateTimeFormatter.ofPattern($P{dateFormat} != null ? $P{dateFormat} : "yyyy-MM-dd").format(java.time.LocalDate.parse(String.valueOf($F{lastUpdate}))) )]]></textFieldExpression>
