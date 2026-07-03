@@ -174,6 +174,16 @@
 				<textElement><font size="8"/></textElement>
 				<textFieldExpression><![CDATA[$F{orderable} != null ? ((java.util.Map)$F{orderable}).get("fullProductName") : ""]]></textFieldExpression>
 			</textField>
+			<textField>
+				<reportElement x="490" y="20" width="52" height="10" uuid="a7328b04-2dca-4458-85c5-7c58cefe658e"/>
+				<textElement><font size="8" isBold="false"/></textElement>
+				<textFieldExpression><![CDATA[$R{report.header.packSize}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="542" y="20" width="53" height="10" uuid="f925d821-31c2-4f9c-93f2-a65610f13f85"/>
+				<textElement><font size="8"/></textElement>
+				<textFieldExpression><![CDATA[$P{orderableNetContent} == null ? "" : String.valueOf($P{orderableNetContent}.longValue())]]></textFieldExpression>
+			</textField>
 			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
 				<reportElement x="70" y="40" width="80" height="10" uuid="40f09f1a-ba6b-4bcc-ad3a-0bffbbb8d984">
 					<printWhenExpression><![CDATA[$P{hasLot}]]></printWhenExpression>
