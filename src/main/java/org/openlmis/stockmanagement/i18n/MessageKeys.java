@@ -213,6 +213,10 @@ public abstract class MessageKeys {
       + ".lineItem.isCancellation";
   public static final String ERROR_EVENT_LINE_ITEM_BLOCKED_PHYSICAL_INVENTORY = EVENT_ERROR_PREFIX
       + ".lineItem.blocked.physicalInventory";
+  public static final String ERROR_EVENT_CANCELLATION_REASON_REQUIRED = EVENT_ERROR_PREFIX
+      + ".cancellation.reason.required";
+  public static final String ERROR_EVENT_CANCELLATION_REASON_INVALID = EVENT_ERROR_PREFIX
+      + ".cancellation.reason.invalid";
   //stock events creation: reason assignment
   //reason.not.in.validList error key is not used for now, because we remove valid reasons
   //check when implementing adjustment's UI

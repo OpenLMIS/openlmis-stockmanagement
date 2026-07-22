@@ -1,0 +1,177 @@
+/*
+ * This program is part of the OpenLMIS logistics management information system platform software.
+ * Copyright © 2017 VillageReach
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation, either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details. You should have received a copy of
+ * the GNU Affero General Public License along with this program. If not, see
+ * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
+ */
+
+package org.openlmis.stockmanagement.service;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.service.StockEventCancelValidationService.CANCEL_TAG;
+
+import java.time.LocalDate;
+import java.util.Optional;
+import java.util.UUID;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
+import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
+import org.openlmis.stockmanagement.domain.reason.ReasonType;
+import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
+import org.openlmis.stockmanagement.dto.StockEventCancelDto;
+import org.openlmis.stockmanagement.dto.StockEventCancelLineItemDto;
+import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
+import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
+import org.openlmis.stockmanagement.repository.StockEventsRepository;
+
+@RunWith(MockitoJUnitRunner.class)
+public class StockEventCancelServiceTest {
+
+  @Mock
+  private StockEventsRepository stockEventsRepository;
+
+  @Mock
+  private StockEventCancelValidationService cancelValidationService;
+
+  @Mock
+  private StockCardLineItemReasonRepository reasonRepository;
+
+  @Mock
+  private StockEventProcessor stockEventProcessor;
+
+  @InjectMocks
+  private StockEventCancelService service;
+
+  private final UUID eventId = UUID.randomUUID();
+  private final UUID facilityId = UUID.randomUUID();
+  private final UUID programId = UUID.randomUUID();
+
+  @Test
+  public void shouldBuildAndProcessCancellationEvent() {
+    StockEvent event = eventWithIssueLine();
+    StockEventLineItem original = event.getLineItems().get(0);
+    StockCardLineItemReason reason = reason(ReasonType.CREDIT, CANCEL_TAG);
+    StockEventCancelDto request = requestFor(original.getId(), reason.getId());
+    UUID newEventId = UUID.randomUUID();
+    ArgumentCaptor<StockEventDto> captor = ArgumentCaptor.forClass(StockEventDto.class);
+    when(stockEventsRepository.findById(eventId)).thenReturn(Optional.of(event));
+    when(reasonRepository.findByIdIn(anyCollection())).thenReturn(singletonList(reason));
+    when(stockEventProcessor.process(captor.capture())).thenReturn(newEventId);
+
+    UUID result = service.cancel(eventId, request);
+
+    assertEquals(newEventId, result);
+    verify(cancelValidationService).validate(eq(event), any());
+    StockEventDto cancellation = captor.getValue();
+    assertEquals(facilityId, cancellation.getFacilityId());
+    assertEquals(programId, cancellation.getProgramId());
+    assertEquals("signature", cancellation.getSignature());
+    assertTrue(cancellation.isActive());
+    StockEventLineItemDto line = cancellation.getLineItems().get(0);
+    assertEquals(original.getId(), line.getReversesEventLineItemId());
+    assertEquals(reason.getId(), line.getReasonId());
+    assertEquals(original.getOrderableId(), line.getOrderableId());
+    assertEquals(original.getQuantity(), line.getQuantity());
+    assertEquals(LocalDate.now(), line.getOccurredDate());
+    assertNull(line.getSourceId());
+    assertNull(line.getDestinationId());
+  }
+
+  @Test(expected = ResourceNotFoundException.class)
+  public void shouldThrowWhenEventDoesNotExist() {
+    when(stockEventsRepository.findById(eventId)).thenReturn(Optional.empty());
+
+    service.cancel(eventId, requestFor(UUID.randomUUID(), UUID.randomUUID()));
+  }
+
+  @Test(expected = ValidationMessageException.class)
+  public void shouldThrowWhenReasonIsNotCancelTagged() {
+    StockEvent event = eventWithIssueLine();
+    StockEventLineItem original = event.getLineItems().get(0);
+    StockCardLineItemReason reason = reason(ReasonType.CREDIT);
+    when(stockEventsRepository.findById(eventId)).thenReturn(Optional.of(event));
+    when(reasonRepository.findByIdIn(anyCollection())).thenReturn(singletonList(reason));
+
+    service.cancel(eventId, requestFor(original.getId(), reason.getId()));
+  }
+
+  @Test(expected = ValidationMessageException.class)
+  public void shouldThrowWhenReasonTypeDoesNotCounterMovement() {
+    StockEvent event = eventWithIssueLine();
+    StockEventLineItem original = event.getLineItems().get(0);
+    StockCardLineItemReason reason = reason(ReasonType.DEBIT, CANCEL_TAG);
+    when(stockEventsRepository.findById(eventId)).thenReturn(Optional.of(event));
+    when(reasonRepository.findByIdIn(anyCollection())).thenReturn(singletonList(reason));
+
+    service.cancel(eventId, requestFor(original.getId(), reason.getId()));
+  }
+
+  @Test(expected = ValidationMessageException.class)
+  public void shouldThrowWhenReasonIsMissing() {
+    StockEvent event = eventWithIssueLine();
+    StockEventLineItem original = event.getLineItems().get(0);
+    when(stockEventsRepository.findById(eventId)).thenReturn(Optional.of(event));
+
+    service.cancel(eventId, requestFor(original.getId(), null));
+  }
+
+  private StockEvent eventWithIssueLine() {
+    StockEventLineItem lineItem = StockEventLineItem.builder()
+        .orderableId(UUID.randomUUID())
+        .lotId(UUID.randomUUID())
+        .quantity(10)
+        .destinationId(UUID.randomUUID())
+        .occurredDate(LocalDate.now())
+        .build();
+    lineItem.setId(UUID.randomUUID());
+    StockEvent event = new StockEvent();
+    event.setId(eventId);
+    event.setFacilityId(facilityId);
+    event.setProgramId(programId);
+    event.setLineItems(singletonList(lineItem));
+    return event;
+  }
+
+  private StockCardLineItemReason reason(ReasonType type, String... tags) {
+    StockCardLineItemReason reason = StockCardLineItemReason.builder()
+        .name("Cancellation " + type)
+        .reasonType(type)
+        .reasonCategory(ReasonCategory.ADJUSTMENT)
+        .tags(asList(tags))
+        .build();
+    reason.setId(UUID.randomUUID());
+    return reason;
+  }
+
+  private StockEventCancelDto requestFor(UUID lineItemId, UUID reasonId) {
+    StockEventCancelLineItemDto lineItem =
+        new StockEventCancelLineItemDto(lineItemId, reasonId, null);
+    return new StockEventCancelDto("signature", singletonList(lineItem));
+  }
+}
