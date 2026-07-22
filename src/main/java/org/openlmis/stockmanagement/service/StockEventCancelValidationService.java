@@ -1,0 +1,176 @@
+/*
+ * This program is part of the OpenLMIS logistics management information system platform software.
+ * Copyright © 2017 VillageReach
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation, either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details. You should have received a copy of
+ * the GNU Affero General Public License along with this program. If not, see
+ * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
+ */
+
+package org.openlmis.stockmanagement.service;
+
+import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_CANCELLATION_VALIDATION;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LINE_ITEM_ALREADY_CANCELLED;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LINE_ITEM_BLOCKED_PHYSICAL_INVENTORY;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LINE_ITEM_IS_CANCELLATION;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LINE_ITEM_NOT_CANCELLABLE;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LINE_ITEM_NOT_FOUND;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_NO_LINE_ITEMS;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
+import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
+import org.openlmis.stockmanagement.dto.BlockingTransactionDto;
+import org.openlmis.stockmanagement.dto.StockEventCancellationLineErrorDto;
+import org.openlmis.stockmanagement.exception.StockEventCancellationException;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
+import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
+import org.openlmis.stockmanagement.repository.StockEventLineItemRepository;
+import org.openlmis.stockmanagement.util.Message;
+import org.springframework.stereotype.Service;
+
+/**
+ * Validates that selected line items of an issue/receive stock event may be cancelled. Every
+ * per-line failure is collected so the caller learns about all blocking line items at once.
+ */
+@Service
+@RequiredArgsConstructor
+public class StockEventCancelValidationService {
+
+  static final String CANCEL_TAG = "cancel";
+  static final String PHYSICAL_INVENTORY_TYPE = "PHYSICAL_INVENTORY";
+
+  private final StockEventLineItemRepository stockEventLineItemRepository;
+  private final PhysicalInventoriesRepository physicalInventoriesRepository;
+  private final StockCardLineItemReasonRepository reasonRepository;
+
+  /**
+   * Validates that the selected line items of the given event can be cancelled. Collects every
+   * per-line failure and, if any, throws a single {@link StockEventCancellationException}.
+   *
+   * @param event               the original stock event being cancelled.
+   * @param lineItemIdsToCancel ids of the event's line items selected for cancellation.
+   */
+  public void validate(StockEvent event, Collection<UUID> lineItemIdsToCancel) {
+    if (lineItemIdsToCancel == null || lineItemIdsToCancel.isEmpty()) {
+      throw new ValidationMessageException(new Message(ERROR_EVENT_NO_LINE_ITEMS, event.getId()));
+    }
+
+    List<StockEventLineItem> selected = resolveSelectedLineItems(event, lineItemIdsToCancel);
+    Set<UUID> alreadyCancelledIds = findAlreadyCancelledIds(lineItemIdsToCancel);
+    Set<UUID> cancelReasonIds = findCancelReasonIds(selected);
+
+    List<StockEventCancellationLineErrorDto> errors = new ArrayList<>();
+    for (StockEventLineItem lineItem : selected) {
+      StockEventCancellationLineErrorDto error =
+          validateLineItem(event, lineItem, alreadyCancelledIds, cancelReasonIds);
+      if (error != null) {
+        errors.add(error);
+      }
+    }
+
+    if (!errors.isEmpty()) {
+      throw new StockEventCancellationException(ERROR_EVENT_CANCELLATION_VALIDATION, errors);
+    }
+  }
+
+  private StockEventCancellationLineErrorDto validateLineItem(StockEvent event,
+      StockEventLineItem lineItem, Set<UUID> alreadyCancelledIds, Set<UUID> cancelReasonIds) {
+    if (isCancellationReason(lineItem, cancelReasonIds)) {
+      return lineError(lineItem, ERROR_EVENT_LINE_ITEM_IS_CANCELLATION, null);
+    }
+    if (!isIssueOrReceive(lineItem)) {
+      return lineError(lineItem, ERROR_EVENT_LINE_ITEM_NOT_CANCELLABLE, null);
+    }
+    if (alreadyCancelledIds.contains(lineItem.getId())) {
+      return lineError(lineItem, ERROR_EVENT_LINE_ITEM_ALREADY_CANCELLED, null);
+    }
+    List<BlockingTransactionDto> blocking = findBlockingInventories(event, lineItem);
+    if (!blocking.isEmpty()) {
+      return lineError(lineItem, ERROR_EVENT_LINE_ITEM_BLOCKED_PHYSICAL_INVENTORY, blocking);
+    }
+    return null;
+  }
+
+  private List<StockEventLineItem> resolveSelectedLineItems(StockEvent event,
+      Collection<UUID> lineItemIdsToCancel) {
+    Map<UUID, StockEventLineItem> byId = event.getLineItems().stream()
+        .collect(toMap(StockEventLineItem::getId, lineItem -> lineItem));
+    List<StockEventLineItem> selected = new ArrayList<>();
+    for (UUID id : lineItemIdsToCancel) {
+      StockEventLineItem lineItem = byId.get(id);
+      if (lineItem == null) {
+        throw new ValidationMessageException(
+            new Message(ERROR_EVENT_LINE_ITEM_NOT_FOUND, id, event.getId()));
+      }
+      selected.add(lineItem);
+    }
+    return selected;
+  }
+
+  private Set<UUID> findAlreadyCancelledIds(Collection<UUID> lineItemIdsToCancel) {
+    return stockEventLineItemRepository.findByReversesEventLineItemIdIn(lineItemIdsToCancel)
+        .stream()
+        .map(StockEventLineItem::getReversesEventLineItemId)
+        .collect(toSet());
+  }
+
+  private Set<UUID> findCancelReasonIds(List<StockEventLineItem> lineItems) {
+    Set<UUID> reasonIds = lineItems.stream()
+        .map(StockEventLineItem::getReasonId)
+        .filter(Objects::nonNull)
+        .collect(toSet());
+    if (reasonIds.isEmpty()) {
+      return emptySet();
+    }
+    return reasonRepository.findByIdIn(reasonIds).stream()
+        .filter(reason -> reason.getTags().contains(CANCEL_TAG))
+        .map(StockCardLineItemReason::getId)
+        .collect(toSet());
+  }
+
+  private boolean isCancellationReason(StockEventLineItem lineItem, Set<UUID> cancelReasonIds) {
+    return lineItem.getReasonId() != null && cancelReasonIds.contains(lineItem.getReasonId());
+  }
+
+  private boolean isIssueOrReceive(StockEventLineItem lineItem) {
+    return lineItem.getSourceId() != null || lineItem.getDestinationId() != null;
+  }
+
+  private List<BlockingTransactionDto> findBlockingInventories(StockEvent event,
+      StockEventLineItem lineItem) {
+    List<PhysicalInventory> inventories = physicalInventoriesRepository.findSubmittedAfter(
+        event.getProgramId(), event.getFacilityId(), lineItem.getOrderableId(),
+        lineItem.getLotId(), lineItem.getOccurredDate());
+    return inventories.stream()
+        .map(inventory -> new BlockingTransactionDto(
+            PHYSICAL_INVENTORY_TYPE, inventory.getOccurredDate(), inventory.getDocumentNumber()))
+        .collect(toList());
+  }
+
+  private StockEventCancellationLineErrorDto lineError(StockEventLineItem lineItem,
+      String messageKey, List<BlockingTransactionDto> blockingTransactions) {
+    return new StockEventCancellationLineErrorDto(
+        lineItem.getId(), messageKey, null, blockingTransactions);
+  }
+}
