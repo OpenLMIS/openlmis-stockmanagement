@@ -15,16 +15,20 @@
 
 package org.openlmis.stockmanagement.errorhandling;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_CANCELLATION_CONCURRENT_MODIFICATION;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_TAGS_INVALID;
 
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.PersistenceException;
+import org.openlmis.stockmanagement.dto.StockEventCancellationErrorDto;
+import org.openlmis.stockmanagement.dto.StockEventCancellationLineErrorDto;
 import org.openlmis.stockmanagement.exception.AuthenticationException;
 import org.openlmis.stockmanagement.exception.JasperReportViewException;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
+import org.openlmis.stockmanagement.exception.StockEventCancellationException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.service.referencedata.DataRetrievalException;
 import org.openlmis.stockmanagement.util.ErrorResponse;
@@ -42,6 +46,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ControllerAdvice
 public class GlobalErrorHandling extends AbstractErrorHandling {
   private static final Map<String, String> SQL_STATES = new HashMap<>();
+  private static final String UNIQUE_VIOLATION = "23505";
+  private static final String REVERSES_UNIQUE_INDEX =
+      "stock_event_line_items_reverses_unique_idx";
 
   static {
     // https://www.postgresql.org/docs/9.6/static/errcodes-appendix.html
@@ -111,6 +118,24 @@ public class GlobalErrorHandling extends AbstractErrorHandling {
   }
 
   /**
+   * Handles cancellation validation failures and returns status 400 with the per-line errors.
+   *
+   * @param ex the StockEventCancellationException to handle
+   * @return the error response listing which line items are blocking the cancellation and why
+   */
+  @ExceptionHandler(StockEventCancellationException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public StockEventCancellationErrorDto handleStockEventCancellationException(
+      StockEventCancellationException ex) {
+    String message = getLocalizedMessage(ex.asMessage()).getMessage();
+    for (StockEventCancellationLineErrorDto lineError : ex.getLineErrors()) {
+      lineError.setMessage(getLocalizedMessage(lineError.getMessageKey()).getMessage());
+    }
+    return new StockEventCancellationErrorDto(ex.getMessageKey(), message, ex.getLineErrors());
+  }
+
+  /**
    * Handles Jpa System Exception.
    * @param ex the Jpa System Exception
    * @return the user-oriented error message.
@@ -131,9 +156,19 @@ public class GlobalErrorHandling extends AbstractErrorHandling {
         if (null != message) {
           return getLocalizedMessage(message);
         }
+
+        if (isReversesUniqueViolation(sql)) {
+          return getLocalizedMessage(ERROR_EVENT_CANCELLATION_CONCURRENT_MODIFICATION);
+        }
       }
     }
 
     return getLocalizedMessage(ex.getMessage());
+  }
+
+  private boolean isReversesUniqueViolation(SQLException sql) {
+    return UNIQUE_VIOLATION.equals(sql.getSQLState())
+        && null != sql.getMessage()
+        && sql.getMessage().contains(REVERSES_UNIQUE_INDEX);
   }
 }

@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.openlmis.stockmanagement.domain.event.EventOrigin;
+import org.openlmis.stockmanagement.dto.StockEventCancelDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventHistoryDto;
 import org.openlmis.stockmanagement.dto.StockEventLineDetailDto;
@@ -33,6 +34,7 @@ import org.openlmis.stockmanagement.i18n.MessageKeys;
 import org.openlmis.stockmanagement.repository.custom.StockEventSearchParams;
 import org.openlmis.stockmanagement.service.HomeFacilityPermissionService;
 import org.openlmis.stockmanagement.service.PermissionService;
+import org.openlmis.stockmanagement.service.StockEventCancelService;
 import org.openlmis.stockmanagement.service.StockEventProcessor;
 import org.openlmis.stockmanagement.service.StockEventsService;
 import org.openlmis.stockmanagement.util.Message;
@@ -76,6 +78,9 @@ public class StockEventsController extends BaseController {
   @Autowired
   private StockEventsService stockEventsService;
 
+  @Autowired
+  private StockEventCancelService stockEventCancelService;
+
   /**
    * Create stock event.
    *
@@ -97,6 +102,24 @@ public class StockEventsController extends BaseController {
     ResponseEntity<UUID> response = new ResponseEntity<>(createdEventId, CREATED);
 
     return stopProfiler(profiler, response);
+  }
+
+  /**
+   * Cancel selected line items of an issue/receive stock event. Builds and persists an adjustment
+   * stock event that reverses them; the original event is left intact.
+   *
+   * @param id      the stock event whose line items are cancelled.
+   * @param request the line items to cancel with their cancellation reasons and the signature.
+   * @return the created cancellation stock event's id.
+   */
+  @RequestMapping(value = "stockEvents/{id}/cancel", method = POST)
+  public ResponseEntity<UUID> cancelStockEvent(
+      @PathVariable UUID id, @RequestBody StockEventCancelDto request) {
+    LOGGER.debug("Try to cancel stock event line items");
+
+    UUID cancellationEventId = stockEventCancelService.cancel(id, request);
+
+    return new ResponseEntity<>(cancellationEventId, CREATED);
   }
 
   /**

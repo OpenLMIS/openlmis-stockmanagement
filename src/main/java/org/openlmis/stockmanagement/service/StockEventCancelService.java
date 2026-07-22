@@ -60,6 +60,7 @@ public class StockEventCancelService {
   private final StockEventCancelValidationService cancelValidationService;
   private final StockCardLineItemReasonRepository reasonRepository;
   private final StockEventProcessor stockEventProcessor;
+  private final PermissionService permissionService;
 
   /**
    * Cancels the selected line items of the given event.
@@ -72,6 +73,8 @@ public class StockEventCancelService {
     StockEvent event = stockEventsRepository.findById(eventId)
         .orElseThrow(() -> new ResourceNotFoundException(
             new Message(ERROR_STOCK_EVENT_NOT_FOUND, eventId)));
+
+    permissionService.canCancelStockEvent(event.getProgramId(), event.getFacilityId());
 
     Map<UUID, StockEventCancelLineItemDto> requestByLineId = request.getLineItems().stream()
         .collect(toMap(StockEventCancelLineItemDto::getStockEventLineItemId, identity()));

@@ -23,8 +23,10 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
 import static org.openlmis.stockmanagement.service.StockEventCancelValidationService.CANCEL_TAG;
 
 import java.time.LocalDate;
@@ -45,10 +47,12 @@ import org.openlmis.stockmanagement.dto.StockEventCancelDto;
 import org.openlmis.stockmanagement.dto.StockEventCancelLineItemDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
+import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
+import org.openlmis.stockmanagement.util.Message;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StockEventCancelServiceTest {
@@ -64,6 +68,9 @@ public class StockEventCancelServiceTest {
 
   @Mock
   private StockEventProcessor stockEventProcessor;
+
+  @Mock
+  private PermissionService permissionService;
 
   @InjectMocks
   private StockEventCancelService service;
@@ -139,6 +146,17 @@ public class StockEventCancelServiceTest {
     when(stockEventsRepository.findById(eventId)).thenReturn(Optional.of(event));
 
     service.cancel(eventId, requestFor(original.getId(), null));
+  }
+
+  @Test(expected = PermissionMessageException.class)
+  public void shouldThrowWhenUserHasNoCancelPermission() {
+    StockEvent event = eventWithIssueLine();
+    StockEventLineItem original = event.getLineItems().get(0);
+    when(stockEventsRepository.findById(eventId)).thenReturn(Optional.of(event));
+    doThrow(new PermissionMessageException(new Message(ERROR_NO_FOLLOWING_PERMISSION)))
+        .when(permissionService).canCancelStockEvent(any(), any());
+
+    service.cancel(eventId, requestFor(original.getId(), UUID.randomUUID()));
   }
 
   private StockEvent eventWithIssueLine() {
