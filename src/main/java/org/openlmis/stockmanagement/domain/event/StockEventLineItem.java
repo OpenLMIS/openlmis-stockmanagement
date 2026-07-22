@@ -73,6 +73,10 @@ public class StockEventLineItem extends BaseEntity
   private UUID destinationId;
   private String destinationFreeText;
 
+  // For a cancellation (ADJUSTMENT) line item, points to the original Issue/Receive
+  // StockEventLineItem it reverses. Null for regular movements.
+  private UUID reversesEventLineItemId;
+
   @ManyToOne()
   @JoinColumn(nullable = false)
   private StockEvent stockEvent;

@@ -19,6 +19,7 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static java.util.Collections.emptyList;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -52,13 +53,17 @@ public class StockEventLineItemDto implements IdentifiableByOrderableLot, VvmApp
   private String sourceFreeText;
   private UUID destinationId;
   private String destinationFreeText;
+  // Set server-side by the cancellation flow; ignored if provided by clients on the create path.
+  @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+  private UUID reversesEventLineItemId;
   private List<StockEventAdjustmentDto> stockAdjustments;
 
   StockEventLineItem toEventLineItem() {
     // event is set in StockEventDto.toEvent()
     return new StockEventLineItem(
         orderableId, lotId, quantity, extraData, occurredDate, reasonId, reasonFreeText, sourceId,
-        sourceFreeText, destinationId, destinationFreeText, null, stockAdjustments()
+        sourceFreeText, destinationId, destinationFreeText, reversesEventLineItemId, null,
+        stockAdjustments()
     );
   }
 

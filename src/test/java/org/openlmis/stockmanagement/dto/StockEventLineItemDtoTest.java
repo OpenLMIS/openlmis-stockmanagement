@@ -18,9 +18,11 @@ package org.openlmis.stockmanagement.dto;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+import java.util.UUID;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
+import org.openlmis.stockmanagement.testutils.StockEventLineItemDtoDataBuilder;
 
 public class StockEventLineItemDtoTest {
   @Test
@@ -41,6 +43,21 @@ public class StockEventLineItemDtoTest {
     assertThat(lineItem.getDestinationId(), is(lineItemDto.getDestinationId()));
     assertThat(lineItem.getSourceFreeText(), is(lineItemDto.getSourceFreeText()));
     assertThat(lineItem.getDestinationFreeText(), is(lineItemDto.getDestinationFreeText()));
+  }
+
+  @Test
+  public void shouldConvertReversesEventLineItemIdFromDtoToJpaModel() throws Exception {
+    //given
+    UUID reversedLineItemId = UUID.randomUUID();
+    StockEventLineItemDto lineItemDto = new StockEventLineItemDtoDataBuilder()
+        .withReversesEventLineItemId(reversedLineItemId)
+        .build();
+
+    //when
+    StockEventLineItem lineItem = lineItemDto.toEventLineItem();
+
+    //then
+    assertThat(lineItem.getReversesEventLineItemId(), is(reversedLineItemId));
   }
 
 }
