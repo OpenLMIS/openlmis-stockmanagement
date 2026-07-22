@@ -1,5 +1,6 @@
 Upcoming Version (WIP)
 ==================
+* [SELV3-858](https://openlmis.atlassian.net/browse/SELV3-858): Added `POST /api/stockEvents/{id}/cancel` endpoint to cancel selected issue/receive line items. Introduces the `STOCK_EVENTS_CANCEL` right, a `reverseseventlineitemid` column on stock event line items, and cancel-tagged adjustment reasons. Cancellation creates a reversing adjustment stock event and recalculates stock on hand; the original event is preserved.
 * [OLMIS-8198](https://openlmis.atlassian.net/browse/OLMIS-8198): Add packs support to stock card and stock card summary reports.
 * [SELV3-849](https://openlmis.atlassian.net/browse/SELV3-849) Unified StockCardLineItem ordering on retrieval
 * [SELV3-842](https://openlmis.atlassian.net/browse/SELV3-842) Added `GET /api/stockEvents/{id}` endpoint

@@ -47,6 +47,8 @@ schemas:
   - stockCardTemplate: !include schemas/stockCardTemplate.json
   - stockEventDto: !include schemas/stockEventDto.json
   - stockEventLineItemDto: !include schemas/stockEventLineItemDto.json
+  - stockEventCancelDto: !include schemas/stockEventCancelDto.json
+  - stockEventCancellationError: !include schemas/stockEventCancellationError.json
   - stockEventExternalDto: !include schemas/stockEventExternalDto.json
   - stockEventLineItemExternalDto: !include schemas/stockEventLineItemExternalDto.json
   - stockEventHistoryDtoPage: !include schemas/stockEventHistoryDto.json
@@ -338,6 +340,34 @@ traits:
               body:
                 application/json:
                   schema: localizedMessage
+        /cancel:
+          post:
+            is: [ secured ]
+            description: Cancel selected issue/receive line items of the stock event. Requires the STOCK_EVENTS_CANCEL right for the event's facility and program. Creates a reversing adjustment stock event and recalculates stock on hand.
+            body:
+              application/json:
+                schema: stockEventCancelDto
+            responses:
+              201:
+                description: The cancellation stock event has been created.
+                body:
+                  application/json:
+                    schema: uuid
+              400:
+                description: One or more line items cannot be cancelled.
+                body:
+                  application/json:
+                    schema: stockEventCancellationError
+              403:
+                description: User does not have the STOCK_EVENTS_CANCEL permission for the facility and program.
+                body:
+                  application/json:
+                    schema: localizedMessage
+              404:
+                description: Stock event with the given id does not exist.
+                body:
+                  application/json:
+                    schema: localizedMessage
         /lineItems:
           get:
             is: [ secured, paginated ]
