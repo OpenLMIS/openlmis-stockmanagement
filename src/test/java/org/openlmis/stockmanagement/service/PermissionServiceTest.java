@@ -34,6 +34,7 @@ import static org.openlmis.stockmanagement.service.PermissionService.STOCK_ADJUS
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARDS_VIEW;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARD_TEMPLATES_MANAGE;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_DESTINATIONS_MANAGE;
+import static org.openlmis.stockmanagement.service.PermissionService.STOCK_EVENTS_CANCEL;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_INVENTORIES_EDIT;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_ORGANIZATIONS_MANAGE;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_SOURCES_MANAGE;
@@ -195,6 +196,23 @@ public class PermissionServiceTest {
   }
 
   @Test
+  public void canCancelStockEvent() {
+    hasRight(rightId, programId, facilityId, true);
+
+    permissionService.canCancelStockEvent(programId, facilityId);
+
+    verifyUserRight(STOCK_EVENTS_CANCEL, rightId, programId, facilityId);
+  }
+
+  @Test
+  public void cannotCancelStockEvent() {
+    expectException(STOCK_EVENTS_CANCEL);
+    hasRight(rightId, programId, facilityId, false);
+
+    permissionService.canCancelStockEvent(programId, facilityId);
+  }
+
+  @Test
   public void canViewStockCard() {
     hasRight(rightId, programId, facilityId, true);
 
@@ -303,6 +321,7 @@ public class PermissionServiceTest {
     permissionService.canCreateStockCardTemplate();
     permissionService.canEditPhysicalInventory(programId, facilityId);
     permissionService.canAdjustStock(programId, facilityId);
+    permissionService.canCancelStockEvent(programId, facilityId);
     permissionService.canViewStockCard(programId, facilityId);
     permissionService.canManageStockSources();
     permissionService.canManageStockDestinations();
