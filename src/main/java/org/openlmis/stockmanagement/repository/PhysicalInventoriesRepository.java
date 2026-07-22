@@ -26,24 +26,30 @@ import org.springframework.data.repository.query.Param;
 public interface PhysicalInventoriesRepository
     extends PagingAndSortingRepository<PhysicalInventory, UUID> {
 
+  String PROGRAM_ID = "programId";
+  String FACILITY_ID = "facilityId";
+  String ORDERABLE_ID = "orderableId";
+  String OCCURRED_DATE = "occurredDate";
+
   List<PhysicalInventory> findByProgramIdAndFacilityIdAndIsDraft(
-      @Param("programId") UUID programId,
-      @Param("facilityId") UUID facilityId,
+      @Param(PROGRAM_ID) UUID programId,
+      @Param(FACILITY_ID) UUID facilityId,
       @Param("isDraft") boolean isDraft);
 
   List<PhysicalInventory> findByProgramIdAndFacilityId(
-      @Param("programId") UUID programId,
-      @Param("facilityId") UUID facilityId);
+      @Param(PROGRAM_ID) UUID programId,
+      @Param(FACILITY_ID) UUID facilityId);
 
   /**
    * Finds submitted physical inventories for the given facility, program, orderable and lot that
    * occurred after the given date. Used to block cancellation of a movement whose product and lot
-   * had a physical inventory recorded after it.
+   * had a physical inventory recorded after it. Kept separate from the no-lot variant so the
+   * {@code lotId} parameter is never bound as an untyped null (which Postgres rejects).
    *
    * @param programId    program id.
    * @param facilityId   facility id.
    * @param orderableId  orderable id.
-   * @param lotId        lot id, may be null.
+   * @param lotId        lot id, must not be null.
    * @param occurredDate the movement's occurred date; inventories strictly after it are returned.
    * @return the blocking submitted physical inventories.
    */
@@ -54,11 +60,34 @@ public interface PhysicalInventoriesRepository
       + " AND pi.isDraft = false"
       + " AND pi.occurredDate > :occurredDate"
       + " AND li.orderableId = :orderableId"
-      + " AND ((:lotId IS NULL AND li.lotId IS NULL) OR li.lotId = :lotId)")
-  List<PhysicalInventory> findSubmittedAfter(
-      @Param("programId") UUID programId,
-      @Param("facilityId") UUID facilityId,
-      @Param("orderableId") UUID orderableId,
+      + " AND li.lotId = :lotId")
+  List<PhysicalInventory> findSubmittedAfterForOrderableAndLot(
+      @Param(PROGRAM_ID) UUID programId,
+      @Param(FACILITY_ID) UUID facilityId,
+      @Param(ORDERABLE_ID) UUID orderableId,
       @Param("lotId") UUID lotId,
-      @Param("occurredDate") LocalDate occurredDate);
+      @Param(OCCURRED_DATE) LocalDate occurredDate);
+
+  /**
+   * Same as {@link #findSubmittedAfterForOrderableAndLot} but for line items without a lot.
+   *
+   * @param programId    program id.
+   * @param facilityId   facility id.
+   * @param orderableId  orderable id.
+   * @param occurredDate the movement's occurred date; inventories strictly after it are returned.
+   * @return the blocking submitted physical inventories.
+   */
+  @Query("SELECT DISTINCT pi FROM PhysicalInventory pi"
+      + " JOIN pi.lineItems li"
+      + " WHERE pi.programId = :programId"
+      + " AND pi.facilityId = :facilityId"
+      + " AND pi.isDraft = false"
+      + " AND pi.occurredDate > :occurredDate"
+      + " AND li.orderableId = :orderableId"
+      + " AND li.lotId IS NULL")
+  List<PhysicalInventory> findSubmittedAfterForOrderableWithoutLot(
+      @Param(PROGRAM_ID) UUID programId,
+      @Param(FACILITY_ID) UUID facilityId,
+      @Param(ORDERABLE_ID) UUID orderableId,
+      @Param(OCCURRED_DATE) LocalDate occurredDate);
 }

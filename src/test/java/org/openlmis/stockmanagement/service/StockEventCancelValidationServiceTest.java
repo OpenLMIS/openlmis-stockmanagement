@@ -77,7 +77,8 @@ public class StockEventCancelValidationServiceTest {
     StockEvent event = eventWith(lineItem);
     when(stockEventLineItemRepository.findByReversesEventLineItemIdIn(anyCollection()))
         .thenReturn(emptyList());
-    when(physicalInventoriesRepository.findSubmittedAfter(any(), any(), any(), any(), any()))
+    when(physicalInventoriesRepository.findSubmittedAfterForOrderableAndLot(
+        any(), any(), any(), any(), any()))
         .thenReturn(emptyList());
 
     service.validate(event, singletonList(lineItem.getId()));
@@ -122,7 +123,8 @@ public class StockEventCancelValidationServiceTest {
     inventory.setDocumentNumber("PI-1");
     when(stockEventLineItemRepository.findByReversesEventLineItemIdIn(anyCollection()))
         .thenReturn(emptyList());
-    when(physicalInventoriesRepository.findSubmittedAfter(any(), any(), any(), any(), any()))
+    when(physicalInventoriesRepository.findSubmittedAfterForOrderableAndLot(
+        any(), any(), any(), any(), any()))
         .thenReturn(singletonList(inventory));
 
     StockEventCancellationLineErrorDto error =
@@ -132,6 +134,29 @@ public class StockEventCancelValidationServiceTest {
     assertEquals(1, error.getBlockingTransactions().size());
     assertEquals(PHYSICAL_INVENTORY_TYPE, error.getBlockingTransactions().get(0).getType());
     assertEquals("PI-1", error.getBlockingTransactions().get(0).getDocumentNumber());
+  }
+
+  @Test
+  public void shouldUseNoLotQueryWhenLineItemHasNoLot() {
+    final StockEventLineItem lineItem = StockEventLineItem.builder()
+        .orderableId(UUID.randomUUID())
+        .destinationId(UUID.randomUUID())
+        .occurredDate(LocalDate.now())
+        .build();
+    lineItem.setId(UUID.randomUUID());
+    final StockEvent event = eventWith(lineItem);
+    PhysicalInventory inventory = new PhysicalInventory();
+    inventory.setOccurredDate(LocalDate.now());
+    when(stockEventLineItemRepository.findByReversesEventLineItemIdIn(anyCollection()))
+        .thenReturn(emptyList());
+    when(physicalInventoriesRepository.findSubmittedAfterForOrderableWithoutLot(
+        any(), any(), any(), any()))
+        .thenReturn(singletonList(inventory));
+
+    StockEventCancellationLineErrorDto error =
+        assertSingleLineError(event, lineItem.getId());
+
+    assertEquals(ERROR_EVENT_LINE_ITEM_BLOCKED_PHYSICAL_INVENTORY, error.getMessageKey());
   }
 
   @Test
@@ -163,7 +188,8 @@ public class StockEventCancelValidationServiceTest {
     inventory.setOccurredDate(LocalDate.now());
     when(stockEventLineItemRepository.findByReversesEventLineItemIdIn(anyCollection()))
         .thenReturn(singletonList(cancellation));
-    when(physicalInventoriesRepository.findSubmittedAfter(any(), any(), any(), any(), any()))
+    when(physicalInventoriesRepository.findSubmittedAfterForOrderableAndLot(
+        any(), any(), any(), any(), any()))
         .thenReturn(singletonList(inventory));
 
     try {

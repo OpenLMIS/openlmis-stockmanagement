@@ -159,9 +159,13 @@ public class StockEventCancelValidationService {
 
   private List<BlockingTransactionDto> findBlockingInventories(StockEvent event,
       StockEventLineItem lineItem) {
-    List<PhysicalInventory> inventories = physicalInventoriesRepository.findSubmittedAfter(
-        event.getProgramId(), event.getFacilityId(), lineItem.getOrderableId(),
-        lineItem.getLotId(), lineItem.getOccurredDate());
+    List<PhysicalInventory> inventories = lineItem.getLotId() == null
+        ? physicalInventoriesRepository.findSubmittedAfterForOrderableWithoutLot(
+            event.getProgramId(), event.getFacilityId(), lineItem.getOrderableId(),
+            lineItem.getOccurredDate())
+        : physicalInventoriesRepository.findSubmittedAfterForOrderableAndLot(
+            event.getProgramId(), event.getFacilityId(), lineItem.getOrderableId(),
+            lineItem.getLotId(), lineItem.getOccurredDate());
     return inventories.stream()
         .map(inventory -> new BlockingTransactionDto(
             PHYSICAL_INVENTORY_TYPE, inventory.getOccurredDate(), inventory.getDocumentNumber()))
