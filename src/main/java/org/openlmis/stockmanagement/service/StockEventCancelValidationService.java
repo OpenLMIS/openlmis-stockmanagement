@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -77,16 +78,16 @@ public class StockEventCancelValidationService {
     }
 
     List<StockEventLineItem> selected = resolveSelectedLineItems(event, lineItemIdsToCancel);
-    Set<UUID> alreadyCancelledIds = findAlreadyCancelledIds(lineItemIdsToCancel);
-    Set<UUID> cancelReasonIds = findCancelReasonIds(selected);
+    List<CancellationRule> rules = cancellationRules(event,
+        findAlreadyCancelledIds(lineItemIdsToCancel), findCancelReasonIds(selected));
 
     List<StockEventCancellationLineErrorDto> errors = new ArrayList<>();
     for (StockEventLineItem lineItem : selected) {
-      StockEventCancellationLineErrorDto error =
-          validateLineItem(event, lineItem, alreadyCancelledIds, cancelReasonIds);
-      if (error != null) {
-        errors.add(error);
-      }
+      rules.stream()
+          .map(rule -> rule.check(lineItem))
+          .filter(Objects::nonNull)
+          .findFirst()
+          .ifPresent(errors::add);
     }
 
     if (!errors.isEmpty()) {
@@ -94,22 +95,26 @@ public class StockEventCancelValidationService {
     }
   }
 
-  private StockEventCancellationLineErrorDto validateLineItem(StockEvent event,
-      StockEventLineItem lineItem, Set<UUID> alreadyCancelledIds, Set<UUID> cancelReasonIds) {
-    if (isCancellationReason(lineItem, cancelReasonIds)) {
-      return lineError(lineItem, ERROR_EVENT_LINE_ITEM_IS_CANCELLATION, null);
-    }
-    if (!lineItem.isMovement()) {
-      return lineError(lineItem, ERROR_EVENT_LINE_ITEM_NOT_CANCELLABLE, null);
-    }
-    if (alreadyCancelledIds.contains(lineItem.getId())) {
-      return lineError(lineItem, ERROR_EVENT_LINE_ITEM_ALREADY_CANCELLED, null);
-    }
+  // The ordered checks a line item must pass to be cancellable; the first failing one is reported.
+  // A new cancellation constraint is added here rather than by editing the validation loop.
+  private List<CancellationRule> cancellationRules(StockEvent event,
+      Set<UUID> alreadyCancelledIds, Set<UUID> cancelReasonIds) {
+    return asList(
+        lineItem -> isCancellationReason(lineItem, cancelReasonIds)
+            ? lineError(lineItem, ERROR_EVENT_LINE_ITEM_IS_CANCELLATION, null) : null,
+        lineItem -> !lineItem.isMovement()
+            ? lineError(lineItem, ERROR_EVENT_LINE_ITEM_NOT_CANCELLABLE, null) : null,
+        lineItem -> alreadyCancelledIds.contains(lineItem.getId())
+            ? lineError(lineItem, ERROR_EVENT_LINE_ITEM_ALREADY_CANCELLED, null) : null,
+        lineItem -> blockedByPhysicalInventory(event, lineItem));
+  }
+
+  private StockEventCancellationLineErrorDto blockedByPhysicalInventory(StockEvent event,
+      StockEventLineItem lineItem) {
     List<BlockingTransactionDto> blocking = findBlockingInventories(event, lineItem);
-    if (!blocking.isEmpty()) {
-      return lineError(lineItem, ERROR_EVENT_LINE_ITEM_BLOCKED_PHYSICAL_INVENTORY, blocking);
-    }
-    return null;
+    return blocking.isEmpty()
+        ? null
+        : lineError(lineItem, ERROR_EVENT_LINE_ITEM_BLOCKED_PHYSICAL_INVENTORY, blocking);
   }
 
   private List<StockEventLineItem> resolveSelectedLineItems(StockEvent event,
@@ -172,5 +177,11 @@ public class StockEventCancelValidationService {
       String messageKey, List<BlockingTransactionDto> blockingTransactions) {
     return new StockEventCancellationLineErrorDto(
         lineItem.getId(), messageKey, null, blockingTransactions);
+  }
+
+  // A single per-line cancellation check; returns an error, or null when the line passes.
+  @FunctionalInterface
+  private interface CancellationRule {
+    StockEventCancellationLineErrorDto check(StockEventLineItem lineItem);
   }
 }
