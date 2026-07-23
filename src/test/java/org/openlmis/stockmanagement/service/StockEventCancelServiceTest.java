@@ -17,17 +17,18 @@ package org.openlmis.stockmanagement.service;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_NO_FOLLOWING_PERMISSION;
-import static org.openlmis.stockmanagement.service.StockEventCancelValidationService.CANCEL_TAG;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -50,7 +51,6 @@ import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.util.Message;
 
@@ -64,7 +64,7 @@ public class StockEventCancelServiceTest {
   private StockEventCancelValidationService cancelValidationService;
 
   @Mock
-  private StockCardLineItemReasonRepository reasonRepository;
+  private CancellationReasonResolver reasonResolver;
 
   @Mock
   private StockEventProcessor stockEventProcessor;
@@ -83,12 +83,13 @@ public class StockEventCancelServiceTest {
   public void shouldBuildAndProcessCancellationEvent() {
     StockEvent event = eventWithIssueLine();
     StockEventLineItem original = event.getLineItems().get(0);
-    StockCardLineItemReason reason = reason(ReasonType.CREDIT, CANCEL_TAG);
+    StockCardLineItemReason reason = reason(ReasonType.CREDIT);
     StockEventCancelDto request = requestFor(original.getId(), reason.getId());
     UUID newEventId = UUID.randomUUID();
     ArgumentCaptor<StockEventDto> captor = ArgumentCaptor.forClass(StockEventDto.class);
     when(stockEventsRepository.findById(eventId)).thenReturn(Optional.of(event));
-    when(reasonRepository.findByIdIn(anyCollection())).thenReturn(singletonList(reason));
+    when(reasonResolver.resolve(anyCollection(), anyMap()))
+        .thenReturn(singletonMap(original.getId(), reason));
     when(stockEventProcessor.process(captor.capture())).thenReturn(newEventId);
 
     UUID result = service.cancel(eventId, request);
@@ -118,34 +119,17 @@ public class StockEventCancelServiceTest {
   }
 
   @Test(expected = ValidationMessageException.class)
-  public void shouldThrowWhenReasonIsNotCancelTagged() {
+  public void shouldThrowWhenLineItemSelectedMoreThanOnce() {
     StockEvent event = eventWithIssueLine();
-    StockEventLineItem original = event.getLineItems().get(0);
-    StockCardLineItemReason reason = reason(ReasonType.CREDIT);
-    when(stockEventsRepository.findById(eventId)).thenReturn(Optional.of(event));
-    when(reasonRepository.findByIdIn(anyCollection())).thenReturn(singletonList(reason));
-
-    service.cancel(eventId, requestFor(original.getId(), reason.getId()));
-  }
-
-  @Test(expected = ValidationMessageException.class)
-  public void shouldThrowWhenReasonTypeDoesNotCounterMovement() {
-    StockEvent event = eventWithIssueLine();
-    StockEventLineItem original = event.getLineItems().get(0);
-    StockCardLineItemReason reason = reason(ReasonType.DEBIT, CANCEL_TAG);
-    when(stockEventsRepository.findById(eventId)).thenReturn(Optional.of(event));
-    when(reasonRepository.findByIdIn(anyCollection())).thenReturn(singletonList(reason));
-
-    service.cancel(eventId, requestFor(original.getId(), reason.getId()));
-  }
-
-  @Test(expected = ValidationMessageException.class)
-  public void shouldThrowWhenReasonIsMissing() {
-    StockEvent event = eventWithIssueLine();
-    StockEventLineItem original = event.getLineItems().get(0);
+    UUID lineId = event.getLineItems().get(0).getId();
     when(stockEventsRepository.findById(eventId)).thenReturn(Optional.of(event));
 
-    service.cancel(eventId, requestFor(original.getId(), null));
+    StockEventCancelLineItemDto first =
+        new StockEventCancelLineItemDto(lineId, UUID.randomUUID(), null);
+    StockEventCancelLineItemDto duplicate =
+        new StockEventCancelLineItemDto(lineId, UUID.randomUUID(), null);
+
+    service.cancel(eventId, new StockEventCancelDto("signature", asList(first, duplicate)));
   }
 
   @Test(expected = PermissionMessageException.class)
@@ -176,12 +160,11 @@ public class StockEventCancelServiceTest {
     return event;
   }
 
-  private StockCardLineItemReason reason(ReasonType type, String... tags) {
+  private StockCardLineItemReason reason(ReasonType type) {
     StockCardLineItemReason reason = StockCardLineItemReason.builder()
         .name("Cancellation " + type)
         .reasonType(type)
         .reasonCategory(ReasonCategory.ADJUSTMENT)
-        .tags(asList(tags))
         .build();
     reason.setId(UUID.randomUUID());
     return reason;

@@ -15,21 +15,16 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static java.util.Collections.emptyMap;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_CANCELLATION_REASON_INVALID;
-import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_CANCELLATION_REASON_REQUIRED;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LINE_ITEM_DUPLICATE;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_STOCK_EVENT_NOT_FOUND;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
@@ -41,7 +36,6 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
-import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.stereotype.Service;
@@ -58,7 +52,7 @@ public class StockEventCancelService {
 
   private final StockEventsRepository stockEventsRepository;
   private final StockEventCancelValidationService cancelValidationService;
-  private final StockCardLineItemReasonRepository reasonRepository;
+  private final CancellationReasonResolver reasonResolver;
   private final StockEventProcessor stockEventProcessor;
   private final PermissionService permissionService;
 
@@ -76,8 +70,7 @@ public class StockEventCancelService {
 
     permissionService.canCancelStockEvent(event.getProgramId(), event.getFacilityId());
 
-    Map<UUID, StockEventCancelLineItemDto> requestByLineId = request.getLineItems().stream()
-        .collect(toMap(StockEventCancelLineItemDto::getStockEventLineItemId, identity()));
+    Map<UUID, StockEventCancelLineItemDto> requestByLineId = indexByLineItemId(request);
 
     cancelValidationService.validate(event, requestByLineId.keySet());
 
@@ -86,16 +79,29 @@ public class StockEventCancelService {
     return stockEventProcessor.process(cancellation);
   }
 
+  // Indexes the requested line items by id, rejecting a line item selected more than once.
+  private Map<UUID, StockEventCancelLineItemDto> indexByLineItemId(StockEventCancelDto request) {
+    Map<UUID, StockEventCancelLineItemDto> byId = new LinkedHashMap<>();
+    for (StockEventCancelLineItemDto line : request.getLineItems()) {
+      if (byId.putIfAbsent(line.getStockEventLineItemId(), line) != null) {
+        throw new ValidationMessageException(
+            new Message(ERROR_EVENT_LINE_ITEM_DUPLICATE, line.getStockEventLineItemId()));
+      }
+    }
+    return byId;
+  }
+
   private StockEventDto buildCancellationEvent(StockEvent event, String signature,
       Map<UUID, StockEventCancelLineItemDto> requestByLineId) {
     Map<UUID, StockEventLineItem> originalById = event.getLineItems().stream()
         .collect(toMap(StockEventLineItem::getId, identity()));
-    Map<UUID, StockCardLineItemReason> reasonsById = loadReasons(requestByLineId.values());
+    Map<UUID, StockCardLineItemReason> reasonsByLineId =
+        reasonResolver.resolve(requestByLineId.values(), originalById);
 
     List<StockEventLineItemDto> lineItems = new ArrayList<>();
     for (StockEventCancelLineItemDto requested : requestByLineId.values()) {
       StockEventLineItem original = originalById.get(requested.getStockEventLineItemId());
-      StockCardLineItemReason reason = resolveCancelReason(requested, original, reasonsById);
+      StockCardLineItemReason reason = reasonsByLineId.get(requested.getStockEventLineItemId());
       lineItems.add(StockEventLineItemDto.builder()
           .orderableId(original.getOrderableId())
           .lotId(original.getLotId())
@@ -114,43 +120,5 @@ public class StockEventCancelService {
     cancellation.setActive(true);
     cancellation.setLineItems(lineItems);
     return cancellation;
-  }
-
-  private Map<UUID, StockCardLineItemReason> loadReasons(
-      Collection<StockEventCancelLineItemDto> requested) {
-    Set<UUID> reasonIds = requested.stream()
-        .map(StockEventCancelLineItemDto::getReasonId)
-        .filter(Objects::nonNull)
-        .collect(toSet());
-    if (reasonIds.isEmpty()) {
-      return emptyMap();
-    }
-    return reasonRepository.findByIdIn(reasonIds).stream()
-        .collect(toMap(StockCardLineItemReason::getId, identity()));
-  }
-
-  private StockCardLineItemReason resolveCancelReason(StockEventCancelLineItemDto requested,
-      StockEventLineItem original, Map<UUID, StockCardLineItemReason> reasonsById) {
-    UUID reasonId = requested.getReasonId();
-    if (reasonId == null) {
-      throw new ValidationMessageException(
-          new Message(ERROR_EVENT_CANCELLATION_REASON_REQUIRED, original.getId()));
-    }
-    StockCardLineItemReason reason = reasonsById.get(reasonId);
-    if (reason == null
-        || !reason.isAdjustmentReasonCategory()
-        || !reason.getTags().contains(StockEventCancelValidationService.CANCEL_TAG)
-        || !countersMovement(original, reason)) {
-      throw new ValidationMessageException(
-          new Message(ERROR_EVENT_CANCELLATION_REASON_INVALID, reasonId));
-    }
-    return reason;
-  }
-
-  private boolean countersMovement(StockEventLineItem original, StockCardLineItemReason reason) {
-    // an issue (has a destination) is reversed with a credit; a receive (has a source) with a debit
-    return original.isIssue()
-        ? reason.isCreditReasonType()
-        : reason.isDebitReasonType();
   }
 }
