@@ -149,7 +149,7 @@ public class StockEventCancelService {
 
   private boolean countersMovement(StockEventLineItem original, StockCardLineItemReason reason) {
     // an issue (has a destination) is reversed with a credit; a receive (has a source) with a debit
-    return original.getDestinationId() != null
+    return original.isIssue()
         ? reason.isCreditReasonType()
         : reason.isDebitReasonType();
   }

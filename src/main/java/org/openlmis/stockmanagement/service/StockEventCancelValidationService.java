@@ -99,7 +99,7 @@ public class StockEventCancelValidationService {
     if (isCancellationReason(lineItem, cancelReasonIds)) {
       return lineError(lineItem, ERROR_EVENT_LINE_ITEM_IS_CANCELLATION, null);
     }
-    if (!isIssueOrReceive(lineItem)) {
+    if (!lineItem.isMovement()) {
       return lineError(lineItem, ERROR_EVENT_LINE_ITEM_NOT_CANCELLABLE, null);
     }
     if (alreadyCancelledIds.contains(lineItem.getId())) {
@@ -151,10 +151,6 @@ public class StockEventCancelValidationService {
 
   private boolean isCancellationReason(StockEventLineItem lineItem, Set<UUID> cancelReasonIds) {
     return lineItem.getReasonId() != null && cancelReasonIds.contains(lineItem.getReasonId());
-  }
-
-  private boolean isIssueOrReceive(StockEventLineItem lineItem) {
-    return lineItem.getSourceId() != null || lineItem.getDestinationId() != null;
   }
 
   private List<BlockingTransactionDto> findBlockingInventories(StockEvent event,
