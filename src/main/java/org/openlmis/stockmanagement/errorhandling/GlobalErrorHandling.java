@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.persistence.PersistenceException;
+import org.apache.commons.lang3.StringUtils;
 import org.openlmis.stockmanagement.dto.StockEventCancellationErrorDto;
 import org.openlmis.stockmanagement.dto.StockEventCancellationLineErrorDto;
 import org.openlmis.stockmanagement.exception.AuthenticationException;
@@ -168,7 +169,6 @@ public class GlobalErrorHandling extends AbstractErrorHandling {
 
   private boolean isReversesUniqueViolation(SQLException sql) {
     return UNIQUE_VIOLATION.equals(sql.getSQLState())
-        && null != sql.getMessage()
-        && sql.getMessage().contains(REVERSES_UNIQUE_INDEX);
+        && StringUtils.contains(sql.getMessage(), REVERSES_UNIQUE_INDEX);
   }
 }
