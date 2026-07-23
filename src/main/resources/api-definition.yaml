@@ -354,7 +354,7 @@ traits:
                   application/json:
                     schema: uuid
               400:
-                description: One or more line items cannot be cancelled.
+                description: Cancellation validation failed. Per-line eligibility failures (e.g. a physical inventory recorded after the movement, or an already-cancelled line) are listed in lineErrors; other failures (invalid request, cancellation reason, resulting negative stock on hand, or concurrent modification) return only the general message. lineErrors is optional, so both cases match this schema.
                 body:
                   application/json:
                     schema: stockEventCancellationError
