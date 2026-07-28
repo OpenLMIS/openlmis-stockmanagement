@@ -32,4 +32,26 @@ public interface StockEventLineItemRepository
    * @return the cancellation line items pointing at any of the given ids.
    */
   List<StockEventLineItem> findByReversesEventLineItemIdIn(Collection<UUID> reversedLineItemIds);
+
+  /**
+   * Returns the cancellation line items (those that reverse another line) belonging to any of the
+   * given stock events. Used to detect which shown events are cancellations and which original
+   * line they reverse.
+   *
+   * @param stockEventIds ids of the stock events shown on the page.
+   * @return the cancellation line items of those events.
+   */
+  List<StockEventLineItem> findByStockEventIdInAndReversesEventLineItemIdIsNotNull(
+      Collection<UUID> stockEventIds);
+
+  /**
+   * Returns the line items of the given stock events for the given orderables. Used to resolve the
+   * original line item behind each shown line (matched by event + orderable + lot).
+   *
+   * @param stockEventIds ids of the stock events shown on the page.
+   * @param orderableIds  ids of the orderables shown on the page.
+   * @return the matching line items.
+   */
+  List<StockEventLineItem> findByStockEventIdInAndOrderableIdIn(
+      Collection<UUID> stockEventIds, Collection<UUID> orderableIds);
 }

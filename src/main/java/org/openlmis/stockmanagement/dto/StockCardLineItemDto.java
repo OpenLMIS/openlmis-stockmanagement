@@ -37,6 +37,14 @@ public class StockCardLineItemDto {
   private UUID originEventId;
   private EventOrigin eventOrigin;
 
+  // Set on read for a cancellation line: the original event it reverses (SELV3-860 "Reversing").
+  private UUID reversedEventId;
+  private String reversedEventDocumentNumber;
+
+  // Set on read for an original line: the cancellation event that reversed it (SELV3-860).
+  private UUID cancellationEventId;
+  private String cancellationEventDocumentNumber;
+
   /**
    * Create stock card line item dto from stock card line item.
    *

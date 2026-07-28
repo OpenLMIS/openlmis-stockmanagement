@@ -56,6 +56,9 @@ public abstract class StockCardBaseService {
   @Autowired
   protected CalculatedStockOnHandService calculatedStockOnHandService;
 
+  @Autowired
+  private CancellationLinkResolver cancellationLinkResolver;
+
   protected List<StockCardDto> createDtos(List<StockCard> stockCards) {
     if (stockCards.isEmpty()) {
       return emptyList();
@@ -68,9 +71,16 @@ public abstract class StockCardBaseService {
     LOGGER.debug("Calling ref data to retrieve program info for card");
     ProgramDto program = programRefDataService.findOne(firstCard.getProgramId());
 
-    return stockCards.stream()
+    List<StockCardDto> dtos = stockCards.stream()
         .map(card -> cardToDto(facility, program, card))
         .collect(toList());
+
+    cancellationLinkResolver.attachCancellationLinks(dtos.stream()
+        .filter(dto -> dto.getLineItems() != null)
+        .flatMap(dto -> dto.getLineItems().stream())
+        .collect(toList()));
+
+    return dtos;
   }
 
   private StockCardDto cardToDto(FacilityDto facility, ProgramDto program,

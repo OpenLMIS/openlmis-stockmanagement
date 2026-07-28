@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.dto;
 
 import java.time.LocalDate;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -42,6 +43,14 @@ public class StockEventLineDetailDto {
   private Integer stockOnHand;
   private String documentNumber;
 
+  // For a cancellation row: the original event it reverses (SELV3-860 "Reversing"). Null otherwise.
+  private UUID reversedEventId;
+  private String reversedEventDocumentNumber;
+
+  // For an original row: the cancellation event that reversed it (SELV3-860). Null otherwise.
+  private UUID cancellationEventId;
+  private String cancellationEventDocumentNumber;
+
   /**
    * Flattens one resolved stock card line item (with its parent card's product/lot) into a single
    * transaction-history detail row.
@@ -63,6 +72,10 @@ public class StockEventLineDetailDto {
         .reason(item.getReason())
         .stockOnHand(item.getStockOnHand())
         .documentNumber(item.getDocumentNumber())
+        .reversedEventId(lineItem.getReversedEventId())
+        .reversedEventDocumentNumber(lineItem.getReversedEventDocumentNumber())
+        .cancellationEventId(lineItem.getCancellationEventId())
+        .cancellationEventDocumentNumber(lineItem.getCancellationEventDocumentNumber())
         .build();
   }
 }
