@@ -4,8 +4,9 @@ Upcoming Version (WIP)
 * [SELV3-849](https://openlmis.atlassian.net/browse/SELV3-849) Unified StockCardLineItem ordering on retrieval
 * [SELV3-842](https://openlmis.atlassian.net/browse/SELV3-842) Added `GET /api/stockEvents/{id}` endpoint
 * [SELV3-841](https://openlmis.atlassian.net/browse/SELV3-841) Added `GET /api/stockEvents/{id}/print` endpoint for generating PDF report for stock event transactions
-* Fixed SonarCloud analysis failing on the deprecated Java 17 runtime by running it through the SonarQube scan action (on Java 21) instead of the Gradle plugin, and removed the now-unused Gradle sonar plugin and configuration.
-* Removed the axios dependency from the Consul registration script, replacing it with the native Node `http` client (no more axios security advisories to track).
+* [OLMIS-8280](https://openlmis.atlassian.net/browse/OLMIS-8280) Fixed SonarCloud analysis failing on the deprecated Java 17 runtime by running it through the SonarQube scan action (on Java 21) instead of the Gradle plugin, and removed the now-unused Gradle sonar plugin and configuration.
+* [OLMIS-8280](https://openlmis.atlassian.net/browse/OLMIS-8280) Removed the axios dependency from the Consul registration script, replacing it with the native Node `http` client (no more axios security advisories to track).
+* [OLMIS-8280](https://openlmis.atlassian.net/browse/OLMIS-8280) Passed sonar.projectVersion (from the service version) to the SonarCloud analysis so New Code (Previous version) coverage is tracked correctly on master — completing the Java 21 migration.
 
 5.3.1 / 2026-06-09
 ==================
