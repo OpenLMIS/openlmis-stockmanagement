@@ -1,6 +1,6 @@
 const commandLineArgs = require('command-line-args');
 const raml = require('raml-parser');
-const axios = require('axios');
+const http = require('http');
 const uuid = require('uuid');
 const fs = require('fs');
 const ip = require('ip');
@@ -73,25 +73,68 @@ class ServiceConsulRegistrator {
     return Promise.all(promises);
   }
 
+  _request(method, url, data) {
+    return new Promise((resolve, reject) => {
+      const options = { method: method };
+      let body;
+      if (data !== undefined) {
+        if (typeof data === 'object') {
+          body = JSON.stringify(data);
+          options.headers = {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(body)
+          };
+        } else {
+          body = String(data);
+          options.headers = { 'Content-Length': Buffer.byteLength(body) };
+        }
+      }
+
+      const req = http.request(url, options, (res) => {
+        let raw = '';
+        res.on('data', (chunk) => {
+          raw += chunk;
+        });
+        res.on('end', () => {
+          let parsed = raw;
+          try {
+            parsed = raw ? JSON.parse(raw) : raw;
+          } catch (parseError) {
+            parsed = raw;
+          }
+          resolve({ status: res.statusCode, data: parsed });
+        });
+      });
+
+      req.on('error', reject);
+      if (body !== undefined) {
+        req.write(body);
+      }
+      req.end();
+    });
+  }
+
   async _requestWithRetry(method, endpoint, data) {
     let lastError;
     for (let i = 0; i < this.attempts; i++) {
       try {
-        const response = await axios({
-          method: method,
-          url: `${this.baseUrl}${endpoint}`,
-          data: data
-        });
+        const response = await this._request(method, `${this.baseUrl}${endpoint}`, data);
         if (response.status >= 200 && response.status < 300) {
           return response.data;
         }
+        // Non-2xx: do not retry client errors (<500), retry server errors.
+        const httpError = new Error(`Request to ${endpoint} failed with status ${response.status}`);
+        httpError.status = response.status;
+        if (response.status < 500) throw httpError;
+        lastError = httpError;
       } catch (err) {
+        // Propagate client errors immediately; retry network/server errors.
+        if (err.status && err.status < 500) throw err;
         lastError = err;
-        if (err.response && err.response.status < 500) throw err;
-
-        console.log(`Attempt ${i + 1}/${this.attempts} connecting to Consul failed. Retrying...`);
-        await sleep(this.attemptTimeout);
       }
+
+      console.log(`Attempt ${i + 1}/${this.attempts} connecting to Consul failed. Retrying...`);
+      await sleep(this.attemptTimeout);
     }
     throw lastError;
   }
