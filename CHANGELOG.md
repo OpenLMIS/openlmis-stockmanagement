@@ -4,6 +4,7 @@ Upcoming Version (WIP)
 * [SELV3-849](https://openlmis.atlassian.net/browse/SELV3-849) Unified StockCardLineItem ordering on retrieval
 * [SELV3-842](https://openlmis.atlassian.net/browse/SELV3-842) Added `GET /api/stockEvents/{id}` endpoint
 * [SELV3-841](https://openlmis.atlassian.net/browse/SELV3-841) Added `GET /api/stockEvents/{id}/print` endpoint for generating PDF report for stock event transactions
+* Fixed SonarCloud analysis failing on the deprecated Java 17 runtime by running it through the SonarQube scan action (on Java 21) instead of the Gradle plugin, and removed the now-unused Gradle sonar plugin and configuration.
 
 5.3.1 / 2026-06-09
 ==================

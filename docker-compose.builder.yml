@@ -14,20 +14,6 @@ services:
       GRADLE_OPTS: '-Dorg.gradle.daemon=false'
       JAVA_OPTS: '-Dlogging.config=/logback.xml'
     env_file: .env
-  sonar:
-    image: openlmis/dev:10
-    links:
-      - db
-      - log
-    volumes:
-      - '.:/app'
-    entrypoint:
-      - 'gradle'
-    command:
-      - 'sonarqube'
-    environment:
-      GRADLE_OPTS: '-Dorg.gradle.daemon=false'
-    env_file: .env
   image:
     build: .
     image: openlmis/stockmanagement
