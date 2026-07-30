@@ -132,6 +132,15 @@ public class StockEventCancelServiceTest {
     service.cancel(eventId, new StockEventCancelDto("signature", asList(first, duplicate)));
   }
 
+  @Test(expected = ValidationMessageException.class)
+  public void shouldThrowWhenLineItemHasNoStableId() {
+    StockEvent event = eventWithIssueLine();
+    when(stockEventsRepository.findById(eventId)).thenReturn(Optional.of(event));
+
+    // A movement recorded before the reversal feature exposes a null stockEventLineItemId.
+    service.cancel(eventId, requestFor(null, UUID.randomUUID()));
+  }
+
   @Test(expected = PermissionMessageException.class)
   public void shouldThrowWhenUserHasNoCancelPermission() {
     StockEvent event = eventWithIssueLine();
