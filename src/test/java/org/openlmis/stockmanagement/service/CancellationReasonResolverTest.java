@@ -18,11 +18,16 @@ package org.openlmis.stockmanagement.service;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.toMap;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_CANCELLATION_REASON_INVALID;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_CANCELLATION_REASON_REQUIRED;
 import static org.openlmis.stockmanagement.service.StockEventCancelValidationService.CANCEL_TAG;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.Test;
@@ -35,7 +40,8 @@ import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventCancelLineItemDto;
-import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.dto.StockEventCancellationLineErrorDto;
+import org.openlmis.stockmanagement.exception.StockEventCancellationException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -60,7 +66,7 @@ public class CancellationReasonResolverTest {
     assertEquals(reason, resolved.get(issue.getId()));
   }
 
-  @Test(expected = ValidationMessageException.class)
+  @Test(expected = StockEventCancellationException.class)
   public void shouldThrowWhenReasonIsMissing() {
     StockEventLineItem issue = issueLineItem();
 
@@ -68,7 +74,7 @@ public class CancellationReasonResolverTest {
         singletonMap(issue.getId(), issue));
   }
 
-  @Test(expected = ValidationMessageException.class)
+  @Test(expected = StockEventCancellationException.class)
   public void shouldThrowWhenReasonIsNotCancelTagged() {
     StockEventLineItem issue = issueLineItem();
     StockCardLineItemReason reason = reason(ReasonType.CREDIT);
@@ -78,7 +84,7 @@ public class CancellationReasonResolverTest {
         singletonMap(issue.getId(), issue));
   }
 
-  @Test(expected = ValidationMessageException.class)
+  @Test(expected = StockEventCancellationException.class)
   public void shouldThrowWhenReasonTypeDoesNotCounterMovement() {
     StockEventLineItem issue = issueLineItem();
     StockCardLineItemReason reason = reason(ReasonType.DEBIT, CANCEL_TAG);
@@ -86,6 +92,35 @@ public class CancellationReasonResolverTest {
 
     resolver.resolve(singletonList(requested(issue.getId(), reason.getId())),
         singletonMap(issue.getId(), issue));
+  }
+
+  @Test
+  public void shouldCollectEveryBadReasonAsAPerLineError() {
+    StockEventLineItem missingReason = issueLineItem();
+    StockEventLineItem wrongType = issueLineItem();
+    StockCardLineItemReason debit = reason(ReasonType.DEBIT, CANCEL_TAG);
+    when(reasonRepository.findByIdIn(anyCollection())).thenReturn(singletonList(debit));
+
+    Map<UUID, StockEventLineItem> originals = new HashMap<>();
+    originals.put(missingReason.getId(), missingReason);
+    originals.put(wrongType.getId(), wrongType);
+
+    try {
+      resolver.resolve(
+          asList(requested(missingReason.getId(), null),
+              requested(wrongType.getId(), debit.getId())),
+          originals);
+      fail("expected StockEventCancellationException");
+    } catch (StockEventCancellationException ex) {
+      assertEquals(2, ex.getLineErrors().size());
+      Map<UUID, String> messageKeyByLine = ex.getLineErrors().stream()
+          .collect(toMap(StockEventCancellationLineErrorDto::getStockEventLineItemId,
+              StockEventCancellationLineErrorDto::getMessageKey));
+      assertEquals(ERROR_EVENT_CANCELLATION_REASON_REQUIRED,
+          messageKeyByLine.get(missingReason.getId()));
+      assertEquals(ERROR_EVENT_CANCELLATION_REASON_INVALID,
+          messageKeyByLine.get(wrongType.getId()));
+    }
   }
 
   private StockEventLineItem issueLineItem() {

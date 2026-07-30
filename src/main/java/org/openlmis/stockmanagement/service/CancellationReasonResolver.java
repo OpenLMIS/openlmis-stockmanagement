@@ -21,9 +21,12 @@ import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_CANCELLATION_REASON_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_CANCELLATION_REASON_REQUIRED;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_CANCELLATION_VALIDATION;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -32,9 +35,9 @@ import lombok.RequiredArgsConstructor;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventCancelLineItemDto;
-import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.dto.StockEventCancellationLineErrorDto;
+import org.openlmis.stockmanagement.exception.StockEventCancellationException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
-import org.openlmis.stockmanagement.util.Message;
 import org.springframework.stereotype.Service;
 
 /**
@@ -60,9 +63,18 @@ public class CancellationReasonResolver {
       Map<UUID, StockEventLineItem> originalById) {
     Map<UUID, StockCardLineItemReason> loaded = loadReasons(requested);
     Map<UUID, StockCardLineItemReason> resolved = new HashMap<>();
+    List<StockEventCancellationLineErrorDto> errors = new ArrayList<>();
     for (StockEventCancelLineItemDto line : requested) {
       StockEventLineItem original = originalById.get(line.getStockEventLineItemId());
-      resolved.put(line.getStockEventLineItemId(), validateReason(line, original, loaded));
+      StockCardLineItemReason reason = reasonOrError(line, original, loaded, errors);
+      if (reason != null) {
+        resolved.put(line.getStockEventLineItemId(), reason);
+      }
+    }
+    // Collect every bad reason and report them together, per line, in the same shape as the other
+    // cancellation checks (AC#9) - the client marks each blocking line rather than only the first.
+    if (!errors.isEmpty()) {
+      throw new StockEventCancellationException(ERROR_EVENT_CANCELLATION_VALIDATION, errors);
     }
     return resolved;
   }
@@ -80,22 +92,31 @@ public class CancellationReasonResolver {
         .collect(toMap(StockCardLineItemReason::getId, identity()));
   }
 
-  private StockCardLineItemReason validateReason(StockEventCancelLineItemDto requested,
-      StockEventLineItem original, Map<UUID, StockCardLineItemReason> reasonsById) {
+  // Returns the validated cancellation reason for the line, or null - recording a per-line error -
+  // when the reason is missing or is not a cancel-tagged ADJUSTMENT that counters the movement.
+  private StockCardLineItemReason reasonOrError(StockEventCancelLineItemDto requested,
+      StockEventLineItem original, Map<UUID, StockCardLineItemReason> reasonsById,
+      List<StockEventCancellationLineErrorDto> errors) {
     UUID reasonId = requested.getReasonId();
     if (reasonId == null) {
-      throw new ValidationMessageException(
-          new Message(ERROR_EVENT_CANCELLATION_REASON_REQUIRED, original.getId()));
+      errors.add(lineError(requested, ERROR_EVENT_CANCELLATION_REASON_REQUIRED));
+      return null;
     }
     StockCardLineItemReason reason = reasonsById.get(reasonId);
     if (reason == null
         || !reason.isAdjustmentReasonCategory()
         || !reason.getTags().contains(StockEventCancelValidationService.CANCEL_TAG)
         || !countersMovement(original, reason)) {
-      throw new ValidationMessageException(
-          new Message(ERROR_EVENT_CANCELLATION_REASON_INVALID, reasonId));
+      errors.add(lineError(requested, ERROR_EVENT_CANCELLATION_REASON_INVALID));
+      return null;
     }
     return reason;
+  }
+
+  private StockEventCancellationLineErrorDto lineError(StockEventCancelLineItemDto requested,
+      String messageKey) {
+    return new StockEventCancellationLineErrorDto(
+        requested.getStockEventLineItemId(), messageKey, null, null);
   }
 
   private boolean countersMovement(StockEventLineItem original, StockCardLineItemReason reason) {
