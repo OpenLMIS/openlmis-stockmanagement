@@ -28,6 +28,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LINE_ITE
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LINE_ITEM_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_NO_LINE_ITEMS;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -160,13 +161,18 @@ public class StockEventCancelValidationService {
 
   private List<BlockingTransactionDto> findBlockingInventories(StockEvent event,
       StockEventLineItem lineItem) {
+    // A physical inventory blocks cancellation when it is ordered after this movement on the stock
+    // card, which is (occurredDate, then processedDate) - see StockCard.getLineItemsComparator().
+    // Comparing occurredDate alone would miss a same-day inventory processed after the movement
+    // (which already reflects it), letting the reversal double-apply the quantity.
+    ZonedDateTime processedDate = event.getProcessedDate();
     List<PhysicalInventory> inventories = lineItem.getLotId() == null
         ? physicalInventoriesRepository.findSubmittedAfterForOrderableWithoutLot(
             event.getProgramId(), event.getFacilityId(), lineItem.getOrderableId(),
-            lineItem.getOccurredDate())
+            lineItem.getOccurredDate(), processedDate)
         : physicalInventoriesRepository.findSubmittedAfterForOrderableAndLot(
             event.getProgramId(), event.getFacilityId(), lineItem.getOrderableId(),
-            lineItem.getLotId(), lineItem.getOccurredDate());
+            lineItem.getLotId(), lineItem.getOccurredDate(), processedDate);
     return inventories.stream()
         .map(inventory -> new BlockingTransactionDto(
             PHYSICAL_INVENTORY_TYPE, inventory.getOccurredDate(), inventory.getDocumentNumber()))

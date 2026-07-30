@@ -78,7 +78,7 @@ public class StockEventCancelValidationServiceTest {
     when(stockEventLineItemRepository.findByReversesEventLineItemIdIn(anyCollection()))
         .thenReturn(emptyList());
     when(physicalInventoriesRepository.findSubmittedAfterForOrderableAndLot(
-        any(), any(), any(), any(), any()))
+        any(), any(), any(), any(), any(), any()))
         .thenReturn(emptyList());
 
     service.validate(event, singletonList(lineItem.getId()));
@@ -124,7 +124,7 @@ public class StockEventCancelValidationServiceTest {
     when(stockEventLineItemRepository.findByReversesEventLineItemIdIn(anyCollection()))
         .thenReturn(emptyList());
     when(physicalInventoriesRepository.findSubmittedAfterForOrderableAndLot(
-        any(), any(), any(), any(), any()))
+        any(), any(), any(), any(), any(), any()))
         .thenReturn(singletonList(inventory));
 
     StockEventCancellationLineErrorDto error =
@@ -150,7 +150,7 @@ public class StockEventCancelValidationServiceTest {
     when(stockEventLineItemRepository.findByReversesEventLineItemIdIn(anyCollection()))
         .thenReturn(emptyList());
     when(physicalInventoriesRepository.findSubmittedAfterForOrderableWithoutLot(
-        any(), any(), any(), any()))
+        any(), any(), any(), any(), any()))
         .thenReturn(singletonList(inventory));
 
     StockEventCancellationLineErrorDto error =
@@ -189,7 +189,7 @@ public class StockEventCancelValidationServiceTest {
     when(stockEventLineItemRepository.findByReversesEventLineItemIdIn(anyCollection()))
         .thenReturn(singletonList(cancellation));
     when(physicalInventoriesRepository.findSubmittedAfterForOrderableAndLot(
-        any(), any(), any(), any(), any()))
+        any(), any(), any(), any(), any(), any()))
         .thenReturn(singletonList(inventory));
 
     try {
