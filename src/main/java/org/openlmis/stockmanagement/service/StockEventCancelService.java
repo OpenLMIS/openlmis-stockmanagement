@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.service;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LINE_ITEM_DUPLICATE;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LINE_ITEM_MISSING_ID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_STOCK_EVENT_NOT_FOUND;
 
 import java.time.LocalDate;
@@ -83,9 +84,15 @@ public class StockEventCancelService {
   private Map<UUID, StockEventCancelLineItemDto> indexByLineItemId(StockEventCancelDto request) {
     Map<UUID, StockEventCancelLineItemDto> byId = new LinkedHashMap<>();
     for (StockEventCancelLineItemDto line : request.getLineItems()) {
-      if (byId.putIfAbsent(line.getStockEventLineItemId(), line) != null) {
+      UUID lineItemId = line.getStockEventLineItemId();
+      if (lineItemId == null) {
+        // A movement recorded before the reversal feature has no stable line item id, so it
+        // cannot be targeted for cancellation; reject it explicitly rather than fail later.
+        throw new ValidationMessageException(new Message(ERROR_EVENT_LINE_ITEM_MISSING_ID));
+      }
+      if (byId.putIfAbsent(lineItemId, line) != null) {
         throw new ValidationMessageException(
-            new Message(ERROR_EVENT_LINE_ITEM_DUPLICATE, line.getStockEventLineItemId()));
+            new Message(ERROR_EVENT_LINE_ITEM_DUPLICATE, lineItemId));
       }
     }
     return byId;

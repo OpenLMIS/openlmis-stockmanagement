@@ -41,6 +41,10 @@ import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLi
 @NoArgsConstructor
 @Builder
 public class StockEventLineItemDto implements IdentifiableByOrderableLot, VvmApplicable {
+  // Set server-side after the event is persisted (so generated stock card line items can record
+  // their origin); ignored if provided by clients on the create path.
+  @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+  private UUID id;
   private UUID orderableId;
   private UUID lotId;
   private Integer quantity;

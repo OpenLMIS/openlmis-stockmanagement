@@ -205,6 +205,8 @@ public abstract class MessageKeys {
       + ".cancellation.concurrentModification";
   public static final String ERROR_EVENT_LINE_ITEM_NOT_FOUND = EVENT_ERROR_PREFIX
       + ".lineItem.notFound";
+  public static final String ERROR_EVENT_LINE_ITEM_MISSING_ID = EVENT_ERROR_PREFIX
+      + ".lineItem.missingId";
   public static final String ERROR_EVENT_LINE_ITEM_DUPLICATE = EVENT_ERROR_PREFIX
       + ".lineItem.duplicate";
   public static final String ERROR_EVENT_LINE_ITEM_NOT_CANCELLABLE = EVENT_ERROR_PREFIX
