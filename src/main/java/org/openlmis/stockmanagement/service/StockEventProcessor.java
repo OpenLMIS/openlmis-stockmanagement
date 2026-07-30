@@ -175,6 +175,13 @@ public class StockEventProcessor {
     List<StockEventLineItemDto> requestLines = eventDto.getLineItems();
     List<StockEventLineItem> savedLines = savedEvent.getLineItems();
     if (requestLines == null || savedLines == null || requestLines.size() != savedLines.size()) {
+      LOGGER.error(
+          "Could not copy persisted line item ids for stock event {}: request line count {} does "
+              + "not match persisted line count {}; generated stock card line items will have no "
+              + "origin line reference and the movement will not be cancellable",
+          savedEvent.getId(),
+          requestLines == null ? null : requestLines.size(),
+          savedLines == null ? null : savedLines.size());
       return;
     }
     for (int i = 0; i < requestLines.size(); i++) {
