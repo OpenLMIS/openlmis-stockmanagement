@@ -43,13 +43,17 @@ public class StockEventLineDetailDto {
   private Integer stockOnHand;
   private String documentNumber;
 
-  // For a cancellation row: the original event it reverses (SELV3-860 "Reversing"). Null otherwise.
+  // For a cancellation row: the original event it reverses ("Reversing" column). Null otherwise.
   private UUID reversedEventId;
   private String reversedEventDocumentNumber;
 
-  // For an original row: the cancellation event that reversed it (SELV3-860). Null otherwise.
+  // For an original row: the cancellation event that reversed it ("Reversed by"). Null otherwise.
   private UUID cancellationEventId;
   private String cancellationEventDocumentNumber;
+
+  // The stock event line item this row corresponds to. The reverse view sends it to
+  // select the exact line to cancel, and per-line cancellation errors (AC#9) join on it.
+  private UUID stockEventLineItemId;
 
   /**
    * Flattens one resolved stock card line item (with its parent card's product/lot) into a single
@@ -76,6 +80,7 @@ public class StockEventLineDetailDto {
         .reversedEventDocumentNumber(lineItem.getReversedEventDocumentNumber())
         .cancellationEventId(lineItem.getCancellationEventId())
         .cancellationEventDocumentNumber(lineItem.getCancellationEventDocumentNumber())
+        .stockEventLineItemId(lineItem.getStockEventLineItemId())
         .build();
   }
 }

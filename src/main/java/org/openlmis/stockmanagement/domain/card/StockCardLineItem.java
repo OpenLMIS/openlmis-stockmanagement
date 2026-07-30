@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
     "stockCard", "originEvent",
     "source", "destination",
     "processedDate",
-    "userId"})
+    "userId", "originEventLineItemId"})
 @Table(name = "stock_card_line_items", schema = "stockmanagement")
 public class StockCardLineItem extends BaseEntity {
 
@@ -111,6 +111,11 @@ public class StockCardLineItem extends BaseEntity {
 
   @Column
   private UUID userId;
+
+  // The stock event line item this row was created from: lets reads expose a stable
+  // stockEventLineItemId to identify the exact line for cancellation and its cross-links.
+  @Column
+  private UUID originEventLineItemId;
 
   @Transient
   private Integer stockOnHand;
@@ -178,6 +183,7 @@ public class StockCardLineItem extends BaseEntity {
         .userId(eventDto.getContext().getCurrentUserId())
 
         .extraData(eventLineItem.getExtraData())
+        .originEventLineItemId(eventLineItem.getId())
         .build();
 
     stockCard.getLineItems().add(cardLineItem);

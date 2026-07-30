@@ -37,13 +37,17 @@ public class StockCardLineItemDto {
   private UUID originEventId;
   private EventOrigin eventOrigin;
 
-  // Set on read for a cancellation line: the original event it reverses (SELV3-860 "Reversing").
+  // Set on read for a cancellation line: the original event it reverses (the "Reversing" column).
   private UUID reversedEventId;
   private String reversedEventDocumentNumber;
 
-  // Set on read for an original line: the cancellation event that reversed it (SELV3-860).
+  // Set on read for an original line: the cancellation event that reversed it ("Reversed by").
   private UUID cancellationEventId;
   private String cancellationEventDocumentNumber;
+
+  // The stock event line item this row was created from: a stable, unique id the
+  // reverse view uses to cancel the exact line, and the resolver uses as the cross-link key.
+  private UUID stockEventLineItemId;
 
   /**
    * Create stock card line item dto from stock card line item.
@@ -57,6 +61,7 @@ public class StockCardLineItemDto {
         .lineItem(stockCardLineItem)
         .originEventId(originEvent == null ? null : originEvent.getId())
         .eventOrigin(originEvent == null ? null : originEvent.getEventOrigin())
+        .stockEventLineItemId(stockCardLineItem.getOriginEventLineItemId())
         .build();
   }
 }
