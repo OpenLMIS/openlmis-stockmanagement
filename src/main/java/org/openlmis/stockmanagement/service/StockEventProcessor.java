@@ -18,14 +18,17 @@ package org.openlmis.stockmanagement.service;
 import static org.openlmis.stockmanagement.dto.PhysicalInventoryDto.fromEventDto;
 
 import java.sql.PreparedStatement;
+import java.util.List;
 import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.extension.ExtensionManager;
 import org.openlmis.stockmanagement.extension.point.ExtensionPointId;
 import org.openlmis.stockmanagement.extension.point.StockEventPostProcessor;
@@ -134,8 +137,14 @@ public class StockEventProcessor {
     StockEvent stockEvent = eventDto.toEvent();
 
     profiler.start("DB_SAVE");
-    UUID savedEventId = stockEventsRepository.save(stockEvent).getId();
+    StockEvent savedEvent = stockEventsRepository.save(stockEvent);
+    UUID savedEventId = savedEvent.getId();
     LOGGER.debug("Saved stock event with id " + savedEventId);
+
+    // The persisted line items now have ids; copy them back onto the request dto in the order
+    // toEvent() created them (before sortEventDtos reorders it), so each generated stock card line
+    // item can record the stock event line item it originates from.
+    copyPersistedLineItemIds(eventDto, savedEvent);
 
     if (eventDto.isPhysicalInventory()) {
       profiler.start("CREATE_PHYSICAL_INVENTORY_DTO");
@@ -158,6 +167,26 @@ public class StockEventProcessor {
 
   private void sortEventDtos(StockEventDto eventDto) {
     eventDto.sortLineItemsByOccurreddate();
+  }
+
+  // toEvent() maps request line items to domain line items 1:1 in order, so after save the two
+  // lists line up by index (this runs before sortEventDtos reorders the request dto).
+  private void copyPersistedLineItemIds(StockEventDto eventDto, StockEvent savedEvent) {
+    List<StockEventLineItemDto> requestLines = eventDto.getLineItems();
+    List<StockEventLineItem> savedLines = savedEvent.getLineItems();
+    if (requestLines == null || savedLines == null || requestLines.size() != savedLines.size()) {
+      LOGGER.error(
+          "Could not copy persisted line item ids for stock event {}: request line count {} does "
+              + "not match persisted line count {}; generated stock card line items will have no "
+              + "origin line reference and the movement will not be cancellable",
+          savedEvent.getId(),
+          requestLines == null ? null : requestLines.size(),
+          savedLines == null ? null : savedLines.size());
+      return;
+    }
+    for (int i = 0; i < requestLines.size(); i++) {
+      requestLines.get(i).setId(savedLines.get(i).getId());
+    }
   }
 
   private void assignDocumentNumberIfNeeded(StockEventDto eventDto) {

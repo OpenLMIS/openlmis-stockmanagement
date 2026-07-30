@@ -73,6 +73,10 @@ public class StockEventLineItem extends BaseEntity
   private UUID destinationId;
   private String destinationFreeText;
 
+  // For a cancellation (ADJUSTMENT) line item, points to the original Issue/Receive
+  // StockEventLineItem it reverses. Null for regular movements.
+  private UUID reversesEventLineItemId;
+
   @ManyToOne()
   @JoinColumn(nullable = false)
   private StockEvent stockEvent;
@@ -99,6 +103,20 @@ public class StockEventLineItem extends BaseEntity
       return newAdjustments;
     }
     return null;
+  }
+
+  // An issue moves stock out to a destination; a receive brings it in from a source. Adjustments
+  // (including cancellations) have neither a source nor a destination.
+  public boolean isIssue() {
+    return destinationId != null;
+  }
+
+  public boolean isReceive() {
+    return sourceId != null;
+  }
+
+  public boolean isMovement() {
+    return isIssue() || isReceive();
   }
 
 }

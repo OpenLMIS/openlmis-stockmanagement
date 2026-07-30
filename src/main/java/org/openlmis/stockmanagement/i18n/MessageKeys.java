@@ -198,6 +198,29 @@ public abstract class MessageKeys {
       + ".debit.quantity.exceed.stockOnHand";
   public static final String ERRRO_EVENT_SOH_EXCEEDS_LIMIT = EVENT_ERROR_PREFIX
       + ".stockOnHand.exceed.upperLimit";
+  //stock events cancellation
+  public static final String ERROR_EVENT_CANCELLATION_VALIDATION = EVENT_ERROR_PREFIX
+      + ".cancellation.validationFailed";
+  public static final String ERROR_EVENT_CANCELLATION_CONCURRENT_MODIFICATION = EVENT_ERROR_PREFIX
+      + ".cancellation.concurrentModification";
+  public static final String ERROR_EVENT_LINE_ITEM_NOT_FOUND = EVENT_ERROR_PREFIX
+      + ".lineItem.notFound";
+  public static final String ERROR_EVENT_LINE_ITEM_MISSING_ID = EVENT_ERROR_PREFIX
+      + ".lineItem.missingId";
+  public static final String ERROR_EVENT_LINE_ITEM_DUPLICATE = EVENT_ERROR_PREFIX
+      + ".lineItem.duplicate";
+  public static final String ERROR_EVENT_LINE_ITEM_NOT_CANCELLABLE = EVENT_ERROR_PREFIX
+      + ".lineItem.notCancellable";
+  public static final String ERROR_EVENT_LINE_ITEM_ALREADY_CANCELLED = EVENT_ERROR_PREFIX
+      + ".lineItem.alreadyCancelled";
+  public static final String ERROR_EVENT_LINE_ITEM_IS_CANCELLATION = EVENT_ERROR_PREFIX
+      + ".lineItem.isCancellation";
+  public static final String ERROR_EVENT_LINE_ITEM_BLOCKED_PHYSICAL_INVENTORY = EVENT_ERROR_PREFIX
+      + ".lineItem.blocked.physicalInventory";
+  public static final String ERROR_EVENT_CANCELLATION_REASON_REQUIRED = EVENT_ERROR_PREFIX
+      + ".cancellation.reason.required";
+  public static final String ERROR_EVENT_CANCELLATION_REASON_INVALID = EVENT_ERROR_PREFIX
+      + ".cancellation.reason.invalid";
   //stock events creation: reason assignment
   //reason.not.in.validList error key is not used for now, because we remove valid reasons
   //check when implementing adjustment's UI

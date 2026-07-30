@@ -56,7 +56,17 @@ public abstract class StockCardBaseService {
   @Autowired
   protected CalculatedStockOnHandService calculatedStockOnHandService;
 
+  @Autowired
+  private CancellationLinkResolver cancellationLinkResolver;
+
   protected List<StockCardDto> createDtos(List<StockCard> stockCards) {
+    return createDtos(stockCards, true);
+  }
+
+  // withCancellationLinks lets callers that discard the line items right after (the stock card
+  // summaries paths) skip cross-link resolution and its extra per-page queries.
+  protected List<StockCardDto> createDtos(List<StockCard> stockCards,
+      boolean withCancellationLinks) {
     if (stockCards.isEmpty()) {
       return emptyList();
     }
@@ -68,9 +78,18 @@ public abstract class StockCardBaseService {
     LOGGER.debug("Calling ref data to retrieve program info for card");
     ProgramDto program = programRefDataService.findOne(firstCard.getProgramId());
 
-    return stockCards.stream()
+    List<StockCardDto> dtos = stockCards.stream()
         .map(card -> cardToDto(facility, program, card))
         .collect(toList());
+
+    if (withCancellationLinks) {
+      cancellationLinkResolver.attachCancellationLinks(dtos.stream()
+          .filter(dto -> dto.getLineItems() != null)
+          .flatMap(dto -> dto.getLineItems().stream())
+          .collect(toList()));
+    }
+
+    return dtos;
   }
 
   private StockCardDto cardToDto(FacilityDto facility, ProgramDto program,
