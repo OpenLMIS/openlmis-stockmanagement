@@ -28,7 +28,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
@@ -66,16 +65,12 @@ public class CancellationLinkResolverTest {
 
   @Test
   public void shouldAttachReversedByLinkForCancelledOriginLine() {
-    UUID orderableId = UUID.randomUUID();
     StockEvent originEvent = event("DOC-ORIGIN");
-    StockEventLineItem originLine = line(originEvent, null);
-    originLine.setOrderableId(orderableId);
+    UUID originLineId = UUID.randomUUID();
     StockEvent cancellationEvent = event("DOC-CANCEL");
-    StockEventLineItem cancellationLine = line(cancellationEvent, originLine.getId());
-    StockCardLineItemDto dto = originDto(originEvent, orderableId);
+    StockEventLineItem cancellationLine = line(cancellationEvent, originLineId);
+    StockCardLineItemDto dto = originDto(originEvent, originLineId);
 
-    when(stockEventLineItemRepository.findByStockEventIdInAndOrderableIdIn(any(), any()))
-        .thenReturn(singletonList(originLine));
     when(stockEventLineItemRepository.findByReversesEventLineItemIdIn(any()))
         .thenReturn(singletonList(cancellationLine));
 
@@ -118,10 +113,11 @@ public class CancellationLinkResolverTest {
     return StockCardLineItemDto.builder().lineItem(cardLine).build();
   }
 
-  private StockCardLineItemDto originDto(StockEvent originEvent, UUID orderableId) {
-    StockCard card = StockCard.builder().orderableId(orderableId).build();
-    StockCardLineItem cardLine = StockCardLineItem.builder()
-        .originEvent(originEvent).stockCard(card).build();
-    return StockCardLineItemDto.builder().lineItem(cardLine).build();
+  private StockCardLineItemDto originDto(StockEvent originEvent, UUID stockEventLineItemId) {
+    StockCardLineItem cardLine = StockCardLineItem.builder().originEvent(originEvent).build();
+    return StockCardLineItemDto.builder()
+        .lineItem(cardLine)
+        .stockEventLineItemId(stockEventLineItemId)
+        .build();
   }
 }

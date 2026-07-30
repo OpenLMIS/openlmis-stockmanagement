@@ -43,15 +43,4 @@ public interface StockEventLineItemRepository
    */
   List<StockEventLineItem> findByStockEventIdInAndReversesEventLineItemIdIsNotNull(
       Collection<UUID> stockEventIds);
-
-  /**
-   * Returns the line items of the given stock events for the given orderables. Used to resolve the
-   * original line item behind each shown line (matched by event + orderable + lot).
-   *
-   * @param stockEventIds ids of the stock events shown on the page.
-   * @param orderableIds  ids of the orderables shown on the page.
-   * @return the matching line items.
-   */
-  List<StockEventLineItem> findByStockEventIdInAndOrderableIdIn(
-      Collection<UUID> stockEventIds, Collection<UUID> orderableIds);
 }

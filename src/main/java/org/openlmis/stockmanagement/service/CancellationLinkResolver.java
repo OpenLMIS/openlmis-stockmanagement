@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockCardLineItemDto;
@@ -34,7 +33,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * Resolves, per page and read-side only, the cross-links between an issue/receive event and the
- * event that cancelled it (SELV3-861, Scenario 2 - the original event is left untouched):
+ * event that cancelled it (resolved on read; the original event is left untouched):
  * "Reversing" (a cancellation line links to the original event it reverses) and "Reversed by"
  * (an original line links to the cancellation event that reversed it).
  */
@@ -72,44 +71,27 @@ public class CancellationLinkResolver {
     }
   }
 
-  // "Reversed by": for an original line, the cancellation event that reversed it. Matched per line
-  // (event + orderable + lot) so a partial cancellation marks only the line that was cancelled.
+  // "Reversed by": for an original line, the cancellation event that reversed it, keyed by the
+  // line's own stock event line item id - stable and unique, unlike an orderable+lot match - so a
+  // partial cancellation marks only the line that was actually cancelled.
   private void attachReversedBy(List<StockCardLineItemDto> lineItems) {
-    Set<UUID> eventIds = new HashSet<>();
-    Set<UUID> orderableIds = new HashSet<>();
-    collectEventAndOrderableIds(lineItems, eventIds, orderableIds);
-    if (eventIds.isEmpty()) {
-      return;
-    }
-    Map<LineKey, UUID> originLineIdByKey = originLineIdsByKey(eventIds, orderableIds);
-    Map<UUID, StockEvent> cancellationByOriginLine =
-        cancellationEventsByOriginLine(originLineIdByKey.values());
+    Set<UUID> lineItemIds = new HashSet<>();
     for (StockCardLineItemDto dto : lineItems) {
-      setReversedBy(dto, originLineIdByKey, cancellationByOriginLine);
-    }
-  }
-
-  private void collectEventAndOrderableIds(List<StockCardLineItemDto> lineItems,
-      Set<UUID> eventIds, Set<UUID> orderableIds) {
-    for (StockCardLineItemDto dto : lineItems) {
-      LineKey key = LineKey.of(dto);
-      if (key != null) {
-        eventIds.add(key.getEventId());
-        orderableIds.add(key.getOrderableId());
+      if (dto.getStockEventLineItemId() != null) {
+        lineItemIds.add(dto.getStockEventLineItemId());
       }
     }
-  }
-
-  // (event, orderable, lot) -> original line id
-  private Map<LineKey, UUID> originLineIdsByKey(Set<UUID> eventIds, Set<UUID> orderableIds) {
-    Map<LineKey, UUID> map = new HashMap<>();
-    for (StockEventLineItem line : stockEventLineItemRepository
-        .findByStockEventIdInAndOrderableIdIn(eventIds, orderableIds)) {
-      map.putIfAbsent(
-          new LineKey(line.getStockEvent().getId(), line.getOrderableId(), line.getLotId()),
-          line.getId());
+    if (lineItemIds.isEmpty()) {
+      return;
     }
-    return map;
+    Map<UUID, StockEvent> cancellationByOriginLine = cancellationEventsByOriginLine(lineItemIds);
+    for (StockCardLineItemDto dto : lineItems) {
+      StockEvent cancellation = cancellationByOriginLine.get(dto.getStockEventLineItemId());
+      if (cancellation != null) {
+        dto.setCancellationEventId(cancellation.getId());
+        dto.setCancellationEventDocumentNumber(cancellation.getDocumentNumber());
+      }
+    }
   }
 
   // original line id -> the cancellation event that reverses it
@@ -121,19 +103,6 @@ public class CancellationLinkResolver {
           cancellationLine.getStockEvent());
     }
     return map;
-  }
-
-  private void setReversedBy(StockCardLineItemDto dto, Map<LineKey, UUID> originLineIdByKey,
-      Map<UUID, StockEvent> cancellationByOriginLine) {
-    LineKey key = LineKey.of(dto);
-    if (key == null) {
-      return;
-    }
-    StockEvent cancellation = cancellationByOriginLine.get(originLineIdByKey.get(key));
-    if (cancellation != null) {
-      dto.setCancellationEventId(cancellation.getId());
-      dto.setCancellationEventDocumentNumber(cancellation.getDocumentNumber());
-    }
   }
 
   private Map<UUID, StockEvent> reversedEvents(List<StockCardLineItemDto> lineItems) {
@@ -171,26 +140,5 @@ public class CancellationLinkResolver {
 
   private static StockEvent originEventOf(StockCardLineItemDto dto) {
     return dto.getLineItem() == null ? null : dto.getLineItem().getOriginEvent();
-  }
-
-  // Identifies a shown line by (origin event, orderable, lot): the tuple that matches a stock
-  // card line item to its stock event line item. A value object (not a stringly-typed key) so a
-  // null lot compares as an absent value rather than the literal text "null".
-  @Value
-  private static class LineKey {
-    UUID eventId;
-    UUID orderableId;
-    UUID lotId;
-
-    // The key of a shown line, or null when the origin event / owning card is unavailable.
-    static LineKey of(StockCardLineItemDto dto) {
-      StockEvent originEvent = originEventOf(dto);
-      if (originEvent == null || dto.getLineItem().getStockCard() == null) {
-        return null;
-      }
-      return new LineKey(originEvent.getId(),
-          dto.getLineItem().getStockCard().getOrderableId(),
-          dto.getLineItem().getStockCard().getLotId());
-    }
   }
 }
