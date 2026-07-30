@@ -265,7 +265,7 @@ public class StockCardSummariesService extends StockCardBaseService {
     List<StockCard> dummyCards = createDummyCards(programId, facilityId,
         orderableLotMap.values(),
         existingCardIdentities).collect(toList());
-    return loadOrderableLotUnitAndRemoveLineItems(createDtos(dummyCards), orderableLotMap);
+    return loadOrderableLotUnitAndRemoveLineItems(createDtos(dummyCards, false), orderableLotMap);
   }
 
   private List<StockCardDto> cardsToDtos(List<StockCard> cards) {
@@ -281,7 +281,7 @@ public class StockCardSummariesService extends StockCardBaseService {
         orderableLotsMapIds.stream().map(OrderableLotIdentity::getLotId).filter(Objects::nonNull)
             .collect(toSet())).stream().collect(toMap(LotDto::getId, identity()));
 
-    return createDtos(cards).stream().map(cardDto -> {
+    return createDtos(cards, false).stream().map(cardDto -> {
       cardDto.setOrderable(orderables.get(cardDto.getOrderableId()));
       cardDto.setLot(cardDto.getLotId() != null ? lots.get(cardDto.getLotId()) : null);
       cardDto.setLineItems(null);
