@@ -88,7 +88,8 @@ public class ResourceServerSecurityConfiguration implements ResourceServerConfig
                     "/stockmanagement",
                     "/webjars/**",
                     "/stockmanagement/webjars/**",
-                    "/stockmanagement/docs/**"
+                    "/stockmanagement/docs/**",
+                    "/actuator/prometheus"
             ).permitAll()
             .antMatchers("/**").fullyAuthenticated();
   }
