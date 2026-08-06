@@ -148,9 +148,9 @@ public class StockEventsController extends BaseController {
     return stockEventsService.search(params, pageable);
   }
 
-  // "all"/blank means issue and receive only; new origins are not auto-included.
+  // "all"/blank means issues, receives and the adjustments that reverse them.
   private static final Collection<EventOrigin> ALL_HISTORY_ORIGINS =
-      Arrays.asList(EventOrigin.ISSUE, EventOrigin.RECEIVE);
+      Arrays.asList(EventOrigin.ISSUE, EventOrigin.RECEIVE, EventOrigin.ADJUSTMENT);
 
   private Collection<EventOrigin> toEventOrigins(String type) {
     if (StringUtils.isBlank(type) || "all".equalsIgnoreCase(type)) {

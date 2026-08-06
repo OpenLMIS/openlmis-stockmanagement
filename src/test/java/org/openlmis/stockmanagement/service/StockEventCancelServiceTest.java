@@ -39,6 +39,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openlmis.stockmanagement.domain.event.EventOrigin;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
@@ -101,6 +102,7 @@ public class StockEventCancelServiceTest {
     assertEquals(programId, cancellation.getProgramId());
     assertEquals("signature", cancellation.getSignature());
     assertTrue(cancellation.isActive());
+    assertEquals(EventOrigin.ADJUSTMENT, cancellation.getEventOrigin());
     StockEventLineItemDto line = cancellation.getLineItems().get(0);
     assertEquals(original.getId(), line.getReversesEventLineItemId());
     assertEquals(reason.getId(), line.getReasonId());
