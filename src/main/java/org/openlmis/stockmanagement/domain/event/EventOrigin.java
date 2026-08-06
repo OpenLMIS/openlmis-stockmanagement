@@ -17,5 +17,6 @@ package org.openlmis.stockmanagement.domain.event;
 
 public enum EventOrigin {
   ISSUE,
-  RECEIVE
+  RECEIVE,
+  ADJUSTMENT
 }

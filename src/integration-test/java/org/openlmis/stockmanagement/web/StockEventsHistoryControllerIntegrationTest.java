@@ -142,7 +142,7 @@ public class StockEventsHistoryControllerIntegrationTest extends BaseWebTest {
     verify(stockEventsService).search(captor.capture(), any(Pageable.class));
 
     assertThat(captor.getValue().getEventOrigins(),
-        containsInAnyOrder(EventOrigin.ISSUE, EventOrigin.RECEIVE));
+        containsInAnyOrder(EventOrigin.ISSUE, EventOrigin.RECEIVE, EventOrigin.ADJUSTMENT));
   }
 
   @Test

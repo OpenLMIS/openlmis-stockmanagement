@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.openlmis.stockmanagement.domain.event.EventOrigin;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
@@ -125,6 +126,8 @@ public class StockEventCancelService {
     cancellation.setProgramId(event.getProgramId());
     cancellation.setSignature(signature);
     cancellation.setActive(true);
+    // So the reversal is listed in the transaction history and gets a document number.
+    cancellation.setEventOrigin(EventOrigin.ADJUSTMENT);
     cancellation.setLineItems(lineItems);
     return cancellation;
   }
