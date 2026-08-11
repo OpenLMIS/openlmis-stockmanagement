@@ -1,5 +1,6 @@
 Upcoming Version (WIP)
 ==================
+* [SELV3-863](https://openlmis.atlassian.net/browse/SELV3-863): Show a localized "Adjustment" transaction type in the stock event report for adjustment stock events instead of the raw event origin value.
 * [SELV3-861](https://openlmis.atlassian.net/browse/SELV3-861): Resolve the "Reversing"/"Reversed by" cancellation cross-links on stock read DTOs and expose a stable `stockEventLineItemId` on the stock card and transaction-history line items, backed by a new `origineventlineitemid` column recording the stock event line item each stock card line item was created from. The column is populated for movements recorded from this version onward; movements recorded earlier have no stable line identifier and therefore cannot be cancelled through the reversal flow.
 * [SELV3-858](https://openlmis.atlassian.net/browse/SELV3-858): Added `POST /api/stockEvents/{id}/cancel` endpoint to cancel selected issue/receive line items. Introduces the `STOCK_EVENTS_CANCEL` right, a `reverseseventlineitemid` column on stock event line items, and cancel-tagged adjustment reasons. Cancellation creates a reversing adjustment stock event and recalculates stock on hand; the original event is preserved.
 * [OLMIS-8198](https://openlmis.atlassian.net/browse/OLMIS-8198): Add packs support to stock card and stock card summary reports.
