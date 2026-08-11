@@ -213,6 +213,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 				    ($F{eventorigin} == null ? "-" :
 				        $F{eventorigin}.equals("ISSUE") ? $R{report.value.transactionType.issue} :
 				        $F{eventorigin}.equals("RECEIVE") ? $R{report.value.transactionType.receive} :
+				        $F{eventorigin}.equals("ADJUSTMENT") ? $R{report.value.transactionType.adjustment} :
 				        $F{eventorigin})]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
