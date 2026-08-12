@@ -701,6 +701,58 @@ public class SourceDestinationBaseServiceTest {
     verify(destinationRepository, times(1)).deleteById(assignmentId);
   }
 
+  @Test
+  public void shouldReturnGeoLevelAffinityIdInSourceAssignmentDto() throws Exception {
+    //given
+    UUID programId = randomUUID();
+    UUID facilityTypeId = randomUUID();
+    UUID sourceId = randomUUID();
+    UUID geoLevelAffinityId = randomUUID();
+
+    ValidSourceAssignment saved =
+        createSourceAssignment(programId, facilityTypeId, createNode(sourceId, false));
+    saved.setGeoLevelAffinityId(geoLevelAffinityId);
+    when(sourceRepository.save(any(ValidSourceAssignment.class))).thenReturn(saved);
+    Organization organization = new Organization();
+    organization.setName(ORGANIZATION_NAME);
+    when(organizationRepository.existsById(sourceId)).thenReturn(true);
+    when(organizationRepository.findById(sourceId)).thenReturn(Optional.of(organization));
+    when(nodeRepository.findByReferenceId(sourceId)).thenReturn(null);
+
+    //when
+    ValidSourceDestinationDto assignmentDto = validSourceService
+        .assignSource(createSource(programId, facilityTypeId, sourceId));
+
+    //then
+    assertThat(assignmentDto.getGeoLevelAffinityId(), is(geoLevelAffinityId));
+  }
+
+  @Test
+  public void shouldReturnGeoLevelAffinityIdInDestinationAssignmentDto() throws Exception {
+    //given
+    UUID programId = randomUUID();
+    UUID facilityTypeId = randomUUID();
+    UUID destinationId = randomUUID();
+    UUID geoLevelAffinityId = randomUUID();
+
+    ValidDestinationAssignment saved =
+        createDestinationAssignment(programId, facilityTypeId, createNode(destinationId, false));
+    saved.setGeoLevelAffinityId(geoLevelAffinityId);
+    when(destinationRepository.save(any(ValidDestinationAssignment.class))).thenReturn(saved);
+    Organization organization = new Organization();
+    organization.setName(ORGANIZATION_NAME);
+    when(organizationRepository.existsById(destinationId)).thenReturn(true);
+    when(organizationRepository.findById(destinationId)).thenReturn(Optional.of(organization));
+    when(nodeRepository.findByReferenceId(destinationId)).thenReturn(null);
+
+    //when
+    ValidSourceDestinationDto assignmentDto = validDestinationService
+        .assignDestination(createDestination(programId, facilityTypeId, destinationId));
+
+    //then
+    assertThat(assignmentDto.getGeoLevelAffinityId(), is(geoLevelAffinityId));
+  }
+
   private Node createNode(UUID referenceId, boolean isRefDataFacility) {
     Node node = new Node();
     node.setReferenceId(referenceId);

@@ -32,6 +32,9 @@
     },
     "isFreeTextAllowed": {
       "type": "boolean"
+    },
+    "geoLevelAffinityId": {
+      "type": "string"
     }
   }
 }
