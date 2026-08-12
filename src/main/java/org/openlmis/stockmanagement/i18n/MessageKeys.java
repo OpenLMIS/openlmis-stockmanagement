@@ -235,6 +235,16 @@ public abstract class MessageKeys {
   public static final String ERROR_EVENT_LOT_NOT_EXIST = EVENT_ERROR_PREFIX + ".lot.not.exist";
   public static final String ERROR_EVENT_LOT_ORDERABLE_NOT_MATCH = EVENT_ERROR_PREFIX
       + ".lot.not.match.orderable";
+  public static final String ERROR_EVENT_LOT_ID_AND_CODE_EXCLUSIVE = EVENT_ERROR_PREFIX
+      + ".lot.idAndCodeExclusive";
+  public static final String ERROR_EVENT_LOT_CODE_INVALID = EVENT_ERROR_PREFIX
+      + ".lot.code.invalid";
+  public static final String ERROR_EVENT_LOT_ORDERABLE_WITHOUT_TRADE_ITEM = EVENT_ERROR_PREFIX
+      + ".lot.orderableWithoutTradeItem";
+  public static final String ERROR_EVENT_LOT_CREATION_NOT_ALLOWED = EVENT_ERROR_PREFIX
+      + ".lot.creationNotAllowed";
+  public static final String ERROR_EVENT_LOT_CREATION_FAILED = EVENT_ERROR_PREFIX
+      + ".lot.creationFailed";
   public static final String ERROR_EVENT_CANNOT_UNPACK_REGULAR_ORDERABLE = EVENT_ERROR_PREFIX
       + ".cannot.unpack.orderable.not.kit";
   public static final String ERROR_EVENT_CANNOT_UNPACK_CONSTITUENT_NOT_ACCOUNTED_FOR =

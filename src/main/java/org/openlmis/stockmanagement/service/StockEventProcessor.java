@@ -79,6 +79,9 @@ public class StockEventProcessor {
   @Autowired
   private DocumentNumberGenerator documentNumberGenerator;
 
+  @Autowired
+  private StockEventLotResolutionService lotResolutionService;
+
   /**
    * Validate and persist event and create stock card and line items from it.
    *
@@ -93,6 +96,9 @@ public class StockEventProcessor {
 
     profiler.start("ACQUIRE_PROCESSING_LOCK");
     acquireProcessingLock(eventDto);
+
+    profiler.start("RESOLVE_LOTS");
+    lotResolutionService.resolve(eventDto);
 
     profiler.start("BUILD_CONTEXT");
     StockEventProcessContext context = contextBuilder.buildContext(eventDto);

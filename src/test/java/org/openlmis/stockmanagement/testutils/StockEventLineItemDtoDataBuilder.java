@@ -57,9 +57,7 @@ public class StockEventLineItemDtoDataBuilder {
    */
   public StockEventLineItemDto buildForAdjustment() {
     noSourceAndDestination();
-    return new StockEventLineItemDto(null, orderableId, lotId, quantity, extraData, occurredDate,
-        reasonId, reasonFreeText, sourceId, sourceFreeText, destinationId, destinationFreeText,
-        reversesEventLineItemId, stockAdjustments);
+    return build();
   }
 
   /**
@@ -68,7 +66,7 @@ public class StockEventLineItemDtoDataBuilder {
   public StockEventLineItemDto build() {
     return new StockEventLineItemDto(null, orderableId, lotId, quantity, extraData, occurredDate,
         reasonId, reasonFreeText, sourceId, sourceFreeText, destinationId, destinationFreeText,
-        reversesEventLineItemId, stockAdjustments);
+        reversesEventLineItemId, stockAdjustments, null);
   }
 
   /**

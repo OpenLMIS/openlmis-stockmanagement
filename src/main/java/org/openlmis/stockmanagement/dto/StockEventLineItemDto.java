@@ -61,6 +61,9 @@ public class StockEventLineItemDto implements IdentifiableByOrderableLot, VvmApp
   @JsonProperty(access = JsonProperty.Access.READ_ONLY)
   private UUID reversesEventLineItemId;
   private List<StockEventAdjustmentDto> stockAdjustments;
+  // Optional alternative to lotId: a lot code + expiry resolved (or created) during event
+  // processing. Mutually exclusive with lotId.
+  private StockEventLineItemLotDto lot;
 
   StockEventLineItem toEventLineItem() {
     // event is set in StockEventDto.toEvent()
@@ -81,6 +84,10 @@ public class StockEventLineItemDto implements IdentifiableByOrderableLot, VvmApp
 
   public boolean hasLotId() {
     return this.lotId != null;
+  }
+
+  public boolean hasLot() {
+    return this.lot != null;
   }
 
   public boolean hasDestinationFreeText() {
