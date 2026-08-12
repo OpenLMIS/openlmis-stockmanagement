@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.20.5.final using JasperReports Library version 6.20.5-3efcf2e67f959db3888d79f73dde2dbd7acb4f8e  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="stockEvent" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="BlankPage" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="20" bottomMargin="0" isFloatColumnFooter="true" resourceBundle="reports/resourceBundles/report_translations" whenResourceMissingType="Empty" uuid="b1b5f972-1837-533f-c4e6-65c2bff0a7df">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="stockEvent" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="BlankPage" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="20" bottomMargin="0" isFloatColumnFooter="true" whenResourceMissingType="Empty" uuid="b1b5f972-1837-533f-c4e6-65c2bff0a7df">
 	<import value="java.util.*"/>
 	<import value="java.time.LocalDate"/>
 	<import value="java.time.format.DateTimeFormatter"/>
@@ -209,12 +209,11 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 				<textElement textAlignment="Right" verticalAlignment="Middle">
                     <font size="16" fontName="DejaVu Sans" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$R{report.header.transactionType} +
-				    ($F{eventorigin} == null ? "-" :
+				<textFieldExpression><![CDATA[msg($R{report.pattern.labelledValue}, $R{report.header.transactionType}, ($F{eventorigin} == null ? "-" :
 				        $F{eventorigin}.equals("ISSUE") ? $R{report.value.transactionType.issue} :
 				        $F{eventorigin}.equals("RECEIVE") ? $R{report.value.transactionType.receive} :
 				        $F{eventorigin}.equals("ADJUSTMENT") ? $R{report.value.transactionType.adjustment} :
-				        $F{eventorigin})]]></textFieldExpression>
+				        $F{eventorigin}))]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement positionType="Float" x="20" y="120" width="400" height="16"
@@ -222,7 +221,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 				<textElement>
 					<font size="11" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$R{report.header.documentNumber} + ($F{documentnumber} == null ? "-" : $F{documentnumber})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[msg($R{report.pattern.labelledValue}, $R{report.header.documentNumber}, ($F{documentnumber} == null ? "-" : $F{documentnumber}))]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement positionType="Float" x="420" y="120" width="402" height="16"
@@ -230,9 +229,9 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 				<textElement>
 					<font size="11" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$R{report.header.processedDate} + ($F{processeddate} == null ? "-" :
+				<textFieldExpression><![CDATA[msg($R{report.pattern.labelledValue}, $R{report.header.processedDate}, ($F{processeddate} == null ? "-" :
 				    DateTimeFormatter.ofPattern($P{dateTimeFormat}).format(
-				        ZonedDateTime.ofInstant($F{processeddate}.toInstant(), ZoneId.of($P{timeZoneId}))))]]></textFieldExpression>
+				        ZonedDateTime.ofInstant($F{processeddate}.toInstant(), ZoneId.of($P{timeZoneId})))))]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement positionType="Float" x="20" y="140" width="802" height="16"
@@ -250,9 +249,8 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 				<textElement>
 					<font size="11"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$R{report.header.user} +
-				    ($F{firstname} == null ? "" : $F{firstname}) + " " +
-				    ($F{lastname}  == null ? "" : $F{lastname})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[msg($R{report.pattern.labelledValue}, $R{report.header.user}, ($F{firstname} == null ? "" : $F{firstname}) + " " +
+				    ($F{lastname}  == null ? "" : $F{lastname}))]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
 				<reportElement positionType="Float" x="420" y="160" width="402" height="16"
@@ -260,7 +258,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 				<textElement>
 					<font size="11"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$R{report.header.signature} + ($F{signature} == null || $F{signature}.isEmpty() ? "-" : $F{signature})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[msg($R{report.pattern.labelledValue}, $R{report.header.signature}, ($F{signature} == null || $F{signature}.isEmpty() ? "-" : $F{signature}))]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>
@@ -480,14 +478,14 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$R{report.controls.page} + $V{PAGE_NUMBER}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[msg($R{report.controls.pageNumber}, $V{PAGE_NUMBER})]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
 				<reportElement x="800" y="10" width="30" height="10" uuid="5ded44a2-6687-46fd-b29e-205ba278ca50"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$R{report.controls.pageOf} +  $V{PAGE_NUMBER}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[msg($R{report.controls.pageTotal}, $V{PAGE_NUMBER})]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement positionType="Float" x="10" y="10" width="80" height="10" uuid="2dd094dc-e4b5-43c0-89ab-02f2dda79bb5"/>
