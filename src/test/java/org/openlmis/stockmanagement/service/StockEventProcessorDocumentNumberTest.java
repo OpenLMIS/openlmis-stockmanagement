@@ -17,7 +17,7 @@ package org.openlmis.stockmanagement.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,7 +30,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.event.EventOrigin;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.StockEventDto;
@@ -67,6 +67,9 @@ public class StockEventProcessorDocumentNumberTest {
 
   @Mock
   private DocumentNumberGenerator documentNumberGenerator;
+
+  @Mock
+  private StockEventLotResolutionService lotResolutionService;
 
   @Mock
   private EntityManager entityManager;
@@ -144,5 +147,14 @@ public class StockEventProcessorDocumentNumberTest {
 
     verify(documentNumberGenerator, never()).generate(any(UUID.class));
     assertNull(eventDto.getDocumentNumber());
+  }
+
+  @Test
+  public void processResolvesLotsForTheEvent() {
+    StockEventDto eventDto = StockEventDtoDataBuilder.createStockEventDto();
+
+    processor.process(eventDto);
+
+    verify(lotResolutionService).resolve(eventDto);
   }
 }

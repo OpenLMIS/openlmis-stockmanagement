@@ -335,7 +335,22 @@ public abstract class BaseCommunicationService<T> {
     return new ResponseEntity<>(body, HttpStatus.OK);
   }
 
-  private DataRetrievalException buildDataRetrievalException(HttpStatusCodeException ex) {
+  /**
+   * Creates a new resource of type {@code T} by POSTing the given payload to the service. The
+   * request carries the service-account token. Any {@link HttpStatusCodeException} is propagated so
+   * the caller can translate it (for example, a 4xx client error into a domain validation error).
+   *
+   * @param payload the resource to create
+   * @return the created resource as returned by the service
+   */
+  protected T createResource(Object payload) {
+    URI uri = RequestHelper.createUri(getServiceUrl() + getUrl());
+    return runWithTokenRetry(
+        () -> restTemplate.exchange(uri, HttpMethod.POST, createEntity(payload), getResultClass()))
+        .getBody();
+  }
+
+  protected DataRetrievalException buildDataRetrievalException(HttpStatusCodeException ex) {
     return new DataRetrievalException(getResultClass().getSimpleName(), ex);
   }
 
