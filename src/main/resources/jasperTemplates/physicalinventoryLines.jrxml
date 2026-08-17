@@ -193,7 +193,7 @@
 					<textElement textAlignment="Right">
 						<font size="8"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$F{netContent}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$F{netContent} == null ? "" : String.valueOf($F{netContent})]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
 					<reportElement stretchType="RelativeToTallestObject" mode="Opaque" x="10" y="0" width="72" height="25" uuid="06a9370e-dcaa-4b03-9d18-aca8abaa56bd"/>

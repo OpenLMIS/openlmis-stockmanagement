@@ -322,7 +322,7 @@
 								<reportElement x="0" y="0" width="50" height="30" uuid="e8c2a4e6-baa8-4825-8eae-bb5be4eae323"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{orderable} != null ? ((java.util.Map)$F{orderable}).get("netContent") : ""]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{orderable} != null && ((java.util.Map)$F{orderable}).get("netContent") != null ? String.valueOf(((java.util.Map)$F{orderable}).get("netContent")) : ""]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
