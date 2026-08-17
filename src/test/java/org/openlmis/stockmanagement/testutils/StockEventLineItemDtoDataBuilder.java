@@ -39,6 +39,7 @@ public class StockEventLineItemDtoDataBuilder {
   private String sourceFreeText = RandomStringUtils.random(5);
   private UUID destinationId = UUID.randomUUID();
   private String destinationFreeText = RandomStringUtils.random(5);
+  private UUID reversesEventLineItemId = null;
   private List<StockEventAdjustmentDto> stockAdjustments = new ArrayList<>();
 
   /**
@@ -56,18 +57,16 @@ public class StockEventLineItemDtoDataBuilder {
    */
   public StockEventLineItemDto buildForAdjustment() {
     noSourceAndDestination();
-    return new StockEventLineItemDto(orderableId, lotId,quantity, extraData, occurredDate, reasonId,
-        reasonFreeText, sourceId, sourceFreeText, destinationId, destinationFreeText,
-        stockAdjustments);
+    return build();
   }
 
   /**
    * Build new Stock Event.
    */
   public StockEventLineItemDto build() {
-    return new StockEventLineItemDto(orderableId, lotId,quantity, extraData, occurredDate, reasonId,
-        reasonFreeText, sourceId, sourceFreeText, destinationId, destinationFreeText,
-        stockAdjustments);
+    return new StockEventLineItemDto(null, orderableId, lotId, quantity, extraData, occurredDate,
+        reasonId, reasonFreeText, sourceId, sourceFreeText, destinationId, destinationFreeText,
+        reversesEventLineItemId, stockAdjustments, null);
   }
 
   /**
@@ -98,6 +97,12 @@ public class StockEventLineItemDtoDataBuilder {
 
   public StockEventLineItemDtoDataBuilder withOrderableId(UUID orderableId) {
     this.orderableId = orderableId;
+    return this;
+  }
+
+  public StockEventLineItemDtoDataBuilder withReversesEventLineItemId(
+      UUID reversesEventLineItemId) {
+    this.reversesEventLineItemId = reversesEventLineItemId;
     return this;
   }
 

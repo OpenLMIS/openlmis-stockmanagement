@@ -1,0 +1,36 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "title": "StockEventCancelDto",
+  "description": "Request to cancel selected line items of an issue/receive stock event.",
+  "properties": {
+    "signature": {
+      "type": "string",
+      "description": "Signature of the user performing the cancellation."
+    },
+    "lineItems": {
+      "type": "array",
+      "title": "lineItems",
+      "items": {
+        "type": "object",
+        "title": "StockEventCancelLineItemDto",
+        "properties": {
+          "stockEventLineItemId": {
+            "type": "string",
+            "description": "Id of the original stock event line item to cancel."
+          },
+          "reasonId": {
+            "type": "string",
+            "description": "Id of the cancellation reason (a cancel-tagged adjustment reason)."
+          },
+          "reasonFreeText": {
+            "type": "string",
+            "description": "Optional free text for the cancellation reason."
+          }
+        },
+        "required": ["stockEventLineItemId", "reasonId"]
+      }
+    }
+  },
+  "required": ["lineItems"]
+}

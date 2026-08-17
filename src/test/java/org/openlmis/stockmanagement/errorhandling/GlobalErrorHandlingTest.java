@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.errorhandling;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_CANCELLATION_CONCURRENT_MODIFICATION;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_TAGS_INVALID;
 
 import java.sql.SQLException;
@@ -54,6 +55,21 @@ public class GlobalErrorHandlingTest {
             new SQLException("sql error", "22001", new NullPointerException(MESSAGE))));
 
     Message.LocalizedMessage message = globalErrorHandling.handleJpaSystemException(ex);
+    assertEquals(translatedMessage, message);
+  }
+
+  @Test
+  public void shouldMapReversesUniqueViolationToConcurrentModification() {
+    Message.LocalizedMessage translatedMessage =
+        new Message(ERROR_EVENT_CANCELLATION_CONCURRENT_MODIFICATION).new LocalizedMessage("msg");
+    when(messageService.localize(new Message(ERROR_EVENT_CANCELLATION_CONCURRENT_MODIFICATION)))
+        .thenReturn(translatedMessage);
+    SQLException sql = new SQLException(
+        "violates unique constraint \"stock_event_line_items_reverses_unique_idx\"", "23505");
+    JpaSystemException ex = new JpaSystemException(new PersistenceException(sql));
+
+    Message.LocalizedMessage message = globalErrorHandling.handleJpaSystemException(ex);
+
     assertEquals(translatedMessage, message);
   }
 

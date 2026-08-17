@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.5.1  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="StockCardSummary" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" resourceBundle="reports/resourceBundles/report_translations" uuid="d0829c7a-bf73-4e6e-9b5a-1735ab6c4d7d">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="StockCardSummary" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="d0829c7a-bf73-4e6e-9b5a-1735ab6c4d7d">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
@@ -143,7 +143,7 @@
 				<textElement textAlignment="Right" verticalAlignment="Bottom">
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$R{report.header.facility}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[msg($R{report.pattern.label}, $R{report.header.facility})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
 				<reportElement x="85" y="0" width="75" height="30" uuid="68d8d341-d519-4cd5-adaf-845085a2b343">
@@ -163,7 +163,7 @@
 				<textElement textAlignment="Right" verticalAlignment="Bottom">
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$R{report.header.facilityCode}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[msg($R{report.pattern.label}, $R{report.header.facilityCode})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
 				<reportElement x="245" y="0" width="65" height="30" uuid="e28722c1-aff1-4167-af88-1d9b88dc2c81">
@@ -183,7 +183,7 @@
 				<textElement textAlignment="Right" verticalAlignment="Bottom">
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$R{report.header.program}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[msg($R{report.pattern.label}, $R{report.header.program})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement x="385" y="0" width="70" height="30" uuid="090f268a-9013-48d7-bf4c-2d082ce82426">
@@ -203,7 +203,7 @@
 				<textElement textAlignment="Right" verticalAlignment="Bottom">
 					<font size="8" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$R{report.header.programCode}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[msg($R{report.pattern.label}, $R{report.header.programCode})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement x="530" y="0" width="60" height="30" uuid="1155efb4-d80b-4867-bc2c-4708e21299cb">
@@ -234,12 +234,12 @@
 			<textField>
 				<reportElement x="510" y="30" width="40" height="15" uuid="ee62efa8-b6f7-4de5-8ede-1ac3db0020cd"/>
 				<textElement textAlignment="Right"/>
-				<textFieldExpression><![CDATA[$R{report.controls.page} + $V{PAGE_NUMBER}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[msg($R{report.controls.pageNumber}, $V{PAGE_NUMBER})]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
 				<reportElement x="550" y="30" width="40" height="15" uuid="fbe34c63-7cfe-41e9-98dd-f1d379e7338c"/>
-				<textElement textAlignment="Left"/>
-				<textFieldExpression><![CDATA[" " + $R{report.controls.pageOf} +  $V{PAGE_NUMBER}]]></textFieldExpression>
+				<textElement textAlignment="Left"><paragraph leftIndent="3"/></textElement>
+				<textFieldExpression><![CDATA[msg($R{report.controls.pageTotal}, $V{PAGE_NUMBER})]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageFooter>
@@ -396,7 +396,7 @@
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="12"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$P{showInDoses} ? $R{report.column.sohDoses} : $R{report.column.sohPacks}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$P{showInDoses} ? $R{report.column.stockOnHandDoses} : $R{report.column.stockOnHandPacks}]]></textFieldExpression>
 							</textField>
 						</jr:columnHeader>
 						<jr:detailCell style="Table 1_TD" height="30">

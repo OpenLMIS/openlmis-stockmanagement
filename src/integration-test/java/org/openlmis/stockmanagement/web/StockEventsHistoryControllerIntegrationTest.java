@@ -142,7 +142,7 @@ public class StockEventsHistoryControllerIntegrationTest extends BaseWebTest {
     verify(stockEventsService).search(captor.capture(), any(Pageable.class));
 
     assertThat(captor.getValue().getEventOrigins(),
-        containsInAnyOrder(EventOrigin.ISSUE, EventOrigin.RECEIVE));
+        containsInAnyOrder(EventOrigin.ISSUE, EventOrigin.RECEIVE, EventOrigin.ADJUSTMENT));
   }
 
   @Test
@@ -212,6 +212,7 @@ public class StockEventsHistoryControllerIntegrationTest extends BaseWebTest {
         .id(eventId)
         .documentNumber("DOC-1")
         .type(EventOrigin.RECEIVE)
+        .signature("signature-user")
         .processedDate(processedDate)
         .build();
 
@@ -224,6 +225,7 @@ public class StockEventsHistoryControllerIntegrationTest extends BaseWebTest {
     resultActions.andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(eventId.toString())))
         .andExpect(jsonPath("$.type", is(EventOrigin.RECEIVE.toString())))
+        .andExpect(jsonPath("$.signature", is("signature-user")))
         .andExpect(jsonPath("$.documentNumber", is("DOC-1")))
         .andExpect(jsonPath("$.processedDate").exists());
   }

@@ -60,6 +60,11 @@ public class StockEventDataBuilder {
     return this;
   }
 
+  public StockEventDataBuilder withSignature(String signature) {
+    this.signature = signature;
+    return this;
+  }
+
   public StockEventDataBuilder withProcessedDate(ZonedDateTime processedDate) {
     this.processedDate = processedDate;
     return this;

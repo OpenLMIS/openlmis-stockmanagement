@@ -34,6 +34,7 @@ public class StockEventHistoryDto {
   private UUID id;
   private String documentNumber;
   private EventOrigin type;
+  private String signature;
   private LocalDate occurredDate;
   private ZonedDateTime processedDate;
   private Integer entriesCount;
@@ -50,6 +51,7 @@ public class StockEventHistoryDto {
         .id(event.getId())
         .documentNumber(event.getDocumentNumber())
         .type(event.getEventOrigin())
+        .signature(event.getSignature())
         .userId(event.getUserId())
         .processedDate(event.getProcessedDate())
         .build();

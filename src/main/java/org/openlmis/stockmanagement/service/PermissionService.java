@@ -54,6 +54,7 @@ public class PermissionService {
 
   public static final String STOCK_INVENTORIES_EDIT = "STOCK_INVENTORIES_EDIT";
   public static final String STOCK_ADJUST = "STOCK_ADJUST";
+  public static final String STOCK_EVENTS_CANCEL = "STOCK_EVENTS_CANCEL";
 
   public static final String STOCK_CARDS_VIEW = "STOCK_CARDS_VIEW";
 
@@ -98,6 +99,16 @@ public class PermissionService {
    */
   public void canAdjustStock(UUID programId, UUID facilityId) {
     hasPermission(STOCK_ADJUST, programId, facilityId, null);
+  }
+
+  /**
+   * Checks if current user has permission to cancel a stock event.
+   *
+   * @param programId  program id.
+   * @param facilityId facility id.
+   */
+  public void canCancelStockEvent(UUID programId, UUID facilityId) {
+    hasPermission(STOCK_EVENTS_CANCEL, programId, facilityId, null);
   }
 
   /**

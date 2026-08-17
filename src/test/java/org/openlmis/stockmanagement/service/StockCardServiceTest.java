@@ -85,6 +85,11 @@ public class StockCardServiceTest {
   @Mock
   private PermissionService permissionService;
 
+  @Mock
+  // injected into StockCardBaseService via @InjectMocks; not referenced directly in this test
+  @SuppressWarnings("PMD.UnusedPrivateField")
+  private CancellationLinkResolver cancellationLinkResolver;
+
   @InjectMocks
   private StockCardService stockCardService;
 

@@ -1,0 +1,61 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "title": "StockEventCancellationError",
+  "description": "Error returned when one or more line items cannot be cancelled.",
+  "properties": {
+    "messageKey": {
+      "type": "string",
+      "description": "General message key for the cancellation failure."
+    },
+    "message": {
+      "type": "string",
+      "description": "General localized message for the cancellation failure."
+    },
+    "lineErrors": {
+      "type": "array",
+      "title": "lineErrors",
+      "items": {
+        "type": "object",
+        "title": "StockEventCancellationLineError",
+        "properties": {
+          "stockEventLineItemId": {
+            "type": "string",
+            "description": "Id of the line item that could not be cancelled."
+          },
+          "messageKey": {
+            "type": "string",
+            "description": "Message key describing why the line item is blocked."
+          },
+          "message": {
+            "type": "string",
+            "description": "Localized message describing why the line item is blocked."
+          },
+          "blockingTransactions": {
+            "type": "array",
+            "title": "blockingTransactions",
+            "items": {
+              "type": "object",
+              "title": "BlockingTransaction",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "Type of the blocking transaction, e.g. PHYSICAL_INVENTORY."
+                },
+                "occurredDate": {
+                  "type": "string",
+                  "format": "date",
+                  "description": "Occurred date of the blocking transaction."
+                },
+                "documentNumber": {
+                  "type": "string",
+                  "description": "Document number of the blocking transaction, if any."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

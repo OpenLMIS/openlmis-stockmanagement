@@ -37,6 +37,7 @@ public class StockEventHistoryDtoTest {
     StockEvent event = new StockEventDataBuilder()
         .withEventOrigin(EventOrigin.ISSUE)
         .withDocumentNumber("2026-02-FAC001-0001")
+        .withSignature("signature-user")
         .withProcessedDate(processedDate)
         .build();
 
@@ -45,6 +46,7 @@ public class StockEventHistoryDtoTest {
     assertThat(dto.getId(), is(event.getId()));
     assertThat(dto.getDocumentNumber(), is("2026-02-FAC001-0001"));
     assertThat(dto.getType(), is(EventOrigin.ISSUE));
+    assertThat(dto.getSignature(), is("signature-user"));
     assertThat(dto.getUserId(), is(event.getUserId()));
     assertThat(dto.getProcessedDate(), is(processedDate));
     assertThat(dto.getUsername(), is(nullValue()));
