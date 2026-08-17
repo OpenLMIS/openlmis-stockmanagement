@@ -186,7 +186,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 					<textElement verticalAlignment="Middle">
                         <font size="10" fontName="DejaVu Sans" isBold="true"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$R{report.header.packSize} + ($F{netcontent} == null ? "" : String.valueOf($F{netcontent}))]]></textFieldExpression>
+					<textFieldExpression><![CDATA[msg($R{report.pattern.labelledValue}, $R{report.header.packSize}, ($F{netcontent} == null ? "" : String.valueOf($F{netcontent})))]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>
