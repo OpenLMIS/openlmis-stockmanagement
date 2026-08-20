@@ -163,7 +163,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 					<textFieldExpression><![CDATA[$F{productcode}]]></textFieldExpression>
 				</textField>
 				<textField isBlankWhenNull="true">
-					<reportElement mode="Opaque" x="130" y="0" width="702" height="25" backcolor="#F2F2F2" uuid="f75fae81-e6b8-4993-898d-632ddf29d1e8"/>
+					<reportElement mode="Opaque" x="130" y="0" width="572" height="25" backcolor="#F2F2F2" uuid="f75fae81-e6b8-4993-898d-632ddf29d1e8"/>
 					<box padding="3">
 						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 						<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -174,6 +174,19 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
                         <font size="10" fontName="DejaVu Sans" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{productname}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement mode="Opaque" x="702" y="0" width="130" height="25" backcolor="#F2F2F2" uuid="0bb8ab33-a01d-4809-a63f-a65549e10eb8"/>
+					<box padding="3">
+						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+                        <font size="10" fontName="DejaVu Sans" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[msg($R{report.pattern.labelledValue}, $R{report.header.packSize}, ($F{netcontent} == null ? "" : String.valueOf($F{netcontent})))]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>
