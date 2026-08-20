@@ -108,7 +108,7 @@ public class StockEventCancelServiceTest {
     assertEquals(reason.getId(), line.getReasonId());
     assertEquals(original.getOrderableId(), line.getOrderableId());
     assertEquals(original.getQuantity(), line.getQuantity());
-    assertEquals(LocalDate.now(), line.getOccurredDate());
+    assertEquals(original.getOccurredDate(), line.getOccurredDate());
     assertNull(line.getSourceId());
     assertNull(line.getDestinationId());
   }
@@ -160,7 +160,8 @@ public class StockEventCancelServiceTest {
         .lotId(UUID.randomUUID())
         .quantity(10)
         .destinationId(UUID.randomUUID())
-        .occurredDate(LocalDate.now())
+        // Not today, so the inherited-date assertion cannot pass by coincidence.
+        .occurredDate(LocalDate.of(2026, 1, 15))
         .build();
     lineItem.setId(UUID.randomUUID());
     StockEvent event = new StockEvent();
