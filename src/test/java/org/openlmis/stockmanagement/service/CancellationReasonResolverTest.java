@@ -25,6 +25,8 @@ import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_CANCELLATION_REASON_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_CANCELLATION_REASON_REQUIRED;
+import static org.openlmis.stockmanagement.service.StockEventCancelValidationService.CANCEL_ADJUSTMENT_TAG;
+import static org.openlmis.stockmanagement.service.StockEventCancelValidationService.CANCEL_MOVEMENT_TAG;
 import static org.openlmis.stockmanagement.service.StockEventCancelValidationService.CANCEL_TAG;
 
 import java.util.HashMap;
@@ -44,6 +46,7 @@ import org.openlmis.stockmanagement.dto.StockEventCancellationLineErrorDto;
 import org.openlmis.stockmanagement.exception.StockEventCancellationException;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 
+@SuppressWarnings("PMD.TooManyMethods")
 @RunWith(MockitoJUnitRunner.class)
 public class CancellationReasonResolverTest {
 
@@ -56,7 +59,7 @@ public class CancellationReasonResolverTest {
   @Test
   public void shouldResolveReasonThatCountersIssue() {
     StockEventLineItem issue = issueLineItem();
-    StockCardLineItemReason reason = reason(ReasonType.CREDIT, CANCEL_TAG);
+    StockCardLineItemReason reason = reason(ReasonType.CREDIT, CANCEL_TAG, CANCEL_MOVEMENT_TAG);
     when(reasonRepository.findByIdIn(anyCollection())).thenReturn(singletonList(reason));
 
     Map<UUID, StockCardLineItemReason> resolved =
@@ -87,7 +90,7 @@ public class CancellationReasonResolverTest {
   @Test(expected = StockEventCancellationException.class)
   public void shouldThrowWhenReasonTypeDoesNotCounterMovement() {
     StockEventLineItem issue = issueLineItem();
-    StockCardLineItemReason reason = reason(ReasonType.DEBIT, CANCEL_TAG);
+    StockCardLineItemReason reason = reason(ReasonType.DEBIT, CANCEL_TAG, CANCEL_MOVEMENT_TAG);
     when(reasonRepository.findByIdIn(anyCollection())).thenReturn(singletonList(reason));
 
     resolver.resolve(singletonList(requested(issue.getId(), reason.getId())),
@@ -98,7 +101,7 @@ public class CancellationReasonResolverTest {
   public void shouldCollectEveryBadReasonAsAPerLineError() {
     StockEventLineItem missingReason = issueLineItem();
     StockEventLineItem wrongType = issueLineItem();
-    StockCardLineItemReason debit = reason(ReasonType.DEBIT, CANCEL_TAG);
+    StockCardLineItemReason debit = reason(ReasonType.DEBIT, CANCEL_TAG, CANCEL_MOVEMENT_TAG);
     when(reasonRepository.findByIdIn(anyCollection())).thenReturn(singletonList(debit));
 
     Map<UUID, StockEventLineItem> originals = new HashMap<>();
@@ -123,10 +126,95 @@ public class CancellationReasonResolverTest {
     }
   }
 
+  @Test
+  public void shouldResolveCreditReasonThatCountersDebitAdjustment() {
+    StockCardLineItemReason originalReason = reason(ReasonType.DEBIT);
+    StockEventLineItem adjustment = adjustmentLineItem(originalReason.getId());
+    StockCardLineItemReason reason = reason(ReasonType.CREDIT, CANCEL_TAG, CANCEL_ADJUSTMENT_TAG);
+    when(reasonRepository.findByIdIn(anyCollection()))
+        .thenReturn(asList(originalReason, reason));
+
+    Map<UUID, StockCardLineItemReason> resolved =
+        resolver.resolve(singletonList(requested(adjustment.getId(), reason.getId())),
+            singletonMap(adjustment.getId(), adjustment));
+
+    assertEquals(reason, resolved.get(adjustment.getId()));
+  }
+
+  @Test
+  public void shouldResolveDebitReasonThatCountersCreditAdjustment() {
+    StockCardLineItemReason originalReason = reason(ReasonType.CREDIT);
+    StockEventLineItem adjustment = adjustmentLineItem(originalReason.getId());
+    StockCardLineItemReason reason = reason(ReasonType.DEBIT, CANCEL_TAG, CANCEL_ADJUSTMENT_TAG);
+    when(reasonRepository.findByIdIn(anyCollection()))
+        .thenReturn(asList(originalReason, reason));
+
+    Map<UUID, StockCardLineItemReason> resolved =
+        resolver.resolve(singletonList(requested(adjustment.getId(), reason.getId())),
+            singletonMap(adjustment.getId(), adjustment));
+
+    assertEquals(reason, resolved.get(adjustment.getId()));
+  }
+
+  @Test(expected = StockEventCancellationException.class)
+  public void shouldThrowWhenReasonTypeDoesNotCounterAdjustment() {
+    StockCardLineItemReason originalReason = reason(ReasonType.DEBIT);
+    StockEventLineItem adjustment = adjustmentLineItem(originalReason.getId());
+    StockCardLineItemReason reason = reason(ReasonType.DEBIT, CANCEL_TAG, CANCEL_ADJUSTMENT_TAG);
+    when(reasonRepository.findByIdIn(anyCollection()))
+        .thenReturn(asList(originalReason, reason));
+
+    resolver.resolve(singletonList(requested(adjustment.getId(), reason.getId())),
+        singletonMap(adjustment.getId(), adjustment));
+  }
+
+  @Test(expected = StockEventCancellationException.class)
+  public void shouldThrowWhenMovementReasonIsUsedToCancelAdjustment() {
+    StockCardLineItemReason originalReason = reason(ReasonType.DEBIT);
+    StockEventLineItem adjustment = adjustmentLineItem(originalReason.getId());
+    StockCardLineItemReason reason = reason(ReasonType.CREDIT, CANCEL_TAG, CANCEL_MOVEMENT_TAG);
+    when(reasonRepository.findByIdIn(anyCollection()))
+        .thenReturn(asList(originalReason, reason));
+
+    resolver.resolve(singletonList(requested(adjustment.getId(), reason.getId())),
+        singletonMap(adjustment.getId(), adjustment));
+  }
+
+  @Test(expected = StockEventCancellationException.class)
+  public void shouldThrowWhenAdjustmentReasonIsUsedToCancelMovement() {
+    StockEventLineItem issue = issueLineItem();
+    StockCardLineItemReason reason = reason(ReasonType.CREDIT, CANCEL_TAG, CANCEL_ADJUSTMENT_TAG);
+    when(reasonRepository.findByIdIn(anyCollection())).thenReturn(singletonList(reason));
+
+    resolver.resolve(singletonList(requested(issue.getId(), reason.getId())),
+        singletonMap(issue.getId(), issue));
+  }
+
+  @Test(expected = StockEventCancellationException.class)
+  public void shouldThrowWhenOriginalAdjustmentReasonHasNoDirection() {
+    StockCardLineItemReason originalReason = reason(ReasonType.BALANCE_ADJUSTMENT);
+    StockEventLineItem adjustment = adjustmentLineItem(originalReason.getId());
+    StockCardLineItemReason reason = reason(ReasonType.CREDIT, CANCEL_TAG, CANCEL_ADJUSTMENT_TAG);
+    when(reasonRepository.findByIdIn(anyCollection()))
+        .thenReturn(asList(originalReason, reason));
+
+    resolver.resolve(singletonList(requested(adjustment.getId(), reason.getId())),
+        singletonMap(adjustment.getId(), adjustment));
+  }
+
   private StockEventLineItem issueLineItem() {
     StockEventLineItem lineItem = StockEventLineItem.builder()
         .orderableId(UUID.randomUUID())
         .destinationId(UUID.randomUUID())
+        .build();
+    lineItem.setId(UUID.randomUUID());
+    return lineItem;
+  }
+
+  private StockEventLineItem adjustmentLineItem(UUID reasonId) {
+    StockEventLineItem lineItem = StockEventLineItem.builder()
+        .orderableId(UUID.randomUUID())
+        .reasonId(reasonId)
         .build();
     lineItem.setId(UUID.randomUUID());
     return lineItem;

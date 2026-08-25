@@ -39,6 +39,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.openlmis.stockmanagement.domain.event.EventOrigin;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
@@ -85,8 +86,9 @@ public class StockEventCancelValidationServiceTest {
   }
 
   @Test
-  public void shouldReportNotCancellableWhenLineItemIsNotIssueOrReceive() {
-    StockEventLineItem lineItem = adjustmentLineItem(UUID.randomUUID());
+  public void shouldReportNotCancellableWhenLineItemIsPhysicalInventory() {
+    // a physical inventory line carries no source, destination or reason of its own
+    StockEventLineItem lineItem = reasonLineItem(UUID.randomUUID(), null);
     StockEvent event = eventWith(lineItem);
     when(stockEventLineItemRepository.findByReversesEventLineItemIdIn(anyCollection()))
         .thenReturn(emptyList());
@@ -96,6 +98,70 @@ public class StockEventCancelValidationServiceTest {
 
     assertEquals(ERROR_EVENT_LINE_ITEM_NOT_CANCELLABLE, error.getMessageKey());
     assertNull(error.getBlockingTransactions());
+  }
+
+  @Test
+  public void shouldNotThrowWhenLineItemIsManualAdjustment() {
+    UUID reasonId = UUID.randomUUID();
+    final StockEventLineItem lineItem = reasonLineItem(UUID.randomUUID(), reasonId);
+    final StockEvent event = eventWith(lineItem);
+    when(stockEventLineItemRepository.findByReversesEventLineItemIdIn(anyCollection()))
+        .thenReturn(emptyList());
+    when(reasonRepository.findByIdIn(anyCollection()))
+        .thenReturn(singletonList(reason(reasonId, ReasonCategory.ADJUSTMENT)));
+    when(physicalInventoriesRepository.findSubmittedAfterForOrderableWithoutLot(
+        any(), any(), any(), any(), any()))
+        .thenReturn(emptyList());
+
+    service.validate(event, singletonList(lineItem.getId()));
+  }
+
+  @Test
+  public void shouldReportNotCancellableWhenLineItemIsKitUnpack() {
+    UUID reasonId = UUID.randomUUID();
+    StockEventLineItem lineItem = reasonLineItem(UUID.randomUUID(), reasonId);
+    StockEvent event = eventWith(lineItem);
+    when(stockEventLineItemRepository.findByReversesEventLineItemIdIn(anyCollection()))
+        .thenReturn(emptyList());
+    when(reasonRepository.findByIdIn(anyCollection()))
+        .thenReturn(singletonList(reason(reasonId, ReasonCategory.AGGREGATION)));
+
+    StockEventCancellationLineErrorDto error =
+        assertSingleLineError(event, lineItem.getId());
+
+    assertEquals(ERROR_EVENT_LINE_ITEM_NOT_CANCELLABLE, error.getMessageKey());
+  }
+
+  @Test
+  public void shouldReportNotCancellableWhenEventHasNoOrigin() {
+    // the requisition service pushes its adjustments on approval without an event origin
+    UUID reasonId = UUID.randomUUID();
+    StockEventLineItem lineItem = reasonLineItem(UUID.randomUUID(), reasonId);
+    StockEvent event = eventWith(lineItem);
+    event.setEventOrigin(null);
+    when(stockEventLineItemRepository.findByReversesEventLineItemIdIn(anyCollection()))
+        .thenReturn(emptyList());
+    when(reasonRepository.findByIdIn(anyCollection()))
+        .thenReturn(singletonList(reason(reasonId, ReasonCategory.ADJUSTMENT)));
+
+    StockEventCancellationLineErrorDto error =
+        assertSingleLineError(event, lineItem.getId());
+
+    assertEquals(ERROR_EVENT_LINE_ITEM_NOT_CANCELLABLE, error.getMessageKey());
+  }
+
+  @Test
+  public void shouldReportNotCancellableWhenMovementEventHasNoOrigin() {
+    StockEventLineItem lineItem = issueLineItem(UUID.randomUUID());
+    StockEvent event = eventWith(lineItem);
+    event.setEventOrigin(null);
+    when(stockEventLineItemRepository.findByReversesEventLineItemIdIn(anyCollection()))
+        .thenReturn(emptyList());
+
+    StockEventCancellationLineErrorDto error =
+        assertSingleLineError(event, lineItem.getId());
+
+    assertEquals(ERROR_EVENT_LINE_ITEM_NOT_CANCELLABLE, error.getMessageKey());
   }
 
   @Test
@@ -231,6 +297,7 @@ public class StockEventCancelValidationServiceTest {
     event.setId(UUID.randomUUID());
     event.setProgramId(programId);
     event.setFacilityId(facilityId);
+    event.setEventOrigin(EventOrigin.ADJUSTMENT);
     event.setLineItems(asList(lineItems));
     return event;
   }
@@ -246,13 +313,25 @@ public class StockEventCancelValidationServiceTest {
     return lineItem;
   }
 
-  private StockEventLineItem adjustmentLineItem(UUID id) {
+  private StockEventLineItem reasonLineItem(UUID id, UUID reasonId) {
     StockEventLineItem lineItem = StockEventLineItem.builder()
         .orderableId(UUID.randomUUID())
+        .reasonId(reasonId)
         .occurredDate(LocalDate.now())
         .build();
     lineItem.setId(id);
     return lineItem;
+  }
+
+  private StockCardLineItemReason reason(UUID id, ReasonCategory category) {
+    StockCardLineItemReason reason = StockCardLineItemReason.builder()
+        .name(category + " reason")
+        .reasonType(ReasonType.DEBIT)
+        .reasonCategory(category)
+        .tags(emptyList())
+        .build();
+    reason.setId(id);
+    return reason;
   }
 
   private StockCardLineItemReason cancelReason(UUID id) {
