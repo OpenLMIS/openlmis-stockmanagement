@@ -52,6 +52,7 @@ import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
+import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonDataBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -85,6 +86,9 @@ public class StockEventCancelServiceIntegrationTest extends BaseIntegrationTest 
 
   @MockBean
   private DocumentNumberGenerator documentNumberGenerator;
+
+  @MockBean
+  OrderableReferenceDataService orderableReferenceDataService;
 
   @Autowired
   private StockEventCancelService stockEventCancelService;
@@ -143,7 +147,6 @@ public class StockEventCancelServiceIntegrationTest extends BaseIntegrationTest 
     when(securityContext.getAuthentication()).thenReturn(authentication);
     when(authentication.isClientOnly()).thenReturn(true);
     doNothing().when(permissionService).canCancelStockEvent(programId, facilityId);
-    // the real one resolves the facility through referencedata, which is not up for this test
     when(documentNumberGenerator.generate(facilityId)).thenReturn("DOC-1");
   }
 
