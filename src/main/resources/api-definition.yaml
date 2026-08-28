@@ -277,7 +277,7 @@ traits:
 
       get:
         is: [ secured, paginated ]
-        description: Get a page of issue/receive stock events (transaction history) for a facility and program.
+        description: Get a page of issue/receive/adjustment stock events (transaction history) for a facility and program.
         queryParameters:
           facilityId:
             required: true
@@ -287,7 +287,7 @@ traits:
             description: Program id the transactions belong to.
           type:
             required: false
-            description: Transaction type filter - issue, receive or all.
+            description: Transaction type filter - issue, receive, adjustment or all.
           startDate:
             required: false
             description: Inclusive lower bound of the occurred date range (ISO date).
@@ -343,7 +343,7 @@ traits:
         /cancel:
           post:
             is: [ secured ]
-            description: Cancel selected issue/receive line items of the stock event. Requires the STOCK_EVENTS_CANCEL right for the event's facility and program. Creates a reversing adjustment stock event and recalculates stock on hand.
+            description: Cancel selected issue/receive/adjustment line items of the stock event. Requires the STOCK_EVENTS_CANCEL right for the event's facility and program. Creates a reversing adjustment stock event and recalculates stock on hand.
             body:
               application/json:
                 schema: stockEventCancelDto
