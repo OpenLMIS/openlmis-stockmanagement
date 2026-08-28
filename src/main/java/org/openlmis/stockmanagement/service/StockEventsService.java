@@ -100,9 +100,12 @@ public class StockEventsService {
     StockEventHistoryDto dto = StockEventHistoryDto.newInstance(event);
     if (aggregate == null) {
       dto.setEntriesCount(0);
+      dto.setReversible(false);
     } else {
       dto.setEntriesCount(aggregate.getEntriesCount());
       dto.setOccurredDate(aggregate.getOccurredDate());
+      dto.setReversible(
+          event.getEventOrigin() != null && aggregate.getOriginalEntriesCount() > 0);
     }
     return dto;
   }

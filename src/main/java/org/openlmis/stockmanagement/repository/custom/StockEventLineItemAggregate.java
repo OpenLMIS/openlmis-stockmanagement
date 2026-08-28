@@ -27,16 +27,18 @@ public class StockEventLineItemAggregate {
 
   private final UUID stockEventId;
   private final int entriesCount;
+  private final int originalEntriesCount;
   private final LocalDate occurredDate;
 
   /**
-   * Creates an aggregate row; {@code entriesCount} comes in as a {@link Long} (from
-   * {@code COUNT(...)}) and is narrowed to an int.
+   * Creates an aggregate row; the counts arrive as {@link Long} and are narrowed to int.
+   * {@code originalEntriesCount} counts the line items that do not reverse another one.
    */
   public StockEventLineItemAggregate(UUID stockEventId, Long entriesCount,
-      LocalDate occurredDate) {
+      Long originalEntriesCount, LocalDate occurredDate) {
     this.stockEventId = stockEventId;
     this.entriesCount = entriesCount == null ? 0 : entriesCount.intValue();
+    this.originalEntriesCount = originalEntriesCount == null ? 0 : originalEntriesCount.intValue();
     this.occurredDate = occurredDate;
   }
 }

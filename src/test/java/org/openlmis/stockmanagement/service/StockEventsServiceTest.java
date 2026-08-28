@@ -128,7 +128,7 @@ public class StockEventsServiceTest {
         .thenReturn(new PageImpl<>(singletonList(event), pageable, 1));
     when(stockEventsRepository.aggregateLineItemsByEventIds(anySet()))
         .thenReturn(singletonList(new StockEventLineItemAggregate(
-            event.getId(), 3L, LocalDate.of(2026, Month.FEBRUARY, 10))));
+            event.getId(), 3L, 3L, LocalDate.of(2026, Month.FEBRUARY, 10))));
 
     Page<StockEventHistoryDto> result = stockEventsService.search(params, pageable);
 
@@ -136,6 +136,42 @@ public class StockEventsServiceTest {
 
     assertThat(dto.getEntriesCount(), is(3));
     assertThat(dto.getOccurredDate(), is(LocalDate.of(2026, Month.FEBRUARY, 10)));
+  }
+
+  @Test
+  public void searchShouldMarkEventReversibleWhenItHasNonCancellationLineItems() {
+    StockEvent event = new StockEventDataBuilder()
+        .withEventOrigin(EventOrigin.ADJUSTMENT).build();
+    StockEventSearchParams params = new StockEventSearchParams(randomUUID(), randomUUID(),
+        singletonList(EventOrigin.ADJUSTMENT), null, null, null);
+
+    when(stockEventsRepository.search(params, pageable))
+        .thenReturn(new PageImpl<>(singletonList(event), pageable, 1));
+    when(stockEventsRepository.aggregateLineItemsByEventIds(anySet()))
+        .thenReturn(singletonList(new StockEventLineItemAggregate(
+            event.getId(), 4L, 1L, LocalDate.of(2026, Month.FEBRUARY, 10))));
+
+    Page<StockEventHistoryDto> result = stockEventsService.search(params, pageable);
+
+    assertThat(result.getContent().get(0).getReversible(), is(true));
+  }
+
+  @Test
+  public void searchShouldNotMarkEventReversibleWhenEveryLineItemIsACancellation() {
+    StockEvent event = new StockEventDataBuilder()
+        .withEventOrigin(EventOrigin.ADJUSTMENT).build();
+    StockEventSearchParams params = new StockEventSearchParams(randomUUID(), randomUUID(),
+        singletonList(EventOrigin.ADJUSTMENT), null, null, null);
+
+    when(stockEventsRepository.search(params, pageable))
+        .thenReturn(new PageImpl<>(singletonList(event), pageable, 1));
+    when(stockEventsRepository.aggregateLineItemsByEventIds(anySet()))
+        .thenReturn(singletonList(new StockEventLineItemAggregate(
+            event.getId(), 3L, 0L, LocalDate.of(2026, Month.FEBRUARY, 10))));
+
+    Page<StockEventHistoryDto> result = stockEventsService.search(params, pageable);
+
+    assertThat(result.getContent().get(0).getReversible(), is(false));
   }
 
   @Test
@@ -304,7 +340,8 @@ public class StockEventsServiceTest {
     when(stockEventsRepository.findById(eventId)).thenReturn(Optional.of(event));
     when(stockEventsRepository.aggregateLineItemsByEventIds(anySet()))
         .thenReturn(singletonList(
-            new StockEventLineItemAggregate(eventId, 3L, LocalDate.of(2026, Month.FEBRUARY, 10))));
+            new StockEventLineItemAggregate(
+            eventId, 3L, 3L, LocalDate.of(2026, Month.FEBRUARY, 10))));
     when(userReferenceDataService.findUsersByIds(anySet()))
         .thenReturn(singletonList(userDto(user, ALICE)));
 
