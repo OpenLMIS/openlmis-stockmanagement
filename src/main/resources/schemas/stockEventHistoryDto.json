@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "title": "StockEventHistoryDto",
-  "description": "A single transaction history row (issue or receive stock event).",
+  "description": "A single transaction history row (issue, receive or adjustment stock event).",
   "properties": {
     "id": {
       "type": "string",
@@ -14,7 +14,7 @@
     },
     "type": {
       "type": "string",
-      "enum": ["ISSUE", "RECEIVE"],
+      "enum": ["ISSUE", "RECEIVE", "ADJUSTMENT"],
       "description": "Transaction type, read from the event origin."
     },
     "signature": {
@@ -40,6 +40,10 @@
     "username": {
       "type": ["string", "null"],
       "description": "Resolved username of the user who performed the transaction."
+    },
+    "reversible": {
+      "type": ["boolean", "null"],
+      "description": "Whether the event holds at least one line item that does not reverse another one, i.e. whether anything in it can still be cancelled."
     }
   },
   "required": ["id", "type"]

@@ -16,7 +16,8 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptySet;
+import static java.util.Collections.emptyMap;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
@@ -52,14 +53,17 @@ import org.openlmis.stockmanagement.util.Message;
 import org.springframework.stereotype.Service;
 
 /**
- * Validates that selected line items of an issue/receive stock event may be cancelled. Every
- * per-line failure is collected so the caller learns about all blocking line items at once.
+ * Validates that selected line items of a stock event may be cancelled - a movement recorded as an
+ * issue, a receive or an adjustment. Every per-line failure is collected so the caller learns about
+ * all blocking line items at once.
  */
 @Service
 @RequiredArgsConstructor
 public class StockEventCancelValidationService {
 
   static final String CANCEL_TAG = "cancel";
+  static final String CANCEL_MOVEMENT_TAG = "cancelMovement";
+  static final String CANCEL_ADJUSTMENT_TAG = "cancelAdjustment";
   static final String PHYSICAL_INVENTORY_TYPE = "PHYSICAL_INVENTORY";
 
   private final StockEventLineItemRepository stockEventLineItemRepository;
@@ -80,7 +84,7 @@ public class StockEventCancelValidationService {
 
     List<StockEventLineItem> selected = resolveSelectedLineItems(event, lineItemIdsToCancel);
     List<CancellationRule> rules = cancellationRules(event,
-        findAlreadyCancelledIds(lineItemIdsToCancel), findCancelReasonIds(selected));
+        findAlreadyCancelledIds(lineItemIdsToCancel), findReasons(selected));
 
     List<StockEventCancellationLineErrorDto> errors = new ArrayList<>();
     for (StockEventLineItem lineItem : selected) {
@@ -99,15 +103,29 @@ public class StockEventCancelValidationService {
   // The ordered checks a line item must pass to be cancellable; the first failing one is reported.
   // A new cancellation constraint is added here rather than by editing the validation loop.
   private List<CancellationRule> cancellationRules(StockEvent event,
-      Set<UUID> alreadyCancelledIds, Set<UUID> cancelReasonIds) {
+      Set<UUID> alreadyCancelledIds, Map<UUID, StockCardLineItemReason> reasonsById) {
     return asList(
-        lineItem -> isCancellationReason(lineItem, cancelReasonIds)
+        // Must stay first: a cancellation is an adjustment too, so this is the only rule keeping a
+        // reversal from being reversed.
+        lineItem -> isCancellationReason(lineItem, reasonsById)
             ? lineError(lineItem, ERROR_EVENT_LINE_ITEM_IS_CANCELLATION, null) : null,
-        lineItem -> !lineItem.isMovement()
+        lineItem -> !isCancellable(event, lineItem, reasonsById)
             ? lineError(lineItem, ERROR_EVENT_LINE_ITEM_NOT_CANCELLABLE, null) : null,
         lineItem -> alreadyCancelledIds.contains(lineItem.getId())
             ? lineError(lineItem, ERROR_EVENT_LINE_ITEM_ALREADY_CANCELLED, null) : null,
         lineItem -> blockedByPhysicalInventory(event, lineItem));
+  }
+
+  private boolean isCancellable(StockEvent event, StockEventLineItem lineItem,
+      Map<UUID, StockCardLineItemReason> reasonsById) {
+    if (event.getEventOrigin() == null) {
+      return false;
+    }
+    if (lineItem.isMovement()) {
+      return true;
+    }
+    StockCardLineItemReason reason = reasonsById.get(lineItem.getReasonId());
+    return reason != null && reason.isAdjustmentReasonCategory();
   }
 
   private StockEventCancellationLineErrorDto blockedByPhysicalInventory(StockEvent event,
@@ -141,22 +159,22 @@ public class StockEventCancelValidationService {
         .collect(toSet());
   }
 
-  private Set<UUID> findCancelReasonIds(List<StockEventLineItem> lineItems) {
+  private Map<UUID, StockCardLineItemReason> findReasons(List<StockEventLineItem> lineItems) {
     Set<UUID> reasonIds = lineItems.stream()
         .map(StockEventLineItem::getReasonId)
         .filter(Objects::nonNull)
         .collect(toSet());
     if (reasonIds.isEmpty()) {
-      return emptySet();
+      return emptyMap();
     }
     return reasonRepository.findByIdIn(reasonIds).stream()
-        .filter(reason -> reason.getTags().contains(CANCEL_TAG))
-        .map(StockCardLineItemReason::getId)
-        .collect(toSet());
+        .collect(toMap(StockCardLineItemReason::getId, identity()));
   }
 
-  private boolean isCancellationReason(StockEventLineItem lineItem, Set<UUID> cancelReasonIds) {
-    return lineItem.getReasonId() != null && cancelReasonIds.contains(lineItem.getReasonId());
+  private boolean isCancellationReason(StockEventLineItem lineItem,
+      Map<UUID, StockCardLineItemReason> reasonsById) {
+    StockCardLineItemReason reason = reasonsById.get(lineItem.getReasonId());
+    return reason != null && reason.getTags().contains(CANCEL_TAG);
   }
 
   private List<BlockingTransactionDto> findBlockingInventories(StockEvent event,

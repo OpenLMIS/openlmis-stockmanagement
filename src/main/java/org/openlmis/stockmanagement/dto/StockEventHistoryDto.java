@@ -40,6 +40,7 @@ public class StockEventHistoryDto {
   private Integer entriesCount;
   private UUID userId;
   private String username;
+  private Boolean reversible;
 
   /**
    * Creates a history row DTO from a stock event's scalar fields. The line-item-derived fields

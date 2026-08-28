@@ -33,11 +33,12 @@ public interface StockEventsRepository extends
    * does not trigger an N+1 over each event's line items.
    *
    * @param eventIds the stock event ids of the current page.
-   * @return one aggregate (event id, line item entry count, earliest occurred date) per event
-   *         that has line items.
+   * @return one aggregate (event id, entry count, non-cancellation entry count, earliest
+   *         occurred date) per event that has line items.
    */
   @Query("SELECT new org.openlmis.stockmanagement.repository.custom.StockEventLineItemAggregate("
       + "lineItem.stockEvent.id, COUNT(lineItem),"
+      + " SUM(CASE WHEN lineItem.reversesEventLineItemId IS NULL THEN 1 ELSE 0 END),"
       + " MIN(lineItem.occurredDate))"
       + " FROM StockEventLineItem lineItem"
       + " WHERE lineItem.stockEvent.id IN :eventIds"

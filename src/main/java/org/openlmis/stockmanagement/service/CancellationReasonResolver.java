@@ -22,6 +22,9 @@ import static java.util.stream.Collectors.toSet;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_CANCELLATION_REASON_INVALID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_CANCELLATION_REASON_REQUIRED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_CANCELLATION_VALIDATION;
+import static org.openlmis.stockmanagement.service.StockEventCancelValidationService.CANCEL_ADJUSTMENT_TAG;
+import static org.openlmis.stockmanagement.service.StockEventCancelValidationService.CANCEL_MOVEMENT_TAG;
+import static org.openlmis.stockmanagement.service.StockEventCancelValidationService.CANCEL_TAG;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,6 +34,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
@@ -42,8 +46,9 @@ import org.springframework.stereotype.Service;
 
 /**
  * Loads and validates the cancellation reason chosen for each line item selected for cancellation.
- * A valid reason is a cancel-tagged ADJUSTMENT reason whose type counters the original movement: an
- * issue is reversed with a credit, a receive with a debit.
+ * A valid reason is a cancel-tagged ADJUSTMENT reason scoped to the kind of line being undone and
+ * of the type that counters it: an issue is reversed with a credit, a receive with a debit and an
+ * adjustment with the opposite of its own type.
  */
 @Service
 @RequiredArgsConstructor
@@ -61,7 +66,7 @@ public class CancellationReasonResolver {
   public Map<UUID, StockCardLineItemReason> resolve(
       Collection<StockEventCancelLineItemDto> requested,
       Map<UUID, StockEventLineItem> originalById) {
-    Map<UUID, StockCardLineItemReason> loaded = loadReasons(requested);
+    Map<UUID, StockCardLineItemReason> loaded = loadReasons(requested, originalById.values());
     Map<UUID, StockCardLineItemReason> resolved = new HashMap<>();
     List<StockEventCancellationLineErrorDto> errors = new ArrayList<>();
     for (StockEventCancelLineItemDto line : requested) {
@@ -80,9 +85,12 @@ public class CancellationReasonResolver {
   }
 
   private Map<UUID, StockCardLineItemReason> loadReasons(
-      Collection<StockEventCancelLineItemDto> requested) {
-    Set<UUID> reasonIds = requested.stream()
-        .map(StockEventCancelLineItemDto::getReasonId)
+      Collection<StockEventCancelLineItemDto> requested,
+      Collection<StockEventLineItem> originals) {
+    Set<UUID> reasonIds = Stream
+        .concat(
+            requested.stream().map(StockEventCancelLineItemDto::getReasonId),
+            originals.stream().map(StockEventLineItem::getReasonId))
         .filter(Objects::nonNull)
         .collect(toSet());
     if (reasonIds.isEmpty()) {
@@ -93,7 +101,7 @@ public class CancellationReasonResolver {
   }
 
   // Returns the validated cancellation reason for the line, or null - recording a per-line error -
-  // when the reason is missing or is not a cancel-tagged ADJUSTMENT that counters the movement.
+  // when the reason is missing or is not a cancel-tagged ADJUSTMENT that counters the line.
   private StockCardLineItemReason reasonOrError(StockEventCancelLineItemDto requested,
       StockEventLineItem original, Map<UUID, StockCardLineItemReason> reasonsById,
       List<StockEventCancellationLineErrorDto> errors) {
@@ -105,8 +113,8 @@ public class CancellationReasonResolver {
     StockCardLineItemReason reason = reasonsById.get(reasonId);
     if (reason == null
         || !reason.isAdjustmentReasonCategory()
-        || !reason.getTags().contains(StockEventCancelValidationService.CANCEL_TAG)
-        || !countersMovement(original, reason)) {
+        || !reason.getTags().contains(CANCEL_TAG)
+        || !counters(original, reason, reasonsById)) {
       errors.add(lineError(requested, ERROR_EVENT_CANCELLATION_REASON_INVALID));
       return null;
     }
@@ -119,10 +127,20 @@ public class CancellationReasonResolver {
         requested.getStockEventLineItemId(), messageKey, null, null);
   }
 
-  private boolean countersMovement(StockEventLineItem original, StockCardLineItemReason reason) {
-    // an issue (has a destination) is reversed with a credit; a receive (has a source) with a debit
-    return original.isIssue()
-        ? reason.isCreditReasonType()
-        : reason.isDebitReasonType();
+  private boolean counters(StockEventLineItem original, StockCardLineItemReason reason,
+      Map<UUID, StockCardLineItemReason> reasonsById) {
+    if (original.isMovement()) {
+      return reason.getTags().contains(CANCEL_MOVEMENT_TAG)
+          && (original.isIssue() ? reason.isCreditReasonType() : reason.isDebitReasonType());
+    }
+    // An adjustment has no source or destination, so its direction comes from its own reason type.
+    StockCardLineItemReason originalReason = reasonsById.get(original.getReasonId());
+    if (originalReason == null || !reason.getTags().contains(CANCEL_ADJUSTMENT_TAG)) {
+      return false;
+    }
+    if (originalReason.isDebitReasonType()) {
+      return reason.isCreditReasonType();
+    }
+    return originalReason.isCreditReasonType() && reason.isDebitReasonType();
   }
 }
