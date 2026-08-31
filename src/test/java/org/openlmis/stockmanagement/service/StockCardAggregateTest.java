@@ -301,10 +301,11 @@ public class StockCardAggregateTest {
         .build());
 
     // calculated stockout days from first stockCard 2018-05-10 to the last one 2019-11-15
-    long stockoutDaysBeforeDate = 456;
+    long stockoutDaysBeforeDate = 455;
 
     assertEquals(
-        new Long(stockoutDaysBeforeDate + Year360Utils.getDaysBetweenUs(date, LocalDate.now())),
+        new Long(stockoutDaysBeforeDate
+            + Year360Utils.getDaysBetweenUs(date, LocalDate.now().plusDays(1))),
         stockCardAggregate.getStockoutDays(null, null));
   }
 

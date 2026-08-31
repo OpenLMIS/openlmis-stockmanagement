@@ -21,7 +21,6 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LINE_ITE
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LINE_ITEM_MISSING_ID;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_STOCK_EVENT_NOT_FOUND;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -114,7 +113,7 @@ public class StockEventCancelService {
           .orderableId(original.getOrderableId())
           .lotId(original.getLotId())
           .quantity(original.getQuantity())
-          .occurredDate(LocalDate.now())
+          .occurredDate(original.getOccurredDate())
           .reasonId(reason.getId())
           .reasonFreeText(requested.getReasonFreeText())
           .reversesEventLineItemId(original.getId())
