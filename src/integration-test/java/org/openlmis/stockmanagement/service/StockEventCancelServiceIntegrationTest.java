@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -69,6 +70,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class StockEventCancelServiceIntegrationTest extends BaseIntegrationTest {
 
   private static final String CANCEL_TAG = "cancel";
+  private static final String CANCEL_MOVEMENT_TAG = "cancelMovement";
   private static final LocalDate MOVEMENT_DATE = LocalDate.now().minusDays(45);
   private static final LocalDate MID_HISTORY = LocalDate.now().minusDays(20);
 
@@ -138,10 +140,10 @@ public class StockEventCancelServiceIntegrationTest extends BaseIntegrationTest 
 
     cancelledIssue = reasonRepository.save(new StockCardLineItemReasonDataBuilder()
         .withoutId().withName("IT cancelled issue").withCreditType().withAdjustmentCategory()
-        .withTags(singletonList(CANCEL_TAG)).build());
+        .withTags(asList(CANCEL_TAG, CANCEL_MOVEMENT_TAG)).build());
     cancelledReceipt = reasonRepository.save(new StockCardLineItemReasonDataBuilder()
         .withoutId().withName("IT cancelled receipt").withDebitType().withAdjustmentCategory()
-        .withTags(singletonList(CANCEL_TAG)).build());
+        .withTags(asList(CANCEL_TAG, CANCEL_MOVEMENT_TAG)).build());
 
     SecurityContextHolder.setContext(securityContext);
     when(securityContext.getAuthentication()).thenReturn(authentication);
