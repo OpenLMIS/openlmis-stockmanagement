@@ -24,7 +24,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_CANCELLA
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_CANCELLATION_VALIDATION;
 import static org.openlmis.stockmanagement.service.StockEventCancelValidationService.CANCEL_ADJUSTMENT_TAG;
 import static org.openlmis.stockmanagement.service.StockEventCancelValidationService.CANCEL_MOVEMENT_TAG;
-import static org.openlmis.stockmanagement.service.StockEventCancelValidationService.CANCEL_TAG;
+import static org.openlmis.stockmanagement.service.StockEventCancelValidationService.isCancelReason;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -113,7 +113,7 @@ public class CancellationReasonResolver {
     StockCardLineItemReason reason = reasonsById.get(reasonId);
     if (reason == null
         || !reason.isAdjustmentReasonCategory()
-        || !reason.getTags().contains(CANCEL_TAG)
+        || !isCancelReason(reason)
         || !counters(original, reason, reasonsById)) {
       errors.add(lineError(requested, ERROR_EVENT_CANCELLATION_REASON_INVALID));
       return null;

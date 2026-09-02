@@ -28,7 +28,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LINE_ITE
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LINE_ITEM_BLOCKED_PHYSICAL_INVENTORY;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LINE_ITEM_IS_CANCELLATION;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LINE_ITEM_NOT_CANCELLABLE;
-import static org.openlmis.stockmanagement.service.StockEventCancelValidationService.CANCEL_TAG;
+import static org.openlmis.stockmanagement.service.StockEventCancelValidationService.CANCEL_MOVEMENT_TAG;
 import static org.openlmis.stockmanagement.service.StockEventCancelValidationService.PHYSICAL_INVENTORY_TYPE;
 
 import java.time.LocalDate;
@@ -339,7 +339,7 @@ public class StockEventCancelValidationServiceTest {
         .name("Cancelled issue")
         .reasonType(ReasonType.CREDIT)
         .reasonCategory(ReasonCategory.ADJUSTMENT)
-        .tags(singletonList(CANCEL_TAG))
+        .tags(singletonList(CANCEL_MOVEMENT_TAG))
         .build();
     reason.setId(id);
     return reason;

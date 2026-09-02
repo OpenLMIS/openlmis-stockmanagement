@@ -61,9 +61,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class StockEventCancelValidationService {
 
-  static final String CANCEL_TAG = "cancel";
   static final String CANCEL_MOVEMENT_TAG = "cancelMovement";
   static final String CANCEL_ADJUSTMENT_TAG = "cancelAdjustment";
+  // Add a new cancel scope here and every "is this a cancel reason" check picks it up.
+  private static final List<String> CANCEL_TAGS =
+      asList(CANCEL_MOVEMENT_TAG, CANCEL_ADJUSTMENT_TAG);
   static final String PHYSICAL_INVENTORY_TYPE = "PHYSICAL_INVENTORY";
 
   private final StockEventLineItemRepository stockEventLineItemRepository;
@@ -173,8 +175,11 @@ public class StockEventCancelValidationService {
 
   private boolean isCancellationReason(StockEventLineItem lineItem,
       Map<UUID, StockCardLineItemReason> reasonsById) {
-    StockCardLineItemReason reason = reasonsById.get(lineItem.getReasonId());
-    return reason != null && reason.getTags().contains(CANCEL_TAG);
+    return isCancelReason(reasonsById.get(lineItem.getReasonId()));
+  }
+
+  static boolean isCancelReason(StockCardLineItemReason reason) {
+    return reason != null && reason.getTags().stream().anyMatch(CANCEL_TAGS::contains);
   }
 
   private List<BlockingTransactionDto> findBlockingInventories(StockEvent event,
