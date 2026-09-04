@@ -75,7 +75,7 @@ public class StockEventProcessor {
 
   @PersistenceContext
   private EntityManager entityManager;
-  
+
   @Autowired
   private DocumentNumberGenerator documentNumberGenerator;
 
@@ -158,12 +158,15 @@ public class StockEventProcessor {
 
       profiler.start("SUBMIT_PHYSICAL_INVENTORY");
       physicalInventoryService.submitPhysicalInventory(inventoryDto, savedEventId);
+
+      profiler.start("FLUSH");
+      entityManager.flush();
+      entityManager.clear();
     }
     profiler.start("SORT_EVENT_LINE_ITEMS");
     sortEventDtos(eventDto);
 
-    profiler.start("SAVE_FROM_EVENT");
-    stockCardService.saveFromEvent(eventDto, savedEventId);
+    stockCardService.saveFromEvent(eventDto, savedEventId, profiler.startNested("SAVE_FROM_EVENT"));
 
     profiler.start("CALL_NOTIFICATIONS");
     stockEventNotificationProcessor.callAllNotifications(eventDto);

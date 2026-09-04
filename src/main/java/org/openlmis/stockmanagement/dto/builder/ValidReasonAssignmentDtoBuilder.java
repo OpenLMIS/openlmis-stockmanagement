@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
+import org.openlmis.stockmanagement.dto.StockCardLineItemReasonDto;
 import org.openlmis.stockmanagement.dto.ValidReasonAssignmentDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -65,9 +66,13 @@ public class ValidReasonAssignmentDtoBuilder {
 
   private ValidReasonAssignmentDto export(ValidReasonAssignment reasonAssignment) {
     ValidReasonAssignmentDto dto = new ValidReasonAssignmentDto();
+    dto.setId(reasonAssignment.getId());
     dto.setServiceUrl(serviceUrl);
-    reasonAssignment.export(dto);
-
+    dto.setFacilityTypeId(reasonAssignment.getFacilityTypeId());
+    dto.setProgramId(reasonAssignment.getProgramId());
+    dto.setHidden(reasonAssignment.getHidden());
+    dto.setReason(reasonAssignment.getReason() != null
+        ? StockCardLineItemReasonDto.newInstance(reasonAssignment.getReason()) : null);
     return dto;
   }
 }

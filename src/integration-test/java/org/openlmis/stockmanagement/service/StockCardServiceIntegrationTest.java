@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -35,6 +36,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import javax.transaction.Transactional;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -72,6 +74,7 @@ import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataSe
 import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
+import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -82,6 +85,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SuppressWarnings("PMD.TooManyMethods")
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Transactional
 public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
   @Autowired
@@ -150,7 +154,7 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     nodeRepository.save(node);
 
     reason = new StockCardLineItemReason("reason", null, ReasonType.CREDIT,
-        ReasonCategory.ADJUSTMENT, false, Collections.emptyList());
+        ReasonCategory.ADJUSTMENT, false, Collections.emptySet());
     stockCardLineItemReasonRepository.save(reason);
 
     when(homeFacilityPermissionService.checkFacilityAndHomeFacilityLinkage(any(UUID.class)))
@@ -177,10 +181,12 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     stockEventDto.getLineItems().get(0).setDestinationId(node.getId());
     StockEvent savedEvent = save(stockEventDto, userId);
 
-    stockCardService.saveFromEvent(stockEventDto, savedEvent.getId());
+    Profiler profilerMock = mock(Profiler.class);
+    when(profilerMock.startNested(anyString())).thenReturn(profilerMock);
+    stockCardService.saveFromEvent(stockEventDto, savedEvent.getId(), profilerMock);
 
     StockCard savedCard = stockCardRepository.findByOriginEvent(savedEvent);
-    StockCardLineItem firstLineItem = savedCard.getLineItems().get(0);
+    StockCardLineItem firstLineItem = savedCard.getSortedLineItems().get(0);
 
     assertThat(firstLineItem.getUserId(), is(userId));
     assertThat(firstLineItem.getSource().isRefDataFacility(), is(false));
@@ -218,7 +224,7 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     long cardAmountAfterSave = stockCardRepository.count();
 
     StockCard savedCard = stockCardRepository.findByOriginEvent(existingEvent);
-    List<StockCardLineItem> lineItems = savedCard.getLineItems();
+    List<StockCardLineItem> lineItems = savedCard.getSortedLineItems();
     lineItems.sort(Comparator.comparing(StockCardLineItem::getProcessedDate));
     StockCardLineItem latestLineItem = lineItems.get(lineItems.size() - 1);
 
@@ -425,7 +431,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
     StockEvent event = eventDto.toEvent();
     StockEvent savedEvent = stockEventsRepository.save(event);
     // saveFromEvent already creates the row for this (stockCard, occurredDate); no second insert.
-    stockCardService.saveFromEvent(eventDto, savedEvent.getId());
+    Profiler profiler = mock(Profiler.class);
+    when(profiler.startNested(anyString())).thenReturn(profiler);
+    stockCardService.saveFromEvent(eventDto, savedEvent.getId(), profiler);
 
     return savedEvent;
   }

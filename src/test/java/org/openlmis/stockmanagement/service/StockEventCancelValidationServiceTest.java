@@ -17,6 +17,8 @@ package org.openlmis.stockmanagement.service;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -328,7 +330,7 @@ public class StockEventCancelValidationServiceTest {
         .name(category + " reason")
         .reasonType(ReasonType.DEBIT)
         .reasonCategory(category)
-        .tags(emptyList())
+        .tags(emptySet())
         .build();
     reason.setId(id);
     return reason;
@@ -339,7 +341,7 @@ public class StockEventCancelValidationServiceTest {
         .name("Cancelled issue")
         .reasonType(ReasonType.CREDIT)
         .reasonCategory(ReasonCategory.ADJUSTMENT)
-        .tags(singletonList(CANCEL_MOVEMENT_TAG))
+        .tags(singleton(CANCEL_MOVEMENT_TAG))
         .build();
     reason.setId(id);
     return reason;

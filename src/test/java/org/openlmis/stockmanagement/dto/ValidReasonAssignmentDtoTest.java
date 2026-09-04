@@ -15,26 +15,22 @@
 
 package org.openlmis.stockmanagement.dto;
 
-import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
-import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
+import static org.junit.Assert.assertEquals;
 
-@Setter
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-public class StockEventAdjustmentDto {
-  private UUID reasonId;
-  private Integer quantity;
+import org.junit.Test;
+import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
+import org.openlmis.stockmanagement.testutils.ValidReasonAssignmentDataBuilder;
 
-  PhysicalInventoryLineItemAdjustment toPhysicalInventoryLineItemAdjustment() {
-    StockCardLineItemReason reason = new StockCardLineItemReason();
-    reason.setId(reasonId);
+public class ValidReasonAssignmentDtoTest {
+  @Test
+  public void shouldCreateFromEntity() {
+    final ValidReasonAssignment validReason = new ValidReasonAssignmentDataBuilder().build();
+    final ValidReasonAssignmentDto dto = ValidReasonAssignmentDto.newInstance(validReason);
 
-    return new PhysicalInventoryLineItemAdjustment(null, null, null, reason, quantity);
+    assertEquals(validReason.getId(), dto.getId());
+    assertEquals(validReason.getProgramId(), dto.getProgramId());
+    assertEquals(validReason.getFacilityTypeId(), dto.getFacilityTypeId());
+    assertEquals(validReason.getHidden(), dto.getHidden());
+    assertEquals(StockCardLineItemReasonDto.newInstance(validReason.getReason()), dto.getReason());
   }
 }

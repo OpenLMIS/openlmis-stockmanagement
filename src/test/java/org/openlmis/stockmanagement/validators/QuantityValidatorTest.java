@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.util.Lists.newArrayList;
@@ -124,7 +125,7 @@ public class QuantityValidatorTest extends BaseValidatorTest {
         firstDate.plusDays(1), 10);
 
     StockCard card = new StockCard();
-    card.setLineItems(newArrayList(lineItem));
+    card.setLineItems(singleton(lineItem));
 
     StockEventDto event = spy(createPhysicalInventoryEventDto(firstDate.plusDays(2), 5,
         singletonList(createDebitAdjustment(5))));
@@ -142,7 +143,7 @@ public class QuantityValidatorTest extends BaseValidatorTest {
         firstDate.plusDays(1), 15);
 
     StockCard card = new StockCard();
-    card.setLineItems(singletonList(lineItem));
+    card.setLineItems(singleton(lineItem));
 
     StockEventDto event = spy(createPhysicalInventoryEventDto(firstDate.plusDays(2), 5,
         singletonList(createCreditAdjustment(-2))));
@@ -156,7 +157,7 @@ public class QuantityValidatorTest extends BaseValidatorTest {
     StockCardLineItem lineItem = createCreditLineItem(firstDate.plusDays(1), 15);
 
     StockCard card = new StockCard();
-    card.setLineItems(newArrayList(lineItem));
+    card.setLineItems(singleton(lineItem));
 
     StockEventDto event = createPhysicalInventoryEventDto(firstDate.plusDays(2), 5, null);
     mockCardFound(event, card);
@@ -170,7 +171,7 @@ public class QuantityValidatorTest extends BaseValidatorTest {
         firstDate.plusDays(1), 15);
 
     StockCard card = new StockCard();
-    card.setLineItems(newArrayList(lineItem));
+    card.setLineItems(singleton(lineItem));
 
     StockEventDto event = spy(createPhysicalInventoryEventDto(firstDate.plusDays(2), 5,
         singletonList(createCreditAdjustment(5))));

@@ -15,7 +15,7 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -314,7 +314,7 @@ public class StockCardSummariesService extends StockCardBaseService {
             .facilityId(facilityId)
             .orderableId(orderableLot.getOrderableId())
             .lotId(orderableLot.getLotId())
-            .lineItems(emptyList())//dummy cards don't have line items
+            .lineItems(emptySet())//dummy cards don't have line items
             .build());
   }
 

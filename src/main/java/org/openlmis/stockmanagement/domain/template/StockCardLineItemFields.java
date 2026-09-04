@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.domain.template;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -32,11 +33,11 @@ import org.openlmis.stockmanagement.domain.BaseEntity;
 @Table(name = "stock_card_line_item_fields", schema = "stockmanagement")
 public class StockCardLineItemFields extends BaseEntity {
 
-  @ManyToOne()
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn()
   private StockCardTemplate stockCardTemplate;
 
-  @ManyToOne()
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn()
   private AvailableStockCardLineItemFields availableStockCardLineItemFields;
 

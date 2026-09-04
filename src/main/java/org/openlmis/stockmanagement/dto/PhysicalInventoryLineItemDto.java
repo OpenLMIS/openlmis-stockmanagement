@@ -15,10 +15,11 @@
 
 package org.openlmis.stockmanagement.dto;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,6 +29,7 @@ import org.openlmis.stockmanagement.domain.identity.IdentifiableByOrderableLot;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
+import org.openlmis.stockmanagement.dto.physicalinventory.PhysicalInventoryLineItemAdjustmentDto;
 
 @Data
 @NoArgsConstructor
@@ -38,7 +40,7 @@ public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot,
   private UUID lotId;
   private Integer stockOnHand;
   private Integer quantity;
-  private List<PhysicalInventoryLineItemAdjustment> stockAdjustments;
+  private List<PhysicalInventoryLineItemAdjustmentDto> stockAdjustments;
   private Map<String, String> extraData;
 
   /**
@@ -48,13 +50,18 @@ public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot,
    * @return the converted jpa model.
    */
   public PhysicalInventoryLineItem toPhysicalInventoryLineItem(PhysicalInventory inventory) {
-    return PhysicalInventoryLineItem.builder()
+    final PhysicalInventoryLineItem item = PhysicalInventoryLineItem.builder()
         .orderableId(getOrderableId())
         .lotId(getLotId())
         .quantity(quantity)
-        .stockAdjustments(stockAdjustments)
         .extraData(extraData)
         .physicalInventory(inventory).build();
+
+    item.setStockAdjustments(stockAdjustments != null ? stockAdjustments.stream().map(
+        stockAdjustment -> PhysicalInventoryLineItemAdjustment.newInstance(item, stockAdjustment))
+        .collect(toList()) : null);
+
+    return item;
   }
 
   /**
@@ -64,14 +71,25 @@ public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot,
    * @return created dto.
    */
   public static PhysicalInventoryLineItemDto from(PhysicalInventoryLineItem lineItem) {
-    return PhysicalInventoryLineItemDto
-        .builder()
-        .quantity(lineItem.getQuantity())
-        .stockAdjustments(lineItem.getStockAdjustments())
-        .extraData(lineItem.getExtraData())
-        .orderableId(lineItem.getOrderableId())
-        .lotId(lineItem.getLotId())
-        .build();
+    return PhysicalInventoryLineItemDto.builder().quantity(lineItem.getQuantity()).stockAdjustments(
+        lineItem.getStockAdjustments() != null
+            ? lineItem.getStockAdjustments().stream()
+                .map(PhysicalInventoryLineItemAdjustmentDto::new)
+                .collect(toList()) : null).extraData(lineItem.getExtraData())
+        .orderableId(lineItem.getOrderableId()).lotId(lineItem.getLotId()).build();
+  }
+
+  /**
+   * Create from Stock Event line item.
+   *
+   * @param lineItem stock event line item, not null
+   * @return new Dto, never null
+   */
+  public static PhysicalInventoryLineItemDto from(StockEventLineItemDto lineItem) {
+    return PhysicalInventoryLineItemDto.builder().quantity(lineItem.getQuantity()).stockAdjustments(
+        lineItem.stockAdjustments().stream().map(PhysicalInventoryLineItemAdjustmentDto::new)
+            .collect(toList())).extraData(lineItem.getExtraData())
+        .orderableId(lineItem.getOrderableId()).lotId(lineItem.getLotId()).build();
   }
 
   /**
@@ -83,14 +101,7 @@ public class PhysicalInventoryLineItemDto implements IdentifiableByOrderableLot,
   public static List<PhysicalInventoryLineItemDto> from(List<StockEventLineItemDto> lineItems) {
     return lineItems
         .stream()
-        .map(lineItem -> PhysicalInventoryLineItemDto
-            .builder()
-            .quantity(lineItem.getQuantity())
-            .stockAdjustments(lineItem.stockAdjustments())
-            .extraData(lineItem.getExtraData())
-            .orderableId(lineItem.getOrderableId())
-            .lotId(lineItem.getLotId())
-            .build())
-        .collect(Collectors.toList());
+        .map(PhysicalInventoryLineItemDto::from)
+        .collect(toList());
   }
 }

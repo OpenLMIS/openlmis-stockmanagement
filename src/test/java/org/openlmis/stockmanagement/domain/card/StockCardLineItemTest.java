@@ -17,8 +17,10 @@ package org.openlmis.stockmanagement.domain.card;
 
 import static java.time.ZonedDateTime.now;
 import static java.time.temporal.ChronoUnit.SECONDS;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertEquals;
@@ -29,13 +31,14 @@ import static org.openlmis.stockmanagement.domain.card.StockCardLineItem.createL
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventAdjustmentDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
@@ -56,7 +59,7 @@ public class StockCardLineItemTest {
   public void shouldCreateLineItemFromStockEvent() {
     //given
     StockCard stockCard = new StockCard();
-    stockCard.setLineItems(new ArrayList<>());
+    stockCard.setLineItems(new HashSet<>());
 
     //when
     UUID userId = randomUUID();
@@ -105,7 +108,12 @@ public class StockCardLineItemTest {
 
     assertThat(cardLineItem.getUserId(), is(userId));
 
-    assertEquals(cardLineItem.getStockAdjustments(), eventLineItem.stockAdjustments());
+    assertThat(cardLineItem.getStockAdjustments(), hasSize(1));
+    PhysicalInventoryLineItemAdjustment adjustment = cardLineItem.getStockAdjustments().get(0);
+    assertThat(adjustment.getStockCardLineItem(), is(cardLineItem));
+    assertThat(adjustment.getReason(), is(eventLineItem.stockAdjustments().get(0).getReason()));
+    assertThat(adjustment.getQuantity(),
+        is(eventLineItem.stockAdjustments().get(0).getQuantity()));
 
     ZonedDateTime processedDate = cardLineItem.getProcessedDate();
     long between = SECONDS.between(processedDate, now());
@@ -156,7 +164,7 @@ public class StockCardLineItemTest {
   public void shouldReturnFalseIfListDoesNotContainTag() {
     StockCardLineItem lineItem = StockCardLineItem.builder()
         .reason(new StockCardLineItemReasonDataBuilder()
-            .withTags(singletonList("tag"))
+            .withTags(singleton("tag"))
             .build())
         .build();
 
@@ -167,7 +175,7 @@ public class StockCardLineItemTest {
   public void shouldReturnTrueIfListDoesContainTag() {
     StockCardLineItem lineItem = StockCardLineItem.builder()
         .reason(new StockCardLineItemReasonDataBuilder()
-            .withTags(singletonList("tag"))
+            .withTags(singleton("tag"))
             .build())
         .build();
 

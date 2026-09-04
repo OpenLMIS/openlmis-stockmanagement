@@ -23,9 +23,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -63,7 +63,7 @@ public class StockCardLineItemReasonRepositoryIntegrationTest
         .isFreeTextAllowed(true)
         .reasonCategory(ReasonCategory.ADJUSTMENT)
         .reasonType(ReasonType.DEBIT)
-        .tags(Lists.newArrayList("newTag"))
+        .tags(Collections.singleton("newTag"))
         .build();
     reasonRepository.save(secondReason);
   }
@@ -127,15 +127,15 @@ public class StockCardLineItemReasonRepositoryIntegrationTest
         .build();
   }
 
-  private List<String> createTags(int instanceNumber) {
+  private Set<String> createTags(int instanceNumber) {
     if (instanceNumber % 3 == 0 && instanceNumber % 5 == 0) {
-      return Lists.newArrayList("FizzBuzz");
+      return Collections.singleton("FizzBuzz");
     } else if (instanceNumber % 5 == 0) {
-      return Lists.newArrayList("Buzz");
+      return Collections.singleton("Buzz");
     } else if (instanceNumber % 3 == 0) {
-      return Lists.newArrayList("Fizz");
+      return Collections.singleton("Fizz");
     } else {
-      return Lists.newArrayList();
+      return Collections.emptySet();
     }
   }
 

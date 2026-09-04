@@ -98,7 +98,7 @@ public final class StockCardDto implements IdentifiableByOrderableLot {
 
     return StockCardDto.builder()
         .id(stockCard.getId())
-        .lineItems(stockCard.getLineItems().stream()
+        .lineItems(stockCard.getSortedLineItems().stream()
             .map(StockCardLineItemDto::createFrom).collect(toList()))
         .stockOnHand(stockCard.getStockOnHand())
         .isActive(stockCard.isActive())

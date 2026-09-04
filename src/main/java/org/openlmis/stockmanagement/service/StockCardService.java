@@ -15,7 +15,6 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static java.time.ZonedDateTime.now;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
@@ -26,6 +25,7 @@ import static org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity.
 import static org.openlmis.stockmanagement.domain.reason.ReasonCategory.PHYSICAL_INVENTORY;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARDS_VIEW;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,6 +37,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import javax.validation.constraints.NotNull;
 import org.openlmis.stockmanagement.domain.card.StockCard;
@@ -54,6 +56,7 @@ import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.i18n.MessageService;
 import org.openlmis.stockmanagement.repository.OrganizationRepository;
+import org.openlmis.stockmanagement.repository.StockCardLineItemRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
@@ -66,6 +69,7 @@ import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.web.Pagination;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.profiler.Profiler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -120,36 +124,67 @@ public class StockCardService extends StockCardBaseService {
   @Autowired
   private HomeFacilityPermissionService homeFacilityPermissionService;
 
+  @Autowired
+  private StockCardLineItemRepository stockCardLineItemRepository;
+
+  @PersistenceContext
+  private EntityManager entityManager;
+
   /**
    * Generate stock card line items and stock cards based on event, and persist them.
    *
    * @param stockEventDto the origin event.
    * @param savedEventId  saved event id.
+   * @param profiler the profiler to use
    */
   @Transactional
-  void saveFromEvent(StockEventDto stockEventDto, UUID savedEventId) {
+  void saveFromEvent(StockEventDto stockEventDto,
+      UUID savedEventId,
+      Profiler profiler) {
+    final ZonedDateTime processedDate = ZonedDateTime.now(ZoneId.systemDefault());
 
-    List<StockCard> cardsToUpdate = new ArrayList<>();
-    List<StockCardLineItem> existingLineItems = new ArrayList<>();
-    ZonedDateTime processedDate = now();
+    profiler.start("CREATE_LINE_ITEMS");
+    final Map<OrderableLotIdentity, List<StockEventLineItemDto>> linesByStockCard =
+        stockEventDto.getLineItems().stream()
+            .collect(Collectors.groupingBy(OrderableLotIdentity::identityOf));
 
-    for (StockEventLineItemDto eventLineItem : stockEventDto.getLineItems()) {
-      StockCard stockCard = findOrCreateCard(
-          stockEventDto, eventLineItem, savedEventId, cardsToUpdate);
-      existingLineItems.addAll(stockCard.getLineItems());
-
-      createLineItemFrom(stockEventDto, eventLineItem, stockCard, savedEventId, processedDate);
+    for (Map.Entry<OrderableLotIdentity, List<StockEventLineItemDto>> stockCardLines :
+        linesByStockCard.entrySet()) {
+      saveOneStockCard(stockEventDto, savedEventId, processedDate,
+          stockCardLines.getValue(), profiler.startNested("CREATE_LINE_ITEM_AND_RECALCULATE_SOH"));
     }
-
-    cardRepository.saveAll(cardsToUpdate);
-    cardRepository.flush();
-
-    calculatedStockOnHandService.recalculateStockOnHand(
-        getSavedButNewLineItems(cardsToUpdate, existingLineItems));
 
     stockEventDto.getContext().refreshCards();
 
     LOGGER.debug("Stock cards and line items saved");
+  }
+
+  private void saveOneStockCard(StockEventDto stockEventDto,
+      UUID savedEventId,
+      ZonedDateTime processedDate,
+      List<StockEventLineItemDto> stockCardLines,
+      Profiler lineProfiler) {
+    lineProfiler.start("LOAD_CARD");
+
+    final StockCard stockCard =
+        findOrCreateCard(stockEventDto, stockCardLines.get(0), savedEventId);
+    final List<StockCardLineItem> newStockCardLineItems = new ArrayList<>();
+
+    lineProfiler.start("CREATE_STOCK_CARDS_ITEMS");
+    for (StockEventLineItemDto eventLineItem : stockCardLines) {
+      StockCardLineItem newLineItem = stockCardLineItemRepository.save(
+          createLineItemFrom(stockEventDto, eventLineItem, stockCard, savedEventId, processedDate));
+      newStockCardLineItems.add(newLineItem);
+    }
+
+    newStockCardLineItems.sort(StockCard.getLineItemsComparator());
+
+    lineProfiler.start("RECALCULATE");
+    calculatedStockOnHandService.recalculateStockOnHand(stockCard, newStockCardLineItems.get(0));
+
+    lineProfiler.start("FLUSH");
+    entityManager.flush();
+    entityManager.clear();
   }
 
   /**
@@ -350,40 +385,21 @@ public class StockCardService extends StockCardBaseService {
     cardRepository.flush();
   }
 
-  private List<StockCardLineItem> getSavedButNewLineItems(List<StockCard> cardsToUpdate,
-      List<StockCardLineItem> existingLineItems) {
-    return cardsToUpdate.stream()
-        .flatMap(card -> card.getLineItems().stream())
-        .filter(item -> !existingLineItems.contains(item))
-        .collect(Collectors.toList());
-  }
-
   private StockCard findOrCreateCard(StockEventDto eventDto, StockEventLineItemDto eventLineItem,
-      UUID savedEventId, List<StockCard> cardsToUpdate) {
+      UUID savedEventId) {
     OrderableLotIdentity identity = identityOf(eventLineItem);
-    StockCard card = eventDto.getContext().findCard(identity);
-
-    if (null == card) {
-      card = cardsToUpdate
-          .stream()
-          .filter(elem -> identityOf(elem).equals(identity))
-          .findFirst()
-          .orElse(null);
-    }
+    StockCard card = eventDto.getContext().removeCard(identity);
 
     if (null == card) {
       card = createStockCardFrom(eventDto, eventLineItem, savedEventId);
     }
 
-    if (cardsToUpdate.stream().noneMatch(elem -> identityOf(elem).equals(identity))) {
-      cardsToUpdate.add(card);
-    }
-
-    if (null != card && eventLineItem.getQuantity() > 0 && !card.isActive()) {
+    if (eventLineItem.getQuantity() > 0 && !card.isActive()) {
       card.setActive(true);
     }
 
-    return card;
+    // Ensure its either persisted or merged into current persistent context
+    return cardRepository.save(card);
   }
 
   private void assignSourceDestinationReasonNameForLineItems(StockCardDto stockCardDto) {
@@ -431,7 +447,7 @@ public class StockCardService extends StockCardBaseService {
    * @param card stock card.
    */
   public void populateUsernames(StockCard card) {
-    List<StockCardLineItem> lineItems = card.getLineItems();
+    List<StockCardLineItem> lineItems = card.getSortedLineItems();
     if (lineItems == null || lineItems.isEmpty()) {
       return;
     }

@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static java.util.Optional.ofNullable;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_ASSIGNMENT_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_ID_EMPTY;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REASON_NOT_FOUND;
@@ -28,6 +29,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import java.util.List;
 import java.util.UUID;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
+import org.openlmis.stockmanagement.dto.StockCardLineItemReasonDto;
 import org.openlmis.stockmanagement.dto.ValidReasonAssignmentDto;
 import org.openlmis.stockmanagement.dto.builder.ValidReasonAssignmentDtoBuilder;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
@@ -126,7 +128,11 @@ public class ValidReasonAssignmentController {
       @RequestBody ValidReasonAssignmentDto assignmentDto) {
     permissionService.canManageReasons();
     assignmentDto.setId(null);
-    ValidReasonAssignment assignment = ValidReasonAssignment.newInstance(assignmentDto);
+    ValidReasonAssignment assignment =
+        new ValidReasonAssignment(assignmentDto.getProgramId(), assignmentDto.getFacilityTypeId(),
+            assignmentDto.getHidden(),
+            ofNullable(assignmentDto.getReason()).map(StockCardLineItemReasonDto::getId)
+                .flatMap(reasonRepository::findById).orElse(null));
     checkIsValidRequest(assignment);
     return findExistingOrSaveNew(assignment);
   }
@@ -147,7 +153,7 @@ public class ValidReasonAssignmentController {
       ValidReasonAssignment assignment) {
     UUID programId = assignment.getProgramId();
     UUID facilityTypeId = assignment.getFacilityTypeId();
-    UUID reasonId = assignment.getReason().getId();
+    UUID reasonId = assignment.getReason() != null ? assignment.getReason().getId() : null;
 
     ValidReasonAssignment foundAssignment = reasonAssignmentRepository
         .findByProgramIdAndFacilityTypeIdAndReasonId(programId, facilityTypeId, reasonId);

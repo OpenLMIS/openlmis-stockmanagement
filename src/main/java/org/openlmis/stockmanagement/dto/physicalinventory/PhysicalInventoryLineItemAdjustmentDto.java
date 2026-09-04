@@ -13,28 +13,35 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.stockmanagement.dto;
+package org.openlmis.stockmanagement.dto.physicalinventory;
 
-import java.util.UUID;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
-import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
+import org.openlmis.stockmanagement.dto.BaseDto;
+import org.openlmis.stockmanagement.dto.StockCardLineItemReasonDto;
 
-@Setter
-@Getter
+@EqualsAndHashCode(callSuper = true)
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class StockEventAdjustmentDto {
-  private UUID reasonId;
+@Builder
+public class PhysicalInventoryLineItemAdjustmentDto extends BaseDto {
+  private StockCardLineItemReasonDto reason;
   private Integer quantity;
 
-  PhysicalInventoryLineItemAdjustment toPhysicalInventoryLineItemAdjustment() {
-    StockCardLineItemReason reason = new StockCardLineItemReason();
-    reason.setId(reasonId);
-
-    return new PhysicalInventoryLineItemAdjustment(null, null, null, reason, quantity);
+  /**
+   * Create new instance.
+   *
+   * @param item the adjustment, not null
+   */
+  public PhysicalInventoryLineItemAdjustmentDto(PhysicalInventoryLineItemAdjustment item) {
+    setId(item.getId());
+    this.reason = item.getReason() != null
+        ? StockCardLineItemReasonDto.newInstance(item.getReason()) : null;
+    this.quantity = item.getQuantity();
   }
 }

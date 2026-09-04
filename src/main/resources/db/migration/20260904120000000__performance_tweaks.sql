@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS phys_inv_adj_stock_event_item_idx ON stockmanagement.physical_inventory_line_item_adjustments(stockeventlineitemid);

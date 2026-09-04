@@ -69,11 +69,11 @@ public class StockCardLineItem extends BaseEntity {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCardLineItem.class);
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(nullable = false)
   private StockCard stockCard;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(nullable = false)
   private StockEvent originEvent;
 
@@ -84,7 +84,7 @@ public class StockCardLineItem extends BaseEntity {
   @Convert(converter = ExtraDataConverter.class)
   private Map<String, String> extraData;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn
   private StockCardLineItemReason reason;
 
@@ -94,11 +94,11 @@ public class StockCardLineItem extends BaseEntity {
   private String reasonFreeText;
   private String signature;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn
   private Node source;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn
   private Node destination;
 
@@ -126,8 +126,8 @@ public class StockCardLineItem extends BaseEntity {
   @OneToMany(
       cascade = ALL,
       fetch = FetchType.LAZY,
-      orphanRemoval = true)
-  @JoinColumn(name = "stockCardLineItemId")
+      orphanRemoval = true,
+      mappedBy = "stockCardLineItem")
   private List<PhysicalInventoryLineItemAdjustment> stockAdjustments;
 
   /**
@@ -165,7 +165,7 @@ public class StockCardLineItem extends BaseEntity {
       builder = builder.destination(destination);
     }
 
-    StockCardLineItem cardLineItem = builder
+    final StockCardLineItem stockCardLineItem = builder
         .stockCard(stockCard)
 
         .quantity(eventLineItem.getQuantity())
@@ -186,9 +186,13 @@ public class StockCardLineItem extends BaseEntity {
         .originEventLineItemId(eventLineItem.getId())
         .build();
 
-    stockCard.getLineItems().add(cardLineItem);
+    // stockAdjustments is mapped by the child side; the copies created above have no parent yet
+    stockCardLineItem.getStockAdjustments()
+        .forEach(adjustment -> adjustment.setStockCardLineItem(stockCardLineItem));
 
-    return cardLineItem;
+    stockCard.getLineItems().add(stockCardLineItem);
+
+    return stockCardLineItem;
   }
 
   /**

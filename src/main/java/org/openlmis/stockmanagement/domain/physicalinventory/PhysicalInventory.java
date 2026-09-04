@@ -16,18 +16,17 @@
 package org.openlmis.stockmanagement.domain.physicalinventory;
 
 import static javax.persistence.CascadeType.ALL;
-import static org.hibernate.annotations.LazyCollectionOption.FALSE;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.Data;
-import org.hibernate.annotations.LazyCollection;
 import org.openlmis.stockmanagement.domain.BaseEntity;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 
@@ -49,10 +48,10 @@ public class PhysicalInventory extends BaseEntity {
   private String signature;
   private String documentNumber;
 
-  @LazyCollection(FALSE)
-  @OneToMany(cascade = ALL, mappedBy = "physicalInventory", orphanRemoval = true)
+  @OneToMany(cascade = ALL, mappedBy = "physicalInventory", orphanRemoval = true,
+      fetch = FetchType.LAZY)
   private List<PhysicalInventoryLineItem> lineItems;
 
-  @OneToOne
+  @OneToOne(fetch = FetchType.LAZY)
   private StockEvent stockEvent;
 }

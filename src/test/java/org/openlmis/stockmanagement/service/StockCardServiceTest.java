@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -33,6 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import javax.persistence.EntityManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -43,6 +45,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCard;
+import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
@@ -50,6 +53,7 @@ import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
+import org.openlmis.stockmanagement.repository.StockCardLineItemRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.PermissionStringDto;
@@ -60,6 +64,7 @@ import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
+import org.slf4j.profiler.Profiler;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -72,6 +77,9 @@ public class StockCardServiceTest {
 
   @Mock
   private StockCardRepository cardRepository;
+
+  @Mock
+  private StockCardLineItemRepository stockCardLineItemRepository;
 
   @Mock
   private FacilityReferenceDataService facilityRefDataService;
@@ -94,7 +102,7 @@ public class StockCardServiceTest {
   private StockCardService stockCardService;
 
   @Captor
-  private ArgumentCaptor<List<StockCard>> cardCaptor;
+  private ArgumentCaptor<StockCard> cardCaptor;
 
   @Mock
   private PermissionStrings.Handler permissionStringsHandler;
@@ -113,6 +121,10 @@ public class StockCardServiceTest {
 
   @Mock
   private OAuth2Authentication authentication;
+
+  @SuppressWarnings("PMD.UnusedPrivateField")
+  @Mock
+  private EntityManager entityManager;
 
   private UUID id = UUID.randomUUID();
   private UUID facilityId = UUID.randomUUID();
@@ -149,6 +161,10 @@ public class StockCardServiceTest {
     SecurityContextHolder.setContext(securityContext);
     when(securityContext.getAuthentication()).thenReturn(authentication);
     when(authentication.isClientOnly()).thenReturn(false);
+    when(cardRepository.save(any(StockCard.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+    when(stockCardLineItemRepository.save(any(StockCardLineItem.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
   }
 
   @Test
@@ -158,15 +174,13 @@ public class StockCardServiceTest {
 
     UUID savedEventId = UUID.randomUUID();
 
-    stockCardService.saveFromEvent(event, savedEventId);
+    Profiler profilerMock = mock(Profiler.class);
+    when(profilerMock.startNested(anyString())).thenReturn(profilerMock);
+    stockCardService.saveFromEvent(event, savedEventId, profilerMock);
 
-    verify(cardRepository).saveAll(cardCaptor.capture());
+    verify(cardRepository).save(cardCaptor.capture());
 
-    List<StockCard> saved = cardCaptor.getValue();
-
-    assertThat(saved, hasSize(1));
-
-    StockCard card = saved.get(0);
+    StockCard card = cardCaptor.getValue();
 
     assertThat(card.getFacilityId(), equalTo(event.getFacilityId()));
     assertThat(card.getProgramId(), equalTo(event.getProgramId()));

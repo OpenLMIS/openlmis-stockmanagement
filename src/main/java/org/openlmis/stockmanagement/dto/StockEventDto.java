@@ -86,6 +86,11 @@ public class StockEventDto {
 
     domainLines.forEach(lineItem -> {
       lineItem.setStockAdjustments(lineItem.stockAdjustments());
+      if (null != lineItem.getStockAdjustments()) {
+        // stockAdjustments is mapped by the child side; wire the parent or the fk stays null
+        lineItem.getStockAdjustments()
+            .forEach(adjustment -> adjustment.setStockEventLineItem(lineItem));
+      }
       lineItem.setStockEvent(event);
     });
 

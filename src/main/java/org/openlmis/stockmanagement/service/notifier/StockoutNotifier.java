@@ -73,7 +73,7 @@ public class StockoutNotifier {
         getOrderableNameLotInformation(valuesMap.get("orderableName"), stockCard.getLotId()));
     valuesMap.put("programName", stockCardNotifier.getProgramName(stockCard.getProgramId()));
 
-    List<StockCardLineItem> lineItems = stockCard.getLineItems();
+    List<StockCardLineItem> lineItems = stockCard.getSortedLineItems();
     LocalDate stockoutDate = lineItems.get(lineItems.size() - 1).getOccurredDate();
     valuesMap.put("stockoutDate", stockCardNotifier.getDateFormatter().format(stockoutDate));
     long numberOfDaysOfStockout = getNumberOfDaysOfStockout(stockoutDate);

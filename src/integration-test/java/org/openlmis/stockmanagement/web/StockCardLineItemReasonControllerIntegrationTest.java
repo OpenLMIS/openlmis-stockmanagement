@@ -23,9 +23,9 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_LINE_ITEM_REASON_TAGS_INVALID;
 
-import com.google.common.collect.Lists;
 import guru.nidi.ramltester.junit.RamlMatchers;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -107,7 +107,7 @@ public class StockCardLineItemReasonControllerIntegrationTest extends BaseWebInt
   public void shouldReturn400WhenReasonTagIsTooLong() throws Exception {
     StockCardLineItemReason createdReason = new StockCardLineItemReasonDataBuilder()
         .withoutId()
-        .withTags(Lists.newArrayList(RandomStringUtils.random(256)))
+        .withTags(Collections.singleton(RandomStringUtils.random(256)))
         .build();
 
     // specific psql format
