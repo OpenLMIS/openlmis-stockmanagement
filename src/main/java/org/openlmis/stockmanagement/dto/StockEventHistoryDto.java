@@ -42,6 +42,9 @@ public class StockEventHistoryDto {
   private String username;
   private Boolean reversible;
 
+  private UUID facilityId;
+  private UUID programId;
+
   /**
    * Creates a history row DTO from a stock event's scalar fields. The line-item-derived fields
    * ({@code entriesCount}, {@code occurredDate}) and {@code username} are filled in afterwards
@@ -55,6 +58,8 @@ public class StockEventHistoryDto {
         .signature(event.getSignature())
         .userId(event.getUserId())
         .processedDate(event.getProcessedDate())
+        .facilityId(event.getFacilityId())
+        .programId(event.getProgramId())
         .build();
   }
 }

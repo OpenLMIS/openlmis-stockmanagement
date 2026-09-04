@@ -355,6 +355,9 @@ public class StockEventsServiceTest {
     assertThat(dto.getOccurredDate(), is(LocalDate.of(2026, Month.FEBRUARY, 10)));
     assertThat(dto.getProcessedDate(), is(event.getProcessedDate()));
     assertThat(dto.getUsername(), is(ALICE));
+    // the detail view resolves the cancel permission and the current stock on hand from these
+    assertThat(dto.getFacilityId(), is(facility));
+    assertThat(dto.getProgramId(), is(program));
     verify(permissionService).canViewStockCard(program, facility);
   }
 

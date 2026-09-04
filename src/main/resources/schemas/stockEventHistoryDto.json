@@ -41,6 +41,14 @@
       "type": ["string", "null"],
       "description": "Resolved username of the user who performed the transaction."
     },
+    "facilityId": {
+      "type": ["string", "null"],
+      "description": "Facility the event was recorded for. The transaction detail view resolves the cancel permission and the current stock on hand from it."
+    },
+    "programId": {
+      "type": ["string", "null"],
+      "description": "Program the event was recorded for. The transaction detail view resolves the cancel permission and the current stock on hand from it."
+    },
     "reversible": {
       "type": ["boolean", "null"],
       "description": "Whether the event holds at least one line item that does not reverse another one, i.e. whether anything in it can still be cancelled."
