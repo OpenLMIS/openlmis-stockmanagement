@@ -447,7 +447,7 @@ public class StockCardService extends StockCardBaseService {
    * @param card stock card.
    */
   public void populateUsernames(StockCard card) {
-    List<StockCardLineItem> lineItems = card.getLineItems();
+    List<StockCardLineItem> lineItems = card.getSortedLineItems();
     if (lineItems == null || lineItems.isEmpty()) {
       return;
     }

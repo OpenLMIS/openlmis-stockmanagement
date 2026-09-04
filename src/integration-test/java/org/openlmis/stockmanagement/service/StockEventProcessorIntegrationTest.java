@@ -15,9 +15,11 @@
 
 package org.openlmis.stockmanagement.service;
 
+import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,12 +37,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.openlmis.stockmanagement.BaseIntegrationTest;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.domain.sourcedestination.Organization;
 import org.openlmis.stockmanagement.dto.PhysicalInventoryDto;
+import org.openlmis.stockmanagement.dto.StockEventAdjustmentDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.NodeRepository;
@@ -222,6 +226,41 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
 
     assertThat(generated, is(notNullValue()));
     assertThat(generated.getOriginEventLineItemId(), is(eventLineItemId));
+  }
+
+  @Test
+  public void shouldPersistAdjustmentsWithParentLinksOnEventAndCardLineItems() {
+    //given
+    StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.setUserId(userId);
+    stockEventDto.setActive(true);
+    stockEventDto.getLineItems().get(0).setReasonId(null);
+    stockEventDto.getLineItems().get(0).setSourceId(null);
+    stockEventDto.getLineItems().get(0).setDestinationId(null);
+    stockEventDto.getLineItems().get(0).setStockAdjustments(
+        singletonList(new StockEventAdjustmentDto(reason.getId(), 10)));
+    setContext(stockEventDto);
+
+    //when
+    UUID savedEventId = stockEventProcessor.process(stockEventDto);
+
+    //then
+    StockEventLineItem eventLineItem = stockEventsRepository.findById(savedEventId)
+        .orElseThrow(AssertionError::new)
+        .getLineItems().get(0);
+    assertThat(eventLineItem.getStockAdjustments(), hasSize(1));
+    assertThat(eventLineItem.getStockAdjustments().get(0).getQuantity(), is(10));
+
+    StockCardLineItem cardLineItem = null;
+    for (StockCardLineItem item : lineItemRepository.findAll()) {
+      if (item.getOriginEvent() != null && savedEventId.equals(item.getOriginEvent().getId())) {
+        cardLineItem = item;
+        break;
+      }
+    }
+    assertThat(cardLineItem, is(notNullValue()));
+    assertThat(cardLineItem.getStockAdjustments(), hasSize(1));
+    assertThat(cardLineItem.getStockAdjustments().get(0).getQuantity(), is(10));
   }
 
   @Test

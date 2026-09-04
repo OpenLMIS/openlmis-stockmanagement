@@ -28,6 +28,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_DEBIT_QU
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import javax.transaction.Transactional;
@@ -140,10 +141,10 @@ public class StockEventCancelServiceIntegrationTest extends BaseIntegrationTest 
 
     cancelledIssue = reasonRepository.save(new StockCardLineItemReasonDataBuilder()
         .withoutId().withName("IT cancelled issue").withCreditType().withAdjustmentCategory()
-        .withTags(asList(CANCEL_TAG, CANCEL_MOVEMENT_TAG)).build());
+        .withTags(new HashSet<>(asList(CANCEL_TAG, CANCEL_MOVEMENT_TAG))).build());
     cancelledReceipt = reasonRepository.save(new StockCardLineItemReasonDataBuilder()
         .withoutId().withName("IT cancelled receipt").withDebitType().withAdjustmentCategory()
-        .withTags(asList(CANCEL_TAG, CANCEL_MOVEMENT_TAG)).build());
+        .withTags(new HashSet<>(asList(CANCEL_TAG, CANCEL_MOVEMENT_TAG))).build());
 
     SecurityContextHolder.setContext(securityContext);
     when(securityContext.getAuthentication()).thenReturn(authentication);

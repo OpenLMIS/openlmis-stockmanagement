@@ -20,6 +20,7 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertEquals;
@@ -37,6 +38,7 @@ import java.util.function.Supplier;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventAdjustmentDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
@@ -106,7 +108,12 @@ public class StockCardLineItemTest {
 
     assertThat(cardLineItem.getUserId(), is(userId));
 
-    assertEquals(cardLineItem.getStockAdjustments(), eventLineItem.stockAdjustments());
+    assertThat(cardLineItem.getStockAdjustments(), hasSize(1));
+    PhysicalInventoryLineItemAdjustment adjustment = cardLineItem.getStockAdjustments().get(0);
+    assertThat(adjustment.getStockCardLineItem(), is(cardLineItem));
+    assertThat(adjustment.getReason(), is(eventLineItem.stockAdjustments().get(0).getReason()));
+    assertThat(adjustment.getQuantity(),
+        is(eventLineItem.stockAdjustments().get(0).getQuantity()));
 
     ZonedDateTime processedDate = cardLineItem.getProcessedDate();
     long between = SECONDS.between(processedDate, now());

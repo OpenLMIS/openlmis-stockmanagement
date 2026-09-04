@@ -186,6 +186,10 @@ public class StockCardLineItem extends BaseEntity {
         .originEventLineItemId(eventLineItem.getId())
         .build();
 
+    // stockAdjustments is mapped by the child side; the copies created above have no parent yet
+    stockCardLineItem.getStockAdjustments()
+        .forEach(adjustment -> adjustment.setStockCardLineItem(stockCardLineItem));
+
     stockCard.getLineItems().add(stockCardLineItem);
 
     return stockCardLineItem;

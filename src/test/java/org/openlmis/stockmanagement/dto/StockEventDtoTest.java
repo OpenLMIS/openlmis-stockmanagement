@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.dto;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.lessThan;
@@ -27,12 +28,33 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
 import org.openlmis.stockmanagement.testutils.StockEventLineItemDtoDataBuilder;
 import org.openlmis.stockmanagement.util.LazyResource;
 import org.openlmis.stockmanagement.util.StockEventProcessContext;
 
 public class StockEventDtoTest {
+
+  @Test
+  public void shouldSetAdjustmentParentsWhenConvertingToJpaModel() {
+    //given
+    StockEventProcessContext context = new StockEventProcessContext();
+    context.setCurrentUserId(new LazyResource<>(UUID::randomUUID));
+
+    StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
+    stockEventDto.setContext(context);
+    stockEventDto.getLineItems().get(0)
+        .setStockAdjustments(singletonList(new StockEventAdjustmentDto(UUID.randomUUID(), 10)));
+
+    //when
+    StockEvent event = stockEventDto.toEvent();
+
+    //then
+    StockEventLineItem lineItem = event.getLineItems().get(0);
+    assertThat(lineItem.getStockAdjustments(), hasSize(1));
+    assertThat(lineItem.getStockAdjustments().get(0).getStockEventLineItem(), is(lineItem));
+  }
 
   @Test
   public void shouldConvertFromDtoToJpaModel() throws Exception {

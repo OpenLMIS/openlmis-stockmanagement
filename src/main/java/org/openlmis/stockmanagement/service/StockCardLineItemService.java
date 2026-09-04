@@ -45,8 +45,7 @@ public class StockCardLineItemService {
     int previousSoH = 0;
 
     if (isNotEmpty(stockCard.getLineItems())) {
-      stockCard.reorderLineItems();
-      for (StockCardLineItem lineItem : stockCard.getLineItems()) {
+      for (StockCardLineItem lineItem : stockCard.getSortedLineItems()) {
         previousSoH = populateStockOnHandLineItems(lineItem, previousSoH);
       }
     }

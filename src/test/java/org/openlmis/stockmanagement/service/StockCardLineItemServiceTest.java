@@ -15,7 +15,7 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static org.assertj.core.util.Lists.newArrayList;
+import static org.assertj.core.util.Sets.newLinkedHashSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -89,6 +89,7 @@ public class StockCardLineItemServiceTest {
   @Test
   public void shouldSkipWithNullLineItems() {
     StockCard card = new StockCard();
+    card.setLineItems(null);
 
     stockCardLineItemService.populateStockOnHandLineItems(card);
 
@@ -101,7 +102,7 @@ public class StockCardLineItemServiceTest {
   @Test
   public void shouldSkipWithEmptyLineItems() {
     StockCard card = new StockCard();
-    card.setLineItems(newArrayList());
+    card.setLineItems(newLinkedHashSet());
 
     stockCardLineItemService.populateStockOnHandLineItems(card);
 
@@ -116,7 +117,7 @@ public class StockCardLineItemServiceTest {
   public void shouldCalculateStockCardLineItemSoHWithCreditReason() {
     StockCard card = new StockCard();
     StockCardLineItem lineItem = createPhysicalInventoryLineItem(firstDate, 10, card);
-    card.setLineItems(newArrayList(lineItem));
+    card.setLineItems(newLinkedHashSet(lineItem));
 
     stockCardLineItemService.populateStockOnHandLineItems(card);
 
@@ -132,7 +133,7 @@ public class StockCardLineItemServiceTest {
     expectedException.expectMessage(ERRRO_EVENT_SOH_EXCEEDS_LIMIT);
 
     StockCard card = new StockCard();
-    card.setLineItems(newArrayList(
+    card.setLineItems(newLinkedHashSet(
         createCreditLineItem(firstDate, Integer.MAX_VALUE, card),
         createCreditLineItem(firstDate.plusDays(1), 1, card)
     ));
@@ -149,7 +150,7 @@ public class StockCardLineItemServiceTest {
     expectedException.expectMessage(ERRRO_EVENT_SOH_EXCEEDS_LIMIT);
 
     StockCard card = new StockCard();
-    card.setLineItems(newArrayList(
+    card.setLineItems(newLinkedHashSet(
         createDebitLineItem(firstDate, Integer.MIN_VALUE, card),
         createDebitLineItem(firstDate.plusDays(1), 1, card)
     ));
@@ -165,7 +166,7 @@ public class StockCardLineItemServiceTest {
     StockCard card = new StockCard();
     StockCardLineItem lineItem1 = createCreditLineItem(firstDate, 15, card);
     StockCardLineItem lineItem2 = createDebitLineItem(firstDate.plusDays(1), 5, card);
-    card.setLineItems(newArrayList(lineItem1, lineItem2));
+    card.setLineItems(newLinkedHashSet(lineItem1, lineItem2));
 
     stockCardLineItemService.populateStockOnHandLineItems(card);
 
@@ -184,7 +185,7 @@ public class StockCardLineItemServiceTest {
         .source(new Node())
         .occurredDate(firstDate.plusDays(1))
         .quantity(15).stockCard(card).build();
-    card.setLineItems(newArrayList(lineItem1, lineItem2));
+    card.setLineItems(newLinkedHashSet(lineItem1, lineItem2));
 
     stockCardLineItemService.populateStockOnHandLineItems(card);
 
@@ -203,7 +204,7 @@ public class StockCardLineItemServiceTest {
         .destination(new Node())
         .occurredDate(firstDate.plusDays(1))
         .quantity(15).stockCard(card).build();
-    card.setLineItems(newArrayList(lineItem1, lineItem2));
+    card.setLineItems(newLinkedHashSet(lineItem1, lineItem2));
 
     stockCardLineItemService.populateStockOnHandLineItems(card);
 
@@ -219,7 +220,7 @@ public class StockCardLineItemServiceTest {
     StockCard card = new StockCard();
     StockCardLineItem lineItem1 = createCreditLineItem(firstDate, 10, card);
     StockCardLineItem lineItem2 = createPhysicalInventoryLineItem(firstDate.plusDays(1), 15, card);
-    card.setLineItems(newArrayList(lineItem1, lineItem2));
+    card.setLineItems(newLinkedHashSet(lineItem1, lineItem2));
 
     stockCardLineItemService.populateStockOnHandLineItems(card);
 
@@ -236,7 +237,7 @@ public class StockCardLineItemServiceTest {
     StockCard card = new StockCard();
     StockCardLineItem lineItem1 = createCreditLineItem(firstDate, 20, card);
     StockCardLineItem lineItem2 = createPhysicalInventoryLineItem(firstDate.plusDays(1), 15, card);
-    card.setLineItems(newArrayList(lineItem1, lineItem2));
+    card.setLineItems(newLinkedHashSet(lineItem1, lineItem2));
 
     stockCardLineItemService.populateStockOnHandLineItems(card);
 
@@ -253,7 +254,7 @@ public class StockCardLineItemServiceTest {
     StockCard card = new StockCard();
     StockCardLineItem lineItem1 = createCreditLineItem(firstDate, 15, card);
     StockCardLineItem lineItem2 = createPhysicalInventoryLineItem(firstDate.plusDays(1), 15, card);
-    card.setLineItems(newArrayList(lineItem1, lineItem2));
+    card.setLineItems(newLinkedHashSet(lineItem1, lineItem2));
 
     stockCardLineItemService.populateStockOnHandLineItems(card);
 

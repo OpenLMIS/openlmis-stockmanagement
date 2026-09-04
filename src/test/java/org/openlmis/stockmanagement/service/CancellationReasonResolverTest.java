@@ -29,6 +29,7 @@ import static org.openlmis.stockmanagement.service.StockEventCancelValidationSer
 import static org.openlmis.stockmanagement.service.StockEventCancelValidationService.CANCEL_MOVEMENT_TAG;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.Test;
@@ -224,7 +225,7 @@ public class CancellationReasonResolverTest {
         .name("Cancellation " + type)
         .reasonType(type)
         .reasonCategory(ReasonCategory.ADJUSTMENT)
-        .tags(asList(tags))
+        .tags(new HashSet<>(asList(tags)))
         .build();
     reason.setId(UUID.randomUUID());
     return reason;
