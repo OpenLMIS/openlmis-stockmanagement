@@ -29,7 +29,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
+
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidDestinationAssignment;
 import org.openlmis.stockmanagement.domain.sourcedestination.ValidSourceAssignment;
@@ -76,23 +79,27 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
     UUID program = randomUUID();
     UUID facility = randomUUID();
 
-    when(validSourceService.findSources(program, facility, null, pageRequest))
+    when(validSourceService.findSources(
+        Collections.singletonList(program), facility, null, pageRequest))
         .thenReturn(Pagination.getPage(singletonList(sourceDestination)));
 
-    when(validDestinationService.findDestinations(program, facility, null, pageRequest))
+    when(validDestinationService.findDestinations(
+        Collections.singletonList(program), facility, null, pageRequest))
         .thenReturn(Pagination.getPage(singletonList(sourceDestination)));
 
     verifyZeroInteractions(permissionService);
 
     //1. perform valid destinations
-    performSourcesOrDestinations(program, facility, sourceDestination, API_VALID_DESTINATIONS);
+    performSourcesOrDestinations(
+        Collections.singletonList(program), facility, sourceDestination, API_VALID_DESTINATIONS);
 
     //2. perform valid sources
-    performSourcesOrDestinations(program, facility, sourceDestination, API_VALID_SOURCES);
+    performSourcesOrDestinations(
+        Collections.singletonList(program), facility, sourceDestination, API_VALID_SOURCES);
   }
 
   @Test
-  public void shouldGeAllValidSourcesOrDestinationsWhenProgramAndFacilityAreNotProvided()
+  public void shouldGetAllValidSourcesOrDestinationsWhenProgramAndFacilityAreNotProvided()
           throws Exception {
     //given
     ValidSourceDestinationDto destinationAssignmentDto = new ValidSourceDestinationDto();
@@ -101,19 +108,23 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
     destinationAssignmentDto.setIsFreeTextAllowed(true);
     ValidSourceDestinationDto sourceAssignmentDto = destinationAssignmentDto;
 
-    when(validSourceService.findSources(null, null, null, pageRequest))
+    when(validSourceService.findSources(
+        Collections.singletonList(null), null, null, pageRequest))
             .thenReturn(Pagination.getPage(singletonList(sourceAssignmentDto)));
 
-    when(validDestinationService.findDestinations(null, null, null, pageRequest))
+    when(validDestinationService.findDestinations(
+        Collections.singletonList(null), null, null, pageRequest))
             .thenReturn(Pagination.getPage(singletonList(destinationAssignmentDto)));
 
     verifyZeroInteractions(permissionService);
 
     //1. perform valid destinations
-    performSourcesOrDestinations(null, null, destinationAssignmentDto, API_VALID_DESTINATIONS);
+    performSourcesOrDestinations(
+        Collections.singletonList(null), null, destinationAssignmentDto, API_VALID_DESTINATIONS);
 
     //2. perform valid sources
-    performSourcesOrDestinations(null, null, sourceAssignmentDto, API_VALID_SOURCES);
+    performSourcesOrDestinations(
+        Collections.singletonList(null), null, sourceAssignmentDto, API_VALID_SOURCES);
   }
 
   @Test
@@ -239,24 +250,26 @@ public class ValidSourceDestinationControllerIntegrationTest extends BaseWebTest
 
   @Test
   public void shouldReturn204WhenSourceAssignmentRemoved() throws Exception {
-    mvc.perform(delete(API_VALID_SOURCES + "/" + randomUUID().toString())
+    mvc.perform(delete(API_VALID_SOURCES + "/" + randomUUID())
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE))
         .andExpect(status().isNoContent());
   }
 
   @Test
   public void shouldReturn204WhenDestinationAssignmentRemoved() throws Exception {
-    mvc.perform(delete(API_VALID_DESTINATIONS + "/" + randomUUID().toString())
+    mvc.perform(delete(API_VALID_DESTINATIONS + "/" + randomUUID())
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE))
         .andExpect(status().isNoContent());
   }
 
   private void performSourcesOrDestinations(
-      UUID programId, UUID facilityId,
+      List<UUID> programIds, UUID facilityId,
       ValidSourceDestinationDto sourceDestinationDto, String uri) throws Exception {
     ResultActions resultActions = mvc.perform(get(uri)
         .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE)
-        .param(PROGRAM_ID, programId != null ? programId.toString() : null)
+        .param(PROGRAM_ID, programIds.stream()
+            .map(id -> id != null ? id.toString() : null)
+            .toArray(String[]::new))
         .param(FACILITY_ID, facilityId != null ? facilityId.toString() : null)
         .param("page", "0")
         .param("size", "20"));

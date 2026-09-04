@@ -28,6 +28,7 @@ public class ValidSourceDestinationDto {
   private Node node;
   private String name;
   private Boolean isFreeTextAllowed;
+  private UUID geoLevelAffinityId;
 
   /**
    * Create DTO from JPA model.
@@ -45,6 +46,7 @@ public class ValidSourceDestinationDto {
     dto.setNode(assignment.getNode());
     dto.setProgramId(assignment.getProgramId());
     dto.setFacilityTypeId(assignment.getFacilityTypeId());
+    dto.setGeoLevelAffinityId(assignment.getGeoLevelAffinityId());
     return dto;
   }
 }

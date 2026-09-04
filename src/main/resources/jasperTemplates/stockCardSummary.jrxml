@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.4.3.final using JasperReports Library version 6.4.3  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="StockCardSummary" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" whenResourceMissingType="Empty" uuid="d0829c7a-bf73-4e6e-9b5a-1735ab6c4d7d">
+<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="StockCardSummary" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="d0829c7a-bf73-4e6e-9b5a-1735ab6c4d7d">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
@@ -11,13 +11,12 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<import value="org.openlmis.stockmanagement.domain.card.*"/>
-	<import value="org.openlmis.stockmanagement.dto.*"/>
 	<import value="java.time.LocalDate"/>
 	<import value="java.time.format.DateTimeFormatter"/>
 	<import value="java.time.ZonedDateTime"/>
 	<import value="java.text.DecimalFormat"/>
 	<import value="net.sf.jasperreports.engine.data.*"/>
+	<style name="BaseStyle" isDefault="true" fontName="DejaVu Sans"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
@@ -74,34 +73,42 @@
 	</style>
 	<subDataset name="summaryDataset" uuid="ae304191-3438-4962-8ef9-3c2d74be4f9a">
 		<parameter name="showProgram" class="java.lang.Boolean">
-			<parameterDescription><![CDATA[]]></parameterDescription>
 			<defaultValueExpression><![CDATA[true]]></defaultValueExpression>
 		</parameter>
 		<parameter name="showFacility" class="java.lang.Boolean">
-			<parameterDescription><![CDATA[]]></parameterDescription>
 			<defaultValueExpression><![CDATA[true]]></defaultValueExpression>
 		</parameter>
 		<parameter name="dateFormat" class="java.lang.String" isForPrompting="false"/>
 		<parameter name="decimalFormat" class="java.text.DecimalFormat" isForPrompting="false"/>
+		<parameter name="showInDoses" class="java.lang.Boolean" isForPrompting="false"/>
 		<queryString>
 			<![CDATA[]]>
 		</queryString>
-		<field name="facility" class="org.openlmis.stockmanagement.dto.referencedata.FacilityDto"/>
-		<field name="program" class="org.openlmis.stockmanagement.dto.referencedata.ProgramDto"/>
-		<field name="orderable" class="org.openlmis.stockmanagement.dto.referencedata.OrderableDto"/>
-		<field name="stockOnHand" class="java.lang.Integer"/>
-		<field name="lastUpdate" class="java.time.LocalDate"/>
-		<field name="lot" class="org.openlmis.stockmanagement.dto.referencedata.LotDto"/>
+		<field name="facility" class="java.util.Map"/>
+		<field name="program" class="java.util.Map"/>
+		<field name="orderable" class="java.util.Map"/>
+		<field name="stockOnHand" class="java.lang.Number"/>
+		<field name="lastUpdate" class="java.lang.Object"/>
+		<field name="lot" class="java.util.Map"/>
+		<variable name="orderableNetContent" class="java.lang.Long" calculation="Nothing">
+			<variableExpression><![CDATA[$F{orderable} == null
+				|| ((java.util.Map) $F{orderable}).get("netContent") == null
+				|| ((java.lang.Number) ((java.util.Map) $F{orderable}).get("netContent")).longValue() <= 0
+				? 1L
+				: ((java.lang.Number) ((java.util.Map) $F{orderable}).get("netContent")).longValue()]]></variableExpression>
+		</variable>
 	</subDataset>
-	<parameter name="program" class="org.openlmis.stockmanagement.dto.referencedata.ProgramDto" isForPrompting="false"/>
-	<parameter name="facility" class="org.openlmis.stockmanagement.dto.referencedata.FacilityDto" isForPrompting="false"/>
+	<parameter name="program" class="java.util.Map" isForPrompting="false"/>
+	<parameter name="facility" class="java.util.Map" isForPrompting="false"/>
 	<parameter name="stockCardSummaries" class="java.util.List" isForPrompting="false"/>
 	<parameter name="showProgram" class="java.lang.Boolean" isForPrompting="false"/>
 	<parameter name="showFacility" class="java.lang.Boolean" isForPrompting="false"/>
 	<parameter name="showLot" class="java.lang.Boolean" isForPrompting="false"/>
+	<parameter name="showInDoses" class="java.lang.Boolean" isForPrompting="false"/>
 	<parameter name="dateTimeFormat" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="dateFormat" class="java.lang.String" isForPrompting="false"/>
 	<parameter name="decimalFormat" class="java.text.DecimalFormat" isForPrompting="false"/>
+	<parameter name="headerTemplate" class="net.sf.jasperreports.engine.JasperReport"/>
 	<queryString>
 		<![CDATA[]]>
 	</queryString>
@@ -109,14 +116,21 @@
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="124" splitType="Stretch">
-			<staticText>
-				<reportElement x="0" y="20" width="595" height="50" uuid="ecab56ef-a62f-486f-bc7d-c1431467efc4"/>
+		<band height="160" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<subreport overflowType="Stretch">
+				<reportElement positionType="Float" mode="Transparent" x="0" y="0" width="595" height="90" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="57924a28-dd0b-4ed5-8b5c-8867c356fb34"/>
+				<parametersMapExpression><![CDATA[$P{REPORT_PARAMETERS_MAP}]]></parametersMapExpression>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{headerTemplate}]]></subreportExpression>
+			</subreport>
+			<textField>
+				<reportElement x="0" y="110" width="595" height="50" uuid="ecab56ef-a62f-486f-bc7d-c1431467efc4"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="SansSerif" size="26" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Stock Card Summary Report]]></text>
-			</staticText>
+				<textFieldExpression><![CDATA[$R{report.title.stockCardSummary}]]></textFieldExpression>
+			</textField>
 		</band>
 	</title>
 	<pageHeader>
@@ -124,90 +138,90 @@
 			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
 			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
 			<printWhenExpression><![CDATA[new Boolean($V{PAGE_NUMBER}.intValue() == 1)]]></printWhenExpression>
-			<staticText>
-				<reportElement x="0" y="0" width="77" height="30" uuid="d88076e4-ce9f-4886-a172-855275a4a5e7">
-					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-				</reportElement>
-				<textElement textAlignment="Right">
+			<textField>
+				<reportElement x="0" y="0" width="80" height="30" uuid="d88076e4-ce9f-4886-a172-855275a4a5e7"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
 					<font size="8" isBold="false"/>
 				</textElement>
-				<text><![CDATA[Facility:]]></text>
-			</staticText>
-			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
-				<reportElement x="90" y="0" width="74" height="30" uuid="68d8d341-d519-4cd5-adaf-845085a2b343"/>
-				<textElement>
-					<font size="8" isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{facility}.getName()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[msg($R{report.pattern.label}, $R{report.header.facility})]]></textFieldExpression>
 			</textField>
-			<staticText>
-				<reportElement x="151" y="0" width="74" height="30" uuid="e70d1a9b-4bcc-460c-8ffe-c238d8d4e9af">
-					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
-				</reportElement>
-				<textElement textAlignment="Right">
-					<font size="8" isBold="false"/>
-				</textElement>
-				<text><![CDATA[Facility code:]]></text>
-			</staticText>
 			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
-				<reportElement x="230" y="0" width="74" height="30" uuid="e28722c1-aff1-4167-af88-1d9b88dc2c81"/>
-				<textElement>
-					<font size="8" isBold="false"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{facility}.getCode()]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement x="299" y="0" width="41" height="30" uuid="f932b782-290f-45d4-9fdf-f2cc21d3088c">
-					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
-					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				<reportElement x="85" y="0" width="75" height="30" uuid="68d8d341-d519-4cd5-adaf-845085a2b343">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
-				<textElement textAlignment="Right">
+				<textElement verticalAlignment="Bottom">
 					<font size="8" isBold="false"/>
 				</textElement>
-				<text><![CDATA[Program:]]></text>
-			</staticText>
+				<textFieldExpression><![CDATA[$P{facility} != null ? ((java.util.Map)$P{facility}).get("name") : ""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="170" y="0" width="70" height="30" uuid="e70d1a9b-4bcc-460c-8ffe-c238d8d4e9af">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[msg($R{report.pattern.label}, $R{report.header.facilityCode})]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="245" y="0" width="65" height="30" uuid="e28722c1-aff1-4167-af88-1d9b88dc2c81">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Bottom">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{facility} != null ? ((java.util.Map)$P{facility}).get("code") : ""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="320" y="0" width="60" height="30" uuid="f932b782-290f-45d4-9fdf-f2cc21d3088c">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[msg($R{report.pattern.label}, $R{report.header.program})]]></textFieldExpression>
+			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement x="350" y="0" width="74" height="30" uuid="090f268a-9013-48d7-bf4c-2d082ce82426">
-					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				<reportElement x="385" y="0" width="70" height="30" uuid="090f268a-9013-48d7-bf4c-2d082ce82426">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
-				<textElement>
+				<textElement verticalAlignment="Bottom">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{program}.getName()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{program} != null ? ((java.util.Map)$P{program}).get("name") : ""]]></textFieldExpression>
 			</textField>
-			<staticText>
-				<reportElement x="424" y="0" width="63" height="30" uuid="dbb8c60d-f18c-4662-82a9-1469ba5ee29b">
-					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
-					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+			<textField>
+				<reportElement x="465" y="0" width="60" height="30" uuid="dbb8c60d-f18c-4662-82a9-1469ba5ee29b">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
-				<textElement textAlignment="Right">
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
 					<font size="8" isBold="false"/>
 				</textElement>
-				<text><![CDATA[Program Code:]]></text>
-			</staticText>
+				<textFieldExpression><![CDATA[msg($R{report.pattern.label}, $R{report.header.programCode})]]></textFieldExpression>
+			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement x="493" y="0" width="74" height="30" uuid="1155efb4-d80b-4867-bc2c-4708e21299cb">
-					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				<reportElement x="530" y="0" width="60" height="30" uuid="1155efb4-d80b-4867-bc2c-4708e21299cb">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
-				<textElement>
+				<textElement verticalAlignment="Bottom">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{program}.getCode()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{program} != null ? ((java.util.Map)$P{program}).get("code") : ""]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>
 	<columnHeader>
 		<band height="50">
 			<textField>
-				<reportElement x="10" y="20" width="580" height="28" uuid="b34d4558-cb9f-40c0-a5fe-ea804c5ee83b">
-					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
-				</reportElement>
-				<textFieldExpression><![CDATA[MessageFormat.format("{0} - {1} - {2}", $P{facility}.getCode(), $P{facility}.getName(), $P{program}.getName())]]></textFieldExpression>
+				<reportElement x="10" y="20" width="580" height="28" uuid="b34d4558-cb9f-40c0-a5fe-ea804c5ee83b"/>
+				<textFieldExpression><![CDATA[java.text.MessageFormat.format("{0} - {1} - {2}", $P{facility} != null ? ((java.util.Map)$P{facility}).get("code") : "", $P{facility} != null ? ((java.util.Map)$P{facility}).get("name") : "", $P{program} != null ? ((java.util.Map)$P{program}).get("name") : "")]]></textFieldExpression>
 			</textField>
 		</band>
 	</columnHeader>
@@ -215,31 +229,24 @@
 		<band height="54" splitType="Stretch">
 			<textField>
 				<reportElement x="10" y="30" width="120" height="15" uuid="93290a78-3c39-4e2b-8f2f-638d0fb3267c"/>
-				<textFieldExpression><![CDATA[DateTimeFormatter.ofPattern($P{dateTimeFormat}).format(ZonedDateTime.now())]]></textFieldExpression>
+				<textFieldExpression><![CDATA[java.time.format.DateTimeFormatter.ofPattern($P{dateFormat} != null ? $P{dateFormat} : "yyyy-MM-dd").format(java.time.ZonedDateTime.now())]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="510" y="30" width="40" height="15" uuid="ee62efa8-b6f7-4de5-8ede-1ac3db0020cd">
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-				</reportElement>
+				<reportElement x="510" y="30" width="40" height="15" uuid="ee62efa8-b6f7-4de5-8ede-1ac3db0020cd"/>
 				<textElement textAlignment="Right"/>
-				<textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[msg($R{report.controls.pageNumber}, $V{PAGE_NUMBER})]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
 				<reportElement x="550" y="30" width="40" height="15" uuid="fbe34c63-7cfe-41e9-98dd-f1d379e7338c"/>
-				<textElement textAlignment="Left"/>
-				<textFieldExpression><![CDATA[" of " + $V{PAGE_NUMBER}]]></textFieldExpression>
+				<textElement textAlignment="Left"><paragraph leftIndent="3"/></textElement>
+				<textFieldExpression><![CDATA[msg($R{report.controls.pageTotal}, $V{PAGE_NUMBER})]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageFooter>
 	<summary>
-		<band height="64">
+		<band height="64" splitType="Stretch">
 			<componentElement>
-				<reportElement x="10" y="4" width="580" height="60" uuid="0a547141-8154-45c5-9011-aca83001f1c9">
-					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
-					<property name="com.jaspersoft.studio.table.style.table_header" value="Table 1_TH"/>
-					<property name="com.jaspersoft.studio.table.style.column_header" value="Table 1_CH"/>
-					<property name="com.jaspersoft.studio.table.style.detail" value="Table 1_TD"/>
-				</reportElement>
+				<reportElement x="10" y="4" width="575" height="60" uuid="0a547141-8154-45c5-9011-aca83001f1c9"/>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
 					<datasetRun subDataset="summaryDataset" uuid="81514070-4b19-446e-a349-006c7aa3df3a">
 						<datasetParameter name="showFacility">
@@ -254,185 +261,196 @@
 						<datasetParameter name="decimalFormat">
 							<datasetParameterExpression><![CDATA[$P{decimalFormat}]]></datasetParameterExpression>
 						</datasetParameter>
-						<dataSourceExpression><![CDATA[new JRBeanCollectionDataSource($P{stockCardSummaries})]]></dataSourceExpression>
+						<datasetParameter name="showInDoses">
+							<datasetParameterExpression><![CDATA[$P{showInDoses}]]></datasetParameterExpression>
+						</datasetParameter>
+						<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRMapCollectionDataSource($P{stockCardSummaries})]]></dataSourceExpression>
 					</datasetRun>
-					<jr:column width="93" uuid="72fd2aee-eded-4f91-b865-2eed6c1f45c2">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
-						<jr:columnHeader style="Table 1_CH" height="30" rowSpan="1">
-							<staticText>
-								<reportElement x="0" y="0" width="93" height="30" uuid="11a54a5c-e198-4880-93c0-d2788f0e5ccd"/>
+					<jr:column width="90" uuid="72fd2aee-eded-4f91-b865-2eed6c1f45c2">
+						<jr:columnHeader style="Table 1_CH" height="30">
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="90" height="30" uuid="11a54a5c-e198-4880-93c0-d2788f0e5ccd"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="12"/>
 								</textElement>
-								<text><![CDATA[Product Code]]></text>
-							</staticText>
+								<textFieldExpression><![CDATA[$R{report.column.productCode}]]></textFieldExpression>
+							</textField>
 						</jr:columnHeader>
 						<jr:detailCell style="Table 1_TD" height="30">
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="93" height="30" uuid="b1604e69-79e0-4933-8ee5-51d6cce5061f"/>
+								<reportElement x="0" y="0" width="90" height="30" uuid="b1604e69-79e0-4933-8ee5-51d6cce5061f"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{orderable}.getProductCode()]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{orderable} != null ? ((java.util.Map)$F{orderable}).get("productCode") : ""]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="77" uuid="33bce733-51fc-4690-ae7e-a70995d90963">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
-						<jr:columnHeader style="Table 1_CH" height="30" rowSpan="1">
-							<staticText>
-								<reportElement x="0" y="0" width="77" height="30" uuid="1a695eef-6fde-43a4-9db7-9e660d907a5e"/>
+					<jr:column width="100" uuid="33bce733-51fc-4690-ae7e-a70995d90963">
+						<jr:columnHeader style="Table 1_CH" height="30">
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="100" height="30" uuid="1a695eef-6fde-43a4-9db7-9e660d907a5e"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="12"/>
 								</textElement>
-								<text><![CDATA[Product]]></text>
-							</staticText>
+								<textFieldExpression><![CDATA[$R{report.column.product}]]></textFieldExpression>
+							</textField>
 						</jr:columnHeader>
 						<jr:detailCell style="Table 1_TD" height="30">
-							<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.HorizontalRowLayout"/>
-							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="77" height="30" uuid="469bc4d2-785e-4ac7-81ab-df1bff6c2525"/>
+								<reportElement x="0" y="0" width="100" height="30" uuid="469bc4d2-785e-4ac7-81ab-df1bff6c2525"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{orderable}.getFullProductName()]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{orderable} != null ? ((java.util.Map)$F{orderable}).get("fullProductName") : ""]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="50" uuid="1e1d0235-f5e5-49fd-bf8b-5339a12b90f0">
+						<jr:columnHeader style="Table 1_CH" height="30">
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="50" height="30" uuid="4e05b9e2-97b5-471d-bc48-eb4b4448f916"/>
+								<box padding="2"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="12"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$R{report.column.packSize}]]></textFieldExpression>
+							</textField>
+						</jr:columnHeader>
+						<jr:detailCell style="Table 1_TD" height="30">
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="50" height="30" uuid="e8c2a4e6-baa8-4825-8eae-bb5be4eae323"/>
+								<box padding="2"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{orderable} != null && ((java.util.Map)$F{orderable}).get("netContent") != null ? String.valueOf(((java.util.Map)$F{orderable}).get("netContent")) : ""]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="95" uuid="a7bee396-1a71-4dc5-a7c7-5a795da02240">
+						<printWhenExpression><![CDATA[$P{showLot}]]></printWhenExpression>
+						<jr:columnHeader style="Table 1_CH" height="30">
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="95" height="30" uuid="f3af19dd-e960-4808-8702-7afdbc4b9503"/>
+								<box padding="2"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="12"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$R{report.column.lotCode}]]></textFieldExpression>
+							</textField>
+						</jr:columnHeader>
+						<jr:detailCell style="Table 1_TD" height="30">
+							<textField isStretchWithOverflow="true" isBlankWhenNull="false">
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="80" height="30" uuid="6680122f-b158-4277-afff-29f8eae11525"/>
+								<box padding="2"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{lot} != null && ((java.util.Map)$F{lot}).get("lotCode") != null ? ((java.util.Map)$F{lot}).get("lotCode") : $R{report.value.noLotDefined}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="90" uuid="c76adfba-b4ff-40fd-bfd9-9ddd6ad743ff">
+						<printWhenExpression><![CDATA[$P{showLot}]]></printWhenExpression>
+						<jr:columnHeader style="Table 1_CH" height="30">
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="90" height="30" uuid="803a20bf-c364-417a-8139-12a4609bf70a"/>
+								<box padding="2"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="12"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$R{report.column.expiryDate}]]></textFieldExpression>
+							</textField>
+						</jr:columnHeader>
+						<jr:detailCell style="Table 1_TD" height="30">
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="90" height="30" uuid="32fea3a9-1db4-4e09-90d0-49c214525ec5"/>
+								<box padding="2"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{lot} != null && ((java.util.Map)$F{lot}).get("expirationDate") != null ? ( String.valueOf(((java.util.Map)$F{lot}).get("expirationDate")).startsWith("[") ? java.time.LocalDate.of(Integer.parseInt(String.valueOf(((java.util.Map)$F{lot}).get("expirationDate")).replaceAll("\\[|\\]|\\s", "").split(",")[0]), Integer.parseInt(String.valueOf(((java.util.Map)$F{lot}).get("expirationDate")).replaceAll("\\[|\\]|\\s", "").split(",")[1]), Integer.parseInt(String.valueOf(((java.util.Map)$F{lot}).get("expirationDate")).replaceAll("\\[|\\]|\\s", "").split(",")[2])).format(java.time.format.DateTimeFormatter.ofPattern($P{dateFormat} != null ? $P{dateFormat} : "yyyy-MM-dd")) : java.time.format.DateTimeFormatter.ofPattern($P{dateFormat} != null ? $P{dateFormat} : "yyyy-MM-dd").format(java.time.LocalDate.parse(String.valueOf(((java.util.Map)$F{lot}).get("expirationDate")))) ) : ""]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="70" uuid="7309737e-e6a7-44ba-bf6d-92b7cc64ef12">
+						<jr:columnHeader style="Table 1_CH" height="30">
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="70" height="30" uuid="2ef9a1d3-3722-44c7-b38a-08b1d7e06bc6"/>
+								<box padding="2"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="12"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$R{report.column.lastUpdate}]]></textFieldExpression>
+							</textField>
+						</jr:columnHeader>
+						<jr:detailCell style="Table 1_TD" height="30">
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="70" height="30" uuid="e8a313ec-9db5-4892-9671-fc221c5e6abd"/>
+								<box padding="2"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{lastUpdate} == null ? "" : ( String.valueOf($F{lastUpdate}).startsWith("[") ? java.time.LocalDate.of(Integer.parseInt(String.valueOf($F{lastUpdate}).replaceAll("\\[|\\]|\\s", "").split(",")[0]), Integer.parseInt(String.valueOf($F{lastUpdate}).replaceAll("\\[|\\]|\\s", "").split(",")[1]), Integer.parseInt(String.valueOf($F{lastUpdate}).replaceAll("\\[|\\]|\\s", "").split(",")[2])).format(java.time.format.DateTimeFormatter.ofPattern($P{dateFormat} != null ? $P{dateFormat} : "yyyy-MM-dd")) : java.time.format.DateTimeFormatter.ofPattern($P{dateFormat} != null ? $P{dateFormat} : "yyyy-MM-dd").format(java.time.LocalDate.parse(String.valueOf($F{lastUpdate}))) )]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="80" uuid="c844b425-61d2-4c3b-b580-7c907854ec8d">
+						<jr:columnHeader style="Table 1_CH" height="30">
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="80" height="30" uuid="7deb2b72-9395-4e87-8da7-a2e576e35820"/>
+								<box padding="2"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="12"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$P{showInDoses} ? $R{report.column.stockOnHandDoses} : $R{report.column.stockOnHandPacks}]]></textFieldExpression>
+							</textField>
+						</jr:columnHeader>
+						<jr:detailCell style="Table 1_TD" height="30">
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="80" height="30" uuid="6b7919e9-5946-4ae1-9417-412f5ddc1286"/>
+								<box padding="2"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{stockOnHand} == null ? "" :
+									( $P{showInDoses}
+										? $P{decimalFormat}.format($F{stockOnHand}).toString()
+										: ( ($F{stockOnHand}.longValue() / $V{orderableNetContent})
+											+ " (+" + ($F{stockOnHand}.longValue() % $V{orderableNetContent}) + ")" ) )]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="67" uuid="aece0ada-49f5-4a52-95f6-4567a7d8c9dd">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
 						<printWhenExpression><![CDATA[$P{showProgram}]]></printWhenExpression>
-						<jr:columnHeader style="Table 1_CH" height="30" rowSpan="1">
-							<staticText>
-								<reportElement x="0" y="0" width="67" height="30" uuid="5fbf1451-a327-4c6c-a502-e8275a01fb5b"/>
+						<jr:columnHeader style="Table 1_CH" height="30">
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="67" height="30" uuid="5fbf1451-a327-4c6c-a502-e8275a01fb5b"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="12"/>
 								</textElement>
-								<text><![CDATA[Program]]></text>
-							</staticText>
+								<textFieldExpression><![CDATA[$R{report.column.program}]]></textFieldExpression>
+							</textField>
 						</jr:columnHeader>
 						<jr:detailCell style="Table 1_TD" height="30">
-							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="67" height="30" uuid="624e834f-d046-4881-a936-88b40ef263bd"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{program}.getName()]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{program} != null ? ((java.util.Map)$F{program}).get("name") : ""]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
 					<jr:column width="50" uuid="6d50f71d-da27-4166-bb53-b518393a48ee">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column4"/>
 						<printWhenExpression><![CDATA[$P{showFacility}]]></printWhenExpression>
-						<jr:columnHeader style="Table 1_CH" height="30" rowSpan="1">
-							<staticText>
-								<reportElement x="0" y="0" width="50" height="30" uuid="d38235ca-700b-46cc-904a-b3e6a45faf60"/>
+						<jr:columnHeader style="Table 1_CH" height="30">
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="50" height="30" uuid="d38235ca-700b-46cc-904a-b3e6a45faf60"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font size="12"/>
 								</textElement>
-								<text><![CDATA[Facility]]></text>
-							</staticText>
+								<textFieldExpression><![CDATA[$R{report.column.facility}]]></textFieldExpression>
+							</textField>
 						</jr:columnHeader>
 						<jr:detailCell style="Table 1_TD" height="30">
-							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="50" height="30" uuid="9abf6368-8b9c-4cc1-9e71-69cb90044263"/>
 								<box padding="2"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{facility}.getName()]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="80" uuid="a7bee396-1a71-4dc5-a7c7-5a795da02240">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
-						<printWhenExpression><![CDATA[$P{showLot}]]></printWhenExpression>
-						<jr:columnHeader style="Table 1_CH" height="30" rowSpan="1">
-							<staticText>
-								<reportElement x="0" y="0" width="80" height="30" uuid="f3af19dd-e960-4808-8702-7afdbc4b9503">
-									<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
-								</reportElement>
-								<box padding="2"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="12"/>
-								</textElement>
-								<text><![CDATA[Lot Code]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:detailCell style="Table 1_TD" height="30">
-							<textField isStretchWithOverflow="true" isBlankWhenNull="false">
-								<reportElement x="0" y="0" width="80" height="30" uuid="6680122f-b158-4277-afff-29f8eae11525"/>
-								<box padding="2"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{lot} != null ? $F{lot}.getLotCode()  : "No lot defined"]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="73" uuid="c76adfba-b4ff-40fd-bfd9-9ddd6ad743ff">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
-						<printWhenExpression><![CDATA[$P{showLot}]]></printWhenExpression>
-						<jr:columnHeader style="Table 1_CH" height="30" rowSpan="1">
-							<staticText>
-								<reportElement x="0" y="0" width="73" height="30" uuid="803a20bf-c364-417a-8139-12a4609bf70a">
-									<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
-								</reportElement>
-								<box padding="2"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="12"/>
-								</textElement>
-								<text><![CDATA[Expiry Date]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:detailCell style="Table 1_TD" height="30">
-							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="73" height="30" uuid="32fea3a9-1db4-4e09-90d0-49c214525ec5"/>
-								<box padding="2"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[DateTimeFormatter.ofPattern($P{dateFormat}).format(LocalDate.parse($F{lot}.getExpirationDate().toString()))]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="102" uuid="7309737e-e6a7-44ba-bf6d-92b7cc64ef12">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column7"/>
-						<jr:columnHeader style="Table 1_CH" height="30" rowSpan="1">
-							<staticText>
-								<reportElement x="0" y="0" width="102" height="30" uuid="2ef9a1d3-3722-44c7-b38a-08b1d7e06bc6"/>
-								<box padding="2"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="12"/>
-								</textElement>
-								<text><![CDATA[Last update]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:detailCell style="Table 1_TD" height="30">
-							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="102" height="30" uuid="e8a313ec-9db5-4892-9671-fc221c5e6abd"/>
-								<box padding="2"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[DateTimeFormatter.ofPattern($P{dateFormat}).format(LocalDate.parse($F{lastUpdate}.toString()))]]></textFieldExpression>
-							</textField>
-						</jr:detailCell>
-					</jr:column>
-					<jr:column width="65" uuid="c844b425-61d2-4c3b-b580-7c907854ec8d">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column8"/>
-						<jr:columnHeader style="Table 1_CH" height="30" rowSpan="1">
-							<staticText>
-								<reportElement x="0" y="0" width="65" height="30" uuid="7deb2b72-9395-4e87-8da7-a2e576e35820"/>
-								<box padding="2"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle">
-									<font size="12"/>
-								</textElement>
-								<text><![CDATA[SOH]]></text>
-							</staticText>
-						</jr:columnHeader>
-						<jr:detailCell style="Table 1_TD" height="30">
-							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-								<reportElement x="0" y="0" width="65" height="30" uuid="6b7919e9-5946-4ae1-9417-412f5ddc1286"/>
-								<box padding="2"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{stockOnHand} != null ? $P{decimalFormat}.format($F{stockOnHand}).toString() : ""]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{facility} != null ? ((java.util.Map)$F{facility}).get("name") : ""]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>

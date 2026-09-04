@@ -19,12 +19,14 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static java.util.Collections.emptyList;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -37,7 +39,12 @@ import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLi
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class StockEventLineItemDto implements IdentifiableByOrderableLot, VvmApplicable {
+  // Set server-side after the event is persisted (so generated stock card line items can record
+  // their origin); ignored if provided by clients on the create path.
+  @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+  private UUID id;
   private UUID orderableId;
   private UUID lotId;
   private Integer quantity;
@@ -50,13 +57,20 @@ public class StockEventLineItemDto implements IdentifiableByOrderableLot, VvmApp
   private String sourceFreeText;
   private UUID destinationId;
   private String destinationFreeText;
+  // Set server-side by the cancellation flow; ignored if provided by clients on the create path.
+  @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+  private UUID reversesEventLineItemId;
   private List<StockEventAdjustmentDto> stockAdjustments;
+  // Optional alternative to lotId: a lot code + expiry resolved (or created) during event
+  // processing. Mutually exclusive with lotId.
+  private StockEventLineItemLotDto lot;
 
   StockEventLineItem toEventLineItem() {
     // event is set in StockEventDto.toEvent()
     return new StockEventLineItem(
         orderableId, lotId, quantity, extraData, occurredDate, reasonId, reasonFreeText, sourceId,
-        sourceFreeText, destinationId, destinationFreeText, null, stockAdjustments()
+        sourceFreeText, destinationId, destinationFreeText, reversesEventLineItemId, null,
+        stockAdjustments()
     );
   }
 
@@ -70,6 +84,10 @@ public class StockEventLineItemDto implements IdentifiableByOrderableLot, VvmApp
 
   public boolean hasLotId() {
     return this.lotId != null;
+  }
+
+  public boolean hasLot() {
+    return this.lot != null;
   }
 
   public boolean hasDestinationFreeText() {

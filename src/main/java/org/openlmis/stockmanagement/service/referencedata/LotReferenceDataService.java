@@ -22,9 +22,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
+import org.openlmis.stockmanagement.i18n.MessageKeys;
+import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.util.RequestParameters;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.HttpStatusCodeException;
 
 @Service
 public class LotReferenceDataService extends BaseReferenceDataService<LotDto> {
@@ -86,5 +90,38 @@ public class LotReferenceDataService extends BaseReferenceDataService<LotDto> {
     return CollectionUtils.isEmpty(ids)
         ? Collections.emptyList()
         : getPage(RequestParameters.init().set("id", ids)).getContent();
+  }
+
+  /**
+   * Finds lot by their exact codes.
+   *
+   * @param exactCodes exact codes to look for.
+   * @return a page of lots
+   */
+  public List<LotDto> findByExactCodes(Collection<String> exactCodes) {
+    return CollectionUtils.isEmpty(exactCodes)
+        ? Collections.emptyList()
+        : getPage(RequestParameters.init().set("exactCode", exactCodes)).getContent();
+  }
+
+  /**
+   * Creates a lot in the reference data service using the stockmanagement service account.
+   * A client error ({@code 4xx}, for example a rejected or duplicate code) is translated into a
+   * {@link ValidationMessageException} so it surfaces as a coherent stock-event error, while a
+   * server error is left as a {@link DataRetrievalException}.
+   *
+   * @param lotDto the lot to create
+   * @return the created lot, including its generated id
+   */
+  public LotDto create(LotDto lotDto) {
+    try {
+      return createResource(lotDto);
+    } catch (HttpStatusCodeException ex) {
+      if (ex.getStatusCode().is4xxClientError()) {
+        throw new ValidationMessageException(ex,
+            new Message(MessageKeys.ERROR_EVENT_LOT_CREATION_FAILED, lotDto.getLotCode()));
+      }
+      throw buildDataRetrievalException(ex);
+    }
   }
 }

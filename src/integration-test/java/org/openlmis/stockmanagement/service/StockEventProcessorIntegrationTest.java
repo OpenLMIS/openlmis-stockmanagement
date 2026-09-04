@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.service;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
@@ -33,6 +34,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.openlmis.stockmanagement.BaseIntegrationTest;
+import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
@@ -191,6 +193,35 @@ public class StockEventProcessorIntegrationTest extends BaseIntegrationTest {
     //then
     assertSize(cardSize + 1, eventSize + 1, lineItemSize + 1);
     verify(stockEventNotificationProcessor).callAllNotifications(stockEventDto);
+  }
+
+  @Test
+  public void shouldRecordOriginEventLineItemIdOnGeneratedStockCardLineItem() {
+    StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
+    stockEventDto.getLineItems().get(0).setSourceId(node.getId());
+    stockEventDto.getLineItems().get(0).setDestinationId(node.getId());
+    stockEventDto.setUserId(userId);
+    stockEventDto.setActive(true);
+    setContext(stockEventDto);
+
+    UUID savedEventId = stockEventProcessor.process(stockEventDto);
+
+    // the generated stock card line item records the persisted stock event line item it came from
+    UUID eventLineItemId = stockEventsRepository.findById(savedEventId)
+        .orElseThrow(AssertionError::new)
+        .getLineItems().get(0).getId();
+
+    StockCardLineItem generated = null;
+    for (StockCardLineItem item : lineItemRepository.findAll()) {
+      if (item.getOriginEvent() != null && savedEventId.equals(item.getOriginEvent().getId())) {
+        generated = item;
+        break;
+      }
+    }
+
+    assertThat(generated, is(notNullValue()));
+    assertThat(generated.getOriginEventLineItemId(), is(eventLineItemId));
   }
 
   @Test

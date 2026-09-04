@@ -1,32 +1,38 @@
-task consulRegistration(type: Exec) {
-    executable "node"
-    args "consul/registration.js", "-c", "register", "-f", "consul/config.json"
+tasks.register('consulRegistration', Exec) {
+    group = 'consul'
+    description = 'Registers the service in Consul'
+    workingDir = file('consul')
+    commandLine 'node', 'registration.js', '-c', 'register', '-f', 'config.json'
 }
 
-task consulDeregistration(type: Exec) {
-    executable "node"
-    args "consul/registration.js", "-c", "deregister", "-f", "consul/config.json"
+tasks.register('consulDeregistration', Exec) {
+    group = 'consul'
+    description = 'Deregisters the service from Consul'
+    workingDir = file('consul')
+    commandLine 'node', 'registration.js', '-c', 'deregister', '-f', 'config.json'
 }
 
-task copyRegistrationToConsulBuild(type: Copy) {
+tasks.register('copyRegistrationToConsulBuild', Copy) {
     from 'consul'
     into 'build/consul'
+    include 'package.json', 'registration.js', 'config.json'
 }
 
-task copyRamlToConsulBuild(type: Copy) {
+tasks.register('copyRamlToConsulBuild', Copy) {
     from 'src/main/resources'
     into 'build/consul'
     include 'api-definition.yaml'
 }
 
-task copyRamlSchemasToConsulBuild(type: Copy) {
+tasks.register('copyRamlSchemasToConsulBuild', Copy) {
     from 'src/main/resources/schemas'
     into 'build/consul/schemas'
 }
 
-task copyConsulRegistrationToBuild(type: Copy)
-copyConsulRegistrationToBuild {
-    dependsOn copyRegistrationToConsulBuild
-    dependsOn copyRamlSchemasToConsulBuild
-    dependsOn copyRamlToConsulBuild
+tasks.register('prepareConsulBuild') {
+    group = 'build'
+    description = 'Prepares all Consul configuration files for the Docker build'
+    dependsOn 'copyRegistrationToConsulBuild'
+    dependsOn 'copyRamlSchemasToConsulBuild'
+    dependsOn 'copyRamlToConsulBuild'
 }

@@ -20,11 +20,17 @@ import java.util.UUID;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 
-public class OrderableDeferredLoader extends DeferredLoader<OrderableDto, UUID> {
+public class OrderableDeferredLoader
+    extends DeferredLoader<OrderableDto, UUID, OrderableDeferredLoader.Handle> {
   private OrderableReferenceDataService orderableReferenceDataService;
 
   public OrderableDeferredLoader(OrderableReferenceDataService orderableReferenceDataService) {
     this.orderableReferenceDataService = orderableReferenceDataService;
+  }
+
+  @Override
+  protected Handle newHandle(UUID key) {
+    return new Handle(key);
   }
 
   @Override
@@ -37,5 +43,11 @@ public class OrderableDeferredLoader extends DeferredLoader<OrderableDto, UUID> 
     }
 
     deferredObjects.clear();
+  }
+
+  public static class Handle extends DeferredObject<OrderableDto, UUID> {
+    public Handle(UUID objectKey) {
+      super(objectKey);
+    }
   }
 }

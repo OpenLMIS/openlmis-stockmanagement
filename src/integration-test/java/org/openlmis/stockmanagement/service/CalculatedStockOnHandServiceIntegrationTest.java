@@ -413,16 +413,11 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
     stockCard.setLineItems(new HashSet<>(lineItemlist));
     stockCardRepository.save(stockCard);
 
+    // A row already exists for the day; recalculation updates it in place, never duplicates.
     calculatedStockOnHandRepository.save(
         calculatedStockOnHandDataBuilder
             .withOccurredDate(lineItem.getOccurredDate().plusDays(1))
             .withStockOnHand(10)
-            .build());
-
-    calculatedStockOnHandRepository.save(
-        calculatedStockOnHandDataBuilder
-            .withOccurredDate(lineItem.getOccurredDate().plusDays(1))
-            .withStockOnHand(20)
             .build());
 
     calculatedStockOnHandService.recalculateStockOnHand(Collections.singletonList(lineItem));
@@ -432,6 +427,10 @@ public class CalculatedStockOnHandServiceIntegrationTest extends BaseIntegration
             stockCard.getId(),
             lineItem.getOccurredDate());
 
+    // the day must still have exactly one row (updated in place, not duplicated)
+    assertThat(result.stream()
+        .filter(soh -> soh.getOccurredDate().equals(lineItem.getOccurredDate().plusDays(1)))
+        .count(), is(1L));
     assertThat(result.get(0).getStockOnHand(), is(15));
     assertThat(result.get(1).getStockOnHand(), is(35));
   }

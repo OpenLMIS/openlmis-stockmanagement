@@ -130,6 +130,11 @@ public class StockCardSummariesServiceTest {
   private CalculatedStockOnHandRepository calculatedStockOnHandRepository;
   @Mock
   private HomeFacilityPermissionService homeFacilityPermissionService;
+  @Mock
+  // injected into StockCardBaseService via @InjectMocks; not referenced directly in this test
+  @SuppressWarnings("PMD.UnusedPrivateField")
+  private CancellationLinkResolver cancellationLinkResolver;
+
   @InjectMocks
   private StockCardSummariesService stockCardSummariesService;
 

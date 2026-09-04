@@ -21,6 +21,7 @@ import static org.openlmis.stockmanagement.web.ValidSourceDestinationSearchParam
 import static org.openlmis.stockmanagement.web.ValidSourceDestinationSearchParams.GEOGRAPHIC_ZONE_ID;
 import static org.openlmis.stockmanagement.web.ValidSourceDestinationSearchParams.PROGRAM_ID;
 
+import java.util.Collections;
 import java.util.UUID;
 import org.junit.Test;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
@@ -105,4 +106,11 @@ public class ValidSourceDestinationSearchParamsTest {
     assertEquals(GEOGRAPHIC_ZONE_ID_VALUE, params.getGeographicZone());
   }
 
+  @Test
+  public void shouldReturnEmptyProgramIdListWhenEmptyParams() {
+    ValidSourceDestinationSearchParams params =
+        new ValidSourceDestinationSearchParams(new LinkedMultiValueMap<>());
+
+    assertEquals(Collections.emptyList(), params.getAllProgramIds());
+  }
 }

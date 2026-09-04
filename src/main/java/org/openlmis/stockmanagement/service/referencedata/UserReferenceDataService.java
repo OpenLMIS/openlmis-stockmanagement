@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
@@ -47,6 +48,21 @@ public class UserReferenceDataService extends BaseReferenceDataService<UserDto> 
 
   public Collection<UserDto> findUsers(Map<String, Object> parameters) {
     return findAll("search", parameters);
+  }
+
+  /**
+   * This method retrieves users data by user ids.
+   *
+   * @param ids ids of users to find.
+   */
+  public Collection<UserDto> findUsersByIds(Set<UUID> ids) {
+    Map<String, Object> payload = Collections.singletonMap("id", ids);
+
+    Page<UserDto> users = getPage("search", Collections.emptyMap(), payload);
+
+    return users == null || users.getContent().isEmpty()
+        ? Collections.emptyList()
+        : users.getContent();
   }
 
   /**

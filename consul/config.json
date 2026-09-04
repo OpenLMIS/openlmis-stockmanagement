@@ -1,10 +1,17 @@
 {
   "service": {
     "Name": "stockmanagement",
+    "Id": "stockmanagement-service",
     "Port": 8080,
-    "Tags": ["openlmis-service"]
+    "Tags": ["openlmis-service"],
+    "check": {
+      "interval": "10s",
+      "http": "http://HOST:PORT/actuator/health",
+      "timeout": "5s",
+      "deregisterCriticalServiceAfter": "10m"
+    }
   },
-  "raml": "src/main/resources/api-definition.yaml",
+  "raml": "/consul/api-definition.yaml",
   "path": [
     "stockmanagement",
     "stockmanagement/docs",

@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -44,7 +46,7 @@ public class StockEvent extends BaseEntity {
   @Column(nullable = false)
   private UUID programId;
 
-  @Column(nullable = false)
+  @Column
   private UUID userId;
 
   @Column(nullable = false, columnDefinition = "timestamp")
@@ -56,6 +58,10 @@ public class StockEvent extends BaseEntity {
   private String signature;
 
   private String documentNumber;
+
+  @Column(columnDefinition = TEXT_COLUMN_DEFINITION)
+  @Enumerated(value = EnumType.STRING)
+  private EventOrigin eventOrigin;
 
   @ToString.Exclude
   @OneToMany(cascade = ALL, mappedBy = "stockEvent", fetch = FetchType.LAZY)

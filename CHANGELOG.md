@@ -1,11 +1,72 @@
-5.2.0 / wip
+Upcoming Version (WIP)
+==================
+* [SELV3-868](https://openlmis.atlassian.net/browse/SELV3-868): A cancellation is now dated on the movement it cancels rather than the current date, fixing the stockout days and consumption reported for the period. The negative-stock check is consequently stricter: stock already issued can no longer be un-received.
+* [SELV3-869](https://openlmis.atlassian.net/browse/SELV3-869): Extended `POST /api/stockEvents/{id}/cancel` to adjustment line items, reversed by an adjustment of the opposite reason type. Cancel reasons gained a scope tag (`cancelMovement` / `cancelAdjustment`) plus a `Cancelled debit adjustment` / `Cancelled credit adjustment` pair, and only line items of an issue, receive or adjustment event are cancellable.
+* [SELV3-863](https://openlmis.atlassian.net/browse/SELV3-863): Show a localized "Adjustment" transaction type in the stock event report for adjustment stock events instead of the raw event origin value.
+* [OLMIS-8288](https://openlmis.atlassian.net/browse/OLMIS-8288): Stock event line items may address a lot by a `lot` object (`lotCode` + `expirationDate`) instead of a `lotId`; the two are mutually exclusive. During event processing the code is resolved against existing lots for the line's trade item and reused, or, for receiving and physical inventory movements, the lot is created in the reference data service under the stockmanagement service account and marked active. Issues and adjustments must reference existing lots. Lot codes are bounded to the GS1 AI(10) contract. Existing `lotId` submissions behave exactly as before. Known limitation: a lot created in-flow is not rolled back if the event subsequently fails validation, so it can remain as an active zero-stock lot; a resubmitted event reuses it (idempotent).
+* [OLMIS-8224](https://openlmis.atlassian.net/browse/OLMIS-8224) Jasper Report translations improvements
+* [SELV3-861](https://openlmis.atlassian.net/browse/SELV3-861): Resolve the "Reversing"/"Reversed by" cancellation cross-links on stock read DTOs and expose a stable `stockEventLineItemId` on the stock card and transaction-history line items, backed by a new `origineventlineitemid` column recording the stock event line item each stock card line item was created from. The column is populated for movements recorded from this version onward; movements recorded earlier have no stable line identifier and therefore cannot be cancelled through the reversal flow.
+* [SELV3-858](https://openlmis.atlassian.net/browse/SELV3-858): Added `POST /api/stockEvents/{id}/cancel` endpoint to cancel selected issue/receive line items. Introduces the `STOCK_EVENTS_CANCEL` right, a `reverseseventlineitemid` column on stock event line items, and cancel-tagged adjustment reasons. Cancellation creates a reversing adjustment stock event and recalculates stock on hand; the original event is preserved.
+* [OLMIS-8198](https://openlmis.atlassian.net/browse/OLMIS-8198): Add packs support to stock card and stock card summary reports.
+* [SELV3-849](https://openlmis.atlassian.net/browse/SELV3-849) Unified StockCardLineItem ordering on retrieval
+* [SELV3-842](https://openlmis.atlassian.net/browse/SELV3-842) Added `GET /api/stockEvents/{id}` endpoint
+* [SELV3-841](https://openlmis.atlassian.net/browse/SELV3-841) Added `GET /api/stockEvents/{id}/print` endpoint for generating PDF report for stock event transactions
+* [OLMIS-8176](https://openlmis.atlassian.net/browse/OLMIS-8176): Added Pack Size to stock card, stock card summary, physical inventory and stock event reports.
+* [OLMIS-8280](https://openlmis.atlassian.net/browse/OLMIS-8280) Fixed SonarCloud analysis failing on the deprecated Java 17 runtime by running it through the SonarQube scan action (on Java 21) instead of the Gradle plugin, and removed the now-unused Gradle sonar plugin and configuration.
+* [OLMIS-8280](https://openlmis.atlassian.net/browse/OLMIS-8280) Removed the axios dependency from the Consul registration script, replacing it with the native Node `http` client (no more axios security advisories to track).
+* [OLMIS-8280](https://openlmis.atlassian.net/browse/OLMIS-8280) Passed sonar.projectVersion (from the service version) to the SonarCloud analysis so New Code (Previous version) coverage is tracked correctly on master — completing the Java 21 migration.
+
+5.3.1 / 2026-06-09
+==================
+
+Improvements:
+* Stabilized consul registration and health checks
+* [ODRC-24](https://openlmis.atlassian.net/browse/ODRC-24) Global header and translations implemented for reports
+* [SELV3-748](https://openlmis.atlassian.net/browse/SELV3-748) Improved 'no permission' warning message
+* [SELV3-839](https://openlmis.atlassian.net/browse/SELV3-839) New document number generation for issue and receive
+* [SELV3-842](https://openlmis.atlassian.net/browse/SELV3-842) Added Transaction History view with new endpoints `GET /api/stockEvents` and `GET /api/stockEvents/{id}/lineItems`, plus a document number column on the stock card bin card report
+
+5.3.0 / 2025-11-27
+==================
+
+Improvements:
+* [OLMIS-8163](https://openlmis.atlassian.net/browse/OLMIS-8163): Stock card details now include user information
+* [OE-99](https://openlmis.atlassian.net/browse/OE-99): Physical Inventory print now displays quantities in doses or packs
+  * Added new optional parameter `showInDoses` to `/api/physicalInventories/print` (boolean, default: `true`)
+
+Changes:
+* Upgrade PostgreSQL JDBC driver to 42.6.2 for PostgreSQL 14 compatibility
+
+5.2.1 / 2025-07-09
+==================
+
+Improvements:
+* [SELV3-814](https://openlmis.atlassian.net/browse/SELV3-814): Added `POST /api/stockCards/deactivate` endpoint
+  * Allows to deactivate a batch of stock cards
+
+5.2.0 / 2025-03-31
 ==================
 
 **Requires referencedata:15.3.0 or later**
 
 Improvements:
-* [OE-86](https://openlmis.atlassian.net/browse/OE-86): Added /api/public/stockCardSummaries endpoint which is an
- an equivalent of /api/v2/stockCardSummaries service tailored for external integrations
+* [OE-86](https://openlmis.atlassian.net/browse/OE-86): Added `/api/public/stockCardSummaries` endpoint
+  * Equivalent to `/api/v2/stockCardSummaries`, tailored for external integrations
+* [OE-87](https://openlmis.atlassian.net/browse/OE-87): Added `/api/public/stockEvents` endpoint
+  * Equivalent to `/api/stockEvents`, tailored for external integrations
+* [OLMIS-8135](https://openlmis.atlassian.net/browse/OLMIS-8135): Fetching valid sources and destinations now supports a list of programs as a parameter
+* Minor coverage updates and code analysis improvements.
+
+Bug Fixes:
+* [OLMIS-8071](https://openlmis.atlassian.net/browse/OLMIS-8071): Stock-out days calculations (360-day calendar)
+  * Fixed issue where a full month of stock-out was incorrectly counted as 29 days instead of 30
+  * `endDate` taken from the period is now converted to an exclusive limit
+    * Months with 31 days return **30** stock-out days when no stock is available
+    * Months with 30 days return **30** stock-out days when no stock is available
+    * Stock movements within a period:
+      * Receiving stock on the **13th** and issuing on the **19th** in a **31-day month** results in **24** stock-out days
+      * Receiving stock on the **13th** and issuing on the **19th** in a **30-day month** results in **24** stock-out days
+    * A full **February** without stock is now counted as **30** days
 
 5.1.12 / 19.11.2024
 ==================

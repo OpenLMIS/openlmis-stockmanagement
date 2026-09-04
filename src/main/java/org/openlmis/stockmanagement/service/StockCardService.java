@@ -16,6 +16,8 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.time.ZonedDateTime.now;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.domain.card.StockCard.createStockCardFrom;
@@ -30,8 +32,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -46,6 +50,8 @@ import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
+import org.openlmis.stockmanagement.dto.referencedata.LotDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.i18n.MessageService;
@@ -57,6 +63,7 @@ import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataServic
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.PermissionStringDto;
 import org.openlmis.stockmanagement.service.referencedata.PermissionStrings;
+import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.web.Pagination;
@@ -77,6 +84,7 @@ import org.springframework.stereotype.Service;
  * for users to view one single stock card with full details.
  */
 @Service
+@SuppressWarnings("PMD.TooManyMethods")
 public class StockCardService extends StockCardBaseService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCardService.class);
@@ -108,7 +116,10 @@ public class StockCardService extends StockCardBaseService {
   private AuthenticationHelper authenticationHelper;
 
   @Autowired
-  private StockOnHandCalculationService calculationSoHService;
+  private UserReferenceDataService userReferenceDataService;
+
+  @Autowired
+  private StockCardLineItemService stockCardLineItemService;
 
   @Autowired
   private HomeFacilityPermissionService homeFacilityPermissionService;
@@ -198,7 +209,9 @@ public class StockCardService extends StockCardBaseService {
       permissionService.canViewStockCard(foundCard.getProgramId(), foundCard.getFacilityId());
     }
 
-    calculationSoHService.calculateStockOnHand(foundCard);
+    stockCardLineItemService.populateStockOnHandLineItems(foundCard);
+
+    populateUsernames(foundCard);
 
     StockCardDto cardDto = createDtos(singletonList(foundCard)).get(0);
     cardDto.setOrderable(orderableRefDataService.findOne(foundCard.getOrderableId()));
@@ -207,6 +220,89 @@ public class StockCardService extends StockCardBaseService {
     }
     assignSourceDestinationReasonNameForLineItems(cardDto);
     return cardDto;
+  }
+
+  /**
+   * Resolves a batch of stock cards by id into fully populated DTOs (stock on hand, names),
+   * batching the reference-data lookups instead of per card. Unlike
+   * {@link #findStockCardById(UUID)} it does NOT re-check the view permission - the caller must.
+   *
+   * @param ids the stock card ids.
+   * @return the resolved stock card DTOs.
+   */
+  public List<StockCardDto> findStockCardsByIds(Collection<UUID> ids) {
+    if (isEmpty(ids)) {
+      return emptyList();
+    }
+
+    List<StockCard> cards = cardRepository.findAllById(ids).stream()
+        .map(StockCard::shallowCopy)
+        .collect(Collectors.toList());
+    cards.forEach(stockCardLineItemService::populateStockOnHandLineItems);
+    cards.forEach(this::populateUsernames);
+
+    List<StockCardDto> dtos = createDtos(cards);
+
+    Set<UUID> orderableIds = dtos.stream()
+        .map(dto -> dto.getOrderable().getId())
+        .collect(Collectors.toSet());
+    Map<UUID, OrderableDto> orderables = orderableRefDataService.findByIds(orderableIds).stream()
+        .collect(Collectors.toMap(OrderableDto::getId, Function.identity()));
+
+    Set<UUID> lotIds = dtos.stream()
+        .filter(StockCardDto::hasLot)
+        .map(dto -> dto.getLot().getId())
+        .collect(Collectors.toSet());
+    Map<UUID, LotDto> lots = lotIds.isEmpty()
+        ? emptyMap()
+        : lotReferenceDataService.findByIds(lotIds).stream()
+            .collect(Collectors.toMap(LotDto::getId, Function.identity()));
+
+    Set<UUID> facilityNodeIds = collectFacilityNodeIds(dtos);
+    Map<UUID, FacilityDto> facilities = facilityNodeIds.isEmpty()
+        ? emptyMap()
+        : facilityRefDataService.findByIds(facilityNodeIds);
+
+    dtos.forEach(dto -> {
+      dto.setOrderable(orderables.get(dto.getOrderable().getId()));
+      if (dto.hasLot()) {
+        dto.setLot(lots.get(dto.getLot().getId()));
+      }
+      dto.getLineItems().forEach(lineItemDto -> {
+        StockCardLineItem lineItem = lineItemDto.getLineItem();
+        assignReasonName(lineItem);
+        lineItemDto.setSource(resolveNodeFacility(lineItem.getSource(), facilities));
+        lineItemDto.setDestination(resolveNodeFacility(lineItem.getDestination(), facilities));
+      });
+    });
+
+    return dtos;
+  }
+
+  private Set<UUID> collectFacilityNodeIds(List<StockCardDto> dtos) {
+    Set<UUID> nodeIds = new HashSet<>();
+    dtos.forEach(dto -> dto.getLineItems().forEach(lineItemDto -> {
+      StockCardLineItem lineItem = lineItemDto.getLineItem();
+      addFacilityNodeId(nodeIds, lineItem.getSource());
+      addFacilityNodeId(nodeIds, lineItem.getDestination());
+    }));
+    return nodeIds;
+  }
+
+  private void addFacilityNodeId(Set<UUID> nodeIds, Node node) {
+    if (node != null && node.isRefDataFacility()) {
+      nodeIds.add(node.getReferenceId());
+    }
+  }
+
+  private FacilityDto resolveNodeFacility(Node node, Map<UUID, FacilityDto> facilities) {
+    if (node == null) {
+      return null;
+    }
+    if (node.isRefDataFacility()) {
+      return facilities.get(node.getReferenceId());
+    }
+    return getFromRefDataOrConvertOrg(node);
   }
 
   /**
@@ -261,16 +357,32 @@ public class StockCardService extends StockCardBaseService {
   }
 
   /**
-   * Set stock card to inactive.
+   * Set stock cards to inactive.
    *
-   * @param stockCardId      id of stockCard to update
+   * @param stockCardIds stock card ids.
    */
   @Transactional
-  public void setInactive(UUID stockCardId) {
-    StockCard stockCard = cardRepository.findById(stockCardId).orElseThrow(() ->
-        new ResourceNotFoundException("Not found stock card with id: " + stockCardId));
-    stockCard.setActive(false);
-    cardRepository.saveAndFlush(stockCard);
+  public void setInactive(List<UUID> stockCardIds) {
+    List<StockCard> stockCards = cardRepository.findAllById(stockCardIds);
+
+    Set<UUID> foundIds = stockCards.stream()
+        .map(StockCard::getId)
+        .collect(Collectors.toSet());
+
+    List<UUID> notFound = stockCardIds.stream()
+        .filter(id -> !foundIds.contains(id))
+        .collect(Collectors.toList());
+
+    if (!notFound.isEmpty()) {
+      throw new ResourceNotFoundException("Stock cards not found for IDs: " + notFound);
+    }
+
+    for (StockCard card : stockCards) {
+      card.setActive(false);
+    }
+
+    cardRepository.saveAll(stockCards);
+    cardRepository.flush();
   }
 
   private StockCard findOrCreateCard(StockEventDto eventDto, StockEventLineItemDto eventLineItem,
@@ -325,6 +437,51 @@ public class StockCardService extends StockCardBaseService {
       } else {
         LOGGER.warn("Could not find any organization matching node id {}", node.getReferenceId());
         return FacilityDto.createFrom(new Organization());
+      }
+    }
+  }
+
+  /**
+   * Set usernames for line items.
+   *
+   * @param card stock card.
+   */
+  public void populateUsernames(StockCard card) {
+    List<StockCardLineItem> lineItems = card.getLineItems();
+    if (lineItems == null || lineItems.isEmpty()) {
+      return;
+    }
+
+    Set<UUID> userIds = lineItems.stream()
+        .map(StockCardLineItem::getUserId)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toSet());
+
+    if (userIds.isEmpty()) {
+      return;
+    }
+
+    Collection<UserDto> users = userReferenceDataService.findUsersByIds(userIds);
+    if (users.isEmpty()) {
+      LOGGER.warn("No users found for IDs: {}, when populating usernames for stock cards.",
+          userIds);
+      return;
+    }
+
+    Map<UUID, String> userIdToUsername = users.stream()
+        .collect(Collectors.toMap(UserDto::getId, UserDto::getUsername));
+
+    Set<UUID> missingIds = new HashSet<>(userIds);
+    missingIds.removeAll(userIdToUsername.keySet());
+    if (!missingIds.isEmpty()) {
+      LOGGER.warn("Users not found for IDs: {}, when populating usernames for stock cards.",
+          missingIds);
+    }
+
+    for (StockCardLineItem item : lineItems) {
+      UUID userId = item.getUserId();
+      if (userId != null) {
+        item.setUsername(userIdToUsername.get(userId));
       }
     }
   }

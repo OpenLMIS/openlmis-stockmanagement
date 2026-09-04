@@ -17,11 +17,14 @@ package org.openlmis.stockmanagement.service;
 
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -29,8 +32,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder.createStockEventDto;
 
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -43,7 +44,6 @@ import org.junit.runner.RunWith;
 import org.openlmis.stockmanagement.BaseIntegrationTest;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
-import org.openlmis.stockmanagement.domain.event.CalculatedStockOnHand;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
@@ -57,6 +57,7 @@ import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
+import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
 import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.NodeRepository;
@@ -70,6 +71,7 @@ import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataS
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.openlmis.stockmanagement.testutils.StockEventDtoDataBuilder;
 import org.openlmis.stockmanagement.util.Message;
 import org.slf4j.profiler.Profiler;
@@ -80,6 +82,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.test.context.junit4.SpringRunner;
 
+@SuppressWarnings("PMD.TooManyMethods")
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Transactional
@@ -129,6 +132,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
   @MockBean
   private HomeFacilityPermissionService homeFacilityPermissionService;
+
+  @MockBean(name = "userReferenceDataService")
+  private UserReferenceDataService userReferenceDataService;
 
   private Node node;
 
@@ -230,6 +236,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
   @Test
   public void shouldGetRefdataAndConvertOrganizationsWhenFindStockCard() {
+    when(userReferenceDataService.findUsersByIds(any()))
+        .thenReturn(Collections.emptyList());
+
     StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.getLineItems().get(0).setLotId(randomUUID());
     stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
@@ -274,7 +283,55 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
+  public void shouldGetRefdataAndConvertOrganizationsWhenFindStockCardsByIds() {
+    when(userReferenceDataService.findUsersByIds(any()))
+        .thenReturn(Collections.emptyList());
+
+    StockEventDto stockEventDto = createStockEventDto();
+    stockEventDto.getLineItems().get(0).setLotId(randomUUID());
+    stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
+    stockEventDto.getLineItems().get(0).setSourceId(node.getId());
+    stockEventDto.getLineItems().get(0).setDestinationId(node.getId());
+
+    Organization org = new Organization();
+    org.setName("org");
+    OrderableDto orderableDto = OrderableDto.builder()
+        .id(stockEventDto.getLineItems().get(0).getOrderableId()).build();
+    LotDto lotDto = LotDto.builder()
+        .id(stockEventDto.getLineItems().get(0).getLotId()).build();
+
+    when(facilityReferenceDataService.findOne(stockEventDto.getFacilityId()))
+        .thenReturn(new FacilityDto());
+    when(programReferenceDataService.findOne(stockEventDto.getProgramId()))
+        .thenReturn(new ProgramDto());
+    when(orderableReferenceDataService.findByIds(anySet()))
+        .thenReturn(Collections.singletonList(orderableDto));
+    when(lotReferenceDataService.findByIds(anySet()))
+        .thenReturn(Collections.singletonList(lotDto));
+
+    StockEvent savedEvent = save(stockEventDto, randomUUID());
+    StockCard savedCard = stockCardRepository.findByOriginEvent(savedEvent);
+
+    List<StockCardDto> foundCards = stockCardService.findStockCardsByIds(
+        Collections.singletonList(savedCard.getId()));
+
+    assertThat(foundCards, hasSize(1));
+
+    StockCardDto foundCardDto = foundCards.get(0);
+    assertThat(foundCardDto.getOrderable(), is(orderableDto));
+    assertThat(foundCardDto.getLot(), is(lotDto));
+
+    StockCardLineItemDto lineItemDto = foundCardDto.getLineItems().get(0);
+    FacilityDto orgFacility = FacilityDto.createFrom(org);
+    assertThat(lineItemDto.getSource(), is(orgFacility));
+    assertThat(lineItemDto.getDestination(), is(orgFacility));
+  }
+
+  @Test
   public void shouldReassignPhysicalInventoryReasonNames() {
+    when(userReferenceDataService.findUsersByIds(any()))
+        .thenReturn(Collections.emptyList());
+
     StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
     stockEventDto.getLineItems().get(0).setSourceId(null);
     stockEventDto.getLineItems().get(0).setDestinationId(null);
@@ -286,6 +343,30 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
     String reasonName = card.getLineItems().get(0).getLineItem().getReason().getName();
     assertThat(reasonName, is("Overstock"));
+  }
+
+  @Test
+  public void shouldPopulateUsernames() {
+    UUID userId = UUID.randomUUID();
+    UserDto userDto = new UserDto();
+    userDto.setId(userId);
+    userDto.setUsername("username");
+
+    when(userReferenceDataService.findUsersByIds(any()))
+        .thenReturn(Collections.singletonList(userDto));
+
+    StockEventDto stockEventDto = StockEventDtoDataBuilder.createStockEventDto();
+    stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
+    stockEventDto.getLineItems().get(0).setSourceId(node.getId());
+    stockEventDto.getLineItems().get(0).setDestinationId(node.getId());
+
+    StockEvent savedEvent = save(stockEventDto, userId);
+    UUID cardId = stockCardRepository.findByOriginEvent(savedEvent).getId();
+    StockCardDto card = stockCardService.findStockCardById(cardId);
+
+    assertThat(card.getId(), is(cardId));
+    assertThat(card.getLineItems().get(0).getLineItem().getUsername(), is("username"));
+    verify(userReferenceDataService).findUsersByIds(argThat(ids -> ids.contains(userId)));
   }
 
   @Test
@@ -326,6 +407,9 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
   @Test
   public void findStockCardByIdShouldNotCheckPermissionsForClientAuthentication() {
+    when(userReferenceDataService.findUsersByIds(any()))
+        .thenReturn(Collections.emptyList());
+
     final StockEventDto stockEventDto = createStockEventDto();
     stockEventDto.getLineItems().get(0).setReasonId(reason.getId());
     stockEventDto.getLineItems().get(0).setSourceId(node.getId());
@@ -346,16 +430,11 @@ public class StockCardServiceIntegrationTest extends BaseIntegrationTest {
 
     StockEvent event = eventDto.toEvent();
     StockEvent savedEvent = stockEventsRepository.save(event);
+    // saveFromEvent already creates the row for this (stockCard, occurredDate); no second insert.
     Profiler profiler = mock(Profiler.class);
     when(profiler.startNested(anyString())).thenReturn(profiler);
     stockCardService.saveFromEvent(eventDto, savedEvent.getId(), profiler);
 
-    List<StockCard> stockCards = stockCardRepository
-        .findByProgramIdAndFacilityId(savedEvent.getProgramId(), savedEvent.getFacilityId());
-    
-    calculatedStockOnHandRepository.save(new CalculatedStockOnHand(
-        savedEvent.getLineItems().get(0).getQuantity(), stockCards.get(0), 
-        LocalDate.now(), ZonedDateTime.now()));
     return savedEvent;
   }
 }

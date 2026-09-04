@@ -19,7 +19,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -38,7 +38,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.service.referencedata.DataRetrievalException;
 import org.openlmis.stockmanagement.testutils.ObjectGenerator;
 import org.openlmis.stockmanagement.util.DynamicPageTypeReference;
@@ -80,6 +80,8 @@ public abstract class BaseCommunicationServiceTest<T> {
 
   private BaseCommunicationService<T> service;
 
+  protected boolean skipAfter = false;
+
   @Before
   public void setUp() throws Exception {
     mockAuth();
@@ -88,6 +90,10 @@ public abstract class BaseCommunicationServiceTest<T> {
 
   @After
   public void tearDown() throws Exception {
+    if (skipAfter) {
+      return;
+    }
+
     checkAuth();
   }
 

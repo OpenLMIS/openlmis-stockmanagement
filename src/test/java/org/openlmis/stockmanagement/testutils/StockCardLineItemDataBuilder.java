@@ -54,6 +54,7 @@ public class StockCardLineItemDataBuilder {
   private ZonedDateTime processedDateTime = getBaseDateTime();
   private UUID userId = UUID.randomUUID();
   private Integer stockOnHand = 0;
+  private String username = EMPTY;
   private List<PhysicalInventoryLineItemAdjustment> stockAdjustments = Lists.newArrayList();
 
   public StockCardLineItemDataBuilder withCreditReason() {
@@ -112,8 +113,18 @@ public class StockCardLineItemDataBuilder {
     return this;
   }
 
+  public StockCardLineItemDataBuilder withId(UUID id) {
+    this.id = id;
+    return this;
+  }
+
   public StockCardLineItemDataBuilder withOriginEvent(StockEvent event) {
     originEvent = event;
+    return this;
+  }
+
+  public StockCardLineItemDataBuilder withDocumentNumber(String documentNumber) {
+    this.documentNumber = documentNumber;
     return this;
   }
 
@@ -156,7 +167,7 @@ public class StockCardLineItemDataBuilder {
     StockCardLineItem lineItem = new StockCardLineItem(
         stockCard, originEvent, quantity, extraData, reason, sourceFreeText, destinationFreeText,
         documentNumber, reasonFreeText, signature, source, destination, occurredDate,
-        processedDateTime, userId, stockOnHand, stockAdjustments
+        processedDateTime, userId, null, stockOnHand, username, stockAdjustments
     );
     lineItem.setId(id);
 

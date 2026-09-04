@@ -165,6 +165,8 @@ public abstract class MessageKeys {
       + ".occurredDate.invalid";
   public static final String ERROR_EVENT_OCCURRED_DATE_IN_FUTURE = EVENT_ERROR_PREFIX
       + ".occurredDate.in.future";
+  public static final String ERROR_EVENT_TYPE_INVALID = EVENT_ERROR_PREFIX + ".type.invalid";
+  public static final String ERROR_STOCK_EVENT_NOT_FOUND = EVENT_ERROR_PREFIX + ".notFound";
   public static final String ERROR_EVENT_QUANTITIES_INVALID = EVENT_ERROR_PREFIX
       + ".quantities.invalid";
   public static final String ERROR_EVENT_FACILITY_INVALID = EVENT_ERROR_PREFIX
@@ -196,6 +198,29 @@ public abstract class MessageKeys {
       + ".debit.quantity.exceed.stockOnHand";
   public static final String ERRRO_EVENT_SOH_EXCEEDS_LIMIT = EVENT_ERROR_PREFIX
       + ".stockOnHand.exceed.upperLimit";
+  //stock events cancellation
+  public static final String ERROR_EVENT_CANCELLATION_VALIDATION = EVENT_ERROR_PREFIX
+      + ".cancellation.validationFailed";
+  public static final String ERROR_EVENT_CANCELLATION_CONCURRENT_MODIFICATION = EVENT_ERROR_PREFIX
+      + ".cancellation.concurrentModification";
+  public static final String ERROR_EVENT_LINE_ITEM_NOT_FOUND = EVENT_ERROR_PREFIX
+      + ".lineItem.notFound";
+  public static final String ERROR_EVENT_LINE_ITEM_MISSING_ID = EVENT_ERROR_PREFIX
+      + ".lineItem.missingId";
+  public static final String ERROR_EVENT_LINE_ITEM_DUPLICATE = EVENT_ERROR_PREFIX
+      + ".lineItem.duplicate";
+  public static final String ERROR_EVENT_LINE_ITEM_NOT_CANCELLABLE = EVENT_ERROR_PREFIX
+      + ".lineItem.notCancellable";
+  public static final String ERROR_EVENT_LINE_ITEM_ALREADY_CANCELLED = EVENT_ERROR_PREFIX
+      + ".lineItem.alreadyCancelled";
+  public static final String ERROR_EVENT_LINE_ITEM_IS_CANCELLATION = EVENT_ERROR_PREFIX
+      + ".lineItem.isCancellation";
+  public static final String ERROR_EVENT_LINE_ITEM_BLOCKED_PHYSICAL_INVENTORY = EVENT_ERROR_PREFIX
+      + ".lineItem.blocked.physicalInventory";
+  public static final String ERROR_EVENT_CANCELLATION_REASON_REQUIRED = EVENT_ERROR_PREFIX
+      + ".cancellation.reason.required";
+  public static final String ERROR_EVENT_CANCELLATION_REASON_INVALID = EVENT_ERROR_PREFIX
+      + ".cancellation.reason.invalid";
   //stock events creation: reason assignment
   //reason.not.in.validList error key is not used for now, because we remove valid reasons
   //check when implementing adjustment's UI
@@ -210,6 +235,16 @@ public abstract class MessageKeys {
   public static final String ERROR_EVENT_LOT_NOT_EXIST = EVENT_ERROR_PREFIX + ".lot.not.exist";
   public static final String ERROR_EVENT_LOT_ORDERABLE_NOT_MATCH = EVENT_ERROR_PREFIX
       + ".lot.not.match.orderable";
+  public static final String ERROR_EVENT_LOT_ID_AND_CODE_EXCLUSIVE = EVENT_ERROR_PREFIX
+      + ".lot.idAndCodeExclusive";
+  public static final String ERROR_EVENT_LOT_CODE_INVALID = EVENT_ERROR_PREFIX
+      + ".lot.code.invalid";
+  public static final String ERROR_EVENT_LOT_ORDERABLE_WITHOUT_TRADE_ITEM = EVENT_ERROR_PREFIX
+      + ".lot.orderableWithoutTradeItem";
+  public static final String ERROR_EVENT_LOT_CREATION_NOT_ALLOWED = EVENT_ERROR_PREFIX
+      + ".lot.creationNotAllowed";
+  public static final String ERROR_EVENT_LOT_CREATION_FAILED = EVENT_ERROR_PREFIX
+      + ".lot.creationFailed";
   public static final String ERROR_EVENT_CANNOT_UNPACK_REGULAR_ORDERABLE = EVENT_ERROR_PREFIX
       + ".cannot.unpack.orderable.not.kit";
   public static final String ERROR_EVENT_CANNOT_UNPACK_CONSTITUENT_NOT_ACCOUNTED_FOR =
@@ -259,6 +294,12 @@ public abstract class MessageKeys {
 
   public static final String ERROR_PROGRAM_CODE_NOT_FOUND =
       ERROR_PREFIX + ".program.code.notFound";
+
+  public static final String ERROR_LOTS_NOT_FOUND = ERROR_PREFIX + ".lot.codes.notFound";
+  public static final String ERROR_ORDERABLES_NOT_FOUND =
+      ERROR_PREFIX + ".orderable.codes.notFound";
+  public static final String ERROR_REASONS_NOT_FOUND =
+      ERROR_PREFIX + ".reason.names.notFound";
 
   private MessageKeys() {
     throw new UnsupportedOperationException();

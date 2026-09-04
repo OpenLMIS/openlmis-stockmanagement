@@ -47,6 +47,13 @@ schemas:
   - stockCardTemplate: !include schemas/stockCardTemplate.json
   - stockEventDto: !include schemas/stockEventDto.json
   - stockEventLineItemDto: !include schemas/stockEventLineItemDto.json
+  - stockEventCancelDto: !include schemas/stockEventCancelDto.json
+  - stockEventCancellationError: !include schemas/stockEventCancellationError.json
+  - stockEventExternalDto: !include schemas/stockEventExternalDto.json
+  - stockEventLineItemExternalDto: !include schemas/stockEventLineItemExternalDto.json
+  - stockEventHistoryDtoPage: !include schemas/stockEventHistoryDto.json
+  - stockEventHistoryDto: !include schemas/stockEventHistoryDto.json
+  - stockEventLineDetailDtoPage: !include schemas/stockEventLineDetailDto.json
 
   - stockCard: !include schemas/stockCard.json
   - stockCardPage: !include schemas/stockCard.json
@@ -268,6 +275,153 @@ traits:
               application/json:
                   schema: localizedMessage
 
+      get:
+        is: [ secured, paginated ]
+        description: Get a page of issue/receive/adjustment stock events (transaction history) for a facility and program.
+        queryParameters:
+          facilityId:
+            required: true
+            description: Facility id the transactions belong to.
+          programId:
+            required: true
+            description: Program id the transactions belong to.
+          type:
+            required: false
+            description: Transaction type filter - issue, receive, adjustment or all.
+          startDate:
+            required: false
+            description: Inclusive lower bound of the occurred date range (ISO date).
+          endDate:
+            required: false
+            description: Inclusive upper bound of the occurred date range (ISO date).
+          documentNumber:
+            required: false
+            description: Document number search (partial, case-insensitive).
+        responses:
+          200:
+            description: A page of stock event history rows.
+            body:
+              application/json:
+                schema: stockEventHistoryDtoPage
+          400:
+            description: The transaction type filter is not a valid value.
+            body:
+              application/json:
+                schema: localizedMessage
+          403:
+            description: User does not have permission to view stock cards of given facility and program.
+            body:
+              application/json:
+                schema: localizedMessage
+
+      /{id}:
+        uriParameters:
+          id:
+            displayName: id
+            type: string
+            required: true
+            repeat: false
+        get:
+          is: [ secured ]
+          description: Get the history header (e.g. event type, document number) of a single stock event.
+          responses:
+            200:
+              description: The stock event's history header.
+              body:
+                application/json:
+                  schema: stockEventHistoryDto
+            403:
+              description: User does not have permission to view stock cards.
+              body:
+                application/json:
+                  schema: localizedMessage
+            404:
+              description: Stock event with the given id does not exist.
+              body:
+                application/json:
+                  schema: localizedMessage
+        /cancel:
+          post:
+            is: [ secured ]
+            description: Cancel selected issue/receive/adjustment line items of the stock event. Requires the STOCK_EVENTS_CANCEL right for the event's facility and program. Creates a reversing adjustment stock event and recalculates stock on hand.
+            body:
+              application/json:
+                schema: stockEventCancelDto
+            responses:
+              201:
+                description: The cancellation stock event has been created.
+                body:
+                  application/json:
+                    schema: uuid
+              400:
+                description: Cancellation validation failed. Per-line eligibility failures (e.g. a physical inventory recorded after the movement, or an already-cancelled line) are listed in lineErrors; other failures (invalid request, cancellation reason, resulting negative stock on hand, or concurrent modification) return only the general message. lineErrors is optional, so both cases match this schema.
+                body:
+                  application/json:
+                    schema: stockEventCancellationError
+              403:
+                description: User does not have the STOCK_EVENTS_CANCEL permission for the facility and program.
+                body:
+                  application/json:
+                    schema: localizedMessage
+              404:
+                description: Stock event with the given id does not exist.
+                body:
+                  application/json:
+                    schema: localizedMessage
+        /lineItems:
+          get:
+            is: [ secured, paginated ]
+            description: Get the line items (transaction detail) of a single stock event.
+            responses:
+              200:
+                description: A page of the stock event's line item details.
+                body:
+                  application/json:
+                    schema: stockEventLineDetailDtoPage
+              403:
+                description: User does not have permission to view stock cards.
+                body:
+                  application/json:
+                    schema: localizedMessage
+              404:
+                description: Stock event with the given id does not exist.
+                body:
+                  application/json:
+                    schema: localizedMessage
+        /print:
+          get:
+            is: [ secured ]
+            description: Get stock event report in PDF format to print.
+            queryParameters:
+              showInDoses:
+                displayName: showInDoses
+                description: Whether quantities should be presented in doses (otherwise in packs).
+                type: boolean
+                required: false
+                default: true
+              lang:
+                displayName: lang
+                description: The language of the generated report.
+                type: string
+                required: false
+                default: en
+            responses:
+              200:
+                body:
+                  application/pdf:
+
+              403:
+                description: User does not have permission to get event card report.
+                body:
+                  application/json:
+                    schema: localizedMessage
+
+              404:
+                description: Stock event with given id does not exist, can not get report.
+                body:
+                  application/json:
+                    schema: localizedMessage
+
   /stockCardSummaries:
       get:
         is: [ secured , paginated ]
@@ -476,6 +630,18 @@ traits:
                   body:
                       application/json:
                           schema: stockCardPage
+      /deactivate:
+        post:
+          is: [ secured ]
+          description: Set stock cards as inactive.
+          responses:
+            200:
+              body:
+                application/json:
+            404:
+              description: At least one stock card with given id does not exist, can not make inactive.
+              body:
+                application/json:
       /{id}:
           get:
             is: [ secured ]
@@ -1207,6 +1373,35 @@ traits:
                 schema: stockCardSummariesExternalPage
           403:
             description: User does not have permission to view stock cards of given facility and program.
+            body:
+              application/json:
+                schema: localizedMessage
+
+    /stockEvents:
+      post:
+        is: [ secured ]
+        description: Create a new stock event with one or more orderables - for external integrators use.
+        body:
+          application/json:
+            schema: stockEventExternalDto
+
+        responses:
+          201:
+            description: Stock event has been processed with no validatoin error or persistence error.
+            headers:
+              Keep-Alive:
+            body:
+              application/json:
+                schema: uuid
+
+          400:
+            description: Failed to process stock event due to validation error.
+            body:
+              application/json:
+                schema: localizedMessage
+
+          403:
+            description: User does not have permission to create stock events for given facility and program.
             body:
               application/json:
                 schema: localizedMessage

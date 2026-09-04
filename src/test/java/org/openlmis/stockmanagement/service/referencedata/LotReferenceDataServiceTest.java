@@ -21,9 +21,12 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.refEq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.refEq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -32,8 +35,13 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
+import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.util.DynamicPageTypeReference;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpStatusCodeException;
 
 public class LotReferenceDataServiceTest extends BaseReferenceDataServiceTest<LotDto> {
 
@@ -121,5 +129,66 @@ public class LotReferenceDataServiceTest extends BaseReferenceDataServiceTest<Lo
 
     assertAuthHeader(entityCaptor.getValue());
     assertNull(entityCaptor.getValue().getBody());
+  }
+
+  @Test
+  public void findByExactCodesShouldReturnMatchingLots() {
+    LotDto lot = mockPageResponseEntityAndGetDto();
+
+    List<LotDto> response = service.findByExactCodes(singletonList(lot.getLotCode()));
+
+    assertThat(response, hasSize(1));
+    assertThat(response, hasItem(lot));
+
+    verify(restTemplate).exchange(
+        uriCaptor.capture(), eq(HttpMethod.GET), entityCaptor.capture(),
+        refEq(new DynamicPageTypeReference<>(LotDto.class)));
+
+    URI uri = uriCaptor.getValue();
+    assertEquals(serviceUrl + service.getUrl() + "?exactCode=" + lot.getLotCode(), uri.toString());
+
+    assertAuthHeader(entityCaptor.getValue());
+    assertNull(entityCaptor.getValue().getBody());
+  }
+
+  @Test
+  public void createShouldPostLotAndReturnCreatedInstance() {
+    LotDto created = LotDto.builder().id(UUID.randomUUID()).lotCode("NEW1").build();
+    when(restTemplate.exchange(any(URI.class), eq(HttpMethod.POST), any(HttpEntity.class),
+        eq(LotDto.class))).thenReturn(new ResponseEntity<>(created, HttpStatus.CREATED));
+
+    LotDto response = service.create(LotDto.builder().lotCode("NEW1").build());
+
+    assertEquals(created, response);
+
+    verify(restTemplate).exchange(uriCaptor.capture(), eq(HttpMethod.POST), entityCaptor.capture(),
+        eq(LotDto.class));
+    assertEquals(serviceUrl + service.getUrl(), uriCaptor.getValue().toString());
+    assertAuthHeader(entityCaptor.getValue());
+  }
+
+  @Test
+  public void createShouldTranslateClientErrorToValidationMessageException() {
+    HttpStatusCodeException conflict = mock(HttpStatusCodeException.class);
+    when(conflict.getStatusCode()).thenReturn(HttpStatus.CONFLICT);
+    when(restTemplate.exchange(any(URI.class), eq(HttpMethod.POST), any(HttpEntity.class),
+        eq(LotDto.class))).thenThrow(conflict);
+
+    expectedException.expect(ValidationMessageException.class);
+
+    service.create(LotDto.builder().lotCode("DUP1").build());
+  }
+
+  @Test
+  public void createShouldTranslateServerErrorToDataRetrievalException() {
+    HttpStatusCodeException serverError = mock(HttpStatusCodeException.class);
+    when(serverError.getStatusCode()).thenReturn(HttpStatus.INTERNAL_SERVER_ERROR);
+    when(serverError.getResponseBodyAsString()).thenReturn("boom");
+    when(restTemplate.exchange(any(URI.class), eq(HttpMethod.POST), any(HttpEntity.class),
+        eq(LotDto.class))).thenThrow(serverError);
+
+    expectedException.expect(DataRetrievalException.class);
+
+    service.create(LotDto.builder().lotCode("ERR1").build());
   }
 }

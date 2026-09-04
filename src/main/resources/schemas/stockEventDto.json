@@ -16,7 +16,12 @@
     },
     "documentNumber": {
       "type": "string",
-      "description": ""
+      "description": "Optional document number. When not supplied and eventOrigin is set, the backend generates a value in the form {YEAR}-{MONTH}-{FACILITY_CODE}-{SEQ}."
+    },
+    "eventOrigin": {
+      "type": ["string", "null"],
+      "enum": ["ISSUE", "RECEIVE", null],
+      "description": "Optional source of the event. When present, the backend assigns a document number if one is not supplied. Other event sources leave this field NULL."
     },
     "programId": {
       "type": "string",

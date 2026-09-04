@@ -22,9 +22,11 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_IO;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REPORT_ID_NOT_FOUND;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.sql.Connection;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -35,6 +37,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import javax.sql.DataSource;
+import lombok.RequiredArgsConstructor;
 import net.sf.jasperreports.engine.JREmptyDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
@@ -47,36 +50,43 @@ import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.openlmis.stockmanagement.domain.JasperTemplate;
 import org.openlmis.stockmanagement.dto.StockCardDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.JasperReportViewException;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
+import org.openlmis.stockmanagement.service.report.ReportService;
 import org.openlmis.stockmanagement.util.Message;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class JasperReportService {
 
   static final String CARD_REPORT_URL = "/jasperTemplates/stockCard.jrxml";
   static final String CARD_SUMMARY_REPORT_URL = "/jasperTemplates/stockCardSummary.jrxml";
+  static final String STOCK_EVENT_REPORT_URL = "/jasperTemplates/stockEvent.jrxml";
   static final String PI_LINES_REPORT_URL = "/jasperTemplates/physicalinventoryLines.jrxml";
 
   private static final String PARAM_DATASOURCE = "datasource";
+  // Net content used when an orderable has none: 1 dose per pack, so the packs
+  // conversion stays a safe division and falls back to showing the raw value.
+  private static final long DEFAULT_NET_CONTENT = 1L;
+  private static final String PARAM_DATE_FORMAT = "dateFormat";
+  private static final String PARAM_DECIMAL_FORMAT = "decimalFormat";
   
-  @Autowired
-  private StockCardService stockCardService;
-
-  @Autowired
-  private StockCardSummariesService stockCardSummariesService;
-
-  @Autowired
-  private DataSource replicationDataSource;
+  private final StockCardService stockCardService;
+  private final StockCardSummariesService stockCardSummariesService;
+  private final ReportService reportService;
+  private final DataSource replicationDataSource;
 
   @Value("${dateFormat}")
   private String dateFormat;
 
   @Value("${dateTimeFormat}")
   private String dateTimeFormat;
+
+  @Value("${time.zoneId}")
+  private String timeZoneId;
 
   @Value("${groupingSeparator}")
   private String groupingSeparator;
@@ -88,9 +98,11 @@ public class JasperReportService {
    * Generate stock card report in PDF format.
    *
    * @param stockCardId stock card id
+   * @param lang        the lang
+   * @param showInDoses whether values should be shown in doses (true) or packs (false)
    * @return generated stock card report.
    */
-  public byte[] generateStockCardReport(UUID stockCardId) {
+  public byte[] generateStockCardReport(UUID stockCardId, String lang, Boolean showInDoses) {
     StockCardDto stockCardDto = stockCardService.findStockCardById(stockCardId);
     if (stockCardDto == null) {
       throw new ResourceNotFoundException(new Message(ERROR_REPORT_ID_NOT_FOUND));
@@ -100,10 +112,15 @@ public class JasperReportService {
     Map<String, Object> params = new HashMap<>();
     params.put(PARAM_DATASOURCE, singletonList(stockCardDto));
     params.put("hasLot", stockCardDto.hasLot());
-    params.put("dateFormat", dateFormat);
-    params.put("decimalFormat", createDecimalFormat());
+    params.put("showInDoses", showInDoses);
+    params.put("orderableNetContent", guardedNetContent(stockCardDto.getOrderable()));
+    params.put(PARAM_DATE_FORMAT, dateFormat);
+    params.put(PARAM_DECIMAL_FORMAT, createDecimalFormat());
+    params.put("lang", lang);
 
-    return fillAndExportReport(compileReportFromTemplateUrl(CARD_REPORT_URL), params);
+    JasperReport compiledReport = compileReportFromTemplateUrl(CARD_REPORT_URL);
+    return reportService.fillAndExportReport("stockCard",
+        serializeReport(compiledReport), params);
   }
 
   /**
@@ -111,14 +128,18 @@ public class JasperReportService {
    *
    * @param program  program id
    * @param facility facility id
+   * @param lang     the lang
+   * @param showInDoses whether values should be shown in doses (true) or packs (false)
    * @return generated stock card summary report.
    */
-  public byte[] generateStockCardSummariesReport(UUID program, UUID facility) {
+  public byte[] generateStockCardSummariesReport(UUID program, UUID facility, String lang,
+      Boolean showInDoses) {
     List<StockCardDto> cards = stockCardSummariesService
         .findStockCards(program, facility);
     StockCardDto firstCard = cards.get(0);
     Map<String, Object> params = new HashMap<>();
     params.put("stockCardSummaries", cards);
+    params.put("showInDoses", showInDoses);
 
     params.put("program", firstCard.getProgram());
     params.put("facility", firstCard.getFacility());
@@ -127,11 +148,38 @@ public class JasperReportService {
     params.put("showProgram", getCount(cards, card -> card.getProgram().getId().toString()) > 1);
     params.put("showFacility", getCount(cards, card -> card.getFacility().getId().toString()) > 1);
     params.put("showLot", cards.stream().anyMatch(card -> card.getLotId() != null));
-    params.put("dateFormat", dateFormat);
+    params.put(PARAM_DATE_FORMAT, dateFormat);
     params.put("dateTimeFormat", dateTimeFormat);
-    params.put("decimalFormat", createDecimalFormat());
+    params.put(PARAM_DECIMAL_FORMAT, createDecimalFormat());
+    params.put("lang", lang);
 
-    return fillAndExportReport(compileReportFromTemplateUrl(CARD_SUMMARY_REPORT_URL), params);
+    JasperReport compiledReport = compileReportFromTemplateUrl(CARD_SUMMARY_REPORT_URL);
+    return reportService.fillAndExportReport("stockCardSummary",
+        serializeReport(compiledReport), params);
+  }
+
+  /**
+   * Generate stock event report byte [ ].
+   *
+   * @param stockEventId the stock event id
+   * @param lang         the lang
+   * @param showInDoses  whether quantities should be presented in doses (otherwise in packs)
+   * @return the byte [ ]
+   */
+  public byte[] generateStockEventReport(UUID stockEventId, String lang, Boolean showInDoses) {
+    Map<String, Object> params = new HashMap<>();
+
+    params.put("stockEventId", stockEventId);
+    params.put(PARAM_DATE_FORMAT, dateFormat);
+    params.put("dateTimeFormat", dateTimeFormat);
+    params.put("timeZoneId", timeZoneId);
+    params.put(PARAM_DECIMAL_FORMAT, createDecimalFormat());
+    params.put("lang", lang);
+    params.put("showInDoses", showInDoses);
+
+    JasperReport compiledReport = compileReportFromTemplateUrl(STOCK_EVENT_REPORT_URL);
+    return reportService.fillAndExportReport("stockEvent",
+        serializeReport(compiledReport), params);
   }
 
   /**
@@ -160,8 +208,42 @@ public class JasperReportService {
     }
   }
 
+  /**
+   * Gets compiled physical inventory line subreport bytes.
+   *
+   * @return the compiled physical inventory line subreport bytes
+   */
+  public byte[] getCompiledPhysicalInventoryLineSubreportBytes() {
+    return serializeReport(compileReportFromTemplateUrl(PI_LINES_REPORT_URL));
+  }
+
   private long getCount(List<StockCardDto> stockCards, Function<StockCardDto, String> mapper) {
     return stockCards.stream().map(mapper).distinct().count();
+  }
+
+  /**
+   * Net content used to convert doses to packs, guarded so it is always a safe divisor.
+   * Computed here (not in the template) because the page header needs the value as a
+   * parameter, which - unlike a dataset variable - is available when the header is rendered.
+   *
+   * @param orderable the report's orderable (may be null)
+   * @return the orderable's net content, or 1 when it is missing or not positive
+   */
+  private long guardedNetContent(OrderableDto orderable) {
+    if (orderable == null || orderable.getNetContent() == null || orderable.getNetContent() <= 0) {
+      return DEFAULT_NET_CONTENT;
+    }
+    return orderable.getNetContent();
+  }
+
+  private byte[] serializeReport(JasperReport report) {
+    try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+         ObjectOutputStream out = new ObjectOutputStream(bos)) {
+      out.writeObject(report);
+      return bos.toByteArray();
+    } catch (IOException ex) {
+      throw new JasperReportViewException(new Message(ERROR_IO, ex.getMessage()), ex);
+    }
   }
 
   byte[] fillAndExportReport(JasperReport compiledReport, Map<String, Object> params) {

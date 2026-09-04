@@ -19,10 +19,12 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertThat;
+import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparators.byId;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparators.byOccurredDate;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparators.byProcessedDate;
 import static org.openlmis.stockmanagement.domain.card.StockCardLineItemComparators.byReasonPriority;
 
+import java.util.UUID;
 import org.junit.Test;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemDataBuilder;
 
@@ -151,5 +153,71 @@ public class StockCardLineItemComparatorsTest {
 
     // then
     assertThat(byReasonPriority().compare(left, right), lessThan(0));
+  }
+
+  @Test
+  public void shouldReturnZeroIfIdsAreSame() {
+    // when
+    UUID id = UUID.randomUUID();
+    StockCardLineItem left = new StockCardLineItemDataBuilder().withId(id).build();
+    StockCardLineItem right = new StockCardLineItemDataBuilder().withId(id).build();
+
+    // then
+    assertThat(byId().compare(left, right), is(0));
+  }
+
+  @Test
+  public void shouldReturnNegativeIfFirstIdIsLowerInCanonicalOrder() {
+    // when
+    StockCardLineItem left = new StockCardLineItemDataBuilder()
+        .withId(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+        .build();
+    StockCardLineItem right = new StockCardLineItemDataBuilder()
+        .withId(UUID.fromString("00000000-0000-0000-0000-000000000002"))
+        .build();
+
+    // then
+    assertThat(byId().compare(left, right), lessThan(0));
+  }
+
+  @Test
+  public void shouldReturnPositiveIfFirstIdIsHigherInCanonicalOrder() {
+    // when
+    StockCardLineItem left = new StockCardLineItemDataBuilder()
+        .withId(UUID.fromString("ffffffff-ffff-ffff-ffff-ffffffffffff"))
+        .build();
+    StockCardLineItem right = new StockCardLineItemDataBuilder()
+        .withId(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+        .build();
+
+    // then
+    assertThat(byId().compare(left, right), greaterThan(0));
+  }
+
+  @Test
+  public void shouldOrderByCanonicalStringNotSignedLongs() {
+    // when
+    StockCardLineItem low = new StockCardLineItemDataBuilder()
+        .withId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
+        .build();
+    StockCardLineItem high = new StockCardLineItemDataBuilder()
+        .withId(UUID.fromString("f0000000-0000-0000-0000-000000000000"))
+        .build();
+
+    // then
+    assertThat(byId().compare(low, high), lessThan(0));
+  }
+
+  @Test
+  public void shouldOrderNullIdLast() {
+    // when
+    StockCardLineItem withId = new StockCardLineItemDataBuilder()
+        .withId(UUID.randomUUID())
+        .build();
+    StockCardLineItem withoutId = new StockCardLineItemDataBuilder().withoutId().build();
+
+    // then
+    assertThat(byId().compare(withId, withoutId), lessThan(0));
+    assertThat(byId().compare(withoutId, withId), greaterThan(0));
   }
 }

@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.validators;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_DESTINATION_ASSIGNMENT_NO_MATCH_GEO_LEVEL_AFFINITY;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_SOURCE_ASSIGNMENT_NO_MATCH_GEO_LEVEL_AFFINITY;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -80,8 +81,8 @@ public class SourceDestinationGeoLevelAffinityValidator implements StockEventVal
   private void  validateDestinations(StockEventDto stockEventDto, Profiler profiler) {
     profiler.start("FIND_DESTINATIONS");
     Page<ValidSourceDestinationDto> validDestinationDtos = validDestinationService
-        .findDestinations(stockEventDto.getProgramId(), stockEventDto.getFacilityId(), null,
-            Pageable.unpaged());
+        .findDestinations(Collections.singletonList(stockEventDto.getProgramId()),
+            stockEventDto.getFacilityId(), null, Pageable.unpaged());
 
     profiler.start("GET_DESTINATION_IDS");
     List<UUID> validDestinationDtoIds = getValidNodeIds(validDestinationDtos.getContent());
@@ -106,7 +107,7 @@ public class SourceDestinationGeoLevelAffinityValidator implements StockEventVal
   private void  validateSources(StockEventDto stockEventDto, Profiler profiler) {
     profiler.start("FIND_SOURCES");
     Page<ValidSourceDestinationDto> validSourceDtos =
-        validSourceService.findSources(stockEventDto.getProgramId(),
+        validSourceService.findSources(Collections.singletonList(stockEventDto.getProgramId()),
         stockEventDto.getFacilityId(), null, Pageable.unpaged());
 
     profiler.start("GET_SOURCE_IDS");

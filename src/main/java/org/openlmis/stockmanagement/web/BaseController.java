@@ -22,7 +22,7 @@ import org.slf4j.profiler.Profiler;
 public abstract class BaseController {
   private final XLogger extLogger = XLoggerFactory.getXLogger(getClass());
 
-  Profiler getProfiler(String name, Object... entryArgs) {
+  protected Profiler getProfiler(String name, Object... entryArgs) {
     extLogger.entry(entryArgs);
 
     Profiler profiler = new Profiler(name);
@@ -31,7 +31,7 @@ public abstract class BaseController {
     return profiler;
   }
 
-  <T> T stopProfiler(Profiler profiler, T exitArg) {
+  protected <T> T stopProfiler(Profiler profiler, T exitArg) {
     profiler.stop().log();
     extLogger.exit(exitArg);
 

@@ -21,6 +21,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,6 +34,7 @@ import static org.openlmis.stockmanagement.service.PermissionService.STOCK_ADJUS
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARDS_VIEW;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARD_TEMPLATES_MANAGE;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_DESTINATIONS_MANAGE;
+import static org.openlmis.stockmanagement.service.PermissionService.STOCK_EVENTS_CANCEL;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_INVENTORIES_EDIT;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_ORGANIZATIONS_MANAGE;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_SOURCES_MANAGE;
@@ -48,11 +50,15 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.openlmis.stockmanagement.dto.referencedata.FacilityDto;
+import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.dto.referencedata.ResultDto;
 import org.openlmis.stockmanagement.dto.referencedata.RightDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
+import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.PermissionStrings;
+import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.springframework.http.HttpStatus;
@@ -80,6 +86,12 @@ public class PermissionServiceTest {
 
   @InjectMocks
   private PermissionService permissionService;
+
+  @Mock
+  private ProgramReferenceDataService programService;
+
+  @Mock
+  private FacilityReferenceDataService facilityService;
 
   @Mock
   private UserDto user;
@@ -118,6 +130,8 @@ public class PermissionServiceTest {
 
     ReflectionTestUtils.setField(permissionService, "serviceTokenClientId", SERVICE_CLIENT_ID);
     ReflectionTestUtils.setField(permissionService, "apiKeyPrefix", API_KEY_PREFIX);
+    ReflectionTestUtils.setField(permissionService, "programService", programService);
+    ReflectionTestUtils.setField(permissionService, "facilityService", facilityService);
   }
 
   @Test
@@ -179,6 +193,23 @@ public class PermissionServiceTest {
     hasRight(rightId, programId, facilityId, false);
 
     permissionService.canAdjustStock(programId, facilityId);
+  }
+
+  @Test
+  public void canCancelStockEvent() {
+    hasRight(rightId, programId, facilityId, true);
+
+    permissionService.canCancelStockEvent(programId, facilityId);
+
+    verifyUserRight(STOCK_EVENTS_CANCEL, rightId, programId, facilityId);
+  }
+
+  @Test
+  public void cannotCancelStockEvent() {
+    expectException(STOCK_EVENTS_CANCEL);
+    hasRight(rightId, programId, facilityId, false);
+
+    permissionService.canCancelStockEvent(programId, facilityId);
   }
 
   @Test
@@ -290,6 +321,7 @@ public class PermissionServiceTest {
     permissionService.canCreateStockCardTemplate();
     permissionService.canEditPhysicalInventory(programId, facilityId);
     permissionService.canAdjustStock(programId, facilityId);
+    permissionService.canCancelStockEvent(programId, facilityId);
     permissionService.canViewStockCard(programId, facilityId);
     permissionService.canManageStockSources();
     permissionService.canManageStockDestinations();
@@ -318,6 +350,48 @@ public class PermissionServiceTest {
 
     assertEquals(handler, response);
     verify(permissionStrings).forUser(userId);
+  }
+
+  @Test
+  public void shouldShowProgramAndFacilityNameInErrorMessage() {
+    ProgramDto program = ProgramDto.builder().name("Program").build();
+    FacilityDto facility = FacilityDto.builder().name("Facility").build();
+    when(programService.findOne(programId)).thenReturn(program);
+    when(facilityService.findOne(facilityId)).thenReturn(facility);
+
+    hasRight(rightId, programId, facilityId, false);
+
+    exception.expect(PermissionMessageException.class);
+    exception.expectMessage("Program");
+    exception.expectMessage("Facility");
+
+    permissionService.canViewStockCard(programId, facilityId);
+  }
+
+  @Test
+  public void shouldShowProgramIdAndFacilityIdInErrorMessageIfNotFound() {
+    when(programService.findOne(programId)).thenReturn(null);
+    when(facilityService.findOne(facilityId)).thenReturn(null);
+
+    hasRight(rightId, programId, facilityId, false);
+
+    exception.expect(PermissionMessageException.class);
+    exception.expectMessage(programId.toString());
+    exception.expectMessage(facilityId.toString());
+
+    permissionService.canViewStockCard(programId, facilityId);
+  }
+
+  @Test
+  public void shouldNotCallServicesWhenProgramIdAndFacilityIdAreNull() {
+    hasRight(rightId, null, null, false);
+
+    exception.expect(PermissionMessageException.class);
+
+    permissionService.canCreateStockCardTemplate();
+
+    verify(programService, never()).findOne(any(UUID.class));
+    verify(facilityService, never()).findOne(any(UUID.class));
   }
 
   private void hasRight(UUID rightId, boolean hasRight) {

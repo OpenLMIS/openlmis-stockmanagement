@@ -20,12 +20,17 @@ import java.util.UUID;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 
-public class LotDeferredLoader extends DeferredLoader<LotDto, UUID> {
+public class LotDeferredLoader extends DeferredLoader<LotDto, UUID, LotDeferredLoader.Handle> {
 
   private final LotReferenceDataService lotReferenceDataService;
 
   public LotDeferredLoader(LotReferenceDataService lotReferenceDataService) {
     this.lotReferenceDataService = lotReferenceDataService;
+  }
+
+  @Override
+  protected Handle newHandle(UUID key) {
+    return new Handle(key);
   }
 
   @Override
@@ -38,5 +43,11 @@ public class LotDeferredLoader extends DeferredLoader<LotDto, UUID> {
     }
 
     deferredObjects.clear();
+  }
+
+  public static class Handle extends DeferredObject<LotDto, UUID> {
+    public Handle(UUID objectKey) {
+      super(objectKey);
+    }
   }
 }

@@ -20,11 +20,17 @@ import java.util.UUID;
 import org.openlmis.stockmanagement.dto.referencedata.ProgramDto;
 import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 
-public class ProgramDeferredLoader extends DeferredLoader<ProgramDto, UUID> {
+public class ProgramDeferredLoader
+    extends DeferredLoader<ProgramDto, UUID, ProgramDeferredLoader.Handle> {
   private ProgramReferenceDataService programReferenceDataService;
 
   public ProgramDeferredLoader(ProgramReferenceDataService programReferenceDataService) {
     this.programReferenceDataService = programReferenceDataService;
+  }
+
+  @Override
+  protected Handle newHandle(UUID key) {
+    return new Handle(key);
   }
 
   @Override
@@ -37,5 +43,11 @@ public class ProgramDeferredLoader extends DeferredLoader<ProgramDto, UUID> {
     }
 
     deferredObjects.clear();
+  }
+
+  public static class Handle extends DeferredObject<ProgramDto, UUID> {
+    public Handle(UUID objectKey) {
+      super(objectKey);
+    }
   }
 }

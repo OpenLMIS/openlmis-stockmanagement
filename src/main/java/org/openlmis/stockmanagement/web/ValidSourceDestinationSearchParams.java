@@ -21,7 +21,10 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROVIDED_FACIL
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_PROVIDED_PROGRAM_ID_WITHOUT_FACILITY_ID;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.util.Message;
 import org.openlmis.stockmanagement.util.UuidUtil;
@@ -54,6 +57,21 @@ public class ValidSourceDestinationSearchParams {
     }
     String program = queryParams.getFirst(PROGRAM_ID);
     return UuidUtil.fromString(program).orElse(null);
+  }
+
+  /**
+   * Gets all program IDs.
+   *
+   * @return list of program UUID or empty list (if params doesn't contain this param)
+   */
+  public List<UUID> getAllProgramIds() {
+    if (!queryParams.containsKey(PROGRAM_ID)) {
+      return Collections.emptyList();
+    }
+
+    return queryParams.get(PROGRAM_ID).stream()
+        .map(uuid -> UuidUtil.fromString(uuid).orElse(null))
+        .collect(Collectors.toList());
   }
 
   /**

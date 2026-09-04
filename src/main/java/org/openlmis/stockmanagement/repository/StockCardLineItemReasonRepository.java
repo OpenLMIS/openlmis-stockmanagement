@@ -30,6 +30,8 @@ public interface StockCardLineItemReasonRepository extends
 
   StockCardLineItemReason findByName(@Param("name") String name);
 
+  List<StockCardLineItemReason> findByNameIn(Collection<String> names);
+
   List<StockCardLineItemReason> findByIdIn(Collection<UUID> ids);
 
   List<StockCardLineItemReason> findByReasonTypeIn(Collection<ReasonType> types);

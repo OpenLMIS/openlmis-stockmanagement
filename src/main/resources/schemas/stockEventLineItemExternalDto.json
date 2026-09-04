@@ -1,0 +1,31 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Line item of an external stock event",
+  "properties": {
+    "orderable": {
+      "type": "string",
+      "title": "Orderable code",
+      "description": "Indicates which orderable this line item is for."
+    },
+    "lot": {
+      "type": "string",
+      "title": "Lot code",
+      "description": "Indicates which lot this line item is for."
+    },
+    "quantity": {
+      "type": "integer",
+      "description": "Indicates quantity of movement. Not allowed to be negative"
+    },
+    "reason": {
+      "type": "string",
+      "description": "A movement reason code."
+    },
+    "occurredDate": {
+      "type": "string",
+      "format": "date",
+      "description": "The date when this event occurred"
+    }
+  },
+  "required": ["orderable", "quantity"]
+}

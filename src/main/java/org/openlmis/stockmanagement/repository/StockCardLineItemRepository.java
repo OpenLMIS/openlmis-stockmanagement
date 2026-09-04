@@ -15,10 +15,22 @@
 
 package org.openlmis.stockmanagement.repository;
 
+import java.util.List;
 import java.util.UUID;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
 public interface StockCardLineItemRepository
     extends PagingAndSortingRepository<StockCardLineItem, UUID> {
+
+  /**
+   * Returns the ids of the stock cards touched by the given origin event. Uses a scalar
+   * projection on purpose: hydrating the line-item entities would trigger {@code StockCard}'s
+   * {@code @PostLoad} reorder mid-load, which can NPE on a not-yet-set occurredDate.
+   */
+  @Query("SELECT DISTINCT lineItem.stockCard.id FROM StockCardLineItem lineItem"
+      + " WHERE lineItem.originEvent.id = :eventId")
+  List<UUID> findStockCardIdsByOriginEvent(@Param("eventId") UUID eventId);
 }

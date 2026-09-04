@@ -77,4 +77,9 @@ public class OrderableDtoDataBuilder {
     this.id = id;
     return this;
   }
+
+  public OrderableDtoDataBuilder withIdentifier(String key, String value) {
+    this.identifiers.put(key, value);
+    return this;
+  }
 }
