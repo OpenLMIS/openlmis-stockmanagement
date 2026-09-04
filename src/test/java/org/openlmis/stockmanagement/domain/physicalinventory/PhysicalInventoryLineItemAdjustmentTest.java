@@ -18,13 +18,14 @@ package org.openlmis.stockmanagement.domain.physicalinventory;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
-import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
+import org.openlmis.stockmanagement.dto.StockCardLineItemReasonDto;
 import org.openlmis.stockmanagement.dto.physicalinventory.PhysicalInventoryLineItemAdjustmentDto;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -38,8 +39,8 @@ public class PhysicalInventoryLineItemAdjustmentTest {
   @Mock
   private PhysicalInventoryLineItem testPhysicalInventoryLineItem;
 
-  @Mock
-  private StockCardLineItemReason testReason;
+  private UUID testReasonId = UUID.randomUUID();
+  private StockCardLineItemReasonDto testReason = new StockCardLineItemReasonDto();
   private Integer testQuantity = 123;
 
   @Test
@@ -51,7 +52,7 @@ public class PhysicalInventoryLineItemAdjustmentTest {
     assertEquals(adjustment.getStockEventLineItem(), testStockEventLineItem);
     assertNull(adjustment.getStockCardLineItem());
     assertNull(adjustment.getPhysicalInventoryLineItem());
-    assertEquals(adjustment.getReason(), testReason);
+    assertEquals(adjustment.getReason().getId(), testReasonId);
     assertEquals(adjustment.getQuantity(), testQuantity);
   }
 
@@ -64,7 +65,7 @@ public class PhysicalInventoryLineItemAdjustmentTest {
     assertNull(adjustment.getStockEventLineItem());
     assertEquals(adjustment.getStockCardLineItem(), testStockCardLineItem);
     assertNull(adjustment.getPhysicalInventoryLineItem());
-    assertEquals(adjustment.getReason(), testReason);
+    assertEquals(adjustment.getReason().getId(), testReasonId);
     assertEquals(adjustment.getQuantity(), testQuantity);
   }
 
@@ -77,11 +78,12 @@ public class PhysicalInventoryLineItemAdjustmentTest {
     assertNull(adjustment.getStockEventLineItem());
     assertNull(adjustment.getStockCardLineItem());
     assertEquals(adjustment.getPhysicalInventoryLineItem(), testPhysicalInventoryLineItem);
-    assertEquals(adjustment.getReason(), testReason);
+    assertEquals(adjustment.getReason().getId(), testReasonId);
     assertEquals(adjustment.getQuantity(), testQuantity);
   }
 
   private PhysicalInventoryLineItemAdjustmentDto createDto() {
+    testReason.setId(testReasonId);
     return PhysicalInventoryLineItemAdjustmentDto.builder().reason(testReason)
         .quantity(testQuantity).build();
   }

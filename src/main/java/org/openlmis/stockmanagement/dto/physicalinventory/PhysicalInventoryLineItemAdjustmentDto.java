@@ -21,8 +21,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
-import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.BaseDto;
+import org.openlmis.stockmanagement.dto.StockCardLineItemReasonDto;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -30,12 +30,18 @@ import org.openlmis.stockmanagement.dto.BaseDto;
 @AllArgsConstructor
 @Builder
 public class PhysicalInventoryLineItemAdjustmentDto extends BaseDto {
-  // FIXME: Use DTO here
-  private StockCardLineItemReason reason;
+  private StockCardLineItemReasonDto reason;
   private Integer quantity;
 
+  /**
+   * Create new instance.
+   *
+   * @param item the adjustment, not null
+   */
   public PhysicalInventoryLineItemAdjustmentDto(PhysicalInventoryLineItemAdjustment item) {
-    this.reason = item.getReason();
+    setId(item.getId());
+    this.reason = item.getReason() != null
+        ? StockCardLineItemReasonDto.newInstance(item.getReason()) : null;
     this.quantity = item.getQuantity();
   }
 }

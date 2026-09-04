@@ -69,7 +69,7 @@ public class StockOnHandCalculationServiceTest {
   private LocalDate firstDate = LocalDate.of(2015, 1, 1);
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
 
     creditAdjustmentReason = new StockCardLineItemReasonDataBuilder()
         .withAdjustmentCategory()

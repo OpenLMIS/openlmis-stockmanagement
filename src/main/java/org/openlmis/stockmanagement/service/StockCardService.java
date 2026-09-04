@@ -15,7 +15,6 @@
 
 package org.openlmis.stockmanagement.service;
 
-import static java.time.ZonedDateTime.now;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
@@ -26,6 +25,7 @@ import static org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity.
 import static org.openlmis.stockmanagement.domain.reason.ReasonCategory.PHYSICAL_INVENTORY;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_CARDS_VIEW;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -141,7 +141,7 @@ public class StockCardService extends StockCardBaseService {
   void saveFromEvent(StockEventDto stockEventDto,
       UUID savedEventId,
       Profiler profiler) {
-    final ZonedDateTime processedDate = now();
+    final ZonedDateTime processedDate = ZonedDateTime.now(ZoneId.systemDefault());
 
     profiler.start("CREATE_LINE_ITEMS");
     final Map<OrderableLotIdentity, List<StockEventLineItemDto>> linesByStockCard =

@@ -68,7 +68,7 @@ public class PhysicalInventoryLineItemAdjustment extends BaseEntity {
    */
   public static PhysicalInventoryLineItemAdjustment newInstance(StockEventLineItem parent,
       PhysicalInventoryLineItemAdjustmentDto dto) {
-    return new PhysicalInventoryLineItemAdjustment(parent, null, null, dto.getReason(),
+    return new PhysicalInventoryLineItemAdjustment(parent, null, null, reasonReference(dto),
         dto.getQuantity());
   }
 
@@ -81,7 +81,7 @@ public class PhysicalInventoryLineItemAdjustment extends BaseEntity {
    */
   public static PhysicalInventoryLineItemAdjustment newInstance(StockCardLineItem parent,
       PhysicalInventoryLineItemAdjustmentDto dto) {
-    return new PhysicalInventoryLineItemAdjustment(null, parent, null, dto.getReason(),
+    return new PhysicalInventoryLineItemAdjustment(null, parent, null, reasonReference(dto),
         dto.getQuantity());
   }
 
@@ -94,8 +94,21 @@ public class PhysicalInventoryLineItemAdjustment extends BaseEntity {
    */
   public static PhysicalInventoryLineItemAdjustment newInstance(PhysicalInventoryLineItem parent,
       PhysicalInventoryLineItemAdjustmentDto dto) {
-    return new PhysicalInventoryLineItemAdjustment(null, null, parent, dto.getReason(),
+    return new PhysicalInventoryLineItemAdjustment(null, null, parent, reasonReference(dto),
         dto.getQuantity());
+  }
+
+  /**
+   * Persistence needs only the id for the fk.
+   */
+  private static StockCardLineItemReason reasonReference(
+      PhysicalInventoryLineItemAdjustmentDto dto) {
+    if (dto.getReason() == null) {
+      return null;
+    }
+    StockCardLineItemReason reason = new StockCardLineItemReason();
+    reason.setId(dto.getReason().getId());
+    return reason;
   }
 
   /**
