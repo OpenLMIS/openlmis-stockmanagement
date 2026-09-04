@@ -1,5 +1,6 @@
 Upcoming Version (WIP)
 ==================
+* [SELV3-873](https://openlmis.atlassian.net/browse/SELV3-873): The StockEventHistoryDto now carries `facilityId` and `programId`.
 * [SELV3-868](https://openlmis.atlassian.net/browse/SELV3-868): A cancellation is now dated on the movement it cancels rather than the current date, fixing the stockout days and consumption reported for the period. The negative-stock check is consequently stricter: stock already issued can no longer be un-received.
 * [SELV3-869](https://openlmis.atlassian.net/browse/SELV3-869): Extended `POST /api/stockEvents/{id}/cancel` to adjustment line items, reversed by an adjustment of the opposite reason type. Cancel reasons gained a scope tag (`cancelMovement` / `cancelAdjustment`) plus a `Cancelled debit adjustment` / `Cancelled credit adjustment` pair, and only line items of an issue, receive or adjustment event are cancellable.
 * [SELV3-863](https://openlmis.atlassian.net/browse/SELV3-863): Show a localized "Adjustment" transaction type in the stock event report for adjustment stock events instead of the raw event origin value.
