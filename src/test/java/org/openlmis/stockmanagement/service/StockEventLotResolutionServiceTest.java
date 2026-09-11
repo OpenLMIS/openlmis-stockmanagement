@@ -206,6 +206,25 @@ public class StockEventLotResolutionServiceTest {
   }
 
   @Test
+  public void shouldNameTheProductWhenItHasNoTradeItem() {
+    OrderableDto noTradeItem = new OrderableDtoDataBuilder().withId(orderableId).build();
+    when(orderableReferenceDataService.findByIds(any())).thenReturn(singletonList(noTradeItem));
+    expectedException.expect(ValidationMessageException.class);
+    expectedException.expectMessage(noTradeItem.getFullProductName());
+
+    service.resolve(event(receiveLine("ABC1")));
+  }
+
+  @Test
+  public void shouldFallBackToOrderableIdWhenReferenceDataDoesNotReturnTheProduct() {
+    when(orderableReferenceDataService.findByIds(any())).thenReturn(emptyList());
+    expectedException.expect(ValidationMessageException.class);
+    expectedException.expectMessage(orderableId.toString());
+
+    service.resolve(event(receiveLine("ABC1")));
+  }
+
+  @Test
   public void shouldFetchLotsOncePerTradeItemAcrossLines() {
     when(lotReferenceDataService.getAllLotsOf(tradeItemId)).thenReturn(emptyList());
     when(lotReferenceDataService.create(any())).thenReturn(lotDto(randomUUID(), "X"));

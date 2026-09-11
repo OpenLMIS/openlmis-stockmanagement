@@ -15,12 +15,14 @@
 
 package org.openlmis.stockmanagement.service;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.openlmis.stockmanagement.dto.StockEventDto;
@@ -73,16 +75,19 @@ public class StockEventLotResolutionService {
       return;
     }
 
-    Map<UUID, UUID> tradeItemByOrderable = mapOrderablesToTradeItems(codeAddressed);
+    Map<UUID, OrderableDto> orderablesById = findOrderables(codeAddressed);
+    Map<UUID, UUID> tradeItemByOrderable = mapOrderablesToTradeItems(orderablesById.values());
     // lots fetched once per trade item and reused across lines that share it
     Map<UUID, List<LotDto>> lotsByTradeItem = new HashMap<>();
 
     for (StockEventLineItemDto lineItem : codeAddressed) {
-      lineItem.setLotId(resolveLine(lineItem, tradeItemByOrderable, lotsByTradeItem));
+      lineItem.setLotId(
+          resolveLine(lineItem, orderablesById, tradeItemByOrderable, lotsByTradeItem));
     }
   }
 
-  private UUID resolveLine(StockEventLineItemDto lineItem, Map<UUID, UUID> tradeItemByOrderable,
+  private UUID resolveLine(StockEventLineItemDto lineItem,
+      Map<UUID, OrderableDto> orderablesById, Map<UUID, UUID> tradeItemByOrderable,
       Map<UUID, List<LotDto>> lotsByTradeItem) {
     StockEventLineItemLotDto lot = lineItem.getLot();
 
@@ -96,7 +101,7 @@ public class StockEventLotResolutionService {
     if (tradeItemId == null) {
       throw new ValidationMessageException(new Message(
           MessageKeys.ERROR_EVENT_LOT_ORDERABLE_WITHOUT_TRADE_ITEM,
-          lot.getLotCode(), lineItem.getOrderableId()));
+          lot.getLotCode(), productLabel(orderablesById, lineItem.getOrderableId())));
     }
 
     return resolveOrCreate(tradeItemId, lot, isCreationAllowed(lineItem), lotsByTradeItem);
@@ -151,13 +156,19 @@ public class StockEventLotResolutionService {
         && (lineItem.hasSourceId() || !lineItem.hasReasonId());
   }
 
-  private Map<UUID, UUID> mapOrderablesToTradeItems(List<StockEventLineItemDto> lineItems) {
+  private Map<UUID, OrderableDto> findOrderables(List<StockEventLineItemDto> lineItems) {
     Set<UUID> orderableIds = lineItems.stream()
         .map(StockEventLineItemDto::getOrderableId)
         .collect(Collectors.toSet());
 
+    return orderableReferenceDataService.findByIds(orderableIds).stream()
+        .collect(Collectors.toMap(
+            OrderableDto::getId, Function.identity(), (first, second) -> first));
+  }
+
+  private Map<UUID, UUID> mapOrderablesToTradeItems(Collection<OrderableDto> orderables) {
     Map<UUID, UUID> tradeItemByOrderable = new HashMap<>();
-    for (OrderableDto orderable : orderableReferenceDataService.findByIds(orderableIds)) {
+    for (OrderableDto orderable : orderables) {
       String tradeItemId = orderable.getIdentifiers() == null
           ? null
           : orderable.getIdentifiers().get(TRADE_ITEM);
@@ -166,5 +177,20 @@ public class StockEventLotResolutionService {
       }
     }
     return tradeItemByOrderable;
+  }
+
+  /**
+   * The product as the user knows it, for error messages. Falls back to the product code, and then
+   * to the id, so a message never goes out empty when reference data returns an incomplete record.
+   */
+  private String productLabel(Map<UUID, OrderableDto> orderablesById, UUID orderableId) {
+    OrderableDto orderable = orderablesById.get(orderableId);
+    if (orderable == null) {
+      return orderableId.toString();
+    }
+    if (orderable.getFullProductName() != null) {
+      return orderable.getFullProductName();
+    }
+    return orderable.getProductCode() == null ? orderableId.toString() : orderable.getProductCode();
   }
 }
