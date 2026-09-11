@@ -57,6 +57,7 @@ import org.openlmis.stockmanagement.testutils.OrderableDtoDataBuilder;
 public class StockEventLotResolutionServiceTest {
 
   private static final String TRADE_ITEM = "tradeItem";
+  private static final String LOT_CODE = "ABC1";
 
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
@@ -150,7 +151,7 @@ public class StockEventLotResolutionServiceTest {
 
   @Test
   public void shouldRejectWhenBothLotIdAndLotPresent() {
-    StockEventLineItemDto line = receiveLine("ABC1");
+    StockEventLineItemDto line = receiveLine(LOT_CODE);
     line.setLotId(randomUUID());
     expectedException.expect(ValidationMessageException.class);
     expectedException.expectMessage(ERROR_EVENT_LOT_ID_AND_CODE_EXCLUSIVE);
@@ -202,7 +203,7 @@ public class StockEventLotResolutionServiceTest {
     expectedException.expect(ValidationMessageException.class);
     expectedException.expectMessage(ERROR_EVENT_LOT_ORDERABLE_WITHOUT_TRADE_ITEM);
 
-    service.resolve(event(receiveLine("ABC1")));
+    service.resolve(event(receiveLine(LOT_CODE)));
   }
 
   @Test
@@ -212,7 +213,7 @@ public class StockEventLotResolutionServiceTest {
     expectedException.expect(ValidationMessageException.class);
     expectedException.expectMessage(noTradeItem.getFullProductName());
 
-    service.resolve(event(receiveLine("ABC1")));
+    service.resolve(event(receiveLine(LOT_CODE)));
   }
 
   @Test
@@ -221,7 +222,7 @@ public class StockEventLotResolutionServiceTest {
     expectedException.expect(ValidationMessageException.class);
     expectedException.expectMessage(orderableId.toString());
 
-    service.resolve(event(receiveLine("ABC1")));
+    service.resolve(event(receiveLine(LOT_CODE)));
   }
 
   @Test
