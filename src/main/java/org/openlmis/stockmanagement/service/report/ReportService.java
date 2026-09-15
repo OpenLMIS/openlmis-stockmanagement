@@ -86,10 +86,10 @@ public class ReportService {
           byte[].class);
       return response.getBody();
     } catch (HttpStatusCodeException ex) {
-      // Deliberately not propagating the upstream status: a 403 here means this service and the
-      // report service disagree on auth.server.clientId, which is a server misconfiguration, not
-      // a permission the caller could be missing. Surfacing it as an error (rather than returning
-      // an empty body, which reached the user as a blank PDF) makes the failure diagnosable.
+      // Deliberately not propagating the upstream status: whatever the report service answers,
+      // the caller's own request was valid, so a 4xx would send people looking for a missing
+      // right instead of a broken service configuration. Surfacing it as an error (rather than
+      // returning an empty body, which reached the user as a blank PDF) makes it diagnosable.
       logger.error(
           "Unable to generate report {}. Error code: {}, response message: {}",
           reportName, ex.getStatusCode(), ex.getResponseBodyAsString()
