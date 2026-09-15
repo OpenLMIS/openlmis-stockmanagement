@@ -125,7 +125,7 @@
 				<subreportExpression><![CDATA[$P{headerTemplate}]]></subreportExpression>
 			</subreport>
 			<textField>
-				<reportElement x="0" y="110" width="595" height="50" uuid="ecab56ef-a62f-486f-bc7d-c1431467efc4"/>
+				<reportElement positionType="Float" x="0" y="110" width="595" height="50" uuid="ecab56ef-a62f-486f-bc7d-c1431467efc4"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="SansSerif" size="26" isBold="true"/>
 				</textElement>
