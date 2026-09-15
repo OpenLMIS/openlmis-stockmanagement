@@ -15,11 +15,13 @@
 
 package org.openlmis.stockmanagement.service.report;
 
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_GENERATE_REPORT_FAILED;
+
 import java.net.URI;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang.ArrayUtils;
 import org.openlmis.stockmanagement.domain.JasperTemplate;
+import org.openlmis.stockmanagement.exception.JasperReportViewException;
 import org.openlmis.stockmanagement.service.AuthService;
 import org.openlmis.stockmanagement.service.RequestHeaders;
 import org.openlmis.stockmanagement.util.RequestHelper;
@@ -84,12 +86,16 @@ public class ReportService {
           byte[].class);
       return response.getBody();
     } catch (HttpStatusCodeException ex) {
+      // Deliberately not propagating the upstream status: a 403 here means this service and the
+      // report service disagree on auth.server.clientId, which is a server misconfiguration, not
+      // a permission the caller could be missing. Surfacing it as an error (rather than returning
+      // an empty body, which reached the user as a blank PDF) makes the failure diagnosable.
       logger.error(
-          "Unable to generate report. Error code: {}, response message: {}",
-          ex.getStatusCode(), ex.getResponseBodyAsString()
+          "Unable to generate report {}. Error code: {}, response message: {}",
+          reportName, ex.getStatusCode(), ex.getResponseBodyAsString()
       );
+      throw new JasperReportViewException(ERROR_GENERATE_REPORT_FAILED, ex);
     }
-    return ArrayUtils.EMPTY_BYTE_ARRAY;
   }
 
   private GenerateReportDto buildGenerateReportRequest(String name, byte[] data, Map<String,
