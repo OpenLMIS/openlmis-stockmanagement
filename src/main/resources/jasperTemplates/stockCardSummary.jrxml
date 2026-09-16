@@ -232,7 +232,7 @@
 				<textFieldExpression><![CDATA[java.time.format.DateTimeFormatter.ofPattern($P{dateFormat} != null ? $P{dateFormat} : "yyyy-MM-dd").format(java.time.ZonedDateTime.now())]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement x="510" y="30" width="40" height="15" uuid="ee62efa8-b6f7-4de5-8ede-1ac3db0020cd"/>
+				<reportElement x="470" y="30" width="80" height="15" uuid="ee62efa8-b6f7-4de5-8ede-1ac3db0020cd"/>
 				<textElement textAlignment="Right"/>
 				<textFieldExpression><![CDATA[msg($R{report.controls.pageNumber}, $V{PAGE_NUMBER})]]></textFieldExpression>
 			</textField>
