@@ -175,7 +175,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 					</textElement>
 					<textFieldExpression><![CDATA[$F{productname}]]></textFieldExpression>
 				</textField>
-				<textField isBlankWhenNull="true">
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 					<reportElement mode="Opaque" x="702" y="0" width="130" height="25" backcolor="#F2F2F2" uuid="0bb8ab33-a01d-4809-a63f-a65549e10eb8"/>
 					<box padding="3">
 						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -208,7 +208,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA[$P{headerTemplate}]]></subreportExpression>
 			</subreport>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement positionType="Float" x="20" y="90" width="500" height="25"
 				               uuid="8b895ad8-e565-41e4-87f4-fe70fea7b9f1"/>
 				<textElement verticalAlignment="Middle">
@@ -216,7 +216,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 				</textElement>
 				<textFieldExpression><![CDATA[$R{report.title.stockEvent}]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement positionType="Float" x="520" y="90" width="302" height="25"
 				               uuid="8b895ad8-e565-41e4-87f4-fe70fea7b9f2"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
@@ -228,7 +228,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 				        $F{eventorigin}.equals("ADJUSTMENT") ? $R{report.value.transactionType.adjustment} :
 				        $F{eventorigin}))]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement positionType="Float" x="20" y="120" width="400" height="16"
 				               uuid="ec47a93b-983c-447f-85cf-4775e800330a"/>
 				<textElement>
@@ -236,7 +236,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 				</textElement>
 				<textFieldExpression><![CDATA[msg($R{report.pattern.labelledValue}, $R{report.header.documentNumber}, ($F{documentnumber} == null ? "-" : $F{documentnumber}))]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement positionType="Float" x="420" y="120" width="402" height="16"
 				               uuid="ec47a93b-983c-447f-85cf-4775e800330b"/>
 				<textElement>
@@ -246,7 +246,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 				    DateTimeFormatter.ofPattern($P{dateTimeFormat}).format(
 				        ZonedDateTime.ofInstant($F{processeddate}.toInstant(), ZoneId.of($P{timeZoneId})))))]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement positionType="Float" x="20" y="140" width="802" height="16"
 				               uuid="a035b2b6-8c32-4db2-89fd-6444a109b1d7"/>
 				<textElement>
@@ -256,7 +256,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 				    $F{facility} == null ? "-" : $F{facility},
 				    $F{program} == null ? "-" : $F{program})]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement positionType="Float" x="20" y="160" width="400" height="16"
 				               uuid="08e7b43c-4f44-4e33-88f6-92324585772e"/>
 				<textElement>
@@ -265,7 +265,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 				<textFieldExpression><![CDATA[msg($R{report.pattern.labelledValue}, $R{report.header.user}, ($F{firstname} == null ? "" : $F{firstname}) + " " +
 				    ($F{lastname}  == null ? "" : $F{lastname}))]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement positionType="Float" x="420" y="160" width="402" height="16"
 				               uuid="08e7b43c-4f44-4e33-88f6-92324585772f"/>
 				<textElement>
@@ -495,14 +495,14 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 	</detail>
 	<pageFooter>
 		<band height="30">
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement x="750" y="10" width="45" height="10" uuid="7510e277-8abf-4ec0-b306-b88cfd265a15"/>
 				<textElement textAlignment="Right">
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[msg($R{report.controls.pageNumber}, $V{PAGE_NUMBER})]]></textFieldExpression>
 			</textField>
-			<textField evaluationTime="Report">
+			<textField isStretchWithOverflow="true" evaluationTime="Report">
 				<reportElement x="800" y="10" width="30" height="10" uuid="5ded44a2-6687-46fd-b29e-205ba278ca50"/>
 				<textElement>
 					<font size="8"/>

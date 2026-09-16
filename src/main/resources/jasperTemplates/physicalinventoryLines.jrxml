@@ -219,7 +219,7 @@
 	</background>
 	<columnHeader>
 		<band height="25" splitType="Stretch">
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement mode="Opaque" x="700" y="0" width="132" height="25" backcolor="#CCCCCC" uuid="dc09a9f2-acf7-4dab-84ef-a500845dde6d"/>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -258,7 +258,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$P{showInDoses} ? $R{report.column.stockOnHandDoses} : $R{report.column.stockOnHandPacks}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement mode="Opaque" x="418" y="0" width="102" height="25" backcolor="#CCCCCC" uuid="d07d08b5-df52-43b1-b3d0-d571623c8b02"/>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -271,7 +271,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$R{report.column.vvmStatus}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement mode="Opaque" x="316" y="0" width="102" height="25" backcolor="#CCCCCC" uuid="dc2ac7c8-1086-49d9-90fb-9acd95271092"/>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -284,7 +284,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$R{report.column.expiryDate}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement mode="Opaque" x="244" y="0" width="72" height="25" backcolor="#CCCCCC" uuid="93bc4e67-36dd-4077-95db-0db852108a30"/>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -297,7 +297,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$R{report.column.lotCode}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement mode="Opaque" x="82" y="0" width="112" height="25" backcolor="#CCCCCC" uuid="f75fae81-e6b8-4993-898d-632ddf29d1e8"/>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -310,7 +310,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$R{report.column.productName}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement mode="Opaque" x="194" y="0" width="50" height="25" backcolor="#CCCCCC" uuid="00ae8f94-4768-40ca-9121-1f4e9c252536"/>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -323,7 +323,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$R{report.column.packSize}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement mode="Opaque" x="10" y="0" width="72" height="25" backcolor="#CCCCCC" uuid="06a9370e-dcaa-4b03-9d18-aca8abaa56bd"/>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -340,7 +340,7 @@
 	</columnHeader>
 	<detail>
 		<band height="25" splitType="Stretch">
-			<textField evaluationTime="Group" evaluationGroup="lineItemGroup" isBlankWhenNull="true">
+			<textField isStretchWithOverflow="true" evaluationTime="Group" evaluationGroup="lineItemGroup" isBlankWhenNull="true">
 				<reportElement x="244" y="0" width="72" height="25" printWhenGroupChanges="lineItemGroup" uuid="c649aa2d-900a-4d7f-94f7-0d072c516c0a">
 					<printWhenExpression><![CDATA[$V{lineItemGroup_COUNT} == 1]]></printWhenExpression>
 				</reportElement>
