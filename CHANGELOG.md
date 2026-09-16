@@ -1,5 +1,12 @@
 Upcoming Version (WIP)
 ==================
+* [SELV3-842](https://openlmis.atlassian.net/browse/SELV3-842) Added Transaction History view with new endpoints `GET /api/stockEvents` and `GET /api/stockEvents/{id}/lineItems`, plus a document number column on the stock card bin card report
+* [OLMIS-8206](https://openlmis.atlassian.net/browse/OLMIS-8206): Serialized concurrent stock events per facility and program, stock on hand is now recalculated in place.
+  * **Note:** the migration de-duplicates `calculated_stocks_on_hand` and makes `(stockcardid, occurreddate)` unique, so duplicate rows are dropped.
+* [OLMIS-8310](https://openlmis.atlassian.net/browse/OLMIS-8310): The lot-without-trade-item error now names the product.
+* [SELV3-856](https://openlmis.atlassian.net/browse/SELV3-856): Added `ADJUSTMENT` to the event origins, so a blank origin filter also returns reversing adjustments.
+* [ODRC-120](https://openlmis.atlassian.net/browse/ODRC-120): Valid source and destination payloads now carry `geoLevelAffinityId`.
+* [MW-1471](https://openlmis.atlassian.net/browse/MW-1471): Exposed the Prometheus metrics endpoint at `/actuator/prometheus`.
 * [SELV3-876](https://openlmis.atlassian.net/browse/SELV3-876): Reason, source and destination now print as `Name: free text` in the stock card and stock event reports, matching the stock views. The stock card previously used `Name : free text` and the stock event `Name (free text)`, and both emitted a stray separator when the free text was empty or the name absent. Both now render through `report.pattern.labelledValue`, so the report translation bundle must carry that key.
 * [OLMIS-8101](https://openlmis.atlassian.net/browse/OLMIS-8101): Requisition 2nd Approval performance improvements. Reworked stock event processing (`POST /api/stockEvents`): event line items are grouped per stock card and each card is flushed and cleared in turn. Stock card, physical inventory and adjustment associations are now fetched lazily.
   * **Note:** the JDBC URL now appends `reWriteBatchedInserts=true`. A deployment whose `DATABASE_URL` already carries its own query string will produce a malformed URL with two `?`. `DATABASE_URL` is expected to be a bare JDBC URL. If you need your own JDBC parameters, leave `DATABASE_URL` bare and instead set `SPRING_DATASOURCE_URL` to the complete URL, which overrides this property; carry `stringtype=unspecified` and `reWriteBatchedInserts=true` across when you do.
@@ -39,7 +46,6 @@ Improvements:
 * [ODRC-24](https://openlmis.atlassian.net/browse/ODRC-24) Global header and translations implemented for reports
 * [SELV3-748](https://openlmis.atlassian.net/browse/SELV3-748) Improved 'no permission' warning message
 * [SELV3-839](https://openlmis.atlassian.net/browse/SELV3-839) New document number generation for issue and receive
-* [SELV3-842](https://openlmis.atlassian.net/browse/SELV3-842) Added Transaction History view with new endpoints `GET /api/stockEvents` and `GET /api/stockEvents/{id}/lineItems`, plus a document number column on the stock card bin card report
 
 5.3.0 / 2025-11-27
 ==================
