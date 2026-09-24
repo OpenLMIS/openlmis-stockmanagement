@@ -1,5 +1,6 @@
 Upcoming Version (WIP)
 ==================
+* [OLMIS-8364](https://openlmis.atlassian.net/browse/OLMIS-8364): Physical inventory print: bold values and headings no longer render with an extra fake-bold stroke, table borders are 0.5pt so they no longer alternate between thin and thick on screen, and the column header row is aligned with the table.
 * [SELV3-842](https://openlmis.atlassian.net/browse/SELV3-842) Added Transaction History view with new endpoints `GET /api/stockEvents` and `GET /api/stockEvents/{id}/lineItems`, plus a document number column on the stock card bin card report
 * [OLMIS-8206](https://openlmis.atlassian.net/browse/OLMIS-8206): Serialized concurrent stock events per facility and program, stock on hand is now recalculated in place.
   * **Note:** the migration de-duplicates `calculated_stocks_on_hand` and makes `(stockcardid, occurreddate)` unique, so duplicate rows are dropped.
