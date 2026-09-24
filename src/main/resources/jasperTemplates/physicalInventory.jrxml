@@ -54,7 +54,7 @@
 				<reportElement positionType="Float" x="20" y="100" width="800" height="20"
                                uuid="8b895ad8-e565-41e4-87f4-fe70fea7b9f1"/>
 				<textElement verticalAlignment="Middle">
-					<font size="16" isBold="true" pdfFontName="Helvetica-Bold"/>
+					<font size="16" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$R{report.title.submittedPhysicalInventory}]]></textFieldExpression>
 			</textField>
@@ -62,7 +62,7 @@
 				<reportElement positionType="Float" x="20" y="130" width="800" height="20"
                                uuid="ec47a93b-983c-447f-85cf-4775e800330a"/>
 				<textElement>
-					<font size="13" isBold="true" pdfFontName="Helvetica-Bold"/>
+					<font size="13" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[MessageFormat.format($R{report.header.physicalInventoryDate},
 					DateTimeFormatter.ofPattern($P{dateFormat}).format(LocalDate.parse($F{occurreddate})))]]></textFieldExpression>
