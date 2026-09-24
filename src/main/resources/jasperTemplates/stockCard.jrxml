@@ -142,7 +142,7 @@
 					( $P{showInDoses}
 						? $P{decimalFormat}.format($F{stockOnHand}).toString()
 						: ( ($F{stockOnHand}.longValue() / $P{orderableNetContent}.longValue())
-							+ " (+" + ($F{stockOnHand}.longValue() % $P{orderableNetContent}.longValue()) + ")" ) )]]></textFieldExpression>
+							+ " ( " + (($F{stockOnHand}.longValue() % $P{orderableNetContent}.longValue()) < 0 ? "" : "+") + ($F{stockOnHand}.longValue() % $P{orderableNetContent}.longValue()) + " )" ) )]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement x="160" y="30" width="70" height="10" uuid="dbb8c60d-f18c-4662-82a9-1469ba5ee29b"/>
@@ -366,7 +366,7 @@
 									( $P{showInDoses}
 										? $P{decimalFormat}.format($F{quantity}).toString()
 										: ( ($F{quantity}.longValue() / $V{paramNetContent})
-											+ " (+" + ($F{quantity}.longValue() % $V{paramNetContent}) + ")" ) )]]></textFieldExpression>
+											+ " ( " + (($F{quantity}.longValue() % $V{paramNetContent}) < 0 ? "" : "+") + ($F{quantity}.longValue() % $V{paramNetContent}) + " )" ) )]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -389,7 +389,7 @@
 									( $P{showInDoses}
 										? $P{decimalFormat}.format($F{stockOnHand}).toString()
 										: ( ($F{stockOnHand}.longValue() / $V{paramNetContent})
-											+ " (+" + ($F{stockOnHand}.longValue() % $V{paramNetContent}) + ")" ) )]]></textFieldExpression>
+											+ " ( " + (($F{stockOnHand}.longValue() % $V{paramNetContent}) < 0 ? "" : "+") + ($F{stockOnHand}.longValue() % $V{paramNetContent}) + " )" ) )]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>

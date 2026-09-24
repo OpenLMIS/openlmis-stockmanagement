@@ -408,7 +408,7 @@
 									( $P{showInDoses}
 										? $P{decimalFormat}.format($F{stockOnHand}).toString()
 										: ( ($F{stockOnHand}.longValue() / $V{orderableNetContent})
-											+ " (+" + ($F{stockOnHand}.longValue() % $V{orderableNetContent}) + ")" ) )]]></textFieldExpression>
+											+ " ( " + (($F{stockOnHand}.longValue() % $V{orderableNetContent}) < 0 ? "" : "+") + ($F{stockOnHand}.longValue() % $V{orderableNetContent}) + " )" ) )]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
