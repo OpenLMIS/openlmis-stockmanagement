@@ -1,4 +1,4 @@
-Upcoming Version (WIP)
+5.4.0 / 2026-09-28
 ==================
 
 * [OLMIS-8364](https://openlmis.atlassian.net/browse/OLMIS-8364): Physical inventory print: bold values and headings no longer render with an extra fake-bold stroke, table borders are 0.5pt so they no longer alternate between thin and thick on screen, and the column header row is aligned with the table.
