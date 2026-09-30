@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
@@ -451,8 +452,8 @@ public class StockCardSummariesServiceTest {
         .withStockOnHand(56)
         .build();
 
-    when(calculatedStockOnHandService
-        .getStockCardsWithStockOnHand(programId, facilityId))
+    when(cardRepository
+        .findByFacilityIdAndProgramIdIn(facilityId, singletonList(programId)))
         .thenReturn(asList(stockCard1, stockCard2, stockCard3, stockCard4, stockCard5));
 
     List<CalculatedStockOnHand> calculatedStockOnHands = new ArrayList<>();
@@ -545,8 +546,8 @@ public class StockCardSummariesServiceTest {
         .withStockOnHand(56)
         .build();
 
-    when(calculatedStockOnHandService
-        .getStockCardsWithStockOnHand(programId, facilityId))
+    when(cardRepository
+        .findByFacilityIdAndProgramIdIn(facilityId, singletonList(programId)))
         .thenReturn(asList(stockCard1, stockCard2, stockCard3, stockCard4, stockCard5));
 
     List<CalculatedStockOnHand> calculatedStockOnHands = new ArrayList<>();
@@ -590,6 +591,52 @@ public class StockCardSummariesServiceTest {
     assertThat(cardMap.get(orderableId7).getStockCards(), hasItems(stockCard5));
     assertThat(cardMap.get(orderableId1).getCalculatedStockOnHands(),
         hasItems(calculatedStockOnHand, calculatedStockOnHand5));
+  }
+
+  @Test
+  public void shouldQueryStockOnHandsOnlyForStockCardsOfRequestedOrderables() {
+    Map<UUID, OrderableFulfillDto> fulfillMap = new HashMap<>();
+    fulfillMap.put(orderableId2, new OrderableFulfillDtoDataBuilder()
+        .withCanBeFulfilledByMe(singletonList(orderableId1)).build());
+    when(orderableFulfillReferenceDataService
+        .findByIds(ImmutableSet.of(orderableId2, orderableId3, orderableId6)))
+        .thenReturn(fulfillMap);
+
+    StockEvent event = new StockEventDataBuilder()
+        .withFacility(facilityId)
+        .withProgram(programId)
+        .build();
+    StockCard fulfillingStockCard = new StockCardDataBuilder(event)
+        .withOrderableId(orderableId2)
+        .build();
+    StockCard requestedStockCard = new StockCardDataBuilder(event)
+        .withOrderableId(orderableId3)
+        .build();
+    StockCard otherStockCard = new StockCardDataBuilder(event)
+        .withOrderableId(orderableId6)
+        .build();
+    when(cardRepository
+        .findByFacilityIdAndProgramIdIn(facilityId, singletonList(programId)))
+        .thenReturn(asList(fulfillingStockCard, requestedStockCard, otherStockCard));
+    when(calculatedStockOnHandRepository
+        .findByStockCardIdInAndOccurredDateBetween(any(), any(), any()))
+        .thenReturn(new ArrayList<>());
+
+    Map<UUID, StockCardAggregate> cardMap =
+        stockCardSummariesService.getGroupedStockCards(programId, facilityId,
+            ImmutableSet.of(orderableId1, orderableId3),
+            LocalDate.of(2017, 3, 16), LocalDate.of(2017, 3, 19));
+
+    assertThat(cardMap.keySet(), hasItems(orderableId1, orderableId3));
+    assertThat(cardMap.size(), is(2));
+    verify(calculatedStockOnHandRepository, never())
+        .findByStockCardIdInAndOccurredDateBetween(
+            eq(singleton(otherStockCard.getId())), any(), any());
+    verify(calculatedStockOnHandRepository, never())
+        .findFirstByStockCardIdAndOccurredDateLessThanEqualOrderByOccurredDateDesc(
+            eq(otherStockCard.getId()), any());
+    verify(calculatedStockOnHandService, never())
+        .getStockCardsWithStockOnHand(any(UUID.class), any(UUID.class));
   }
 
   @Test
