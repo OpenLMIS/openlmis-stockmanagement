@@ -16,6 +16,7 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.util.Collections.emptySet;
+import static java.util.Collections.singletonList;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -119,18 +120,19 @@ public class StockCardSummariesService extends StockCardBaseService {
                                                             Set<UUID> orderableIds,
                                                             LocalDate startDate,
                                                             LocalDate endDate) {
-    List<StockCard> stockCards = calculatedStockOnHandService
-        .getStockCardsWithStockOnHand(programId, facilityId);
-
+    List<StockCard> stockCards = stockCardRepository
+        .findByFacilityIdAndProgramIdIn(facilityId, singletonList(programId));
     Map<UUID, OrderableFulfillDto> orderableFulfillMap =
         orderableFulfillService.findByIds(stockCards.stream()
             .map(StockCard::getOrderableId)
             .collect(toSet()));
 
     return stockCards.stream()
-        .map(stockCard -> assignOrderableToStockCard(
-            stockCard, orderableFulfillMap, orderableIds, startDate, endDate))
-        .filter(pair -> null != pair.getLeft())
+        .map(stockCard -> new ImmutablePair<>(
+            getAssignedOrderableId(stockCard, orderableFulfillMap), stockCard))
+        .filter(pair -> isEmpty(orderableIds) || orderableIds.contains(pair.getLeft()))
+        .map(pair -> new ImmutablePair<>(pair.getLeft(),
+            createStockCardAggregate(pair.getRight(), startDate, endDate)))
         .collect(toMap(
             ImmutablePair::getLeft,
             ImmutablePair::getRight,
@@ -139,6 +141,7 @@ public class StockCardSummariesService extends StockCardBaseService {
               return aggregate1;
             }));
   }
+
 
   /**
    * Get a page of stock cards.
@@ -348,19 +351,17 @@ public class StockCardSummariesService extends StockCardBaseService {
     }
   }
 
-  private ImmutablePair<UUID, StockCardAggregate> assignOrderableToStockCard(
-      StockCard stockCard,
-      Map<UUID, OrderableFulfillDto> orderableFulfillMap,
-                                                                             Set<UUID> orderableIds,
-                                                                             LocalDate startDate,
-                                                                             LocalDate endDate) {
-
+  private UUID getAssignedOrderableId(StockCard stockCard,
+      Map<UUID, OrderableFulfillDto> orderableFulfillMap) {
     OrderableFulfillDto fulfills = orderableFulfillMap.get(stockCard.getOrderableId());
 
-    UUID orderableId = null == fulfills || isEmpty(fulfills.getCanBeFulfilledByMe())
+    return null == fulfills || isEmpty(fulfills.getCanBeFulfilledByMe())
         ? stockCard.getOrderableId()
         : fulfills.getCanBeFulfilledByMe().get(0);
+  }
 
+  private StockCardAggregate createStockCardAggregate(StockCard stockCard,
+      LocalDate startDate, LocalDate endDate) {
     List<StockCard> stockCards = new ArrayList<>();
     stockCards.add(stockCard);
 
@@ -389,12 +390,9 @@ public class StockCardSummariesService extends StockCardBaseService {
       });
     }
 
-    return new ImmutablePair<>(
-        !isEmpty(orderableIds) && !orderableIds.contains(orderableId)
-            ? null
-            : orderableId,
-        new StockCardAggregate(stockCards, calculatedStockOnHands));
+    return new StockCardAggregate(stockCards, calculatedStockOnHands);
   }
+
 
   @AllArgsConstructor
   @Getter
