@@ -1,6 +1,8 @@
 5.5.0-SNAPSHOT (WIP)
 ==================
 
+* [FM-188](https://openlmis.atlassian.net/browse/FM-188): `GET /api/v2/stockCardSummaries` takes `q`, which keeps products whose code or name contains the text, ignoring case, with all their stock cards, and products with a lot whose code contains it, with only those lots.
+
 5.4.1 / 2026-10-05
 ==================
 * [OLMIS-8369](https://openlmis.atlassian.net/browse/OLMIS-8369): Stock card range summaries skip the unused stock on hand lookup per stock card and query stock on hand history only for stock cards of the requested orderables.

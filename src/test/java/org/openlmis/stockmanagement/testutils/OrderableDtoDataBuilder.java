@@ -78,6 +78,16 @@ public class OrderableDtoDataBuilder {
     return this;
   }
 
+  public OrderableDtoDataBuilder withProductCode(String productCode) {
+    this.productCode = productCode;
+    return this;
+  }
+
+  public OrderableDtoDataBuilder withFullProductName(String fullProductName) {
+    this.fullProductName = fullProductName;
+    return this;
+  }
+
   public OrderableDtoDataBuilder withIdentifier(String key, String value) {
     this.identifiers.put(key, value);
     return this;

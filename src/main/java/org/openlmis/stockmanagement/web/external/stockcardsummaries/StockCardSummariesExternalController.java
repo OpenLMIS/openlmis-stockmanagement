@@ -107,7 +107,7 @@ public class StockCardSummariesExternalController {
     final List<UUID> programIds = getProgramIds(parameters);
 
     return new StockCardSummariesV2SearchParams(programIds, facility.getId(), null, null, true,
-        parameters.getFirst(ORDERABLE_CODE_PARAM_NAME), null, null);
+        parameters.getFirst(ORDERABLE_CODE_PARAM_NAME), null, null, null);
   }
 
   private FacilityDto getFacility(MultiValueMap<String, String> requestParameters) {

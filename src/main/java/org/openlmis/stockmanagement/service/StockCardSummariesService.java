@@ -29,6 +29,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -208,10 +209,40 @@ public class StockCardSummariesService extends StockCardBaseService {
         .getStockCardsWithStockOnHand(params.getProgramIds(), params.getFacilityId(),
             params.getAsOfDate(), orderableIdsForStockCard, lotCodeIds);
 
-    Page<ApprovedProductDto> orderablesPage = approvedProducts.getApprovedProducts();
+    List<ApprovedProductDto> products = approvedProducts.getApprovedProducts().getContent();
+
+    if (!StringUtils.isBlank(params.getQuery())) {
+      profiler.start("MATCH_QUERY");
+      String query = params.getQuery();
+      Set<UUID> matchingLotIds = findLotIdsByCode(query);
+      Set<UUID> matchingProductIds = products.stream()
+          .map(ApprovedProductDto::getOrderable)
+          .filter(orderable -> StringUtils.containsIgnoreCase(orderable.getProductCode(), query)
+              || StringUtils.containsIgnoreCase(orderable.getFullProductName(), query))
+          .map(OrderableDto::getId)
+          .collect(toSet());
+      Set<UUID> fillingMatchingProducts = matchingProductIds.stream()
+          .flatMap(id -> fulfillingIds(id, orderableFulfillMap).stream())
+          .collect(toSet());
+
+      stockCards = stockCards.stream()
+          .filter(card -> fillingMatchingProducts.contains(card.getOrderableId())
+              || matchingLotIds.contains(card.getLotId()))
+          .collect(toList());
+
+      Set<UUID> cardOrderableIds = stockCards.stream()
+          .map(StockCard::getOrderableId)
+          .collect(toSet());
+      products = products.stream()
+          .filter(product -> matchingProductIds.contains(product.getOrderable().getId())
+              || fulfillingIds(product.getOrderable().getId(), orderableFulfillMap).stream()
+                  .anyMatch(cardOrderableIds::contains))
+          .collect(toList());
+    }
+
     StockCardSummaries result = new StockCardSummaries(
-        orderablesPage.getContent(), stockCards, orderableFulfillMap,
-            params.getAsOfDate(), orderablesPage.getTotalElements());
+        products, stockCards, orderableFulfillMap,
+            params.getAsOfDate(), (long) products.size());
 
     profiler.stop().log();
     return result;
@@ -407,5 +438,22 @@ public class StockCardSummariesService extends StockCardBaseService {
     public UUID getOrderableId() {
       return orderable == null ? null : orderable.getId();
     }
+  }
+
+  private Set<UUID> findLotIdsByCode(String lotCode) {
+    RequestParameters searchParams = RequestParameters
+        .init()
+        .set("size", Integer.MAX_VALUE)
+        .set("lotCode", lotCode);
+    return lotReferenceDataService.getPage(searchParams).map(LotDto::getId).toSet();
+  }
+
+  private Set<UUID> fulfillingIds(UUID orderableId, Map<UUID, OrderableFulfillDto> fulfillMap) {
+    Set<UUID> ids = new HashSet<>(singletonList(orderableId));
+    OrderableFulfillDto fulfills = fulfillMap.get(orderableId);
+    if (fulfills != null) {
+      ids.addAll(fulfills.getCanFulfillForMe());
+    }
+    return ids;
   }
 }
