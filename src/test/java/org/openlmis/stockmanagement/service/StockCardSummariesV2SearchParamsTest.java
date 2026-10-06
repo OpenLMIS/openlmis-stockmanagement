@@ -29,6 +29,7 @@ import static org.openlmis.stockmanagement.service.StockCardSummariesV2SearchPar
 import static org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams.NON_EMPTY_ONLY;
 import static org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams.ORDERABLE_ID;
 import static org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams.PROGRAM_ID;
+import static org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams.QUERY;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -99,6 +100,7 @@ public class StockCardSummariesV2SearchParamsTest {
     parameters.add(ORDERABLE_ID, orderableId1.toString());
     parameters.add(ORDERABLE_ID, orderableId2.toString());
     parameters.add(NON_EMPTY_ONLY, Boolean.toString(nonEmptyOnly));
+    parameters.add(QUERY, "rota");
 
     StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParams(parameters);
 
@@ -107,6 +109,7 @@ public class StockCardSummariesV2SearchParamsTest {
     assertEquals(asOfDate, params.getAsOfDate());
     assertEquals(asList(orderableId1, orderableId2), params.getOrderableIds());
     assertEquals(nonEmptyOnly, params.isNonEmptyOnly());
+    assertEquals("rota", params.getQuery());
   }
 
   @Test

@@ -19,6 +19,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import org.openlmis.stockmanagement.service.StockCardSummariesV2SearchParams;
@@ -33,6 +34,7 @@ public class StockCardSummariesV2SearchParamsDataBuilder {
   private String orderabletName;
   private String orderableCode;
   private String lotCode;
+  private String query;
 
   /**
    * Creates builder for creating new instance of {@link StockCardSummariesV2SearchParams}.
@@ -54,7 +56,7 @@ public class StockCardSummariesV2SearchParamsDataBuilder {
    */
   public StockCardSummariesV2SearchParams build() {
     return new StockCardSummariesV2SearchParams(programId, facilityId,
-        orderableId, asOfDate, nonEmptyOnly, orderableCode, orderabletName, lotCode);
+        orderableId, asOfDate, nonEmptyOnly, orderableCode, orderabletName, lotCode, query);
   }
 
   public StockCardSummariesV2SearchParamsDataBuilder withoutFacilityId() {
@@ -64,6 +66,18 @@ public class StockCardSummariesV2SearchParamsDataBuilder {
 
   public StockCardSummariesV2SearchParamsDataBuilder withoutProgramId() {
     this.programId = null;
+    return this;
+  }
+
+  /**
+   * Searches by query alone, without the separate code, name and lot filters.
+   */
+  public StockCardSummariesV2SearchParamsDataBuilder withQueryOnly(String query) {
+    this.query = query;
+    this.orderableId = Collections.emptyList();
+    this.orderabletName = null;
+    this.orderableCode = null;
+    this.lotCode = null;
     return this;
   }
 

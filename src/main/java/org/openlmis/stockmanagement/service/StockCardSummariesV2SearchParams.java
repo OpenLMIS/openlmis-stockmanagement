@@ -54,6 +54,7 @@ public final class StockCardSummariesV2SearchParams {
   static final String ORDERABLE_CODE = "orderableCode";
   static final String ORDERABLE_NAME = "orderableName";
   static final String LOT_CODE = "lotCode";
+  static final String QUERY = "q";
 
   private List<UUID> programIds;
   private UUID facilityId;
@@ -64,6 +65,7 @@ public final class StockCardSummariesV2SearchParams {
   private String orderableCode;
   private String orderableName;
   private String lotCode;
+  private String query;
 
   /**
    * Creates stock card summaries search params from multi value map.
@@ -83,6 +85,7 @@ public final class StockCardSummariesV2SearchParams {
       this.orderableCode = parameters.getFirst(ORDERABLE_CODE);
       this.orderableName = parameters.getFirst(ORDERABLE_NAME);
       this.lotCode = parameters.getFirst(LOT_CODE);
+      this.query = parameters.getFirst(QUERY);
     }
   }
 

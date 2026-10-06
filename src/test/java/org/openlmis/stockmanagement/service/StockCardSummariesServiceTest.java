@@ -302,6 +302,61 @@ public class StockCardSummariesServiceTest {
   }
 
   @Test
+  public void shouldFindProductsMatchingQueryByCodeNameOrLotCode() {
+    ProgramDto program = ProgramDto.builder().id(randomUUID()).build();
+    OrderableDto byCode = new OrderableDtoDataBuilder().withProductCode("rota1").build();
+    OrderableDto byName = new OrderableDtoDataBuilder().withFullProductName("RotaTeq").build();
+    OrderableDto byLot = new OrderableDtoDataBuilder().build();
+    OrderableDto unmatched = new OrderableDtoDataBuilder().build();
+    List<OrderableDto> orderables = asList(byCode, byName, byLot, unmatched);
+
+    StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParamsDataBuilder()
+        .withQueryOnly("ROTA")
+        .build();
+
+    when(approvedProductReferenceDataService.getApprovedProducts(
+        eq(params.getFacilityId()), eq(params.getProgramIds()), eq(params.getOrderableIds()),
+        eq(null), eq(null)))
+        .thenReturn(new OrderablesAggregator(orderables.stream()
+            .map(orderable -> new ApprovedProductDto(orderable, program, null))
+            .collect(Collectors.toList())));
+
+    Map<UUID, OrderableFulfillDto> fulfillMap = new HashMap<>();
+    orderables.forEach(orderable -> fulfillMap.put(orderable.getId(),
+        new OrderableFulfillDtoDataBuilder()
+            .withCanFulfillForMe(singletonList(orderable.getId())).build()));
+    when(orderableFulfillReferenceDataService.findByIds(any())).thenReturn(fulfillMap);
+
+    when(lotReferenceDataService.getPage(any(RequestParameters.class)))
+        .thenReturn(new PageImpl<>(singletonList(
+            LotDto.builder().id(lotId1).lotCode("ROTAM2017").build())));
+
+    StockEvent event = new StockEventDataBuilder()
+        .withFacility(params.getFacilityId())
+        .withProgram(params.getProgramIds().get(0))
+        .build();
+    StockCard codeCard = new StockCardDataBuilder(event).withOrderableId(byCode.getId()).build();
+    StockCard nameCard = new StockCardDataBuilder(event).withOrderableId(byName.getId())
+        .withLotId(lotId2).build();
+    StockCard lotCard = new StockCardDataBuilder(event).withOrderableId(byLot.getId())
+        .withLotId(lotId1).build();
+    StockCard otherLotCard = new StockCardDataBuilder(event).withOrderableId(byLot.getId())
+        .build();
+    StockCard unmatchedCard = new StockCardDataBuilder(event)
+        .withOrderableId(unmatched.getId()).build();
+    when(calculatedStockOnHandService.getStockCardsWithStockOnHand(
+        params.getProgramIds(), params.getFacilityId(), params.getAsOfDate(),
+        Collections.emptyList(), Collections.emptySet()))
+        .thenReturn(asList(codeCard, nameCard, lotCard, otherLotCard, unmatchedCard));
+
+    StockCardSummaries result = stockCardSummariesService.findStockCards(params);
+
+    assertThat(result.getPageOfApprovedProducts(), is(asList(byCode, byName, byLot)));
+    assertThat(result.getStockCardsForFulfillOrderables(),
+        is(asList(codeCard, nameCard, lotCard)));
+  }
+
+  @Test
   public void shouldNotCallPermissionServiceWhenApplicationClientOnly() {
     OrderableDto orderable = new OrderableDtoDataBuilder().build();
     OrderableDto orderable2 = new OrderableDtoDataBuilder().build();

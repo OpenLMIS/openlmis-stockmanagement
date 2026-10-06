@@ -522,6 +522,11 @@ traits:
           description: Lot code of orderables which can fulfill stock card
           repeat: false
           type: string
+        q:
+          required: false
+          description: Text found, ignoring case, in the product code or name, which keeps all the product's stock cards, or in a lot code, which keeps only the cards of matching lots.
+          repeat: false
+          type: string
       responses:
         200:
           body:
