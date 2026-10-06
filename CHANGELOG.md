@@ -1,6 +1,9 @@
 5.5.0-SNAPSHOT (WIP)
 ==================
 
+Bug fixes:
+* [OLMIS-8397](https://openlmis.atlassian.net/browse/OLMIS-8397): `POST /api/validReasons` without `hidden` creates the assignment as shown (`hidden = false`) again instead of answering HTTP 500. Regression from 5.4.0.
+
 5.4.1 / 2026-10-05
 ==================
 * [OLMIS-8369](https://openlmis.atlassian.net/browse/OLMIS-8369): Stock card range summaries skip the unused stock on hand lookup per stock card and query stock on hand history only for stock cards of the requested orderables.
