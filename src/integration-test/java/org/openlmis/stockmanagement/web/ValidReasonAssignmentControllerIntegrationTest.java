@@ -30,6 +30,7 @@ import guru.nidi.ramltester.junit.RamlMatchers;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.Before;
@@ -216,6 +217,31 @@ public class ValidReasonAssignmentControllerIntegrationTest extends BaseWebInteg
         .as(ValidReasonAssignmentDto.class);
 
     assertThat(response.getHidden(), is(true));
+    assertThat(RAML_ASSERT_MESSAGE,
+        restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
+
+  @Test
+  public void shouldSetValidReasonAsShownWhenHiddenIsNotProvided() {
+    ValidReasonAssignmentDto assignment = mockedValidReasonAssignment(false);
+    Map<String, Object> body = new LinkedHashMap<>();
+    body.put(PROGRAM, assignment.getProgram());
+    body.put(FACILITY_TYPE, assignment.getFacilityType());
+    body.put(REASON, assignment.getReason());
+
+    ValidReasonAssignmentDto response = restAssured
+        .given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .body(body)
+        .when()
+        .post(VALID_REASON_API)
+        .then()
+        .statusCode(201)
+        .extract()
+        .as(ValidReasonAssignmentDto.class);
+
+    assertThat(response.getHidden(), is(false));
     assertThat(RAML_ASSERT_MESSAGE,
         restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }

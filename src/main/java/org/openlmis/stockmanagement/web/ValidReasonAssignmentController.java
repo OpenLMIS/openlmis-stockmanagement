@@ -130,7 +130,7 @@ public class ValidReasonAssignmentController {
     assignmentDto.setId(null);
     ValidReasonAssignment assignment =
         new ValidReasonAssignment(assignmentDto.getProgramId(), assignmentDto.getFacilityTypeId(),
-            assignmentDto.getHidden(),
+            Boolean.TRUE.equals(assignmentDto.getHidden()),
             ofNullable(assignmentDto.getReason()).map(StockCardLineItemReasonDto::getId)
                 .flatMap(reasonRepository::findById).orElse(null));
     checkIsValidRequest(assignment);

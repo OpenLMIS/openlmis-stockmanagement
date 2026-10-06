@@ -1,5 +1,6 @@
 5.5.0-SNAPSHOT (WIP)
 ==================
+* [OLMIS-8400](https://openlmis.atlassian.net/browse/OLMIS-8400): `POST /api/validReasons` without `hidden` no longer fails with 500; a missing `hidden` defaults to `false`.
 
 5.4.1 / 2026-10-05
 ==================
