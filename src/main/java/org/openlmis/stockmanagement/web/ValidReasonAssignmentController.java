@@ -119,6 +119,7 @@ public class ValidReasonAssignmentController {
   /**
    * Assign a reason to program and facility type.
    * If valid reason assignment ID is specified, ID will be ignored.
+   * A missing or null hidden means the reason is shown.
    *
    * @param assignmentDto valid reason assignment.
    * @return the assigned reason and program and facility type.
@@ -130,7 +131,7 @@ public class ValidReasonAssignmentController {
     assignmentDto.setId(null);
     ValidReasonAssignment assignment =
         new ValidReasonAssignment(assignmentDto.getProgramId(), assignmentDto.getFacilityTypeId(),
-            assignmentDto.getHidden(),
+            ofNullable(assignmentDto.getHidden()).orElse(false),
             ofNullable(assignmentDto.getReason()).map(StockCardLineItemReasonDto::getId)
                 .flatMap(reasonRepository::findById).orElse(null));
     checkIsValidRequest(assignment);

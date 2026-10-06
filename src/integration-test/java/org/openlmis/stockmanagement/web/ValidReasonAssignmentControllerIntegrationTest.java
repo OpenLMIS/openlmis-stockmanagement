@@ -28,12 +28,15 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.Sets;
 import guru.nidi.ramltester.junit.RamlMatchers;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.openlmis.stockmanagement.domain.reason.ReasonType;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.reason.ValidReasonAssignment;
@@ -218,6 +221,59 @@ public class ValidReasonAssignmentControllerIntegrationTest extends BaseWebInteg
     assertThat(response.getHidden(), is(true));
     assertThat(RAML_ASSERT_MESSAGE,
         restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
+
+  @Test
+  public void shouldSetValidReasonAsShownWhenHiddenIsMissing() {
+    ValidReasonAssignmentDto assignment = mockedValidReasonAssignment(false);
+    Map<String, Object> body = new HashMap<>();
+    body.put("program", assignment.getProgram());
+    body.put("facilityType", assignment.getFacilityType());
+    body.put("reason", assignment.getReason());
+
+    ValidReasonAssignmentDto response = restAssured
+        .given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .body(body)
+        .when()
+        .post(VALID_REASON_API)
+        .then()
+        .statusCode(201)
+        .extract()
+        .as(ValidReasonAssignmentDto.class);
+
+    assertThat(response.getHidden(), is(false));
+    ArgumentCaptor<ValidReasonAssignment> saved =
+        ArgumentCaptor.forClass(ValidReasonAssignment.class);
+    verify(reasonAssignmentRepository).save(saved.capture());
+    assertThat(saved.getValue().getHidden(), is(false));
+    assertThat(RAML_ASSERT_MESSAGE,
+        restAssured.getLastReport(), RamlMatchers.hasNoViolations());
+  }
+
+  @Test
+  public void shouldSetValidReasonAsShownWhenHiddenIsNull() {
+    ValidReasonAssignmentDto assignment = mockedValidReasonAssignment(false);
+    assignment.setHidden(null);
+
+    ValidReasonAssignmentDto response = restAssured
+        .given()
+        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .body(assignment)
+        .when()
+        .post(VALID_REASON_API)
+        .then()
+        .statusCode(201)
+        .extract()
+        .as(ValidReasonAssignmentDto.class);
+
+    assertThat(response.getHidden(), is(false));
+    ArgumentCaptor<ValidReasonAssignment> saved =
+        ArgumentCaptor.forClass(ValidReasonAssignment.class);
+    verify(reasonAssignmentRepository).save(saved.capture());
+    assertThat(saved.getValue().getHidden(), is(false));
   }
 
   @Test
