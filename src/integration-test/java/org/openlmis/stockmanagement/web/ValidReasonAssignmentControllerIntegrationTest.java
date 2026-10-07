@@ -227,9 +227,9 @@ public class ValidReasonAssignmentControllerIntegrationTest extends BaseWebInteg
   public void shouldSetValidReasonAsShownWhenHiddenIsMissing() {
     ValidReasonAssignmentDto assignment = mockedValidReasonAssignment(false);
     Map<String, Object> body = new HashMap<>();
-    body.put("program", assignment.getProgram());
-    body.put("facilityType", assignment.getFacilityType());
-    body.put("reason", assignment.getReason());
+    body.put(PROGRAM, assignment.getProgram());
+    body.put(FACILITY_TYPE, assignment.getFacilityType());
+    body.put(REASON, assignment.getReason());
 
     ValidReasonAssignmentDto response = restAssured
         .given()
