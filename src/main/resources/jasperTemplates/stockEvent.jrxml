@@ -169,7 +169,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 					<reportElement stretchType="RelativeToBandHeight" mode="Opaque" x="130" y="0" width="572" height="25" backcolor="#F2F2F2" uuid="f75fae81-e6b8-4993-898d-632ddf29d1e8"/>
 					<box padding="3">
 						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-						<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					</box>
@@ -297,7 +297,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 				<reportElement stretchType="RelativeToBandHeight" mode="Opaque" x="90" y="0" width="80" height="25" backcolor="#CCCCCC" uuid="dc2ac7c8-1086-49d9-90fb-9acd95271092"/>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
@@ -310,7 +310,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 				<reportElement stretchType="RelativeToBandHeight" mode="Opaque" x="170" y="0" width="160" height="25" backcolor="#CCCCCC" uuid="93bc4e67-36dd-4077-95db-0db852108a31"/>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
@@ -323,7 +323,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 				<reportElement stretchType="RelativeToBandHeight" mode="Opaque" x="330" y="0" width="160" height="25" backcolor="#CCCCCC" uuid="93bc4e67-36dd-4077-95db-0db852108a32"/>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
@@ -336,7 +336,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 				<reportElement stretchType="RelativeToBandHeight" mode="Opaque" x="490" y="0" width="190" height="25" backcolor="#CCCCCC" uuid="d07d08b5-df52-43b1-b3d0-d571623c8b03"/>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
@@ -349,7 +349,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 				<reportElement stretchType="RelativeToBandHeight" mode="Opaque" x="680" y="0" width="70" height="25" backcolor="#CCCCCC" uuid="10ff459c-97ad-48f1-b414-6158967a3b95"/>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
@@ -362,7 +362,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 				<reportElement stretchType="RelativeToBandHeight" mode="Opaque" x="750" y="0" width="82" height="25" backcolor="#CCCCCC" uuid="8d4d1ea9-e98c-43b5-a4e2-64a13ad5ab51"/>
 				<box padding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
