@@ -3,7 +3,7 @@
 
 Bug fixes:
 * [OLMIS-8397](https://openlmis.atlassian.net/browse/OLMIS-8397): `POST /api/validReasons` without `hidden` creates the assignment as shown (`hidden = false`) again instead of answering HTTP 500. Regression from 5.4.0.
-* [OLMIS-8401](https://openlmis.atlassian.net/browse/OLMIS-8401): Stock event print: a product with several versions prints once, with the details of its latest version, instead of once per version. When a product code, product name or translated pack size label wraps, all cells of the product row grow together, so the borders stay aligned and long codes and names print in full.
+* [OLMIS-8401](https://openlmis.atlassian.net/browse/OLMIS-8401): Stock event print: a product with several versions prints once, with the details of its latest version, instead of once per version. When a product code, product name or translated pack size label wraps, all cells of the product row grow together, so the borders stay aligned and long codes and names print in full; physical inventory print: long product codes, product names and lot codes wrap inside their rows instead of being cut off.
 
 5.4.1 / 2026-10-05
 ==================
