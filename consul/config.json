@@ -7,8 +7,7 @@
     "check": {
       "interval": "10s",
       "http": "http://HOST:PORT/actuator/health",
-      "timeout": "5s",
-      "deregisterCriticalServiceAfter": "10m"
+      "timeout": "5s"
     }
   },
   "raml": "/consul/api-definition.yaml",
