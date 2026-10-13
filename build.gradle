@@ -16,21 +16,12 @@ apply plugin: 'io.spring.dependency-management'
 apply plugin: 'checkstyle'
 apply plugin: 'jacoco'
 apply plugin: 'pmd'
-apply plugin: 'maven'
 apply plugin: 'maven-publish'
-apply plugin: 'signing'
-
-ext {
-    ossrhUsername = System.getenv("OSSRH_USERNAME")
-    ossrhPassword = System.getenv("OSSRH_PASSWORD")
-}
-ext.set("signing.secretKeyRingFile", ".signing/secring.gpg")
-ext.set("signing.keyId", System.getenv("SIGNING_KEYID"))
-ext.set("signing.password", System.getenv("SIGNING_PASSWORD"))
 
 group = serviceGroup
 version = serviceVersion
 archivesBaseName = rootProject.name
+description = serviceDescription
 project.ext.buildTime = java.time.Instant.now().toString() // for versioning
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -232,74 +223,7 @@ test {
 //    jvmArgs = ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"]
 //}
 
-signing {
-    sign configurations.archives
-}
-
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-}
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-task execJar(type: Jar) {
-    classifier = 'exec'
-    from sourceSets.main.output
-}
-
-artifacts {
-    archives javadocJar, sourcesJar, execJar
-}
-
-signArchives.onlyIf {project.findProperty("signing.keyId") && project.findProperty("signing.password")}
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-            snapshotRepository(url: "https://central.sonatype.com/repository/maven-snapshots/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-
-            repository(url: "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-
-            pom.project {
-                name = project.name
-                packaging = 'jar'
-                description = project.description
-                url = 'https://openlmis.org'
-                licenses {
-                    license {
-                        name = 'GNU Affero General Public License, Version 3'
-                        url = 'https://www.gnu.org/licenses/agpl-3.0.txt'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'techcommittee'
-                        name = 'tech committee'
-                        email = 'info@openlmis.org'
-                        organizationUrl = 'https://villagereach.org'
-                    }
-                }
-                scm {
-                    connection = 'scm:git:git://github.com/OpenLMIS/openlmis-stockmanagement.git'
-                    developerConnection = 'scm:git:ssh://github.com/OpenLMIS/openlmis-stockmanagement.git'
-                    url = 'http://github.com/OpenLMIS/openlmis-stockmanagement/'
-                }
-            }
-        }
-    }
-}
-
-uploadArchives.onlyIf { project.getProperty("ossrhUsername") && project.getProperty("ossrhPassword") }
+apply from: "publishing.gradle"
 
 apply from: "documentation.gradle"
 integrationTest {
@@ -319,7 +243,6 @@ processResources {
 check {
     dependsOn checkApiIsRaml
     dependsOn integrationTest
-    finalizedBy uploadArchives
 }
 
 apply from: "registration.gradle"
