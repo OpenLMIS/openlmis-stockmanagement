@@ -51,6 +51,7 @@ pipeline {
                         STAGING_VERSION += "-STAGING"
                     }
                     currentBuild.displayName += " - " + VERSION
+                    MAVEN_PUBLISH_FAILED = false
                 }
             }
             post {
@@ -82,6 +83,8 @@ pipeline {
                     script {
                         try {
                             sh(script: "./ci-buildImage.sh")
+                            // build.sh leaves this marker when publishing to Maven failed, see publishing.gradle
+                            MAVEN_PUBLISH_FAILED = fileExists('build/maven-publish-failed')
                             currentBuild.result = processTestResults('SUCCESS')
                         }
                         catch (exc) {
@@ -195,6 +198,19 @@ pipeline {
                     script {
                         notifyAfterFailure()
                     }
+                }
+            }
+        }
+        stage('Check Maven publish') {
+            when {
+                expression {
+                    return MAVEN_PUBLISH_FAILED
+                }
+            }
+            steps {
+                unstable("Publishing to Maven failed, see uploadArchives in the Build stage log. The image was built.")
+                script {
+                    notifyAfterFailure()
                 }
             }
         }

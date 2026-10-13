@@ -1,0 +1,332 @@
+// Publishing the service's jars to Maven.
+//
+// * A SNAPSHOT version is deployed to the Central snapshots repository, from any branch.
+// * A release, meaning a bare X.Y.Z version built on master, is published to Maven Central. openStagingRepository
+//   opens a staging repository for this build alone, uploadArchives deploys into it, and releaseToCentral hands only
+//   that repository to the Central Portal, which publishes it automatically once it passes validation. Uploads of
+//   other services or other builds can't end up in this deployment.
+// * Anything else (-RCn and other pre-release versions, a release version built on another branch, a build without
+//   credentials) uploads nothing.
+//
+// uploadArchives isn't part of the build: build.sh runs it as a separate step, so a failure here doesn't stop the
+// image from being built. Keep this file identical in every service that publishes to Maven.
+
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+ext {
+    ossrhUsername = System.getenv('OSSRH_USERNAME')
+    ossrhPassword = System.getenv('OSSRH_PASSWORD')
+
+    // The endpoints and timings can be overridden with -P, e.g. to test against a mock server.
+    stagingApiUrl = project.findProperty('stagingApiUrl') ?: 'https://ossrh-staging-api.central.sonatype.com'
+    portalApiUrl = project.findProperty('portalApiUrl') ?: 'https://central.sonatype.com'
+    snapshotsUrl = project.findProperty('snapshotsUrl') ?: 'https://central.sonatype.com/repository/maven-snapshots/'
+    mavenCentralUrl = project.findProperty('mavenCentralUrl') ?: 'https://repo1.maven.org/maven2'
+    centralTimeoutSeconds = (project.findProperty('centralTimeoutSeconds') ?: '900') as int
+    centralPollSeconds = (project.findProperty('centralPollSeconds') ?: '15') as int
+    // automatic publishes once validation passes; user_managed (for a dry run) stops at VALIDATED for a person.
+    centralPublishingType = project.findProperty('centralPublishingType') ?: 'automatic'
+}
+ext.set('signing.secretKeyRingFile', '.signing/secring.gpg')
+ext.set('signing.keyId', System.getenv('SIGNING_KEYID'))
+ext.set('signing.password', System.getenv('SIGNING_PASSWORD'))
+
+def hasMavenCredentials = { ossrhUsername && ossrhPassword }
+def hasSigningKey = { project.findProperty('signing.keyId') && project.findProperty('signing.password') }
+def isSnapshotVersion = { version.toString().endsWith('-SNAPSHOT') }
+def isCentralRelease = {
+    hasMavenCredentials() && !version.toString().contains('-') && System.getenv('GIT_BRANCH') == 'master'
+}
+def willUpload = { hasMavenCredentials() && (isSnapshotVersion() || isCentralRelease()) }
+
+signing {
+    sign configurations.archives
+}
+
+// Sign only for an upload, so a broken signing key fails the publishing step and not the build.
+signArchives.onlyIf { hasSigningKey() && gradle.taskGraph.hasTask(uploadArchives) && willUpload() }
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+// Extension modules compile against this jar: the main jar is the Spring Boot executable, whose classes can't be
+// compiled against.
+task execJar(type: Jar) {
+    classifier = 'exec'
+    from sourceSets.main.output
+}
+
+artifacts {
+    archives javadocJar, sourcesJar, execJar
+}
+
+def scmPath = "github.com/OpenLMIS/${rootProject.name}"
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment ->
+                if (hasSigningKey()) {
+                    signing.signPom(deployment)
+                }
+            }
+
+            snapshotRepository(url: snapshotsUrl) {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            // openStagingRepository replaces this with the staging repository it opens for the build.
+            repository(url: "${stagingApiUrl}/service/local/staging/deployByRepositoryId/not-opened/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                name = project.name
+                packaging = 'jar'
+                description = project.description
+                url = 'https://openlmis.org'
+                licenses {
+                    license {
+                        name = 'GNU Affero General Public License, Version 3'
+                        url = 'https://www.gnu.org/licenses/agpl-3.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'techcommittee'
+                        name = 'tech committee'
+                        email = 'info@openlmis.org'
+                        organizationUrl = 'https://villagereach.org'
+                    }
+                }
+                scm {
+                    connection = "scm:git:git://${scmPath}.git"
+                    developerConnection = "scm:git:ssh://${scmPath}.git"
+                    url = "http://${scmPath}/"
+                }
+            }
+        }
+    }
+}
+
+uploadArchives.onlyIf {
+    if (hasMavenCredentials() && !willUpload()) {
+        logger.lifecycle("Not publishing ${version}: only SNAPSHOT versions and X.Y.Z releases built on master are published")
+    }
+    return willUpload() && !project.ext.has('alreadyOnCentral')
+}
+
+uploadArchives.doFirst {
+    if (!isSnapshotVersion() && !project.ext.has('stagingRepositoryId')) {
+        throw new GradleException("No staging repository was opened for ${version}")
+    }
+}
+
+// Returns the status code and body; throws an IOException when no response arrives.
+def centralCall = { String method, String url, String body = null, int readTimeoutSeconds = 60 ->
+    def token = "${ossrhUsername}:${ossrhPassword}".bytes.encodeBase64().toString()
+    def connection = (HttpURLConnection) new URL(url).openConnection()
+    connection.requestMethod = method
+    connection.connectTimeout = 30_000
+    connection.readTimeout = readTimeoutSeconds * 1000
+    connection.setRequestProperty('Authorization', "Bearer ${token}")
+    connection.setRequestProperty('Accept', 'application/json')
+    if (method == 'POST') {
+        // A fixed length stops the JDK from silently sending the POST again when the connection drops.
+        def bytes = (body ?: '').getBytes('UTF-8')
+        connection.doOutput = true
+        connection.setFixedLengthStreamingMode(bytes.length)
+        if (body != null) {
+            connection.setRequestProperty('Content-Type', 'application/json')
+        }
+        connection.outputStream.withStream { it.write(bytes) }
+    }
+    def code = connection.responseCode
+    def stream = code >= 400 ? connection.errorStream : connection.inputStream
+    return [code: code, text: stream ? stream.getText('UTF-8') : '']
+}
+
+def centralRequest = { String method, String url, String body = null ->
+    def response = centralCall(method, url, body)
+    if (response.code >= 400) {
+        throw new GradleException("${method} ${url} failed (${response.code}): ${response.text}")
+    }
+    return response.text
+}
+
+def parseJson = { String text -> new groovy.json.JsonSlurper().parseText(text) }
+
+def findStagingRepository = { String description ->
+    def found = parseJson(centralRequest('GET', "${stagingApiUrl}/manual/search/repositories?ip=any"))
+            .repositories.findAll { it.description == description }
+    if (found.size() > 1) {
+        throw new GradleException("More than one staging repository is described as '${description}': ${found*.key}")
+    }
+    return found ? found[0] : null
+}
+
+def dropStagingRepository = { String key ->
+    try {
+        centralRequest('DELETE', "${stagingApiUrl}/manual/drop/repository/${URLEncoder.encode(key, 'UTF-8')}")
+        logger.lifecycle("Dropped staging repository ${key}")
+    } catch (Exception e) {
+        logger.warn("Could not drop staging repository ${key}: ${e.message}")
+    }
+}
+
+task openStagingRepository {
+    // Build and sign everything first, so a repository is opened only when there is something to deploy.
+    dependsOn signArchives
+    onlyIf { isCentralRelease() }
+    doLast {
+        def pom = "${project.group.toString().replace('.', '/')}/${project.name}/${version}/${project.name}-${version}.pom"
+        try {
+            def check = (HttpURLConnection) new URL("${mavenCentralUrl}/${pom}").openConnection()
+            check.requestMethod = 'HEAD'
+            check.connectTimeout = 30_000
+            check.readTimeout = 30_000
+            if (check.responseCode == 200) {
+                project.ext.alreadyOnCentral = true
+                logger.lifecycle("${project.name} ${version} is already on Maven Central, nothing to publish")
+                return
+            }
+        } catch (IOException e) {
+            logger.warn("Could not check whether ${version} is already on Maven Central: ${e.message}")
+        }
+
+        def profiles = parseJson(centralRequest('GET', "${stagingApiUrl}/service/local/staging/profiles")).data
+        def profile = profiles.findAll { project.group.toString().startsWith(it.name) }.max { it.name.length() }
+        if (!profile) {
+            throw new GradleException("No staging profile for ${project.group} among ${profiles*.name}")
+        }
+
+        def description = "${project.name} ${version} build ${System.getenv('BUILD_NUMBER') ?: 'local'} " +
+                java.time.Instant.now()
+        def started = parseJson(centralRequest('POST',
+                "${stagingApiUrl}/service/local/staging/profiles/${profile.id}/start",
+                groovy.json.JsonOutput.toJson([data: [description: description]])))
+        def repositoryId = started.data?.stagedRepositoryId
+        if (!repositoryId) {
+            throw new GradleException("Opening a staging repository returned no id: ${started}")
+        }
+
+        project.ext.stagingRepositoryId = repositoryId
+        project.ext.stagingRepositoryDescription = description
+        uploadArchives.repositories.getByName('mavenDeployer').repository.url =
+                "${stagingApiUrl}/service/local/staging/deployByRepositoryId/${repositoryId}/"
+        logger.lifecycle("Opened staging repository ${repositoryId} described as '${description}'")
+    }
+}
+
+uploadArchives.dependsOn openStagingRepository
+
+task releaseToCentral {
+    onlyIf { isCentralRelease() && project.ext.has('stagingRepositoryId') }
+    doLast {
+        def description = project.ext.stagingRepositoryDescription
+        def repository = findStagingRepository(description)
+
+        if (uploadArchives.state.failure != null) {
+            // The upload failure fails the build on its own; only clean up.
+            if (repository) {
+                dropStagingRepository(repository.key)
+            }
+            return
+        }
+        if (!repository) {
+            throw new GradleException("Staging repository '${description}' not found")
+        }
+
+        def deadline = 0L
+        def waitOrFail = { String what ->
+            if (System.currentTimeMillis() > deadline) {
+                throw new GradleException("Timed out after ${centralTimeoutSeconds} s waiting for ${what}. " +
+                        "Check ${portalApiUrl}/publishing/deployments")
+            }
+            sleep(centralPollSeconds * 1000L)
+        }
+
+        def keepStagingRepository = false
+        try {
+            def uploadUrl = "${stagingApiUrl}/manual/upload/repository/" +
+                    "${URLEncoder.encode(repository.key, 'UTF-8')}?publishing_type=${centralPublishingType}"
+            def unclearAnswer = null
+            try {
+                // Handing the repository over can take minutes for the Spring Boot jar.
+                def response = centralCall('POST', uploadUrl, null, centralTimeoutSeconds)
+                if (response.code >= 400 && response.code < 500) {
+                    throw new GradleException("POST ${uploadUrl} failed (${response.code}): ${response.text}")
+                }
+                if (response.code >= 500) {
+                    unclearAnswer = "${response.code}: ${response.text}"
+                }
+            } catch (IOException e) {
+                unclearAnswer = e.toString()
+            }
+            if (unclearAnswer) {
+                logger.warn("No clear answer when handing ${repository.key} to the Central Portal (${unclearAnswer}), " +
+                        "checking whether the Portal has it")
+            }
+
+            // From here on the Portal may have the deployment and publish it on its own, so the staging repository
+            // is dropped only once the outcome is known; a timeout leaves it for a person to check.
+            keepStagingRepository = true
+            deadline = System.currentTimeMillis() + centralTimeoutSeconds * 1000L
+
+            def deploymentId = null
+            while (!deploymentId) {
+                waitOrFail("a Central Portal deployment of ${repository.key}")
+                try {
+                    deploymentId = findStagingRepository(description)?.portal_deployment_id
+                } catch (Exception e) {
+                    logger.warn("Could not read staging repository ${repository.key}: ${e.message}")
+                }
+            }
+            logger.lifecycle("Central Portal deployment ${deploymentId} created for ${project.name} ${version}")
+
+            while (true) {
+                def status
+                try {
+                    status = parseJson(centralRequest('POST',
+                            "${portalApiUrl}/api/v1/publisher/status?id=${deploymentId}"))
+                } catch (Exception e) {
+                    logger.warn("Could not read the status of deployment ${deploymentId}: ${e.message}")
+                    waitOrFail("deployment ${deploymentId} to pass validation")
+                    continue
+                }
+                def state = status.deploymentState
+                logger.lifecycle("Central Portal deployment ${deploymentId}: ${state}")
+                if (state == 'PUBLISHING' || state == 'PUBLISHED') {
+                    keepStagingRepository = false
+                    logger.lifecycle("${project.name} ${version} passed validation and is being published to Maven Central")
+                    break
+                }
+                if (state == 'VALIDATED' && centralPublishingType == 'user_managed') {
+                    keepStagingRepository = false
+                    logger.lifecycle("${project.name} ${version} passed validation; publish or drop it at " +
+                            "${portalApiUrl}/publishing/deployments")
+                    break
+                }
+                if (state == 'FAILED') {
+                    keepStagingRepository = false
+                    throw new GradleException("Central Portal rejected ${project.name} ${version}: ${status.errors}")
+                }
+                waitOrFail("deployment ${deploymentId} to pass validation")
+            }
+        } finally {
+            if (!keepStagingRepository) {
+                dropStagingRepository(repository.key)
+            }
+        }
+    }
+}
+
+uploadArchives.finalizedBy releaseToCentral
