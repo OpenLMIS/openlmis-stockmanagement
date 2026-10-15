@@ -148,7 +148,7 @@ ORDER BY o.code, l.lotcode NULLS FIRST, rs.rn DESC
 	<field name="reasonfreetext" class="java.lang.String"/>
 	<field name="quantity" class="java.lang.Integer"/>
 	<field name="stockonhand" class="java.lang.Integer"/>
-	<group name="productGroup">
+	<group name="productGroup" minHeightToStartNewPage="48">
 		<groupExpression><![CDATA[$F{productcode} + "|" + $F{productname}]]></groupExpression>
 		<groupHeader>
 			<band height="25" splitType="Prevent">
