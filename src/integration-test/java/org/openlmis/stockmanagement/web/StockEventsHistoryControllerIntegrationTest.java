@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.web;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -28,16 +29,20 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LINE_ITEM_BLOCKED_PHYSICAL_INVENTORY;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.openlmis.stockmanagement.domain.event.EventOrigin;
+import org.openlmis.stockmanagement.dto.BlockingTransactionDto;
+import org.openlmis.stockmanagement.dto.StockEventCancellationLineErrorDto;
 import org.openlmis.stockmanagement.dto.StockEventHistoryDto;
 import org.openlmis.stockmanagement.dto.StockEventLineDetailDto;
 import org.openlmis.stockmanagement.exception.PermissionMessageException;
@@ -206,6 +211,47 @@ public class StockEventsHistoryControllerIntegrationTest extends BaseWebTest {
         .andExpect(jsonPath("$.content[0].reasonFreeText", is(nullValue())))
         .andExpect(jsonPath("$.content[0].sourceFreeText", is(nullValue())))
         .andExpect(jsonPath("$.content[0].destinationFreeText", is(nullValue())));
+  }
+
+  @Test
+  public void shouldGetWhetherEachStockEventLineItemCanBeCancelled() throws Exception {
+    UUID eventId = UUID.randomUUID();
+    UUID blockedLineItemId = UUID.randomUUID();
+    StockEventLineDetailDto cancellable = StockEventLineDetailDto.builder()
+        .stockEventLineItemId(UUID.randomUUID())
+        .cancellable(true)
+        .build();
+    StockEventLineDetailDto blocked = StockEventLineDetailDto.builder()
+        .stockEventLineItemId(blockedLineItemId)
+        .cancellable(false)
+        .cancellationError(new StockEventCancellationLineErrorDto(blockedLineItemId,
+            ERROR_EVENT_LINE_ITEM_BLOCKED_PHYSICAL_INVENTORY, "blocked by a physical inventory",
+            singletonList(new BlockingTransactionDto("PHYSICAL_INVENTORY",
+                LocalDate.of(2026, 7, 20), "PI-1"))))
+        .build();
+
+    when(stockEventsService.findStockEventLineItems(eq(eventId), any(Pageable.class)))
+        .thenReturn(new PageImpl<>(asList(cancellable, blocked)));
+
+    ResultActions resultActions = mvc.perform(
+        get(STOCK_EVENTS_URL + "/" + eventId + LINE_ITEMS)
+            .param(ACCESS_TOKEN, ACCESS_TOKEN_VALUE));
+
+    resultActions.andExpect(status().isOk())
+        .andExpect(jsonPath("$.content[0].cancellable", is(true)))
+        .andExpect(jsonPath("$.content[0].cancellationError", is(nullValue())))
+        .andExpect(jsonPath("$.content[1].cancellable", is(false)))
+        .andExpect(jsonPath("$.content[1].cancellationError.stockEventLineItemId",
+            is(blockedLineItemId.toString())))
+        .andExpect(jsonPath("$.content[1].cancellationError.messageKey",
+            is(ERROR_EVENT_LINE_ITEM_BLOCKED_PHYSICAL_INVENTORY)))
+        .andExpect(jsonPath("$.content[1].cancellationError.message",
+            is("blocked by a physical inventory")))
+        .andExpect(jsonPath(
+            "$.content[1].cancellationError.blockingTransactions[0].documentNumber", is("PI-1")))
+        .andExpect(jsonPath(
+            "$.content[1].cancellationError.blockingTransactions[0].occurredDate",
+            is("2026-07-20")));
   }
 
   @Test

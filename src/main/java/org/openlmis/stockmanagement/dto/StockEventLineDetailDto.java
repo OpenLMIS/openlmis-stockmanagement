@@ -58,6 +58,11 @@ public class StockEventLineDetailDto {
   // select the exact line to cancel, and per-line cancellation errors (AC#9) join on it.
   private UUID stockEventLineItemId;
 
+  // Whether this row's line item can still be cancelled by the rules the cancel endpoint applies,
+  // and if not, why. Filled in by the service; newInstance leaves them null.
+  private Boolean cancellable;
+  private StockEventCancellationLineErrorDto cancellationError;
+
   /**
    * Flattens one resolved stock card line item (with its parent card's product/lot) into a single
    * transaction-history detail row.

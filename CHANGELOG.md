@@ -1,6 +1,9 @@
 5.4.3-SNAPSHOT (WIP)
 ==================
 
+Bug fixes:
+* [OLMIS-8409](https://openlmis.atlassian.net/browse/OLMIS-8409): `GET /api/stockEvents/{id}` reports `reversible` only when at least one line item can still be cancelled. Movements recorded before cancellations were introduced, fully cancelled events and events whose line items are all blocked by a later physical inventory are not offered for reversal. Each row of `GET /api/stockEvents/{id}/lineItems` has `cancellable` and `cancellationError` (same shape as a `lineErrors` entry of the cancel endpoint), so a client knows before submitting which line items the server will refuse and why. New message key: `stockmanagement.error.event.lineItem.recordedBeforeReversal`. The check for a later physical inventory runs one query per stock event instead of one per line item.
+
 5.4.2 / 2026-10-16
 ==================
 

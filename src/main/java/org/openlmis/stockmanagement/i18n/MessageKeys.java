@@ -207,6 +207,8 @@ public abstract class MessageKeys {
       + ".lineItem.notFound";
   public static final String ERROR_EVENT_LINE_ITEM_MISSING_ID = EVENT_ERROR_PREFIX
       + ".lineItem.missingId";
+  public static final String ERROR_EVENT_LINE_ITEM_RECORDED_BEFORE_REVERSAL = EVENT_ERROR_PREFIX
+      + ".lineItem.recordedBeforeReversal";
   public static final String ERROR_EVENT_LINE_ITEM_DUPLICATE = EVENT_ERROR_PREFIX
       + ".lineItem.duplicate";
   public static final String ERROR_EVENT_LINE_ITEM_NOT_CANCELLABLE = EVENT_ERROR_PREFIX
