@@ -51,6 +51,14 @@
     "documentNumber": {
       "type": ["string", "null"],
       "description": "Document number of the originating event."
+    },
+    "cancellable": {
+      "type": ["boolean", "null"],
+      "description": "Whether the line item can still be cancelled, by the same rules as POST /api/stockEvents/{id}/cancel. The STOCK_EVENTS_CANCEL right and the stock on hand left after the cancellation are only checked on cancel."
+    },
+    "cancellationError": {
+      "type": ["object", "null"],
+      "description": "Why the line item cannot be cancelled; null when it can. Same shape as an entry of lineErrors returned by POST /api/stockEvents/{id}/cancel: stockEventLineItemId, messageKey, message (localized) and blockingTransactions (the physical inventories recorded after the movement, when they are the reason). Line items recorded before cancellations were introduced report stockmanagement.error.event.lineItem.recordedBeforeReversal."
     }
   }
 }

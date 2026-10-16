@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -26,13 +27,16 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
+import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
 import org.openlmis.stockmanagement.dto.StockCardDto;
 import org.openlmis.stockmanagement.dto.StockCardLineItemDto;
+import org.openlmis.stockmanagement.dto.StockEventCancellationLineErrorDto;
 import org.openlmis.stockmanagement.dto.StockEventHistoryDto;
 import org.openlmis.stockmanagement.dto.StockEventLineDetailDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
 import org.openlmis.stockmanagement.i18n.MessageKeys;
+import org.openlmis.stockmanagement.i18n.MessageService;
 import org.openlmis.stockmanagement.repository.StockCardLineItemRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.repository.custom.StockEventLineItemAggregate;
@@ -63,6 +67,12 @@ public class StockEventsService {
 
   @Autowired
   private PermissionService permissionService;
+
+  @Autowired
+  private StockEventCancelValidationService cancelValidationService;
+
+  @Autowired
+  private MessageService messageService;
 
   /**
    * Searches issue/receive stock events matching the params and maps them to history rows.
@@ -167,13 +177,48 @@ public class StockEventsService {
               details.add(StockEventLineDetailDto.newInstance(card, lineItem)));
         });
 
-    return Pagination.getPage(details, pageable);
+    Page<StockEventLineDetailDto> page = Pagination.getPage(details, pageable);
+    addCancellability(event, page.getContent());
+    return page;
+  }
+
+  // Tells, for each row, whether its line item can still be cancelled and, if not, why, by the
+  // rules the cancel endpoint applies. A row without a link to its stock event line item was
+  // recorded before cancelling was introduced and cannot be selected for cancellation at all.
+  private void addCancellability(StockEvent event, List<StockEventLineDetailDto> rows) {
+    Map<UUID, StockEventLineItem> eventLineItems = event.getLineItems().stream()
+        .collect(Collectors.toMap(StockEventLineItem::getId, Function.identity()));
+    List<StockEventLineItem> linked = rows.stream()
+        .map(StockEventLineDetailDto::getStockEventLineItemId)
+        .filter(Objects::nonNull)
+        .distinct()
+        .map(eventLineItems::get)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+    Map<UUID, StockEventCancellationLineErrorDto> errors =
+        cancelValidationService.evaluate(event, linked);
+
+    for (StockEventLineDetailDto row : rows) {
+      UUID lineItemId = row.getStockEventLineItemId();
+      StockEventCancellationLineErrorDto error = eventLineItems.containsKey(lineItemId)
+          ? errors.get(lineItemId)
+          : new StockEventCancellationLineErrorDto(lineItemId,
+              MessageKeys.ERROR_EVENT_LINE_ITEM_RECORDED_BEFORE_REVERSAL, null, null);
+      if (error != null) {
+        error.setMessage(messageService.localize(new Message(error.getMessageKey()))
+            .getMessage());
+      }
+      row.setCancellable(error == null);
+      row.setCancellationError(error);
+    }
   }
 
   /**
    * Returns the history header of a single stock event (the transaction detail header). The DTO
    * has the same shape as the rows returned by {@link #search}, so the detail header stays
-   * consistent with the list.
+   * consistent with the list. Unlike the list, the header is reversible only when at least one
+   * line item passes the cancellation rules, so the detail view offers the Reverse action only
+   * when something can really be cancelled.
    *
    * @param stockEventId the stock event id.
    * @return the history row for the event.
@@ -188,6 +233,11 @@ public class StockEventsService {
     Map<UUID, StockEventLineItemAggregate> aggregates =
         aggregateLineItems(Collections.singletonList(event));
     StockEventHistoryDto dto = toHistoryDto(event, aggregates.get(event.getId()));
+    if (Boolean.TRUE.equals(dto.getReversible())) {
+      Set<UUID> linkedLineItemIds = new HashSet<>(
+          stockCardLineItemRepository.findOriginEventLineItemIdsByOriginEvent(event.getId()));
+      dto.setReversible(cancelValidationService.hasCancellableLine(event, linkedLineItemIds));
+    }
     populateUsernames(Collections.singletonList(dto));
 
     return dto;

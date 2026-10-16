@@ -16,8 +16,11 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static java.util.Comparator.naturalOrder;
 import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
@@ -29,18 +32,21 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LINE_ITE
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LINE_ITEM_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_NO_LINE_ITEMS;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
-import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.BlockingTransactionDto;
 import org.openlmis.stockmanagement.dto.StockEventCancellationLineErrorDto;
@@ -49,13 +55,15 @@ import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
 import org.openlmis.stockmanagement.repository.StockEventLineItemRepository;
+import org.openlmis.stockmanagement.repository.custom.SubmittedPhysicalInventoryLine;
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.stereotype.Service;
 
 /**
  * Validates that selected line items of a stock event may be cancelled - a movement recorded as an
  * issue, a receive or an adjustment. Every per-line failure is collected so the caller learns about
- * all blocking line items at once.
+ * all blocking line items at once. The same rules serve the submit path ({@link #validate}) and
+ * callers that only need to know which lines can be cancelled ({@link #evaluate}).
  */
 @Service
 @RequiredArgsConstructor
@@ -77,7 +85,7 @@ public class StockEventCancelValidationService {
    * per-line failure and, if any, throws a single {@link StockEventCancellationException}.
    *
    * @param event               the original stock event being cancelled.
-   * @param lineItemIdsToCancel ids of the event's line items selected for cancellation.
+   * @param lineItemIdsToCancel distinct ids of the event's line items selected for cancellation.
    */
   public void validate(StockEvent event, Collection<UUID> lineItemIdsToCancel) {
     if (lineItemIdsToCancel == null || lineItemIdsToCancel.isEmpty()) {
@@ -85,25 +93,87 @@ public class StockEventCancelValidationService {
     }
 
     List<StockEventLineItem> selected = resolveSelectedLineItems(event, lineItemIdsToCancel);
-    List<CancellationRule> rules = cancellationRules(event,
-        findAlreadyCancelledIds(lineItemIdsToCancel), findReasons(selected));
-
-    List<StockEventCancellationLineErrorDto> errors = new ArrayList<>();
-    for (StockEventLineItem lineItem : selected) {
-      rules.stream()
-          .map(rule -> rule.check(lineItem))
-          .filter(Objects::nonNull)
-          .findFirst()
-          .ifPresent(errors::add);
-    }
+    Map<UUID, StockEventCancellationLineErrorDto> errors = evaluate(event, selected);
 
     if (!errors.isEmpty()) {
-      throw new StockEventCancellationException(ERROR_EVENT_CANCELLATION_VALIDATION, errors);
+      throw new StockEventCancellationException(ERROR_EVENT_CANCELLATION_VALIDATION,
+          new ArrayList<>(errors.values()));
     }
   }
 
+  /**
+   * Checks the given line items of an event against the cancellation rules without throwing, so a
+   * caller can learn which lines cannot be cancelled before anything is submitted. Applies the
+   * same rules as {@link #validate}.
+   *
+   * @param event     the stock event the line items belong to.
+   * @param lineItems distinct line items of that event.
+   * @return for each failing line item, the error of the first rule it fails, keyed by line item
+   *         id in the order of {@code lineItems}. Line items that can be cancelled are absent.
+   */
+  public Map<UUID, StockEventCancellationLineErrorDto> evaluate(StockEvent event,
+      Collection<StockEventLineItem> lineItems) {
+    if (lineItems.isEmpty()) {
+      return emptyMap();
+    }
+
+    Set<UUID> lineItemIds = lineItems.stream()
+        .map(StockEventLineItem::getId)
+        .collect(toSet());
+    List<CancellationRule> rules = cancellationRules(event,
+        findAlreadyCancelledIds(lineItemIds), findReasons(lineItems));
+
+    Map<UUID, StockEventCancellationLineErrorDto> ruleErrors = new HashMap<>();
+    List<StockEventLineItem> passingRules = new ArrayList<>();
+    for (StockEventLineItem lineItem : lineItems) {
+      Optional<StockEventCancellationLineErrorDto> ruleError = rules.stream()
+          .map(rule -> rule.check(lineItem))
+          .filter(Objects::nonNull)
+          .findFirst();
+      if (ruleError.isPresent()) {
+        ruleErrors.put(lineItem.getId(), ruleError.get());
+      } else {
+        passingRules.add(lineItem);
+      }
+    }
+
+    // Checked last, and for all line items that passed the rules at once (one query per event).
+    Map<UUID, List<BlockingTransactionDto>> blockingInventories =
+        findBlockingInventories(event, passingRules);
+
+    Map<UUID, StockEventCancellationLineErrorDto> errors = new LinkedHashMap<>();
+    for (StockEventLineItem lineItem : lineItems) {
+      StockEventCancellationLineErrorDto error = ruleErrors.get(lineItem.getId());
+      if (error == null && blockingInventories.containsKey(lineItem.getId())) {
+        error = lineError(lineItem, ERROR_EVENT_LINE_ITEM_BLOCKED_PHYSICAL_INVENTORY,
+            blockingInventories.get(lineItem.getId()));
+      }
+      if (error != null) {
+        errors.put(lineItem.getId(), error);
+      }
+    }
+    return errors;
+  }
+
+  /**
+   * Tells whether at least one of the given line items of an event can still be cancelled.
+   *
+   * @param event             the stock event.
+   * @param linkedLineItemIds ids of the event's line items that a stock card line item points at.
+   *                          Only those can be selected for cancellation; the others were
+   *                          recorded before cancelling was introduced.
+   * @return true when at least one of them passes every cancellation rule.
+   */
+  public boolean hasCancellableLine(StockEvent event, Set<UUID> linkedLineItemIds) {
+    List<StockEventLineItem> candidates = event.getLineItems().stream()
+        .filter(lineItem -> linkedLineItemIds.contains(lineItem.getId()))
+        .collect(toList());
+    return !candidates.isEmpty() && evaluate(event, candidates).size() < candidates.size();
+  }
+
   // The ordered checks a line item must pass to be cancellable; the first failing one is reported.
-  // A new cancellation constraint is added here rather than by editing the validation loop.
+  // A new cancellation constraint is added here rather than by editing the validation loop. The
+  // physical inventory check runs after these, for all remaining line items in one query.
   private List<CancellationRule> cancellationRules(StockEvent event,
       Set<UUID> alreadyCancelledIds, Map<UUID, StockCardLineItemReason> reasonsById) {
     return asList(
@@ -114,8 +184,7 @@ public class StockEventCancelValidationService {
         lineItem -> !isCancellable(event, lineItem, reasonsById)
             ? lineError(lineItem, ERROR_EVENT_LINE_ITEM_NOT_CANCELLABLE, null) : null,
         lineItem -> alreadyCancelledIds.contains(lineItem.getId())
-            ? lineError(lineItem, ERROR_EVENT_LINE_ITEM_ALREADY_CANCELLED, null) : null,
-        lineItem -> blockedByPhysicalInventory(event, lineItem));
+            ? lineError(lineItem, ERROR_EVENT_LINE_ITEM_ALREADY_CANCELLED, null) : null);
   }
 
   private boolean isCancellable(StockEvent event, StockEventLineItem lineItem,
@@ -128,14 +197,6 @@ public class StockEventCancelValidationService {
     }
     StockCardLineItemReason reason = reasonsById.get(lineItem.getReasonId());
     return reason != null && reason.isAdjustmentReasonCategory();
-  }
-
-  private StockEventCancellationLineErrorDto blockedByPhysicalInventory(StockEvent event,
-      StockEventLineItem lineItem) {
-    List<BlockingTransactionDto> blocking = findBlockingInventories(event, lineItem);
-    return blocking.isEmpty()
-        ? null
-        : lineError(lineItem, ERROR_EVENT_LINE_ITEM_BLOCKED_PHYSICAL_INVENTORY, blocking);
   }
 
   private List<StockEventLineItem> resolveSelectedLineItems(StockEvent event,
@@ -161,7 +222,8 @@ public class StockEventCancelValidationService {
         .collect(toSet());
   }
 
-  private Map<UUID, StockCardLineItemReason> findReasons(List<StockEventLineItem> lineItems) {
+  private Map<UUID, StockCardLineItemReason> findReasons(
+      Collection<StockEventLineItem> lineItems) {
     Set<UUID> reasonIds = lineItems.stream()
         .map(StockEventLineItem::getReasonId)
         .filter(Objects::nonNull)
@@ -182,24 +244,58 @@ public class StockEventCancelValidationService {
     return reason != null && reason.getTags().stream().anyMatch(CANCEL_TAGS::contains);
   }
 
-  private List<BlockingTransactionDto> findBlockingInventories(StockEvent event,
-      StockEventLineItem lineItem) {
-    // A physical inventory blocks cancellation when it is ordered after this movement on the stock
-    // card, which is (occurredDate, then processedDate) - see StockCard.getLineItemsComparator().
-    // Comparing occurredDate alone would miss a same-day inventory processed after the movement
-    // (which already reflects it), letting the reversal double-apply the quantity.
-    ZonedDateTime processedDate = event.getProcessedDate();
-    List<PhysicalInventory> inventories = lineItem.getLotId() == null
-        ? physicalInventoriesRepository.findSubmittedAfterForOrderableWithoutLot(
-            event.getProgramId(), event.getFacilityId(), lineItem.getOrderableId(),
-            lineItem.getOccurredDate(), processedDate)
-        : physicalInventoriesRepository.findSubmittedAfterForOrderableAndLot(
-            event.getProgramId(), event.getFacilityId(), lineItem.getOrderableId(),
-            lineItem.getLotId(), lineItem.getOccurredDate(), processedDate);
-    return inventories.stream()
-        .map(inventory -> new BlockingTransactionDto(
-            PHYSICAL_INVENTORY_TYPE, inventory.getOccurredDate(), inventory.getDocumentNumber()))
-        .collect(toList());
+  // Returns, for each given line item that has any, the submitted physical inventories of the same
+  // product and lot recorded after it, keyed by line item id.
+  private Map<UUID, List<BlockingTransactionDto>> findBlockingInventories(StockEvent event,
+      List<StockEventLineItem> lineItems) {
+    if (lineItems.isEmpty()) {
+      return emptyMap();
+    }
+
+    Set<UUID> orderableIds = lineItems.stream()
+        .map(StockEventLineItem::getOrderableId)
+        .collect(toSet());
+    LocalDate earliestOccurredDate = lineItems.stream()
+        .map(StockEventLineItem::getOccurredDate)
+        .min(naturalOrder())
+        .get();
+    Map<UUID, List<SubmittedPhysicalInventoryLine>> inventoryLinesByOrderable =
+        physicalInventoriesRepository.findSubmittedLinesOfOrderablesFrom(event.getProgramId(),
+            event.getFacilityId(), orderableIds, earliestOccurredDate)
+            .stream()
+            .collect(groupingBy(SubmittedPhysicalInventoryLine::getOrderableId));
+
+    Map<UUID, List<BlockingTransactionDto>> blocking = new HashMap<>();
+    for (StockEventLineItem lineItem : lineItems) {
+      Map<UUID, BlockingTransactionDto> byInventory = new LinkedHashMap<>();
+      inventoryLinesByOrderable.getOrDefault(lineItem.getOrderableId(), emptyList()).stream()
+          .filter(inventoryLine -> Objects.equals(inventoryLine.getLotId(), lineItem.getLotId()))
+          .filter(inventoryLine -> isRecordedAfter(inventoryLine, lineItem, event))
+          .forEach(inventoryLine -> byInventory.putIfAbsent(
+              inventoryLine.getPhysicalInventoryId(),
+              new BlockingTransactionDto(PHYSICAL_INVENTORY_TYPE,
+                  inventoryLine.getOccurredDate(), inventoryLine.getDocumentNumber())));
+      if (!byInventory.isEmpty()) {
+        blocking.put(lineItem.getId(), new ArrayList<>(byInventory.values()));
+      }
+    }
+    return blocking;
+  }
+
+  // A physical inventory blocks cancellation when it is ordered after the movement on the stock
+  // card, which is (occurredDate, then processedDate) - see StockCard.getLineItemsComparator().
+  // Comparing occurredDate alone would miss a same-day inventory processed after the movement
+  // (which already reflects it), letting the reversal double-apply the quantity. An inventory
+  // without a stock event has no processed date, so on the same day it does not block.
+  private boolean isRecordedAfter(SubmittedPhysicalInventoryLine inventoryLine,
+      StockEventLineItem lineItem, StockEvent event) {
+    if (inventoryLine.getOccurredDate().isAfter(lineItem.getOccurredDate())) {
+      return true;
+    }
+    ZonedDateTime inventoryProcessedDate = inventoryLine.getProcessedDate();
+    return inventoryLine.getOccurredDate().isEqual(lineItem.getOccurredDate())
+        && inventoryProcessedDate != null && event.getProcessedDate() != null
+        && inventoryProcessedDate.isAfter(event.getProcessedDate());
   }
 
   private StockEventCancellationLineErrorDto lineError(StockEventLineItem lineItem,

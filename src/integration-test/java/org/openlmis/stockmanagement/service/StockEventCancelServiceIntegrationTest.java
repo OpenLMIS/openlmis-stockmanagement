@@ -16,21 +16,28 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_DEBIT_QUANTITY_EXCEED_SOH;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LINE_ITEM_BLOCKED_PHYSICAL_INVENTORY;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import org.junit.After;
 import org.junit.Before;
@@ -40,22 +47,29 @@ import org.mockito.Mock;
 import org.openlmis.stockmanagement.BaseIntegrationTest;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.event.EventOrigin;
+import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.event.StockEventLineItem;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.domain.sourcedestination.Node;
 import org.openlmis.stockmanagement.dto.StockEventCancelDto;
 import org.openlmis.stockmanagement.dto.StockEventCancelLineItemDto;
+import org.openlmis.stockmanagement.dto.StockEventCancellationLineErrorDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
+import org.openlmis.stockmanagement.exception.StockEventCancellationException;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.repository.CalculatedStockOnHandRepository;
 import org.openlmis.stockmanagement.repository.NodeRepository;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
 import org.openlmis.stockmanagement.repository.StockCardLineItemReasonRepository;
+import org.openlmis.stockmanagement.repository.StockCardLineItemRepository;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.repository.StockEventsRepository;
 import org.openlmis.stockmanagement.service.referencedata.OrderableReferenceDataService;
 import org.openlmis.stockmanagement.testutils.StockCardLineItemReasonDataBuilder;
+import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -74,6 +88,7 @@ public class StockEventCancelServiceIntegrationTest extends BaseIntegrationTest 
   private static final String CANCEL_MOVEMENT_TAG = "cancelMovement";
   private static final LocalDate MOVEMENT_DATE = LocalDate.now().minusDays(45);
   private static final LocalDate MID_HISTORY = LocalDate.now().minusDays(20);
+  private static final String PHYSICAL_INVENTORY_DOCUMENT_NUMBER = "PI-IT";
 
   @MockBean
   StockEventValidationsService stockEventValidationsService;
@@ -116,6 +131,15 @@ public class StockEventCancelServiceIntegrationTest extends BaseIntegrationTest 
 
   @Autowired
   private CalculatedStockOnHandRepository calculatedStockOnHandRepository;
+
+  @Autowired
+  private StockCardLineItemRepository stockCardLineItemRepository;
+
+  @Autowired
+  private StockEventCancelValidationService cancelValidationService;
+
+  @PersistenceContext
+  private EntityManager entityManager;
 
   @Mock
   private SecurityContext securityContext;
@@ -231,6 +255,68 @@ public class StockEventCancelServiceIntegrationTest extends BaseIntegrationTest 
     assertEquals(150, stockOnHandAsOf(LocalDate.now()));
   }
 
+  @Test
+  public void shouldRefuseCancellingMovementWithLaterPhysicalInventory() {
+    receive(100, MOVEMENT_DATE.minusDays(1));
+    UUID issueId = issue(10, MOVEMENT_DATE);
+    savePhysicalInventory(MOVEMENT_DATE.plusDays(1), null);
+
+    assertCancellationBlockedByPhysicalInventory(issueId);
+  }
+
+  @Test
+  public void shouldRefuseCancellingMovementWithSameDayPhysicalInventoryProcessedAfterIt() {
+    receive(100, MOVEMENT_DATE.minusDays(1));
+    UUID issueId = issue(10, MOVEMENT_DATE);
+    savePhysicalInventory(MOVEMENT_DATE, processedDateOf(issueId).plusHours(1));
+
+    assertCancellationBlockedByPhysicalInventory(issueId);
+  }
+
+  @Test
+  public void shouldCancelMovementWithSameDayPhysicalInventoryProcessedBeforeIt() {
+    receive(100, MOVEMENT_DATE.minusDays(1));
+    UUID issueId = issue(10, MOVEMENT_DATE);
+    savePhysicalInventory(MOVEMENT_DATE, processedDateOf(issueId).minusHours(1));
+
+    cancel(issueId, cancelledIssue);
+
+    assertEquals(100, stockOnHandAsOf(LocalDate.now()));
+  }
+
+  @Test
+  public void shouldFindCancellableLineAmongLineItemsLinkedToStockCard() {
+    receive(100, MOVEMENT_DATE.minusDays(1));
+    UUID issueId = issue(10, MOVEMENT_DATE);
+
+    Set<UUID> linked = linkedLineItemIdsOf(issueId);
+
+    assertEquals(singleton(onlyLineItemOf(issueId).getId()), linked);
+    assertTrue(cancelValidationService.hasCancellableLine(eventOf(issueId), linked));
+
+    savePhysicalInventory(MOVEMENT_DATE.plusDays(1), null);
+
+    assertFalse(cancelValidationService.hasCancellableLine(eventOf(issueId), linked));
+  }
+
+  @Test
+  public void shouldFindNoCancellableLineForMovementRecordedBeforeLineItemsWereLinked() {
+    receive(100, MOVEMENT_DATE.minusDays(1));
+    UUID issueId = issue(10, MOVEMENT_DATE);
+    // stock card line items written before the link column existed have no link
+    entityManager.flush();
+    entityManager.createNativeQuery("UPDATE stockmanagement.stock_card_line_items"
+        + " SET origineventlineitemid = NULL WHERE origineventid = CAST(:eventId AS uuid)")
+        .setParameter("eventId", issueId.toString())
+        .executeUpdate();
+    entityManager.clear();
+
+    Set<UUID> linked = linkedLineItemIdsOf(issueId);
+
+    assertTrue(linked.isEmpty());
+    assertFalse(cancelValidationService.hasCancellableLine(eventOf(issueId), linked));
+  }
+
   private UUID issue(int quantity, LocalDate occurredDate) {
     return movement(quantity, occurredDate, null, node.getId(), EventOrigin.ISSUE);
   }
@@ -270,6 +356,57 @@ public class StockEventCancelServiceIntegrationTest extends BaseIntegrationTest 
     request.setLineItems(singletonList(line));
 
     return stockEventCancelService.cancel(eventId, request);
+  }
+
+  private void assertCancellationBlockedByPhysicalInventory(UUID eventId) {
+    try {
+      cancel(eventId, cancelledIssue);
+      fail("expected the cancellation to be refused");
+    } catch (StockEventCancellationException expected) {
+      assertEquals(1, expected.getLineErrors().size());
+      StockEventCancellationLineErrorDto lineError = expected.getLineErrors().get(0);
+      assertEquals(ERROR_EVENT_LINE_ITEM_BLOCKED_PHYSICAL_INVENTORY, lineError.getMessageKey());
+      assertEquals(PHYSICAL_INVENTORY_DOCUMENT_NUMBER,
+          lineError.getBlockingTransactions().get(0).getDocumentNumber());
+    }
+  }
+
+  private Set<UUID> linkedLineItemIdsOf(UUID eventId) {
+    return new HashSet<>(
+        stockCardLineItemRepository.findOriginEventLineItemIdsByOriginEvent(eventId));
+  }
+
+  private StockEvent eventOf(UUID eventId) {
+    return stockEventsRepository.findById(eventId).get();
+  }
+
+  private ZonedDateTime processedDateOf(UUID eventId) {
+    return stockEventsRepository.findById(eventId).get().getProcessedDate();
+  }
+
+  // Saved directly: the physical inventory service is mocked here, so processing a physical
+  // inventory event would not store one. A null processed date leaves it without a stock event.
+  private void savePhysicalInventory(LocalDate occurredDate, ZonedDateTime processedDate) {
+    PhysicalInventory inventory = new PhysicalInventory();
+    inventory.setProgramId(programId);
+    inventory.setFacilityId(facilityId);
+    inventory.setIsDraft(false);
+    inventory.setOccurredDate(occurredDate);
+    inventory.setDocumentNumber(PHYSICAL_INVENTORY_DOCUMENT_NUMBER);
+    if (processedDate != null) {
+      inventory.setStockEvent(stockEventsRepository.save(new StockEventDataBuilder()
+          .withoutId()
+          .withFacility(facilityId)
+          .withProgram(programId)
+          .withProcessedDate(processedDate)
+          .build()));
+    }
+
+    PhysicalInventoryLineItem lineItem = new PhysicalInventoryLineItem();
+    lineItem.setOrderableId(orderableId);
+    lineItem.setPhysicalInventory(inventory);
+    inventory.setLineItems(singletonList(lineItem));
+    physicalInventoriesRepository.save(inventory);
   }
 
   private StockEventLineItem onlyLineItemOf(UUID eventId) {

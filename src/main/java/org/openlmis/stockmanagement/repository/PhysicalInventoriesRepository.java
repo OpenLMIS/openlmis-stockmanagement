@@ -16,10 +16,12 @@
 package org.openlmis.stockmanagement.repository;
 
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
+import org.openlmis.stockmanagement.repository.custom.SubmittedPhysicalInventoryLine;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -29,9 +31,6 @@ public interface PhysicalInventoriesRepository
 
   String PROGRAM_ID = "programId";
   String FACILITY_ID = "facilityId";
-  String ORDERABLE_ID = "orderableId";
-  String OCCURRED_DATE = "occurredDate";
-  String PROCESSED_DATE = "processedDate";
 
   List<PhysicalInventory> findByProgramIdAndFacilityIdAndIsDraft(
       @Param(PROGRAM_ID) UUID programId,
@@ -43,63 +42,54 @@ public interface PhysicalInventoriesRepository
       @Param(FACILITY_ID) UUID facilityId);
 
   /**
-   * Finds submitted physical inventories for the given facility, program, orderable and lot that
-   * occurred after the given date. Used to block cancellation of a movement whose product and lot
-   * had a physical inventory recorded after it. Kept separate from the no-lot variant so the
-   * {@code lotId} parameter is never bound as an untyped null (which Postgres rejects).
+   * Finds the counted products of the submitted physical inventories of the given facility and
+   * program that occurred on or after the given date, limited to the given orderables. Used to
+   * block cancellation of movements whose product and lot had a physical inventory recorded after
+   * them: one lookup serves every line item of a stock event, and the caller matches the lot and
+   * orders each inventory against its movement. No lot is bound as a parameter, so an untyped null
+   * (which Postgres rejects) never reaches the query.
+   *
+   * <p>Two queries on purpose. Joining the inventory line items to the inventories in a single
+   * statement lets Postgres scan every inventory line item of the instance, while starting from
+   * the few inventories of one facility and program reaches their line items through the
+   * physical inventory id index.
    *
    * @param programId    program id.
    * @param facilityId   facility id.
-   * @param orderableId  orderable id.
-   * @param lotId        lot id, must not be null.
-   * @param occurredDate the movement's occurred date.
-   * @param processedDate the movement's processed date; used as the tiebreaker on equal occurred
-   *                      dates, matching StockCard.getLineItemsComparator() ordering.
-   * @return the blocking submitted physical inventories (ordered after the movement).
+   * @param orderableIds ids of the orderables of the movements.
+   * @param occurredDate the earliest occurred date of the movements.
+   * @return one row per inventory line item, ordered by the inventory's occurred date.
    */
-  @Query("SELECT DISTINCT pi FROM PhysicalInventory pi"
-      + " JOIN pi.lineItems li"
-      + " LEFT JOIN pi.stockEvent se"
-      + " WHERE pi.programId = :programId"
-      + " AND pi.facilityId = :facilityId"
-      + " AND pi.isDraft = false"
-      + " AND (pi.occurredDate > :occurredDate"
-      + "   OR (pi.occurredDate = :occurredDate AND se.processedDate > :processedDate))"
-      + " AND li.orderableId = :orderableId"
-      + " AND li.lotId = :lotId")
-  List<PhysicalInventory> findSubmittedAfterForOrderableAndLot(
-      @Param(PROGRAM_ID) UUID programId,
-      @Param(FACILITY_ID) UUID facilityId,
-      @Param(ORDERABLE_ID) UUID orderableId,
-      @Param("lotId") UUID lotId,
-      @Param(OCCURRED_DATE) LocalDate occurredDate,
-      @Param(PROCESSED_DATE) ZonedDateTime processedDate);
+  default List<SubmittedPhysicalInventoryLine> findSubmittedLinesOfOrderablesFrom(
+      UUID programId, UUID facilityId, Collection<UUID> orderableIds, LocalDate occurredDate) {
+    if (orderableIds.isEmpty()) {
+      return Collections.emptyList();
+    }
+    List<UUID> inventoryIds = findSubmittedIdsFrom(programId, facilityId, occurredDate);
+    return inventoryIds.isEmpty()
+        ? Collections.emptyList()
+        : findLinesOfOrderables(inventoryIds, orderableIds);
+  }
 
-  /**
-   * Same as {@link #findSubmittedAfterForOrderableAndLot} but for line items without a lot.
-   *
-   * @param programId    program id.
-   * @param facilityId   facility id.
-   * @param orderableId  orderable id.
-   * @param occurredDate the movement's occurred date.
-   * @param processedDate the movement's processed date; used as the tiebreaker on equal occurred
-   *                      dates, matching StockCard.getLineItemsComparator() ordering.
-   * @return the blocking submitted physical inventories (ordered after the movement).
-   */
-  @Query("SELECT DISTINCT pi FROM PhysicalInventory pi"
-      + " JOIN pi.lineItems li"
-      + " LEFT JOIN pi.stockEvent se"
+  @Query("SELECT pi.id FROM PhysicalInventory pi"
       + " WHERE pi.programId = :programId"
       + " AND pi.facilityId = :facilityId"
       + " AND pi.isDraft = false"
-      + " AND (pi.occurredDate > :occurredDate"
-      + "   OR (pi.occurredDate = :occurredDate AND se.processedDate > :processedDate))"
-      + " AND li.orderableId = :orderableId"
-      + " AND li.lotId IS NULL")
-  List<PhysicalInventory> findSubmittedAfterForOrderableWithoutLot(
+      + " AND pi.occurredDate >= :occurredDate")
+  List<UUID> findSubmittedIdsFrom(
       @Param(PROGRAM_ID) UUID programId,
       @Param(FACILITY_ID) UUID facilityId,
-      @Param(ORDERABLE_ID) UUID orderableId,
-      @Param(OCCURRED_DATE) LocalDate occurredDate,
-      @Param(PROCESSED_DATE) ZonedDateTime processedDate);
+      @Param("occurredDate") LocalDate occurredDate);
+
+  @Query("SELECT new org.openlmis.stockmanagement.repository.custom.SubmittedPhysicalInventoryLine("
+      + "pi.id, pi.occurredDate, pi.documentNumber, se.processedDate, li.orderableId, li.lotId)"
+      + " FROM PhysicalInventoryLineItem li"
+      + " JOIN li.physicalInventory pi"
+      + " LEFT JOIN pi.stockEvent se"
+      + " WHERE li.physicalInventory.id IN :physicalInventoryIds"
+      + " AND li.orderableId IN :orderableIds"
+      + " ORDER BY pi.occurredDate")
+  List<SubmittedPhysicalInventoryLine> findLinesOfOrderables(
+      @Param("physicalInventoryIds") Collection<UUID> physicalInventoryIds,
+      @Param("orderableIds") Collection<UUID> orderableIds);
 }

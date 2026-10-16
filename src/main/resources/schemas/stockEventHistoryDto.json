@@ -51,7 +51,7 @@
     },
     "reversible": {
       "type": ["boolean", "null"],
-      "description": "Whether the event holds at least one line item that does not reverse another one, i.e. whether anything in it can still be cancelled."
+      "description": "Whether anything in the event can still be cancelled. GET /api/stockEvents/{id} reports true only when at least one line item passes every cancellation rule: it was recorded after cancelling was introduced, is an issue, a receive or an adjustment, is not a cancellation, has not been cancelled yet and has no physical inventory of the same product and lot recorded after it. GET /api/stockEvents only checks that the event has an origin and a line item that does not reverse another one, so a row in the list can be true while its event is not reversible."
     }
   },
   "required": ["id", "type"]
