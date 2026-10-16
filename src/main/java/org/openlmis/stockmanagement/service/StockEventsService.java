@@ -18,6 +18,7 @@ package org.openlmis.stockmanagement.service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -63,6 +64,9 @@ public class StockEventsService {
 
   @Autowired
   private PermissionService permissionService;
+
+  @Autowired
+  private StockEventCancelValidationService cancelValidationService;
 
   /**
    * Searches issue/receive stock events matching the params and maps them to history rows.
@@ -173,7 +177,9 @@ public class StockEventsService {
   /**
    * Returns the history header of a single stock event (the transaction detail header). The DTO
    * has the same shape as the rows returned by {@link #search}, so the detail header stays
-   * consistent with the list.
+   * consistent with the list. Unlike the list, the header is reversible only when at least one
+   * line item passes the cancellation rules, so the detail view offers the Reverse action only
+   * when something can really be cancelled.
    *
    * @param stockEventId the stock event id.
    * @return the history row for the event.
@@ -188,6 +194,11 @@ public class StockEventsService {
     Map<UUID, StockEventLineItemAggregate> aggregates =
         aggregateLineItems(Collections.singletonList(event));
     StockEventHistoryDto dto = toHistoryDto(event, aggregates.get(event.getId()));
+    if (Boolean.TRUE.equals(dto.getReversible())) {
+      Set<UUID> linkedLineItemIds = new HashSet<>(
+          stockCardLineItemRepository.findOriginEventLineItemIdsByOriginEvent(event.getId()));
+      dto.setReversible(cancelValidationService.hasCancellableLine(event, linkedLineItemIds));
+    }
     populateUsernames(Collections.singletonList(dto));
 
     return dto;

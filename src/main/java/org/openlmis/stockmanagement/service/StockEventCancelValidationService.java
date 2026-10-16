@@ -21,6 +21,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.Comparator.naturalOrder;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_CANCELLATION_VALIDATION;
@@ -152,6 +153,22 @@ public class StockEventCancelValidationService {
       }
     }
     return errors;
+  }
+
+  /**
+   * Tells whether at least one of the given line items of an event can still be cancelled.
+   *
+   * @param event             the stock event.
+   * @param linkedLineItemIds ids of the event's line items that a stock card line item points at.
+   *                          Only those can be selected for cancellation; the others were
+   *                          recorded before cancelling was introduced.
+   * @return true when at least one of them passes every cancellation rule.
+   */
+  public boolean hasCancellableLine(StockEvent event, Set<UUID> linkedLineItemIds) {
+    List<StockEventLineItem> candidates = event.getLineItems().stream()
+        .filter(lineItem -> linkedLineItemIds.contains(lineItem.getId()))
+        .collect(toList());
+    return !candidates.isEmpty() && evaluate(event, candidates).size() < candidates.size();
   }
 
   // The ordered checks a line item must pass to be cancellable; the first failing one is reported.

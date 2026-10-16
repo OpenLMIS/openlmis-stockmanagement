@@ -33,4 +33,14 @@ public interface StockCardLineItemRepository
   @Query("SELECT DISTINCT lineItem.stockCard.id FROM StockCardLineItem lineItem"
       + " WHERE lineItem.originEvent.id = :eventId")
   List<UUID> findStockCardIdsByOriginEvent(@Param("eventId") UUID eventId);
+
+  /**
+   * Returns the ids of the stock event line items that the stock card line items of the given
+   * origin event were created from. Line items recorded before this link existed have none and
+   * are left out. A scalar projection, so no line item entity is loaded.
+   */
+  @Query("SELECT lineItem.originEventLineItemId FROM StockCardLineItem lineItem"
+      + " WHERE lineItem.originEvent.id = :eventId"
+      + " AND lineItem.originEventLineItemId IS NOT NULL")
+  List<UUID> findOriginEventLineItemIdsByOriginEvent(@Param("eventId") UUID eventId);
 }

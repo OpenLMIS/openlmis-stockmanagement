@@ -16,15 +16,19 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
@@ -81,6 +85,9 @@ public class StockEventsServiceTest {
 
   @Mock
   private PermissionService permissionService;
+
+  @Mock
+  private StockEventCancelValidationService cancelValidationService;
 
   @InjectMocks
   private StockEventsService stockEventsService;
@@ -395,6 +402,40 @@ public class StockEventsServiceTest {
     assertThat(dto.getFacilityId(), is(facility));
     assertThat(dto.getProgramId(), is(program));
     verify(permissionService).canViewStockCard(program, facility);
+  }
+
+  @Test
+  public void findStockEventShouldBeReversibleOnlyWhenALinkedLineItemCanBeCancelled() {
+    StockEvent event = new StockEventDataBuilder().withEventOrigin(EventOrigin.ISSUE).build();
+    UUID eventId = event.getId();
+    UUID linkedLineItemId = randomUUID();
+    when(stockEventsRepository.findById(eventId)).thenReturn(Optional.of(event));
+    when(stockEventsRepository.aggregateLineItemsByEventIds(anySet()))
+        .thenReturn(singletonList(new StockEventLineItemAggregate(
+            eventId, 2L, 2L, LocalDate.of(2026, Month.FEBRUARY, 10))));
+    when(stockCardLineItemRepository.findOriginEventLineItemIdsByOriginEvent(eventId))
+        .thenReturn(singletonList(linkedLineItemId));
+    when(cancelValidationService.hasCancellableLine(event, singleton(linkedLineItemId)))
+        .thenReturn(true, false);
+
+    assertThat(stockEventsService.findStockEvent(eventId).getReversible(), is(true));
+    assertThat(stockEventsService.findStockEvent(eventId).getReversible(), is(false));
+  }
+
+  @Test
+  public void findStockEventShouldNotCheckCancellationRulesWhenEventHasNoOrigin() {
+    // pushed by another service without an origin, e.g. requisition adjustments on approval
+    StockEvent event = new StockEventDataBuilder().build();
+    event.setEventOrigin(null);
+    UUID eventId = event.getId();
+    when(stockEventsRepository.findById(eventId)).thenReturn(Optional.of(event));
+    when(stockEventsRepository.aggregateLineItemsByEventIds(anySet()))
+        .thenReturn(singletonList(new StockEventLineItemAggregate(
+            eventId, 2L, 2L, LocalDate.of(2026, Month.FEBRUARY, 10))));
+
+    assertThat(stockEventsService.findStockEvent(eventId).getReversible(), is(false));
+    verify(stockCardLineItemRepository, never()).findOriginEventLineItemIdsByOriginEvent(any());
+    verifyNoInteractions(cancelValidationService);
   }
 
   @Test(expected = ResourceNotFoundException.class)

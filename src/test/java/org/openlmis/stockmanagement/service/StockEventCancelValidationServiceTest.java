@@ -22,6 +22,7 @@ import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -430,6 +431,51 @@ public class StockEventCancelValidationServiceTest {
     Map<UUID, StockEventCancellationLineErrorDto> errors = service.evaluate(event, emptyList());
 
     assertTrue(errors.isEmpty());
+    verifyNoInteractions(stockEventLineItemRepository, physicalInventoriesRepository,
+        reasonRepository);
+  }
+
+  @Test
+  public void shouldFindCancellableLineWhenOneLinkedLineItemPassesTheRules() {
+    StockEventLineItem cancellable = issueLineItem(UUID.randomUUID());
+    StockEventLineItem reversed = issueLineItem(UUID.randomUUID());
+    StockEvent event = eventWith(cancellable, reversed);
+    when(stockEventLineItemRepository.findByReversesEventLineItemIdIn(anyCollection()))
+        .thenReturn(singletonList(reversing(reversed)));
+
+    assertTrue(service.hasCancellableLine(event,
+        new HashSet<>(asList(cancellable.getId(), reversed.getId()))));
+  }
+
+  @Test
+  public void shouldFindNoCancellableLineWhenEveryLinkedLineItemFails() {
+    StockEventLineItem reversed = issueLineItem(UUID.randomUUID());
+    StockEventLineItem blocked = issueLineItem(UUID.randomUUID());
+    StockEvent event = eventWith(reversed, blocked);
+    when(stockEventLineItemRepository.findByReversesEventLineItemIdIn(anyCollection()))
+        .thenReturn(singletonList(reversing(reversed)));
+    stubInventoryLines(laterInventoryLineFor(blocked, PI_DOCUMENT_NUMBER));
+
+    assertFalse(service.hasCancellableLine(event,
+        new HashSet<>(asList(reversed.getId(), blocked.getId()))));
+  }
+
+  @Test
+  public void shouldIgnoreLineItemsThatAreNotLinkedWhenLookingForCancellableLine() {
+    StockEventLineItem notLinked = issueLineItem(UUID.randomUUID());
+    StockEventLineItem reversed = issueLineItem(UUID.randomUUID());
+    StockEvent event = eventWith(notLinked, reversed);
+    when(stockEventLineItemRepository.findByReversesEventLineItemIdIn(anyCollection()))
+        .thenReturn(singletonList(reversing(reversed)));
+
+    assertFalse(service.hasCancellableLine(event, singleton(reversed.getId())));
+  }
+
+  @Test
+  public void shouldFindNoCancellableLineWithoutQueryingWhenNoLineItemIsLinked() {
+    StockEvent event = eventWith(issueLineItem(UUID.randomUUID()));
+
+    assertFalse(service.hasCancellableLine(event, emptySet()));
     verifyNoInteractions(stockEventLineItemRepository, physicalInventoriesRepository,
         reasonRepository);
   }
