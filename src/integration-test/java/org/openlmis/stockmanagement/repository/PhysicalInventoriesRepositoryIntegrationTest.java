@@ -15,20 +15,27 @@
 
 package org.openlmis.stockmanagement.repository;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.Test;
 import org.openlmis.stockmanagement.domain.event.StockEvent;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
+import org.openlmis.stockmanagement.repository.custom.SubmittedPhysicalInventoryLine;
 import org.openlmis.stockmanagement.testutils.StockEventDataBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
@@ -58,61 +65,58 @@ public class PhysicalInventoriesRepositoryIntegrationTest
   }
 
   @Test
-  public void shouldReturnSubmittedInventoryRecordedAfterMovementForOrderableAndLot() {
+  public void shouldReturnSubmittedLinesOfTheGivenOrderablesFromTheGivenDate() {
     UUID program = randomUUID();
     UUID facility = randomUUID();
     UUID orderable = randomUUID();
+    UUID otherOrderable = randomUUID();
     UUID lot = randomUUID();
-    final PhysicalInventory expected =
+    final PhysicalInventory sameDayWithoutLot =
+        save(program, facility, orderable, null, MOVEMENT_DATE, false);
+    final PhysicalInventory nextDay =
         save(program, facility, orderable, lot, MOVEMENT_DATE.plusDays(1), false);
+    final PhysicalInventory otherOrderableLater =
+        save(program, facility, otherOrderable, lot, MOVEMENT_DATE.plusDays(2), false);
     save(program, facility, orderable, lot, MOVEMENT_DATE.plusDays(1), true); // draft
     save(program, facility, orderable, lot, MOVEMENT_DATE.minusDays(1), false); // earlier
-    save(program, facility, randomUUID(), lot, MOVEMENT_DATE.plusDays(1), false); // other product
-    save(program, facility, orderable, null, MOVEMENT_DATE.plusDays(1), false); // no lot
+    save(program, facility, randomUUID(), lot, MOVEMENT_DATE.plusDays(1), false); // not asked for
+    save(randomUUID(), facility, orderable, lot, MOVEMENT_DATE.plusDays(1), false); // program
+    save(program, randomUUID(), orderable, lot, MOVEMENT_DATE.plusDays(1), false); // facility
 
-    List<PhysicalInventory> result = repository.findSubmittedAfterForOrderableAndLot(
-        program, facility, orderable, lot, MOVEMENT_DATE, MOVEMENT_PROCESSED);
+    List<SubmittedPhysicalInventoryLine> result = repository.findSubmittedLinesOfOrderablesFrom(
+        program, facility, asList(orderable, otherOrderable), MOVEMENT_DATE);
 
-    assertThat(result, hasSize(1));
-    assertThat(result.get(0).getId(), is(expected.getId()));
+    assertThat(result.stream().map(SubmittedPhysicalInventoryLine::getPhysicalInventoryId)
+            .collect(toList()),
+        contains(sameDayWithoutLot.getId(), nextDay.getId(), otherOrderableLater.getId()));
+    assertThat(result.get(0).getOrderableId(), is(orderable));
+    assertThat(result.get(0).getLotId(), is(nullValue()));
+    assertThat(result.get(1).getLotId(), is(lot));
+    assertThat(result.get(2).getOrderableId(), is(otherOrderable));
   }
 
   @Test
-  public void shouldReturnSameDayInventoryProcessedAfterTheMovementButNotBefore() {
+  public void shouldReturnProcessedDateOfTheInventoryStockEvent() {
     UUID program = randomUUID();
     UUID facility = randomUUID();
     UUID orderable = randomUUID();
     UUID lot = randomUUID();
-    // Same occurred date as the movement: the one processed AFTER it already reflects the movement
-    // and must block; the one processed BEFORE must not.
-    final PhysicalInventory processedAfter = saveWithEvent(program, facility, orderable, lot,
+    // Same occurred date as the movement: the caller orders such inventories by this processed
+    // date, so it must come back as the same instant that was stored.
+    final PhysicalInventory withEvent = saveWithEvent(program, facility, orderable, lot,
         MOVEMENT_DATE, MOVEMENT_PROCESSED.plusHours(1));
-    saveWithEvent(program, facility, orderable, lot, MOVEMENT_DATE,
-        MOVEMENT_PROCESSED.minusHours(1));
+    final PhysicalInventory withoutEvent =
+        save(program, facility, orderable, lot, MOVEMENT_DATE, false);
 
-    List<PhysicalInventory> result = repository.findSubmittedAfterForOrderableAndLot(
-        program, facility, orderable, lot, MOVEMENT_DATE, MOVEMENT_PROCESSED);
+    Map<UUID, SubmittedPhysicalInventoryLine> result = repository
+        .findSubmittedLinesOfOrderablesFrom(program, facility, singletonList(orderable),
+            MOVEMENT_DATE)
+        .stream()
+        .collect(toMap(SubmittedPhysicalInventoryLine::getPhysicalInventoryId, identity()));
 
-    assertThat(result, hasSize(1));
-    assertThat(result.get(0).getId(), is(processedAfter.getId()));
-  }
-
-  @Test
-  public void shouldReturnSubmittedInventoryRecordedAfterMovementForOrderableWithoutLot() {
-    UUID program = randomUUID();
-    UUID facility = randomUUID();
-    UUID orderable = randomUUID();
-    final PhysicalInventory expected =
-        save(program, facility, orderable, null, MOVEMENT_DATE.plusDays(1), false);
-    save(program, facility, orderable, null, MOVEMENT_DATE.plusDays(1), true); // draft
-    save(program, facility, orderable, null, MOVEMENT_DATE.minusDays(1), false); // earlier
-    save(program, facility, orderable, randomUUID(), MOVEMENT_DATE.plusDays(1), false); // lot
-
-    List<PhysicalInventory> result = repository.findSubmittedAfterForOrderableWithoutLot(
-        program, facility, orderable, MOVEMENT_DATE, MOVEMENT_PROCESSED);
-
-    assertThat(result, hasSize(1));
-    assertThat(result.get(0).getId(), is(expected.getId()));
+    assertThat(result.get(withEvent.getId()).getProcessedDate().toInstant(),
+        is(MOVEMENT_PROCESSED.plusHours(1).toInstant()));
+    assertThat(result.get(withoutEvent.getId()).getProcessedDate(), is(nullValue()));
   }
 
   private PhysicalInventory save(UUID program, UUID facility, UUID orderable, UUID lot,
