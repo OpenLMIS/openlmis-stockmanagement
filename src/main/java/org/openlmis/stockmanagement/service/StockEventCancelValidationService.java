@@ -32,6 +32,7 @@ import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_NO_LINE_
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -55,7 +56,8 @@ import org.springframework.stereotype.Service;
 /**
  * Validates that selected line items of a stock event may be cancelled - a movement recorded as an
  * issue, a receive or an adjustment. Every per-line failure is collected so the caller learns about
- * all blocking line items at once.
+ * all blocking line items at once. The same rules serve the submit path ({@link #validate}) and
+ * callers that only need to know which lines can be cancelled ({@link #evaluate}).
  */
 @Service
 @RequiredArgsConstructor
@@ -77,7 +79,7 @@ public class StockEventCancelValidationService {
    * per-line failure and, if any, throws a single {@link StockEventCancellationException}.
    *
    * @param event               the original stock event being cancelled.
-   * @param lineItemIdsToCancel ids of the event's line items selected for cancellation.
+   * @param lineItemIdsToCancel distinct ids of the event's line items selected for cancellation.
    */
   public void validate(StockEvent event, Collection<UUID> lineItemIdsToCancel) {
     if (lineItemIdsToCancel == null || lineItemIdsToCancel.isEmpty()) {
@@ -85,21 +87,45 @@ public class StockEventCancelValidationService {
     }
 
     List<StockEventLineItem> selected = resolveSelectedLineItems(event, lineItemIdsToCancel);
-    List<CancellationRule> rules = cancellationRules(event,
-        findAlreadyCancelledIds(lineItemIdsToCancel), findReasons(selected));
+    Map<UUID, StockEventCancellationLineErrorDto> errors = evaluate(event, selected);
 
-    List<StockEventCancellationLineErrorDto> errors = new ArrayList<>();
-    for (StockEventLineItem lineItem : selected) {
+    if (!errors.isEmpty()) {
+      throw new StockEventCancellationException(ERROR_EVENT_CANCELLATION_VALIDATION,
+          new ArrayList<>(errors.values()));
+    }
+  }
+
+  /**
+   * Checks the given line items of an event against the cancellation rules without throwing, so a
+   * caller can learn which lines cannot be cancelled before anything is submitted. Applies the
+   * same rules as {@link #validate}.
+   *
+   * @param event     the stock event the line items belong to.
+   * @param lineItems distinct line items of that event.
+   * @return for each failing line item, the error of the first rule it fails, keyed by line item
+   *         id in the order of {@code lineItems}. Line items that can be cancelled are absent.
+   */
+  public Map<UUID, StockEventCancellationLineErrorDto> evaluate(StockEvent event,
+      Collection<StockEventLineItem> lineItems) {
+    if (lineItems.isEmpty()) {
+      return emptyMap();
+    }
+
+    Set<UUID> lineItemIds = lineItems.stream()
+        .map(StockEventLineItem::getId)
+        .collect(toSet());
+    List<CancellationRule> rules = cancellationRules(event,
+        findAlreadyCancelledIds(lineItemIds), findReasons(lineItems));
+
+    Map<UUID, StockEventCancellationLineErrorDto> errors = new LinkedHashMap<>();
+    for (StockEventLineItem lineItem : lineItems) {
       rules.stream()
           .map(rule -> rule.check(lineItem))
           .filter(Objects::nonNull)
           .findFirst()
-          .ifPresent(errors::add);
+          .ifPresent(error -> errors.put(lineItem.getId(), error));
     }
-
-    if (!errors.isEmpty()) {
-      throw new StockEventCancellationException(ERROR_EVENT_CANCELLATION_VALIDATION, errors);
-    }
+    return errors;
   }
 
   // The ordered checks a line item must pass to be cancellable; the first failing one is reported.
@@ -161,7 +187,8 @@ public class StockEventCancelValidationService {
         .collect(toSet());
   }
 
-  private Map<UUID, StockCardLineItemReason> findReasons(List<StockEventLineItem> lineItems) {
+  private Map<UUID, StockCardLineItemReason> findReasons(
+      Collection<StockEventLineItem> lineItems) {
     Set<UUID> reasonIds = lineItems.stream()
         .map(StockEventLineItem::getReasonId)
         .filter(Objects::nonNull)

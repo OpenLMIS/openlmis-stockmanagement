@@ -22,9 +22,12 @@ import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LINE_ITEM_ALREADY_CANCELLED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_LINE_ITEM_BLOCKED_PHYSICAL_INVENTORY;
@@ -34,7 +37,9 @@ import static org.openlmis.stockmanagement.service.StockEventCancelValidationSer
 import static org.openlmis.stockmanagement.service.StockEventCancelValidationService.PHYSICAL_INVENTORY_TYPE;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -70,6 +75,8 @@ public class StockEventCancelValidationServiceTest {
 
   @InjectMocks
   private StockEventCancelValidationService service;
+
+  private static final String PI_DOCUMENT_NUMBER = "PI-1";
 
   private final UUID programId = UUID.randomUUID();
   private final UUID facilityId = UUID.randomUUID();
@@ -188,7 +195,7 @@ public class StockEventCancelValidationServiceTest {
     final StockEvent event = eventWith(lineItem);
     PhysicalInventory inventory = new PhysicalInventory();
     inventory.setOccurredDate(LocalDate.now());
-    inventory.setDocumentNumber("PI-1");
+    inventory.setDocumentNumber(PI_DOCUMENT_NUMBER);
     when(stockEventLineItemRepository.findByReversesEventLineItemIdIn(anyCollection()))
         .thenReturn(emptyList());
     when(physicalInventoriesRepository.findSubmittedAfterForOrderableAndLot(
@@ -201,7 +208,7 @@ public class StockEventCancelValidationServiceTest {
     assertEquals(ERROR_EVENT_LINE_ITEM_BLOCKED_PHYSICAL_INVENTORY, error.getMessageKey());
     assertEquals(1, error.getBlockingTransactions().size());
     assertEquals(PHYSICAL_INVENTORY_TYPE, error.getBlockingTransactions().get(0).getType());
-    assertEquals("PI-1", error.getBlockingTransactions().get(0).getDocumentNumber());
+    assertEquals(PI_DOCUMENT_NUMBER, error.getBlockingTransactions().get(0).getDocumentNumber());
   }
 
   @Test
@@ -268,6 +275,72 @@ public class StockEventCancelValidationServiceTest {
     }
   }
 
+  @Test
+  public void shouldReturnNoErrorWhenEvaluatingCancellableLineItem() {
+    StockEventLineItem lineItem = issueLineItem(UUID.randomUUID());
+    StockEvent event = eventWith(lineItem);
+    when(stockEventLineItemRepository.findByReversesEventLineItemIdIn(anyCollection()))
+        .thenReturn(emptyList());
+
+    Map<UUID, StockEventCancellationLineErrorDto> errors =
+        service.evaluate(event, singletonList(lineItem));
+
+    assertTrue(errors.isEmpty());
+  }
+
+  @Test
+  public void shouldReturnFirstFailingRuleOfEachLineItemInInputOrderWhenEvaluating() {
+    final UUID cancelReasonId = UUID.randomUUID();
+    final UUID kitUnpackReasonId = UUID.randomUUID();
+    final StockEventLineItem cancellable = issueLineItem(UUID.randomUUID());
+    final StockEventLineItem cancellation = issueLineItem(UUID.randomUUID());
+    cancellation.setReasonId(cancelReasonId);
+    final StockEventLineItem kitUnpack = reasonLineItem(UUID.randomUUID(), kitUnpackReasonId);
+    final StockEventLineItem reversed = issueLineItem(UUID.randomUUID());
+    final StockEventLineItem blocked = issueLineItem(UUID.randomUUID());
+    final StockEvent event = eventWith(cancellable, cancellation, kitUnpack, reversed, blocked);
+    PhysicalInventory inventory = new PhysicalInventory();
+    inventory.setOccurredDate(LocalDate.now());
+    inventory.setDocumentNumber(PI_DOCUMENT_NUMBER);
+    // the cancellation line is reversed too, which must not hide that it is a cancellation
+    when(stockEventLineItemRepository.findByReversesEventLineItemIdIn(anyCollection()))
+        .thenReturn(asList(reversing(cancellation), reversing(reversed)));
+    when(reasonRepository.findByIdIn(anyCollection()))
+        .thenReturn(asList(cancelReason(cancelReasonId),
+            reason(kitUnpackReasonId, ReasonCategory.AGGREGATION)));
+    when(physicalInventoriesRepository.findSubmittedAfterForOrderableAndLot(
+        any(), any(), eq(blocked.getOrderableId()), any(), any(), any()))
+        .thenReturn(singletonList(inventory));
+
+    Map<UUID, StockEventCancellationLineErrorDto> errors = service.evaluate(event,
+        asList(cancellable, cancellation, kitUnpack, reversed, blocked));
+
+    assertEquals(asList(cancellation.getId(), kitUnpack.getId(), reversed.getId(),
+        blocked.getId()), new ArrayList<>(errors.keySet()));
+    assertEquals(ERROR_EVENT_LINE_ITEM_IS_CANCELLATION,
+        errors.get(cancellation.getId()).getMessageKey());
+    assertEquals(ERROR_EVENT_LINE_ITEM_NOT_CANCELLABLE,
+        errors.get(kitUnpack.getId()).getMessageKey());
+    assertEquals(ERROR_EVENT_LINE_ITEM_ALREADY_CANCELLED,
+        errors.get(reversed.getId()).getMessageKey());
+    StockEventCancellationLineErrorDto blockedError = errors.get(blocked.getId());
+    assertEquals(ERROR_EVENT_LINE_ITEM_BLOCKED_PHYSICAL_INVENTORY, blockedError.getMessageKey());
+    assertEquals(blocked.getId(), blockedError.getStockEventLineItemId());
+    assertEquals(PI_DOCUMENT_NUMBER,
+        blockedError.getBlockingTransactions().get(0).getDocumentNumber());
+  }
+
+  @Test
+  public void shouldNotQueryAnythingWhenEvaluatingNoLineItems() {
+    StockEvent event = eventWith(issueLineItem(UUID.randomUUID()));
+
+    Map<UUID, StockEventCancellationLineErrorDto> errors = service.evaluate(event, emptyList());
+
+    assertTrue(errors.isEmpty());
+    verifyNoInteractions(stockEventLineItemRepository, physicalInventoriesRepository,
+        reasonRepository);
+  }
+
   @Test(expected = ValidationMessageException.class)
   public void shouldThrowWhenLineItemDoesNotBelongToEvent() {
     StockEvent event = eventWith(issueLineItem(UUID.randomUUID()));
@@ -313,6 +386,12 @@ public class StockEventCancelValidationServiceTest {
         .build();
     lineItem.setId(id);
     return lineItem;
+  }
+
+  private StockEventLineItem reversing(StockEventLineItem original) {
+    return StockEventLineItem.builder()
+        .reversesEventLineItemId(original.getId())
+        .build();
   }
 
   private StockEventLineItem reasonLineItem(UUID id, UUID reasonId) {
