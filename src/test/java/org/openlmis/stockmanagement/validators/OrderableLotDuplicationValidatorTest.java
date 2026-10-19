@@ -15,9 +15,12 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static java.util.Collections.singletonList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static org.junit.rules.ExpectedException.none;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ORDERABLE_LOT_DUPLICATION;
 
 import java.util.Arrays;
@@ -30,9 +33,11 @@ import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
+import org.openlmis.stockmanagement.dto.referencedata.LotDto;
+import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OrderableLotDuplicationValidatorTest {
+public class OrderableLotDuplicationValidatorTest extends BaseValidatorTest {
 
   @Rule
   public ExpectedException expectedEx = none();
@@ -53,11 +58,44 @@ public class OrderableLotDuplicationValidatorTest {
   public void physicalInventoryEventWithSameOrderableAndLotAppearTwiceShouldNotPass()
       throws Exception {
     //expect: exception
-    expectedEx.expectMessage(ERROR_EVENT_ORDERABLE_LOT_DUPLICATION);
+    expectedEx.expectMessage(ERROR_EVENT_ORDERABLE_LOT_DUPLICATION + ": C100 Levora / LOT-1");
     StockEventDto eventDto = createStockEventDtoWithDuplicateOrderableLot(null);
+    prepareContext(eventDto);
 
     //when
     orderableLotDuplicationValidator.validate(eventDto);
+  }
+
+  @Test
+  public void physicalInventoryEventWithSameOrderableWithoutLotAppearTwiceShouldNotPass()
+      throws Exception {
+    //expect: exception
+    expectedEx.expectMessage(ERROR_EVENT_ORDERABLE_LOT_DUPLICATION + ": C100 Levora");
+    StockEventDto eventDto = createStockEventDtoWithDuplicateOrderableLot(null);
+    eventDto.getLineItems().forEach(lineItem -> lineItem.setLotId(null));
+    prepareContext(eventDto);
+
+    //when
+    orderableLotDuplicationValidator.validate(eventDto);
+  }
+
+  private void prepareContext(StockEventDto eventDto) {
+    StockEventLineItemDto lineItem = eventDto.getLineItems().get(0);
+    OrderableDto orderableDto = OrderableDto.builder()
+        .id(lineItem.getOrderableId())
+        .productCode("C100")
+        .fullProductName("Levora")
+        .build();
+    when(orderableReferenceDataService.findByIds(any())).thenReturn(singletonList(orderableDto));
+
+    if (lineItem.getLotId() != null) {
+      LotDto lotDto = new LotDto();
+      lotDto.setId(lineItem.getLotId());
+      lotDto.setLotCode("LOT-1");
+      when(lotReferenceDataService.findOne(lineItem.getLotId())).thenReturn(lotDto);
+    }
+
+    setContext(eventDto);
   }
 
   private StockEventDto createStockEventDtoWithDuplicateOrderableLot(UUID reasonId) {
