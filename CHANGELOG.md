@@ -2,7 +2,7 @@
 ==================
 
 Improvements:
-* [OLMIS-8377](https://openlmis.atlassian.net/browse/OLMIS-8377): `GET /api/v2/stockCardSummaries` with `nonEmptyOnly=true` (and the stock card summaries endpoint for external integrations) asks referencedata only for the approved products and orderable fulfills of the orderables that have stock cards at the facility, instead of the whole program catalogue; the response is unchanged. A request that matches no approved product no longer fetches the orderable fulfills of every orderable.
+* [OLMIS-8377](https://openlmis.atlassian.net/browse/OLMIS-8377): `GET /api/v2/stockCardSummaries` with `nonEmptyOnly=true` (and the stock card summaries endpoint for external integrations) asks referencedata only for the approved products and orderable fulfills of the orderables that have stock cards at the facility, instead of the whole program catalogue; the summaries are unchanged. A request without `programId` no longer fails with HTTP 403 because of a program without any stock card at the facility that the user may not view. A request that matches no approved product no longer fetches the orderable fulfills of every orderable.
 
 Bug fixes:
 * [OLMIS-8383](https://openlmis.atlassian.net/browse/OLMIS-8383): The physical inventory error for a duplicated product and lot names them (product code, name and lot code) instead of showing an internal object reference.

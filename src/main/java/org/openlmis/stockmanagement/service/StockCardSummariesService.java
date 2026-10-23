@@ -164,8 +164,9 @@ public class StockCardSummariesService extends StockCardBaseService {
 
       if (orderableIds.isEmpty()) {
         profiler.start("VALIDATE_VIEW_RIGHTS");
-        validateViewRights(stockCards.stream().map(StockCard::getProgramId),
-            params.getFacilityId());
+        // with nothing to return, a requested program the user may not view still answers 403
+        validateViewRights(concat(stockCards.stream().map(StockCard::getProgramId),
+            params.getProgramIds().stream()), params.getFacilityId());
         profiler.stop().log();
         return new StockCardSummaries(Collections.emptyList(), stockCards,
             Collections.emptyMap(), params.getAsOfDate(), 0L);

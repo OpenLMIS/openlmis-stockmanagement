@@ -548,6 +548,22 @@ public class StockCardSummariesServiceTest {
   }
 
   @Test(expected = PermissionMessageException.class)
+  public void shouldCheckViewRightsForRequestedProgramsWhenNoStockCardsAndNonEmptyOnly() {
+    StockCardSummariesV2SearchParams params = nonEmptyOnlyParams(Collections.emptyList());
+    when(calculatedStockOnHandService
+        .getStockCardsWithStockOnHand(params.getProgramIds(), params.getFacilityId(),
+            params.getAsOfDate(), Collections.emptyList(), Collections.emptySet()))
+        .thenReturn(Collections.emptyList());
+    when(homeFacilityPermissionService.checkFacilityAndHomeFacilityLinkage(params.getFacilityId()))
+        .thenReturn(false);
+    doThrow(new PermissionMessageException(new Message("no permission")))
+        .when(permissionService)
+        .canViewStockCard(params.getProgramIds().get(0), params.getFacilityId());
+
+    stockCardSummariesService.findStockCards(params);
+  }
+
+  @Test(expected = PermissionMessageException.class)
   public void shouldCheckViewRightsForStockCardProgramsBeforeReturningNoSummaries() {
     StockCardSummariesV2SearchParams params = nonEmptyOnlyParams(singletonList(orderableId3));
     when(calculatedStockOnHandService
