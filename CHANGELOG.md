@@ -1,6 +1,9 @@
 5.4.3-SNAPSHOT (WIP)
 ==================
 
+Bug fixes:
+* [OLMIS-8383](https://openlmis.atlassian.net/browse/OLMIS-8383): The physical inventory error for a duplicated product and lot names them (product code, name and lot code) instead of showing an internal object reference.
+
 5.4.2 / 2026-10-16
 ==================
 

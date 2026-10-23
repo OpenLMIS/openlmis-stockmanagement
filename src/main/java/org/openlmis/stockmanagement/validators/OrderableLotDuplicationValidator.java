@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.validators;
 
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_EVENT_ORDERABLE_LOT_DUPLICATION;
 
@@ -22,8 +23,10 @@ import java.util.HashSet;
 import java.util.Set;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
 import org.openlmis.stockmanagement.dto.StockEventDto;
+import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.exception.ValidationMessageException;
 import org.openlmis.stockmanagement.util.Message;
+import org.openlmis.stockmanagement.util.StockEventProcessContext;
 import org.slf4j.profiler.Profiler;
 import org.springframework.stereotype.Component;
 
@@ -56,10 +59,29 @@ public class OrderableLotDuplicationValidator implements StockEventValidator {
 
     if (duplicates.size() > 0) {
       throw new ValidationMessageException(
-          new Message(ERROR_EVENT_ORDERABLE_LOT_DUPLICATION, duplicates));
+          new Message(ERROR_EVENT_ORDERABLE_LOT_DUPLICATION, duplicates.stream()
+              .map(identity -> describe(stockEventDto.getContext(), identity))
+              .collect(joining(", "))));
     }
 
     profiler.stop().log();
     XLOGGER.exit(stockEventDto);
+  }
+
+  private String describe(StockEventProcessContext context, OrderableLotIdentity identity) {
+    String description = context.getAllApprovedProducts().stream()
+        .filter(orderableDto -> orderableDto.getId().equals(identity.getOrderableId()))
+        .findFirst()
+        .map(orderableDto ->
+            orderableDto.getProductCode() + " " + orderableDto.getFullProductName())
+        .orElse(identity.getOrderableId().toString());
+
+    if (identity.getLotId() == null) {
+      return description;
+    }
+
+    LotDto lotDto = context.findLot(identity.getLotId());
+    return description + " / "
+        + (lotDto != null ? lotDto.getLotCode() : identity.getLotId().toString());
   }
 }
