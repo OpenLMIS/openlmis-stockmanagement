@@ -81,6 +81,7 @@ import org.springframework.stereotype.Service;
 @SuppressWarnings("PMD.TooManyMethods")
 public class StockCardSummariesService extends StockCardBaseService {
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCardSummariesService.class);
+  private static final String COMMODITY_TYPE = "commodityType";
 
   @Autowired
   private OrderableReferenceDataService orderableReferenceDataService;
@@ -186,7 +187,7 @@ public class StockCardSummariesService extends StockCardBaseService {
 
     profiler.start("FIND_ORDERABLE_FULFILL_BY_ID");
     Map<UUID, OrderableFulfillDto> orderableFulfillMap =
-        findOrderableFulfills(approvedProducts.getIdentifiers());
+        findOrderableFulfills(commodityTypeIds(approvedProducts));
 
     Page<ApprovedProductDto> orderablesPage = approvedProducts.getApprovedProducts();
     StockCardSummaries result = new StockCardSummaries(
@@ -293,6 +294,15 @@ public class StockCardSummariesService extends StockCardBaseService {
       programIds.distinct().forEach(
           programId -> permissionService.canViewStockCard(programId, facilityId));
     }
+  }
+
+  // only a commodity type can be fulfilled by other orderables; the builders read nothing else
+  private List<UUID> commodityTypeIds(OrderablesAggregator approvedProducts) {
+    return approvedProducts.getApprovedProducts().stream()
+        .map(ApprovedProductDto::getOrderable)
+        .filter(orderable -> orderable.getIdentifiers().containsKey(COMMODITY_TYPE))
+        .map(OrderableDto::getId)
+        .collect(toList());
   }
 
   private Map<UUID, OrderableFulfillDto> findOrderableFulfills(Collection<UUID> orderableIds) {
