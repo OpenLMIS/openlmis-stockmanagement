@@ -503,6 +503,67 @@ public class StockCardSummariesServiceTest {
   }
 
   @Test
+  public void shouldKeepRequestedCommodityTypeWhoseTradeItemHasStockCardWhenNonEmptyOnly() {
+    UUID tradeItemId = orderableId1;
+    UUID commodityTypeId = orderableId2;
+    StockCardSummariesV2SearchParams params = nonEmptyOnlyParams(singletonList(commodityTypeId));
+    when(calculatedStockOnHandService
+        .getStockCardsWithStockOnHand(params.getProgramIds(), params.getFacilityId(),
+            params.getAsOfDate(), Collections.emptyList(), Collections.emptySet()))
+        .thenReturn(singletonList(stockCardOf(params, tradeItemId)));
+    when(orderableFulfillReferenceDataService.findByIds(singleton(tradeItemId)))
+        .thenReturn(Collections.singletonMap(tradeItemId, new OrderableFulfillDtoDataBuilder()
+            .withCanBeFulfilledByMe(singletonList(commodityTypeId))
+            .build()));
+    when(approvedProductReferenceDataService
+        .getApprovedProducts(any(), any(), any(), any(), any()))
+        .thenReturn(new OrderablesAggregator(Collections.emptyList()));
+    when(authentication.isClientOnly()).thenReturn(true);
+
+    stockCardSummariesService.findStockCards(params);
+
+    verify(approvedProductReferenceDataService)
+        .getApprovedProducts(params.getFacilityId(), params.getProgramIds(),
+            singleton(commodityTypeId), params.getOrderableCode(), params.getOrderableName());
+  }
+
+  @Test
+  public void shouldAcceptNoRequestedOrderablesWhenNonEmptyOnly() {
+    OrderableDto orderable = new OrderableDtoDataBuilder().build();
+    StockCardSummariesV2SearchParams params = nonEmptyOnlyParams(null);
+    when(calculatedStockOnHandService
+        .getStockCardsWithStockOnHand(params.getProgramIds(), params.getFacilityId(),
+            params.getAsOfDate(), Collections.emptyList(), Collections.emptySet()))
+        .thenReturn(singletonList(stockCardOf(params, orderable.getId())));
+    when(approvedProductReferenceDataService
+        .getApprovedProducts(params.getFacilityId(), params.getProgramIds(),
+            singleton(orderable.getId()), params.getOrderableCode(), params.getOrderableName()))
+        .thenReturn(new OrderablesAggregator(singletonList(
+            new ApprovedProductDto(orderable, null, null))));
+    when(authentication.isClientOnly()).thenReturn(true);
+
+    StockCardSummaries result = stockCardSummariesService.findStockCards(params);
+
+    assertEquals(singletonList(orderable), result.getPageOfApprovedProducts());
+  }
+
+  @Test(expected = PermissionMessageException.class)
+  public void shouldCheckViewRightsForStockCardProgramsBeforeReturningNoSummaries() {
+    StockCardSummariesV2SearchParams params = nonEmptyOnlyParams(singletonList(orderableId3));
+    when(calculatedStockOnHandService
+        .getStockCardsWithStockOnHand(params.getProgramIds(), params.getFacilityId(),
+            params.getAsOfDate(), Collections.emptyList(), Collections.emptySet()))
+        .thenReturn(singletonList(stockCardOf(params, orderableId1)));
+    when(homeFacilityPermissionService.checkFacilityAndHomeFacilityLinkage(params.getFacilityId()))
+        .thenReturn(false);
+    doThrow(new PermissionMessageException(new Message("no permission")))
+        .when(permissionService)
+        .canViewStockCard(params.getProgramIds().get(0), params.getFacilityId());
+
+    stockCardSummariesService.findStockCards(params);
+  }
+
+  @Test
   public void shouldNotAskForOrderableFulfillsWhenNoApprovedProducts() {
     StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParamsDataBuilder()
         .withoutLotCode()

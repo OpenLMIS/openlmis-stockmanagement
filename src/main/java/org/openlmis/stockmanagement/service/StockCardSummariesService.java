@@ -163,6 +163,9 @@ public class StockCardSummariesService extends StockCardBaseService {
       orderableIds = findOrderableIdsWithStockCards(stockCards, params.getOrderableIds());
 
       if (orderableIds.isEmpty()) {
+        profiler.start("VALIDATE_VIEW_RIGHTS");
+        validateViewRights(stockCards.stream().map(StockCard::getProgramId),
+            params.getFacilityId());
         profiler.stop().log();
         return new StockCardSummaries(Collections.emptyList(), stockCards,
             Collections.emptyMap(), params.getAsOfDate(), 0L);
@@ -174,15 +177,11 @@ public class StockCardSummariesService extends StockCardBaseService {
         .getApprovedProducts(params.getFacilityId(), params.getProgramIds(),
             orderableIds, params.getOrderableCode(), params.getOrderableName());
 
-    OAuth2Authentication authentication =
-        (OAuth2Authentication) SecurityContextHolder.getContext().getAuthentication();
-    if (!authentication.isClientOnly() && !homeFacilityPermissionService
-        .checkFacilityAndHomeFacilityLinkage(params.getFacilityId())) {
-      profiler.start("VALIDATE_VIEW_RIGHTS");
-      approvedProducts.getApprovedProducts().stream().map(ApprovedProductDto::getProgram)
-          .map(ProgramDto::getId).distinct().forEach(
-              programId -> permissionService.canViewStockCard(programId, params.getFacilityId()));
-    }
+    profiler.start("VALIDATE_VIEW_RIGHTS");
+    validateViewRights(concat(
+        approvedProducts.getApprovedProducts().stream()
+            .map(ApprovedProductDto::getProgram).map(ProgramDto::getId),
+        stockCards.stream().map(StockCard::getProgramId)), params.getFacilityId());
 
     profiler.start("FIND_ORDERABLE_FULFILL_BY_ID");
     Map<UUID, OrderableFulfillDto> orderableFulfillMap =
@@ -282,6 +281,17 @@ public class StockCardSummariesService extends StockCardBaseService {
     }
 
     return orderableIds;
+  }
+
+  private void validateViewRights(Stream<UUID> programIds, UUID facilityId) {
+    OAuth2Authentication authentication =
+        (OAuth2Authentication) SecurityContextHolder.getContext().getAuthentication();
+
+    if (!authentication.isClientOnly()
+        && !homeFacilityPermissionService.checkFacilityAndHomeFacilityLinkage(facilityId)) {
+      programIds.distinct().forEach(
+          programId -> permissionService.canViewStockCard(programId, facilityId));
+    }
   }
 
   private Map<UUID, OrderableFulfillDto> findOrderableFulfills(Collection<UUID> orderableIds) {
