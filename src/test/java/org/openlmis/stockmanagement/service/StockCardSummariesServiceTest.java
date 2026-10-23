@@ -35,6 +35,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableSet;
@@ -382,7 +383,7 @@ public class StockCardSummariesServiceTest {
     ));
 
     StockCardSummariesV2SearchParams params =
-        new StockCardSummariesV2SearchParamsDataBuilder().build();
+        new StockCardSummariesV2SearchParamsDataBuilder().withoutLotCode().build();
 
     when(approvedProductReferenceDataService
         .getApprovedProducts(
@@ -403,6 +404,138 @@ public class StockCardSummariesServiceTest {
         .canViewStockCard(any(UUID.class), any(UUID.class));
 
     stockCardSummariesService.findStockCards(params);
+  }
+
+  @Test
+  public void shouldAskForApprovedProductsOfStockCardOrderablesOnlyWhenNonEmptyOnly() {
+    ProgramDto program = ProgramDto.builder().id(programId).build();
+    OrderableDto tradeItem = new OrderableDtoDataBuilder().build();
+    OrderableDto commodityType = new OrderableDtoDataBuilder().build();
+    StockCardSummariesV2SearchParams params = nonEmptyOnlyParams(Collections.emptyList());
+
+    List<StockCard> stockCards = singletonList(stockCardOf(params, tradeItem.getId()));
+    when(calculatedStockOnHandService
+        .getStockCardsWithStockOnHand(params.getProgramIds(), params.getFacilityId(),
+            params.getAsOfDate(), Collections.emptyList(), Collections.emptySet()))
+        .thenReturn(stockCards);
+    when(orderableFulfillReferenceDataService.findByIds(singleton(tradeItem.getId())))
+        .thenReturn(Collections.singletonMap(tradeItem.getId(),
+            new OrderableFulfillDtoDataBuilder()
+                .withCanBeFulfilledByMe(singletonList(commodityType.getId()))
+                .build()));
+
+    OrderablesAggregator approvedProducts = new OrderablesAggregator(asList(
+        new ApprovedProductDto(tradeItem, program, null),
+        new ApprovedProductDto(commodityType, program, null)));
+    when(approvedProductReferenceDataService
+        .getApprovedProducts(params.getFacilityId(), params.getProgramIds(),
+            new HashSet<>(asList(tradeItem.getId(), commodityType.getId())),
+            params.getOrderableCode(), params.getOrderableName()))
+        .thenReturn(approvedProducts);
+    Map<UUID, OrderableFulfillDto> fulfillMap = Collections.singletonMap(commodityType.getId(),
+        new OrderableFulfillDtoDataBuilder()
+            .withCanFulfillForMe(singletonList(tradeItem.getId()))
+            .build());
+    when(orderableFulfillReferenceDataService
+        .findByIds(asList(tradeItem.getId(), commodityType.getId())))
+        .thenReturn(fulfillMap);
+    when(homeFacilityPermissionService.checkFacilityAndHomeFacilityLinkage(params.getFacilityId()))
+        .thenReturn(false);
+
+    StockCardSummaries result = stockCardSummariesService.findStockCards(params);
+
+    assertEquals(asList(tradeItem, commodityType), result.getPageOfApprovedProducts());
+    assertEquals(stockCards, result.getStockCardsForFulfillOrderables());
+    assertEquals(fulfillMap, result.getOrderableFulfillMap());
+    verify(permissionService).canViewStockCard(programId, params.getFacilityId());
+  }
+
+  @Test
+  public void shouldReturnNoSummariesWithoutAskingReferenceDataWhenNoStockCardsAndNonEmptyOnly() {
+    StockCardSummariesV2SearchParams params = nonEmptyOnlyParams(Collections.emptyList());
+    when(calculatedStockOnHandService
+        .getStockCardsWithStockOnHand(params.getProgramIds(), params.getFacilityId(),
+            params.getAsOfDate(), Collections.emptyList(), Collections.emptySet()))
+        .thenReturn(Collections.emptyList());
+
+    StockCardSummaries result = stockCardSummariesService.findStockCards(params);
+
+    assertThat(result.getPageOfApprovedProducts(), hasSize(0));
+    assertThat(result.getOrderableFulfillMap().isEmpty(), is(true));
+    verifyZeroInteractions(approvedProductReferenceDataService,
+        orderableFulfillReferenceDataService);
+  }
+
+  @Test
+  public void shouldNarrowStockCardOrderablesToRequestedOnesWhenNonEmptyOnly() {
+    StockCardSummariesV2SearchParams params =
+        nonEmptyOnlyParams(asList(orderableId1, orderableId3));
+    when(calculatedStockOnHandService
+        .getStockCardsWithStockOnHand(params.getProgramIds(), params.getFacilityId(),
+            params.getAsOfDate(), Collections.emptyList(), Collections.emptySet()))
+        .thenReturn(asList(stockCardOf(params, orderableId1), stockCardOf(params, orderableId2)));
+    when(approvedProductReferenceDataService
+        .getApprovedProducts(any(), any(), any(), any(), any()))
+        .thenReturn(new OrderablesAggregator(Collections.emptyList()));
+    when(authentication.isClientOnly()).thenReturn(true);
+
+    stockCardSummariesService.findStockCards(params);
+
+    verify(orderableFulfillReferenceDataService)
+        .findByIds(new HashSet<>(asList(orderableId1, orderableId2)));
+    verify(approvedProductReferenceDataService)
+        .getApprovedProducts(params.getFacilityId(), params.getProgramIds(),
+            singleton(orderableId1), params.getOrderableCode(), params.getOrderableName());
+  }
+
+  @Test
+  public void shouldReturnNoSummariesWhenRequestedOrderablesHaveNoStockCardsAndNonEmptyOnly() {
+    StockCardSummariesV2SearchParams params = nonEmptyOnlyParams(singletonList(orderableId3));
+    when(calculatedStockOnHandService
+        .getStockCardsWithStockOnHand(params.getProgramIds(), params.getFacilityId(),
+            params.getAsOfDate(), Collections.emptyList(), Collections.emptySet()))
+        .thenReturn(singletonList(stockCardOf(params, orderableId1)));
+
+    StockCardSummaries result = stockCardSummariesService.findStockCards(params);
+
+    assertThat(result.getPageOfApprovedProducts(), hasSize(0));
+    verifyZeroInteractions(approvedProductReferenceDataService);
+  }
+
+  @Test
+  public void shouldNotAskForOrderableFulfillsWhenNoApprovedProducts() {
+    StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParamsDataBuilder()
+        .withoutLotCode()
+        .build();
+    when(approvedProductReferenceDataService
+        .getApprovedProducts(params.getFacilityId(), params.getProgramIds(),
+            params.getOrderableIds(), params.getOrderableCode(), params.getOrderableName()))
+        .thenReturn(new OrderablesAggregator(Collections.emptyList()));
+    when(authentication.isClientOnly()).thenReturn(true);
+
+    StockCardSummaries result = stockCardSummariesService.findStockCards(params);
+
+    assertThat(result.getPageOfApprovedProducts(), hasSize(0));
+    verifyZeroInteractions(orderableFulfillReferenceDataService);
+  }
+
+  private StockCardSummariesV2SearchParams nonEmptyOnlyParams(List<UUID> orderableIds) {
+    return new StockCardSummariesV2SearchParamsDataBuilder()
+        .withNonEmptyOnly()
+        .withoutLotCode()
+        .withOrderableIds(orderableIds)
+        .build();
+  }
+
+  private StockCard stockCardOf(StockCardSummariesV2SearchParams params, UUID orderableId) {
+    StockEvent event = new StockEventDataBuilder()
+        .withFacility(params.getFacilityId())
+        .withProgram(params.getProgramIds().get(0))
+        .build();
+    return new StockCardDataBuilder(event)
+        .withOrderableId(orderableId)
+        .withStockOnHand(10)
+        .build();
   }
 
   @Test

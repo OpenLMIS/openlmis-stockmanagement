@@ -71,4 +71,14 @@ public class StockCardSummariesV2SearchParamsDataBuilder {
     this.orderableId = orderableId;
     return this;
   }
+
+  public StockCardSummariesV2SearchParamsDataBuilder withNonEmptyOnly() {
+    this.nonEmptyOnly = true;
+    return this;
+  }
+
+  public StockCardSummariesV2SearchParamsDataBuilder withoutLotCode() {
+    this.lotCode = null;
+    return this;
+  }
 }
