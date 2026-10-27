@@ -29,6 +29,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -80,6 +81,7 @@ import org.springframework.stereotype.Service;
 @SuppressWarnings("PMD.TooManyMethods")
 public class StockCardSummariesService extends StockCardBaseService {
   private static final Logger LOGGER = LoggerFactory.getLogger(StockCardSummariesService.class);
+  private static final String COMMODITY_TYPE = "commodityType";
 
   @Autowired
   private OrderableReferenceDataService orderableReferenceDataService;
@@ -152,61 +154,40 @@ public class StockCardSummariesService extends StockCardBaseService {
   public StockCardSummaries findStockCards(StockCardSummariesV2SearchParams params) {
     Profiler profiler = new Profiler("FIND_STOCK_CARD_SUMMARIES_FOR_PARAMS");
     profiler.setLogger(LOGGER);
-    OAuth2Authentication authentication =
-        (OAuth2Authentication) SecurityContextHolder.getContext().getAuthentication();
+
+    profiler.start("FIND_STOCK_CARD_BY_PROGRAM_AND_FACILITY");
+    List<StockCard> stockCards = findStockCardsWithStockOnHand(params);
+
+    Collection<UUID> orderableIds = params.getOrderableIds();
+    if (params.isNonEmptyOnly()) {
+      profiler.start("FIND_ORDERABLES_WITH_STOCK_CARDS");
+      orderableIds = findOrderableIdsWithStockCards(stockCards, params.getOrderableIds());
+
+      if (orderableIds.isEmpty()) {
+        profiler.start("VALIDATE_VIEW_RIGHTS");
+        // with nothing to return, a requested program the user may not view still answers 403
+        validateViewRights(concat(stockCards.stream().map(StockCard::getProgramId),
+            params.getProgramIds().stream()), params.getFacilityId());
+        profiler.stop().log();
+        return new StockCardSummaries(Collections.emptyList(), stockCards,
+            Collections.emptyMap(), params.getAsOfDate(), 0L);
+      }
+    }
 
     profiler.start("GET_APPROVED_PRODUCTS");
     OrderablesAggregator approvedProducts = approvedProductReferenceDataService
         .getApprovedProducts(params.getFacilityId(), params.getProgramIds(),
-            params.getOrderableIds(), params.getOrderableCode(), params.getOrderableName());
+            orderableIds, params.getOrderableCode(), params.getOrderableName());
 
-    if (!authentication.isClientOnly() && !homeFacilityPermissionService
-        .checkFacilityAndHomeFacilityLinkage(params.getFacilityId())) {
-      profiler.start("VALIDATE_VIEW_RIGHTS");
-      approvedProducts.getApprovedProducts().stream().map(ApprovedProductDto::getProgram)
-          .map(ProgramDto::getId).distinct().forEach(
-              programId -> permissionService.canViewStockCard(programId, params.getFacilityId()));
-    }
+    profiler.start("VALIDATE_VIEW_RIGHTS");
+    validateViewRights(concat(
+        approvedProducts.getApprovedProducts().stream()
+            .map(ApprovedProductDto::getProgram).map(ProgramDto::getId),
+        stockCards.stream().map(StockCard::getProgramId)), params.getFacilityId());
 
     profiler.start("FIND_ORDERABLE_FULFILL_BY_ID");
-    Map<UUID, OrderableFulfillDto> orderableFulfillMap = orderableFulfillService.findByIds(
-        approvedProducts.getIdentifiers());
-
-    profiler.start("FIND_STOCK_CARD_BY_PROGRAM_AND_FACILITY");
-
-    List<UUID> orderableIdsForStockCard = Collections.emptyList();
-    Set<UUID> lotCodeIds = Collections.emptySet();
-    String lotCode = params.getLotCode();
-
-    if (!StringUtils.isBlank(lotCode)) {
-      RequestParameters searchParams = RequestParameters
-          .init()
-          .set("size", Integer.MAX_VALUE)
-          .set("lotCode", lotCode);
-
-      Page<LotDto> lotPage = lotReferenceDataService.getPage(searchParams);
-
-      List<UUID> tradeItemsMatchingLotCode = lotPage.map(LotDto::getTradeItemId)
-          .toList();
-
-      lotCodeIds = lotPage.map(LotDto::getId).toSet();
-
-      searchParams = RequestParameters
-          .init()
-          .set("size", tradeItemsMatchingLotCode.size())
-          .set("tradeItemId", tradeItemsMatchingLotCode);
-
-      orderableIdsForStockCard = orderableReferenceDataService.getPage(searchParams)
-          .stream()
-          .map(OrderableDto::getId)
-              .collect(toList());
-    }
-
-    // FIXME: Fix page retrieving/calculation,
-    //  page size may be wrong when there are orderables matching not only by lot codes
-    List<StockCard> stockCards = calculatedStockOnHandService
-        .getStockCardsWithStockOnHand(params.getProgramIds(), params.getFacilityId(),
-            params.getAsOfDate(), orderableIdsForStockCard, lotCodeIds);
+    Map<UUID, OrderableFulfillDto> orderableFulfillMap =
+        findOrderableFulfills(commodityTypeIds(approvedProducts));
 
     Page<ApprovedProductDto> orderablesPage = approvedProducts.getApprovedProducts();
     StockCardSummaries result = new StockCardSummaries(
@@ -246,6 +227,89 @@ public class StockCardSummariesService extends StockCardBaseService {
     profiler.start("CARDS_TO_DTO");
     List<StockCardDto> cardDtos = cardsToDtos(pageOfCards.getContent());
     return new PageImpl<>(cardDtos, pageable, pageOfCards.getTotalElements());
+  }
+
+  private List<StockCard> findStockCardsWithStockOnHand(StockCardSummariesV2SearchParams params) {
+    List<UUID> orderableIdsForStockCard = Collections.emptyList();
+    Set<UUID> lotCodeIds = Collections.emptySet();
+    String lotCode = params.getLotCode();
+
+    if (!StringUtils.isBlank(lotCode)) {
+      RequestParameters searchParams = RequestParameters
+          .init()
+          .set("size", Integer.MAX_VALUE)
+          .set("lotCode", lotCode);
+
+      Page<LotDto> lotPage = lotReferenceDataService.getPage(searchParams);
+
+      List<UUID> tradeItemsMatchingLotCode = lotPage.map(LotDto::getTradeItemId)
+          .toList();
+
+      lotCodeIds = lotPage.map(LotDto::getId).toSet();
+
+      searchParams = RequestParameters
+          .init()
+          .set("size", tradeItemsMatchingLotCode.size())
+          .set("tradeItemId", tradeItemsMatchingLotCode);
+
+      orderableIdsForStockCard = orderableReferenceDataService.getPage(searchParams)
+          .stream()
+          .map(OrderableDto::getId)
+              .collect(toList());
+    }
+
+    // FIXME: Fix page retrieving/calculation,
+    //  page size may be wrong when there are orderables matching not only by lot codes
+    return calculatedStockOnHandService
+        .getStockCardsWithStockOnHand(params.getProgramIds(), params.getFacilityId(),
+            params.getAsOfDate(), orderableIdsForStockCard, lotCodeIds);
+  }
+
+  private Set<UUID> findOrderableIdsWithStockCards(List<StockCard> stockCards,
+      Collection<UUID> requestedOrderableIds) {
+    Set<UUID> stockCardOrderableIds = stockCards.stream()
+        .map(StockCard::getOrderableId)
+        .collect(toSet());
+
+    Set<UUID> orderableIds = new HashSet<>(stockCardOrderableIds);
+    // a commodity type is non-empty when one of its trade items has a stock card
+    findOrderableFulfills(stockCardOrderableIds).values().stream()
+        .map(OrderableFulfillDto::getCanBeFulfilledByMe)
+        .filter(fulfilledBy -> !isEmpty(fulfilledBy))
+        .forEach(orderableIds::addAll);
+
+    if (!isEmpty(requestedOrderableIds)) {
+      orderableIds.retainAll(requestedOrderableIds);
+    }
+
+    return orderableIds;
+  }
+
+  private void validateViewRights(Stream<UUID> programIds, UUID facilityId) {
+    OAuth2Authentication authentication =
+        (OAuth2Authentication) SecurityContextHolder.getContext().getAuthentication();
+
+    if (!authentication.isClientOnly()
+        && !homeFacilityPermissionService.checkFacilityAndHomeFacilityLinkage(facilityId)) {
+      programIds.distinct().forEach(
+          programId -> permissionService.canViewStockCard(programId, facilityId));
+    }
+  }
+
+  // only a commodity type can be fulfilled by other orderables; the builders read nothing else
+  private List<UUID> commodityTypeIds(OrderablesAggregator approvedProducts) {
+    return approvedProducts.getApprovedProducts().stream()
+        .map(ApprovedProductDto::getOrderable)
+        .filter(orderable -> orderable.getIdentifiers().containsKey(COMMODITY_TYPE))
+        .map(OrderableDto::getId)
+        .collect(toList());
+  }
+
+  private Map<UUID, OrderableFulfillDto> findOrderableFulfills(Collection<UUID> orderableIds) {
+    // without ids referencedata answers with the fulfills of every orderable
+    return isEmpty(orderableIds)
+        ? Collections.emptyMap()
+        : orderableFulfillService.findByIds(orderableIds);
   }
 
   /**
