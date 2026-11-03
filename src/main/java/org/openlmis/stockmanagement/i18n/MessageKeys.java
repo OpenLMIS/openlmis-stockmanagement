@@ -27,6 +27,9 @@ public abstract class MessageKeys {
       SERVICE_PREFIX + ".email.nearExpiry.subject";
   public static final String NOTIFICATION_NEAR_EXPIRY_CONTENT =
       SERVICE_PREFIX + ".email.nearExpiry.content";
+  //stock card print
+  public static final String STOCK_CARD_PHYSICAL_INVENTORY =
+      SERVICE_PREFIX + ".stockCard.physicalInventory";
   //server errors
   public static final String SERVER_ERROR_SHALLOW_COPY
       = SERVICE_PREFIX + ".error.shallowCopy";

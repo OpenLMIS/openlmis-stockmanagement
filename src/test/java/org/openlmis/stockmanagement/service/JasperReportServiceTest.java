@@ -24,6 +24,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.STOCK_CARD_PHYSICAL_INVENTORY;
 import static org.openlmis.stockmanagement.service.JasperReportService.PI_LINES_REPORT_URL;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
@@ -32,7 +33,12 @@ import java.io.ObjectOutputStream;
 import java.sql.Connection;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import javax.sql.DataSource;
@@ -49,10 +55,18 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.openlmis.stockmanagement.domain.JasperTemplate;
+import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
+import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
+import org.openlmis.stockmanagement.domain.reason.ReasonType;
+import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockCardDto;
+import org.openlmis.stockmanagement.dto.StockCardLineItemDto;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
+import org.openlmis.stockmanagement.i18n.MessageService;
 import org.openlmis.stockmanagement.service.report.ReportService;
 import org.openlmis.stockmanagement.testutils.StockCardDtoDataBuilder;
+import org.openlmis.stockmanagement.util.Message;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -60,6 +74,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({JasperFillManager.class,JasperExportManager.class})
+@SuppressWarnings("PMD.TooManyMethods")
 public class JasperReportServiceTest {
 
   private static final String DATE_FORMAT = "dd/MM/yyyy";
@@ -68,6 +83,9 @@ public class JasperReportServiceTest {
   private static final String GROUPING_SEPARATOR = ",";
   private static final String GROUPING_SIZE = "3";
   private static final String SHOW_IN_DOSES = "showInDoses";
+  private static final String PHYSICAL_INVENTORY = "Physical Inventory";
+  private static final String DAMAGE = "Damage";
+  private static final String TRANSFER_IN = "Transfer In";
 
   private JasperReportService jasperReportService;
 
@@ -86,13 +104,16 @@ public class JasperReportServiceTest {
   @Mock
   private ReportService reportService;
 
+  @Mock
+  private MessageService messageService;
+
   private byte[] testReportData;
   
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
     jasperReportService = spy(new JasperReportService(stockCardService, stockCardSummariesService,
-        reportService, dataSource));
+        reportService, dataSource, messageService));
     ReflectionTestUtils.setField(jasperReportService, "dateFormat", DATE_FORMAT);
     ReflectionTestUtils.setField(jasperReportService, "dateTimeFormat", DATE_TIME_FORMAT);
     ReflectionTestUtils.setField(jasperReportService, "timeZoneId", TIME_ZONE_ID);
@@ -218,6 +239,146 @@ public class JasperReportServiceTest {
     byte[] reportData = jasperReportService.generateReport(jasperTemplate, params);
 
     assertEquals(testReportData, reportData);
+  }
+
+  @Test
+  public void shouldPrintOneRowPerAdjustmentForPhysicalInventoryWithAdjustments() {
+    StockCardLineItem lineItem = physicalInventoryLine(0, 100,
+        StockCardLineItemReason.physicalDebit(),
+        adjustment(ReasonType.DEBIT, "Ajustement Inventaire (-)", 100));
+
+    List<StockCardLineItemDto> printed = printStockCard("en", lineItem);
+
+    assertEquals(1, printed.size());
+    assertRow(printed.get(0), "Ajustement Inventaire (-)", 100, 0);
+  }
+
+  @Test
+  public void shouldChainStockOnHandAcrossAdjustmentRows() {
+    StockCardLineItem lineItem = physicalInventoryLine(120, 20,
+        StockCardLineItemReason.physicalCredit(),
+        adjustment(ReasonType.CREDIT, TRANSFER_IN, 30),
+        adjustment(ReasonType.DEBIT, DAMAGE, 10));
+
+    List<StockCardLineItemDto> printed = printStockCard("en", lineItem);
+
+    assertEquals(2, printed.size());
+    assertRow(printed.get(0), DAMAGE, 10, 120);
+    assertRow(printed.get(1), TRANSFER_IN, 30, 130);
+  }
+
+  @Test
+  public void shouldPrintPhysicalInventoryReasonForPhysicalInventoryWithoutAdjustments() {
+    Message physicalInventory = new Message(STOCK_CARD_PHYSICAL_INVENTORY);
+    when(messageService.localize(physicalInventory, Locale.ENGLISH))
+        .thenReturn(physicalInventory.new LocalizedMessage(PHYSICAL_INVENTORY));
+    StockCardLineItem lineItem = physicalInventoryLine(0, 0,
+        StockCardLineItemReason.physicalBalance());
+
+    List<StockCardLineItemDto> printed = printStockCard("en", lineItem);
+
+    assertEquals(1, printed.size());
+    assertRow(printed.get(0), PHYSICAL_INVENTORY, 0, 0);
+  }
+
+  @Test
+  public void shouldLocalizePhysicalInventoryReasonInReportLanguage() {
+    Message physicalInventory = new Message(STOCK_CARD_PHYSICAL_INVENTORY);
+    when(messageService.localize(physicalInventory, Locale.FRENCH))
+        .thenReturn(physicalInventory.new LocalizedMessage("Inventaire physique"));
+    StockCardLineItem lineItem = physicalInventoryLine(50, 50,
+        StockCardLineItemReason.physicalCredit());
+
+    List<StockCardLineItemDto> printed = printStockCard("fr", lineItem);
+
+    assertEquals("Inventaire physique", printed.get(0).getLineItem().getReason().getName());
+  }
+
+  @Test
+  public void shouldKeepReasonFreeTextOnPhysicalInventoryRows() {
+    StockCardLineItem lineItem = physicalInventoryLine(120, 20,
+        StockCardLineItemReason.physicalCredit(),
+        adjustment(ReasonType.CREDIT, TRANSFER_IN, 30),
+        adjustment(ReasonType.DEBIT, DAMAGE, 10));
+    lineItem.setReasonFreeText("note");
+
+    List<StockCardLineItemDto> printed = printStockCard("en", lineItem);
+
+    assertEquals("note", printed.get(0).getLineItem().getReasonFreeText());
+    assertEquals("note", printed.get(1).getLineItem().getReasonFreeText());
+  }
+
+  @Test
+  public void shouldPrintNonPhysicalInventoryLineItemsUnchanged() {
+    StockCardLineItem lineItem = StockCardLineItem.builder()
+        .occurredDate(LocalDate.of(2017, 2, 13))
+        .reason(reason(ReasonType.DEBIT, ReasonCategory.ADJUSTMENT, DAMAGE))
+        .quantity(5)
+        .stockOnHand(95)
+        .build();
+
+    List<StockCardLineItemDto> printed = printStockCard("en", lineItem);
+
+    assertEquals(1, printed.size());
+    assertRow(printed.get(0), DAMAGE, 5, 95);
+  }
+
+  private List<StockCardLineItemDto> printStockCard(String lang,
+      StockCardLineItem... lineItems) {
+    StockCardDto stockCard = StockCardDtoDataBuilder.createStockCardDto();
+    List<StockCardLineItemDto> lineItemDtos = new ArrayList<>();
+    for (StockCardLineItem lineItem : lineItems) {
+      lineItemDtos.add(StockCardLineItemDto.builder().lineItem(lineItem).build());
+    }
+    stockCard.setLineItems(lineItemDtos);
+    when(stockCardService.findStockCardById(stockCard.getId())).thenReturn(stockCard);
+    when(reportService.fillAndExportReport(any(String.class), any(byte[].class), anyMap()))
+        .thenReturn(testReportData);
+
+    jasperReportService.generateStockCardReport(stockCard.getId(), lang, true);
+
+    verify(reportService).fillAndExportReport(eq("stockCard"), any(byte[].class),
+        paramsCaptor.capture());
+    @SuppressWarnings("unchecked")
+    List<StockCardDto> datasource = (List<StockCardDto>) paramsCaptor.getValue()
+        .get("datasource");
+    return datasource.get(0).getLineItems();
+  }
+
+  private void assertRow(StockCardLineItemDto row, String reasonName, int quantity,
+      int stockOnHand) {
+    assertEquals(reasonName, row.getLineItem().getReason().getName());
+    assertEquals(Integer.valueOf(quantity), row.getLineItem().getQuantity());
+    assertEquals(Integer.valueOf(stockOnHand), row.getLineItem().getStockOnHand());
+  }
+
+  private StockCardLineItem physicalInventoryLine(int stockOnHand, int quantity,
+      StockCardLineItemReason generatedReason,
+      PhysicalInventoryLineItemAdjustment... adjustments) {
+    return StockCardLineItem.builder()
+        .occurredDate(LocalDate.of(2026, 9, 10))
+        .reason(generatedReason)
+        .quantity(quantity)
+        .stockOnHand(stockOnHand)
+        .stockAdjustments(new ArrayList<>(Arrays.asList(adjustments)))
+        .build();
+  }
+
+  private PhysicalInventoryLineItemAdjustment adjustment(ReasonType type, String name,
+      int quantity) {
+    return PhysicalInventoryLineItemAdjustment.builder()
+        .reason(reason(type, ReasonCategory.ADJUSTMENT, name))
+        .quantity(quantity)
+        .build();
+  }
+
+  private StockCardLineItemReason reason(ReasonType type, ReasonCategory category,
+      String name) {
+    return StockCardLineItemReason.builder()
+        .reasonType(type)
+        .reasonCategory(category)
+        .name(name)
+        .build();
   }
 
   private DecimalFormat createDecimalFormat() {
