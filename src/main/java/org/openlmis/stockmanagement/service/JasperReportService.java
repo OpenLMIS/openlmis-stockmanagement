@@ -143,12 +143,19 @@ public class JasperReportService {
   private List<StockCardLineItemDto> toPrintLineItems(List<StockCardLineItemDto> lineItems,
       String lang) {
     List<StockCardLineItemDto> rows = new ArrayList<>();
+    String physicalInventoryName = null;
     for (StockCardLineItemDto lineItemDto : lineItems) {
       StockCardLineItem lineItem = lineItemDto.getLineItem();
       if (!isPhysicalInventoryReason(lineItem.getReason())) {
         rows.add(lineItemDto);
       } else if (isEmpty(lineItem.getStockAdjustments())) {
-        rows.add(printRow(lineItemDto, physicalInventoryReason(lineItem.getReason(), lang),
+        if (physicalInventoryName == null) {
+          physicalInventoryName = messageService.localize(
+              new Message(STOCK_CARD_PHYSICAL_INVENTORY), Locale.forLanguageTag(lang))
+              .getMessage();
+        }
+        rows.add(printRow(lineItemDto,
+            physicalInventoryReason(lineItem.getReason(), physicalInventoryName),
             lineItem.getQuantity(), lineItem.getStockOnHand()));
       } else {
         List<PhysicalInventoryLineItemAdjustment> adjustments =
@@ -176,9 +183,7 @@ public class JasperReportService {
   }
 
   private StockCardLineItemReason physicalInventoryReason(StockCardLineItemReason reason,
-      String lang) {
-    String name = messageService.localize(new Message(STOCK_CARD_PHYSICAL_INVENTORY),
-        Locale.forLanguageTag(lang)).getMessage();
+      String name) {
     return StockCardLineItemReason.builder()
         .reasonType(reason.getReasonType())
         .reasonCategory(ReasonCategory.PHYSICAL_INVENTORY)

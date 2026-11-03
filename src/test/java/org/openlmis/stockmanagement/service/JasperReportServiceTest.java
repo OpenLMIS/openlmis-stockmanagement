@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.STOCK_CARD_PHYSICAL_INVENTORY;
@@ -292,6 +293,21 @@ public class JasperReportServiceTest {
     List<StockCardLineItemDto> printed = printStockCard("fr", lineItem);
 
     assertEquals("Inventaire physique", printed.get(0).getLineItem().getReason().getName());
+  }
+
+  @Test
+  public void shouldLocalizePhysicalInventoryReasonOncePerReport() {
+    Message physicalInventory = new Message(STOCK_CARD_PHYSICAL_INVENTORY);
+    when(messageService.localize(physicalInventory, Locale.ENGLISH))
+        .thenReturn(physicalInventory.new LocalizedMessage(PHYSICAL_INVENTORY));
+
+    List<StockCardLineItemDto> printed = printStockCard("en",
+        physicalInventoryLine(50, 50, StockCardLineItemReason.physicalCredit()),
+        physicalInventoryLine(40, 10, StockCardLineItemReason.physicalDebit()));
+
+    assertRow(printed.get(0), PHYSICAL_INVENTORY, 10, 40);
+    assertRow(printed.get(1), PHYSICAL_INVENTORY, 50, 50);
+    verify(messageService, times(1)).localize(physicalInventory, Locale.ENGLISH);
   }
 
   @Test
