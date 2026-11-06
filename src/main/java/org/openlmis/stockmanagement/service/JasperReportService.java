@@ -16,10 +16,12 @@
 package org.openlmis.stockmanagement.service;
 
 import static java.util.Collections.singletonList;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_CLASS_NOT_FOUND;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_GENERATE_REPORT_FAILED;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_IO;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.ERROR_REPORT_ID_NOT_FOUND;
+import static org.openlmis.stockmanagement.i18n.MessageKeys.STOCK_CARD_PHYSICAL_INVENTORY;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -30,9 +32,12 @@ import java.io.ObjectOutputStream;
 import java.sql.Connection;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
@@ -49,10 +54,17 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.openlmis.stockmanagement.domain.JasperTemplate;
+import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
+import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItemAdjustment;
+import org.openlmis.stockmanagement.domain.reason.ReasonCategory;
+import org.openlmis.stockmanagement.domain.reason.ReasonType;
+import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockCardDto;
+import org.openlmis.stockmanagement.dto.StockCardLineItemDto;
 import org.openlmis.stockmanagement.dto.referencedata.OrderableDto;
 import org.openlmis.stockmanagement.exception.JasperReportViewException;
 import org.openlmis.stockmanagement.exception.ResourceNotFoundException;
+import org.openlmis.stockmanagement.i18n.MessageService;
 import org.openlmis.stockmanagement.service.report.ReportService;
 import org.openlmis.stockmanagement.util.Message;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,6 +72,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("PMD.TooManyMethods")
 public class JasperReportService {
 
   static final String CARD_REPORT_URL = "/jasperTemplates/stockCard.jrxml";
@@ -78,6 +91,7 @@ public class JasperReportService {
   private final StockCardSummariesService stockCardSummariesService;
   private final ReportService reportService;
   private final DataSource replicationDataSource;
+  private final MessageService messageService;
 
   @Value("${dateFormat}")
   private String dateFormat;
@@ -109,6 +123,7 @@ public class JasperReportService {
     }
 
     Collections.reverse(stockCardDto.getLineItems());
+    stockCardDto.setLineItems(toPrintLineItems(stockCardDto.getLineItems(), lang));
     Map<String, Object> params = new HashMap<>();
     params.put(PARAM_DATASOURCE, singletonList(stockCardDto));
     params.put("hasLot", stockCardDto.hasLot());
@@ -121,6 +136,82 @@ public class JasperReportService {
     JasperReport compiledReport = compileReportFromTemplateUrl(CARD_REPORT_URL);
     return reportService.fillAndExportReport("stockCard",
         serializeReport(compiledReport), params);
+  }
+
+  // The same rows as the stock card page: a physical inventory shows its adjustments, or a
+  // "Physical Inventory" row when it has none, not the reason derived from the change in SOH.
+  private List<StockCardLineItemDto> toPrintLineItems(List<StockCardLineItemDto> lineItems,
+      String lang) {
+    List<StockCardLineItemDto> rows = new ArrayList<>();
+    String physicalInventoryName = null;
+    for (StockCardLineItemDto lineItemDto : lineItems) {
+      StockCardLineItem lineItem = lineItemDto.getLineItem();
+      if (!isPhysicalInventoryReason(lineItem.getReason())) {
+        rows.add(lineItemDto);
+      } else if (isEmpty(lineItem.getStockAdjustments())) {
+        if (physicalInventoryName == null) {
+          physicalInventoryName = messageService.localize(
+              new Message(STOCK_CARD_PHYSICAL_INVENTORY), Locale.forLanguageTag(lang))
+              .getMessage();
+        }
+        rows.add(printRow(lineItemDto,
+            physicalInventoryReason(lineItem.getReason(), physicalInventoryName),
+            lineItem.getQuantity(), lineItem.getStockOnHand()));
+      } else {
+        List<PhysicalInventoryLineItemAdjustment> adjustments =
+            new ArrayList<>(lineItem.getStockAdjustments());
+        Collections.reverse(adjustments);
+        int stockOnHand = lineItem.getStockOnHand();
+        for (PhysicalInventoryLineItemAdjustment adjustment : adjustments) {
+          rows.add(printRow(lineItemDto, adjustment.getReason(), adjustment.getQuantity(),
+              stockOnHand));
+          stockOnHand -= signedQuantity(adjustment);
+        }
+      }
+    }
+    return rows;
+  }
+
+  private boolean isPhysicalInventoryReason(StockCardLineItemReason reason) {
+    return reason != null && reason.getReasonCategory() == ReasonCategory.PHYSICAL_INVENTORY;
+  }
+
+  private int signedQuantity(PhysicalInventoryLineItemAdjustment adjustment) {
+    return adjustment.getReason().getReasonType() == ReasonType.DEBIT
+        ? -adjustment.getQuantity()
+        : adjustment.getQuantity();
+  }
+
+  private StockCardLineItemReason physicalInventoryReason(StockCardLineItemReason reason,
+      String name) {
+    return StockCardLineItemReason.builder()
+        .reasonType(reason.getReasonType())
+        .reasonCategory(ReasonCategory.PHYSICAL_INVENTORY)
+        .name(name)
+        .tags(new HashSet<>())
+        .build();
+  }
+
+  private StockCardLineItemDto printRow(StockCardLineItemDto lineItemDto,
+      StockCardLineItemReason reason, Integer quantity, Integer stockOnHand) {
+    StockCardLineItem lineItem = lineItemDto.getLineItem();
+    StockCardLineItem row = StockCardLineItem.builder()
+        .occurredDate(lineItem.getOccurredDate())
+        .sourceFreeText(lineItem.getSourceFreeText())
+        .destinationFreeText(lineItem.getDestinationFreeText())
+        .reasonFreeText(lineItem.getReasonFreeText())
+        .documentNumber(lineItem.getDocumentNumber())
+        .signature(lineItem.getSignature())
+        .username(lineItem.getUsername())
+        .reason(reason)
+        .quantity(quantity)
+        .stockOnHand(stockOnHand)
+        .build();
+    return StockCardLineItemDto.builder()
+        .lineItem(row)
+        .source(lineItemDto.getSource())
+        .destination(lineItemDto.getDestination())
+        .build();
   }
 
   /**

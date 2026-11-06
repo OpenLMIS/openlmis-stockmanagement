@@ -6,6 +6,7 @@ Improvements:
 
 Bug fixes:
 * [OLMIS-8383](https://openlmis.atlassian.net/browse/OLMIS-8383): The physical inventory error for a duplicated product and lot names them (product code, name and lot code) instead of showing an internal object reference.
+* [OLMIS-5784](https://openlmis.atlassian.net/browse/OLMIS-5784): The printed stock card shows the same reason rows as the stock card page for physical inventories: one row per adjustment reason, or "Physical Inventory" in the report's language when there are none, instead of Overstock, Understock or Balance adjustment.
 
 5.4.2 / 2026-10-16
 ==================
