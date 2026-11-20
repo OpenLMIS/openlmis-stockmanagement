@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.web.stockcardsummariesv2;
 
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
 import static org.junit.Assert.assertEquals;
@@ -238,6 +239,34 @@ public class StockCardSummariesV2DtoBuilderTest {
     assertEquals(2, result.size());
     assertEquals(result.get(0), summary3);
     assertEquals(result.get(1), summary2);
+  }
+
+  @Test
+  public void shouldOrderSummariesWithTheSameNumberOfCardsByProductCode() {
+    orderable1.setProductCode("B");
+    orderable2.setProductCode("D");
+    orderable3.setProductCode("A");
+    orderable4.setProductCode("C");
+    List<StockCard> stockCards = asList(stockCard1, stockCard3a);
+    List<OrderableDto> products = asList(orderable1, orderable2, orderable3, orderable4);
+    List<OrderableDto> reversed = asList(orderable4, orderable3, orderable2, orderable1);
+
+    assertEquals(
+        asList(orderable3.getId(), orderable1.getId(), orderable4.getId(), orderable2.getId()),
+        orderableIds(builder.build(products, stockCards, fulfillMap, false)));
+    assertEquals(
+        asList(orderable3.getId(), orderable1.getId()),
+        orderableIds(builder.build(products, stockCards, fulfillMap, true)));
+    assertEquals(
+        builder.build(products, stockCards, fulfillMap, false),
+        builder.build(reversed, stockCards, fulfillMap, false));
+    assertEquals(
+        builder.build(products, stockCards, fulfillMap, true),
+        builder.build(reversed, stockCards, fulfillMap, true));
+  }
+
+  private List<UUID> orderableIds(List<StockCardSummaryV2Dto> summaries) {
+    return summaries.stream().map(summary -> summary.getOrderable().getId()).collect(toList());
   }
 
   @Test
