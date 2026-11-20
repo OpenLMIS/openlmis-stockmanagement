@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.web.external.stockcardsummaries;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -24,7 +25,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -63,6 +66,81 @@ public class StockCardSummariesExternalDtoBuilderTest {
   public void shouldBuildStockCardSummaries() {
     final TestContext testContext = prepareTestContext();
 
+    final List<StockCardSummaryExternalDto> result = prepareBuilder(testContext)
+        .build(testContext.approvedProducts, testContext.stockCards, testContext.orderableFulfills,
+            true, profiler);
+
+    assertNotNull(result);
+    assertEquals(testContext.orderables.size(), result.size());
+  }
+
+  @Test
+  public void shouldBuildSummariesInTheSameOrderForAnyOrderOfApprovedProducts() {
+    final TestContext testContext = prepareTestContext();
+    final StockCardSummariesExternalDtoBuilder builder = prepareBuilder(testContext);
+
+    final List<ApprovedProductDto> reversed = new ArrayList<>(testContext.approvedProducts);
+    Collections.reverse(reversed);
+
+    final List<StockCardSummaryExternalDto> result = builder
+        .build(testContext.approvedProducts, testContext.stockCards, testContext.orderableFulfills,
+            true, profiler);
+    final List<StockCardSummaryExternalDto> resultForReversed = builder
+        .build(reversed, testContext.stockCards, testContext.orderableFulfills, true, profiler);
+
+    assertEquals(
+        testContext.orderables.stream().map(OrderableDto::getProductCode).sorted()
+            .collect(toList()),
+        result.stream().map(StockCardSummaryExternalDto::getOrderable).collect(toList()));
+    assertEquals(result, resultForReversed);
+  }
+
+  @Test
+  public void shouldOrderSummariesByNumberOfCardsThenProductCodeThenProgramCode() {
+    final ProgramDto programA = ProgramDto.builder().id(UUID.randomUUID()).code("A").build();
+    final ProgramDto programB = ProgramDto.builder().id(UUID.randomUUID()).code("B").build();
+    final OrderableDto twoCards = orderableWithCode("P1");
+    final OrderableDto oneCard = orderableWithCode("P2");
+    final OrderableDto otherOneCard = orderableWithCode("P3");
+    final StockEvent stockEvent = new StockEventDataBuilder().withProgram(programA.getId()).build();
+
+    final TestContext testContext = new TestContext(asList(programA, programB),
+        asList(twoCards, oneCard, otherOneCard),
+        asList(approvedProduct(otherOneCard, programA), approvedProduct(oneCard, programB),
+            approvedProduct(oneCard, programA), approvedProduct(twoCards, programA)),
+        asList(stockCard(stockEvent, twoCards), stockCard(stockEvent, twoCards),
+            stockCard(stockEvent, oneCard), stockCard(stockEvent, otherOneCard)),
+        emptyMap());
+
+    final List<StockCardSummaryExternalDto> result = prepareBuilder(testContext)
+        .build(testContext.approvedProducts, testContext.stockCards, testContext.orderableFulfills,
+            true, profiler);
+
+    assertEquals(
+        asList("P2 A 1", "P2 B 1", "P3 A 1", "P1 A 2"),
+        result.stream()
+            .map(summary -> summary.getOrderable() + " " + summary.getProgram() + " "
+                + summary.getStockCards().size())
+            .collect(toList()));
+  }
+
+  private OrderableDto orderableWithCode(String productCode) {
+    final OrderableDto orderable = new OrderableDtoDataBuilder().build();
+    orderable.setProductCode(productCode);
+    return orderable;
+  }
+
+  private ApprovedProductDto approvedProduct(OrderableDto orderable, ProgramDto program) {
+    return ApprovedProductDto.builder().facilityType(FacilityTypeDto.builder().build())
+        .program(program).orderable(orderable).build();
+  }
+
+  private StockCard stockCard(StockEvent stockEvent, OrderableDto orderable) {
+    return new StockCardDataBuilder(stockEvent).withLotId(null).withOrderableId(orderable.getId())
+        .withStockOnHand(3).build();
+  }
+
+  private StockCardSummariesExternalDtoBuilder prepareBuilder(TestContext testContext) {
     when(orderableReferenceDataService.findByIds(anyCollection())).thenAnswer(invocation -> {
       final Collection<UUID> idsToFind = invocation.getArgument(0);
       return testContext.orderables.stream().filter(o -> idsToFind.contains(o.getId()))
@@ -74,16 +152,8 @@ public class StockCardSummariesExternalDtoBuilderTest {
           .collect(toList());
     });
 
-    final StockCardSummariesExternalDtoBuilder builder =
-        new StockCardSummariesExternalDtoBuilder(lotReferenceDataService,
-            orderableReferenceDataService, programReferenceDataService);
-
-    final List<StockCardSummaryExternalDto> result = builder
-        .build(testContext.approvedProducts, testContext.stockCards, testContext.orderableFulfills,
-            true, profiler);
-
-    assertNotNull(result);
-    assertEquals(testContext.orderables.size(), result.size());
+    return new StockCardSummariesExternalDtoBuilder(lotReferenceDataService,
+        orderableReferenceDataService, programReferenceDataService);
   }
 
   private TestContext prepareTestContext() {

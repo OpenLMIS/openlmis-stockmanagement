@@ -15,6 +15,7 @@
 
 package org.openlmis.stockmanagement.web.stockcardsummariesv2;
 
+import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
@@ -58,7 +59,9 @@ public class StockCardSummariesV2DtoBuilder {
   public List<StockCardSummaryV2Dto> build(List<OrderableDto> approvedProducts,
       List<StockCard> stockCards, Map<UUID, OrderableFulfillDto> orderables,
       boolean nonEmptySummariesOnly) {
+    // the sorts below are stable, so summaries with the same number of cards keep this order
     Stream<StockCardSummaryV2Dto> summariesStream = approvedProducts.stream()
+        .sorted(comparing(OrderableDto::getProductCode))
         .map(p -> build(stockCards, p.getId(), p.getMeta().getVersionNumber(),
             MapUtils.isEmpty(orderables) ? null : orderables.get(p.getId())))
         .sorted();

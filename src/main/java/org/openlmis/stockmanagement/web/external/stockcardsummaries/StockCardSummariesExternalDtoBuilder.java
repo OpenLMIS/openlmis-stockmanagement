@@ -95,16 +95,18 @@ public class StockCardSummariesExternalDtoBuilder {
     final List<DeferredStockCardsSummary> deferredStockCardsSummaries = approvedProducts.stream()
         .map(approvedProduct -> fromApprovedProduct(
             new ProductBuildContext(approvedProduct, stockCards, orderableFulfills, deferredLoaders,
-                nonEmptySummariesOnly))).filter(Optional::isPresent).map(Optional::get).sorted(
-            comparing(
-                deferredStockCardsSummary -> deferredStockCardsSummary.getStockCards().size()))
+                nonEmptySummariesOnly))).filter(Optional::isPresent).map(Optional::get)
         .collect(toList());
 
     profiler.start("LOAD_DEFERRED_DATA");
     deferredLoaders.loadAll();
 
     profiler.start("TO_DTO");
-    return deferredStockCardsSummaries.stream().map(this::mapDto).collect(Collectors.toList());
+    return deferredStockCardsSummaries.stream().map(this::mapDto)
+        .sorted(comparing((StockCardSummaryExternalDto summary) -> summary.getStockCards().size())
+            .thenComparing(StockCardSummaryExternalDto::getOrderable)
+            .thenComparing(StockCardSummaryExternalDto::getProgram))
+        .collect(Collectors.toList());
   }
 
   private Optional<DeferredStockCardsSummary> fromApprovedProduct(ProductBuildContext context) {
