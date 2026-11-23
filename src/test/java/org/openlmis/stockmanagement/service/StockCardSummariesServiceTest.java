@@ -624,6 +624,68 @@ public class StockCardSummariesServiceTest {
     verifyZeroInteractions(orderableFulfillReferenceDataService);
   }
 
+  @Test
+  public void shouldLoadStockCardsOfApprovedProductsAndProductsThatFulfillThem() {
+    OrderableDto plain = new OrderableDtoDataBuilder().build();
+    OrderableDto commodityType = commodityType();
+    UUID tradeItemId = randomUUID();
+    StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParamsDataBuilder()
+        .withoutLotCode()
+        .build();
+    when(approvedProductReferenceDataService
+        .getApprovedProducts(params.getFacilityId(), params.getProgramIds(),
+            params.getOrderableIds(), params.getOrderableCode(), params.getOrderableName()))
+        .thenReturn(new OrderablesAggregator(asList(
+            new ApprovedProductDto(plain, null, null),
+            new ApprovedProductDto(commodityType, null, null))));
+    when(orderableFulfillReferenceDataService.findByIds(singletonList(commodityType.getId())))
+        .thenReturn(Collections.singletonMap(commodityType.getId(),
+            new OrderableFulfillDtoDataBuilder()
+                .withCanFulfillForMe(singletonList(tradeItemId)).build()));
+    when(authentication.isClientOnly()).thenReturn(true);
+
+    stockCardSummariesService.findStockCards(params);
+
+    verify(calculatedStockOnHandService).getStockCardsWithStockOnHand(params.getProgramIds(),
+        params.getFacilityId(), params.getAsOfDate(),
+        asList(plain.getId(), commodityType.getId(), tradeItemId), Collections.emptySet());
+  }
+
+  @Test
+  public void shouldNotLoadStockCardsWhenNoApprovedProducts() {
+    StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParamsDataBuilder()
+        .withoutLotCode()
+        .build();
+    when(approvedProductReferenceDataService
+        .getApprovedProducts(params.getFacilityId(), params.getProgramIds(),
+            params.getOrderableIds(), params.getOrderableCode(), params.getOrderableName()))
+        .thenReturn(new OrderablesAggregator(Collections.emptyList()));
+    when(authentication.isClientOnly()).thenReturn(true);
+
+    StockCardSummaries result = stockCardSummariesService.findStockCards(params);
+
+    assertThat(result.getStockCardsForFulfillOrderables(), hasSize(0));
+    verifyZeroInteractions(calculatedStockOnHandService);
+  }
+
+  @Test(expected = PermissionMessageException.class)
+  public void shouldCheckViewRightsForRequestedProgramsWhenNoStockCardsAreLoaded() {
+    StockCardSummariesV2SearchParams params = new StockCardSummariesV2SearchParamsDataBuilder()
+        .withoutLotCode()
+        .build();
+    when(approvedProductReferenceDataService
+        .getApprovedProducts(params.getFacilityId(), params.getProgramIds(),
+            params.getOrderableIds(), params.getOrderableCode(), params.getOrderableName()))
+        .thenReturn(new OrderablesAggregator(Collections.emptyList()));
+    when(homeFacilityPermissionService.checkFacilityAndHomeFacilityLinkage(any(UUID.class)))
+        .thenReturn(false);
+    doThrow(new PermissionMessageException(new Message("no view right")))
+        .when(permissionService)
+        .canViewStockCard(params.getProgramIds().get(0), params.getFacilityId());
+
+    stockCardSummariesService.findStockCards(params);
+  }
+
   private OrderableDto commodityType() {
     return new OrderableDtoDataBuilder()
         .withIdentifier(COMMODITY_TYPE, randomUUID().toString())
@@ -696,6 +758,7 @@ public class StockCardSummariesServiceTest {
         .withStockOnHand(56)
         .build();
 
+    mockCardIdentities(stockCard1, stockCard2, stockCard3, stockCard4, stockCard5);
     when(cardRepository
         .findByFacilityIdAndProgramIdIn(facilityId, singletonList(programId)))
         .thenReturn(asList(stockCard1, stockCard2, stockCard3, stockCard4, stockCard5));
@@ -790,6 +853,7 @@ public class StockCardSummariesServiceTest {
         .withStockOnHand(56)
         .build();
 
+    mockCardIdentities(stockCard1, stockCard2, stockCard3, stockCard4, stockCard5);
     when(cardRepository
         .findByFacilityIdAndProgramIdIn(facilityId, singletonList(programId)))
         .thenReturn(asList(stockCard1, stockCard2, stockCard3, stockCard4, stockCard5));
@@ -859,9 +923,10 @@ public class StockCardSummariesServiceTest {
     StockCard otherStockCard = new StockCardDataBuilder(event)
         .withOrderableId(orderableId6)
         .build();
-    when(cardRepository
-        .findByFacilityIdAndProgramIdIn(facilityId, singletonList(programId)))
-        .thenReturn(asList(fulfillingStockCard, requestedStockCard, otherStockCard));
+    mockCardIdentities(fulfillingStockCard, requestedStockCard, otherStockCard);
+    when(cardRepository.findByFacilityIdAndOrderableIdInAndProgramIdIn(facilityId,
+        ImmutableSet.of(orderableId2, orderableId3), singletonList(programId)))
+        .thenReturn(asList(fulfillingStockCard, requestedStockCard));
     when(calculatedStockOnHandRepository
         .findByStockCardIdInAndOccurredDateBetween(any(), any(), any()))
         .thenReturn(new ArrayList<>());
@@ -881,6 +946,37 @@ public class StockCardSummariesServiceTest {
             eq(otherStockCard.getId()), any());
     verify(calculatedStockOnHandService, never())
         .getStockCardsWithStockOnHand(any(UUID.class), any(UUID.class));
+    verify(cardRepository, never()).findByFacilityIdAndProgramIdIn(any(), any());
+  }
+
+  @Test
+  public void shouldNotLoadStockCardsWhenNoneMatchRequestedOrderables() {
+    StockEvent event = new StockEventDataBuilder()
+        .withFacility(facilityId)
+        .withProgram(programId)
+        .build();
+    StockCard stockCard = new StockCardDataBuilder(event)
+        .withOrderableId(orderableId6)
+        .build();
+    mockCardIdentities(stockCard);
+    when(orderableFulfillReferenceDataService.findByIds(ImmutableSet.of(orderableId6)))
+        .thenReturn(new HashMap<>());
+
+    Map<UUID, StockCardAggregate> cardMap =
+        stockCardSummariesService.getGroupedStockCards(programId, facilityId,
+            ImmutableSet.of(orderableId1), LocalDate.of(2017, 3, 16), LocalDate.of(2017, 3, 19));
+
+    assertThat(cardMap.size(), is(0));
+    verify(cardRepository, never()).findByFacilityIdAndProgramIdIn(any(), any());
+    verify(cardRepository, never())
+        .findByFacilityIdAndOrderableIdInAndProgramIdIn(any(), any(), any());
+  }
+
+  private void mockCardIdentities(StockCard... stockCards) {
+    when(cardRepository.getIdentitiesBy(programId, facilityId))
+        .thenReturn(Arrays.stream(stockCards)
+            .map(card -> new OrderableLotIdentity(card.getOrderableId(), card.getLotId()))
+            .collect(Collectors.toList()));
   }
 
   @Test

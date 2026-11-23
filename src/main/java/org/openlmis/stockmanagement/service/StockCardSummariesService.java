@@ -122,12 +122,26 @@ public class StockCardSummariesService extends StockCardBaseService {
                                                             Set<UUID> orderableIds,
                                                             LocalDate startDate,
                                                             LocalDate endDate) {
-    List<StockCard> stockCards = stockCardRepository
-        .findByFacilityIdAndProgramIdIn(facilityId, singletonList(programId));
+    Set<UUID> cardOrderableIds = stockCardRepository.getIdentitiesBy(programId, facilityId)
+        .stream()
+        .map(OrderableLotIdentity::getOrderableId)
+        .collect(toSet());
     Map<UUID, OrderableFulfillDto> orderableFulfillMap =
-        orderableFulfillService.findByIds(stockCards.stream()
-            .map(StockCard::getOrderableId)
-            .collect(toSet()));
+        orderableFulfillService.findByIds(cardOrderableIds);
+
+    List<StockCard> stockCards;
+    if (isEmpty(orderableIds)) {
+      stockCards = stockCardRepository
+          .findByFacilityIdAndProgramIdIn(facilityId, singletonList(programId));
+    } else {
+      Set<UUID> requestedCardOrderableIds = cardOrderableIds.stream()
+          .filter(id -> orderableIds.contains(getAssignedOrderableId(id, orderableFulfillMap)))
+          .collect(toSet());
+      stockCards = requestedCardOrderableIds.isEmpty()
+          ? new ArrayList<>()
+          : stockCardRepository.findByFacilityIdAndOrderableIdInAndProgramIdIn(
+              facilityId, requestedCardOrderableIds, singletonList(programId));
+    }
 
     return stockCards.stream()
         .map(stockCard -> new ImmutablePair<>(
@@ -155,8 +169,13 @@ public class StockCardSummariesService extends StockCardBaseService {
     Profiler profiler = new Profiler("FIND_STOCK_CARD_SUMMARIES_FOR_PARAMS");
     profiler.setLogger(LOGGER);
 
-    profiler.start("FIND_STOCK_CARD_BY_PROGRAM_AND_FACILITY");
-    List<StockCard> stockCards = findStockCardsWithStockOnHand(params);
+    // nonEmptyOnly and a lot code narrow the result by the stock cards, so those load them first
+    boolean stockCardsFirst = params.isNonEmptyOnly() || !StringUtils.isBlank(params.getLotCode());
+    List<StockCard> stockCards = Collections.emptyList();
+    if (stockCardsFirst) {
+      profiler.start("FIND_STOCK_CARD_BY_PROGRAM_AND_FACILITY");
+      stockCards = findStockCardsWithStockOnHand(params);
+    }
 
     Collection<UUID> orderableIds = params.getOrderableIds();
     if (params.isNonEmptyOnly()) {
@@ -179,15 +198,30 @@ public class StockCardSummariesService extends StockCardBaseService {
         .getApprovedProducts(params.getFacilityId(), params.getProgramIds(),
             orderableIds, params.getOrderableCode(), params.getOrderableName());
 
-    profiler.start("VALIDATE_VIEW_RIGHTS");
-    validateViewRights(concat(
-        approvedProducts.getApprovedProducts().stream()
-            .map(ApprovedProductDto::getProgram).map(ProgramDto::getId),
-        stockCards.stream().map(StockCard::getProgramId)), params.getFacilityId());
+    if (stockCardsFirst) {
+      profiler.start("VALIDATE_VIEW_RIGHTS");
+      validateViewRights(concat(
+          approvedProducts.getApprovedProducts().stream()
+              .map(ApprovedProductDto::getProgram).map(ProgramDto::getId),
+          stockCards.stream().map(StockCard::getProgramId)), params.getFacilityId());
+    }
 
     profiler.start("FIND_ORDERABLE_FULFILL_BY_ID");
     Map<UUID, OrderableFulfillDto> orderableFulfillMap =
         findOrderableFulfills(commodityTypeIds(approvedProducts));
+
+    if (!stockCardsFirst) {
+      profiler.start("FIND_STOCK_CARD_BY_PROGRAM_AND_FACILITY");
+      stockCards = findStockCardsOfApprovedProducts(params, approvedProducts, orderableFulfillMap);
+
+      profiler.start("VALIDATE_VIEW_RIGHTS");
+      // the requested programs as well, as the cards of a program are loaded only for its products
+      validateViewRights(concat(concat(
+          approvedProducts.getApprovedProducts().stream()
+              .map(ApprovedProductDto::getProgram).map(ProgramDto::getId),
+          stockCards.stream().map(StockCard::getProgramId)), params.getProgramIds().stream()),
+          params.getFacilityId());
+    }
 
     Page<ApprovedProductDto> orderablesPage = approvedProducts.getApprovedProducts();
     StockCardSummaries result = new StockCardSummaries(
@@ -263,6 +297,24 @@ public class StockCardSummariesService extends StockCardBaseService {
     return calculatedStockOnHandService
         .getStockCardsWithStockOnHand(params.getProgramIds(), params.getFacilityId(),
             params.getAsOfDate(), orderableIdsForStockCard, lotCodeIds);
+  }
+
+  private List<StockCard> findStockCardsOfApprovedProducts(
+      StockCardSummariesV2SearchParams params, OrderablesAggregator approvedProducts,
+      Map<UUID, OrderableFulfillDto> orderableFulfillMap) {
+    // only the cards that can appear in the result: approved products and what fulfills them
+    List<UUID> orderableIds = concat(
+        approvedProducts.getIdentifiers().stream(),
+        orderableFulfillMap.values().stream()
+            .flatMap(fulfills -> fulfills.getCanFulfillForMe().stream()))
+        .distinct()
+        .collect(toList());
+
+    // without ids every stock card of the facility would be loaded
+    return orderableIds.isEmpty()
+        ? new ArrayList<>()
+        : calculatedStockOnHandService.getStockCardsWithStockOnHand(params.getProgramIds(),
+            params.getFacilityId(), params.getAsOfDate(), orderableIds, Collections.emptySet());
   }
 
   private Set<UUID> findOrderableIdsWithStockCards(List<StockCard> stockCards,
@@ -417,10 +469,15 @@ public class StockCardSummariesService extends StockCardBaseService {
 
   private UUID getAssignedOrderableId(StockCard stockCard,
       Map<UUID, OrderableFulfillDto> orderableFulfillMap) {
-    OrderableFulfillDto fulfills = orderableFulfillMap.get(stockCard.getOrderableId());
+    return getAssignedOrderableId(stockCard.getOrderableId(), orderableFulfillMap);
+  }
+
+  private UUID getAssignedOrderableId(UUID cardOrderableId,
+      Map<UUID, OrderableFulfillDto> orderableFulfillMap) {
+    OrderableFulfillDto fulfills = orderableFulfillMap.get(cardOrderableId);
 
     return null == fulfills || isEmpty(fulfills.getCanBeFulfilledByMe())
-        ? stockCard.getOrderableId()
+        ? cardOrderableId
         : fulfills.getCanBeFulfilledByMe().get(0);
   }
 
