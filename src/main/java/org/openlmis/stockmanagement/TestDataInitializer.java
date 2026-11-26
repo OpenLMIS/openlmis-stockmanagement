@@ -16,152 +16,136 @@
 package org.openlmis.stockmanagement;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import org.openlmis.stockmanagement.util.Resource2Db;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+/**
+ * Loads layered test data into an empty database when a data profile is active.
+ *
+ * <p>Each data profile is a layer stored in {@code db/<layer>/}, with one CSV file per table
+ * named {@code <schema>.<table>.csv}. Every data profile implies {@code base-data}, which is
+ * loaded first. A layer only holds files for the tables it adds rows to, and its rows may refer
+ * only to rows of their own layer or of {@code base-data}.
+ */
 @Component
-@Profile("demo-data & !test-run")
+@Profile("(base-data | demo-data | functional-test-data | edge-case-data | performance-data)"
+    + " & !test-run")
 @Order(5)
 public class TestDataInitializer implements CommandLineRunner {
   private static final XLogger XLOGGER = XLoggerFactory.getXLogger(TestDataInitializer.class);
 
-  private static final String DEMO_DATA_PATH = "classpath:db/demo-data/";
-  private static final String FILE_EXTENSION = ".csv";
+  static final String BASE_DATA = "base-data";
+  static final String DEMO_DATA = "demo-data";
+  static final String FUNCTIONAL_TEST_DATA = "functional-test-data";
+  static final String EDGE_CASE_DATA = "edge-case-data";
+  static final String PERFORMANCE_DATA = "performance-data";
 
-  // table names
-  private static final String NODES = "nodes";
-  private static final String ORGANIZATIONS = "organizations";
-  private static final String PHYSICAL_INVENTORIES = "physical_inventories";
-  private static final String PHYSICAL_INVENTORY_LINE_ITEMS = "physical_inventory_line_items";
-  private static final String STOCK_CARD_LINE_ITEM_REASON_TAGS = "stock_card_line_item_reason_tags";
-  private static final String STOCK_CARD_LINE_ITEM_REASONS = "stock_card_line_item_reasons";
-  private static final String STOCK_CARD_LINE_ITEMS = "stock_card_line_items";
-  private static final String CALCULATED_STOCKS_ON_HAND = "calculated_stocks_on_hand";
-  private static final String STOCK_CARDS = "stock_cards";
-  private static final String STOCK_EVENT_LINE_ITEMS = "stock_event_line_items";
-  private static final String STOCK_EVENTS = "stock_events";
-  private static final String VALID_SOURCE_ASSIGNMENTS = "valid_source_assignments";
-  private static final String VALID_REASON_ASSIGNMENTS = "valid_reason_assignments";
-  private static final String VALID_DESTINATION_ASSIGNMENTS = "valid_destination_assignments";
-  private static final String PHYSICAL_INVENTORY_LINE_ITEM_ADJUSTMENTS =
-      "physical_inventory_line_item_adjustments";
+  /**
+   * All data layers, in load order.
+   */
+  static final List<String> LAYERS = Collections.unmodifiableList(Arrays.asList(
+      BASE_DATA, DEMO_DATA, FUNCTIONAL_TEST_DATA, EDGE_CASE_DATA, PERFORMANCE_DATA));
 
-  // database path
-  private static final String DB_SCHEMA = "stockmanagement.";
-  static final String NODES_TABLE = DB_SCHEMA + NODES;
-  static final String ORGANIZATIONS_TABLE = DB_SCHEMA + ORGANIZATIONS;
-  static final String PHYSICAL_INVENTORIES_TABLE = DB_SCHEMA + PHYSICAL_INVENTORIES;
-  static final String PHYSICAL_INVENTORY_LINE_ITEMS_TABLE = 
-      DB_SCHEMA + PHYSICAL_INVENTORY_LINE_ITEMS;
-  static final String STOCK_CARD_LINE_ITEM_REASON_TAGS_TABLE = 
-      DB_SCHEMA + STOCK_CARD_LINE_ITEM_REASON_TAGS;
-  static final String STOCK_CARD_LINE_ITEM_REASONS_TABLE = DB_SCHEMA + STOCK_CARD_LINE_ITEM_REASONS;
-  static final String STOCK_CARD_LINE_ITEMS_TABLE = DB_SCHEMA + STOCK_CARD_LINE_ITEMS;
-  static final String CALCULATED_STOCKS_ON_HAND_TABLE = DB_SCHEMA + CALCULATED_STOCKS_ON_HAND;
-  static final String STOCK_CARDS_TABLE = DB_SCHEMA + STOCK_CARDS;
-  static final String STOCK_EVENT_LINE_ITEMS_TABLE = DB_SCHEMA + STOCK_EVENT_LINE_ITEMS;
-  static final String STOCK_EVENTS_TABLE = DB_SCHEMA + STOCK_EVENTS;
-  static final String VALID_SOURCE_ASSIGNMENTS_TABLE = DB_SCHEMA + VALID_SOURCE_ASSIGNMENTS;
-  static final String VALID_REASON_ASSIGNMENTS_TABLE = DB_SCHEMA + VALID_REASON_ASSIGNMENTS;
-  static final String VALID_DESTINATION_ASSIGNMENTS_TABLE =
-      DB_SCHEMA + VALID_DESTINATION_ASSIGNMENTS;
-  static final String PHYSICAL_INVENTORY_LINE_ITEM_ADJUSTMENTS_TABLE =
-      DB_SCHEMA + PHYSICAL_INVENTORY_LINE_ITEM_ADJUSTMENTS;
+  /**
+   * All tables a layer may hold, in an order that satisfies the foreign keys between them.
+   */
+  static final List<String> TABLES = Collections.unmodifiableList(Arrays.asList(
+      "stockmanagement.stock_card_line_item_reasons",
+      "stockmanagement.stock_card_line_item_reason_tags",
+      "stockmanagement.valid_reason_assignments",
+      "stockmanagement.organizations",
+      "stockmanagement.nodes",
+      "stockmanagement.valid_source_assignments",
+      "stockmanagement.valid_destination_assignments",
+      "stockmanagement.stock_events",
+      "stockmanagement.stock_event_line_items",
+      "stockmanagement.stock_cards",
+      "stockmanagement.stock_card_line_items",
+      "stockmanagement.calculated_stocks_on_hand",
+      "stockmanagement.physical_inventories",
+      "stockmanagement.physical_inventory_line_items",
+      "stockmanagement.physical_inventory_line_item_adjustments"));
 
-  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + NODES + FILE_EXTENSION)
-  private Resource nodesResource;
-
-  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + ORGANIZATIONS + FILE_EXTENSION)
-  private Resource organizationsResource;
-
-  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + PHYSICAL_INVENTORIES + FILE_EXTENSION)
-  private Resource physicalInventoriesResource;
-
-  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + PHYSICAL_INVENTORY_LINE_ITEMS + FILE_EXTENSION)
-  private Resource physicalInventoryLineItemsResource;
-
-  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + STOCK_CARD_LINE_ITEM_REASON_TAGS + FILE_EXTENSION)
-  private Resource stockCardLineItemReasonTagsResource;
-
-  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + STOCK_CARD_LINE_ITEM_REASONS + FILE_EXTENSION)
-  private Resource stockCardLineItemReasonsResource;
-
-  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + STOCK_CARD_LINE_ITEMS + FILE_EXTENSION)
-  private Resource stockCardLineItemsResource;
-
-  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + CALCULATED_STOCKS_ON_HAND + FILE_EXTENSION)
-  private Resource calculatedStocksOnHandResource;
-
-  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + STOCK_CARDS + FILE_EXTENSION)
-  private Resource stockCardsResource;
-
-  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + STOCK_EVENT_LINE_ITEMS + FILE_EXTENSION)
-  private Resource stockEventLineItemsResource;
-
-  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + STOCK_EVENTS + FILE_EXTENSION)
-  private Resource stockEventsResource;
-
-  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + VALID_SOURCE_ASSIGNMENTS + FILE_EXTENSION)
-  private Resource validSourceAssignmentsResource;
-
-  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + VALID_REASON_ASSIGNMENTS + FILE_EXTENSION)
-  private Resource validReasonAssignmentsResource;
-
-  @Value(value = DEMO_DATA_PATH + DB_SCHEMA + VALID_DESTINATION_ASSIGNMENTS + FILE_EXTENSION)
-  private Resource validDestinationAssignmentsResource;
-
-  @Value(value = DEMO_DATA_PATH + DB_SCHEMA
-      + PHYSICAL_INVENTORY_LINE_ITEM_ADJUSTMENTS + FILE_EXTENSION)
-  private Resource physicalInventoryLineItemAdjustments;
-
-  private Resource2Db loader;
+  private final Resource2Db loader;
+  private final ResourceLoader resourceLoader;
+  private final Environment environment;
 
   @Autowired
-  public TestDataInitializer(JdbcTemplate template) {
-    this(new Resource2Db(template));
+  public TestDataInitializer(JdbcTemplate template, ResourceLoader resourceLoader,
+      Environment environment) {
+    this(new Resource2Db(template), resourceLoader, environment);
   }
 
-  TestDataInitializer(Resource2Db loader) {
+  TestDataInitializer(Resource2Db loader, ResourceLoader resourceLoader,
+      Environment environment) {
     this.loader = loader;
+    this.resourceLoader = resourceLoader;
+    this.environment = environment;
   }
 
   /**
-   * Initializes test data.
+   * Loads every table file of each active data layer.
    * @param args command line arguments
    */
   public void run(String... args) throws IOException {
     XLOGGER.entry();
 
-    loader.insertToDbFromCsv(STOCK_CARD_LINE_ITEM_REASONS_TABLE, stockCardLineItemReasonsResource);
-    loader.insertToDbFromCsv(
-        STOCK_CARD_LINE_ITEM_REASON_TAGS_TABLE, stockCardLineItemReasonTagsResource);
-    loader.insertToDbFromCsv(VALID_REASON_ASSIGNMENTS_TABLE, validReasonAssignmentsResource);
-    loader.insertToDbFromCsv(ORGANIZATIONS_TABLE, organizationsResource);
-    loader.insertToDbFromCsv(NODES_TABLE, nodesResource);
-    loader.insertToDbFromCsv(VALID_SOURCE_ASSIGNMENTS_TABLE, validSourceAssignmentsResource);
-    loader.insertToDbFromCsv(
-        VALID_DESTINATION_ASSIGNMENTS_TABLE, validDestinationAssignmentsResource);
-    loader.insertToDbFromCsv(STOCK_EVENTS_TABLE, stockEventsResource);
-    loader.insertToDbFromCsv(STOCK_EVENT_LINE_ITEMS_TABLE, stockEventLineItemsResource);
-    loader.insertToDbFromCsv(STOCK_CARDS_TABLE, stockCardsResource);
-    loader.insertToDbFromCsv(STOCK_CARD_LINE_ITEMS_TABLE, stockCardLineItemsResource);
-    loader.insertToDbFromCsv(CALCULATED_STOCKS_ON_HAND_TABLE, calculatedStocksOnHandResource);
-    loader.insertToDbFromCsv(PHYSICAL_INVENTORIES_TABLE, physicalInventoriesResource);
-    loader.insertToDbFromCsv(
-        PHYSICAL_INVENTORY_LINE_ITEMS_TABLE, physicalInventoryLineItemsResource);
-    loader.insertToDbFromCsv(
-        PHYSICAL_INVENTORY_LINE_ITEM_ADJUSTMENTS_TABLE, physicalInventoryLineItemAdjustments);
+    List<String> layers = resolveLayers(environment.getActiveProfiles());
+    XLOGGER.info("Loading data layers: " + layers);
+
+    for (String layer : layers) {
+      int loaded = 0;
+      for (String table : TABLES) {
+        Resource resource = resourceLoader.getResource(location(layer, table));
+        if (resource.exists()) {
+          loader.insertToDbFromCsv(table, resource);
+          loaded++;
+        }
+      }
+      XLOGGER.info("Data layer " + layer + ": loaded " + loaded + " table file(s)");
+    }
 
     XLOGGER.exit();
   }
 
+  /**
+   * Returns the data layers to load for the given active profiles, in load order. Any data
+   * profile implies {@code base-data}.
+   *
+   * @throws IllegalStateException when both demo-data and functional-test-data are active
+   */
+  static List<String> resolveLayers(String... activeProfiles) {
+    List<String> active = Arrays.asList(activeProfiles);
+
+    if (active.contains(DEMO_DATA) && active.contains(FUNCTIONAL_TEST_DATA)) {
+      throw new IllegalStateException("The " + DEMO_DATA + " and " + FUNCTIONAL_TEST_DATA
+          + " profiles cannot be active together; choose one of them");
+    }
+
+    List<String> layers = new ArrayList<>();
+    for (String layer : LAYERS) {
+      if (BASE_DATA.equals(layer) || active.contains(layer)) {
+        layers.add(layer);
+      }
+    }
+    return layers;
+  }
+
+  static String location(String layer, String table) {
+    return "classpath:db/" + layer + "/" + table + ".csv";
+  }
 }
