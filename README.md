@@ -286,10 +286,27 @@ expected use-case for this is when this service is deployed through the
 [Reference Distribution](https://github.com/openlmis/openlmis-ref-distro).
 
 ### Demo Data
-A basic set of demo data is included with this service, defined under 
-`./src/main/resources/db/demo-data/`.  This data may be optionally loaded by using the `demo-data` 
-Spring Profile.  Setting this profile may be done by setting the `spring.profiles.active` 
-environment variable.
+Test data is included with this service as layers under `./src/main/resources/db/<layer>/`, with
+one CSV file per table named `<schema>.<table>.csv`. Each layer is loaded by the Spring Profile of
+the same name. Setting this profile may be done by setting the `spring.profiles.active` environment
+variable.
+
+| Profile | Contents |
+|---|---|
+| `base-data` | Setup that every layer needs. Loaded with every other data profile |
+| `demo-data` | Data for demos, manual QA and UAT |
+| `functional-test-data` | Fixed fixtures for automated tests. Cannot be combined with `demo-data` |
+| `edge-case-data` | Unusual but valid records for exploratory testing |
+| `performance-data` | Volume for performance tests |
+
+`base-data` is loaded first, then the other active layers in the order of the table. A layer only
+holds files for the tables it adds rows to. Rows of a layer may refer only to rows of their own
+layer or of `base-data`, here and in the referencedata service, whose layers the data of this
+service follows. Data is inserted into a freshly cleaned database, so a data profile must not be
+combined with `production`. Files of a layer must be for tables listed in
+`TestDataInitializer.TABLES`, in which the order of tables follows their foreign keys.
+`functional-test-data` and `edge-case-data` have no files yet. Each layer folder has a README
+describing its data.
 
 When building locally from the development environment, you may run:
 
